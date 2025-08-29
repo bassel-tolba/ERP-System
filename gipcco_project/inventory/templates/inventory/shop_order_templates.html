@@ -5,10 +5,14 @@
 
 {% block content %}
   {% include "inventory/partials/shop_order_templates_content.html" %}
+
+  {# Scripts are placed inside the content block to ensure they are loaded with partials #}
+  <!-- CHANGE: Removed .values -->
+  {{ primitive_products|json_script:"primitive-products-data" }}
+  {{ source_template|json_script:"source-template-data" }}
+  {{ source_items|json_script:"source-items-data" }}
 {% endblock content %}
 
 {% block scripts %}
-{{ primitive_products_json|json_script:"primitive-products-data" }}
-{{ source_template_json|json_script:"source-template-data" }}
-{{ source_items_json|json_script:"source-items-data" }}
+{# This block is intentionally left empty #}
 {% endblock scripts %}

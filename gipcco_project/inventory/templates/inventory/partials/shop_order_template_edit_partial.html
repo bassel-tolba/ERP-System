@@ -1,0 +1,202 @@
+{% load static %}
+
+<!-- Page Header -->
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+  <h1 class="h2">
+    <i class="bi bi-pencil-square text-primary"></i> تعديل قالب: <span class="fw-bold">{{ template.name }}</span>
+  </h1>
+  <div class="btn-toolbar mb-2 mb-md-0">
+    <a href="{% url 'inventory:view_shop_order_template' pk=template.pk %}" class="btn btn-sm btn-outline-secondary">
+      <i class="bi bi-x-circle me-1"></i> إلغاء التعديل
+    </a>
+  </div>
+</div>
+
+<form id="editTemplateForm" action="{% url 'inventory:edit_shop_order_template' pk=template.pk %}" method="post">
+  {% csrf_token %}
+  <div class="row g-4">
+
+    <!-- Card for Basic Template Information -->
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-light">
+          <h5 class="mb-0"><i class="bi bi-file-earmark-text me-2"></i> بيانات القالب الأساسية</h5>
+        </div>
+        <div class="card-body p-4">
+          <div class="row g-3">
+            <div class="col-md-6 mb-2">
+              <label for="template_name_input" class="form-label fw-bold">اسم القالب</label>
+              <input
+                type="text"
+                class="form-control form-control-lg"
+                id="template_name_input"
+                name="template_name"
+                value="{{ template.name }}"
+                required
+              />
+            </div>
+            <div class="col-md-6 mb-2">
+              <label for="final_product_id_select" class="form-label fw-bold">المنتج النهائي</label>
+              <select
+                class="form-select form-select-lg searchable-select"
+                id="final_product_id_select"
+                name="final_product_id"
+                required
+                placeholder="ابحث واختر المنتج النهائي..."
+              >
+                <option value=""></option>
+                {% for p in final_products %}
+                  <option value="{{ p.id }}" {% if p.id == template.final_product.id %}selected{% endif %}>
+                    {{ p.name }} ({{ p.code }})
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card for Template Items -->
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><i class="bi bi-list-check me-2"></i> مواد القالب</h5>
+          <button type="button" class="btn btn-success" id="add-item-btn">
+            <i class="bi bi-plus-lg me-1"></i> إضافة مادة
+          </button>
+        </div>
+        <div class="card-body p-4">
+          <!-- This container will be populated by JavaScript -->
+          <div id="template-items-container">
+            <!-- Dynamic rows will be inserted here -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Submission Buttons -->
+    <div class="col-12 text-center mt-3 d-grid gap-2 d-md-block">
+      <button type="submit" class="btn btn-primary btn-lg px-5">
+        <i class="bi bi-check2-circle me-2"></i> حفظ التعديلات
+      </button>
+      <a href="{% url 'inventory:view_shop_order_template' pk=template.pk %}" class="btn btn-secondary btn-lg px-5">
+        <i class="bi bi-x-circle me-2"></i> إلغاء
+      </a>
+    </div>
+
+  </div>
+</form>
+
+<!-- Data Islands for JavaScript -->
+{{ primitive_products|json_script:"primitive-products-data" }}
+{{ template_items|json_script:"initial-items-data" }}
+
+<!-- ========================================================= -->
+<!--  SELF-CONTAINED SCRIPT FOR THIS TEMPLATE                  -->
+<!-- ========================================================= -->
+<script>
+// Use a 'guard' to prevent this script from running multiple times
+document.addEventListener('DOMContentLoaded', () => {
+  if (document.body.dataset.shopOrderEditInitialized) return;
+  document.body.dataset.shopOrderEditInitialized = 'true';
+
+  const setupShopOrderEditPage = () => {
+    // Helper to get data from Django
+    function getDataFromIsland(islandId) {
+      const island = document.getElementById(islandId);
+      if (!island || !island.textContent) return null;
+      try { return JSON.parse(island.textContent); } catch (e) { return null; }
+    }
+    
+    const container = document.getElementById("template-items-container");
+    const addItemBtn = document.getElementById("add-item-btn");
+    const primitiveProducts = getDataFromIsland("primitive-products-data") || [];
+    const initialItems = getDataFromIsland("initial-items-data") || [];
+
+    if (!container || !addItemBtn) return;
+    
+    container.innerHTML = ''; // Clear container
+
+    const createItemRow = (productId = "", quantity = "") => {
+      const row = document.createElement("div");
+      // Added 'template-item-row' for easier selection and a bottom border for separation
+      row.className = "row g-2 align-items-center mb-3 pb-3 border-bottom template-item-row";
+
+      // The new structure creates a more spacious and aligned layout
+      row.innerHTML = `
+        <div class="col-md-7">
+          <label class="form-label visually-hidden">المادة</label>
+          <select name="primitive_product_id" class="form-select searchable-select-item" required>
+            <option value="">اختر مادة خام أو تعبئة...</option>
+            ${primitiveProducts.map(p => `
+              <option value="${p.id}" ${p.id == productId ? 'selected' : ''}>
+                ${p.name} (${p.code})
+              </option>
+            `).join('')}
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label visually-hidden">الكمية</label>
+          <input type="number" step="any" name="theoretical_quantity" class="form-control" placeholder="الكمية النظرية" value="${quantity}" required>
+        </div>
+        <div class="col-md-1 text-center">
+          <label class="form-label visually-hidden">إجراء</label>
+          <button type="button" class="btn btn-outline-danger w-100" aria-label="Remove item" title="حذف المادة">
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+      `;
+      
+      row.querySelector('button').addEventListener('click', () => row.remove());
+      container.appendChild(row);
+
+      // Initialize TomSelect on the new element. Using a specific class to avoid re-initializing the main one.
+      const newSelect = row.querySelector('.searchable-select-item');
+      if (typeof TomSelect !== 'undefined') {
+        new TomSelect(newSelect, {
+            create: false,
+            sortField: { field: "text", direction: "asc" },
+            placeholder: 'ابحث عن مادة...',
+            dropdownParent: 'body'
+        });
+      }
+    };
+
+    if (initialItems && initialItems.length > 0) {
+      initialItems.forEach(item => createItemRow(item.primitive_product_id, item.theoretical_quantity));
+    } else {
+      createItemRow();
+    }
+
+    addItemBtn.addEventListener('click', () => createItemRow());
+
+    // Initialize the main TomSelect on the page
+    document.querySelectorAll('.searchable-select').forEach(el => {
+        if (typeof TomSelect !== 'undefined' && !el.classList.contains('tomselected')) {
+             new TomSelect(el, {
+                rtl: true,
+                placeholder: el.getAttribute("placeholder") || "ابحث أو اختر...",
+                create: false,
+                dropdownParent: "body"
+            });
+        }
+    });
+  };
+
+  // This structure ensures the script runs on both full refresh and dynamic load.
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupShopOrderEditPage);
+  } else {
+    setupShopOrderEditPage();
+  }
+
+  // Cleanup the guard when a navigation link is clicked to allow re-initialization on next visit.
+  document.body.addEventListener('click', e => {
+      if(e.target.closest('a')) {
+          delete document.body.dataset.shopOrderEditInitialized;
+      }
+  });
+
+});
+</script>

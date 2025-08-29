@@ -13,12 +13,16 @@
             {% csrf_token %}
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label class="form-label fw-bold">اسم القالب</label>
-                    <input type="text" class="form-control" name="template_name" placeholder="مثال: وصفة جلوكوز 500مل" value="{{ template.name }}" required>
+                    <!-- CHANGE: Added for="id_template_name" -->
+                    <label for="id_template_name" class="form-label fw-bold">اسم القالب</label>
+                    <!-- CHANGE: Added id="id_template_name" -->
+                    <input type="text" class="form-control" name="template_name" id="id_template_name" placeholder="مثال: وصفة جلوكوز 500مل" value="{{ template.name }}" required>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label class="form-label fw-bold">المنتج النهائي المرتبط</label>
-                    <select class="form-select searchable-select" name="final_product_id" required>
+                    <!-- CHANGE: Added for="id_final_product" -->
+                    <label for="id_final_product" class="form-label fw-bold">المنتج النهائي المرتبط</label>
+                    <!-- CHANGE: Added id="id_final_product" -->
+                    <select class="form-select searchable-select" name="final_product_id" id="id_final_product" required>
                         <option value="">اختر منتج نهائي...</option>
                         {% for p in final_products %}
                         <option value="{{ p.id }}" {% if p.id == template.final_product.id %}selected{% endif %}>{{ p.name }} ({{ p.code }})</option>
@@ -40,8 +44,3 @@
         </form>
     </div>
 </div>
-
-{% block scripts %}
-{{ primitive_products_json|json_script:"primitive-products-data" }}
-{{ template_items_json|json_script:"initial-items-data" }}
-{% endblock scripts %}

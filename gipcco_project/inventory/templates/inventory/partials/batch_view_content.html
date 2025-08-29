@@ -22,10 +22,14 @@
                 </div>
                 <div class="col-md-4 mb-3">
                     <label class="form-label">أرقام التشغيلة</label>
-                    <div class="input-group">
-                        <input type="number" class="form-control" name="batch_number_from" placeholder="من" value="{{ batch_from }}" required>
-                        <span class="input-group-text">-</span>
-                        <input type="number" class="form-control" name="batch_number_to" placeholder="إلى (اختياري)" value="{{ batch_to }}">
+                    <div class="row g-2 align-items-center">
+                        <div class="col">
+                            <input type="number" class="form-control" name="batch_number_from" placeholder="من" value="{{ batch_from }}" required>
+                        </div>
+                        <div class="col-auto">-</div>
+                        <div class="col">
+                            <input type="number" class="form-control" name="batch_number_to" placeholder="إلى" value="{{ batch_to }}">
+                        </div>
                     </div>
                 </div>
                 <div class="col-md-2 mb-3 d-flex align-items-end">

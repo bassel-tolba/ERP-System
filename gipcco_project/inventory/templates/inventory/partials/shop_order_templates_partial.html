@@ -1,0 +1,6 @@
+{% include "inventory/partials/shop_order_templates_content.html" %}
+
+<!-- CHANGE: Removed .values -->
+{{ primitive_products|json_script:"primitive-products-data" }}
+{{ source_template|json_script:"source-template-data" }}
+{{ source_items|json_script:"source-items-data" }}

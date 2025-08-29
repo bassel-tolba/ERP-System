@@ -455,24 +455,32 @@ def shop_order_templates(request: HttpRequest) -> HttpResponse:
         
         return redirect('inventory:shop_order_templates')
     
-    # Logic for copying a template
-    source_template = None
-    source_items = None
+    source_template_data = None
+    source_items_queryset = None
     copy_from_id = request.GET.get('copy_from')
     if copy_from_id:
-        source_template = get_object_or_404(ShopOrderTemplate.objects.prefetch_related('items'), pk=copy_from_id)
-        source_items = source_template.items.all()
+        source_template_obj = get_object_or_404(ShopOrderTemplate.objects.prefetch_related('items'), pk=copy_from_id)
+        source_items_queryset = source_template_obj.items.all()
+        # Serialize the template object into a dictionary for json_script
+        source_template_data = {
+            'name': source_template_obj.name,
+            'final_product_id': source_template_obj.final_product_id
+        }
+
+    primitive_products_qs = Product.objects.filter(~Q(product_type=Product.ProductType.FINAL_PRODUCT))
 
     context = {
         'active_page': 'shop_orders',
         'templates': ShopOrderTemplate.objects.select_related('final_product').all(),
         'final_products': Product.objects.filter(product_type=Product.ProductType.FINAL_PRODUCT),
-        'primitive_products': Product.objects.filter(~Q(product_type=Product.ProductType.FINAL_PRODUCT)),
-        'source_template': source_template,
-        'source_items': source_items,
+        # CHANGE: Convert QuerySets to lists of dictionaries for JSON serialization.
+        'primitive_products': list(primitive_products_qs.values('id', 'name', 'code')),
+        'source_template': source_template_data,
+        'source_items': list(source_items_queryset.values('primitive_product_id', 'theoretical_quantity')) if source_items_queryset else None,
     }
+
     if 'X-Partial-Request' in request.headers:
-        return render(request, 'inventory/partials/shop_order_templates_content.html', context)
+        return render(request, 'inventory/partials/shop_order_templates_partial.html', context)
     return render(request, 'inventory/shop_order_templates.html', context)
 
 
@@ -492,6 +500,7 @@ def view_shop_order_template(request: HttpRequest, pk: int) -> HttpResponse:
     Displays the details of a single shop order template.
     """
     template = get_object_or_404(ShopOrderTemplate.objects.select_related('final_product'), pk=pk)
+    # This line is crucial. It must not have .values()
     items = template.items.select_related('primitive_product').order_by('primitive_product__name')
     context = {
         'active_page': 'shop_orders',
@@ -545,15 +554,20 @@ def edit_shop_order_template(request: HttpRequest, pk: int) -> HttpResponse:
             messages.error(request, f"حدث خطأ أثناء تحديث القالب: {e}")
             return redirect('inventory:edit_shop_order_template', pk=pk)
 
+    template_items_qs = template.items.all()
+    primitive_products_qs = Product.objects.filter(~Q(product_type=Product.ProductType.FINAL_PRODUCT))
+
     context = {
         'active_page': 'shop_orders',
         'template': template,
-        'template_items': template.items.all(),
         'final_products': Product.objects.filter(product_type=Product.ProductType.FINAL_PRODUCT),
-        'primitive_products': Product.objects.filter(~Q(product_type=Product.ProductType.FINAL_PRODUCT)),
+        # CHANGE: Convert QuerySets to lists of dictionaries for JSON serialization.
+        'template_items': list(template_items_qs.values('primitive_product_id', 'theoretical_quantity')),
+        'primitive_products': list(primitive_products_qs.values('id', 'name', 'code')),
     }
+
     if 'X-Partial-Request' in request.headers:
-        return render(request, 'inventory/partials/shop_order_template_edit_content.html', context)
+        return render(request, 'inventory/partials/shop_order_template_edit_partial.html', context)
     return render(request, 'inventory/shop_order_template_edit.html', context)
 
 # --- Batch Views ---
@@ -714,7 +728,10 @@ def create_batch(request: HttpRequest) -> HttpResponse:
 
     page_data = get_page_data()
     json_stock = {pid: [{'id': s['id'], 'qc_no': s['qc_no'], 'timestamp': s['timestamp'].strftime('%Y-%m-%d'), 'remaining_quantity': "%.3f" % s['remaining_quantity']} for s in stock_list] for pid, stock_list in page_data['all_available_stock'].items()}
-    primitive_products_for_json = list(page_data['primitive_products'].values('id', 'name', 'unit'))
+    
+    # CHANGE: I'm replacing the incorrect 'primitive_products' key with 'primitive_products_json'
+    # which was already being created correctly but not used in the context for this script.
+    primitive_products_for_json = list(page_data['primitive_products'].values('id', 'name', 'code', 'unit'))
     
     context = {
         'active_page': 'shop_orders',
@@ -722,12 +739,16 @@ def create_batch(request: HttpRequest) -> HttpResponse:
         'templates': page_data['templates'],
         'templates_with_items': page_data['templates_with_items'],
         'all_available_stock': json_stock,
-        'primitive_products': primitive_products_for_json,
+        'primitive_products': page_data['primitive_products'], # This one is for the template loops, which is fine
+        'primitive_products_json': primitive_products_for_json, # This one is for json_script
         'is_partial_request': 'X-Partial-Request' in request.headers
     }
     if 'X-Partial-Request' in request.headers:
+        # The partial template needs the correct variable name
         return render(request, 'inventory/partials/create_batch_content.html', context)
+    # The main template also needs the correct variable name
     return render(request, 'inventory/create_batch.html', context)
+
 
 
 def view_batch(request: HttpRequest, pk: int) -> HttpResponse:

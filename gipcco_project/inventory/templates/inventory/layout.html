@@ -395,23 +395,38 @@
           }
         }
 
-        function initializePluginsInContent() {
+        /**
+         * Initializes plugins on all relevant elements within a given container.
+         * If no container is provided, it defaults to the whole document.
+         * @param {HTMLElement} [container=document] - The element to search within for plugins to initialize.
+         */
+        function initializePluginsInContent(container = document) {
           // --- 1. Generic Plugin Initializers ---
-          flatpickr(".datepicker", { dateFormat: "Y-m-d", locale: "ar" });
-          document.querySelectorAll(".searchable-select").forEach((el) => {
+          // Initialize Flatpickr on any datepickers inside the container
+          container.querySelectorAll(".datepicker").forEach(el => {
+              flatpickr(el, { dateFormat: "Y-m-d", locale: "ar" });
+          });
+          
+          // Initialize TomSelect on any searchable-selects inside the container
+          container.querySelectorAll(".searchable-select").forEach((el) => {
             if (el.tomselect) {
               el.tomselect.destroy();
             }
-            new TomSelect(el, {
-              rtl: true,
-              placeholder: el.getAttribute("placeholder") || "ابحث أو اختر...",
-              create: false,
-              dropdownParent: "body",
-              render: {
-                no_results: (data, escape) =>
-                  '<div class="no-results">لا توجد نتائج مطابقة</div>',
-              },
-            });
+            // CRITICAL CHECK: Make sure TomSelect is actually loaded before trying to use it.
+            if (typeof TomSelect !== 'undefined') {
+                new TomSelect(el, {
+                  rtl: true,
+                  placeholder: el.getAttribute("placeholder") || "ابحث أو اختر...",
+                  create: false,
+                  dropdownParent: "body",
+                  render: {
+                    no_results: (data, escape) =>
+                      '<div class="no-results">لا توجد نتائج مطابقة</div>',
+                  },
+                });
+            } else {
+                console.error("TomSelect library is not available. Cannot initialize searchable selects.");
+            }
           });
 
           // --- 2. Page-Specific Initializers ---
@@ -890,82 +905,9 @@
           }
 
           // ----- Logic for shop_order_template_edit.html -----
-          const editTemplateContainer = document.querySelector(
-            'form[action*="edit_shop_order_template"] #template-items-container'
-          );
-          if (editTemplateContainer) {
-            console.log("Initializing shop_order_template_edit.html logic...");
-            if (document.body.hasAttribute("data-template-edit-initialized"))
-              return;
-            document.body.setAttribute(
-              "data-template-edit-initialized",
-              "true"
-            );
-            const container = editTemplateContainer;
-            const addItemBtn = document.getElementById("add-item-btn");
-            const primitiveProducts =
-              getDataFromIsland("primitive-products-data") || [];
-            const initialItems = getDataFromIsland("initial-items-data") || [];
-            function createItemRow(productId = "", quantity = "") {
-              const row = document.createElement("div");
-              row.className =
-                "row g-3 align-items-center mb-3 template-item-row";
-              const productCol = document.createElement("div");
-              productCol.className = "col-md-7";
-              const select = document.createElement("select");
-              select.name = "primitive_product_id";
-              select.className = "form-select";
-              select.required = true;
-              let options =
-                '<option value="">اختر مادة خام أو تعبئة...</option>';
-              primitiveProducts.forEach((p) => {
-                const isSelected = p.id == productId ? "selected" : "";
-                options += `<option value="${p.id}" ${isSelected}>${p.name} (${p.code})</option>`;
-              });
-              select.innerHTML = options;
-              productCol.appendChild(select);
-              const qtyCol = document.createElement("div");
-              qtyCol.className = "col-md-4";
-              const qtyInput = document.createElement("input");
-              qtyInput.type = "number";
-              qtyInput.step = "any";
-              qtyInput.name = "theoretical_quantity";
-              qtyInput.className = "form-control";
-              qtyInput.placeholder = "الكمية النظرية";
-              qtyInput.value = quantity;
-              qtyInput.required = true;
-              qtyCol.appendChild(qtyInput);
-              const removeCol = document.createElement("div");
-              removeCol.className = "col-md-1";
-              const removeBtn = document.createElement("button");
-              removeBtn.type = "button";
-              removeBtn.className = "btn btn-sm btn-outline-danger";
-              removeBtn.innerHTML = '<i class="bi bi-trash"></i>';
-              removeBtn.onclick = () => row.remove();
-              removeCol.appendChild(removeBtn);
-              row.appendChild(productCol);
-              row.appendChild(qtyCol);
-              row.appendChild(removeCol);
-              container.appendChild(row);
-              new TomSelect(select, {
-                create: false,
-                sortField: { field: "text", direction: "asc" },
-              });
-            }
-            addItemBtn.addEventListener("click", () => createItemRow());
-            if (initialItems.length > 0) {
-              initialItems.forEach((item) => {
-                createItemRow(
-                  item.primitive_product_id,
-                  item.theoretical_quantity
-                );
-              });
-            } else {
-              createItemRow();
-            }
-          } else {
-            document.body.removeAttribute("data-template-edit-initialized");
-          }
+          // NOTE: This logic has been moved to its own partial template
+          // (shop_order_template_edit_partial.html) to ensure it runs correctly
+          // after dynamic page loads.
 
           // ----- Logic for shop_order_templates.html (Add/Copy Modal) -----
           const addTemplateModalEl =

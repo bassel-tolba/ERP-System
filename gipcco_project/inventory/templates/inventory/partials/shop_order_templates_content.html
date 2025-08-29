@@ -117,10 +117,3 @@
         </div>
     </div>
 </div>
-
-
-{% block scripts %}
-{{ primitive_products_json|json_script:"primitive-products-data" }}
-{{ source_template_json|json_script:"source-template-data" }}
-{{ source_items_json|json_script:"source-items-data" }}
-{% endblock scripts %}
