@@ -1,0 +1,1467 @@
+<!-- gipcco_project/inventory/templates/inventory/layout.html -->
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-bs-theme="light">
+  <head>
+    <meta charset="utf-t-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GIPCCO Warehouse System</title>
+    <!-- Google Fonts (Local) -->
+    <link
+      rel="stylesheet"
+      href="{% static 'css/google-fonts.css' %}"
+    />
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="{% static 'css/bootstrap.css' %}"
+    />
+    <!-- Bootstrap Icons (Local) -->
+    <link
+      rel="stylesheet"
+      href="{% static 'css/bootstrap-icons.min.css' %}"
+    />
+    <!-- Third-party CSS (Local) -->
+    <link
+      rel="stylesheet"
+      href="{% static 'css/flatpickr.min.css' %}"
+    />
+    <link
+      rel="stylesheet"
+      href="{% static 'css/tom-select.bootstrap5.min.css' %}"
+    />
+    <!-- Custom CSS -->
+    <link
+      rel="stylesheet"
+      href="{% static 'css/style.css' %}"
+    />
+    <!-- Favicon -->
+    <link
+      rel="icon"
+      href="{% static 'img/favicon.ico' %}"
+      type="image/x-icon"
+    />
+  </head>
+  <body>
+    <!-- Seasonal Theme Elements -->
+    <div class="precipitation" id="precipitation"></div>
+    <div class="celestial" id="celestial" title="Click to change season"></div>
+    <div class="cloud cloud1"></div>
+    <div class="cloud cloud2"></div>
+
+    <!-- Hidden Season Toggle - Easter Egg -->
+    <button
+      class="season-toggle"
+      id="seasonToggle"
+      title="Change season"
+      aria-label="Change season"
+    ></button>
+
+    <!-- Season Indicator -->
+    <div class="season-indicator" id="seasonIndicator"></div>
+
+    <header class="navbar navbar-expand-lg sticky-top">
+      <div class="container-fluid">
+        <a
+          class="navbar-brand d-flex align-items-center"
+          href="{% url 'inventory:index' %}"
+        >
+          <i class="bi bi-buildings-fill brand-icon"></i>
+          <span class="brand-text">GIPCCO Warehouse System</span>
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a
+                class="nav-link {% if active_page == 'index' %}active{% endif %}"
+                href="{% url 'inventory:index' %}"
+                ><i class="bi bi-grid-1x2-fill me-2"></i>لوحة التحكم</a
+              >
+            </li>
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle {% if active_page == 'shop_orders' %}active{% endif %}"
+                href="#"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                <i class="bi bi-box-seam-fill me-2"></i>أوامر التشغيل
+              </a>
+              <ul class="dropdown-menu">
+                <li>
+                  <a class="dropdown-item" href="{% url 'inventory:batches' %}"
+                    >عرض أوامر التشغيل</a
+                  >
+                </li>
+                <li>
+                  <a
+                    class="dropdown-item"
+                    href="{% url 'inventory:shop_order_templates' %}"
+                    >إدارة القوالب</a
+                  >
+                </li>
+              </ul>
+            </li>
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle {% if active_page == 'analysis' or active_page == 'production_returns' %}active{% endif %}"
+                href="#"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                <i class="bi bi-bar-chart-line-fill me-2"></i>التحليل والمخزون
+              </a>
+              <ul class="dropdown-menu">
+                <li>
+                  <a class="dropdown-item" href="{% url 'inventory:analysis' %}"
+                    >تحليل حركة المخزون</a
+                  >
+                </li>
+                <li>
+                  <a
+                    class="dropdown-item"
+                    href="{% url 'inventory:opening_balances' %}"
+                    >الأرصدة الاftتاحية</a
+                  >
+                </li>
+                <li>
+                  <a class="dropdown-item" href="{% url 'inventory:production_returns' %}">
+                    <i class="bi bi-arrow-return-left me-2"></i>إرجاع من الإنتاج
+                  </a>
+                </li>
+                <li><hr class="dropdown-divider" /></li>
+                <li>
+                  <a class="dropdown-item" href="{% url 'inventory:ledger' %}"
+                    >كشف حساب منتج/شركة</a
+                  >
+                </li>
+                <li>
+                  <a class="dropdown-item" href="{% url 'inventory:visuals' %}"
+                    ><i class="bi bi-pie-chart-fill me-2"></i>لوحة المؤشرات
+                    الرسومية</a
+                  >
+                </li>
+              </ul>
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link {% if active_page == 'records' %}active{% endif %}"
+                href="{% url 'inventory:records' %}"
+                ><i class="bi bi-journal-richtext me-2"></i>إدارة السجلات</a
+              >
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link {% if active_page == 'products' %}active{% endif %}"
+                href="{% url 'inventory:products' %}"
+                ><i class="bi bi-tags-fill me-2"></i>إدارة المنتجات</a
+              >
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link {% if active_page == 'companies' %}active{% endif %}"
+                href="{% url 'inventory:companies' %}"
+                ><i class="bi bi-building-fill me-2"></i>إدارة الشركات</a
+              >
+            </li>
+          </ul>
+          <div class="d-flex align-items-center">
+            <div class="form-check form-switch theme-switch">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                role="switch"
+                id="darkModeSwitch"
+              />
+              <label
+                class="form-check-label"
+                for="darkModeSwitch"
+                id="darkModeLabel"
+              >
+                <i class="bi bi-moon-stars-fill"></i>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+    <main class="container py-4 flex-grow-1">
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show d-flex align-items-center shadow-sm" role="alert">
+            {% if 'success' in message.tags %}
+              <i class="bi bi-check-circle-fill" style="margin-inline-end: 0.75rem; font-size: 1.2rem"></i>
+            {% elif 'warning' in message.tags or 'danger' in message.tags %}
+              <i class="bi bi-exclamation-triangle-fill" style="margin-inline-end: 0.75rem; font-size: 1.2rem"></i>
+            {% else %}
+              <i class="bi bi-info-circle-fill" style="margin-inline-end: 0.75rem; font-size: 1.2rem"></i>
+            {% endif %}
+            <div>{{ message }}</div>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+              aria-label="Close"
+            ></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <!-- MODIFICATION: Added a wrapper div for our script to target -->
+      <div id="page-content">{% block content %}{% endblock %}</div>
+    </main>
+
+    <footer class="footer mt-auto py-3 text-center">
+      <div class="container">
+        <span class="text-body-secondary">
+          Developed by Bassel for Gipco Company &copy; 2025
+        </span>
+      </div>
+    </footer>
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'js/flatpickr.min.js' %}"></script>
+    <script src="{% static 'js/flatpickr.l10n.ar.js' %}"></script>
+    <script src="{% static 'js/tom-select.complete.min.js' %}"></script>
+
+    <!-- The entire JavaScript block is preserved as-is because it contains no server-side template code -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // --- Theme Switcher & Seasonal Logic (Unchanged) ---
+        const themeSwitch = document.getElementById("darkModeSwitch");
+        const themeLabel = document.getElementById("darkModeLabel");
+        const htmlElement = document.documentElement;
+        function setTheme(theme) {
+          htmlElement.setAttribute("data-bs-theme", theme);
+          localStorage.setItem("theme", theme);
+          themeSwitch.checked = theme === "dark";
+          themeLabel.innerHTML =
+            theme === "dark"
+              ? '<i class="bi bi-sun-fill text-warning"></i>'
+              : '<i class="bi bi-moon-stars-fill"></i>';
+        }
+        themeSwitch.addEventListener("change", () => {
+          setTheme(themeSwitch.checked ? "dark" : "light");
+        });
+        const currentTheme = localStorage.getItem("theme") || "light";
+        setTheme(currentTheme);
+        const seasonToggle = document.getElementById("seasonToggle");
+        const celestialBody = document.getElementById("celestial");
+        const seasonIndicator = document.getElementById("seasonIndicator");
+        const body = document.body;
+        const seasons = ["winter", "spring", "summer", "autumn"];
+        const seasonNames = {
+          winter: "Winter",
+          spring: "Spring",
+          summer: "Summer",
+          autumn: "Autumn",
+        };
+        const currentSeason = localStorage.getItem("season") || null;
+        let seasonalModeEnabled =
+          localStorage.getItem("seasonalModeEnabled") === "true";
+        let seasonIndex = currentSeason ? seasons.indexOf(currentSeason) : 0;
+        function applySeason(season) {
+          body.classList.remove(
+            "seasonal-mode",
+            "spring-mode",
+            "summer-mode",
+            "autumn-mode"
+          );
+          if (seasonalModeEnabled && season) {
+            body.classList.add("seasonal-mode");
+            if (season === "spring") body.classList.add("spring-mode");
+            else if (season === "summer") body.classList.add("summer-mode");
+            else if (season === "autumn") body.classList.add("autumn-mode");
+            else body.classList.add("seasonal-mode");
+            localStorage.setItem("season", season);
+            createPrecipitation();
+            showSeasonIndicator(seasonNames[season]);
+          } else {
+            body.style.backgroundImage = "";
+            localStorage.removeItem("season");
+          }
+        }
+        function showSeasonIndicator(seasonName) {
+          seasonIndicator.textContent = seasonName;
+          seasonIndicator.classList.add("show");
+          setTimeout(() => {
+            seasonIndicator.classList.remove("show");
+          }, 2000);
+        }
+        if (seasonalModeEnabled && currentSeason) {
+          applySeason(currentSeason);
+        }
+        function changeSeason() {
+          if (!seasonalModeEnabled) {
+            seasonalModeEnabled = true;
+            localStorage.setItem("seasonalModeEnabled", "true");
+            showSeasonIndicator("Seasonal Theme Enabled!");
+          }
+          seasonIndex = (seasonIndex + 1) % seasons.length;
+          applySeason(seasons[seasonIndex]);
+        }
+        celestialBody.addEventListener("click", changeSeason);
+        seasonToggle.addEventListener("click", changeSeason);
+        function createPrecipitation() {
+          if (!seasonalModeEnabled) return;
+          const container = document.getElementById("precipitation");
+          container.innerHTML = "";
+          const numElements = 30;
+          for (let i = 0; i < numElements; i++) {
+            const element = document.createElement("div");
+            element.className = "precipitation-element";
+            element.style.left = Math.random() * 100 + "%";
+            element.style.animationDelay = Math.random() * 2 + "s";
+            element.style.animationDuration = Math.random() * 2 + 3 + "s";
+            element.style.opacity = Math.random() * 0.4 + 0.2;
+            container.appendChild(element);
+          }
+        }
+        if (seasonalModeEnabled) {
+          createPrecipitation();
+        }
+        window.addEventListener("scroll", () => {
+          if (!seasonalModeEnabled) return;
+          const celestial = document.getElementById("celestial");
+          const scrolled = window.pageYOffset;
+          const rate = scrolled * -0.3;
+          celestial.style.transform = `translateY(${rate}px)`;
+        });
+        const brandLogo = document.querySelector(".navbar-brand");
+        let clickCount = 0;
+        let clickTimer = null;
+        brandLogo.addEventListener("click", () => {
+          clickCount++;
+          if (clickCount === 1) {
+            clickTimer = setTimeout(() => {
+              clickCount = 0;
+            }, 1000);
+          } else if (clickCount === 3) {
+            clearTimeout(clickTimer);
+            clickCount = 0;
+            if (!seasonalModeEnabled) {
+              seasonalModeEnabled = true;
+              localStorage.setItem("seasonalModeEnabled", "true");
+              applySeason(seasons[seasonIndex]);
+              showSeasonIndicator("Seasonal Theme Enabled!");
+            }
+            seasonToggle.style.opacity = "1";
+            seasonToggle.style.transform = "scale(1.2)";
+            setTimeout(() => {
+              seasonToggle.style.opacity = "0.2";
+              seasonToggle.style.transform = "scale(1)";
+            }, 3000);
+          }
+        });
+
+        // =========================================================
+        //  FINAL, ROBUST - DYNAMIC PAGE LOADING ENGINE
+        // =========================================================
+        const contentContainer = document.getElementById("page-content");
+
+        /**
+         * Helper function to reliably read and parse JSON from a "data island" script tag.
+         * This avoids race conditions.
+         * @param {string} islandId - The ID of the <script type="application/json"> tag.
+         * @returns {object|null} The parsed JSON data or null if not found or invalid.
+         */
+        function getDataFromIsland(islandId) {
+          const island = document.getElementById(islandId);
+          if (!island || !island.textContent) {
+            // It's normal for islands not to exist on certain pages, so no console error here.
+            return null;
+          }
+          try {
+            return JSON.parse(island.textContent);
+          } catch (e) {
+            console.error(
+              `Failed to parse JSON from data island #${islandId}. Error:`,
+              e
+            );
+            return null;
+          }
+        }
+
+        function initializePluginsInContent() {
+          // --- 1. Generic Plugin Initializers ---
+          flatpickr(".datepicker", { dateFormat: "Y-m-d", locale: "ar" });
+          document.querySelectorAll(".searchable-select").forEach((el) => {
+            if (el.tomselect) {
+              el.tomselect.destroy();
+            }
+            new TomSelect(el, {
+              rtl: true,
+              placeholder: el.getAttribute("placeholder") || "ابحث أو اختر...",
+              create: false,
+              dropdownParent: "body",
+              render: {
+                no_results: (data, escape) =>
+                  '<div class="no-results">لا توجد نتائج مطابقة</div>',
+              },
+            });
+          });
+
+          // --- 2. Page-Specific Initializers ---
+
+          // ----- Logic for records.html -----
+          const editModal = document.getElementById("editRecordModal");
+          if (editModal) {
+            console.log("Initializing records.html modal logic...");
+            editModal.addEventListener("show.bs.modal", function (event) {
+              const button = event.relatedTarget;
+              if (!button) return;
+              const form = document.getElementById("editRecordForm");
+              // DYNAMIC URL FOR DJANGO
+              const recordId = button.getAttribute("data-log-id");
+              const url = `/records/edit/${recordId}/`; // NOTE: Trailing slash is Django convention
+              form.action = url;
+              
+              document.getElementById("editQuantity").value =
+                button.getAttribute("data-quantity");
+              document.getElementById("editQcNo").value =
+                button.getAttribute("data-qc-no");
+              document.getElementById("editEntryDate").value =
+                button.getAttribute("data-entry-date");
+              const productSelectEl = document.getElementById("editProductId");
+              if (productSelectEl && productSelectEl.tomselect) {
+                productSelectEl.tomselect.setValue(
+                  button.getAttribute("data-product-id"),
+                  true
+                );
+              }
+              const companySelectEl = document.getElementById("editCompanyId");
+              if (companySelectEl && companySelectEl.tomselect) {
+                companySelectEl.tomselect.setValue(
+                  button.getAttribute("data-company-id"),
+                  true
+                );
+              }
+            });
+          }
+
+          // ----- Logic for create_batch.html -----
+          const createBatchTemplateSelect =
+            document.getElementById("template_id");
+          if (createBatchTemplateSelect) {
+            console.log("Initializing create_batch.html dynamic logic...");
+
+            // Use the reliable data island helper function
+            const templateData = getDataFromIsland("template-data") || {};
+            const availableStockData =
+              getDataFromIsland("available-stock-data") || {};
+            const allPrimitiveProducts =
+              getDataFromIsland("primitive-products-data") || [];
+
+            const templateSelect = document.getElementById("template_id");
+            const fromInput = document.getElementById("batch_number_from");
+            const toInput = document.getElementById("batch_number_to");
+            const materialsCard = document.getElementById("materials_card");
+            const materialsTbody = document.getElementById("materials_tbody");
+            const batchCountDisplay = document.getElementById(
+              "batch_count_display"
+            );
+            const addManualBtn = document.getElementById(
+              "add-material-manually-btn"
+            );
+            const creationDateInput = document.getElementById("creation_date");
+            function validateRowQuantity(row) {
+              const actualQtyInput = row.querySelector(".actual-qty");
+              const qcSelect = row.querySelector(".qc-select");
+              const feedbackDiv = actualQtyInput.nextElementSibling;
+              const selectedOption = qcSelect.options[qcSelect.selectedIndex];
+              actualQtyInput.classList.remove("is-invalid");
+              feedbackDiv.textContent = "";
+              if (!selectedOption || !selectedOption.value) return;
+              const availableQty = parseFloat(selectedOption.dataset.available);
+              const actualQty = parseFloat(actualQtyInput.value);
+              if (
+                !isNaN(availableQty) &&
+                !isNaN(actualQty) &&
+                actualQty > availableQty
+              ) {
+                actualQtyInput.classList.add("is-invalid");
+                feedbackDiv.textContent = `الكمية أكبر من المتاح (${availableQty.toFixed(
+                  3
+                )})`;
+              }
+            }
+            function validateRowDate(row) {
+              const qcSelect = row.querySelector(".qc-select");
+              const feedbackDiv = qcSelect.nextElementSibling;
+              const selectedOption = qcSelect.options[qcSelect.selectedIndex];
+              qcSelect.classList.remove("is-invalid");
+              feedbackDiv.textContent = "";
+              if (
+                !selectedOption ||
+                !selectedOption.value ||
+                !selectedOption.dataset.timestamp
+              )
+                return;
+              const creationDateStr = creationDateInput.value;
+              const qcTimestamp = selectedOption.dataset.timestamp;
+              if (qcTimestamp > creationDateStr) {
+                qcSelect.classList.add("is-invalid");
+                feedbackDiv.textContent = "تاريخ المصدر أحدث من تاريخ الأمر.";
+              }
+            }
+            function updateQuantitySummaries() {
+              const productTotals = {};
+              materialsTbody.querySelectorAll("tr").forEach((row) => {
+                const productIdInput = row.querySelector(
+                  '[name="primitive_product_id"]'
+                );
+                if (!productIdInput) return;
+                const productId = productIdInput.value;
+                if (!productTotals[productId]) {
+                  productTotals[productId] = { theoretical: 0, actual: 0 };
+                }
+                productTotals[productId].theoretical +=
+                  parseFloat(row.querySelector(".theoretical-qty").value) || 0;
+                productTotals[productId].actual +=
+                  parseFloat(row.querySelector(".actual-qty").value) || 0;
+              });
+              materialsTbody
+                .querySelectorAll(".quantity-summary")
+                .forEach((span) => (span.textContent = ""));
+              Object.keys(productTotals).forEach((productId) => {
+                const totals = productTotals[productId];
+                const difference = totals.theoretical - totals.actual;
+                const isMatch = Math.abs(difference) < 0.001;
+                let summaryText = `(${totals.actual.toFixed(
+                  3
+                )} / ${totals.theoretical.toFixed(3)})`;
+                if (!isMatch) {
+                  summaryText += ` | متبقي: ${difference.toFixed(3)}`;
+                }
+                const badgeClass = isMatch ? "bg-success" : "bg-danger";
+                materialsTbody
+                  .querySelectorAll(
+                    `input[name="primitive_product_id"][value="${productId}"]`
+                  )
+                  .forEach((input) => {
+                    const summarySpan = input
+                      .closest("td")
+                      .querySelector(".quantity-summary");
+                    if (summarySpan) {
+                      summarySpan.textContent = summaryText;
+                      summarySpan.className = `quantity-summary badge ${badgeClass}`;
+                    }
+                  });
+              });
+            }
+            if (materialsTbody.children.length > 0) {
+              materialsTbody.querySelectorAll("tr").forEach((row) => {
+                attachRowListeners(row);
+                validateRowQuantity(row);
+                validateRowDate(row);
+              });
+              recalculateQuantities();
+            }
+            materialsTbody.addEventListener("click", function (e) {
+              if (e.target.closest(".remove-row-btn")) {
+                e.target.closest("tr").remove();
+                updateQuantitySummaries();
+              }
+              if (e.target.closest(".split-quantity-btn")) {
+                handleSplitClick(e.target.closest("tr"));
+              }
+            });
+            materialsTbody.addEventListener("change", function (e) {
+              if (e.target.classList.contains("qc-select")) {
+                const row = e.target.closest("tr");
+                validateRowQuantity(row);
+                validateRowDate(row);
+              }
+              if (e.target.classList.contains("material-select")) {
+                updateQuantitySummaries();
+              }
+            });
+            materialsTbody.addEventListener("input", function (e) {
+              if (
+                e.target.classList.contains("actual-qty") ||
+                e.target.classList.contains("theoretical-qty")
+              ) {
+                if (e.target.classList.contains("actual-qty"))
+                  validateRowQuantity(e.target.closest("tr"));
+                updateQuantitySummaries();
+              }
+            });
+            function handleSplitClick(currentRow) {
+              const productId = currentRow.querySelector(
+                '[name="primitive_product_id"]'
+              )?.value;
+              if (!productId) {
+                alert("الرجاء اختيار مادة أولاً.");
+                return;
+              }
+              const qcSelect = currentRow.querySelector(".qc-select");
+              const selectedOption = qcSelect.options[qcSelect.selectedIndex];
+              if (!selectedOption || !selectedOption.value) {
+                alert("الرجاء اختيار مصدر مخزون أولاً.");
+                return;
+              }
+              const availableInCurrentQC =
+                parseFloat(selectedOption.dataset.available) || 0;
+              const allQCsForProduct = Array.from(qcSelect.options)
+                .slice(1)
+                .map((opt) => ({
+                  id: opt.value,
+                  available: parseFloat(opt.dataset.available),
+                }));
+              const currentQCIndex = allQCsForProduct.findIndex(
+                (qc) => qc.id === selectedOption.value
+              );
+              if (
+                currentQCIndex === -1 ||
+                currentQCIndex >= allQCsForProduct.length - 1
+              ) {
+                alert("لا يوجد مصدر مخزون تالي متاح لهذا المنتج.");
+                return;
+              }
+              const nextQC = allQCsForProduct[currentQCIndex + 1];
+              const actualInputCurrent =
+                currentRow.querySelector(".actual-qty");
+              actualInputCurrent.value = availableInCurrentQC.toFixed(3);
+              let totalTheoretical = 0;
+              let totalActual = 0;
+              materialsTbody
+                .querySelectorAll(
+                  `input[name="primitive_product_id"][value="${productId}"]`
+                )
+                .forEach((input) => {
+                  const row = input.closest("tr");
+                  totalTheoretical +=
+                    parseFloat(row.querySelector(".theoretical-qty").value) ||
+                    0;
+                  totalActual +=
+                    parseFloat(row.querySelector(".actual-qty").value) || 0;
+                });
+              const remainingNeeded = totalTheoretical - totalActual;
+              if (remainingNeeded <= 0) {
+                alert("الكمية المطلوبة تم تحقيقها بالفعل أو تجاوزها.");
+                updateQuantitySummaries();
+                return;
+              }
+              const productInfo = allPrimitiveProducts.find(
+                (p) => p.id == productId
+              );
+              const newRow = createMaterialRow(
+                { ...productInfo, primitive_product_id: productId },
+                false,
+                true
+              );
+              currentRow.after(newRow);
+              newRow.querySelector(".theoretical-qty").value = "0.000";
+              const qtyForNewRow = Math.min(remainingNeeded, nextQC.available);
+              newRow.querySelector(".actual-qty").value =
+                qtyForNewRow.toFixed(3);
+              newRow.querySelector(".qc-select").value = nextQC.id;
+              validateRowQuantity(currentRow);
+              validateRowQuantity(newRow);
+              validateRowDate(newRow);
+              updateQuantitySummaries();
+            }
+            function createMaterialRow(
+              item,
+              isManualAdd = false,
+              isSplit = false
+            ) {
+              const row = document.createElement("tr");
+              const theoreticalQty =
+                isManualAdd || isSplit ? 0 : item.theoretical_quantity;
+              let materialCellHTML;
+              if (isManualAdd) {
+                let productOptions = '<option value="">اختر مادة...</option>';
+                allPrimitiveProducts.forEach((p) => {
+                  productOptions += `<option value="${p.id}" data-unit="${p.unit}">${p.name} (${p.unit})</option>`;
+                });
+                materialCellHTML = `<select class="form-select material-select" name="primitive_product_id" required>${productOptions}</select>`;
+              } else {
+                materialCellHTML = `<strong>${item.name}</strong> (${item.unit}) <span class="quantity-summary badge"></span><input type="hidden" name="primitive_product_id" value="${item.primitive_product_id}">`;
+              }
+              const initialActualQty = isSplit ? 0 : theoreticalQty;
+              row.innerHTML = `<td class="ps-3">${materialCellHTML}</td><td><input type="number" step="any" class="form-control text-center fw-bold theoretical-qty" name="theoretical_quantity" value="${theoreticalQty.toFixed(
+                3
+              )}" data-base-quantity="${theoreticalQty}" required></td><td><input type="number" step="any" class="form-control text-center fw-bold actual-qty" name="actual_quantity" value="${initialActualQty.toFixed(
+                3
+              )}" data-base-quantity="${theoreticalQty}" required><div class="invalid-feedback small text-center"></div></td><td class="qc-cell"><select class="form-select qc-select" name="source_log_id" disabled><option>اختر مادة أولاً</option></select><div class="invalid-feedback small"></div></td><td class="text-center pe-2"><button type="button" class="btn btn-sm btn-outline-info split-quantity-btn" title="تقسيم الكمية من المصدر التالي" data-bs-toggle="tooltip"><i class="bi bi-distribute-vertical"></i></button><button type="button" class="btn btn-sm btn-outline-danger remove-row-btn" title="حذف الصف"><i class="bi bi-trash"></i></button></td>`;
+              materialsTbody.appendChild(row);
+              attachRowListeners(row);
+              if (!isManualAdd) {
+                populateQcSelect(row, item.primitive_product_id);
+              }
+              return row;
+            }
+            function attachRowListeners(row) {
+              const materialSelect = row.querySelector(".material-select");
+              if (materialSelect) {
+                new TomSelect(materialSelect, {
+                  create: false,
+                  dropdownParent: "body",
+                });
+                materialSelect.addEventListener("change", (e) => {
+                  populateQcSelect(row, e.target.value);
+                  updateQuantitySummaries();
+                });
+              }
+            }
+            function populateQcSelect(row, productId) {
+              const qcSelect = row.querySelector(".qc-select");
+              if (!productId) {
+                qcSelect.innerHTML = "<option>اختر مادة أولاً</option>";
+                qcSelect.disabled = true;
+                return;
+              }
+              const stockForProduct = availableStockData[productId] || [];
+              let optionsHTML = '<option value="">اختر مصدر...</option>';
+              stockForProduct.forEach((stock) => {
+                optionsHTML += `<option value="${stock.id}" data-available="${stock.remaining_quantity}" data-timestamp="${stock.timestamp}">QC: ${stock.qc_no} | متاح: ${stock.remaining_quantity} | ${stock.timestamp}</option>`;
+              });
+              if (stockForProduct.length === 0) {
+                optionsHTML +=
+                  '<option value="" disabled>لا يوجد مخزون متاح</option>';
+              }
+              qcSelect.innerHTML = optionsHTML;
+              qcSelect.disabled = false;
+              validateRowQuantity(row);
+              validateRowDate(row);
+            }
+            function recalculateQuantities() {
+              const fromVal = parseInt(fromInput.value) || 0;
+              const toVal = parseInt(toInput.value) || fromVal;
+              const numBatches =
+                fromVal > 0 && toVal >= fromVal
+                  ? toVal - fromVal + 1
+                  : fromVal > 0
+                  ? 1
+                  : 0;
+              batchCountDisplay.textContent =
+                numBatches > 0 ? `لـ ${numBatches} تشغيلة` : "";
+              materialsTbody.querySelectorAll("tr").forEach((row) => {
+                const theoreticalInput = row.querySelector(".theoretical-qty");
+                const actualInput = row.querySelector(".actual-qty");
+                const baseQuantity = parseFloat(
+                  theoreticalInput.dataset.baseQuantity
+                );
+                if (isNaN(baseQuantity)) return;
+                const total = numBatches > 0 ? baseQuantity * numBatches : 0;
+                if (theoreticalInput.dataset.baseQuantity) {
+                  theoreticalInput.value = total.toFixed(3);
+                  actualInput.value = total.toFixed(3);
+                }
+                validateRowQuantity(row);
+              });
+              updateQuantitySummaries();
+            }
+            function loadTemplate() {
+              const selectedTemplateId = templateSelect.value;
+              const items = templateData[selectedTemplateId];
+              materialsTbody.innerHTML = "";
+              if (!selectedTemplateId || !items) {
+                materialsCard.style.display = "none";
+                return;
+              }
+              materialsCard.style.display = "block";
+              items.forEach((item) => {
+                const newRow = createMaterialRow(item);
+                const stockForThisItem =
+                  availableStockData[item.primitive_product_id] || [];
+                if (stockForThisItem.length > 0) {
+                  const firstValidOption = stockForThisItem.find(
+                    (s) => s.timestamp <= creationDateInput.value
+                  );
+                  newRow.querySelector(".qc-select").value = firstValidOption
+                    ? firstValidOption.id
+                    : stockForThisItem[0].id;
+                  validateRowQuantity(newRow);
+                  validateRowDate(newRow);
+                }
+              });
+              recalculateQuantities();
+            }
+            creationDateInput.addEventListener("change", () => {
+              materialsTbody.querySelectorAll("tr").forEach((row) => {
+                validateRowDate(row);
+              });
+            });
+            templateSelect.addEventListener("change", loadTemplate);
+            fromInput.addEventListener("input", recalculateQuantities);
+            toInput.addEventListener("input", recalculateQuantities);
+            addManualBtn.addEventListener("click", () =>
+              createMaterialRow({}, true)
+            );
+          }
+
+          // ----- Logic for batch_view.html -----
+          const batchViewForm = document.getElementById("batchEditForm");
+          if (batchViewForm) {
+            console.log("Initializing batch_view.html logic...");
+            
+            // --- Recalculation logic for batch quantities ---
+            const fromInput = document.getElementById("batch_number_from");
+            const toInput = document.getElementById("batch_number_to");
+            const materialsTbody = document.getElementById("materials_tbody");
+            const batchCountDisplay = document.getElementById("batch_count_display");
+
+            if(fromInput && toInput && materialsTbody) {
+                const getNumBatches = () => {
+                  const fromVal = parseInt(fromInput.value) || 0;
+                  const toVal = parseInt(toInput.value) || fromVal;
+                  return fromVal > 0 && toVal >= fromVal
+                    ? toVal - fromVal + 1
+                    : fromVal > 0
+                    ? 1
+                    : 0;
+                };
+                const updateBatchCountDisplay = () => {
+                  const numBatches = getNumBatches();
+                  if (batchCountDisplay) {
+                    batchCountDisplay.textContent =
+                      numBatches > 0 ? `لـ ${numBatches} تشغيلة` : "";
+                  }
+                };
+                const recalculateAllQuantities = () => {
+                  const numBatches = getNumBatches();
+                  materialsTbody.querySelectorAll("tr").forEach((row) => {
+                    const theoreticalInput = row.querySelector(".theoretical-qty");
+                    const actualInput = row.querySelector(".actual-qty");
+                    const baseTheoretical = parseFloat(
+                      theoreticalInput.dataset.baseTheoreticalQuantity
+                    );
+                    if (!isNaN(baseTheoretical)) {
+                      const totalTheoretical =
+                        numBatches > 0 ? baseTheoretical * numBatches : 0;
+                      theoreticalInput.value = totalTheoretical.toFixed(3);
+                    }
+                    const baseActual = parseFloat(
+                      actualInput.dataset.baseActualQuantity
+                    );
+                    if (!isNaN(baseActual)) {
+                      const totalActual =
+                        numBatches > 0 ? baseActual * numBatches : 0;
+                      actualInput.value = totalActual.toFixed(3);
+                    }
+                  });
+                };
+                const handleBatchNumberChange = () => {
+                  updateBatchCountDisplay();
+                  recalculateAllQuantities();
+                };
+                
+                if (!fromInput.dataset.recalcInitialized) {
+                    fromInput.addEventListener("input", handleBatchNumberChange);
+                    toInput.addEventListener("input", handleBatchNumberChange);
+                    fromInput.dataset.recalcInitialized = 'true';
+                }
+                updateBatchCountDisplay(); // Run once on init
+            }
+
+            // --- Delete item logic (using event delegation) ---
+            const batchItemsTable = document.getElementById('batchItemsTable');
+            if (batchItemsTable && !batchItemsTable.dataset.deleteInitialized) {
+                batchItemsTable.dataset.deleteInitialized = 'true';
+                batchItemsTable.addEventListener('click', function(event) {
+                    const deleteButton = event.target.closest('.delete-item-btn');
+                    if (deleteButton) {
+                        event.preventDefault();
+                        if (confirm('هل أنت متأكد من حذف هذه المادة؟')) {
+                            const form = document.getElementById('deleteItemForm');
+                            if (form) {
+                                form.action = deleteButton.dataset.formAction;
+                                form.submit();
+                            }
+                        }
+                    }
+                });
+            }
+          }
+
+          // ----- Logic for shop_order_template_edit.html -----
+          const editTemplateContainer = document.querySelector(
+            'form[action*="edit_shop_order_template"] #template-items-container'
+          );
+          if (editTemplateContainer) {
+            console.log("Initializing shop_order_template_edit.html logic...");
+            if (document.body.hasAttribute("data-template-edit-initialized"))
+              return;
+            document.body.setAttribute(
+              "data-template-edit-initialized",
+              "true"
+            );
+            const container = editTemplateContainer;
+            const addItemBtn = document.getElementById("add-item-btn");
+            const primitiveProducts =
+              getDataFromIsland("primitive-products-data") || [];
+            const initialItems = getDataFromIsland("initial-items-data") || [];
+            function createItemRow(productId = "", quantity = "") {
+              const row = document.createElement("div");
+              row.className =
+                "row g-3 align-items-center mb-3 template-item-row";
+              const productCol = document.createElement("div");
+              productCol.className = "col-md-7";
+              const select = document.createElement("select");
+              select.name = "primitive_product_id";
+              select.className = "form-select";
+              select.required = true;
+              let options =
+                '<option value="">اختر مادة خام أو تعبئة...</option>';
+              primitiveProducts.forEach((p) => {
+                const isSelected = p.id == productId ? "selected" : "";
+                options += `<option value="${p.id}" ${isSelected}>${p.name} (${p.code})</option>`;
+              });
+              select.innerHTML = options;
+              productCol.appendChild(select);
+              const qtyCol = document.createElement("div");
+              qtyCol.className = "col-md-4";
+              const qtyInput = document.createElement("input");
+              qtyInput.type = "number";
+              qtyInput.step = "any";
+              qtyInput.name = "theoretical_quantity";
+              qtyInput.className = "form-control";
+              qtyInput.placeholder = "الكمية النظرية";
+              qtyInput.value = quantity;
+              qtyInput.required = true;
+              qtyCol.appendChild(qtyInput);
+              const removeCol = document.createElement("div");
+              removeCol.className = "col-md-1";
+              const removeBtn = document.createElement("button");
+              removeBtn.type = "button";
+              removeBtn.className = "btn btn-sm btn-outline-danger";
+              removeBtn.innerHTML = '<i class="bi bi-trash"></i>';
+              removeBtn.onclick = () => row.remove();
+              removeCol.appendChild(removeBtn);
+              row.appendChild(productCol);
+              row.appendChild(qtyCol);
+              row.appendChild(removeCol);
+              container.appendChild(row);
+              new TomSelect(select, {
+                create: false,
+                sortField: { field: "text", direction: "asc" },
+              });
+            }
+            addItemBtn.addEventListener("click", () => createItemRow());
+            if (initialItems.length > 0) {
+              initialItems.forEach((item) => {
+                createItemRow(
+                  item.primitive_product_id,
+                  item.theoretical_quantity
+                );
+              });
+            } else {
+              createItemRow();
+            }
+          } else {
+            document.body.removeAttribute("data-template-edit-initialized");
+          }
+
+          // ----- Logic for shop_order_templates.html (Add/Copy Modal) -----
+          const addTemplateModalEl =
+            document.getElementById("addTemplateModal");
+          if (addTemplateModalEl) {
+            console.log(
+              "Initializing shop_order_templates.html modal logic..."
+            );
+            if (document.body.hasAttribute("data-templates-page-initialized"))
+              return;
+            document.body.setAttribute(
+              "data-templates-page-initialized",
+              "true"
+            );
+            const container = addTemplateModalEl.querySelector(
+              "#template-items-container"
+            );
+            const addItemBtn =
+              addTemplateModalEl.querySelector("#add-item-btn");
+            const primitiveProducts =
+              getDataFromIsland("primitive-products-data") || [];
+            const addTemplateModal = new bootstrap.Modal(addTemplateModalEl);
+            const sourceTemplate =
+              getDataFromIsland("source-template-data") || null;
+            const sourceItems = getDataFromIsland("source-items-data") || [];
+            function createItemRow(productId = "", quantity = "") {
+              const row = document.createElement("div");
+              row.className =
+                "row g-3 align-items-center mb-3 template-item-row";
+              const productCol = document.createElement("div");
+              productCol.className = "col-md-7";
+              const select = document.createElement("select");
+              select.name = "primitive_product_id";
+              select.className = "form-select";
+              select.required = true;
+              let options =
+                '<option value="">اختر مادة خام أو تعبئة...</option>';
+              primitiveProducts.forEach((p) => {
+                const isSelected = p.id == productId ? "selected" : "";
+                options += `<option value="${p.id}" ${isSelected}>${p.name} (${p.code})</option>`;
+              });
+              select.innerHTML = options;
+              productCol.appendChild(select);
+              const qtyCol = document.createElement("div");
+              qtyCol.className = "col-md-4";
+              const qtyInput = document.createElement("input");
+              qtyInput.type = "number";
+              qtyInput.step = "any";
+              qtyInput.name = "theoretical_quantity";
+              qtyInput.className = "form-control";
+              qtyInput.placeholder = "الكمية النظرية";
+              qtyInput.value = quantity;
+              qtyInput.required = true;
+              qtyCol.appendChild(qtyInput);
+              const removeCol = document.createElement("div");
+              removeCol.className = "col-md-1";
+              const removeBtn = document.createElement("button");
+              removeBtn.type = "button";
+              removeBtn.className = "btn btn-sm btn-outline-danger";
+              removeBtn.innerHTML = '<i class="bi bi-trash"></i>';
+              removeBtn.onclick = () => row.remove();
+              removeCol.appendChild(removeBtn);
+              row.appendChild(productCol);
+              row.appendChild(qtyCol);
+              row.appendChild(removeCol);
+              container.appendChild(row);
+              new TomSelect(select, {
+                create: false,
+                sortField: { field: "text", direction: "asc" },
+              });
+            }
+            addItemBtn.addEventListener("click", () => createItemRow());
+            addTemplateModalEl.addEventListener("show.bs.modal", () => {
+              container.innerHTML = "";
+              let isCopying = getDataFromIsland("source-template-data") != null; // Check if we should be in copy mode
+              if (isCopying) {
+                const sourceTpl = getDataFromIsland("source-template-data");
+                const sourceItms = getDataFromIsland("source-items-data");
+                addTemplateModalEl.querySelector(
+                  "#addTemplateModalLabel"
+                ).innerText = "إنشاء قالب جديد من نسخة";
+                addTemplateModalEl.querySelector(
+                  "#template_name_input"
+                ).value = `نسخة من - ${sourceTpl.name}`;
+                if (sourceItms && sourceItms.length > 0) {
+                  sourceItms.forEach((item) => {
+                    createItemRow(
+                      item.primitive_product_id,
+                      item.theoretical_quantity
+                    );
+                  });
+                } else {
+                  createItemRow();
+                }
+                // Important: Erase the data island content after use to prevent re-copying on next modal open
+                const island1 = document.getElementById("source-template-data");
+                if (island1) island1.textContent = "";
+                const island2 = document.getElementById("source-items-data");
+                if (island2) island2.textContent = "";
+              } else {
+                addTemplateModalEl.querySelector(
+                  "#addTemplateModalLabel"
+                ).innerText = "إنشاء قالب جديد";
+                addTemplateModalEl.querySelector("form").reset();
+                addTemplateModalEl
+                  .querySelectorAll(".searchable-select")
+                  .forEach((sel) => {
+                    if (sel.tomselect) sel.tomselect.clear();
+                  });
+                createItemRow();
+              }
+            });
+            if (sourceTemplate) {
+              addTemplateModal.show();
+            }
+          } else {
+            document.body.removeAttribute("data-templates-page-initialized");
+          }
+
+          // ----- Logic for ledger.html -----
+          const detailsModalEl = document.getElementById("detailsModal");
+          if (detailsModalEl) {
+            if (document.body.hasAttribute("data-ledger-initialized")) return;
+            document.body.setAttribute("data-ledger-initialized", "true");
+
+            const detailsModal = new bootstrap.Modal(detailsModalEl);
+            const batchDetailsModalEl = document.getElementById("batchDetailsModal");
+            const batchDetailsModal = batchDetailsModalEl ? new bootstrap.Modal(batchDetailsModalEl) : null;
+            
+            // Logic for the FIRST modal (basic details)
+            detailsModalEl.addEventListener("show.bs.modal", function (event) {
+                const button = event.relatedTarget;
+                const modal = this;
+                const type = button.getAttribute("data-type");
+
+                modal.querySelector("#modal-date").textContent = button.getAttribute("data-date");
+                modal.querySelector("#modal-product").textContent = `${button.getAttribute("data-product-name")} (${button.getAttribute("data-product-code")})`;
+                modal.querySelector("#modal-actual").textContent = button.getAttribute("data-actual-qty");
+                
+                const inDetails = modal.querySelectorAll(".in-details");
+                const outDetails = modal.querySelectorAll(".out-details");
+                const batchBtnContainer = modal.querySelector("#batch-details-btn-container");
+                const viewFullBatchBtn = modal.querySelector("#viewFullBatchBtn");
+
+                if (type === 'IN' || type === 'RETURN_IN') {
+                    inDetails.forEach((el) => (el.style.display = "table-row"));
+                    outDetails.forEach((el) => (el.style.display = "none"));
+                    batchBtnContainer.classList.add('d-none');
+                    modal.querySelector("#detailsModalLabel").textContent = "تفاصيل حركة وارد";
+                    modal.querySelector("#modal-company").textContent = button.getAttribute("data-company-name");
+                    modal.querySelector("#modal-qc").textContent = button.getAttribute("data-qc-no");
+                } else { // type === 'OUT'
+                    inDetails.forEach((el) => (el.style.display = "none"));
+                    outDetails.forEach((el) => (el.style.display = "table-row"));
+                    modal.querySelector("#detailsModalLabel").textContent = "تفاصيل حركة منصرف";
+                    
+                    const shopOrderCell = modal.querySelector("#modal-shop-order");
+                    const batchId = button.getAttribute("data-batch-id");
+                    const shopOrderNumber = button.getAttribute("data-shop-order-no");
+                    
+                    if (batchId) {
+                        shopOrderCell.innerHTML = `<a href="/batch/${batchId}/" title="عرض تفاصيل أمر التشغيل">${shopOrderNumber} <i class="bi bi-box-arrow-up-right small"></i></a>`;
+                        batchBtnContainer.classList.remove('d-none');
+                        viewFullBatchBtn.dataset.batchId = batchId;
+                    } else {
+                        shopOrderCell.textContent = shopOrderNumber;
+                        batchBtnContainer.classList.add('d-none');
+                    }
+                    modal.querySelector("#modal-batch").textContent = button.getAttribute("data-batch-no");
+                    modal.querySelector("#modal-final-product").textContent = button.getAttribute("data-final-product");
+                    modal.querySelector("#modal-theoretical").textContent = button.getAttribute("data-theoretical-qty");
+                }
+            });
+
+            // Logic for the SECOND modal (deep dive)
+            if (batchDetailsModalEl) {
+                const viewFullBatchBtn = document.getElementById("viewFullBatchBtn");
+                if (viewFullBatchBtn) {
+                    viewFullBatchBtn.addEventListener('click', async function() {
+                        const batchId = this.dataset.batchId;
+                        if (!batchId) return;
+
+                        const loadingEl = batchDetailsModalEl.querySelector('#batch-details-content-loading');
+                        const mainEl = batchDetailsModalEl.querySelector('#batch-details-content-main');
+                        const tbody = batchDetailsModalEl.querySelector('#batch-modal-items-tbody');
+                        
+                        // Show loading spinner
+                        loadingEl.classList.remove('d-none');
+                        mainEl.classList.add('d-none');
+                        tbody.innerHTML = '';
+
+                        try {
+                            const response = await fetch(`/api/batch_details/${batchId}/`);
+                            const data = await response.json();
+
+                            if (response.ok) {
+                                // Populate header info
+                                batchDetailsModalEl.querySelector('#batch-modal-so-num').textContent = data.shop_order_number;
+                                batchDetailsModalEl.querySelector('#batch-modal-batch-num').textContent = data.batch_number;
+                                batchDetailsModalEl.querySelector('#batch-modal-date').textContent = new Date(data.creation_date).toLocaleDateString('en-CA');
+                                batchDetailsModalEl.querySelector('#batch-modal-final-prod').textContent = data.final_product_name;
+
+                                // --- FIX: Change data.items to data.item_list ---
+                                // Populate items table
+                                data.item_list.forEach(item => {
+                                    const row = `
+                                        <tr>
+                                            <td>${item.primitive_product_name}</td>
+                                            <td>${item.source_qc_no || 'N/A'}</td>
+                                            <td class="text-center">${parseFloat(item.theoretical_quantity).toFixed(3)} ${item.primitive_product_unit}</td>
+                                            <td class="text-center">${parseFloat(item.actual_quantity).toFixed(3)} ${item.primitive_product_unit}</td>
+                                        </tr>
+                                    `;
+                                    tbody.insertAdjacentHTML('beforeend', row);
+                                });
+
+                                // Show main content
+                                loadingEl.classList.add('d-none');
+                                mainEl.classList.remove('d-none');
+
+                            }  else {
+                                tbody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">خطأ: ${data.error || 'فشل تحميل البيانات.'}</td></tr>`;
+                                loadingEl.classList.add('d-none');
+                                mainEl.classList.remove('d-none');
+                            }
+                        } catch (error) {
+                             tbody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">حدث خطأ في الشبكة.</td></tr>`;
+                             loadingEl.classList.add('d-none');
+                             mainEl.classList.remove('d-none');
+                        }
+                    });
+                }
+            }
+          } else {
+            document.body.removeAttribute("data-ledger-initialized");
+          }
+
+          // ----- Logic for production_returns.html -----
+          const productSelectForReturns = document.getElementById('product_id');
+          // Check if we are on the production returns page by looking for the form.
+          if (productSelectForReturns && productSelectForReturns.closest('#returnForm')) {
+            // Use a guard on the element itself to prevent re-adding listeners if the script runs multiple times by mistake.
+            if (!productSelectForReturns.dataset.returnsInitialized) {
+                console.log("Initializing production_returns.html logic...");
+                productSelectForReturns.dataset.returnsInitialized = 'true';
+
+                const sourceSelect = document.getElementById('source_log_id');
+                const quantityInput = document.getElementById('quantity');
+                const maxHelpText = document.getElementById('maxReturnableHelp');
+
+                productSelectForReturns.addEventListener('change', async function() {
+                    const productId = this.value;
+                    sourceSelect.innerHTML = '<option>جاري التحميل...</option>';
+                    sourceSelect.disabled = true;
+                    maxHelpText.textContent = '';
+                    quantityInput.removeAttribute('max');
+
+                    if (!productId) {
+                        sourceSelect.innerHTML = '<option value="" selected disabled>-- اختر المادة أولاً --</option>';
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch(`/api/get_used_qc_sources/${productId}/`);
+                        if (!response.ok) throw new Error('Network response was not ok');
+                        
+                        const sources = await response.json();
+                        
+                        sourceSelect.innerHTML = '<option value="" selected disabled>-- اختر المصدر --</option>';
+                        if (sources.length > 0) {
+                            sources.forEach(source => {
+                                const option = document.createElement('option');
+                                option.value = source.id;
+                                const date = new Date(source.timestamp).toLocaleDateString('en-CA'); // YYYY-MM-DD format
+                                option.textContent = `${source.qc_no || 'N/A'} (تاريخ: ${date})`;
+                                option.dataset.maxReturnable = source.max_returnable;
+                                sourceSelect.appendChild(option);
+                            });
+                            sourceSelect.disabled = false;
+                        } else {
+                            sourceSelect.innerHTML = '<option value="" selected disabled>-- لا توجد مصادر مستخدمة لهذه المادة --</option>';
+                        }
+                    } catch (error) {
+                        console.error('Failed to fetch sources:', error);
+                        sourceSelect.innerHTML = '<option value="" selected disabled>-- خطأ في التحميل --</option>';
+                    }
+                });
+
+                sourceSelect.addEventListener('change', function() {
+                    const selectedOption = this.options[this.selectedIndex];
+                    const maxReturnable = selectedOption.dataset.maxReturnable;
+                    if (maxReturnable) {
+                        const maxVal = parseFloat(maxReturnable).toFixed(3);
+                        quantityInput.setAttribute('max', maxVal);
+                        maxHelpText.textContent = `الكمية القصوى الممكن إرجاعها من هذا المصدر: ${maxVal}`;
+                    } else {
+                        quantityInput.removeAttribute('max');
+                        maxHelpText.textContent = '';
+                    }
+                });
+            }
+          }
+
+          // ----- Logic for visuals.html -----
+          const inventoryFlowChartCanvas =
+            document.getElementById("inventoryFlowChart");
+          if (inventoryFlowChartCanvas) {
+            console.log("Initializing visuals.html chart logic...");
+            if (document.body.hasAttribute("data-visuals-initialized")) return;
+            document.body.setAttribute("data-visuals-initialized", "true");
+            if (typeof Chart === "undefined") {
+              console.error("Chart.js not loaded!");
+              return;
+            }
+            const chartColors = [
+              "#0d6efd",
+              "#6f42c1",
+              "#d63384",
+              "#dc3545",
+              "#fd7e14",
+              "#ffc107",
+              "#198754",
+              "#20c997",
+              "#0dcaf0",
+              "#6c757d",
+            ];
+            const inOutData = getDataFromIsland("data-for-chart-1");
+            if (
+              inventoryFlowChartCanvas &&
+              inOutData &&
+              inOutData.labels &&
+              inOutData.labels.length > 0
+            ) {
+              new Chart(inventoryFlowChartCanvas.getContext("2d"), {
+                type: "line",
+                data: inOutData,
+                options: {
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  interaction: { mode: "index", intersect: false },
+                  scales: {
+                    y: {
+                      beginAtZero: true,
+                      title: { display: true, text: "الكمية" },
+                    },
+                  },
+                },
+              });
+            } else {
+              showNoDataMessage("inventoryFlowChart");
+            }
+            const consumptionData = getDataFromIsland("data-for-chart-2");
+            const consumptionCanvas =
+              document.getElementById("consumptionChart");
+            if (
+              consumptionCanvas &&
+              consumptionData &&
+              consumptionData.labels &&
+              consumptionData.labels.length > 0
+            ) {
+              consumptionData.datasets[0].backgroundColor = chartColors;
+              new Chart(consumptionCanvas.getContext("2d"), {
+                type: "doughnut",
+                data: consumptionData,
+                options: {
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: { legend: { position: "top" } },
+                },
+              });
+            } else {
+              showNoDataMessage("consumptionChart");
+            }
+            const varianceData = getDataFromIsland("data-for-chart-3");
+            const varianceCanvas = document.getElementById("varianceChart");
+            if (
+              varianceCanvas &&
+              varianceData &&
+              varianceData.labels &&
+              varianceData.labels.length > 0
+            ) {
+              varianceData.datasets[0].backgroundColor =
+                varianceData.datasets[0].data.map((v) =>
+                  v > 0 ? "rgba(220, 53, 69, 0.7)" : "rgba(25, 135, 84, 0.7)"
+                );
+              varianceData.datasets[0].borderColor =
+                varianceData.datasets[0].data.map((v) =>
+                  v > 0 ? "#dc3545" : "#198754"
+                );
+              varianceData.datasets[0].borderWidth = 1;
+              new Chart(varianceCanvas.getContext("2d"), {
+                type: "bar",
+                data: varianceData,
+                options: {
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  scales: {
+                    y: {
+                      beginAtZero: true,
+                      title: { display: true, text: "كمية الفرق" },
+                    },
+                  },
+                },
+              });
+            } else {
+              showNoDataMessage("varianceChart");
+            }
+          } else {
+            document.body.removeAttribute("data-visuals-initialized");
+          }
+        }
+
+        // --- Core Dynamic Loading Functions ---
+        async function loadContent(url, pushState = true) {
+          try {
+            contentContainer.style.transition = "opacity 0.2s ease-in-out";
+            contentContainer.style.opacity = "0.5";
+            const response = await fetch(url, {
+              headers: { "X-Partial-Request": "true" },
+            });
+            if (!response.ok) {
+              window.location.href = url;
+              return;
+            }
+            const html = await response.text();
+            contentContainer.innerHTML = html;
+            contentContainer.style.opacity = "1";
+            if (pushState) {
+              history.pushState({ path: url }, "", url);
+            }
+            const newTitle = contentContainer.querySelector("h1")?.innerText;
+            document.title = newTitle
+              ? `${newTitle} - GIPCCO`
+              : "GIPCCO Warehouse System";
+            initializePluginsInContent();
+            updateActiveNav(url);
+          } catch (error) {
+            console.error("Failed to load dynamic content:", error);
+            window.location.href = url;
+          }
+        }
+        function updateActiveNav(url) {
+          const path = new URL(url, window.location.origin).pathname;
+          document
+            .querySelectorAll(".nav-link, .dropdown-item")
+            .forEach((link) => {
+              const linkPath = new URL(link.href).pathname;
+              if (link.classList.contains("nav-link")) {
+                if (linkPath === path) {
+                  link.classList.add("active");
+                } else {
+                  link.classList.remove("active");
+                }
+              }
+              const dropdown = link.closest(".nav-item.dropdown");
+              if (dropdown) {
+                const dropdownToggle = dropdown.querySelector(
+                  ".nav-link.dropdown-toggle"
+                );
+                const hasActiveItem = Array.from(
+                  dropdown.querySelectorAll(".dropdown-item")
+                ).some((item) => new URL(item.href).pathname === path);
+                if (hasActiveItem) {
+                  dropdownToggle.classList.add("active");
+                } else {
+                  dropdownToggle.classList.remove("active");
+                }
+              }
+            });
+        }
+        document.body.addEventListener("click", (event) => {
+          const link = event.target.closest("a");
+          if (
+            link &&
+            link.href &&
+            link.target !== "_blank" &&
+            new URL(link.href).origin === window.location.origin &&
+            !link.hasAttribute("data-no-dynamic")
+          ) {
+            event.preventDefault();
+            loadContent(link.href);
+          }
+        });
+        window.addEventListener("popstate", (event) => {
+          if (event.state && event.state.path) {
+            loadContent(event.state.path, false);
+          }
+        });
+        history.replaceState(
+          { path: window.location.href },
+          "",
+          window.location.href
+        );
+        initializePluginsInContent();
+      });
+    </script>
+    {% block scripts %}{% endblock %}
+  </body>
+</html>

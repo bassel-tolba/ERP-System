@@ -1,0 +1,211 @@
+<!-- gipcco_project/inventory/templates/inventory/partials/ledger_content.html -->
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="mb-0 h2">كشف حساب المخزون</h1>
+    <a id="printReportBtn" href="#" class="btn btn-outline-secondary {% if not transactions %}disabled{% endif %}" target="_blank">
+        <i class="bi bi-printer-fill me-2"></i>طباعة التقرير
+    </a>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-filter-circle-fill me-2"></i>خيارات البحث والتصفية</h5>
+    </div>
+    <div class="card-body">
+        <form id="ledgerFilterForm" method="GET" action="{% url 'inventory:ledger' %}">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label for="product_id" class="form-label">المنتج (المادة الأولية)</label>
+                    <select name="product_id" id="product_id" class="form-select searchable-select">
+                        <option value="">-- اختر منتج --</option>
+                        {% for product in all_primitive_products %}
+                        <option value="{{ product.id }}" {% if request.GET.product_id == product.id|stringformat:"s" %}selected{% endif %}>{{ product.name }} ({{ product.code }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="company_id" class="form-label">الشركة الموردة</label>
+                    <select name="company_id" id="company_id" class="form-select searchable-select">
+                        <option value="">-- اختر شركة --</option>
+                        {% for company in all_companies %}
+                        <option value="{{ company.id }}" {% if request.GET.company_id == company.id|stringformat:"s" %}selected{% endif %}>{{ company.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="qc_no" class="form-label">رقم مراقبة الجودة</label>
+                    <input type="text" name="qc_no" id="qc_no" class="form-control" value="{{ request.GET.qc_no|default:'' }}">
+                </div>
+                <div class="col-md-2">
+                    <label for="start_date" class="form-label">من تاريخ</label>
+                    <input type="text" name="start_date" id="start_date" class="form-control datepicker" value="{{ request.GET.start_date|default:'' }}">
+                </div>
+                <div class="col-md-2">
+                    <label for="end_date" class="form-label">إلى تاريخ</label>
+                    <input type="text" name="end_date" id="end_date" class="form-control datepicker" value="{{ request.GET.end_date|default:'' }}">
+                </div>
+                <div class="col-12 text-end">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-search me-2"></i>بحث</button>
+                    <a href="{% url 'inventory:ledger' %}" class="btn btn-secondary"><i class="bi bi-eraser-fill me-2"></i>مسح الفلاتر</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if transactions is defined %}
+    {% if transactions %}
+    <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+             <h5 class="mb-0">نتائج البحث</h5>
+             <span>الرصيد الافتتاحي للفترة: <strong>{{ opening_balance_for_period|floatformat:3 }}</strong> {{ unit }}</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover table-striped mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>التاريخ</th>
+                        {% if not request.GET.product_id %}<th>المنتج</th>{% endif %}
+                        <th>النوع</th>
+                        <th>البيان / السبب</th>
+                        <th class="text-center">التغيير</th>
+                        <th class="text-center">رصيد قبل</th>
+                        <th class="text-center">رصيد بعد</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in transactions %}
+                    <tr>
+                        <td>{{ t.date|date:"Y-m-d H:i" }}</td>
+                        {% if not request.GET.product_id %}<td>{{ t.product_name }}</td>{% endif %}
+                        <td>
+                            {% if t.type == 'IN' %}<span class="badge bg-success-subtle border border-success-subtle text-success-emphasis rounded-pill">وارد (مورد)</span>
+                            {% elif t.type == 'RETURN_IN' %}<span class="badge bg-info-subtle border border-info-subtle text-info-emphasis rounded-pill">وارد (مرتجع)</span>
+                            {% else %}<span class="badge bg-danger-subtle border border-danger-subtle text-danger-emphasis rounded-pill">منصرف (إنتاج)</span>{% endif %}
+                        </td>
+                        <td>{{ t.description }}</td>
+                        <td class="text-center fw-bold {% if t.quantity_change > 0 %}text-success{% else %}text-danger{% endif %}">{{ t.quantity_change|floatformat:3 }}</td>
+                        <td class="text-center text-muted">{{ t.balance_before|floatformat:3 }}</td>
+                        <td class="text-center fw-bold">{{ t.balance_after|floatformat:3 }}</td>
+                        <td class="text-end">
+                             <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#detailsModal"
+                                data-type="{{ t.type }}" data-date="{{ t.date|date:'Y-m-d H:i' }}"
+                                data-product-name="{{ t.product_name }}" data-product-code="{{ t.product_code }}"
+                                data-actual-qty="{{ t.quantity_change|floatformat:'-3g' }}" data-company-name="{{ t.company_name|default:'N/A' }}"
+                                data-qc-no="{{ t.qc_no|default:'N/A' }}" data-shop-order-no="{{ t.shop_order_number|default:'N/A' }}"
+                                data-batch-no="{{ t.batch_number|default:'N/A' }}" data-final-product="{{ t.final_product_name|default:'N/A' }}"
+                                data-theoretical-qty="{{ t.theoretical_quantity|floatformat:3|default:'N/A' }}"
+                                data-batch-id="{{ t.batch_id|default:'' }}">
+                                <i class="bi bi-info-circle"></i> تفاصيل
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% elif request.GET %}
+    <div class="alert alert-info"><i class="bi bi-search me-2"></i> لا توجد حركات مطابقة لمعايير البحث المحددة.</div>
+    {% else %}
+     <div class="alert alert-secondary"><i class="bi bi-info-circle-fill me-2"></i> الرجاء استخدام الفلاتر أعلاه لعرض كشف حساب.</div>
+    {% endif %}
+{% endif %}
+
+<!-- Modals (Copied directly as they are pure HTML/Bootstrap) -->
+<!-- Modal 1: Basic Details -->
+<div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="detailsModalLabel">تفاصيل الحركة</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+         <table class="table table-sm">
+            <tbody>
+                <tr><th style="width: 35%;">التاريخ:</th><td id="modal-date"></td></tr>
+                <tr><th>المنتج:</th><td id="modal-product"></td></tr>
+                <tr class="in-details"><th>الشركة الموردة:</th><td id="modal-company"></td></tr>
+                <tr class="in-details"><th>رقم QC:</th><td id="modal-qc"></td></tr>
+                <tr class="out-details"><th>أمر التشغيل:</th><td id="modal-shop-order"></td></tr>
+                <tr class="out-details"><th>رقم التشغيلة:</th><td id="modal-batch"></td></tr>
+                <tr class="out-details"><th>لإنتاج منتج:</th><td id="modal-final-product"></td></tr>
+                <tr class="out-details"><th>الكمية النظرية:</th><td id="modal-theoretical"></td></tr>
+                <tr><th>الكمية الفعلية:</th><td id="modal-actual"></td></tr>
+            </tbody>
+        </table>
+        <div id="batch-details-btn-container" class="text-center mt-3 d-none">
+            <button class="btn btn-primary" id="viewFullBatchBtn" data-bs-toggle="modal" data-bs-target="#batchDetailsModal">
+                <i class="bi bi-zoom-in"></i> عرض تفاصيل أمر التشغيل الكامل
+            </button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal 2: Full Batch Details (Deep Dive) -->
+<div class="modal fade" id="batchDetailsModal" tabindex="-1" aria-labelledby="batchDetailsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="batchDetailsModalLabel">تفاصيل أمر التشغيل الكاملة</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="batch-details-content-loading" class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>
+        <div id="batch-details-content-main" class="d-none">
+            <div class="row mb-3 p-2 bg-light rounded">
+                <div class="col-md-3"><strong>رقم الأمر:</strong> <span id="batch-modal-so-num"></span></div>
+                <div class="col-md-3"><strong>رقم التشغيلة:</strong> <span id="batch-modal-batch-num"></span></div>
+                <div class="col-md-3"><strong>تاريخ الإنشاء:</strong> <span id="batch-modal-date"></span></div>
+                <div class="col-md-3"><strong>المنتج النهائي:</strong> <span id="batch-modal-final-prod"></span></div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered">
+                    <thead>
+                        <tr>
+                            <th>المادة المستخدمة</th>
+                            <th>المصدر (QC)</th>
+                            <th class="text-center">الكمية النظرية</th>
+                            <th class="text-center">الكمية الفعلية</th>
+                        </tr>
+                    </thead>
+                    <tbody id="batch-modal-items-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterForm = document.getElementById('ledgerFilterForm');
+    const printBtn = document.getElementById('printReportBtn');
+    if (filterForm && printBtn) {
+        function updatePrintLink() {
+            const formData = new FormData(filterForm);
+            const params = new URLSearchParams();
+            for (const pair of formData) {
+                if (pair[1]) {
+                    params.append(pair[0], pair[1]);
+                }
+            }
+            printBtn.href = `{% url 'inventory:print_ledger' %}?${params.toString()}`;
+        }
+        filterForm.addEventListener('change', updatePrintLink);
+        filterForm.addEventListener('submit', updatePrintLink);
+        updatePrintLink(); // Initial update on page load
+    }
+});
+</script>

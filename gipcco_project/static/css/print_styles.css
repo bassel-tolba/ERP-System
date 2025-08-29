@@ -1,0 +1,115 @@
+/* static/css/print_styles.css */
+
+/* This rule applies ONLY when printing */
+@media print {
+    /* Define A4 page layout */
+    @page {
+        size: A4;
+        margin: 1.5cm; /* Standard margin for documents */
+    }
+
+    body {
+        -webkit-print-color-adjust: exact !important; /* Force printing of background colors in Chrome/Safari */
+        print-color-adjust: exact !important; /* Standard property */
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* A clean, professional font */
+        font-size: 10pt; /* A good readable size for print */
+        background-color: #ffffff; /* Ensure background is white */
+        color: #000000;
+    }
+
+    /* --- Hide Elements Not For Print --- */
+    .no-print, 
+    .navbar, 
+    .footer, 
+    .season-toggle,
+    .precipitation,
+    .celestial,
+    .cloud,
+    .season-indicator {
+        display: none !important;
+    }
+
+    /* --- Page Header & Footer --- */
+    .report-header-container,
+    .report-footer-container {
+        position: fixed;
+        width: calc(100% - 3cm); /* Page width minus left/right margins */
+        font-size: 8pt;
+        color: #555;
+    }
+
+    .report-header-container {
+        top: 0;
+        left: 1.5cm;
+        right: 1.5cm;
+        padding-bottom: 5px;
+        border-bottom: 2px solid #005a9e; /* GIPCCO Blue */
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+    }
+
+    .report-footer-container {
+        bottom: 0;
+        left: 1.5cm;
+        right: 1.5cm;
+        padding-top: 5px;
+        border-top: 1px solid #ccc;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* Page number generation */
+    .page-counter::after {
+        counter-increment: page;
+        content: "Page " counter(page);
+    }
+    body {
+        counter-reset: page;
+    }
+
+    /* --- General Styling --- */
+    h1, h2, h3 {
+        color: #003366 !important; /* Darker GIPCCO Blue */
+        page-break-after: avoid; /* Don't split a heading from its content */
+    }
+
+    a {
+        text-decoration: none;
+        color: #000000;
+    }
+
+    .card {
+        border: 1px solid #ddd !important;
+        box-shadow: none !important;
+        page-break-inside: avoid; /* Try to keep cards from splitting across pages */
+    }
+
+    .table {
+        font-size: 9pt;
+    }
+    
+    .table thead {
+        background-color: #f2f2f2 !important;
+    }
+
+    .table-bordered th,
+    .table-bordered td {
+        border: 1px solid #dee2e6 !important;
+    }
+
+    .badge {
+        border: 1px solid #ccc !important;
+    }
+
+    /* --- Report Specific Layout --- */
+    .main-content-area {
+        padding-top: 50px; /* Space for the fixed header */
+        padding-bottom: 50px; /* Space for the fixed footer */
+    }
+
+    .material-details-section {
+        page-break-before: always; /* Each material detail section starts on a new page */
+    }
+}

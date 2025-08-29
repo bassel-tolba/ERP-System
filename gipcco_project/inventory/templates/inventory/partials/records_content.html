@@ -1,0 +1,112 @@
+<!-- gipcco_project/inventory/templates/inventory/partials/records_content.html -->
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0" style="font-weight: 700;">إدارة سجلات المخزون</h1>
+    <a href="{% url 'inventory:index' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> إضافة سجل جديد</a>
+</div>
+<div class="card">
+    <div class="card-header"><h3><i class="bi bi-receipt-cutoff"></i> كل السجلات</h3></div>
+    <div class="card-body p-0">
+        {% if not logs %}
+        <div class="text-center p-5"><i class="bi bi-journal-x display-4 text-secondary"></i><h5 class="mt-3">لا توجد سجلات</h5><p class="text-muted">اذهب إلى لوحة التحكم لإضافة أول سجل.</p><a href="{% url 'inventory:index' %}" class="btn btn-primary mt-2"><i class="bi bi-plus-lg"></i> إضافة سجل</a></div>
+        {% else %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">المنتج</th>
+                        <th>QC No.</th>
+                        <th>الشركة</th>
+                        <th>الكمية</th>
+                        <th>التاريخ</th>
+                        <th class="text-end pe-3">إجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td class="ps-3"><strong>{{ log.product.name }}</strong><br><small class="text-muted font-monospace">{{ log.product.code }}</small></td>
+                        <td><span class="badge bg-secondary font-monospace">{{ log.qc_no|default:"N/A" }}</span></td>
+                        <td>{% if log.company %}{{ log.company.name }}{% else %}---{% endif %}</td>
+                        <td class="fw-bold">{{ log.quantity|floatformat:3 }} <small class="text-muted">{{ log.product.unit }}</small></td>
+                        <td class="text-nowrap">{{ log.timestamp|date:"Y-m-d" }}</td>
+                        <td class="text-end pe-3">
+                            <button 
+                                type="button" 
+                                class="btn btn-sm btn-outline-secondary edit-record-btn" 
+                                data-bs-toggle="modal" 
+                                data-bs-target="#editRecordModal"
+                                data-log-id="{{ log.id }}"
+                                data-product-id="{{ log.product.id }}"
+                                data-company-id="{{ log.company.id }}"
+                                data-quantity="{{ log.quantity|floatformat:3 }}"
+                                data-qc-no="{{ log.qc_no|default:'' }}"
+                                data-entry-date="{{ log.timestamp|date:'Y-m-d' }}"
+                            >
+                                <i class="bi bi-pencil-square"></i> تعديل
+                            </button>
+                            <form method="post" action="{% url 'inventory:delete_record' pk=log.id %}" class="d-inline" onsubmit="return confirm('هل أنت متأكد من حذف هذا السجل؟');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> حذف</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- SINGLE Edit Modal -->
+<div class="modal fade" id="editRecordModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">تعديل سجل</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <!-- Action will be set by JavaScript -->
+            <form method="post" action="" id="editRecordForm">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">المنتج</label>
+                        <select class="form-select searchable-select" name="product_id" id="editProductId" required>
+                            {% for p in all_products %}
+                            <option value="{{ p.id }}">{{ p.name }} ({{ p.code }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">الشركة</label>
+                        <select class="form-select searchable-select" name="company_id" id="editCompanyId" required>
+                            {% for c in all_companies %}
+                            <option value="{{ c.id }}">{{ c.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">الكمية</label>
+                            <input type="number" step="any" class="form-control" name="quantity" id="editQuantity" required>
+                        </div>
+                         <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">QC Number</label>
+                            <input type="text" class="form-control" name="qc_no" id="editQcNo">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">التاريخ</label>
+                        <input type="text" class="form-control datepicker" name="entry_date" id="editEntryDate" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check2-circle"></i> حفظ التغييرات</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

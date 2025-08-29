@@ -1,0 +1,305 @@
+<!-- gipcco_project/inventory/templates/inventory/print_ledger.html -->
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ report_title }}</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'css/google-fonts.css' %}">
+    <style>
+        :root {
+            --gipco-primary: #0d6efd;
+            --gipco-secondary: #6c757d;
+            --gipco-light-gray: #f8f9fa;
+        }
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #FFF;
+            color: #212529;
+        }
+        .page {
+            width: 21cm;
+            min-height: 29.7cm;
+            padding: 1.5cm;
+            margin: 1cm auto;
+            border: 1px #D3D3D3 solid;
+            border-radius: 5px;
+            background: white;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--gipco-primary);
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .page-header .logo {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--gipco-primary);
+        }
+        .page-header .company-info h1 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        .page-header .company-info p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--gipco-secondary);
+        }
+        .report-title {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .report-title h2 {
+            font-weight: 700;
+            color: var(--gipco-primary);
+        }
+        .report-meta {
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #dee2e6;
+            padding: 1rem;
+            border-radius: .25rem;
+            background-color: var(--gipco-light-gray);
+        }
+        .table {
+            font-size: 0.85rem;
+        }
+        .table th {
+            background-color: var(--gipco-light-gray);
+            font-weight: 600;
+        }
+        .page-footer {
+            position: absolute;
+            bottom: 1.5cm;
+            left: 1.5cm;
+            right: 1.5cm;
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--gipco-secondary);
+            border-top: 1px solid #dee2e6;
+            padding-top: 0.5rem;
+        }
+        .page-footer .credits {
+            font-size: 0.65rem;
+            color: #adb5bd;
+        }
+        .page-footer .page-number::after {
+            content: counter(page);
+        }
+        .detail-page-break {
+            page-break-after: always;
+        }
+        .detail-card {
+            border: 1px solid #dee2e6;
+            border-radius: .25rem;
+            margin-bottom: 1rem;
+        }
+        .detail-card .card-header {
+            background-color: var(--gipco-light-gray);
+            font-weight: bold;
+        }
+        .internal-link {
+            text-decoration: none;
+            font-weight: 500;
+            color: var(--gipco-primary);
+        }
+        @media print {
+            body, .page {
+                margin: 0;
+                box-shadow: none;
+                border: none;
+                border-radius: 0;
+            }
+            .page {
+                page-break-after: always;
+            }
+            .internal-link {
+                color: black !important;
+                text-decoration: underline !important;
+            }
+        }
+        @page {
+            size: A4;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Summary Page -->
+    <div class="page" id="summary-page">
+        <div class="page-header">
+            <div class="logo">GIPCCO</div>
+            <div class="company-info text-end">
+                <h1>شركة جيبكو للصناعات الكيماوية</h1>
+                <p>قسم المبيعات - السيد أحمد شوقي</p>
+            </div>
+        </div>
+
+        <div class="report-title">
+            <h2>{{ report_title }}</h2>
+            <p class="text-muted">
+                تقرير حركة المخزون للفترة من {{ start_date|default:"البداية" }} إلى {{ end_date|default:"النهاية" }}
+            </p>
+        </div>
+
+        {% if product_details %}
+        <div class="report-meta">
+            <div class="row">
+                <div class="col-6"><strong>الرصيد الافتتاحي للفترة:</strong></div>
+                <div class="col-6 text-end"><strong>{{ opening_balance_for_period|floatformat:3 }} {{ product_details.unit }}</strong></div>
+            </div>
+            <hr class="my-2">
+            <div class="row">
+                <div class="col-6"><strong>الرصيد الختامي للفترة:</strong></div>
+                <div class="col-6 text-end"><strong>{{ closing_balance|floatformat:3 }} {{ product_details.unit }}</strong></div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="table-responsive">
+            <table class="table table-sm table-bordered">
+                <thead>
+                    <tr>
+                        <th>التاريخ</th>
+                        <th>البيان</th>
+                        <th class="text-center">التغيير</th>
+                        <th class="text-center">رصيد قبل</th>
+                        <th class="text-center">رصيد بعد</th>
+                        <th>تفاصيل</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in transactions %}
+                    <tr>
+                        <td>{{ t.date|date:"Y-m-d H:i" }}</td>
+                        <td>{{ t.description }}</td>
+                        <td class="text-center fw-bold {% if t.quantity_change > 0 %}text-success{% else %}text-danger{% endif %}">
+                            {{ t.quantity_change|floatformat:3 }}
+                        </td>
+                        <td class="text-center text-muted">{{ t.balance_before|floatformat:3 }}</td>
+                        <td class="text-center fw-bold">{{ t.balance_after|floatformat:3 }}</td>
+                        <td class="text-center">
+                            <a href="#detail-transaction-{{ forloop.counter }}" class="internal-link">عرض</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="page-footer">
+            <div>
+                <span>تاريخ الطباعة: {{ print_date|date:"Y-m-d H:i:s" }}</span> | 
+                <span class="page-number">صفحة 1</span>
+            </div>
+            <div class="credits">Developed by Bassel for Gipco Company</div>
+        </div>
+    </div>
+
+    <!-- Detail Pages -->
+    {% for t in transactions %}
+    <div class="page detail-page-break" id="detail-transaction-{{ forloop.counter }}">
+        <div class="page-header">
+            <div class="logo">GIPCCO</div>
+            <div class="company-info text-end">
+                <h1>تفاصيل حركة مخزون</h1>
+            </div>
+        </div>
+
+        <div class="report-title">
+            <h2>تفاصيل حركة بتاريخ: {{ t.date|date:"Y-m-d H:i" }}</h2>
+        </div>
+        
+        <div class="detail-card">
+            <div class="card-header">المعلومات الأساسية</div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-6"><strong>المنتج:</strong> {{ t.product_name }} ({{ t.product_code }})</div>
+                    <div class="col-6"><strong>الكمية:</strong> {{ t.quantity_change|floatformat:"-3g" }} {{ t.unit }}</div>
+                </div>
+            </div>
+        </div>
+
+        {% if t.type == 'OUT' and t.batch_id %}
+            {% with batch_details=batch_details_map|get_item:t.batch_id %}
+            {% if batch_details %}
+            <div class="detail-card">
+                <div class="card-header">تفاصيل أمر التشغيل</div>
+                <div class="card-body">
+                    <div class="row mb-2">
+                        <div class="col-6"><strong>رقم أمر التشغيل:</strong> {{ batch_details.info.shop_order_number }}</div>
+                        <div class="col-6"><strong>رقم التشغيلة:</strong> {{ batch_details.info.batch_number }}</div>
+                        <div class="col-6"><strong>تاريخ الإنشاء:</strong> {{ batch_details.info.creation_date|date:"Y-m-d" }}</div>
+                        <div class="col-6"><strong>المنتج النهائي:</strong> {{ batch_details.info.final_product_name }}</div>
+                    </div>
+                </div>
+            </div>
+            <h5>المواد المستخدمة في هذا الأمر:</h5>
+            <div class="table-responsive">
+                <table class="table table-bordered table-sm">
+                    <thead>
+                        <tr>
+                            <th>المادة</th>
+                            <th>المصدر (QC)</th>
+                            <th class="text-center">الكمية النظرية</th>
+                            <th class="text-center">الكمية الفعلية</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in batch_details.item_list %}
+                        <tr>
+                            <td>{{ item.primitive_product_name }}</td>
+                            <td>{{ item.source_qc_no|default:"N/A" }}</td>
+                            <td class="text-center">{{ item.theoretical_quantity|floatformat:3 }} {{ item.unit }}</td>
+                            <td class="text-center">{{ item.actual_quantity|floatformat:3 }} {{ item.unit }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+            {% endwith %}
+        {% else %}
+            <div class="detail-card">
+                <div class="card-header">تفاصيل الإدخال</div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6"><strong>الشركة:</strong> {{ t.company_name|default:"N/A" }}</div>
+                        <div class="col-6"><strong>رقم QC:</strong> {{ t.qc_no|default:"N/A" }}</div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="page-footer">
+            <div>
+                <span>تاريخ الطباعة: {{ print_date|date:"Y-m-d H:i:s" }}</span> | 
+                <span class="page-number">صفحة {{ forloop.counter|add:1 }}</span>
+            </div>
+            <div class="credits">Developed by Bassel for Gipco Company</div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <script>
+        window.onload = function() {
+            const style = document.createElement('style');
+            style.innerHTML = `@media print { 
+                .page { counter-increment: page; }
+                .page-footer .page-number::after { content: counter(page) ' من ' {{ transactions|length|add:1 }}; } 
+            }`;
+            document.head.appendChild(style);
+            window.print();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!-- gipcco_project/inventory/templates/inventory/partials/visuals_content.html -->
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="mb-0 h2">لوحة المؤشرات الرسومية</h1>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-filter-circle-fill me-2"></i>عرض البيانات لـ:</h5>
+    </div>
+    <div class="card-body">
+        <form method="GET" action="{% url 'inventory:visuals' %}">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    <label for="visuals_product_id" class="form-label">المنتج (المادة الأولية)</label>
+                    <select name="product_id" id="visuals_product_id" class="form-select searchable-select" onchange="this.form.submit()">
+                        <option value="">-- يجب اختيار منتج لعرض الرسوم البيانية --</option>
+                        {% for product in all_primitive_products %}
+                        <option value="{{ product.id }}" {% if selected_product_id == product.id %}selected{% endif %}>{{ product.name }} ({{ product.code }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="visuals_start_date" class="form-label">من تاريخ</label>
+                    <input type="text" name="start_date" id="visuals_start_date" class="form-control datepicker" value="{{ start_date }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="visuals_end_date" class="form-label">إلى تاريخ</label>
+                    <input type="text" name="end_date" id="visuals_end_date" class="form-control datepicker" value="{{ end_date }}">
+                </div>
+                <div class="col-md-1">
+                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search"></i></button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if selected_product_id %}
+<div class="row g-4">
+    <div class="col-lg-12">
+        <div class="card shadow-sm">
+            <div class="card-header"><h5 class="mb-0">حركة المخزون (وارد/منصرف) شهرياً</h5></div>
+            <div class="card-body">
+                <div style="position: relative; height: 300px; width: 100%;">
+                    <canvas id="inventoryFlowChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header"><h5 class="mb-0">استهلاك المادة حسب المنتج النهائي</h5></div>
+            <div class="card-body">
+                 <div style="position: relative; height: 300px; width: 100%;">
+                    <canvas id="consumptionChart"></canvas>
+                 </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header"><h5 class="mb-0">تحليل الفرق في الاستخدام (فعلي - نظري)</h5></div>
+            <div class="card-body">
+                 <div style="position: relative; height: 300px; width: 100%;">
+                    <canvas id="varianceChart"></canvas>
+                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-info text-center">
+    <h4 class="alert-heading"><i class="bi bi-bar-chart-line-fill me-2"></i>مرحباً بك في لوحة المؤشرات</h4>
+    <p>الرجاء اختيار منتج من القائمة أعلاه لبدء تحليل البيانات وعرض الرسوم البيانية التفاعلية.</p>
+</div>
+{% endif %}
+
+{% if selected_product_id %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{{ in_out_data|json_script:"data-for-chart-1" }}
+{{ consumption_data|json_script:"data-for-chart-2" }}
+{{ variance_data|json_script:"data-for-chart-3" }}
+{% endif %}

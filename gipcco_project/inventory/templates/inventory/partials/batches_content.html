@@ -1,0 +1,141 @@
+<!-- gipcco_project/inventory/templates/inventory/partials/batches_content.html -->
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0" style="font-weight: 700;">عرض أوامر التشغيل</h1>
+    <a href="{% url 'inventory:create_batch' %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> إنشاء أمر تشغيل جديد
+    </a>
+</div>
+
+<!-- Search Form -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" action="{% url 'inventory:batches' %}">
+            <div class="input-group">
+                <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-search"></i> بحث</button>
+                 {% if search_query %}
+                    <a href="{% url 'inventory:batches' %}" class="btn btn-outline-danger" title="إلغاء البحث"><i class="bi bi-x-lg"></i></a>
+                {% endif %}
+                <input type="text" class="form-control" name="q" placeholder="ابحث باسم المنتج، رقم أمر التشغيل، أو رقم التشغيلة..." value="{{ search_query|default:'' }}">
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<div class="card">
+    <div class="card-header">
+        <h3><i class="bi bi-list-ol"></i> أوامر التشغيل المسجلة</h3>
+    </div>
+    <div class="card-body p-0">
+        {% if not batches %}
+        <div class="text-center p-5">
+            <i class="bi bi-journal-x display-4 text-secondary"></i>
+            {% if search_query %}
+            <h5 class="mt-3">لا توجد نتائج تطابق بحثك</h5>
+            <p class="text-muted">حاول استخدام كلمات بحث مختلفة.</p>
+            <a href="{% url 'inventory:batches' %}" class="btn btn-secondary mt-2">
+                <i class="bi bi-arrow-clockwise"></i> عرض كل الأوامر
+            </a>
+            {% else %}
+            <h5 class="mt-3">لا توجد أوامر تشغيل</h5>
+            <p class="text-muted">ابدأ بإنشاء أول أمر تشغيل.</p>
+            <a href="{% url 'inventory:create_batch' %}" class="btn btn-primary mt-2">
+                <i class="bi bi-plus-lg"></i> إنشاء أمر تشغيل
+            </a>
+            {% endif %}
+        </div>
+        {% else %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-3">رقم أمر التشغيل</th>
+                        <th>رقم التشغيلة</th>
+                        <th>المنتج</th>
+                        <th>تاريخ الإنشاء</th>
+                        <th>الحالة</th>
+                        <th class="text-end pe-3">إجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for b in batches %}
+                    <tr>
+                        <td class="ps-3 font-monospace"><strong>{{ b.shop_order_number }}</strong></td>
+                        <td class="font-monospace">{{ b.batch_number }}</td>
+                        <td>{{ b.template.final_product.name }}</td>
+                        <td>{{ b.creation_date|date:"Y-m-d" }}</td>
+                        <td>
+                            {% if b.is_customized %}
+                            <span class="badge text-bg-warning">مُخصصة</span>
+                            {% else %}
+                            <span class="badge text-bg-secondary">قياسية</span>
+                            {% endif %}
+                            
+                            {% if b.is_continuation %}
+                            <span class="badge text-bg-info ms-1">تكملة</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end pe-3">
+                            <a href="{% url 'inventory:view_batch' pk=b.id %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil-square"></i> عرض وتعديل</a>
+                            <form method="post" action="{% url 'inventory:delete_batch' pk=b.id %}" class="d-inline" onsubmit="return confirm('هل أنت متأكد من حذف أمر التشغيل هذا؟ لا يمكن التراجع عن هذا الإجراء.');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> حذف</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Pagination Controls -->
+    {% if batches.paginator.num_pages > 1 %}
+    <div class="card-footer d-flex justify-content-center">
+        <nav aria-label="Page navigation">
+            <ul class="pagination mb-0">
+                <!-- Previous Page Link -->
+                {% if batches.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ batches.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&laquo;</span>
+                </li>
+                {% endif %}
+                
+                <!-- Page Number Links -->
+                {% for page_num in batches.paginator.page_range %}
+                    {% if batches.number == page_num %}
+                    <li class="page-item active" aria-current="page">
+                        <span class="page-link">{{ page_num }}</span>
+                    </li>
+                    {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_num }}{% if search_query %}&q={{ search_query }}{% endif %}">{{ page_num }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+
+                <!-- Next Page Link -->
+                {% if batches.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ batches.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&raquo;</span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>

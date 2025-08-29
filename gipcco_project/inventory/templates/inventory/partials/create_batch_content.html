@@ -1,0 +1,99 @@
+<!-- gipcco_project/inventory/templates/inventory/partials/create_batch_content.html -->
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0" style="font-weight: 700;">إنشاء أمر تشغيل جديد</h1>
+    <a href="{% url 'inventory:batches' %}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> العودة لقائمة الأوامر</a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-11">
+        <form method="post" action="{% url 'inventory:create_batch' %}">
+            {% csrf_token %}
+            <div class="card">
+                 <div class="card-header">
+                    <h3><i class="bi bi-input-cursor-text"></i> 1. بيانات أمر التشغيل</h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="mb-3">
+                        <label for="template_id" class="form-label fw-bold">اختر القالب لتحميل المواد</label>
+                        <select class="form-select searchable-select" id="template_id" name="template_id" required>
+                            <option value="">اختر قالب...</option>
+                            {% for t in templates %}
+                            <option value="{{ t.id }}">{{ t.name }} ({{ t.final_product.name }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="shop_order_number" class="form-label fw-bold">رقم أمر التشغيل</label>
+                            <input type="text" class="form-control" id="shop_order_number" name="shop_order_number" required>
+                        </div>
+                         <div class="col-md-2 mb-3">
+                            <label for="batch_number_from" class="form-label fw-bold">رقم التشغيلة (من)</label>
+                            <input type="number" class="form-control" id="batch_number_from" name="batch_number_from" required placeholder="مثال: 101">
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <label for="batch_number_to" class="form-label fw-bold">إلى (اختياري)</label>
+                            <input type="number" class="form-control" id="batch_number_to" name="batch_number_to" placeholder="مثال: 105">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="creation_date" class="form-label fw-bold">تاريخ الإنشاء</label>
+                            <input type="text" class="form-control datepicker" id="creation_date" name="creation_date" value="{{ today_date }}" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="notes" class="form-label fw-bold">ملاحظات (اختياري)</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="2" placeholder="أضف أي ملاحظات خاصة بأمر التشغيل هنا..."></textarea>
+                    </div>
+                     <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="is_continuation" name="is_continuation">
+                            <label class="form-check-label" for="is_continuation">
+                                تكملة لأمر تشغيل سابق (يسمح بتكرار رقم أمر التشغيل)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-4" id="materials_card" style="display: none;">
+                <div class="card-header">
+                     <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-pencil-square"></i> 2. مراجعة وتعديل المواد <span id="batch_count_display" class="badge bg-primary ms-2"></span></h5>
+                        <button type="button" class="btn btn-sm btn-outline-success" id="add-material-manually-btn"><i class="bi bi-plus-circle"></i> إضافة صف مادة</button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                     <div class="alert alert-info mb-0 border-0 rounded-0">
+                        <i class="bi bi-info-circle-fill"></i>
+                        <strong>لتقسيم الكمية:</strong> اضغط على أيقونة التقسيم <i class="bi bi-distribute-vertical"></i> لملء الكمية المتاحة تلقائيًا وإضافة صف جديد بالمتبقي من المصدر التالي.
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-striped mb-0 align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3" style="width: 28%;">المادة</th>
+                                    <th class="text-center" style="width: 14%;">الكمية النظرية</th>
+                                    <th class="text-center" style="width: 14%;">الكمية الفعلية</th>
+                                    <th style="width: 28%;">المخزون المصدر (QC)</th>
+                                    <th class="text-center pe-2" style="width: 16%;">إجراء</th>
+                                </tr>
+                            </thead>
+                            <tbody id="materials_tbody">
+                                <!-- JavaScript will populate this section -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-grid mt-4">
+                <button type="submit" class="btn btn-primary btn-lg"><i class="bi bi-save"></i> إنشاء وحفظ الأمر</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{ templates_with_items|json_script:"template-data" }}
+{{ all_available_stock|json_script:"available-stock-data" }}
+{{ primitive_products|json_script:"primitive-products-data" }}

@@ -1,0 +1,2056 @@
+INFO 2025-08-27 20:51:17,720 django.utils.autoreload autoreload 10760 10288 Watching for file changes with StatReloader
+INFO 2025-08-27 20:51:20,767 django.server basehttp 10760 10388 "GET / HTTP/1.1" 200 64950
+INFO 2025-08-27 20:51:20,921 django.server basehttp 10760 10388 "GET /static/css/google-fonts.css HTTP/1.1" 200 12053
+INFO 2025-08-27 20:51:20,939 django.server basehttp 10760 10388 "GET /static/js/bootstrap.bundle.min.js HTTP/1.1" 200 80663
+INFO 2025-08-27 20:51:20,950 django.server basehttp 10760 5044 "GET /static/css/bootstrap.css HTTP/1.1" 200 287759
+INFO 2025-08-27 20:51:20,964 django.server basehttp 10760 10388 "GET /static/js/flatpickr.min.js HTTP/1.1" 200 50679
+INFO 2025-08-27 20:51:20,978 django.server basehttp 10760 5044 "GET /static/js/flatpickr.l10n.ar.js HTTP/1.1" 200 1928
+INFO 2025-08-27 20:51:20,980 django.server basehttp 10760 11040 "GET /static/css/flatpickr.min.css HTTP/1.1" 200 16166
+INFO 2025-08-27 20:51:20,988 django.server basehttp 10760 10388 "GET /static/js/tom-select.complete.min.js HTTP/1.1" 200 50720
+INFO 2025-08-27 20:51:21,013 django.server basehttp 10760 4636 "GET /static/css/style.css HTTP/1.1" 200 36176
+INFO 2025-08-27 20:51:21,016 django.server basehttp 10760 9208 "GET /static/css/tom-select.bootstrap5.min.css HTTP/1.1" 200 15345
+INFO 2025-08-27 20:51:21,049 django.server basehttp 10760 11124 "GET /static/css/bootstrap-icons.min.css HTTP/1.1" 200 85887
+INFO 2025-08-27 20:51:21,198 django.server basehttp 10760 11124 "GET /static/webfonts/bootstrap-icons.woff2?dd67030699838ea613ee6dbda90effa6 HTTP/1.1" 200 130396
+INFO 2025-08-27 20:51:21,200 django.server basehttp 10760 11040 "GET /static/webfonts/21.woff2 HTTP/1.1" 200 48256
+INFO 2025-08-27 20:51:21,201 django.server basehttp 10760 4636 "GET /static/webfonts/35.woff2 HTTP/1.1" 200 48256
+INFO 2025-08-27 20:51:21,202 django.server basehttp 10760 10388 "GET /static/webfonts/14.woff2 HTTP/1.1" 200 48256
+INFO 2025-08-27 20:51:21,203 django.server basehttp 10760 9208 "GET /static/webfonts/28.woff2 HTTP/1.1" 200 48256
+INFO 2025-08-27 20:51:21,428 django.server basehttp 10760 11124 "GET /static/img/favicon.ico HTTP/1.1" 200 41001
+INFO 2025-08-27 20:51:24,628 django.server basehttp 10760 11124 "GET /static/webfonts/07.woff2 HTTP/1.1" 200 48256
+INFO 2025-08-27 20:51:27,054 django.server basehttp 10760 11124 "GET / HTTP/1.1" 200 3525
+INFO 2025-08-27 20:51:27,535 django.server basehttp 10760 11124 "GET / HTTP/1.1" 200 3525
+INFO 2025-08-27 20:51:27,967 django.server basehttp 10760 11124 "GET / HTTP/1.1" 200 3525
+ERROR 2025-08-27 20:51:28,389 django.request log 10760 11124 Internal Server Error: /batches/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py", line 581, in batches
+    return render(request, 'inventory/batches.html', context)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: inventory/batches.html
+ERROR 2025-08-27 20:51:28,394 django.server basehttp 10760 11124 "GET /batches/ HTTP/1.1" 500 85285
+ERROR 2025-08-27 20:51:28,453 django.request log 10760 11124 Internal Server Error: /batches/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py", line 581, in batches
+    return render(request, 'inventory/batches.html', context)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: inventory/batches.html
+ERROR 2025-08-27 20:51:28,456 django.server basehttp 10760 11124 "GET /batches/ HTTP/1.1" 500 85563
+WARNING 2025-08-27 20:51:28,657 django.request log 10760 11124 Not Found: /favicon.ico
+WARNING 2025-08-27 20:51:28,658 django.server basehttp 10760 11124 "GET /favicon.ico HTTP/1.1" 404 11233
+ERROR 2025-08-27 20:51:50,614 django.request log 10760 11124 Internal Server Error: /companies/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py", line 327, in companies
+    return render(request, 'inventory/companies.html', context)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: inventory/companies.html
+ERROR 2025-08-27 20:51:50,617 django.server basehttp 10760 11124 "GET /companies/ HTTP/1.1" 500 84297
+ERROR 2025-08-27 20:51:50,691 django.request log 10760 11124 Internal Server Error: /companies/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py", line 327, in companies
+    return render(request, 'inventory/companies.html', context)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: inventory/companies.html
+ERROR 2025-08-27 20:51:50,697 django.server basehttp 10760 11124 "GET /companies/ HTTP/1.1" 500 84575
+ERROR 2025-08-27 20:51:54,342 django.request log 10760 11124 Internal Server Error: /records/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py", line 261, in records
+    return render(request, 'inventory/records.html', context)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: inventory/records.html
+ERROR 2025-08-27 20:51:54,346 django.server basehttp 10760 11124 "GET /records/ HTTP/1.1" 500 84637
+ERROR 2025-08-27 20:51:54,417 django.request log 10760 11124 Internal Server Error: /records/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py", line 261, in records
+    return render(request, 'inventory/records.html', context)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: inventory/records.html
+ERROR 2025-08-27 20:51:54,420 django.server basehttp 10760 11124 "GET /records/ HTTP/1.1" 500 84915
+INFO 2025-08-27 20:51:57,560 django.server basehttp 10760 11124 "GET / HTTP/1.1" 200 3525
+ERROR 2025-08-27 20:51:58,872 django.request log 10760 11124 Internal Server Error: /visuals/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py", line 1278, in visuals
+    return render(request, 'inventory/visuals.html', context)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: inventory/visuals.html
+ERROR 2025-08-27 20:51:58,875 django.server basehttp 10760 11124 "GET /visuals/ HTTP/1.1" 500 88100
+ERROR 2025-08-27 20:51:58,938 django.request log 10760 11124 Internal Server Error: /visuals/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py", line 1278, in visuals
+    return render(request, 'inventory/visuals.html', context)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: inventory/visuals.html
+ERROR 2025-08-27 20:51:58,941 django.server basehttp 10760 11124 "GET /visuals/ HTTP/1.1" 500 88378
+INFO 2025-08-27 20:52:51,260 django.server basehttp 10760 11124 "GET / HTTP/1.1" 200 3525
+ERROR 2025-08-27 20:52:51,893 django.request log 10760 11124 Internal Server Error: /batches/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py", line 581, in batches
+    return render(request, 'inventory/batches.html', context)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: inventory/batches.html
+ERROR 2025-08-27 20:52:51,898 django.server basehttp 10760 11124 "GET /batches/ HTTP/1.1" 500 85285
+ERROR 2025-08-27 20:52:51,961 django.request log 10760 11124 Internal Server Error: /batches/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py", line 581, in batches
+    return render(request, 'inventory/batches.html', context)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: inventory/batches.html
+ERROR 2025-08-27 20:52:51,969 django.server basehttp 10760 11124 "GET /batches/ HTTP/1.1" 500 85563
+INFO 2025-08-27 20:58:43,850 django.server basehttp 10760 524 "GET / HTTP/1.1" 200 64950
+INFO 2025-08-27 20:58:49,415 django.server basehttp 10760 524 "GET /companies/ HTTP/1.1" 200 63718
+INFO 2025-08-27 20:58:56,250 django.server basehttp 10760 524 "GET /products/ HTTP/1.1" 200 64585
+INFO 2025-08-27 20:59:01,640 django.server basehttp 10760 524 "GET /products/ HTTP/1.1" 200 64585
+INFO 2025-08-27 20:59:05,040 django.server basehttp 10760 524 "GET /products/ HTTP/1.1" 200 64585
+INFO 2025-08-27 20:59:05,301 django.server basehttp 10760 524 "GET /records/ HTTP/1.1" 200 64890
+INFO 2025-08-27 20:59:07,556 django.server basehttp 10760 524 "GET /records/ HTTP/1.1" 200 64890
+INFO 2025-08-27 20:59:08,447 django.server basehttp 10760 524 "GET / HTTP/1.1" 200 3525
+INFO 2025-08-27 20:59:10,892 django.server basehttp 10760 524 "GET /records/ HTTP/1.1" 200 64890
+INFO 2025-08-27 20:59:11,794 django.server basehttp 10760 524 "GET /records/ HTTP/1.1" 200 64890
+INFO 2025-08-27 20:59:12,296 django.server basehttp 10760 524 "GET /records/ HTTP/1.1" 200 64890
+ERROR 2025-08-27 20:59:13,783 django.request log 10760 524 Internal Server Error: /visuals/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py", line 1278, in visuals
+    return render(request, 'inventory/visuals.html', context)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: inventory/visuals.html
+ERROR 2025-08-27 20:59:13,786 django.server basehttp 10760 524 "GET /visuals/ HTTP/1.1" 500 88108
+ERROR 2025-08-27 20:59:13,847 django.request log 10760 524 Internal Server Error: /visuals/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py", line 1278, in visuals
+    return render(request, 'inventory/visuals.html', context)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: inventory/visuals.html
+ERROR 2025-08-27 20:59:13,849 django.server basehttp 10760 524 "GET /visuals/ HTTP/1.1" 500 88386
+INFO 2025-08-27 20:59:16,961 django.server basehttp 10760 524 "GET /records/ HTTP/1.1" 200 64890
+INFO 2025-08-27 20:59:17,522 django.server basehttp 10760 524 "GET / HTTP/1.1" 200 3525
+INFO 2025-08-27 20:59:20,324 django.server basehttp 10760 524 "GET /companies/ HTTP/1.1" 200 63718
+INFO 2025-08-27 20:59:22,088 django.server basehttp 10760 524 "GET /companies/ HTTP/1.1" 200 63718
+INFO 2025-08-27 20:59:28,979 django.server basehttp 10760 524 "POST /companies/ HTTP/1.1" 302 0
+INFO 2025-08-27 20:59:28,993 django.server basehttp 10760 524 "GET /companies/ HTTP/1.1" 200 66478
+INFO 2025-08-27 20:59:30,471 django.server basehttp 10760 524 "GET /products/ HTTP/1.1" 200 64585
+INFO 2025-08-27 20:59:32,110 django.server basehttp 10760 524 "GET /products/ HTTP/1.1" 200 64585
+INFO 2025-08-27 21:00:04,467 django.server basehttp 10760 524 "GET /records/ HTTP/1.1" 200 64997
+INFO 2025-08-27 21:00:05,694 django.server basehttp 10760 524 "GET /records/ HTTP/1.1" 200 64997
+INFO 2025-08-27 21:00:06,354 django.server basehttp 10760 524 "GET /records/ HTTP/1.1" 200 64997
+INFO 2025-08-27 21:00:06,931 django.server basehttp 10760 524 "GET / HTTP/1.1" 200 3604
+INFO 2025-08-27 21:01:46,720 django.server basehttp 10760 524 "GET /static/img/spring.png HTTP/1.1" 200 1238993
+INFO 2025-08-27 21:02:05,432 django.server basehttp 10760 524 "GET / HTTP/1.1" 200 3604
+INFO 2025-08-27 21:02:06,400 django.server basehttp 10760 524 "GET /companies/ HTTP/1.1" 200 65910
+INFO 2025-08-27 21:02:15,901 django.server basehttp 10760 524 "GET /companies/ HTTP/1.1" 200 65910
+INFO 2025-08-27 21:02:17,219 django.server basehttp 10760 524 "GET /static/img/summer.png HTTP/1.1" 200 1222590
+INFO 2025-08-27 21:02:17,538 django.server basehttp 10760 524 "GET /static/img/fall.png HTTP/1.1" 200 1463923
+INFO 2025-08-27 21:02:18,106 django.server basehttp 10760 524 "GET /static/img/winter.png HTTP/1.1" 200 1439973
+INFO 2025-08-27 21:07:45,950 django.utils.autoreload autoreload 7184 6932 Watching for file changes with StatReloader
+INFO 2025-08-27 21:07:48,799 django.server basehttp 7184 5076 "GET /companies/ HTTP/1.1" 200 65910
+INFO 2025-08-27 21:07:49,593 django.server basehttp 7184 5076 "GET /products/ HTTP/1.1" 200 64585
+INFO 2025-08-27 21:07:51,222 django.server basehttp 7184 5076 "GET /records/ HTTP/1.1" 200 64997
+INFO 2025-08-27 21:07:52,836 django.server basehttp 7184 5076 "GET / HTTP/1.1" 200 3604
+INFO 2025-08-27 21:07:56,181 django.server basehttp 7184 5076 "GET /products/ HTTP/1.1" 200 64585
+INFO 2025-08-27 21:08:07,816 django.server basehttp 7184 5076 "GET /records/ HTTP/1.1" 200 64997
+INFO 2025-08-27 21:08:09,295 django.server basehttp 7184 5076 "GET /records/ HTTP/1.1" 200 64997
+INFO 2025-08-27 21:08:11,779 django.server basehttp 7184 5076 "GET /records/ HTTP/1.1" 200 64997
+INFO 2025-08-27 21:08:13,586 django.server basehttp 7184 5076 "GET /records/ HTTP/1.1" 200 64997
+INFO 2025-08-27 21:08:14,113 django.server basehttp 7184 5076 "GET /records/ HTTP/1.1" 200 64997
+INFO 2025-08-27 21:08:14,570 django.server basehttp 7184 5076 "GET /records/ HTTP/1.1" 200 64997
+INFO 2025-08-27 21:08:15,433 django.server basehttp 7184 5076 "GET /records/ HTTP/1.1" 200 64997
+INFO 2025-08-27 21:08:16,956 django.server basehttp 7184 5076 "GET /ledger/ HTTP/1.1" 200 69479
+INFO 2025-08-27 21:08:20,085 django.server basehttp 7184 5076 "GET /ledger/?product_id=&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 69463
+INFO 2025-08-27 21:08:23,008 django.server basehttp 7184 5076 "GET /ledger/?product_id=&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 69463
+INFO 2025-08-27 21:08:23,921 django.server basehttp 7184 5076 "GET /batches/ HTTP/1.1" 200 63066
+INFO 2025-08-27 21:08:24,978 django.server basehttp 7184 5076 "GET /batches/create/ HTTP/1.1" 200 67747
+INFO 2025-08-27 21:08:34,449 django.server basehttp 7184 5076 "GET / HTTP/1.1" 200 3604
+INFO 2025-08-27 21:33:25,837 django.utils.autoreload autoreload 7184 6932 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-08-27 21:33:26,737 django.utils.autoreload autoreload 2440 3584 Watching for file changes with StatReloader
+INFO 2025-08-27 21:33:30,167 django.utils.autoreload autoreload 2440 3584 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-08-27 21:33:31,268 django.utils.autoreload autoreload 10624 5288 Watching for file changes with StatReloader
+INFO 2025-08-27 21:35:24,278 django.utils.autoreload autoreload 10624 5288 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py changed, reloading.
+INFO 2025-08-27 21:35:25,403 django.utils.autoreload autoreload 5076 10572 Watching for file changes with StatReloader
+INFO 2025-08-27 21:36:25,475 django.utils.autoreload autoreload 10020 6056 Watching for file changes with StatReloader
+INFO 2025-08-27 21:36:27,939 django.server basehttp 10020 8892 "GET / HTTP/1.1" 200 80225
+INFO 2025-08-27 21:36:37,622 django.server basehttp 10020 8892 "GET / HTTP/1.1" 200 18800
+ERROR 2025-08-27 21:36:38,300 django.request log 10020 8892 Internal Server Error: /batches/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such column: batches.notes
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py", line 581, in batches
+    return render(request, 'inventory/batches.html', context)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader_tags.py", line 210, in render
+    return template.render(context)
+           ~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 173, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\defaulttags.py", line 327, in render
+    return nodelist.render(context)
+           ~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\defaulttags.py", line 199, in render
+    len_values = len(values)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\paginator.py", line 191, in __len__
+    return len(self.object_list)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\db\models\query.py", line 366, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\db\models\query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: no such column: batches.notes
+ERROR 2025-08-27 21:36:38,328 django.server basehttp 10020 8892 "GET /batches/ HTTP/1.1" 500 256284
+ERROR 2025-08-27 21:36:38,442 django.request log 10020 8892 Internal Server Error: /batches/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such column: batches.notes
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py", line 581, in batches
+    return render(request, 'inventory/batches.html', context)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader_tags.py", line 210, in render
+    return template.render(context)
+           ~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 173, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\defaulttags.py", line 327, in render
+    return nodelist.render(context)
+           ~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\defaulttags.py", line 199, in render
+    len_values = len(values)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\paginator.py", line 191, in __len__
+    return len(self.object_list)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\db\models\query.py", line 366, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\db\models\query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: no such column: batches.notes
+ERROR 2025-08-27 21:36:38,465 django.server basehttp 10020 8892 "GET /batches/ HTTP/1.1" 500 256583
+INFO 2025-08-27 21:37:54,152 django.server basehttp 10020 8892 "GET /batches/ HTTP/1.1" 200 93456
+INFO 2025-08-27 21:37:59,737 django.server basehttp 10020 8892 "GET /batches/?page=3 HTTP/1.1" 200 94080
+INFO 2025-08-27 21:38:01,318 django.server basehttp 10020 8892 "GET /batches/?page=2 HTTP/1.1" 200 93387
+INFO 2025-08-27 21:38:03,948 django.server basehttp 10020 8892 "GET /batches/?page=3 HTTP/1.1" 200 94080
+INFO 2025-08-27 21:38:05,960 django.server basehttp 10020 8892 "GET /batches/?page=2 HTTP/1.1" 200 93387
+INFO 2025-08-27 21:38:07,479 django.server basehttp 10020 8892 "GET /batches/?page=3 HTTP/1.1" 200 94080
+INFO 2025-08-27 21:38:08,260 django.server basehttp 10020 8892 "GET /batches/?page=2 HTTP/1.1" 200 93387
+INFO 2025-08-27 21:38:09,485 django.server basehttp 10020 8892 "GET /batches/?page=1 HTTP/1.1" 200 93456
+INFO 2025-08-27 21:38:12,614 django.server basehttp 10020 8892 "GET /batches/?page=4 HTTP/1.1" 200 93669
+INFO 2025-08-27 21:38:15,080 django.server basehttp 10020 8892 "GET /batches/?page=6 HTTP/1.1" 200 70889
+INFO 2025-08-27 21:38:16,186 django.server basehttp 10020 8892 "GET /batches/?page=5 HTTP/1.1" 200 93346
+INFO 2025-08-27 21:38:17,910 django.server basehttp 10020 8892 "GET /batches/?page=4 HTTP/1.1" 200 93669
+ERROR 2025-08-27 21:38:20,113 django.request log 10020 8892 Internal Server Error: /batch/77/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\smartif.py", line 180, in translate_token
+    op = OPERATORS[token]
+         ~~~~~~~~~^^^^^^^
+KeyError: '(item.source_type'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py", line 778, in view_batch
+    return render(request, 'inventory/batch_view.html', context)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader_tags.py", line 199, in render
+    template = context.template.engine.select_template(template_name)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\engine.py", line 208, in select_template
+    return self.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 196, in compile_nodelist
+    nodelist = parser.parse()
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\defaulttags.py", line 862, in do_for
+    nodelist_loop = parser.parse(
+        (
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\defaulttags.py", line 862, in do_for
+    nodelist_loop = parser.parse(
+        (
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\defaulttags.py", line 961, in do_if
+    condition = TemplateIfParser(parser, bits).parse()
+                ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\defaulttags.py", line 894, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\smartif.py", line 171, in __init__
+    mapped_tokens.append(self.translate_token(token))
+                         ~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\smartif.py", line 182, in translate_token
+    return self.create_var(token)
+           ~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\defaulttags.py", line 897, in create_var
+    return TemplateLiteral(self.template_parser.compile_filter(value), value)
+                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 609, in compile_filter
+    return FilterExpression(token, self)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 710, in __init__
+    raise TemplateSyntaxError(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Could not parse the remainder: '(item.source_type' from '(item.source_type'
+ERROR 2025-08-27 21:38:20,152 django.server basehttp 10020 8892 "GET /batch/77/ HTTP/1.1" 500 341872
+ERROR 2025-08-27 21:38:20,403 django.request log 10020 8892 Internal Server Error: /batch/77/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\smartif.py", line 180, in translate_token
+    op = OPERATORS[token]
+         ~~~~~~~~~^^^^^^^
+KeyError: '(item.source_type'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py", line 778, in view_batch
+    return render(request, 'inventory/batch_view.html', context)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader_tags.py", line 199, in render
+    template = context.template.engine.select_template(template_name)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\engine.py", line 208, in select_template
+    return self.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 196, in compile_nodelist
+    nodelist = parser.parse()
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\defaulttags.py", line 862, in do_for
+    nodelist_loop = parser.parse(
+        (
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\defaulttags.py", line 862, in do_for
+    nodelist_loop = parser.parse(
+        (
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\defaulttags.py", line 961, in do_if
+    condition = TemplateIfParser(parser, bits).parse()
+                ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\defaulttags.py", line 894, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\smartif.py", line 171, in __init__
+    mapped_tokens.append(self.translate_token(token))
+                         ~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\smartif.py", line 182, in translate_token
+    return self.create_var(token)
+           ~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\defaulttags.py", line 897, in create_var
+    return TemplateLiteral(self.template_parser.compile_filter(value), value)
+                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 609, in compile_filter
+    return FilterExpression(token, self)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 710, in __init__
+    raise TemplateSyntaxError(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Could not parse the remainder: '(item.source_type' from '(item.source_type'
+ERROR 2025-08-27 21:38:20,452 django.server basehttp 10020 8892 "GET /batch/77/ HTTP/1.1" 500 342163
+INFO 2025-08-27 21:39:23,822 django.server basehttp 10020 8892 "GET /batches/create/ HTTP/1.1" 200 117397
+INFO 2025-08-27 21:39:29,849 django.server basehttp 10020 8892 "GET /batches/create/ HTTP/1.1" 200 117397
+INFO 2025-08-27 21:39:41,719 django.server basehttp 10020 8892 "GET /products/ HTTP/1.1" 200 237120
+INFO 2025-08-27 21:39:44,421 django.server basehttp 10020 8892 "GET /products/ HTTP/1.1" 200 237120
+INFO 2025-08-27 21:39:45,989 django.server basehttp 10020 8892 "GET /products/ HTTP/1.1" 200 237120
+INFO 2025-08-27 21:39:46,554 django.server basehttp 10020 8892 "GET /products/ HTTP/1.1" 200 237120
+INFO 2025-08-27 21:39:46,988 django.server basehttp 10020 8892 "GET /products/ HTTP/1.1" 200 237120
+INFO 2025-08-27 21:39:47,764 django.server basehttp 10020 8892 "GET /products/ HTTP/1.1" 200 237120
+INFO 2025-08-27 21:39:48,640 django.server basehttp 10020 8892 "GET /products/ HTTP/1.1" 200 237120
+INFO 2025-08-27 21:39:49,253 django.server basehttp 10020 8892 "GET /products/ HTTP/1.1" 200 237120
+INFO 2025-08-27 21:39:50,586 django.server basehttp 10020 8892 "GET /batches/ HTTP/1.1" 200 93456
+INFO 2025-08-27 21:39:51,227 django.server basehttp 10020 8892 "GET /batches/ HTTP/1.1" 200 93456
+INFO 2025-08-27 21:39:51,947 django.server basehttp 10020 8892 "GET /batches/ HTTP/1.1" 200 93456
+INFO 2025-08-27 21:39:53,356 django.server basehttp 10020 8892 "GET /batches/ HTTP/1.1" 200 93456
+INFO 2025-08-27 21:39:55,046 django.server basehttp 10020 8892 "GET /batches/ HTTP/1.1" 200 93456
+INFO 2025-08-27 21:39:55,801 django.server basehttp 10020 8892 "GET /shop_order_templates/ HTTP/1.1" 200 135851
+INFO 2025-08-27 21:39:57,185 django.server basehttp 10020 8892 "GET /shop_order_template/edit/18/ HTTP/1.1" 200 66505
+INFO 2025-08-27 21:39:58,954 django.server basehttp 10020 8892 "GET /shop_order_templates/ HTTP/1.1" 200 135851
+INFO 2025-08-27 21:39:59,774 django.server basehttp 10020 8892 "GET /shop_order_template/18/ HTTP/1.1" 200 63374
+INFO 2025-08-27 21:40:02,468 django.server basehttp 10020 8892 "GET /shop_order_templates/ HTTP/1.1" 200 135851
+INFO 2025-08-27 21:40:04,506 django.server basehttp 10020 8892 "GET /shop_order_template/4/ HTTP/1.1" 200 66242
+INFO 2025-08-27 21:40:06,190 django.server basehttp 10020 8892 "GET /shop_order_templates/ HTTP/1.1" 200 135851
+INFO 2025-08-27 21:40:07,749 django.server basehttp 10020 8892 "GET /shop_order_template/edit/1/ HTTP/1.1" 200 66542
+INFO 2025-08-27 21:40:10,163 django.server basehttp 10020 8892 "GET /shop_order_template/edit/1/ HTTP/1.1" 200 66542
+INFO 2025-08-27 21:40:11,623 django.server basehttp 10020 8892 "GET /shop_order_template/1/ HTTP/1.1" 200 66274
+INFO 2025-08-27 21:40:12,413 django.server basehttp 10020 8892 "GET /shop_order_template/1/ HTTP/1.1" 200 66274
+INFO 2025-08-27 21:40:13,683 django.server basehttp 10020 8892 "GET /shop_order_templates/ HTTP/1.1" 200 135851
+INFO 2025-08-27 21:40:19,171 django.server basehttp 10020 8892 "GET /shop_order_templates/ HTTP/1.1" 200 135851
+INFO 2025-08-27 21:40:21,119 django.server basehttp 10020 8892 "GET /shop_order_template/edit/12/ HTTP/1.1" 200 66538
+INFO 2025-08-27 21:40:23,252 django.server basehttp 10020 8892 "GET /shop_order_template/12/ HTTP/1.1" 200 65857
+INFO 2025-08-27 21:40:26,281 django.server basehttp 10020 8892 "GET /shop_order_templates/ HTTP/1.1" 200 135851
+INFO 2025-08-27 21:40:29,873 django.server basehttp 10020 8892 "GET /shop_order_templates/ HTTP/1.1" 200 135851
+INFO 2025-08-27 21:40:31,957 django.server basehttp 10020 8892 "GET /shop_order_templates/ HTTP/1.1" 200 135851
+INFO 2025-08-27 21:40:32,791 django.server basehttp 10020 8892 "GET /analysis/ HTTP/1.1" 200 82431
+INFO 2025-08-27 21:40:34,195 django.server basehttp 10020 8892 "POST /analysis/ HTTP/1.1" 200 82431
+INFO 2025-08-27 21:40:35,838 django.server basehttp 10020 8892 "GET /analysis/ HTTP/1.1" 200 82431
+INFO 2025-08-27 21:40:36,778 django.server basehttp 10020 8892 "GET /ledger/ HTTP/1.1" 200 74316
+INFO 2025-08-27 21:40:38,840 django.server basehttp 10020 8892 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 74135
+INFO 2025-08-27 21:40:40,484 django.server basehttp 10020 8892 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 74135
+INFO 2025-08-27 21:40:43,869 django.server basehttp 10020 8892 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=2025-01-01&end_date= HTTP/1.1" 200 74145
+INFO 2025-08-27 21:40:49,232 django.server basehttp 10020 8892 "GET /ledger/?product_id=18&company_id=7&qc_no=&start_date=2025-01-01&end_date= HTTP/1.1" 200 74161
+INFO 2025-08-27 21:40:55,584 django.server basehttp 10020 8892 "GET /ledger/?product_id=18&company_id=7&qc_no=&start_date=2025-01-01&end_date=2025-11-19 HTTP/1.1" 200 74171
+INFO 2025-08-27 21:41:00,850 django.server basehttp 10020 8892 "GET /ledger/?product_id=18&company_id=7&qc_no=&start_date=2025-01-01&end_date=2025-11-19 HTTP/1.1" 200 74171
+INFO 2025-08-27 21:41:04,027 django.server basehttp 10020 8892 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=2025-01-01&end_date=2025-11-19 HTTP/1.1" 200 74155
+ERROR 2025-08-27 21:41:06,392 django.request log 10020 8892 Internal Server Error: /ledger/print/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py", line 1466, in print_ledger
+    return render(request, 'inventory/print_ledger.html', context)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\backends\django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 196, in compile_nodelist
+    nodelist = parser.parse()
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\defaulttags.py", line 862, in do_for
+    nodelist_loop = parser.parse(
+        (
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\defaulttags.py", line 962, in do_if
+    nodelist = parser.parse(("elif", "else", "endif"))
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\defaulttags.py", line 1531, in do_with
+    extra_context = token_kwargs(remaining_bits, parser, support_legacy=True)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 1127, in token_kwargs
+    kwargs[key] = parser.compile_filter(value)
+                  ~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 609, in compile_filter
+    return FilterExpression(token, self)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 705, in __init__
+    filter_func = parser.find_filter(filter_name)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 615, in find_filter
+    raise TemplateSyntaxError("Invalid filter: '%s'" % filter_name)
+django.template.exceptions.TemplateSyntaxError: Invalid filter: 'get_item'
+ERROR 2025-08-27 21:41:06,414 django.server basehttp 10020 8892 "GET /ledger/print/?product_id=18&start_date=2025-01-01&end_date=2025-11-19 HTTP/1.1" 500 290370
+INFO 2025-08-27 21:43:13,462 django.server basehttp 10020 8892 "GET / HTTP/1.1" 200 18800
+INFO 2025-08-27 21:43:13,948 django.server basehttp 10020 8892 "GET / HTTP/1.1" 200 18800
+INFO 2025-08-27 21:43:22,670 django.server basehttp 10020 8892 "POST / HTTP/1.1" 302 0
+INFO 2025-08-27 21:43:22,699 django.server basehttp 10020 8892 "GET / HTTP/1.1" 200 80762
+INFO 2025-08-27 21:43:30,010 django.server basehttp 10020 8892 "GET / HTTP/1.1" 200 18791
+INFO 2025-08-27 21:43:30,585 django.server basehttp 10020 8892 "GET /batches/ HTTP/1.1" 200 93456
+INFO 2025-08-27 21:43:31,610 django.server basehttp 10020 8892 "GET /batches/create/ HTTP/1.1" 200 117505
+INFO 2025-08-27 21:43:37,828 django.server basehttp 10020 8892 "GET /records/ HTTP/1.1" 200 425722
+INFO 2025-08-27 21:43:38,910 django.server basehttp 10020 8892 "GET / HTTP/1.1" 200 18791
+INFO 2025-08-27 21:43:40,465 django.server basehttp 10020 8892 "GET /products/ HTTP/1.1" 200 237120
+INFO 2025-08-27 21:43:58,687 django.server basehttp 10020 8892 "GET /companies/ HTTP/1.1" 200 102500
+INFO 2025-08-27 21:44:02,893 django.server basehttp 10020 8892 "POST /companies/ HTTP/1.1" 302 0
+INFO 2025-08-27 21:44:02,915 django.server basehttp 10020 8892 "GET /companies/ HTTP/1.1" 200 105323
+INFO 2025-08-27 21:44:04,964 django.server basehttp 10020 8892 "POST /companies/delete/18/ HTTP/1.1" 302 0
+INFO 2025-08-27 21:44:04,982 django.server basehttp 10020 8892 "GET /companies/ HTTP/1.1" 200 103027
+INFO 2025-08-27 21:44:07,961 django.server basehttp 10020 8892 "POST /companies/edit/7/ HTTP/1.1" 302 0
+INFO 2025-08-27 21:44:07,979 django.server basehttp 10020 8892 "GET /companies/ HTTP/1.1" 200 103044
+INFO 2025-08-27 21:44:12,880 django.server basehttp 10020 8892 "GET /products/ HTTP/1.1" 200 237120
+INFO 2025-08-27 21:52:30,326 django.utils.autoreload autoreload 10020 6056 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-08-27 21:52:31,419 django.utils.autoreload autoreload 11040 9120 Watching for file changes with StatReloader
+INFO 2025-08-27 21:53:03,129 django.utils.autoreload autoreload 11040 9120 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py changed, reloading.
+INFO 2025-08-27 21:53:04,045 django.utils.autoreload autoreload 1260 8400 Watching for file changes with StatReloader
+INFO 2025-08-27 21:53:05,464 django.utils.autoreload autoreload 1260 8400 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py changed, reloading.
+INFO 2025-08-27 21:53:06,506 django.utils.autoreload autoreload 3960 9676 Watching for file changes with StatReloader
+INFO 2025-08-27 21:54:28,534 django.server basehttp 3960 8912 "GET /products/ HTTP/1.1" 200 258175
+INFO 2025-08-27 21:54:39,599 django.server basehttp 3960 8912 "POST /products/ HTTP/1.1" 302 0
+INFO 2025-08-27 21:54:39,646 django.server basehttp 3960 8912 "GET /products/ HTTP/1.1" 200 262540
+INFO 2025-08-27 21:54:50,318 django.server basehttp 3960 8912 "POST /products/delete/51/ HTTP/1.1" 302 0
+INFO 2025-08-27 21:54:50,360 django.server basehttp 3960 8912 "GET /products/ HTTP/1.1" 200 258726
+INFO 2025-08-27 21:54:52,594 django.server basehttp 3960 8912 "GET / HTTP/1.1" 200 18792
+INFO 2025-08-27 21:54:55,066 django.server basehttp 3960 8912 "GET / HTTP/1.1" 200 18792
+INFO 2025-08-27 21:54:55,834 django.server basehttp 3960 8912 "GET /records/ HTTP/1.1" 200 425725
+INFO 2025-08-27 21:54:58,386 django.server basehttp 3960 8912 "GET /records/ HTTP/1.1" 200 425725
+INFO 2025-08-27 21:54:59,084 django.server basehttp 3960 8912 "GET /analysis/ HTTP/1.1" 200 82431
+INFO 2025-08-27 21:55:04,861 django.server basehttp 3960 8912 "GET /analysis/ HTTP/1.1" 200 82431
+INFO 2025-08-27 21:55:05,792 django.server basehttp 3960 8912 "GET /analysis/ HTTP/1.1" 200 82431
+INFO 2025-08-27 21:55:06,919 django.server basehttp 3960 8912 "GET /analysis/ HTTP/1.1" 200 82431
+INFO 2025-08-27 21:55:07,088 django.server basehttp 3960 8912 "GET /batches/ HTTP/1.1" 200 93456
+INFO 2025-08-27 21:55:08,864 django.server basehttp 3960 8912 "GET /batches/ HTTP/1.1" 200 93456
+ERROR 2025-08-27 21:55:10,387 django.request log 3960 8912 Internal Server Error: /batch/149/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\smartif.py", line 180, in translate_token
+    op = OPERATORS[token]
+         ~~~~~~~~~^^^^^^^
+KeyError: '(item.source_type'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py", line 778, in view_batch
+    return render(request, 'inventory/batch_view.html', context)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader_tags.py", line 199, in render
+    template = context.template.engine.select_template(template_name)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\engine.py", line 208, in select_template
+    return self.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 196, in compile_nodelist
+    nodelist = parser.parse()
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\defaulttags.py", line 862, in do_for
+    nodelist_loop = parser.parse(
+        (
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\defaulttags.py", line 862, in do_for
+    nodelist_loop = parser.parse(
+        (
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\defaulttags.py", line 961, in do_if
+    condition = TemplateIfParser(parser, bits).parse()
+                ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\defaulttags.py", line 894, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\smartif.py", line 171, in __init__
+    mapped_tokens.append(self.translate_token(token))
+                         ~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\smartif.py", line 182, in translate_token
+    return self.create_var(token)
+           ~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\defaulttags.py", line 897, in create_var
+    return TemplateLiteral(self.template_parser.compile_filter(value), value)
+                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 609, in compile_filter
+    return FilterExpression(token, self)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 710, in __init__
+    raise TemplateSyntaxError(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Could not parse the remainder: '(item.source_type' from '(item.source_type'
+ERROR 2025-08-27 21:55:10,409 django.server basehttp 3960 8912 "GET /batch/149/ HTTP/1.1" 500 357846
+ERROR 2025-08-27 21:55:10,940 django.request log 3960 8912 Internal Server Error: /batch/149/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\smartif.py", line 180, in translate_token
+    op = OPERATORS[token]
+         ~~~~~~~~~^^^^^^^
+KeyError: '(item.source_type'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py", line 778, in view_batch
+    return render(request, 'inventory/batch_view.html', context)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader_tags.py", line 199, in render
+    template = context.template.engine.select_template(template_name)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\engine.py", line 208, in select_template
+    return self.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 196, in compile_nodelist
+    nodelist = parser.parse()
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\defaulttags.py", line 862, in do_for
+    nodelist_loop = parser.parse(
+        (
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\defaulttags.py", line 862, in do_for
+    nodelist_loop = parser.parse(
+        (
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\defaulttags.py", line 961, in do_if
+    condition = TemplateIfParser(parser, bits).parse()
+                ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\defaulttags.py", line 894, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\smartif.py", line 171, in __init__
+    mapped_tokens.append(self.translate_token(token))
+                         ~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\smartif.py", line 182, in translate_token
+    return self.create_var(token)
+           ~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\defaulttags.py", line 897, in create_var
+    return TemplateLiteral(self.template_parser.compile_filter(value), value)
+                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 609, in compile_filter
+    return FilterExpression(token, self)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 710, in __init__
+    raise TemplateSyntaxError(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Could not parse the remainder: '(item.source_type' from '(item.source_type'
+ERROR 2025-08-27 21:55:10,958 django.server basehttp 3960 8912 "GET /batch/149/ HTTP/1.1" 500 358137
+INFO 2025-08-27 21:59:08,702 django.server basehttp 3960 8912 "GET /batches/ HTTP/1.1" 200 93456
+INFO 2025-08-27 21:59:11,053 django.server basehttp 3960 8912 "GET /batch/149/ HTTP/1.1" 200 95290
+INFO 2025-08-27 21:59:27,635 django.server basehttp 3960 8912 "GET /batches/ HTTP/1.1" 200 93456
+INFO 2025-08-27 21:59:35,830 django.server basehttp 3960 8912 "GET /batches/ HTTP/1.1" 200 93456
+INFO 2025-08-27 21:59:37,099 django.server basehttp 3960 8912 "GET /batch/149/ HTTP/1.1" 200 94714
+INFO 2025-08-27 21:59:55,497 django.server basehttp 3960 8912 "POST /batch/item/add/149/ HTTP/1.1" 302 0
+INFO 2025-08-27 21:59:56,053 django.server basehttp 3960 8912 "GET /batch/149/ HTTP/1.1" 200 97413
+INFO 2025-08-27 22:00:10,872 django.server basehttp 3960 8912 "GET /batch/149/ HTTP/1.1" 200 96876
+INFO 2025-08-27 22:00:12,565 django.server basehttp 3960 8912 "GET /batches/ HTTP/1.1" 200 93456
+INFO 2025-08-27 22:00:14,378 django.server basehttp 3960 8912 "GET /batches/ HTTP/1.1" 200 93456
+INFO 2025-08-27 22:00:16,583 django.server basehttp 3960 8912 "GET /batches/create/ HTTP/1.1" 200 117505
+INFO 2025-08-27 22:00:21,699 django.server basehttp 3960 8912 "GET /batches/create/ HTTP/1.1" 200 117505
+WARNING 2025-08-27 22:11:37,209 django.request log 3960 8844 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-08-27 22:11:37,214 django.server basehttp 3960 8844 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 11344
+WARNING 2025-08-27 22:11:37,372 django.server basehttp 3960 8844 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-08-27 22:11:47,922 django.server basehttp 3960 3048 "GET /batches/ HTTP/1.1" 200 93456
+INFO 2025-08-27 22:11:48,241 django.server basehttp 3960 3048 "GET /products/ HTTP/1.1" 200 258175
+INFO 2025-08-27 22:11:48,801 django.server basehttp 3960 3048 "GET /records/ HTTP/1.1" 200 425725
+INFO 2025-08-27 22:11:50,843 django.server basehttp 3960 3048 "GET /records/ HTTP/1.1" 200 425725
+INFO 2025-08-27 22:11:51,443 django.server basehttp 3960 3048 "GET /records/ HTTP/1.1" 200 425725
+INFO 2025-08-27 22:11:51,906 django.server basehttp 3960 3048 "GET /records/ HTTP/1.1" 200 425725
+INFO 2025-08-27 22:11:53,120 django.server basehttp 3960 3048 "GET /ledger/ HTTP/1.1" 200 74317
+INFO 2025-08-27 22:11:54,089 django.server basehttp 3960 3048 "GET /ledger/ HTTP/1.1" 200 74317
+INFO 2025-08-27 22:11:57,556 django.server basehttp 3960 3048 "GET /ledger/ HTTP/1.1" 200 74317
+INFO 2025-08-27 22:11:58,157 django.server basehttp 3960 3048 "GET /ledger/ HTTP/1.1" 200 74317
+INFO 2025-08-27 22:11:59,353 django.server basehttp 3960 3048 "GET /ledger/ HTTP/1.1" 200 74317
+INFO 2025-08-27 22:11:59,873 django.server basehttp 3960 3048 "GET /ledger/ HTTP/1.1" 200 74317
+ERROR 2025-08-27 22:12:03,971 django.request log 3960 3048 Internal Server Error: /opening_balances/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py", line 1015, in opening_balances
+    return render(request, 'inventory/opening_balances.html', context)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: inventory/opening_balances.html
+ERROR 2025-08-27 22:12:03,974 django.server basehttp 3960 3048 "GET /opening_balances/ HTTP/1.1" 500 94075
+ERROR 2025-08-27 22:12:04,049 django.request log 3960 3048 Internal Server Error: /opening_balances/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py", line 1015, in opening_balances
+    return render(request, 'inventory/opening_balances.html', context)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: inventory/opening_balances.html
+ERROR 2025-08-27 22:12:04,055 django.server basehttp 3960 3048 "GET /opening_balances/ HTTP/1.1" 500 94353
+INFO 2025-08-27 22:12:34,260 django.server basehttp 3960 3048 "GET /opening_balances/ HTTP/1.1" 200 181861
+INFO 2025-08-27 22:12:47,609 django.server basehttp 3960 3048 "GET /opening_balances/ HTTP/1.1" 200 181861
+INFO 2025-08-27 22:12:50,072 django.server basehttp 3960 3048 "GET /opening_balances/ HTTP/1.1" 200 181861
+INFO 2025-08-27 22:12:51,626 django.server basehttp 3960 3048 "GET /records/ HTTP/1.1" 200 425725
+INFO 2025-08-27 22:12:52,982 django.server basehttp 3960 3048 "GET /records/ HTTP/1.1" 200 425725
+INFO 2025-08-27 22:12:55,809 django.server basehttp 3960 3048 "GET /production_returns/ HTTP/1.1" 200 71523
+INFO 2025-08-27 22:13:13,771 django.server basehttp 3960 3048 "GET /production_returns/ HTTP/1.1" 200 71523
+INFO 2025-08-27 22:13:15,113 django.server basehttp 3960 3048 "GET /api/get_used_qc_sources/8/ HTTP/1.1" 200 2
+INFO 2025-08-27 22:13:16,903 django.server basehttp 3960 3048 "GET /api/get_used_qc_sources/17/ HTTP/1.1" 200 767
+INFO 2025-08-27 22:34:52,359 django.server basehttp 3960 9352 "GET /production_returns/ HTTP/1.1" 200 71523
+INFO 2025-08-27 22:34:53,145 django.server basehttp 3960 9352 "GET /batches/ HTTP/1.1" 200 93456
+INFO 2025-08-27 22:34:54,600 django.server basehttp 3960 9352 "GET /batches/ HTTP/1.1" 200 93456
+INFO 2025-08-27 22:34:57,971 django.server basehttp 3960 9352 "GET /batches/?page=5 HTTP/1.1" 200 93346
+INFO 2025-08-27 22:34:59,416 django.server basehttp 3960 9352 "GET /batches/?page=6 HTTP/1.1" 200 70889
+INFO 2025-08-27 22:35:00,808 django.server basehttp 3960 9352 "GET /batches/?page=1 HTTP/1.1" 200 93456
+ERROR 2025-08-28 08:09:05,407 django.request log 3960 13036 Internal Server Error: /ledger/print/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py", line 1466, in print_ledger
+    return render(request, 'inventory/print_ledger.html', context)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\backends\django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 196, in compile_nodelist
+    nodelist = parser.parse()
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\defaulttags.py", line 862, in do_for
+    nodelist_loop = parser.parse(
+        (
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\defaulttags.py", line 962, in do_if
+    nodelist = parser.parse(("elif", "else", "endif"))
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\defaulttags.py", line 1531, in do_with
+    extra_context = token_kwargs(remaining_bits, parser, support_legacy=True)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 1127, in token_kwargs
+    kwargs[key] = parser.compile_filter(value)
+                  ~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 609, in compile_filter
+    return FilterExpression(token, self)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 705, in __init__
+    filter_func = parser.find_filter(filter_name)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 615, in find_filter
+    raise TemplateSyntaxError("Invalid filter: '%s'" % filter_name)
+django.template.exceptions.TemplateSyntaxError: Invalid filter: 'get_item'
+ERROR 2025-08-28 08:09:05,426 django.server basehttp 3960 13036 "GET /ledger/print/?product_id=18&start_date=2025-01-01&end_date=2025-11-19 HTTP/1.1" 500 290339
+INFO 2025-08-28 08:09:22,312 django.server basehttp 3960 13036 "GET /batches/?page=6 HTTP/1.1" 200 70889
+INFO 2025-08-28 08:09:22,853 django.server basehttp 3960 13036 "GET /batches/?page=1 HTTP/1.1" 200 93456
+INFO 2025-08-28 08:09:24,100 django.server basehttp 3960 13036 "GET /batches/create/ HTTP/1.1" 200 117505
+INFO 2025-08-28 08:09:40,485 django.server basehttp 3960 13036 "GET /batches/create/ HTTP/1.1" 200 117505
+INFO 2025-08-28 08:09:41,074 django.server basehttp 3960 13036 "GET /batches/create/ HTTP/1.1" 200 117505
+INFO 2025-08-28 08:09:42,413 django.server basehttp 3960 13036 "GET /batches/create/ HTTP/1.1" 200 117505
+INFO 2025-08-28 08:09:43,044 django.server basehttp 3960 13036 "GET /companies/ HTTP/1.1" 200 102502
+INFO 2025-08-28 08:09:44,996 django.server basehttp 3960 13036 "GET / HTTP/1.1" 200 18792
+INFO 2025-08-28 08:09:46,189 django.server basehttp 3960 13036 "GET /products/ HTTP/1.1" 200 258175
+INFO 2025-08-28 08:09:47,178 django.server basehttp 3960 13036 "GET /records/ HTTP/1.1" 200 425725
+INFO 2025-08-28 08:09:48,090 django.server basehttp 3960 13036 "GET /records/ HTTP/1.1" 200 425725
+INFO 2025-08-28 08:09:48,959 django.server basehttp 3960 13036 "GET /records/ HTTP/1.1" 200 425725
+INFO 2025-08-28 08:09:49,597 django.server basehttp 3960 13036 "GET / HTTP/1.1" 200 18792
+INFO 2025-08-28 08:09:50,568 django.server basehttp 3960 13036 "GET /companies/ HTTP/1.1" 200 102502
+INFO 2025-08-28 08:09:51,082 django.server basehttp 3960 13036 "GET /companies/ HTTP/1.1" 200 102502
+INFO 2025-08-28 08:11:37,240 django.server basehttp 3960 11580 "GET /companies/ HTTP/1.1" 200 102502
+INFO 2025-08-28 08:15:01,007 django.server basehttp 3960 11580 "GET /companies/ HTTP/1.1" 200 102502
+INFO 2025-08-28 08:15:04,132 django.server basehttp 3960 11580 "GET / HTTP/1.1" 200 18792
+INFO 2025-08-28 08:15:05,134 django.server basehttp 3960 11580 "GET / HTTP/1.1" 200 18792
+INFO 2025-08-28 08:15:05,813 django.server basehttp 3960 11580 "GET /batches/ HTTP/1.1" 200 93456
+INFO 2025-08-28 08:15:14,987 django.server basehttp 3960 11580 "GET /batches/ HTTP/1.1" 200 93456
+INFO 2025-08-28 08:15:15,754 django.server basehttp 3960 11580 "GET /companies/ HTTP/1.1" 200 102502
+INFO 2025-08-28 08:15:16,828 django.server basehttp 3960 11580 "GET /products/ HTTP/1.1" 200 258175
+INFO 2025-08-28 08:15:17,557 django.server basehttp 3960 11580 "GET /records/ HTTP/1.1" 200 425725
+INFO 2025-08-28 08:15:18,125 django.server basehttp 3960 11580 "GET /companies/ HTTP/1.1" 200 102502
+INFO 2025-08-28 08:15:19,054 django.server basehttp 3960 11580 "GET /companies/ HTTP/1.1" 200 102502
+INFO 2025-08-28 08:15:20,190 django.server basehttp 3960 11580 "GET /companies/ HTTP/1.1" 200 102502
+INFO 2025-08-28 08:15:20,561 django.server basehttp 3960 11580 "GET /batches/ HTTP/1.1" 200 93456
+INFO 2025-08-28 08:16:36,203 django.server basehttp 3960 11580 "GET /batches/ HTTP/1.1" 200 93456
+INFO 2025-08-28 08:17:00,193 django.server basehttp 3960 11580 "GET /batches/?q=250 HTTP/1.1" 200 93417
+INFO 2025-08-28 08:17:00,600 django.server basehttp 3960 11580 "GET /batches/?q=250 HTTP/1.1" 200 93417
+INFO 2025-08-28 08:17:04,803 django.server basehttp 3960 11580 "GET /batches/create/ HTTP/1.1" 200 117505
+INFO 2025-08-28 08:17:09,579 django.server basehttp 3960 11580 "GET /batches/create/ HTTP/1.1" 200 117505
+INFO 2025-08-28 10:16:39,569 django.server basehttp 3960 8908 "GET /batches/create/ HTTP/1.1" 200 117505
+INFO 2025-08-28 10:16:39,635 django.server basehttp 3960 8908 "GET /static/css/google-fonts.css HTTP/1.1" 304 0
+INFO 2025-08-28 10:16:39,651 django.server basehttp 3960 11404 "GET /static/css/bootstrap-icons.min.css HTTP/1.1" 304 0
+INFO 2025-08-28 10:16:39,651 django.server basehttp 3960 8908 "GET /static/css/tom-select.bootstrap5.min.css HTTP/1.1" 304 0
+INFO 2025-08-28 10:16:39,652 django.server basehttp 3960 5976 "GET /static/css/flatpickr.min.css HTTP/1.1" 304 0
+INFO 2025-08-28 10:16:39,653 django.server basehttp 3960 252 "GET /static/css/style.css HTTP/1.1" 304 0
+INFO 2025-08-28 10:16:39,654 django.server basehttp 3960 10844 "GET /static/js/bootstrap.bundle.min.js HTTP/1.1" 304 0
+INFO 2025-08-28 10:16:39,655 django.server basehttp 3960 11404 "GET /static/js/flatpickr.l10n.ar.js HTTP/1.1" 304 0
+INFO 2025-08-28 10:16:39,663 django.server basehttp 3960 8908 "GET /static/js/tom-select.complete.min.js HTTP/1.1" 304 0
+INFO 2025-08-28 10:16:39,665 django.server basehttp 3960 6064 "GET /static/js/flatpickr.min.js HTTP/1.1" 304 0
+INFO 2025-08-28 10:16:39,769 django.server basehttp 3960 8908 "GET /static/webfonts/21.woff2 HTTP/1.1" 304 0
+INFO 2025-08-28 10:16:39,769 django.server basehttp 3960 6064 "GET /static/webfonts/28.woff2 HTTP/1.1" 304 0
+INFO 2025-08-28 10:16:39,770 django.server basehttp 3960 11404 "GET /static/webfonts/14.woff2 HTTP/1.1" 304 0
+INFO 2025-08-28 10:16:39,788 django.server basehttp 3960 11404 "GET /static/webfonts/35.woff2 HTTP/1.1" 304 0
+INFO 2025-08-28 10:16:39,863 django.server basehttp 3960 11404 "GET /static/img/fall.png HTTP/1.1" 304 0
+INFO 2025-08-28 10:16:40,086 django.server basehttp 3960 11404 "GET /companies/ HTTP/1.1" 200 102502
+INFO 2025-08-28 10:16:40,167 django.server basehttp 3960 11404 "GET /static/img/favicon.ico HTTP/1.1" 304 0
+INFO 2025-08-28 10:16:40,835 django.server basehttp 3960 11404 "GET /products/ HTTP/1.1" 200 258175
+INFO 2025-08-28 10:16:41,929 django.server basehttp 3960 11404 "GET /products/ HTTP/1.1" 200 258175
+INFO 2025-08-28 10:24:23,008 django.server basehttp 3960 6356 "GET /companies/ HTTP/1.1" 200 102502
+INFO 2025-08-28 10:24:30,127 django.server basehttp 3960 6356 "GET /companies/ HTTP/1.1" 200 102502
+INFO 2025-08-28 10:24:33,458 django.server basehttp 3960 6356 "GET /products/ HTTP/1.1" 200 258175
+INFO 2025-08-28 10:24:36,376 django.server basehttp 3960 6356 "GET /records/ HTTP/1.1" 200 425725
+ERROR 2025-08-28 10:38:00,414 django.request log 3960 12012 Internal Server Error: /ledger/print/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py", line 1466, in print_ledger
+    return render(request, 'inventory/print_ledger.html', context)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\backends\django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 196, in compile_nodelist
+    nodelist = parser.parse()
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\defaulttags.py", line 862, in do_for
+    nodelist_loop = parser.parse(
+        (
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\defaulttags.py", line 962, in do_if
+    nodelist = parser.parse(("elif", "else", "endif"))
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\defaulttags.py", line 1531, in do_with
+    extra_context = token_kwargs(remaining_bits, parser, support_legacy=True)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 1127, in token_kwargs
+    kwargs[key] = parser.compile_filter(value)
+                  ~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 609, in compile_filter
+    return FilterExpression(token, self)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 705, in __init__
+    filter_func = parser.find_filter(filter_name)
+  File "C:\Users\Bassel\Music\DjangoMigration\venv\Lib\site-packages\django\template\base.py", line 615, in find_filter
+    raise TemplateSyntaxError("Invalid filter: '%s'" % filter_name)
+django.template.exceptions.TemplateSyntaxError: Invalid filter: 'get_item'
+ERROR 2025-08-28 10:38:00,427 django.server basehttp 3960 12012 "GET /ledger/print/?product_id=18&start_date=2025-01-01&end_date=2025-11-19 HTTP/1.1" 500 290339
+INFO 2025-08-28 19:24:03,514 django.utils.autoreload autoreload 1392 3008 Watching for file changes with StatReloader
+INFO 2025-08-28 19:24:08,825 django.server basehttp 1392 132 "GET / HTTP/1.1" 200 80217
+INFO 2025-08-28 19:24:11,235 django.server basehttp 1392 132 "GET / HTTP/1.1" 200 18792
+INFO 2025-08-28 19:24:12,195 django.server basehttp 1392 132 "GET /batches/ HTTP/1.1" 200 93456
+INFO 2025-08-28 19:24:13,366 django.server basehttp 1392 132 "GET /batches/create/ HTTP/1.1" 200 111384
+INFO 2025-08-28 19:24:15,910 django.server basehttp 1392 132 "GET /static/webfonts/07.woff2 HTTP/1.1" 304 0
+INFO 2025-08-28 20:35:09,690 django.utils.autoreload autoreload 1392 3008 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py changed, reloading.
+INFO 2025-08-28 20:35:10,812 django.utils.autoreload autoreload 12972 12228 Watching for file changes with StatReloader
+INFO 2025-08-28 20:36:27,792 django.server basehttp 12972 4040 "GET /batches/create/ HTTP/1.1" 200 111384
+INFO 2025-08-28 20:36:28,863 django.server basehttp 12972 4040 "GET /products/ HTTP/1.1" 200 258175
+INFO 2025-08-28 20:36:29,969 django.server basehttp 12972 4040 "GET /records/ HTTP/1.1" 200 364302
+INFO 2025-08-28 20:36:31,265 django.server basehttp 12972 4040 "GET /records/ HTTP/1.1" 200 425725
+INFO 2025-08-28 20:36:31,988 django.server basehttp 12972 4040 "GET /records/ HTTP/1.1" 200 364302
+INFO 2025-08-28 20:36:32,802 django.server basehttp 12972 4040 "GET /records/ HTTP/1.1" 200 364302
+INFO 2025-08-28 20:36:33,440 django.server basehttp 12972 4040 "GET /records/ HTTP/1.1" 200 364302
+INFO 2025-08-28 20:36:34,362 django.server basehttp 12972 4040 "GET /analysis/ HTTP/1.1" 200 82432
+INFO 2025-08-28 20:36:35,165 django.server basehttp 12972 4040 "GET /records/ HTTP/1.1" 200 364302
+INFO 2025-08-28 20:36:36,232 django.server basehttp 12972 4040 "GET /records/ HTTP/1.1" 200 364302
+INFO 2025-08-28 20:36:36,516 django.server basehttp 12972 4040 "GET /products/ HTTP/1.1" 200 258175
+INFO 2025-08-28 20:36:37,259 django.server basehttp 12972 4040 "GET /records/ HTTP/1.1" 200 364302
+INFO 2025-08-28 20:36:37,866 django.server basehttp 12972 4040 "GET /products/ HTTP/1.1" 200 258175
+INFO 2025-08-28 20:36:38,459 django.server basehttp 12972 4040 "GET /records/ HTTP/1.1" 200 364302
+INFO 2025-08-28 20:36:39,958 django.server basehttp 12972 4040 "GET /products/ HTTP/1.1" 200 258175
+INFO 2025-08-28 20:36:40,489 django.server basehttp 12972 4040 "GET /companies/ HTTP/1.1" 200 102502
+INFO 2025-08-28 20:36:41,079 django.server basehttp 12972 4040 "GET /products/ HTTP/1.1" 200 258175
+INFO 2025-08-28 20:36:41,693 django.server basehttp 12972 4040 "GET /records/ HTTP/1.1" 200 364302
+INFO 2025-08-28 20:36:42,909 django.server basehttp 12972 4040 "GET /products/ HTTP/1.1" 200 258175
+INFO 2025-08-28 20:36:43,527 django.server basehttp 12972 4040 "GET /records/ HTTP/1.1" 200 364302
+INFO 2025-08-28 20:36:44,200 django.server basehttp 12972 4040 "GET /products/ HTTP/1.1" 200 258175
+INFO 2025-08-28 20:36:44,713 django.server basehttp 12972 4040 "GET /records/ HTTP/1.1" 200 364302
+INFO 2025-08-28 20:36:45,546 django.server basehttp 12972 4040 "GET /products/ HTTP/1.1" 200 258175
+INFO 2025-08-28 20:36:46,041 django.server basehttp 12972 4040 "GET /records/ HTTP/1.1" 200 364302
+INFO 2025-08-28 20:36:58,440 django.server basehttp 12972 4040 "GET / HTTP/1.1" 200 18792
+INFO 2025-08-28 20:37:01,774 django.server basehttp 12972 4040 "GET /records/ HTTP/1.1" 200 364302
+INFO 2025-08-28 20:37:03,494 django.server basehttp 12972 4040 "GET /records/ HTTP/1.1" 200 425725
+INFO 2025-08-28 20:37:05,995 django.server basehttp 12972 4040 "GET / HTTP/1.1" 200 18792
+INFO 2025-08-28 20:37:10,783 django.server basehttp 12972 4040 "GET / HTTP/1.1" 200 18792
+INFO 2025-08-28 20:37:35,795 django.server basehttp 12972 4040 "GET / HTTP/1.1" 200 18792
+INFO 2025-08-28 20:37:36,507 django.server basehttp 12972 4040 "GET / HTTP/1.1" 200 18792
+INFO 2025-08-28 20:37:37,079 django.server basehttp 12972 4040 "GET /shop_order_templates/ HTTP/1.1" 200 135851
+INFO 2025-08-28 20:37:45,966 django.server basehttp 12972 4040 "GET /shop_order_templates/ HTTP/1.1" 200 135851
+INFO 2025-08-28 20:37:54,017 django.server basehttp 12972 4040 "GET /shop_order_templates/?copy_from=20 HTTP/1.1" 200 135851
+INFO 2025-08-28 20:37:56,472 django.server basehttp 12972 4040 "GET /shop_order_templates/?copy_from=18 HTTP/1.1" 200 135851
+INFO 2025-08-28 20:37:58,960 django.server basehttp 12972 4040 "GET /shop_order_templates/?copy_from=18 HTTP/1.1" 200 135851
+INFO 2025-08-28 20:38:00,065 django.server basehttp 12972 4040 "GET /shop_order_templates/?copy_from=21 HTTP/1.1" 200 135851
+INFO 2025-08-28 20:38:01,976 django.server basehttp 12972 4040 "GET /shop_order_templates/?copy_from=21 HTTP/1.1" 200 135851
+INFO 2025-08-28 20:38:02,910 django.server basehttp 12972 4040 "GET /shop_order_template/edit/18/ HTTP/1.1" 200 66505
+INFO 2025-08-28 20:38:05,329 django.server basehttp 12972 4040 "GET /shop_order_templates/?copy_from=21 HTTP/1.1" 200 135851
+INFO 2025-08-28 20:38:07,204 django.server basehttp 12972 4040 "GET /shop_order_templates/?copy_from=21 HTTP/1.1" 200 135851
+INFO 2025-08-28 20:38:08,403 django.server basehttp 12972 4040 "GET /shop_order_template/edit/17/ HTTP/1.1" 200 66523
+INFO 2025-08-28 20:38:11,283 django.server basehttp 12972 4040 "GET /shop_order_template/17/ HTTP/1.1" 200 67406
+INFO 2025-08-28 20:38:13,294 django.server basehttp 12972 4040 "GET /shop_order_templates/ HTTP/1.1" 200 135851
+INFO 2025-08-28 21:02:00,744 django.server basehttp 12972 12156 "GET /shop_order_templates/ HTTP/1.1" 200 135854
+INFO 2025-08-28 21:02:00,788 django.server basehttp 12972 12156 "GET /static/css/bootstrap.css HTTP/1.1" 304 0
+INFO 2025-08-28 21:02:01,348 django.server basehttp 12972 12156 "GET /companies/ HTTP/1.1" 200 102502
+INFO 2025-08-28 21:02:02,145 django.server basehttp 12972 12156 "GET /products/ HTTP/1.1" 200 258175
+INFO 2025-08-28 21:02:02,709 django.server basehttp 12972 12156 "GET /records/ HTTP/1.1" 200 364302
+INFO 2025-08-28 21:02:03,458 django.server basehttp 12972 12156 "GET /records/ HTTP/1.1" 200 364302
+INFO 2025-08-28 21:02:04,263 django.server basehttp 12972 12156 "GET /analysis/ HTTP/1.1" 200 82432
+INFO 2025-08-28 21:02:05,005 django.server basehttp 12972 12156 "GET /analysis/ HTTP/1.1" 200 82432
+INFO 2025-08-28 21:02:05,863 django.server basehttp 12972 12156 "GET /analysis/ HTTP/1.1" 200 82432
+INFO 2025-08-28 21:02:06,857 django.server basehttp 12972 12156 "GET /analysis/ HTTP/1.1" 200 82432
+INFO 2025-08-28 21:02:06,931 django.server basehttp 12972 12156 "GET /batches/ HTTP/1.1" 200 93456
+INFO 2025-08-28 21:02:07,711 django.server basehttp 12972 12156 "GET /batches/ HTTP/1.1" 200 93456
+INFO 2025-08-28 21:02:09,780 django.server basehttp 12972 12156 "GET /batches/ HTTP/1.1" 200 93456
+INFO 2025-08-28 21:02:10,864 django.server basehttp 12972 12156 "GET /batches/ HTTP/1.1" 200 93456
+INFO 2025-08-28 21:02:14,109 django.server basehttp 12972 12156 "GET /shop_order_templates/ HTTP/1.1" 200 135854
+INFO 2025-08-28 21:02:19,261 django.server basehttp 12972 12156 "GET /shop_order_template/edit/18/ HTTP/1.1" 200 66507
+INFO 2025-08-28 21:02:21,213 django.server basehttp 12972 12156 "GET /shop_order_templates/ HTTP/1.1" 200 135854
+INFO 2025-08-28 21:02:22,366 django.server basehttp 12972 12156 "GET /shop_order_template/edit/2/ HTTP/1.1" 200 66530
+INFO 2025-08-28 21:02:24,776 django.server basehttp 12972 12156 "GET /shop_order_template/edit/2/ HTTP/1.1" 200 66530
+INFO 2025-08-28 21:02:25,963 django.server basehttp 12972 12156 "GET /shop_order_template/2/ HTTP/1.1" 200 66242
+INFO 2025-08-28 21:02:27,812 django.server basehttp 12972 12156 "GET /shop_order_template/edit/2/ HTTP/1.1" 200 66530
+INFO 2025-08-28 21:02:28,581 django.server basehttp 12972 12156 "GET /shop_order_template/2/ HTTP/1.1" 200 66242
+INFO 2025-08-28 21:02:29,075 django.server basehttp 12972 12156 "GET /shop_order_templates/ HTTP/1.1" 200 135854
+INFO 2025-08-28 21:02:30,006 django.server basehttp 12972 12156 "GET /shop_order_templates/ HTTP/1.1" 200 135854
+INFO 2025-08-28 21:02:31,432 django.server basehttp 12972 12156 "GET /shop_order_template/edit/15/ HTTP/1.1" 200 66526
+INFO 2025-08-28 21:02:36,138 django.server basehttp 12972 12156 "GET /shop_order_template/edit/15/ HTTP/1.1" 200 66526
+INFO 2025-08-28 21:02:36,693 django.server basehttp 12972 12156 "GET /shop_order_template/edit/15/ HTTP/1.1" 200 66526
+INFO 2025-08-28 21:02:37,353 django.server basehttp 12972 12156 "GET /shop_order_template/edit/15/ HTTP/1.1" 200 66526
+INFO 2025-08-28 21:02:37,600 django.server basehttp 12972 12156 "GET /shop_order_template/edit/15/ HTTP/1.1" 200 66526
+INFO 2025-08-28 21:02:38,605 django.server basehttp 12972 12156 "GET /shop_order_template/edit/15/ HTTP/1.1" 200 66526
+INFO 2025-08-28 21:03:40,630 django.server basehttp 12972 12156 "GET /shop_order_template/edit/15/ HTTP/1.1" 200 66526
+INFO 2025-08-28 21:03:40,853 django.server basehttp 12972 12156 "GET /shop_order_template/edit/15/ HTTP/1.1" 200 66526
+INFO 2025-08-28 21:03:41,463 django.server basehttp 12972 12156 "GET /batches/ HTTP/1.1" 200 93456
+INFO 2025-08-28 21:03:42,648 django.server basehttp 12972 12156 "GET /batches/create/ HTTP/1.1" 200 71739
+INFO 2025-08-28 21:03:45,665 django.server basehttp 12972 12156 "GET /batches/create/ HTTP/1.1" 200 71739
+INFO 2025-08-28 21:05:37,668 django.server basehttp 12972 12156 "GET /batches/create/ HTTP/1.1" 200 111384
+INFO 2025-08-28 21:06:02,495 django.server basehttp 12972 12156 "GET /batches/ HTTP/1.1" 200 93456
+INFO 2025-08-28 21:06:03,250 django.server basehttp 12972 12156 "GET /batches/ HTTP/1.1" 200 93456
+INFO 2025-08-28 21:06:04,280 django.server basehttp 12972 12156 "GET /analysis/ HTTP/1.1" 200 82432
+INFO 2025-08-28 21:06:06,200 django.server basehttp 12972 12156 "GET /analysis/ HTTP/1.1" 200 82432
+INFO 2025-08-28 21:28:26,563 django.server basehttp 12972 3836 "GET /analysis/ HTTP/1.1" 200 82432
+INFO 2025-08-28 21:28:27,490 django.server basehttp 12972 3836 "GET /records/ HTTP/1.1" 200 364302
+INFO 2025-08-28 21:28:28,356 django.server basehttp 12972 3836 "GET /products/ HTTP/1.1" 200 258175
+INFO 2025-08-28 21:28:29,324 django.server basehttp 12972 3836 "GET /companies/ HTTP/1.1" 200 102502
+INFO 2025-08-28 21:28:30,630 django.server basehttp 12972 3836 "GET /records/ HTTP/1.1" 200 364302
+INFO 2025-08-28 21:28:31,139 django.server basehttp 12972 3836 "GET /records/ HTTP/1.1" 200 364302
+INFO 2025-08-28 21:28:32,269 django.server basehttp 12972 3836 "GET /analysis/ HTTP/1.1" 200 82432
+INFO 2025-08-28 21:28:33,345 django.server basehttp 12972 3836 "GET /analysis/ HTTP/1.1" 200 82432
+INFO 2025-08-28 21:28:34,023 django.server basehttp 12972 3836 "GET /analysis/ HTTP/1.1" 200 82432
+INFO 2025-08-28 21:28:34,895 django.server basehttp 12972 3836 "GET /analysis/ HTTP/1.1" 200 82432
+INFO 2025-08-28 21:28:36,551 django.server basehttp 12972 3836 "GET /analysis/ HTTP/1.1" 200 82432
+INFO 2025-08-28 21:28:36,869 django.server basehttp 12972 3836 "GET /ledger/ HTTP/1.1" 200 74317
+INFO 2025-08-28 21:28:37,428 django.server basehttp 12972 3836 "GET /ledger/ HTTP/1.1" 200 74317
+INFO 2025-08-28 21:28:38,030 django.server basehttp 12972 3836 "GET /ledger/ HTTP/1.1" 200 74317
+INFO 2025-08-28 21:28:38,613 django.server basehttp 12972 3836 "GET /ledger/ HTTP/1.1" 200 74317
+INFO 2025-08-28 21:28:39,425 django.server basehttp 12972 3836 "GET /visuals/ HTTP/1.1" 200 66933
+INFO 2025-08-28 21:28:41,551 django.server basehttp 12972 3836 "GET /visuals/ HTTP/1.1" 200 66933
+INFO 2025-08-28 21:28:42,493 django.server basehttp 12972 3836 "GET /batches/ HTTP/1.1" 200 93456
+INFO 2025-08-28 21:28:43,085 django.server basehttp 12972 3836 "GET / HTTP/1.1" 200 18792
+INFO 2025-08-28 21:28:44,996 django.server basehttp 12972 3836 "GET / HTTP/1.1" 200 18792
+INFO 2025-08-28 21:28:45,763 django.server basehttp 12972 3836 "GET / HTTP/1.1" 200 18792
+INFO 2025-08-28 21:28:47,563 django.server basehttp 12972 3836 "GET /companies/ HTTP/1.1" 200 102502
+INFO 2025-08-28 21:28:48,481 django.server basehttp 12972 3836 "GET / HTTP/1.1" 200 18792
+INFO 2025-08-28 21:36:03,684 django.server basehttp 12972 8928 "GET /companies/ HTTP/1.1" 200 102502
+INFO 2025-08-28 21:36:04,225 django.server basehttp 12972 8928 "GET /companies/ HTTP/1.1" 200 102502
+INFO 2025-08-28 21:36:04,787 django.server basehttp 12972 8928 "GET /products/ HTTP/1.1" 200 258175
+INFO 2025-08-28 21:36:05,335 django.server basehttp 12972 8928 "GET /records/ HTTP/1.1" 200 364302
+INFO 2025-08-28 21:36:06,022 django.server basehttp 12972 8928 "GET /records/ HTTP/1.1" 200 364302
+INFO 2025-08-28 21:36:07,030 django.server basehttp 12972 8928 "GET /analysis/ HTTP/1.1" 200 82432
+INFO 2025-08-28 21:36:07,954 django.server basehttp 12972 8928 "GET /analysis/ HTTP/1.1" 200 82432
+INFO 2025-08-28 21:36:08,073 django.server basehttp 12972 8928 "GET /production_returns/ HTTP/1.1" 200 71523
+INFO 2025-08-28 21:36:08,692 django.server basehttp 12972 8928 "GET /production_returns/ HTTP/1.1" 200 71523
+INFO 2025-08-28 21:36:09,412 django.server basehttp 12972 8928 "GET /ledger/ HTTP/1.1" 200 74317
+INFO 2025-08-28 21:36:10,111 django.server basehttp 12972 8928 "GET /ledger/ HTTP/1.1" 200 74317
+INFO 2025-08-28 21:36:10,665 django.server basehttp 12972 8928 "GET / HTTP/1.1" 200 18792
+INFO 2025-08-28 21:36:11,562 django.server basehttp 12972 8928 "GET /products/ HTTP/1.1" 200 258175
+INFO 2025-08-28 21:36:12,042 django.server basehttp 12972 8928 "GET /companies/ HTTP/1.1" 200 102502
+INFO 2025-08-28 21:36:12,599 django.server basehttp 12972 8928 "GET /products/ HTTP/1.1" 200 258175
+INFO 2025-08-28 21:36:13,370 django.server basehttp 12972 8928 "GET /records/ HTTP/1.1" 200 364302
+INFO 2025-08-28 21:38:43,160 django.utils.autoreload autoreload 12972 12228 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py changed, reloading.
+INFO 2025-08-28 21:38:44,443 django.utils.autoreload autoreload 1272 12824 Watching for file changes with StatReloader
+INFO 2025-08-28 21:38:49,848 django.server basehttp 1272 8208 "GET /records/ HTTP/1.1" 200 425725
+INFO 2025-08-28 21:38:51,064 django.server basehttp 1272 8208 "GET /companies/ HTTP/1.1" 200 41077
+INFO 2025-08-28 21:38:51,856 django.server basehttp 1272 8208 "GET /products/ HTTP/1.1" 200 258175
+INFO 2025-08-28 21:38:52,826 django.server basehttp 1272 8208 "GET /companies/ HTTP/1.1" 200 41077
+INFO 2025-08-28 21:38:55,857 django.server basehttp 1272 8208 "GET /records/ HTTP/1.1" 200 364302
+INFO 2025-08-28 21:38:56,686 django.server basehttp 1272 8208 "GET /companies/ HTTP/1.1" 200 41077
+INFO 2025-08-28 21:38:58,191 django.server basehttp 1272 8208 "GET /records/ HTTP/1.1" 200 364302
+INFO 2025-08-28 21:38:58,898 django.server basehttp 1272 8208 "GET /companies/ HTTP/1.1" 200 41077
+INFO 2025-08-28 21:38:59,805 django.server basehttp 1272 8208 "GET /records/ HTTP/1.1" 200 364302
+INFO 2025-08-28 21:39:00,324 django.server basehttp 1272 8208 "GET /companies/ HTTP/1.1" 200 41077
+INFO 2025-08-28 21:39:08,436 django.utils.autoreload autoreload 1272 12824 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py changed, reloading.
+INFO 2025-08-28 21:39:09,687 django.utils.autoreload autoreload 1040 11228 Watching for file changes with StatReloader
+INFO 2025-08-28 21:39:32,692 django.server basehttp 1040 7496 "GET /products/ HTTP/1.1" 200 196751
+INFO 2025-08-28 21:42:30,845 django.utils.autoreload autoreload 1040 11228 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py changed, reloading.
+INFO 2025-08-28 21:42:31,747 django.utils.autoreload autoreload 8912 13176 Watching for file changes with StatReloader
+INFO 2025-08-28 21:42:36,522 django.server basehttp 8912 1488 "GET /products/ HTTP/1.1" 200 196751
+INFO 2025-08-28 21:42:37,639 django.server basehttp 8912 1488 "GET /analysis/ HTTP/1.1" 200 82432
+INFO 2025-08-28 21:42:38,726 django.server basehttp 8912 1488 "GET /analysis/ HTTP/1.1" 200 82432
+INFO 2025-08-28 21:42:39,705 django.server basehttp 8912 1488 "GET /analysis/ HTTP/1.1" 200 82432
+INFO 2025-08-28 21:42:41,232 django.server basehttp 8912 1488 "GET /analysis/ HTTP/1.1" 200 82432
+INFO 2025-08-28 21:42:41,430 django.server basehttp 8912 1488 "GET /shop_order_templates/ HTTP/1.1" 200 74418
+INFO 2025-08-28 21:42:42,701 django.server basehttp 8912 1488 "GET /shop_order_templates/ HTTP/1.1" 200 74418
+INFO 2025-08-28 21:42:43,297 django.server basehttp 8912 1488 "GET /shop_order_templates/ HTTP/1.1" 200 74418
+INFO 2025-08-28 21:42:48,307 django.server basehttp 8912 1488 "GET /shop_order_templates/?copy_from=18 HTTP/1.1" 200 74418
+INFO 2025-08-28 21:42:49,400 django.server basehttp 8912 1488 "GET /shop_order_template/edit/18/ HTTP/1.1" 200 66649
+INFO 2025-08-28 21:42:51,958 django.server basehttp 8912 1488 "GET /shop_order_template/18/ HTTP/1.1" 200 63374
+INFO 2025-08-28 21:42:53,114 django.server basehttp 8912 1488 "GET /shop_order_templates/ HTTP/1.1" 200 74418
+INFO 2025-08-28 21:43:00,079 django.utils.autoreload autoreload 8912 13176 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py changed, reloading.
+INFO 2025-08-28 21:43:01,570 django.utils.autoreload autoreload 6800 1848 Watching for file changes with StatReloader
+INFO 2025-08-28 21:47:43,835 django.utils.autoreload autoreload 6800 1848 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py changed, reloading.
+INFO 2025-08-28 21:47:44,748 django.utils.autoreload autoreload 4416 4368 Watching for file changes with StatReloader
+INFO 2025-08-28 21:49:35,671 django.server basehttp 4416 6532 "GET /shop_order_template/edit/10/ HTTP/1.1" 200 5061
+INFO 2025-08-28 21:49:39,421 django.server basehttp 4416 6532 "GET /shop_order_template/10/ HTTP/1.1" 200 3908
+INFO 2025-08-28 21:49:41,481 django.server basehttp 4416 6532 "GET /shop_order_templates/ HTTP/1.1" 200 74418
+INFO 2025-08-28 21:49:43,006 django.server basehttp 4416 6532 "GET /shop_order_template/18/ HTTP/1.1" 200 1934
+INFO 2025-08-28 21:49:44,006 django.server basehttp 4416 6532 "GET /shop_order_templates/ HTTP/1.1" 200 74418
+INFO 2025-08-28 21:49:56,692 django.server basehttp 4416 6532 "GET / HTTP/1.1" 200 18792
+INFO 2025-08-28 22:35:48,534 django.server basehttp 4416 11480 "GET / HTTP/1.1" 200 18792
+INFO 2025-08-28 22:35:49,478 django.server basehttp 4416 11480 "GET /analysis/ HTTP/1.1" 200 82432
+INFO 2025-08-28 22:35:50,061 django.server basehttp 4416 11480 "GET /analysis/ HTTP/1.1" 200 82432
+INFO 2025-08-28 22:35:50,311 django.server basehttp 4416 11480 "GET /batches/ HTTP/1.1" 200 93456
+INFO 2025-08-28 22:36:27,302 django.server basehttp 4416 11480 "GET /batches/ HTTP/1.1" 200 93456
+INFO 2025-08-28 22:36:30,075 django.server basehttp 4416 11480 "GET /batches/create/ HTTP/1.1" 200 111384
+INFO 2025-08-28 22:36:34,067 django.server basehttp 4416 11480 "GET /batches/create/ HTTP/1.1" 200 111384
+INFO 2025-08-28 22:36:35,213 django.server basehttp 4416 11480 "GET /batches/create/ HTTP/1.1" 200 111384
+INFO 2025-08-28 22:36:35,678 django.server basehttp 4416 11480 "GET /batches/ HTTP/1.1" 200 93456
+INFO 2025-08-28 22:38:02,203 django.utils.autoreload autoreload 4416 4368 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py changed, reloading.
+INFO 2025-08-28 22:38:03,738 django.utils.autoreload autoreload 8444 9540 Watching for file changes with StatReloader
+INFO 2025-08-28 22:38:06,327 django.utils.autoreload autoreload 8444 9540 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py changed, reloading.
+INFO 2025-08-28 22:38:07,785 django.utils.autoreload autoreload 13012 11164 Watching for file changes with StatReloader
+INFO 2025-08-28 22:38:10,796 django.server basehttp 13012 11520 "GET /batches/ HTTP/1.1" 200 32033
+INFO 2025-08-28 22:38:11,287 django.server basehttp 13012 11520 "GET /batches/ HTTP/1.1" 200 32033
+INFO 2025-08-28 22:38:12,830 django.server basehttp 13012 11520 "GET /batches/ HTTP/1.1" 200 32033
+INFO 2025-08-28 22:38:13,535 django.server basehttp 13012 11520 "GET /batches/ HTTP/1.1" 200 32033
+INFO 2025-08-28 22:38:14,527 django.server basehttp 13012 11520 "GET /batches/ HTTP/1.1" 200 32033
+INFO 2025-08-28 22:38:15,016 django.server basehttp 13012 11520 "GET /shop_order_templates/ HTTP/1.1" 200 74418
+INFO 2025-08-28 22:38:15,654 django.server basehttp 13012 11520 "GET /shop_order_templates/ HTTP/1.1" 200 74418
+INFO 2025-08-28 22:38:16,062 django.server basehttp 13012 11520 "GET /batches/ HTTP/1.1" 200 32033
+INFO 2025-08-28 22:38:16,486 django.server basehttp 13012 11520 "GET /batches/ HTTP/1.1" 200 32033
+INFO 2025-08-28 22:38:17,447 django.server basehttp 13012 11520 "GET /analysis/ HTTP/1.1" 200 82432
+INFO 2025-08-28 22:38:18,463 django.server basehttp 13012 11520 "GET /analysis/ HTTP/1.1" 200 82432
+INFO 2025-08-28 22:38:18,555 django.server basehttp 13012 11520 "GET /batches/ HTTP/1.1" 200 32033
+INFO 2025-08-28 22:38:23,819 django.server basehttp 13012 11520 "GET /batches/create/ HTTP/1.1" 200 111384
+INFO 2025-08-28 22:39:10,317 django.utils.autoreload autoreload 13012 11164 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py changed, reloading.
+INFO 2025-08-28 22:39:11,733 django.utils.autoreload autoreload 7260 12528 Watching for file changes with StatReloader
+INFO 2025-08-28 22:39:13,499 django.utils.autoreload autoreload 7260 12528 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py changed, reloading.
+INFO 2025-08-28 22:39:14,904 django.utils.autoreload autoreload 5692 7704 Watching for file changes with StatReloader
+INFO 2025-08-28 22:39:15,330 django.server basehttp 5692 11696 "GET /batches/ HTTP/1.1" 200 32033
+INFO 2025-08-28 22:39:16,172 django.server basehttp 5692 11696 "GET /batches/create/ HTTP/1.1" 200 10311
+INFO 2025-08-28 22:39:17,640 django.server basehttp 5692 11696 "GET /batches/ HTTP/1.1" 200 32033
+INFO 2025-08-28 22:39:39,541 django.utils.autoreload autoreload 5692 7704 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py changed, reloading.
+INFO 2025-08-28 22:39:40,900 django.utils.autoreload autoreload 6168 4036 Watching for file changes with StatReloader
+INFO 2025-08-28 22:39:42,370 django.server basehttp 6168 11060 "GET /batches/create/ HTTP/1.1" 200 10311
+INFO 2025-08-28 22:39:42,618 django.utils.autoreload autoreload 6168 4036 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py changed, reloading.
+INFO 2025-08-28 22:39:43,662 django.utils.autoreload autoreload 4060 7792 Watching for file changes with StatReloader
+INFO 2025-08-28 22:39:44,716 django.server basehttp 4060 460 "GET /batches/ HTTP/1.1" 200 32033
+INFO 2025-08-28 22:39:47,006 django.server basehttp 4060 460 "GET /batch/149/ HTTP/1.1" 200 35516
+INFO 2025-08-28 22:40:05,517 django.server basehttp 4060 460 "GET /batch/149/ HTTP/1.1" 200 35516
+INFO 2025-08-28 22:40:05,585 django.server basehttp 4060 460 "GET /batches/ HTTP/1.1" 200 32033
+INFO 2025-08-28 22:40:06,029 django.server basehttp 4060 460 "GET /batches/ HTTP/1.1" 200 32033
+INFO 2025-08-28 22:40:06,725 django.server basehttp 4060 460 "GET /shop_order_templates/ HTTP/1.1" 200 74418
+INFO 2025-08-28 22:40:07,490 django.server basehttp 4060 460 "GET /shop_order_templates/ HTTP/1.1" 200 74418
+INFO 2025-08-28 22:40:07,915 django.server basehttp 4060 460 "GET /batches/ HTTP/1.1" 200 32033
+INFO 2025-08-28 22:40:09,280 django.server basehttp 4060 460 "GET /batches/create/ HTTP/1.1" 200 10311
+INFO 2025-08-28 22:40:10,034 django.server basehttp 4060 460 "GET /batches/ HTTP/1.1" 200 32033
+INFO 2025-08-28 22:40:11,546 django.server basehttp 4060 460 "GET /batch/149/ HTTP/1.1" 200 35516
+INFO 2025-08-28 22:40:15,300 django.server basehttp 4060 460 "GET /batches/ HTTP/1.1" 200 32033
+INFO 2025-08-28 22:40:16,957 django.server basehttp 4060 460 "GET /batch/149/ HTTP/1.1" 200 35516
+INFO 2025-08-28 22:40:19,575 django.server basehttp 4060 460 "POST /batch/149/update_all/ HTTP/1.1" 302 0
+INFO 2025-08-28 22:40:20,039 django.server basehttp 4060 460 "GET /batch/149/ HTTP/1.1" 200 97566
+INFO 2025-08-28 22:40:29,864 django.server basehttp 4060 460 "GET /batch/149/ HTTP/1.1" 200 35516
+INFO 2025-08-28 22:40:29,972 django.server basehttp 4060 460 "GET /opening_balances/ HTTP/1.1" 200 181861
+INFO 2025-08-28 22:40:30,810 django.server basehttp 4060 460 "GET /opening_balances/ HTTP/1.1" 200 181861
+INFO 2025-08-28 22:40:31,236 django.server basehttp 4060 460 "GET /batches/ HTTP/1.1" 200 32033
+INFO 2025-08-28 22:40:33,901 django.server basehttp 4060 460 "GET /batch/149/ HTTP/1.1" 200 35516
+INFO 2025-08-28 22:40:53,865 django.utils.autoreload autoreload 4060 7792 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py changed, reloading.
+INFO 2025-08-28 22:40:55,640 django.utils.autoreload autoreload 3604 11400 Watching for file changes with StatReloader
+INFO 2025-08-28 22:40:56,686 django.server basehttp 3604 2304 "GET /batch/149/ HTTP/1.1" 200 96876
+INFO 2025-08-28 22:40:56,797 django.server basehttp 3604 2304 "GET /batches/ HTTP/1.1" 200 32033
+INFO 2025-08-28 22:40:58,624 django.server basehttp 3604 2304 "GET /batch/149/ HTTP/1.1" 200 96876
+INFO 2025-08-28 22:41:04,135 django.utils.autoreload autoreload 3604 11400 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py changed, reloading.
+INFO 2025-08-28 22:41:05,276 django.utils.autoreload autoreload 2792 4700 Watching for file changes with StatReloader
+INFO 2025-08-28 22:41:20,748 django.server basehttp 2792 12832 "GET /batch/149/ HTTP/1.1" 200 35516
+INFO 2025-08-28 22:41:20,886 django.server basehttp 2792 12832 "GET /ledger/ HTTP/1.1" 200 74317
+INFO 2025-08-28 22:41:23,211 django.server basehttp 2792 12832 "GET /ledger/ HTTP/1.1" 200 74317
+INFO 2025-08-28 22:41:25,845 django.server basehttp 2792 12832 "GET /analysis/ HTTP/1.1" 200 82432
+INFO 2025-08-28 22:41:27,816 django.server basehttp 2792 12832 "GET /analysis/ HTTP/1.1" 200 82432
+INFO 2025-08-28 22:41:30,714 django.server basehttp 2792 12832 "GET /production_returns/ HTTP/1.1" 200 71523
+INFO 2025-08-28 22:41:39,274 django.server basehttp 2792 12832 "GET /production_returns/ HTTP/1.1" 200 71523
+INFO 2025-08-28 22:41:40,342 django.server basehttp 2792 12832 "GET /api/get_used_qc_sources/8/ HTTP/1.1" 200 2
+INFO 2025-08-28 22:41:41,655 django.server basehttp 2792 12832 "GET /api/get_used_qc_sources/22/ HTTP/1.1" 200 106
+INFO 2025-08-28 22:41:47,174 django.server basehttp 2792 12832 "GET /records/ HTTP/1.1" 200 364302
+INFO 2025-08-28 22:41:47,644 django.server basehttp 2792 12832 "GET /records/ HTTP/1.1" 200 364302
+INFO 2025-08-28 22:41:48,711 django.server basehttp 2792 12832 "GET /visuals/ HTTP/1.1" 200 66930
+INFO 2025-08-28 22:41:49,759 django.server basehttp 2792 12832 "GET /visuals/ HTTP/1.1" 200 66930
+INFO 2025-08-28 22:41:50,633 django.server basehttp 2792 12832 "GET /ledger/ HTTP/1.1" 200 74317
+INFO 2025-08-28 22:41:51,370 django.server basehttp 2792 12832 "GET /ledger/ HTTP/1.1" 200 74317
+INFO 2025-08-28 22:41:52,736 django.server basehttp 2792 12832 "GET /ledger/ HTTP/1.1" 200 74317
+INFO 2025-08-28 22:41:53,389 django.server basehttp 2792 12832 "GET /ledger/ HTTP/1.1" 200 74317
+INFO 2025-08-28 22:41:55,880 django.server basehttp 2792 12832 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 74136
+INFO 2025-08-28 22:41:58,000 django.server basehttp 2792 12832 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 74136
+INFO 2025-08-28 22:42:06,487 django.server basehttp 2792 12832 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=2025-01-01&end_date= HTTP/1.1" 200 74146
+INFO 2025-08-28 22:42:10,279 django.server basehttp 2792 12832 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=2025-01-01&end_date=2025-08-28 HTTP/1.1" 200 74156
+ERROR 2025-08-28 22:42:11,518 django.request log 2792 12832 Internal Server Error: /ledger/print/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py", line 1477, in print_ledger
+    return render(request, 'inventory/print_ledger.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 196, in compile_nodelist
+    nodelist = parser.parse()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 862, in do_for
+    nodelist_loop = parser.parse(
+        (
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 962, in do_if
+    nodelist = parser.parse(("elif", "else", "endif"))
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 1531, in do_with
+    extra_context = token_kwargs(remaining_bits, parser, support_legacy=True)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1127, in token_kwargs
+    kwargs[key] = parser.compile_filter(value)
+                  ~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 609, in compile_filter
+    return FilterExpression(token, self)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 705, in __init__
+    filter_func = parser.find_filter(filter_name)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 615, in find_filter
+    raise TemplateSyntaxError("Invalid filter: '%s'" % filter_name)
+django.template.exceptions.TemplateSyntaxError: Invalid filter: 'get_item'
+ERROR 2025-08-28 22:42:11,538 django.server basehttp 2792 12832 "GET /ledger/print/?product_id=18&start_date=2025-01-01&end_date=2025-08-28 HTTP/1.1" 500 289375
+INFO 2025-08-29 12:36:51,683 django.server basehttp 2792 6808 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=2025-01-01&end_date=2025-08-28 HTTP/1.1" 200 74156
+INFO 2025-08-29 12:36:51,720 django.server basehttp 2792 6808 "GET /static/css/google-fonts.css HTTP/1.1" 304 0
+INFO 2025-08-29 12:36:51,730 django.server basehttp 2792 6808 "GET /static/css/bootstrap-icons.min.css HTTP/1.1" 304 0
+INFO 2025-08-29 12:36:51,740 django.server basehttp 2792 6808 "GET /static/js/bootstrap.bundle.min.js HTTP/1.1" 304 0
+INFO 2025-08-29 12:36:51,741 django.server basehttp 2792 12468 "GET /static/css/flatpickr.min.css HTTP/1.1" 304 0
+INFO 2025-08-29 12:36:51,743 django.server basehttp 2792 10888 "GET /static/css/tom-select.bootstrap5.min.css HTTP/1.1" 304 0
+INFO 2025-08-29 12:36:51,744 django.server basehttp 2792 6808 "GET /static/js/tom-select.complete.min.js HTTP/1.1" 304 0
+INFO 2025-08-29 12:36:51,750 django.server basehttp 2792 13072 "GET /static/js/flatpickr.min.js HTTP/1.1" 304 0
+INFO 2025-08-29 12:36:51,751 django.server basehttp 2792 4568 "GET /static/js/flatpickr.l10n.ar.js HTTP/1.1" 304 0
+INFO 2025-08-29 12:36:51,751 django.server basehttp 2792 10892 "GET /static/css/style.css HTTP/1.1" 304 0
+INFO 2025-08-29 12:36:51,780 django.server basehttp 2792 10892 "GET /static/img/fall.png HTTP/1.1" 304 0
+INFO 2025-08-29 12:36:51,855 django.server basehttp 2792 10892 "GET /static/img/favicon.ico HTTP/1.1" 304 0
+INFO 2025-08-29 12:36:56,215 django.server basehttp 2792 10892 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=2025-01-01&end_date=2025-08-28 HTTP/1.1" 200 74156
+WARNING 2025-08-29 12:37:01,125 django.request log 2792 10892 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-08-29 12:37:01,125 django.server basehttp 2792 10892 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 11344
+WARNING 2025-08-29 12:37:01,326 django.server basehttp 2792 10892 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-08-29 12:37:11,721 django.server basehttp 2792 4568 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=2025-01-01&end_date=2025-08-28 HTTP/1.1" 200 74156
+WARNING 2025-08-29 12:37:11,773 django.request log 2792 4568 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-08-29 12:37:11,776 django.server basehttp 2792 4568 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 11344
+INFO 2025-08-29 12:37:11,857 django.server basehttp 2792 4568 "GET /static/webfonts/28.woff2 HTTP/1.1" 304 0
+INFO 2025-08-29 12:37:11,858 django.server basehttp 2792 13072 "GET /static/webfonts/14.woff2 HTTP/1.1" 304 0
+WARNING 2025-08-29 12:37:11,871 django.server basehttp 2792 13072 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-08-29 12:37:11,881 django.server basehttp 2792 4568 "GET /static/webfonts/21.woff2 HTTP/1.1" 304 0
+INFO 2025-08-29 12:37:19,615 django.server basehttp 2792 4568 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=2025-01-01&end_date=2025-08-28 HTTP/1.1" 200 74156
+INFO 2025-08-29 12:37:21,167 django.server basehttp 2792 4568 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=2025-01-01&end_date=2025-08-28 HTTP/1.1" 200 74156
+INFO 2025-08-29 12:37:22,067 django.server basehttp 2792 4568 "GET /analysis/ HTTP/1.1" 200 82432
+INFO 2025-08-29 12:37:22,138 django.server basehttp 2792 4568 "GET /static/webfonts/35.woff2 HTTP/1.1" 304 0
+INFO 2025-08-29 12:37:23,082 django.server basehttp 2792 4568 "GET /analysis/ HTTP/1.1" 200 82432
+INFO 2025-08-29 12:37:24,597 django.server basehttp 2792 4568 "GET /analysis/ HTTP/1.1" 200 82432
+INFO 2025-08-29 12:37:24,899 django.server basehttp 2792 4568 "GET /ledger/ HTTP/1.1" 200 74317
+INFO 2025-08-29 12:37:25,961 django.server basehttp 2792 4568 "GET /ledger/ HTTP/1.1" 200 74317
+INFO 2025-08-29 12:37:26,691 django.server basehttp 2792 4568 "GET /visuals/ HTTP/1.1" 200 66930
+INFO 2025-08-29 12:37:27,438 django.server basehttp 2792 4568 "GET /records/ HTTP/1.1" 200 364302
+INFO 2025-08-29 12:37:28,152 django.server basehttp 2792 4568 "GET /products/ HTTP/1.1" 200 196751
+INFO 2025-08-29 12:37:28,656 django.server basehttp 2792 4568 "GET /companies/ HTTP/1.1" 200 41077
+INFO 2025-08-29 12:37:29,102 django.server basehttp 2792 4568 "GET /products/ HTTP/1.1" 200 196751
+INFO 2025-08-29 12:37:29,616 django.server basehttp 2792 4568 "GET /records/ HTTP/1.1" 200 364302
+INFO 2025-08-29 12:37:30,527 django.server basehttp 2792 4568 "GET / HTTP/1.1" 200 18792
+INFO 2025-08-29 12:37:31,279 django.server basehttp 2792 4568 "GET / HTTP/1.1" 200 18792
+INFO 2025-08-29 12:37:31,786 django.server basehttp 2792 4568 "GET /batches/ HTTP/1.1" 200 32033
+INFO 2025-08-29 12:37:34,210 django.server basehttp 2792 4568 "GET /batches/create/ HTTP/1.1" 200 10311
+INFO 2025-08-29 12:37:36,748 django.server basehttp 2792 4568 "GET /static/webfonts/07.woff2 HTTP/1.1" 304 0
+INFO 2025-08-29 12:37:40,055 django.server basehttp 2792 4568 "GET /batches/create/ HTTP/1.1" 200 111384
+INFO 2025-08-29 12:37:47,834 django.server basehttp 2792 4568 "GET /batches/create/ HTTP/1.1" 200 10311
+INFO 2025-08-29 12:37:48,314 django.server basehttp 2792 4568 "GET /shop_order_templates/ HTTP/1.1" 200 74418
+INFO 2025-08-29 12:37:53,634 django.server basehttp 2792 4568 "GET /shop_order_templates/ HTTP/1.1" 200 136065
+WARNING 2025-08-29 12:37:54,841 django.request log 2792 4568 Not Found: /favicon.ico
+WARNING 2025-08-29 12:37:54,842 django.server basehttp 2792 4568 "GET /favicon.ico HTTP/1.1" 404 11233
+INFO 2025-08-29 12:37:54,882 django.server basehttp 2792 4568 "GET /shop_order_template/edit/18/ HTTP/1.1" 200 5067
+INFO 2025-08-29 12:40:04,092 django.server basehttp 2792 4568 "GET /shop_order_template/edit/18/ HTTP/1.1" 200 5067
+INFO 2025-08-29 12:46:34,837 django.utils.autoreload autoreload 2792 4700 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py changed, reloading.
+INFO 2025-08-29 12:46:35,811 django.utils.autoreload autoreload 9924 832 Watching for file changes with StatReloader
+INFO 2025-08-29 12:46:47,104 django.server basehttp 9924 9764 "GET /shop_order_template/edit/18/ HTTP/1.1" 200 5067
+INFO 2025-08-29 12:46:49,585 django.server basehttp 9924 9764 "GET /ledger/ HTTP/1.1" 200 12901
+INFO 2025-08-29 12:46:54,324 django.server basehttp 9924 9764 "GET /ledger/ HTTP/1.1" 200 74317
+INFO 2025-08-29 12:46:57,672 django.server basehttp 9924 9764 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 74136
+ERROR 2025-08-29 12:46:58,886 django.request log 9924 9764 Internal Server Error: /ledger/print/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py", line 1482, in print_ledger
+    return render(request, 'inventory/print_ledger.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 196, in compile_nodelist
+    nodelist = parser.parse()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 862, in do_for
+    nodelist_loop = parser.parse(
+        (
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 962, in do_if
+    nodelist = parser.parse(("elif", "else", "endif"))
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 1531, in do_with
+    extra_context = token_kwargs(remaining_bits, parser, support_legacy=True)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1127, in token_kwargs
+    kwargs[key] = parser.compile_filter(value)
+                  ~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 609, in compile_filter
+    return FilterExpression(token, self)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 705, in __init__
+    filter_func = parser.find_filter(filter_name)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 615, in find_filter
+    raise TemplateSyntaxError("Invalid filter: '%s'" % filter_name)
+django.template.exceptions.TemplateSyntaxError: Invalid filter: 'get_item'
+ERROR 2025-08-29 12:46:58,904 django.server basehttp 9924 9764 "GET /ledger/print/?product_id=18 HTTP/1.1" 500 288447
+INFO 2025-08-29 12:47:55,398 django.server basehttp 9924 9764 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 12720
+INFO 2025-08-29 12:47:57,517 django.server basehttp 9924 9764 "GET /opening_balances/ HTTP/1.1" 200 181861
+INFO 2025-08-29 12:48:15,991 django.server basehttp 9924 9764 "GET /opening_balances/ HTTP/1.1" 200 181861
+INFO 2025-08-29 12:48:17,379 django.server basehttp 9924 9764 "GET /ledger/ HTTP/1.1" 200 12901
+INFO 2025-08-29 12:48:18,233 django.server basehttp 9924 9764 "GET /ledger/ HTTP/1.1" 200 12901
+INFO 2025-08-29 12:48:18,887 django.server basehttp 9924 9764 "GET /visuals/ HTTP/1.1" 200 66930
+INFO 2025-08-29 12:48:20,364 django.server basehttp 9924 9764 "GET /visuals/ HTTP/1.1" 200 66930
+INFO 2025-08-29 12:48:22,044 django.server basehttp 9924 9764 "GET /analysis/ HTTP/1.1" 200 82432
+INFO 2025-08-29 12:48:22,471 django.server basehttp 9924 9764 "GET /analysis/ HTTP/1.1" 200 82432
+INFO 2025-08-29 12:48:23,160 django.server basehttp 9924 9764 "GET /ledger/ HTTP/1.1" 200 12901
+INFO 2025-08-29 12:48:23,644 django.server basehttp 9924 9764 "GET /ledger/ HTTP/1.1" 200 12901
+INFO 2025-08-29 12:48:25,338 django.server basehttp 9924 9764 "GET /analysis/ HTTP/1.1" 200 82432
+INFO 2025-08-29 12:54:03,042 django.utils.autoreload autoreload 9924 832 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py changed, reloading.
+INFO 2025-08-29 12:54:03,961 django.utils.autoreload autoreload 10820 7308 Watching for file changes with StatReloader
+INFO 2025-08-29 12:54:10,216 django.server basehttp 10820 1424 "GET /analysis/ HTTP/1.1" 200 21008
+INFO 2025-08-29 12:54:10,721 django.server basehttp 10820 1424 "GET /analysis/ HTTP/1.1" 200 21008
+INFO 2025-08-29 12:54:12,503 django.server basehttp 10820 1424 "GET /analysis/ HTTP/1.1" 200 21008
+INFO 2025-08-29 12:54:13,460 django.server basehttp 10820 1424 "GET /opening_balances/ HTTP/1.1" 200 120429
+INFO 2025-08-29 12:54:16,186 django.server basehttp 10820 1424 "GET /opening_balances/ HTTP/1.1" 200 120429
+INFO 2025-08-29 12:54:20,860 django.server basehttp 10820 1424 "GET /opening_balances/ HTTP/1.1" 200 120429
+INFO 2025-08-29 12:54:21,524 django.server basehttp 10820 1424 "GET /production_returns/ HTTP/1.1" 200 10089
+INFO 2025-08-29 12:54:22,149 django.server basehttp 10820 1424 "GET /production_returns/ HTTP/1.1" 200 10089
+INFO 2025-08-29 12:54:27,267 django.server basehttp 10820 1424 "GET /production_returns/ HTTP/1.1" 200 10089
+INFO 2025-08-29 12:54:31,000 django.server basehttp 10820 1424 "GET /production_returns/ HTTP/1.1" 200 71523
+INFO 2025-08-29 12:54:32,135 django.server basehttp 10820 1424 "GET /api/get_used_qc_sources/18/ HTTP/1.1" 200 2
+INFO 2025-08-29 12:54:33,612 django.server basehttp 10820 1424 "GET /production_returns/ HTTP/1.1" 200 10089
+INFO 2025-08-29 12:54:34,604 django.server basehttp 10820 1424 "GET /ledger/ HTTP/1.1" 200 12901
+INFO 2025-08-29 12:54:40,740 django.server basehttp 10820 1424 "GET /ledger/ HTTP/1.1" 200 12901
+INFO 2025-08-29 12:54:42,232 django.server basehttp 10820 1424 "GET /visuals/ HTTP/1.1" 200 5513
+INFO 2025-08-29 12:54:44,817 django.server basehttp 10820 1424 "GET /visuals/?product_id=8&start_date=2025-08-01&end_date=2025-08-29 HTTP/1.1" 200 68556
+INFO 2025-08-29 12:54:48,467 django.server basehttp 10820 1424 "GET /visuals/?product_id=7&start_date=2025-08-01&end_date=2025-08-29 HTTP/1.1" 200 69643
+INFO 2025-08-29 12:54:49,813 django.server basehttp 10820 1424 "GET /visuals/?product_id=7&start_date=2025-08-01&end_date=2025-08-29 HTTP/1.1" 200 8226
+INFO 2025-08-29 12:55:02,210 django.server basehttp 10820 1424 "GET /records/ HTTP/1.1" 200 364302
+INFO 2025-08-29 12:55:07,348 django.server basehttp 10820 1424 "GET /records/ HTTP/1.1" 200 364302
+INFO 2025-08-29 12:55:08,061 django.server basehttp 10820 1424 "GET /analysis/ HTTP/1.1" 200 21008
+INFO 2025-08-29 12:55:08,927 django.server basehttp 10820 1424 "GET /analysis/ HTTP/1.1" 200 21008
+INFO 2025-08-29 12:55:09,256 django.server basehttp 10820 1424 "GET /batches/ HTTP/1.1" 200 32033
+INFO 2025-08-29 12:55:23,496 django.server basehttp 10820 1424 "GET /batches/ HTTP/1.1" 200 32033
+INFO 2025-08-29 12:55:24,376 django.server basehttp 10820 1424 "GET /batches/ HTTP/1.1" 200 32033
+INFO 2025-08-29 12:55:24,967 django.server basehttp 10820 1424 "GET /shop_order_templates/ HTTP/1.1" 200 74418
+INFO 2025-08-29 12:55:25,397 django.server basehttp 10820 1424 "GET /shop_order_templates/ HTTP/1.1" 200 74418
+INFO 2025-08-29 12:55:25,761 django.server basehttp 10820 1424 "GET /batches/ HTTP/1.1" 200 32033
+INFO 2025-08-29 12:55:26,594 django.server basehttp 10820 1424 "GET /batches/ HTTP/1.1" 200 32033
+INFO 2025-08-29 12:55:27,194 django.server basehttp 10820 1424 "GET /analysis/ HTTP/1.1" 200 21008
+INFO 2025-08-29 12:55:27,596 django.server basehttp 10820 1424 "GET /analysis/ HTTP/1.1" 200 21008
+INFO 2025-08-29 12:55:28,088 django.server basehttp 10820 1424 "GET /analysis/ HTTP/1.1" 200 21008
+INFO 2025-08-29 12:55:28,523 django.server basehttp 10820 1424 "GET /analysis/ HTTP/1.1" 200 21008
+INFO 2025-08-29 12:55:28,922 django.server basehttp 10820 1424 "GET /records/ HTTP/1.1" 200 364302
+INFO 2025-08-29 12:55:29,337 django.server basehttp 10820 1424 "GET /products/ HTTP/1.1" 200 196751
+INFO 2025-08-29 12:55:29,747 django.server basehttp 10820 1424 "GET /companies/ HTTP/1.1" 200 41077
+INFO 2025-08-29 12:55:30,392 django.server basehttp 10820 1424 "GET / HTTP/1.1" 200 18792
+INFO 2025-08-29 12:55:33,371 django.server basehttp 10820 1424 "GET / HTTP/1.1" 200 18792
+INFO 2025-08-29 12:55:34,151 django.server basehttp 10820 1424 "GET /analysis/ HTTP/1.1" 200 21008
+INFO 2025-08-29 12:55:34,564 django.server basehttp 10820 1424 "GET /analysis/ HTTP/1.1" 200 21008
+INFO 2025-08-29 12:55:35,339 django.server basehttp 10820 1424 "GET /analysis/ HTTP/1.1" 200 21008
+INFO 2025-08-29 12:55:36,192 django.server basehttp 10820 1424 "GET /opening_balances/ HTTP/1.1" 200 120429
+INFO 2025-08-29 12:55:38,074 django.server basehttp 10820 1424 "GET /opening_balances/ HTTP/1.1" 200 120429
+INFO 2025-08-29 12:55:38,540 django.server basehttp 10820 1424 "GET /production_returns/ HTTP/1.1" 200 10089
+INFO 2025-08-29 12:58:56,216 django.server basehttp 10820 1424 "GET /production_returns/ HTTP/1.1" 200 10089
+INFO 2025-08-29 12:58:57,563 django.server basehttp 10820 1424 "GET /production_returns/ HTTP/1.1" 200 10089
+INFO 2025-08-29 12:59:01,696 django.server basehttp 10820 1424 "GET /production_returns/ HTTP/1.1" 200 10089
+INFO 2025-08-29 12:59:02,520 django.server basehttp 10820 1424 "GET /production_returns/ HTTP/1.1" 200 10089
+INFO 2025-08-29 12:59:04,632 django.server basehttp 10820 1424 "GET /production_returns/ HTTP/1.1" 200 71523
+INFO 2025-08-29 12:59:06,245 django.server basehttp 10820 1424 "GET /production_returns/ HTTP/1.1" 200 10089
+INFO 2025-08-29 12:59:07,110 django.server basehttp 10820 1424 "GET /analysis/ HTTP/1.1" 200 21008
+INFO 2025-08-29 12:59:08,137 django.server basehttp 10820 1424 "GET /analysis/ HTTP/1.1" 200 21008
+INFO 2025-08-29 12:59:09,392 django.server basehttp 10820 1424 "GET /production_returns/ HTTP/1.1" 200 10089
+INFO 2025-08-29 12:59:11,859 django.server basehttp 10820 1424 "GET /production_returns/ HTTP/1.1" 200 10089
+INFO 2025-08-29 12:59:13,839 django.server basehttp 10820 1424 "GET /opening_balances/ HTTP/1.1" 200 120429
+INFO 2025-08-29 12:59:18,784 django.server basehttp 10820 1424 "GET /opening_balances/ HTTP/1.1" 200 120429
+INFO 2025-08-29 12:59:20,710 django.server basehttp 10820 1424 "GET /production_returns/ HTTP/1.1" 200 10089
+INFO 2025-08-29 12:59:25,802 django.server basehttp 10820 1424 "GET /production_returns/ HTTP/1.1" 200 71523
+INFO 2025-08-29 12:59:27,164 django.server basehttp 10820 1424 "GET /api/get_used_qc_sources/18/ HTTP/1.1" 200 2
+INFO 2025-08-29 13:05:21,266 django.server basehttp 10820 10432 "GET /production_returns/ HTTP/1.1" 200 71523
+INFO 2025-08-29 13:05:21,741 django.server basehttp 10820 10432 "GET /production_returns/ HTTP/1.1" 200 10089
+INFO 2025-08-29 13:05:22,516 django.server basehttp 10820 10432 "GET /ledger/ HTTP/1.1" 200 12901
+INFO 2025-08-29 13:05:23,780 django.server basehttp 10820 10432 "GET /ledger/ HTTP/1.1" 200 12901
+INFO 2025-08-29 13:05:24,257 django.server basehttp 10820 10432 "GET /production_returns/ HTTP/1.1" 200 10089
+INFO 2025-08-29 13:37:54,957 django.server basehttp 10820 3496 "GET /production_returns/ HTTP/1.1" 200 16449
+INFO 2025-08-29 13:38:09,237 django.server basehttp 10820 3496 "GET /production_returns/ HTTP/1.1" 200 77883
+INFO 2025-08-29 13:38:10,931 django.server basehttp 10820 3496 "GET /api/get_used_qc_sources/18/ HTTP/1.1" 200 2
+INFO 2025-08-29 13:38:10,939 django.server basehttp 10820 3496 "GET /api/get_used_qc_sources/18/ HTTP/1.1" 200 2
+INFO 2025-08-29 13:38:13,940 django.server basehttp 10820 3496 "GET /api/get_used_qc_sources/22/ HTTP/1.1" 200 106
+INFO 2025-08-29 13:38:13,948 django.server basehttp 10820 3496 "GET /api/get_used_qc_sources/22/ HTTP/1.1" 200 106
+INFO 2025-08-29 13:38:15,271 django.server basehttp 10820 3496 "GET /api/get_used_qc_sources/8/ HTTP/1.1" 200 2
+INFO 2025-08-29 13:38:15,278 django.server basehttp 10820 3496 "GET /api/get_used_qc_sources/8/ HTTP/1.1" 200 2
+INFO 2025-08-29 13:40:57,797 django.server basehttp 10820 3496 "GET /api/get_used_qc_sources/17/ HTTP/1.1" 200 767
+INFO 2025-08-29 13:40:57,806 django.server basehttp 10820 3496 "GET /api/get_used_qc_sources/17/ HTTP/1.1" 200 767
+INFO 2025-08-29 13:40:58,736 django.server basehttp 10820 3496 "GET /production_returns/ HTTP/1.1" 200 77883
+INFO 2025-08-29 13:41:03,292 django.server basehttp 10820 3496 "GET /api/get_used_qc_sources/17/ HTTP/1.1" 200 767
+INFO 2025-08-29 13:41:03,303 django.server basehttp 10820 3496 "GET /api/get_used_qc_sources/17/ HTTP/1.1" 200 767
+INFO 2025-08-29 13:41:04,439 django.server basehttp 10820 3496 "GET /api/get_used_qc_sources/18/ HTTP/1.1" 200 2
+INFO 2025-08-29 13:41:04,445 django.server basehttp 10820 3496 "GET /api/get_used_qc_sources/18/ HTTP/1.1" 200 2
+INFO 2025-08-29 13:41:05,906 django.server basehttp 10820 3496 "GET /api/get_used_qc_sources/17/ HTTP/1.1" 200 767
+INFO 2025-08-29 13:41:05,916 django.server basehttp 10820 3496 "GET /api/get_used_qc_sources/17/ HTTP/1.1" 200 767
+INFO 2025-08-29 13:41:07,743 django.server basehttp 10820 3496 "GET /production_returns/ HTTP/1.1" 200 16449
+INFO 2025-08-29 13:41:08,120 django.server basehttp 10820 3496 "GET /opening_balances/ HTTP/1.1" 200 120429
+INFO 2025-08-29 13:41:08,640 django.server basehttp 10820 3496 "GET /opening_balances/ HTTP/1.1" 200 120429
+INFO 2025-08-29 13:41:10,250 django.server basehttp 10820 3496 "GET /production_returns/ HTTP/1.1" 200 16449
+INFO 2025-08-29 13:57:20,004 django.server basehttp 10820 6624 "GET /production_returns/ HTTP/1.1" 200 10047
+INFO 2025-08-29 13:57:20,616 django.server basehttp 10820 6624 "GET /opening_balances/ HTTP/1.1" 200 120429
+INFO 2025-08-29 13:57:21,320 django.server basehttp 10820 6624 "GET /opening_balances/ HTTP/1.1" 200 120429
+INFO 2025-08-29 13:57:22,061 django.server basehttp 10820 6624 "GET /analysis/ HTTP/1.1" 200 21008
+INFO 2025-08-29 13:57:22,727 django.server basehttp 10820 6624 "GET /analysis/ HTTP/1.1" 200 21008
+INFO 2025-08-29 13:57:24,966 django.server basehttp 10820 6624 "GET /production_returns/ HTTP/1.1" 200 10047
+INFO 2025-08-29 13:57:28,956 django.server basehttp 10820 6624 "GET /production_returns/ HTTP/1.1" 200 71481
+INFO 2025-08-29 13:57:29,807 django.server basehttp 10820 6624 "GET /production_returns/ HTTP/1.1" 200 10047
+INFO 2025-08-29 13:57:30,392 django.server basehttp 10820 6624 "GET /ledger/ HTTP/1.1" 200 12901
+INFO 2025-08-29 13:57:30,996 django.server basehttp 10820 6624 "GET /ledger/ HTTP/1.1" 200 12901
+INFO 2025-08-29 13:57:32,477 django.server basehttp 10820 6624 "GET /production_returns/ HTTP/1.1" 200 10047
+INFO 2025-08-29 13:57:44,101 django.server basehttp 10820 6624 "GET /production_returns/ HTTP/1.1" 200 71481
+INFO 2025-08-29 13:57:45,577 django.server basehttp 10820 6624 "GET /api/get_used_qc_sources/18/ HTTP/1.1" 200 2
+INFO 2025-08-29 13:57:48,611 django.server basehttp 10820 6624 "GET /api/get_used_qc_sources/17/ HTTP/1.1" 200 767
+INFO 2025-08-29 13:57:55,789 django.server basehttp 10820 6624 "GET /production_returns/ HTTP/1.1" 200 71481
+INFO 2025-08-29 13:57:57,113 django.server basehttp 10820 6624 "GET /api/get_used_qc_sources/17/ HTTP/1.1" 200 767
+INFO 2025-08-29 13:57:59,130 django.server basehttp 10820 6624 "GET /production_returns/ HTTP/1.1" 200 10047
+INFO 2025-08-29 13:57:59,538 django.server basehttp 10820 6624 "GET /ledger/ HTTP/1.1" 200 12901
+INFO 2025-08-29 13:58:00,251 django.server basehttp 10820 6624 "GET /ledger/ HTTP/1.1" 200 12901
+INFO 2025-08-29 13:58:01,176 django.server basehttp 10820 6624 "GET /production_returns/ HTTP/1.1" 200 10047
+INFO 2025-08-29 13:58:10,431 django.server basehttp 10820 6624 "GET /production_returns/ HTTP/1.1" 200 10047
+INFO 2025-08-29 13:58:11,209 django.server basehttp 10820 6624 "GET /shop_order_templates/ HTTP/1.1" 200 74418
+INFO 2025-08-29 13:58:18,573 django.server basehttp 10820 6624 "GET /shop_order_templates/?copy_from=18 HTTP/1.1" 200 74418
+INFO 2025-08-29 13:58:24,034 django.server basehttp 10820 6624 "GET /shop_order_templates/ HTTP/1.1" 200 74418
+INFO 2025-08-29 13:58:24,665 django.server basehttp 10820 6624 "GET /shop_order_templates/?copy_from=18 HTTP/1.1" 200 74418
+INFO 2025-08-29 13:58:25,308 django.server basehttp 10820 6624 "GET /shop_order_templates/?copy_from=18 HTTP/1.1" 200 136065
+INFO 2025-08-29 13:58:26,429 django.server basehttp 10820 6624 "GET /shop_order_templates/?copy_from=22 HTTP/1.1" 200 74418
+INFO 2025-08-29 13:58:27,788 django.server basehttp 10820 6624 "GET /shop_order_template/edit/22/ HTTP/1.1" 200 5073
+INFO 2025-08-29 13:58:35,335 django.server basehttp 10820 6624 "GET /shop_order_templates/?copy_from=22 HTTP/1.1" 200 74418
+INFO 2025-08-29 14:07:58,194 django.server basehttp 10820 8940 "GET /shop_order_templates/?copy_from=22 HTTP/1.1" 200 140027
+INFO 2025-08-29 14:07:59,007 django.server basehttp 10820 8940 "GET /shop_order_templates/?copy_from=22 HTTP/1.1" 200 74418
+INFO 2025-08-29 14:07:59,946 django.server basehttp 10820 8940 "GET /production_returns/ HTTP/1.1" 200 7045
+INFO 2025-08-29 14:08:01,290 django.server basehttp 10820 8940 "GET /api/get_used_qc_sources/17/ HTTP/1.1" 200 767
+INFO 2025-08-29 14:08:03,121 django.server basehttp 10820 8940 "GET /production_returns/ HTTP/1.1" 200 7045
+INFO 2025-08-29 14:08:03,596 django.server basehttp 10820 8940 "GET /ledger/ HTTP/1.1" 200 12901
+INFO 2025-08-29 14:08:04,463 django.server basehttp 10820 8940 "GET /ledger/ HTTP/1.1" 200 12901
+INFO 2025-08-29 14:08:05,077 django.server basehttp 10820 8940 "GET /opening_balances/ HTTP/1.1" 200 120429
+INFO 2025-08-29 14:08:05,820 django.server basehttp 10820 8940 "GET /opening_balances/ HTTP/1.1" 200 120429
+INFO 2025-08-29 14:08:06,389 django.server basehttp 10820 8940 "GET /production_returns/ HTTP/1.1" 200 7045
+INFO 2025-08-29 14:08:08,035 django.server basehttp 10820 8940 "GET /api/get_used_qc_sources/17/ HTTP/1.1" 200 767
+INFO 2025-08-29 14:08:10,032 django.server basehttp 10820 8940 "GET /production_returns/ HTTP/1.1" 200 7045
+INFO 2025-08-29 14:08:10,675 django.server basehttp 10820 8940 "GET /batches/ HTTP/1.1" 200 32033
+INFO 2025-08-29 14:08:12,415 django.server basehttp 10820 8940 "GET /batches/create/ HTTP/1.1" 200 10311
+INFO 2025-08-29 14:12:15,542 django.utils.autoreload autoreload 10820 7308 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views.py changed, reloading.
+INFO 2025-08-29 14:12:16,450 django.utils.autoreload autoreload 8276 12424 Watching for file changes with StatReloader

@@ -1,0 +1,51 @@
+<!-- gipcco_project/inventory/templates/inventory/partials/shop_order_template_view_content.html -->
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 mb-0" style="font-weight: 700;">تفاصيل القالب</h1>
+        <p class="text-muted mb-0">عرض مكونات قالب أمر التشغيل</p>
+    </div>
+    <div>
+        <a href="{% url 'inventory:shop_order_templates' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-right"></i> العودة إلى القائمة
+        </a>
+        <a href="{% url 'inventory:edit_shop_order_template' pk=template.id %}" class="btn btn-primary">
+            <i class="bi bi-pencil-square"></i> تعديل القالب
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="mb-0"><i class="bi bi-file-earmark-text"></i> {{ template.name }}</h3>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <p class="mb-1"><strong>اسم القالب:</strong></p>
+                <p>{{ template.name }}</p>
+            </div>
+            <div class="col-md-6">
+                <p class="mb-1"><strong>المنتج النهائي المرتبط:</strong></p>
+                <p>{{ template.final_product.name }} <span class="text-muted font-monospace">({{ template.final_product.code }})</span></p>
+            </div>
+        </div>
+        <hr>
+        <h5 class="mb-3">مواد الوصفة</h5>
+        {% if items %}
+        <ul class="list-group">
+            {% for item in items %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>{{ item.primitive_product.name }}</strong>
+                    <small class="text-muted font-monospace">({{ item.primitive_product.code }})</small>
+                </div>
+                <span class="badge bg-primary rounded-pill fs-6">{{ item.theoretical_quantity|floatformat:3 }} {{ item.primitive_product.unit }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-muted">لا توجد مواد مضافة إلى هذا القالب.</p>
+        {% endif %}
+    </div>
+</div>

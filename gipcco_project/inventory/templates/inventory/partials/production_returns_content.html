@@ -1,0 +1,105 @@
+<!-- gipcco_project/inventory/templates/inventory/partials/production_returns_content.html -->
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">إرجاع من الإنتاج</h1>
+</div>
+
+<!-- Form to Add New Return -->
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="bi bi-plus-circle me-1"></i>
+        تسجيل إرجاع جديد
+    </div>
+    <div class="card-body">
+        <form action="{% url 'inventory:production_returns' %}" method="post" id="returnForm">
+            {% csrf_token %}
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label for="product_id" class="form-label">المادة الخام</label>
+                    <select class="form-select searchable-select" id="product_id" name="product_id" required>
+                        <option value="" selected disabled>-- اختر المادة --</option>
+                        {% for product in products %}
+                        <option value="{{ product.id }}">{{ product.name }} ({{ product.code }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label for="source_log_id" class="form-label">مصدر QC الأصلي</label>
+                    <select class="form-select" id="source_log_id" name="source_log_id" required disabled>
+                        <option value="" selected disabled>-- اختر المادة أولاً --</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label for="quantity" class="form-label">الكمية المرتجعة</label>
+                    <input type="number" class="form-control" id="quantity" name="quantity" step="0.001" min="0" required>
+                    <div id="maxReturnableHelp" class="form-text"></div>
+                </div>
+
+                <div class="col-md-4">
+                    <label for="return_date" class="form-label">تاريخ الإرجاع</label>
+                    <input type="text" class="form-control datepicker" id="return_date" name="return_date" value="{{ today_date }}" required>
+                </div>
+
+                <div class="col-md-8">
+                    <label for="notes" class="form-label">ملاحظات (اختياري)</label>
+                    <input type="text" class="form-control" id="notes" name="notes">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">
+                <i class="bi bi-save me-1"></i>
+                حفظ الإرجاع
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Table of Existing Returns -->
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-clock-history me-1"></i>
+        سجل المرتجعات
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>التاريخ</th>
+                        <th>المادة</th>
+                        <th>الكمية</th>
+                        <th>الوحدة</th>
+                        <th>مصدر QC الأصلي</th>
+                        <th>ملاحظات</th>
+                        <th>إجراء</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in returns %}
+                    <tr>
+                        <td>{{ item.return_date|date:"Y-m-d" }}</td>
+                        <td>{{ item.product.name }}</td>
+                        <td>{{ item.quantity|floatformat:3 }}</td>
+                        <td>{{ item.product.unit }}</td>
+                        <td>{{ item.source_log.qc_no|default:"N/A" }}</td>
+                        <td>{{ item.notes }}</td>
+                        <td>
+                            <form action="{% url 'inventory:delete_production_return' pk=item.id %}" method="post" onsubmit="return confirm('هل أنت متأكد من حذف هذا السجل؟');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="حذف السجل">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center">لا توجد سجلات مرتجعات.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
