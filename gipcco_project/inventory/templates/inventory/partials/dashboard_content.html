@@ -13,11 +13,10 @@
           <div class="mb-3">
             <label for="product_id" class="form-label fw-bold">المنتج</label>
             <select
-              class="form-select form-select-lg searchable-select"
+              class="form-select form-select-lg"
               id="product_id"
               name="product_id"
               required
-              placeholder="ابحث عن منتج..."
             >
               <option value=""></option>
               {% for p in all_products %}
@@ -30,11 +29,10 @@
               >الشركة المورّدة</label
             >
             <select
-              class="form-select form-select-lg searchable-select"
+              class="form-select form-select-lg"
               id="company_id"
               name="company_id"
               required
-              placeholder="ابحث عن شركة..."
             >
               <option value=""></option>
               {% for c in all_companies %}
@@ -64,6 +62,15 @@
               />
             </div>
           </div>
+          <div class="mb-3">
+            <label for="tags" class="form-label fw-bold">الوسوم</label>
+            <select class="form-select form-select-lg" id="tags" name="tags" multiple>
+              <option value="">يرجى اختيار منتج أولاً</option>
+            </select>
+          </div>
+
+          <!-- The entire <script> block has been REMOVED from here and moved to layout.html -->
+
           <div class="mb-3">
             <label for="entry_date" class="form-label fw-bold">التاريخ</label>
             <input

@@ -1,6 +1,4 @@
-<!-- gipcco_project/inventory/templates/inventory/print_ledger.html -->
-
-{% load static %}
+{% load static inventory_extras %}
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -140,39 +138,50 @@
             <div class="logo">GIPCCO</div>
             <div class="company-info text-end">
                 <h1>شركة جيبكو للصناعات الكيماوية</h1>
-                <p>قسم المبيعات - السيد أحمد شوقي</p>
+                <p>قسم المخازن</p>
             </div>
         </div>
-
         <div class="report-title">
             <h2>{{ report_title }}</h2>
             <p class="text-muted">
                 تقرير حركة المخزون للفترة من {{ start_date|default:"البداية" }} إلى {{ end_date|default:"النهاية" }}
             </p>
         </div>
-
-        {% if product_details %}
+        
         <div class="report-meta">
+            <div class="row">
+                <div class="col-4"><strong>الفلاتر المطبقة:</strong></div>
+                <div class="col-8 text-end">
+                    {% if product_details %}
+                        المنتج: {{ product_details.name }}
+                    {% elif selected_tags %}
+                        الوسوم: {% for tag in selected_tags %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                    {% else %}
+                        عام
+                    {% endif %}
+                </div>
+            </div>
+             {% if product_details %}
+            <hr class="my-2">
             <div class="row">
                 <div class="col-6"><strong>الرصيد الافتتاحي للفترة:</strong></div>
                 <div class="col-6 text-end"><strong>{{ opening_balance_for_period|floatformat:3 }} {{ product_details.unit }}</strong></div>
             </div>
-            <hr class="my-2">
             <div class="row">
                 <div class="col-6"><strong>الرصيد الختامي للفترة:</strong></div>
                 <div class="col-6 text-end"><strong>{{ closing_balance|floatformat:3 }} {{ product_details.unit }}</strong></div>
             </div>
+            {% endif %}
         </div>
-        {% endif %}
-
+        
         <div class="table-responsive">
             <table class="table table-sm table-bordered">
                 <thead>
                     <tr>
                         <th>التاريخ</th>
+                        <th>المنتج</th>
                         <th>البيان</th>
                         <th class="text-center">التغيير</th>
-                        <th class="text-center">رصيد قبل</th>
                         <th class="text-center">رصيد بعد</th>
                         <th>تفاصيل</th>
                     </tr>
@@ -181,11 +190,11 @@
                     {% for t in transactions %}
                     <tr>
                         <td>{{ t.date|date:"Y-m-d H:i" }}</td>
+                        <td>{{ t.product_name }}</td>
                         <td>{{ t.description }}</td>
                         <td class="text-center fw-bold {% if t.quantity_change > 0 %}text-success{% else %}text-danger{% endif %}">
                             {{ t.quantity_change|floatformat:3 }}
                         </td>
-                        <td class="text-center text-muted">{{ t.balance_before|floatformat:3 }}</td>
                         <td class="text-center fw-bold">{{ t.balance_after|floatformat:3 }}</td>
                         <td class="text-center">
                             <a href="#detail-transaction-{{ forloop.counter }}" class="internal-link">عرض</a>
@@ -195,7 +204,6 @@
                 </tbody>
             </table>
         </div>
-
         <div class="page-footer">
             <div>
                 <span>تاريخ الطباعة: {{ print_date|date:"Y-m-d H:i:s" }}</span> | 
@@ -204,8 +212,7 @@
             <div class="credits">Developed by Bassel for Gipco Company</div>
         </div>
     </div>
-
-    <!-- Detail Pages -->
+    <!-- Detail Pages (Restored) -->
     {% for t in transactions %}
     <div class="page detail-page-break" id="detail-transaction-{{ forloop.counter }}">
         <div class="page-header">
@@ -214,7 +221,6 @@
                 <h1>تفاصيل حركة مخزون</h1>
             </div>
         </div>
-
         <div class="report-title">
             <h2>تفاصيل حركة بتاريخ: {{ t.date|date:"Y-m-d H:i" }}</h2>
         </div>
@@ -224,11 +230,10 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-6"><strong>المنتج:</strong> {{ t.product_name }} ({{ t.product_code }})</div>
-                    <div class="col-6"><strong>الكمية:</strong> {{ t.quantity_change|floatformat:"-3g" }} {{ t.unit }}</div>
+                    <div class="col-6"><strong>الكمية:</strong> {{ t.quantity_change|my_abs|floatformat:3 }} {{ t.unit }}</div>
                 </div>
             </div>
         </div>
-
         {% if t.type == 'OUT' and t.batch_id %}
             {% with batch_details=batch_details_map|get_item:t.batch_id %}
             {% if batch_details %}
@@ -239,7 +244,7 @@
                         <div class="col-6"><strong>رقم أمر التشغيل:</strong> {{ batch_details.info.shop_order_number }}</div>
                         <div class="col-6"><strong>رقم التشغيلة:</strong> {{ batch_details.info.batch_number }}</div>
                         <div class="col-6"><strong>تاريخ الإنشاء:</strong> {{ batch_details.info.creation_date|date:"Y-m-d" }}</div>
-                        <div class="col-6"><strong>المنتج النهائي:</strong> {{ batch_details.info.final_product_name }}</div>
+                        <div class="col-6"><strong>المنتج النهائي:</strong> {{ batch_details.info.template.final_product.name }}</div>
                     </div>
                 </div>
             </div>
@@ -279,7 +284,6 @@
                 </div>
             </div>
         {% endif %}
-
         <div class="page-footer">
             <div>
                 <span>تاريخ الطباعة: {{ print_date|date:"Y-m-d H:i:s" }}</span> | 
@@ -289,7 +293,6 @@
         </div>
     </div>
     {% endfor %}
-
     <script>
         window.onload = function() {
             const style = document.createElement('style');

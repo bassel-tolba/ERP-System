@@ -240,7 +240,7 @@
     <!-- The entire JavaScript block is preserved as-is because it contains no server-side template code -->
     <script>
       document.addEventListener("DOMContentLoaded", function () {
-        // --- Theme Switcher & Seasonal Logic (Unchanged) ---
+        // --- Theme Switcher & Seasonal Logic (Unchanged from your original file) ---
         const themeSwitch = document.getElementById("darkModeSwitch");
         const themeLabel = document.getElementById("darkModeLabel");
         const htmlElement = document.documentElement;
@@ -367,105 +367,139 @@
           }
         });
 
-        // =========================================================
-        //  FINAL, ROBUST - DYNAMIC PAGE LOADING ENGINE
-        // =========================================================
         const contentContainer = document.getElementById("page-content");
 
-        /**
-         * Helper function to reliably read and parse JSON from a "data island" script tag.
-         * This avoids race conditions.
-         * @param {string} islandId - The ID of the <script type="application/json"> tag.
-         * @returns {object|null} The parsed JSON data or null if not found or invalid.
-         */
         function getDataFromIsland(islandId) {
           const island = document.getElementById(islandId);
-          if (!island || !island.textContent) {
-            // It's normal for islands not to exist on certain pages, so no console error here.
-            return null;
-          }
+          if (!island || !island.textContent) return null;
           try {
             return JSON.parse(island.textContent);
           } catch (e) {
-            console.error(
-              `Failed to parse JSON from data island #${islandId}. Error:`,
-              e
-            );
+            console.error(`Failed to parse JSON from data island #${islandId}. Error:`, e);
             return null;
           }
         }
 
-        /**
-         * Initializes plugins on all relevant elements within a given container.
-         * If no container is provided, it defaults to the whole document.
-         * @param {HTMLElement} [container=document] - The element to search within for plugins to initialize.
-         */
+        // =========================================================
+        //  MASTER PLUGIN INITIALIZER FUNCTION
+        // =========================================================
         function initializePluginsInContent(container = document) {
-          // --- 1. Generic Plugin Initializers ---
-          // Initialize Flatpickr on any datepickers inside the container
-          container.querySelectorAll(".datepicker").forEach(el => {
-              flatpickr(el, { dateFormat: "Y-m-d", locale: "ar" });
-          });
-          
-          // Initialize TomSelect on any searchable-selects inside the container
-          container.querySelectorAll(".searchable-select").forEach((el) => {
-            if (el.tomselect) {
-              el.tomselect.destroy();
-            }
-            // CRITICAL CHECK: Make sure TomSelect is actually loaded before trying to use it.
-            if (typeof TomSelect !== 'undefined') {
-                new TomSelect(el, {
-                  rtl: true,
-                  placeholder: el.getAttribute("placeholder") || "ابحث أو اختر...",
-                  create: false,
-                  dropdownParent: "body",
-                  render: {
-                    no_results: (data, escape) =>
-                      '<div class="no-results">لا توجد نتائج مطابقة</div>',
-                  },
-                });
-            } else {
-                console.error("TomSelect library is not available. Cannot initialize searchable selects.");
-            }
-          });
+            
+            // 1. Generic Initializers
+            flatpickr(container.querySelectorAll(".datepicker"), { dateFormat: "Y-m-d", locale: "ar" });
 
-          // --- 2. Page-Specific Initializers ---
-
-          // ----- Logic for records.html -----
-          const editModal = document.getElementById("editRecordModal");
-          if (editModal) {
-            console.log("Initializing records.html modal logic...");
-            editModal.addEventListener("show.bs.modal", function (event) {
-              const button = event.relatedTarget;
-              if (!button) return;
-              const form = document.getElementById("editRecordForm");
-              // DYNAMIC URL FOR DJANGO
-              const recordId = button.getAttribute("data-log-id");
-              const url = `/records/edit/${recordId}/`; // NOTE: Trailing slash is Django convention
-              form.action = url;
-              
-              document.getElementById("editQuantity").value =
-                button.getAttribute("data-quantity");
-              document.getElementById("editQcNo").value =
-                button.getAttribute("data-qc-no");
-              document.getElementById("editEntryDate").value =
-                button.getAttribute("data-entry-date");
-              const productSelectEl = document.getElementById("editProductId");
-              if (productSelectEl && productSelectEl.tomselect) {
-                productSelectEl.tomselect.setValue(
-                  button.getAttribute("data-product-id"),
-                  true
-                );
-              }
-              const companySelectEl = document.getElementById("editCompanyId");
-              if (companySelectEl && companySelectEl.tomselect) {
-                companySelectEl.tomselect.setValue(
-                  button.getAttribute("data-company-id"),
-                  true
-                );
-              }
+            // Initialize all general-purpose TomSelect elements
+            container.querySelectorAll(".searchable-select").forEach((el) => {
+                if (!el.tomselect) {
+                    new TomSelect(el, {
+                        rtl: true,
+                        placeholder: el.getAttribute("placeholder") || "ابحث أو اختر...",
+                        create: false,
+                        dropdownParent: "body",
+                    });
+                }
             });
-          }
+
+            // =========================================================
+            //  FIXED AND CENTRALIZED TAGS LOGIC
+            // =========================================================
+
+            // --- A. Logic for dashboard.html (Add New Record Form) ---
+            const dashboardProductSelectEl = container.querySelector('#product_id');
+            const dashboardTagsSelectEl = container.querySelector('#tags');
+            if (dashboardProductSelectEl && dashboardTagsSelectEl && dashboardProductSelectEl.closest('form[action="{% url 'inventory:index' %}"]')) {
+                if (!dashboardProductSelectEl.dataset.tagsInitialized) {
+                    console.log("Initializing dashboard dynamic tags logic...");
+                    dashboardProductSelectEl.dataset.tagsInitialized = 'true';
+
+                    const tagsUrlTemplate = "{% url 'inventory:api_product_tags' 0 %}";
+                    
+                    const productSelect = new TomSelect(dashboardProductSelectEl, { placeholder: 'ابحث عن منتج...' });
+                    new TomSelect(container.querySelector('#company_id'), { placeholder: 'ابحث عن شركة...' });
+                    const tagsSelect = new TomSelect(dashboardTagsSelectEl, {
+                        plugins: ['remove_button'],
+                        placeholder: 'اختر الوسوم المناسبة'
+                    });
+                    tagsSelect.disable();
+
+                    productSelect.on('change', function(productId) {
+                        tagsSelect.disable();
+                        tagsSelect.clear();
+                        tagsSelect.clearOptions();
+                        
+                        if (productId) {
+                            const finalUrl = tagsUrlTemplate.replace('0', productId);
+                            fetch(finalUrl)
+                                .then(response => response.json())
+                                .then(data => {
+                                    data.tags.forEach(tag => tagsSelect.addOption({value: tag.id, text: tag.name}));
+                                    tagsSelect.enable();
+                                })
+                                .catch(error => console.error('Error fetching dashboard tags:', error));
+                        }
+                    });
+                }
+            }
+            
+            // --- B. Logic for records.html (Edit Record Modal) ---
+            const editModal = document.getElementById("editRecordModal");
+            if (editModal && !editModal.dataset.listenerAttached) {
+                editModal.dataset.listenerAttached = 'true'; 
+                console.log("Initializing records modal logic with tag support...");
+
+                const tagsUrlTemplate = "{% url 'inventory:api_product_tags' 0 %}";
+                const editProductSelectEl = editModal.querySelector('#editProductId');
+                const editCompanySelectEl = editModal.querySelector('#editCompanyId');
+                const editTagsSelectEl = editModal.querySelector('#editTags');
+                
+                const productSelect = new TomSelect(editProductSelectEl);
+                const companySelect = new TomSelect(editCompanySelectEl);
+                const tagsSelect = new TomSelect(editTagsSelectEl, { plugins: ['remove_button'] });
+
+                const fetchAndSetTags = async (productId, selectedTagIds = []) => {
+                    tagsSelect.disable();
+                    tagsSelect.clear();
+                    tagsSelect.clearOptions();
+                    
+                    if (!productId) return;
+                    
+                    const finalUrl = tagsUrlTemplate.replace('0', productId);
+                    try {
+                        const response = await fetch(finalUrl);
+                        const data = await response.json();
+                        data.tags.forEach(tag => tagsSelect.addOption({ value: tag.id, text: tag.name }));
+                        tagsSelect.enable();
+                        if (selectedTagIds.length > 0) {
+                            tagsSelect.setValue(selectedTagIds);
+                        }
+                    } catch (error) {
+                        console.error('Error fetching modal tags:', error);
+                    }
+                };
+
+                productSelect.on('change', (productId) => fetchAndSetTags(productId));
+
+                editModal.addEventListener("show.bs.modal", function (event) {
+                    const button = event.relatedTarget;
+                    if (!button) return;
+
+                    const recordId = button.getAttribute("data-log-id");
+                    document.getElementById("editRecordForm").action = `/records/edit/${recordId}/`;
+                    
+                    document.getElementById("editQuantity").value = button.getAttribute("data-quantity");
+                    document.getElementById("editQcNo").value = button.getAttribute("data-qc-no");
+                    document.getElementById("editEntryDate").value = button.getAttribute("data-entry-date");
+                    
+                    const productId = button.getAttribute("data-product-id");
+                    const companyId = button.getAttribute("data-company-id");
+                    
+                    productSelect.setValue(productId, true); 
+                    companySelect.setValue(companyId, true);
+
+                    const tagIds = button.getAttribute('data-tag-ids').split(',').filter(Boolean);
+                    fetchAndSetTags(productId, tagIds);
+                });
+            }
 
           // ----- Logic for create_batch.html -----
           const createBatchTemplateSelect =
@@ -1339,10 +1373,8 @@
               history.pushState({ path: url }, "", url);
             }
             const newTitle = contentContainer.querySelector("h1")?.innerText;
-            document.title = newTitle
-              ? `${newTitle} - GIPCCO`
-              : "GIPCCO Warehouse System";
-            initializePluginsInContent();
+            document.title = newTitle ? `${newTitle} - GIPCCO` : "GIPCCO Warehouse System";
+            initializePluginsInContent(contentContainer); // Pass container for targeted initialization
             updateActiveNav(url);
           } catch (error) {
             console.error("Failed to load dynamic content:", error);
@@ -1351,32 +1383,26 @@
         }
         function updateActiveNav(url) {
           const path = new URL(url, window.location.origin).pathname;
-          document
-            .querySelectorAll(".nav-link, .dropdown-item")
-            .forEach((link) => {
+          document.querySelectorAll(".nav-link, .dropdown-item").forEach((link) => {
               const linkPath = new URL(link.href).pathname;
-              if (link.classList.contains("nav-link")) {
-                if (linkPath === path) {
+              const isDirectMatch = linkPath === path;
+              
+              if (link.classList.contains("dropdown-item") && isDirectMatch) {
                   link.classList.add("active");
-                } else {
-                  link.classList.remove("active");
-                }
+                  const dropdownToggle = link.closest(".dropdown").querySelector(".dropdown-toggle");
+                  if (dropdownToggle) dropdownToggle.classList.add("active");
+              } else if (link.classList.contains("nav-link") && !link.classList.contains("dropdown-toggle")) {
+                  link.classList.toggle("active", isDirectMatch);
+              } else {
+                   link.classList.remove("active");
               }
-              const dropdown = link.closest(".nav-item.dropdown");
-              if (dropdown) {
-                const dropdownToggle = dropdown.querySelector(
-                  ".nav-link.dropdown-toggle"
-                );
-                const hasActiveItem = Array.from(
-                  dropdown.querySelectorAll(".dropdown-item")
-                ).some((item) => new URL(item.href).pathname === path);
-                if (hasActiveItem) {
-                  dropdownToggle.classList.add("active");
-                } else {
-                  dropdownToggle.classList.remove("active");
-                }
-              }
-            });
+          });
+          // Ensure parent dropdowns are active
+           document.querySelectorAll(".nav-item.dropdown").forEach(dropdown => {
+               const dropdownToggle = dropdown.querySelector(".nav-link.dropdown-toggle");
+               const hasActiveItem = dropdown.querySelector(".dropdown-item.active");
+               dropdownToggle.classList.toggle("active", !!hasActiveItem);
+           });
         }
         document.body.addEventListener("click", (event) => {
           const link = event.target.closest("a");
@@ -1385,7 +1411,8 @@
             link.href &&
             link.target !== "_blank" &&
             new URL(link.href).origin === window.location.origin &&
-            !link.hasAttribute("data-no-dynamic")
+            !link.hasAttribute("data-no-dynamic") &&
+            !link.closest('.modal') // Do not intercept links inside modals
           ) {
             event.preventDefault();
             loadContent(link.href);
@@ -1396,12 +1423,10 @@
             loadContent(event.state.path, false);
           }
         });
-        history.replaceState(
-          { path: window.location.href },
-          "",
-          window.location.href
-        );
-        initializePluginsInContent();
+        history.replaceState({ path: window.location.href }, "", window.location.href);
+        
+        // Initial call on first page load
+        initializePluginsInContent(document.body);
       });
     </script>
     {% block scripts %}{% endblock %}

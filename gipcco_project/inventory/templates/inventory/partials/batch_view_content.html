@@ -72,15 +72,18 @@
                         {% for item in items %}
                         <tr>
                             <td class="ps-3">
+                                <!-- This hidden input is crucial for the view to know which items were submitted -->
                                 <input type="hidden" name="item_id" value="{{ item.id }}">
                                 <strong>{{ item.primitive_product.name }}</strong>
                                 <small class="text-muted font-monospace">{{ item.primitive_product.code }}</small>
                             </td>
                             <td>
-                                <input type="number" step="any" class="form-control text-center theoretical-qty" name="theoretical_quantity" value="{{ item.theoretical_quantity|floatformat:3 }}" data-base-theoretical-quantity="{{ item.base_theoretical_quantity }}" required>
+                                <!-- CHANGE HERE: The name now includes the item's ID to uniquely identify it -->
+                                <input type="number" step="any" class="form-control text-center theoretical-qty" name="theoretical_quantity_{{ item.id }}" value="{{ item.theoretical_quantity|floatformat:3 }}" data-base-theoretical-quantity="{{ item.base_theoretical_quantity }}" required>
                             </td>
                             <td>
-                                <select class="form-select searchable-select" name="source_log_id">
+                                <!-- CHANGE HERE: The name now includes the item's ID -->
+                                <select class="form-select searchable-select" name="source_log_id_{{ item.id }}">
                                     <option value="">اختر مصدر المخزون...</option>
                                     {% for stock in item.available_stock %}
                                     <option value="{{ stock.id }}" 
@@ -93,7 +96,8 @@
                                 </select>
                             </td>
                             <td>
-                                <input type="number" step="any" class="form-control text-center actual-qty" name="actual_quantity" value="{{ item.actual_quantity|floatformat:3|default:'0.000' }}" data-base-actual-quantity="{{ item.base_actual_quantity }}" required>
+                                <!-- CHANGE HERE: The name now includes the item's ID -->
+                                <input type="number" step="any" class="form-control text-center actual-qty" name="actual_quantity_{{ item.id }}" value="{{ item.actual_quantity|floatformat:3|default:'0.000' }}" data-base-actual-quantity="{{ item.base_actual_quantity }}" required>
                             </td>
                             <td class="text-end pe-3">
                                 <button type="button" class="btn btn-sm btn-outline-danger delete-item-btn" data-form-action="{% url 'inventory:delete_batch_item' item_pk=item.id %}">

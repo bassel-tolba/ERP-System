@@ -19,6 +19,7 @@
                         <th>الشركة</th>
                         <th>الكمية</th>
                         <th>التاريخ</th>
+                        <th>الوسوم</th>
                         <th class="text-end pe-3">إجراءات</th>
                     </tr>
                 </thead>
@@ -30,6 +31,13 @@
                         <td>{% if log.company %}{{ log.company.name }}{% else %}---{% endif %}</td>
                         <td class="fw-bold">{{ log.quantity|floatformat:3 }} <small class="text-muted">{{ log.product.unit }}</small></td>
                         <td class="text-nowrap">{{ log.timestamp|date:"Y-m-d" }}</td>
+                        <td>
+                            {% for tag in log.tags.all %}
+                                <span class="badge text-bg-secondary">{{ tag.name }}</span>
+                            {% empty %}
+                                <span class="text-muted">لا يوجد</span>
+                            {% endfor %}
+                        </td>
                         <td class="text-end pe-3">
                             <button 
                                 type="button" 
@@ -42,6 +50,7 @@
                                 data-quantity="{{ log.quantity|floatformat:3 }}"
                                 data-qc-no="{{ log.qc_no|default:'' }}"
                                 data-entry-date="{{ log.timestamp|date:'Y-m-d' }}"
+                                data-tag-ids="{% for tag in log.tags.all %}{{ tag.id }},{% endfor %}"
                             >
                                 <i class="bi bi-pencil-square"></i> تعديل
                             </button>
@@ -73,7 +82,8 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label fw-bold">المنتج</label>
-                        <select class="form-select searchable-select" name="product_id" id="editProductId" required>
+                        <!-- Removed searchable-select class to let the main JS handle it -->
+                        <select name="product_id" id="editProductId" required>
                             {% for p in all_products %}
                             <option value="{{ p.id }}">{{ p.name }} ({{ p.code }})</option>
                             {% endfor %}
@@ -81,7 +91,8 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">الشركة</label>
-                        <select class="form-select searchable-select" name="company_id" id="editCompanyId" required>
+                         <!-- Removed searchable-select class -->
+                        <select name="company_id" id="editCompanyId" required>
                             {% for c in all_companies %}
                             <option value="{{ c.id }}">{{ c.name }}</option>
                             {% endfor %}
@@ -96,6 +107,13 @@
                             <label class="form-label fw-bold">QC Number</label>
                             <input type="text" class="form-control" name="qc_no" id="editQcNo">
                         </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">الوسوم</label>
+                        <!-- Removed searchable-select class -->
+                        <select id="editTags" name="tags" multiple disabled>
+                            <option value="">يرجى اختيار منتج أولاً</option>
+                        </select>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">التاريخ</label>

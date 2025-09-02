@@ -1,8 +1,15 @@
 <!-- gipcco_project/inventory/templates/inventory/partials/products_content.html -->
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h2 mb-0" style="font-weight: 700;">إدارة المنتجات</h1><button type="button" class="btn btn-primary"
-        data-bs-toggle="modal" data-bs-target="#addProductModal"><i class="bi bi-plus-lg"></i> إضافة منتج جديد</button>
+    <h1 class="h2 mb-0" style="font-weight: 700;">إدارة المنتجات</h1>
+    <div>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">
+            <i class="bi bi-plus-lg"></i> إضافة منتج جديد
+        </button>
+        <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#manageTagsModal">
+            <i class="bi bi-tags"></i> إدارة الوسوم
+        </button>
+    </div>
 </div>
 <div class="card">
     <div class="card-header">
@@ -25,6 +32,7 @@
                         <th>الكود</th>
                         <th>النوع</th>
                         <th>الوحدة</th>
+                        <th>الوسوم</th>
                         <th class="text-end pe-3">إجراءات</th>
                     </tr>
                 </thead>
@@ -43,6 +51,13 @@
                         </span>
                     </td>
                     <td>{{ p.unit }}</td>
+                    <td>
+                        {% for tag in p.tags.all %}
+                            <span class="badge text-bg-secondary">{{ tag.name }}</span>
+                        {% empty %}
+                            <span class="text-muted">لا يوجد</span>
+                        {% endfor %}
+                    </td>
                     <td class="text-end pe-3">
                         <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editProductModal-{{ p.id }}">
                             <i class="bi bi-pencil-square"></i> تعديل
@@ -92,6 +107,14 @@
                         <div class="col-md-6 mb-3"><label class="form-label">وحدة القياس</label><input type="text"
                                 class="form-control" name="unit" required></div>
                     </div>
+                    <div class="mb-3">
+                        <label for="add_product_tags" class="form-label">الوسوم</label>
+                        <select class="form-select searchable-select" id="add_product_tags" name="tags" multiple>
+                            {% for tag in all_tags %}
+                                <option value="{{ tag.id }}">{{ tag.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
                 <div class="modal-footer"><button type="button" class="btn btn-secondary"
                         data-bs-dismiss="modal">إلغاء</button><button type="submit" class="btn btn-primary"><i
@@ -110,7 +133,7 @@
                 <h5 class="modal-title">تعديل منتج</h5><button type="button" class="btn-close"
                     data-bs-dismiss="modal"></button>
             </div>
-            <form method="post" action="{% url 'inventory:edit_product' pk=p.id %}">
+            <form method="post" action="{% url 'inventory:edit_product' pk=p.id %}" id="editProductForm-{{ p.id }}">
                 {% csrf_token %}
                 <div class="modal-body">
                     <div class="row">
@@ -131,12 +154,118 @@
                         <div class="col-md-6 mb-3"><label class="form-label">وحدة القياس</label><input type="text"
                                 class="form-control" name="unit" value="{{ p.unit }}" required></div>
                     </div>
+                    <div class="mb-3">
+                        <label for="edit_product_tags_{{ p.id }}" class="form-label">الوسوم</label>
+                        <select class="form-select" id="edit_product_tags_{{ p.id }}" name="tags" multiple>
+                            {% for tag in all_tags %}
+                                <option value="{{ tag.id }}" {% if tag in p.tags.all %}selected{% endif %}>{{ tag.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
-                <div class="modal-footer"><button type="button" class="btn btn-secondary"
-                        data-bs-dismiss="modal">إلغاء</button><button type="submit" class="btn btn-primary"><i
-                            class="bi bi-check2-circle"></i> حفظ</button></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check2-circle"></i> حفظ
+                    </button>
+                </div>
             </form>
         </div>
     </div>
 </div>
 {% endfor %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize all select elements
+    document.querySelectorAll('select.searchable-select, select[multiple]').forEach(function(select) {
+        if (window.TomSelect) {
+            new TomSelect(select, {
+                plugins: ['remove_button'],
+                placeholder: select.multiple ? 'اختر الوسوم المناسبة' : 'اختر...'
+            });
+        }
+    });
+
+    // Initialize TomSelect for all products and tags selects
+    document.querySelectorAll('select.searchable-select, select[name="products"], select[name="tags"]').forEach(function(select) {
+        if (window.TomSelect) {
+            new TomSelect(select, {
+                plugins: ['remove_button'],
+                placeholder: select.multiple ? 'اختر من القائمة' : 'اختر...'
+            });
+        }
+    });
+
+    // Add confirmation dialog for tag deletion
+    document.querySelectorAll('form[action*="delete_tag"]').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            if (!confirm('هل أنت متأكد من حذف هذا الوسم؟')) {
+                e.preventDefault();
+                return;
+            }
+        });
+    });
+        });
+    });
+});
+</script>
+
+<!-- Manage Tags Modal -->
+<div class="modal fade" id="manageTagsModal" tabindex="-1" aria-labelledby="manageTagsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="manageTagsModalLabel">إدارة الوسوم</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6>إضافة وسم جديد</h6>
+                <form method="post" action="{% url 'inventory:create_tag' %}" class="mb-4">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">اسم الوسم</label>
+                        <input type="text" class="form-control" name="name" placeholder="اسم الوسم الجديد" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">المنتجات المرتبطة</label>
+                        <select class="form-select" name="products" multiple>
+                            {% for p in products %}
+                                <option value="{{ p.id }}">{{ p.name }} ({{ p.code }})</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">يمكنك اختيار منتج واحد أو أكثر لربطهم بهذا الوسم</div>
+                    </div>
+                    <button class="btn btn-primary" type="submit">
+                        <i class="bi bi-plus-lg"></i> إضافة الوسم
+                    </button>
+                </form>
+
+                <h6>الوسوم الموجودة</h6>
+                {% if all_tags %}
+                <ul class="list-group">
+                    {% for tag in all_tags %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span class="flex-grow-1 me-2">{{ tag.name }}</span>
+                        <form method="post" action="{% url 'inventory:edit_tag' pk=tag.id %}" class="d-inline-flex me-2">
+                            {% csrf_token %}
+                            <input type="text" class="form-control form-control-sm me-2" name="name" value="{{ tag.name }}" required>
+                            <button type="submit" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i> تعديل</button>
+                        </form>
+                        <form method="post" action="{% url 'inventory:delete_tag' pk=tag.id %}" class="d-inline" onsubmit="return confirm('هل أنت متأكد من حذف هذا الوسم؟');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> حذف</button>
+                        </form>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted">لا توجد وسوم حالياً. ابدأ بإضافة وسم جديد.</p>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+            </div>
+        </div>
+    </div>
+</div>

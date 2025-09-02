@@ -38,6 +38,7 @@ class Product(models.Model):
         verbose_name=_("Product Type")
     )
     unit = models.CharField(max_length=50, verbose_name=_("Unit of Measurement"))
+    tags = models.ManyToManyField('ProductTag', blank=True, verbose_name=_("Tags"))
 
     class Meta:
         db_table = 'products'  # Explicitly map to the existing table
@@ -47,6 +48,22 @@ class Product(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.code})"
+
+
+class ProductTag(models.Model):
+    """
+    Represents a tag that can be assigned to products.
+    """
+    name = models.CharField(max_length=100, unique=True, verbose_name=_("Tag Name"))
+
+    class Meta:
+        db_table = 'product_tags'
+        verbose_name = _("Product Tag")
+        verbose_name_plural = _("Product Tags")
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
 
 
 class InventoryLog(models.Model):
@@ -75,6 +92,12 @@ class InventoryLog(models.Model):
         null=True,
         blank=True,
         verbose_name=_("QC Number")
+    )
+    tags = models.ManyToManyField(
+        'ProductTag',
+        blank=True,
+        verbose_name=_("Tags"),
+        related_name='inventory_logs'
     )
 
     class Meta:
