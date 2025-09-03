@@ -1,5 +1,6 @@
-# gipcco_project/inventory/views/api.py
 
+# gipcco_project/inventory/views/api.py
+from decimal import Decimal
 from django.db.models import Sum, F, FloatField
 from django.db.models.functions import Coalesce
 from django.http import HttpRequest, JsonResponse
@@ -110,7 +111,7 @@ def api_get_po_items(request: HttpRequest, po_id: int) -> JsonResponse:
     """
     po_items = PurchaseOrderItem.objects.filter(
         purchase_order_id=po_id
-    ).select_related('product').annotate(
+    ).select_related('product').prefetch_related('receipts').annotate(
         total_received=Coalesce(Sum('receipts__quantity'), 0.0, output_field=FloatField())
     ).annotate(
         quantity_remaining=F('quantity_ordered') - F('total_received')
@@ -122,7 +123,8 @@ def api_get_po_items(request: HttpRequest, po_id: int) -> JsonResponse:
             'product_id': item.product.id,
             'product_name': f"{item.product.name} ({item.product.code})",
             'quantity_remaining': item.quantity_remaining,
-            'unit_price': item.unit_price
+            # --- MODIFIED: Use the effective_unit_price property from the model ---
+            'unit_price': item.effective_unit_price
         } for item in po_items
     ]
     return JsonResponse(data, safe=False)

@@ -14,8 +14,25 @@
     <!-- PO Details -->
     <div class="col-12">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <h3 class="mb-0"><i class="bi bi-file-earmark-text"></i> أمر شراء رقم: {{ po.po_number }}</h3>
+                <div>
+                    {% if not has_any_receipts %}
+                    <a href="{% url 'inventory:edit_purchase_order' pk=po.id %}" class="btn btn-secondary">
+                        <i class="bi bi-pencil-square"></i> تعديل
+                    </a>
+                    <form method="post" action="{% url 'inventory:delete_purchase_order' pk=po.id %}" class="d-inline" onsubmit="return confirm('هل أنت متأكد من حذف أمر الشراء هذا؟ لا يمكن التراجع عن هذا الإجراء.');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash"></i> حذف
+                        </button>
+                    </form>
+                    {% else %}
+                    <span class="text-muted fst-italic" title="لا يمكن التعديل أو الحذف بعد استلام أي بند.">
+                        <i class="bi bi-lock-fill"></i> مقفل للتعديل
+                    </span>
+                    {% endif %}
+                </div>
             </div>
             <div class="card-body">
                 <div class="row">
@@ -62,8 +79,9 @@
                                 <th class="text-center">الكمية المطلوبة</th>
                                 <th class="text-center">الكمية المستلمة</th>
                                 <th class="text-center">الكمية المتبقية</th>
-                                <th class="text-center">سعر الوحدة</th>
+                                <th class="text-center">السعر الإجمالي للبند</th>
                                 <th class="text-center">الحالة</th>
+                                <th class="text-center pe-3">إجراء</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -75,9 +93,8 @@
                                 </td>
                                 <td class="text-center">{{ item.quantity_ordered|floatformat:3 }} {{ item.product.unit }}</td>
                                 <td class="text-center text-success fw-bold">{{ item.total_received|floatformat:3 }} {{ item.product.unit }}</td>
-                                <!-- THIS LINE IS FIXED -->
                                 <td class="text-center text-danger fw-bold">{{ item.quantity_remaining|floatformat:3 }} {{ item.product.unit }}</td>
-                                <td class="text-center">{{ item.unit_price }}</td>
+                                <td class="text-center">{{ item.total_price }}</td>
                                 <td class="text-center">
                                     {% if item.is_completed %}
                                         <span class="badge text-bg-success">مكتمل</span>
@@ -85,10 +102,17 @@
                                         <span class="badge text-bg-warning">غير مكتمل</span>
                                     {% endif %}
                                 </td>
+                                <td class="text-center pe-3">
+                                    {% if item.quantity_remaining > 0.001 %}
+                                    <a href="{% url 'inventory:index' %}?po_item_id={{ item.id }}" class="btn btn-sm btn-success" title="استلام كمية من هذا البند">
+                                        <i class="bi bi-box-arrow-in-down"></i> استلام
+                                    </a>
+                                    {% endif %}
+                                </td>
                             </tr>
                             {% if item.receipts.all %}
                             <tr class="table-group-divider">
-                                <td colspan="6" class="p-0">
+                                <td colspan="7" class="p-0">
                                     <div class="accordion accordion-flush" id="accordion-{{item.id}}">
                                         <div class="accordion-item">
                                             <h2 class="accordion-header">

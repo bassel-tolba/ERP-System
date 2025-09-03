@@ -272,1420 +272,1456 @@
 
     <!-- The entire JavaScript block is preserved as-is because it contains no server-side template code -->
     <script>
-            document.addEventListener("DOMContentLoaded", function () {
-              // --- Theme Switcher & Seasonal Logic (Unchanged from your original file) ---
-              const themeSwitch = document.getElementById("darkModeSwitch");
-              const themeLabel = document.getElementById("darkModeLabel");
-              const htmlElement = document.documentElement;
-              function setTheme(theme) {
-                htmlElement.setAttribute("data-bs-theme", theme);
-                localStorage.setItem("theme", theme);
-                themeSwitch.checked = theme === "dark";
-                themeLabel.innerHTML =
-                  theme === "dark"
-                    ? '<i class="bi bi-sun-fill text-warning"></i>'
-                    : '<i class="bi bi-moon-stars-fill"></i>';
-              }
-              themeSwitch.addEventListener("change", () => {
-                setTheme(themeSwitch.checked ? "dark" : "light");
-              });
-              const currentTheme = localStorage.getItem("theme") || "light";
-              setTheme(currentTheme);
-              const seasonToggle = document.getElementById("seasonToggle");
-              const celestialBody = document.getElementById("celestial");
-              const seasonIndicator = document.getElementById("seasonIndicator");
-              const body = document.body;
-              const seasons = ["winter", "spring", "summer", "autumn"];
-              const seasonNames = {
-                winter: "Winter",
-                spring: "Spring",
-                summer: "Summer",
-                autumn: "Autumn",
-              };
-              const currentSeason = localStorage.getItem("season") || null;
-              let seasonalModeEnabled =
-                localStorage.getItem("seasonalModeEnabled") === "true";
-              let seasonIndex = currentSeason ? seasons.indexOf(currentSeason) : 0;
-              function applySeason(season) {
-                body.classList.remove(
-                  "seasonal-mode",
-                  "spring-mode",
-                  "summer-mode",
-                  "autumn-mode"
-                );
-                if (seasonalModeEnabled && season) {
-                  body.classList.add("seasonal-mode");
-                  if (season === "spring") body.classList.add("spring-mode");
-                  else if (season === "summer") body.classList.add("summer-mode");
-                  else if (season === "autumn") body.classList.add("autumn-mode");
-                  else body.classList.add("seasonal-mode");
-                  localStorage.setItem("season", season);
-                  createPrecipitation();
-                  showSeasonIndicator(seasonNames[season]);
-                } else {
-                  body.style.backgroundImage = "";
-                  localStorage.removeItem("season");
-                }
-              }
-              function showSeasonIndicator(seasonName) {
-                seasonIndicator.textContent = seasonName;
-                seasonIndicator.classList.add("show");
-                setTimeout(() => {
-                  seasonIndicator.classList.remove("show");
-                }, 2000);
-              }
-              if (seasonalModeEnabled && currentSeason) {
-                applySeason(currentSeason);
-              }
-              function changeSeason() {
-                if (!seasonalModeEnabled) {
-                  seasonalModeEnabled = true;
-                  localStorage.setItem("seasonalModeEnabled", "true");
-                  showSeasonIndicator("Seasonal Theme Enabled!");
-                }
-                seasonIndex = (seasonIndex + 1) % seasons.length;
-                applySeason(seasons[seasonIndex]);
-              }
-              celestialBody.addEventListener("click", changeSeason);
-              seasonToggle.addEventListener("click", changeSeason);
-              function createPrecipitation() {
-                if (!seasonalModeEnabled) return;
-                const container = document.getElementById("precipitation");
-                container.innerHTML = "";
-                const numElements = 30;
-                for (let i = 0; i < numElements; i++) {
-                  const element = document.createElement("div");
-                  element.className = "precipitation-element";
-                  element.style.left = Math.random() * 100 + "%";
-                  element.style.animationDelay = Math.random() * 2 + "s";
-                  element.style.animationDuration = Math.random() * 2 + 3 + "s";
-                  element.style.opacity = Math.random() * 0.4 + 0.2;
-                  container.appendChild(element);
-                }
-              }
-              if (seasonalModeEnabled) {
-                createPrecipitation();
-              }
-              window.addEventListener("scroll", () => {
-                if (!seasonalModeEnabled) return;
-                const celestial = document.getElementById("celestial");
-                const scrolled = window.pageYOffset;
-                const rate = scrolled * -0.3;
-                celestial.style.transform = `translateY(${rate}px)`;
-              });
-              const brandLogo = document.querySelector(".navbar-brand");
-              let clickCount = 0;
-              let clickTimer = null;
-              brandLogo.addEventListener("click", () => {
-                clickCount++;
-                if (clickCount === 1) {
-                  clickTimer = setTimeout(() => {
-                    clickCount = 0;
-                  }, 1000);
-                } else if (clickCount === 3) {
-                  clearTimeout(clickTimer);
-                  clickCount = 0;
-                  if (!seasonalModeEnabled) {
-                    seasonalModeEnabled = true;
-                    localStorage.setItem("seasonalModeEnabled", "true");
-                    applySeason(seasons[seasonIndex]);
-                    showSeasonIndicator("Seasonal Theme Enabled!");
-                  }
-                  seasonToggle.style.opacity = "1";
-                  seasonToggle.style.transform = "scale(1.2)";
-                  setTimeout(() => {
-                    seasonToggle.style.opacity = "0.2";
-                    seasonToggle.style.transform = "scale(1)";
-                  }, 3000);
-                }
-              });
-
-              const contentContainer = document.getElementById("page-content");
-
-              function getDataFromIsland(islandId) {
-                const island = document.getElementById(islandId);
-                if (!island || !island.textContent) return null;
-                try {
-                  return JSON.parse(island.textContent);
-                } catch (e) {
-                  console.error(`Failed to parse JSON from data island #${islandId}. Error:`, e);
-                  return null;
-                }
-              }
-
-              // =========================================================
-              //  MASTER PLUGIN INITIALIZER FUNCTION
-              // =========================================================
-              function initializePluginsInContent(container = document) {
-
-                  // 1. Generic Initializers
-                  flatpickr(container.querySelectorAll(".datepicker"), { dateFormat: "Y-m-d", locale: "ar" });
-
-                  // Initialize all general-purpose TomSelect elements
-                  container.querySelectorAll(".searchable-select").forEach((el) => {
-                      if (!el.tomselect) {
-                          new TomSelect(el, {
-                              rtl: true,
-                              placeholder: el.getAttribute("placeholder") || "ابحث أو اختر...",
-                              create: false,
-                              dropdownParent: "body",
-                          });
+                  document.addEventListener("DOMContentLoaded", function () {
+                    // --- Theme Switcher & Seasonal Logic (Unchanged from your original file) ---
+                    const themeSwitch = document.getElementById("darkModeSwitch");
+                    const themeLabel = document.getElementById("darkModeLabel");
+                    const htmlElement = document.documentElement;
+                    function setTheme(theme) {
+                      htmlElement.setAttribute("data-bs-theme", theme);
+                      localStorage.setItem("theme", theme);
+                      themeSwitch.checked = theme === "dark";
+                      themeLabel.innerHTML =
+                        theme === "dark"
+                          ? '<i class="bi bi-sun-fill text-warning"></i>'
+                          : '<i class="bi bi-moon-stars-fill"></i>';
+                    }
+                    themeSwitch.addEventListener("change", () => {
+                      setTheme(themeSwitch.checked ? "dark" : "light");
+                    });
+                    const currentTheme = localStorage.getItem("theme") || "light";
+                    setTheme(currentTheme);
+                    const seasonToggle = document.getElementById("seasonToggle");
+                    const celestialBody = document.getElementById("celestial");
+                    const seasonIndicator = document.getElementById("seasonIndicator");
+                    const body = document.body;
+                    const seasons = ["winter", "spring", "summer", "autumn"];
+                    const seasonNames = {
+                      winter: "Winter",
+                      spring: "Spring",
+                      summer: "Summer",
+                      autumn: "Autumn",
+                    };
+                    const currentSeason = localStorage.getItem("season") || null;
+                    let seasonalModeEnabled =
+                      localStorage.getItem("seasonalModeEnabled") === "true";
+                    let seasonIndex = currentSeason ? seasons.indexOf(currentSeason) : 0;
+                    function applySeason(season) {
+                      body.classList.remove(
+                        "seasonal-mode",
+                        "spring-mode",
+                        "summer-mode",
+                        "autumn-mode"
+                      );
+                      if (seasonalModeEnabled && season) {
+                        body.classList.add("seasonal-mode");
+                        if (season === "spring") body.classList.add("spring-mode");
+                        else if (season === "summer") body.classList.add("summer-mode");
+                        else if (season === "autumn") body.classList.add("autumn-mode");
+                        else body.classList.add("seasonal-mode");
+                        localStorage.setItem("season", season);
+                        createPrecipitation();
+                        showSeasonIndicator(seasonNames[season]);
+                      } else {
+                        body.style.backgroundImage = "";
+                        localStorage.removeItem("season");
                       }
-                  });
+                    }
+                    function showSeasonIndicator(seasonName) {
+                      seasonIndicator.textContent = seasonName;
+                      seasonIndicator.classList.add("show");
+                      setTimeout(() => {
+                        seasonIndicator.classList.remove("show");
+                      }, 2000);
+                    }
+                    if (seasonalModeEnabled && currentSeason) {
+                      applySeason(currentSeason);
+                    }
+                    function changeSeason() {
+                      if (!seasonalModeEnabled) {
+                        seasonalModeEnabled = true;
+                        localStorage.setItem("seasonalModeEnabled", "true");
+                        showSeasonIndicator("Seasonal Theme Enabled!");
+                      }
+                      seasonIndex = (seasonIndex + 1) % seasons.length;
+                      applySeason(seasons[seasonIndex]);
+                    }
+                    celestialBody.addEventListener("click", changeSeason);
+                    seasonToggle.addEventListener("click", changeSeason);
+                    function createPrecipitation() {
+                      if (!seasonalModeEnabled) return;
+                      const container = document.getElementById("precipitation");
+                      container.innerHTML = "";
+                      const numElements = 30;
+                      for (let i = 0; i < numElements; i++) {
+                        const element = document.createElement("div");
+                        element.className = "precipitation-element";
+                        element.style.left = Math.random() * 100 + "%";
+                        element.style.animationDelay = Math.random() * 2 + "s";
+                        element.style.animationDuration = Math.random() * 2 + 3 + "s";
+                        element.style.opacity = Math.random() * 0.4 + 0.2;
+                        container.appendChild(element);
+                      }
+                    }
+                    if (seasonalModeEnabled) {
+                      createPrecipitation();
+                    }
+                    window.addEventListener("scroll", () => {
+                      if (!seasonalModeEnabled) return;
+                      const celestial = document.getElementById("celestial");
+                      const scrolled = window.pageYOffset;
+                      const rate = scrolled * -0.3;
+                      celestial.style.transform = `translateY(${rate}px)`;
+                    });
+                    const brandLogo = document.querySelector(".navbar-brand");
+                    let clickCount = 0;
+                    let clickTimer = null;
+                    brandLogo.addEventListener("click", () => {
+                      clickCount++;
+                      if (clickCount === 1) {
+                        clickTimer = setTimeout(() => {
+                          clickCount = 0;
+                        }, 1000);
+                      } else if (clickCount === 3) {
+                        clearTimeout(clickTimer);
+                        clickCount = 0;
+                        if (!seasonalModeEnabled) {
+                          seasonalModeEnabled = true;
+                          localStorage.setItem("seasonalModeEnabled", "true");
+                          applySeason(seasons[seasonIndex]);
+                          showSeasonIndicator("Seasonal Theme Enabled!");
+                        }
+                        seasonToggle.style.opacity = "1";
+                        seasonToggle.style.transform = "scale(1.2)";
+                        setTimeout(() => {
+                          seasonToggle.style.opacity = "0.2";
+                          seasonToggle.style.transform = "scale(1)";
+                        }, 3000);
+                      }
+                    });
 
-                  // =========================================================
-                  //  FIXED AND CENTRALIZED TAGS LOGIC
-                  // =========================================================
+                    const contentContainer = document.getElementById("page-content");
 
-                  // --- A. Logic for dashboard.html (Add New Record Form) ---
-                  // --- A. Logic for dashboard.html (Add New Record Form) ---
-const dashboardProductSelectEl = container.querySelector('#product_id');
-const dashboardTagsSelectEl = container.querySelector('#tags');
-if (dashboardProductSelectEl && dashboardTagsSelectEl && dashboardProductSelectEl.closest('form[action="{% url 'inventory:index' %}"]')) {
-    if (!dashboardProductSelectEl.dataset.tagsInitialized) {
-        console.log("Initializing dashboard dynamic tags logic...");
-        dashboardProductSelectEl.dataset.tagsInitialized = 'true';
+                    function getDataFromIsland(islandId) {
+                      const island = document.getElementById(islandId);
+                      if (!island || !island.textContent) return null;
+                      try {
+                        return JSON.parse(island.textContent);
+                      } catch (e) {
+                        console.error(`Failed to parse JSON from data island #${islandId}. Error:`, e);
+                        return null;
+                      }
+                    }
 
-        const tagsUrlTemplate = "{% url 'inventory:api_product_tags' 0 %}";
-        
-        const productSelect = dashboardProductSelectEl.tomselect || new TomSelect(dashboardProductSelectEl, { placeholder: 'ابحث عن منتج...' });
-        const companySelectEl = container.querySelector('#company_id');
-        const companySelect = companySelectEl.tomselect || new TomSelect(companySelectEl, { placeholder: 'ابحث عن شركة...' });
-        const tagsSelect = dashboardTagsSelectEl.tomselect || new TomSelect(dashboardTagsSelectEl, {
-            plugins: ['remove_button'],
-            placeholder: 'اختر الوسوم المناسبة'
-        });
-        tagsSelect.disable();
+                    // =========================================================
+                    //  MASTER PLUGIN INITIALIZER FUNCTION
+                    // =========================================================
+                    function initializePluginsInContent(container = document) {
 
-        // *** STEP 1: THIS IS OUR NEW REUSABLE FUNCTION ***
-        window.updateTagsForProduct = function(productId) {
-            console.log(`[TAGS] Updating tags for product ID: ${productId}`);
-            tagsSelect.disable();
-            tagsSelect.clear();
-            tagsSelect.clearOptions();
-            
-            if (productId) {
-                const finalUrl = tagsUrlTemplate.replace('0', productId);
-                fetch(finalUrl)
-                    .then(response => response.json())
-                    .then(data => {
-                        data.tags.forEach(tag => tagsSelect.addOption({value: tag.id, text: tag.name}));
-                        tagsSelect.enable();
-                    })
-                    .catch(error => console.error('Error fetching dashboard tags:', error));
-            }
-        }
+                        // 1. Generic Initializers
+                        flatpickr(container.querySelectorAll(".datepicker"), { dateFormat: "Y-m-d", locale: "ar" });
 
-        // The original event handler now just calls our reusable function
-        productSelect.on('change', function(productId) {
-            window.updateTagsForProduct(productId);
-        });
-    }
-}
-                  // --- B. Logic for records.html (Edit Record Modal) ---
-                  const editModal = document.getElementById("editRecordModal");
-                  if (editModal && !editModal.dataset.listenerAttached) {
-                      editModal.dataset.listenerAttached = 'true';
-                      console.log("Initializing records modal logic with tag support...");
+                        // Initialize all general-purpose TomSelect elements
+                        container.querySelectorAll(".searchable-select").forEach((el) => {
+                            if (!el.tomselect) {
+                                new TomSelect(el, {
+                                    rtl: true,
+                                    placeholder: el.getAttribute("placeholder") || "ابحث أو اختر...",
+                                    create: false,
+                                    dropdownParent: "body",
+                                });
+                            }
+                        });
 
-                      const tagsUrlTemplate = "{% url 'inventory:api_product_tags' 0 %}";
-                      const editProductSelectEl = editModal.querySelector('#editProductId');
-                      const editCompanySelectEl = editModal.querySelector('#editCompanyId');
-                      const editTagsSelectEl = editModal.querySelector('#editTags');
+                        // =========================================================
+                        //  FIXED AND CENTRALIZED TAGS LOGIC
+                        // =========================================================
 
-                      const productSelect = new TomSelect(editProductSelectEl);
-                      const companySelect = new TomSelect(editCompanySelectEl);
-                      const tagsSelect = new TomSelect(editTagsSelectEl, { plugins: ['remove_button'] });
 
-                      const fetchAndSetTags = async (productId, selectedTagIds = []) => {
-                          tagsSelect.disable();
-                          tagsSelect.clear();
-                          tagsSelect.clearOptions();
+                        // --- A. Logic for dashboard.html (Add New Record Form) ---
+                        const dashboardProductSelectEl = container.querySelector('#product_id');
+                        const dashboardTagsSelectEl = container.querySelector('#tags');
+                        if (dashboardProductSelectEl && dashboardTagsSelectEl && dashboardProductSelectEl.closest('form[action="{% url 'inventory:index' %}"]')) {
+                            if (!dashboardProductSelectEl.dataset.tagsInitialized) {
+                                console.log("Initializing dashboard dynamic tags logic...");
+                                dashboardProductSelectEl.dataset.tagsInitialized = 'true';
 
-                          if (!productId) return;
+                                const tagsUrlTemplate = "{% url 'inventory:api_product_tags' 0 %}";
 
-                          const finalUrl = tagsUrlTemplate.replace('0', productId);
+                                const productSelect = dashboardProductSelectEl.tomselect || new TomSelect(dashboardProductSelectEl, { placeholder: 'ابحث عن منتج...' });
+                                const companySelectEl = container.querySelector('#company_id');
+                                const companySelect = companySelectEl.tomselect || new TomSelect(companySelectEl, { placeholder: 'ابحث عن شركة...' });
+                                const tagsSelect = dashboardTagsSelectEl.tomselect || new TomSelect(dashboardTagsSelectEl, {
+                                    plugins: ['remove_button'],
+                                    placeholder: 'اختر الوسوم المناسبة'
+                                });
+                                tagsSelect.disable();
+
+                                // *** STEP 1: THIS IS OUR NEW REUSABLE FUNCTION ***
+                                window.updateTagsForProduct = function(productId) {
+                                    console.log(`[TAGS] Updating tags for product ID: ${productId}`);
+                                    tagsSelect.disable();
+                                    tagsSelect.clear();
+                                    tagsSelect.clearOptions();
+
+                                    if (productId) {
+                                        const finalUrl = tagsUrlTemplate.replace('0', productId);
+                                        fetch(finalUrl)
+                                            .then(response => response.json())
+                                            .then(data => {
+                                                data.tags.forEach(tag => tagsSelect.addOption({value: tag.id, text: tag.name}));
+                                                tagsSelect.enable();
+                                            })
+                                            .catch(error => console.error('Error fetching dashboard tags:', error));
+                                    }
+                                }
+
+                                // The original event handler now just calls our reusable function
+                                productSelect.on('change', function(productId) {
+                                    window.updateTagsForProduct(productId);
+                                });
+                            }
+                        }
+                        // =========================================================
+                        //  **FIXED AND FINAL**: Logic for records.html (Edit Record Modal)
+                        // =========================================================
+                        const editModal = document.getElementById("editRecordModal");
+                        if (editModal && !editModal.dataset.poLogicInitialized) {
+                            console.log("Initializing Edit Record Modal PO logic...");
+                            editModal.dataset.poLogicInitialized = 'true';
+                            
+                            // --- Get all DOM elements ---
+                            const mainProductSelect = new TomSelect('#editProductId');
+                            const mainCompanySelect = new TomSelect('#editCompanyId');
+                            const manualPriceContainer = document.getElementById('edit-manual-price-container');
+                            const unitPriceInput = document.getElementById('editUnitPrice');
+
+                            const linkPoCheck = document.getElementById('editLinkToPoCheck');
+                            const poFieldsContainer = document.getElementById('edit-po-fields-container');
+                            const poSupplierSelect = new TomSelect('#edit_po_supplier_id', { placeholder: 'اختر مورد...' });
+                            const poSelect = new TomSelect('#edit_purchase_order_id', { placeholder: 'اختر أمر شراء...' });
+                            const poItemSelect = new TomSelect('#edit_po_item_id', { placeholder: 'اختر المادة...' });
+                            
+                            const tagsUrlTemplate = "{% url 'inventory:api_product_tags' 0 %}";
+                            const tagsSelect = new TomSelect('#editTags', { plugins: ['remove_button'] });
+
+                            // --- Helper functions ---
+                            const fetchAndSetTags = async (productId, selectedTagIds = []) => {
+                                tagsSelect.disable(); tagsSelect.clear(); tagsSelect.clearOptions();
+                                if (!productId) return;
+                                try {
+                                    const response = await fetch(tagsUrlTemplate.replace('0', productId));
+                                    const data = await response.json();
+                                    data.tags.forEach(tag => tagsSelect.addOption({ value: tag.id, text: tag.name }));
+                                    tagsSelect.enable();
+                                    if (selectedTagIds.length > 0) tagsSelect.setValue(selectedTagIds);
+                                } catch (error) { console.error('Error fetching modal tags:', error); }
+                            };
+
+                            const togglePoFields = (isLinked) => {
+                                if (isLinked) {
+                                    poFieldsContainer.style.display = 'block';
+                                    manualPriceContainer.style.display = 'none';
+                                    unitPriceInput.required = false;
+                                    mainProductSelect.lock();
+                                    mainCompanySelect.lock();
+                                } else {
+                                    poFieldsContainer.style.display = 'none';
+                                    manualPriceContainer.style.display = 'block';
+                                    unitPriceInput.required = true;
+                                    mainProductSelect.unlock();
+                                    mainCompanySelect.unlock();
+                                    poSupplierSelect.clear();
+                                }
+                            };
+                            
+                            const loadPOs = async (supplierId) => {
+                                poSelect.clear(); poSelect.clearOptions(); poSelect.disable();
+                                if (!supplierId) return;
+                                try {
+                                    const response = await fetch(`/api/supplier/${supplierId}/open_pos/`);
+                                    const data = await response.json();
+                                    data.forEach(po => poSelect.addOption({value: po.id, text: `${po.po_number} (${po.order_date})`}));
+                                    poSelect.enable();
+                                } catch (error) { console.error("Failed to load POs:", error); }
+                            };
+
+                            const loadPOItems = async (poId) => {
+                                poItemSelect.clear(); poItemSelect.clearOptions(); poItemSelect.disable();
+                                if (!poId) return;
+                                try {
+                                    const response = await fetch(`/api/po/${poId}/items/`);
+                                    const data = await response.json();
+                                    data.forEach(item => poItemSelect.addOption({
+                                        value: item.id,
+                                        text: `${item.product_name} | متبقي: ${item.quantity_remaining}`,
+                                        'data-product-id': item.product_id
+                                    }));
+                                    poItemSelect.enable();
+                                } catch (error) { console.error("Failed to load PO Items:", error); }
+                            };
+                            
+                            // --- Event Listeners ---
+                            linkPoCheck.addEventListener('change', (e) => togglePoFields(e.target.checked));
+                            mainProductSelect.on('change', (productId) => fetchAndSetTags(productId));
+                            poSupplierSelect.on('change', (supplierId) => loadPOs(supplierId));
+                            poSelect.on('change', (poId) => loadPOItems(poId));
+                            poItemSelect.on('change', (itemId) => {
+                                const selectedOption = poItemSelect.options[itemId];
+                                if (itemId && selectedOption) {
+                                    const productId = selectedOption['data-product-id'];
+                                    mainProductSelect.setValue(productId, true); 
+                                    mainCompanySelect.setValue(poSupplierSelect.getValue(), true);
+                                    fetchAndSetTags(productId);
+                                }
+                            });
+
+                            // --- Main Modal Opening Logic ---
+                            editModal.addEventListener("show.bs.modal", async function (event) {
+                                const button = event.relatedTarget;
+                                if (!button) return;
+                                
+                                // 1. Reset state completely
+                                linkPoCheck.checked = false;
+                                togglePoFields(false);
+                                poSupplierSelect.clear();
+                                poSelect.clear();
+                                poItemSelect.clear();
+
+                                // 2. Populate standard fields
+                                const logId = button.getAttribute("data-log-id");
+                                const productId = button.getAttribute("data-product-id");
+                                const companyId = button.getAttribute("data-company-id");
+                                const tagIds = button.getAttribute('data-tag-ids').split(',').filter(Boolean);
+                                
+                                document.getElementById("editRecordForm").action = `/records/edit/${logId}/`;
+                                document.getElementById("editQuantity").value = button.getAttribute("data-quantity");
+                                document.getElementById("editQcNo").value = button.getAttribute("data-qc-no");
+                                document.getElementById("editEntryDate").value = button.getAttribute("data-entry-date");
+                                unitPriceInput.value = button.getAttribute("data-unit-price");
+
+                                mainProductSelect.setValue(productId, true);
+                                mainCompanySelect.setValue(companyId, true);
+                                await fetchAndSetTags(productId, tagIds);
+
+                                // 3. Populate PO fields if the log is already linked
+                                const poItemId = button.getAttribute("data-po-item-id");
+                                if (poItemId) {
+                                    const supplierId = button.getAttribute("data-supplier-id");
+                                    const poId = button.getAttribute("data-po-id");
+                                    
+                                    linkPoCheck.checked = true;
+                                    togglePoFields(true);
+                                    
+                                    // Set supplier and load POs
+                                    poSupplierSelect.setValue(supplierId);
+                                    await loadPOs(supplierId);
+
+                                    // Manually add the current PO if it's closed and not in the list
+                                    if (!poSelect.options[poId]) {
+                                      poSelect.addOption({value: poId, text: `أمر شراء #${poId} (مغلق)`});
+                                    }
+                                    poSelect.setValue(poId);
+                                    
+                                    // Load Items for the selected PO
+                                    await loadPOItems(poId);
+
+                                    // Manually add the current Item if it's fully received and not in the list
+                                    if (!poItemSelect.options[poItemId]) {
+                                        poItemSelect.addOption({value: poItemId, text: 'البند الحالي (مستلم بالكامل)'});
+                                    }
+                                    poItemSelect.setValue(poItemId);
+                                }
+                            });
+                        }
+
+                      // =========================================================================
+                      //  FINAL FIX & DEBUGGED: Logic for dashboard.html (PO Workflow)
+                      // =========================================================================
+                      const poCheck = container.querySelector('#receiveAgainstPoCheck');
+                      if (poCheck && !poCheck.dataset.poLogicInitialized) {
+                          console.log('[DEBUG] 1. Initializing PO workflow logic...');
+                          poCheck.dataset.poLogicInitialized = 'true';
+
                           try {
-                              const response = await fetch(finalUrl);
-                              const data = await response.json();
-                              data.tags.forEach(tag => tagsSelect.addOption({ value: tag.id, text: tag.name }));
-                              tagsSelect.enable();
-                              if (selectedTagIds.length > 0) {
-                                  tagsSelect.setValue(selectedTagIds);
-                              }
+                              const poContainer = container.querySelector('#po-fields-container');
+                              const poSupplierSelectEl = container.querySelector('#po_supplier_id');
+                              const poSelectEl = container.querySelector('#purchase_order_id');
+                              const poItemSelectEl = container.querySelector('#po_item_id');
+                              const mainProductSelect = container.querySelector('#product_id').tomselect;
+                              const mainCompanySelect = container.querySelector('#company_id').tomselect;
+                              const quantityInput = container.querySelector('#quantity');
+                              const priceInput = container.querySelector('#unit_price');
+                              
+                              console.log('[DEBUG] 2. All required elements found.');
+
+                              const poSupplierSelect = poSupplierSelectEl.tomselect;
+                              const poSelect = poSelectEl.tomselect;
+                              const poItemSelect = poItemSelectEl.tomselect;
+
+                              poCheck.addEventListener('change', function() {
+                                  console.log(`[DEBUG] EVENT: PO Checkbox changed. Is checked: ${this.checked}`);
+                                  if (this.checked) {
+                                      poContainer.style.display = 'block';
+                                      mainProductSelect.lock();
+                                      mainCompanySelect.lock();
+                                      priceInput.setAttribute('readonly', true);
+                                      priceInput.value = '0.000'; 
+                                  } else {
+                                      poContainer.style.display = 'none';
+                                      mainProductSelect.unlock();
+                                      mainCompanySelect.unlock();
+                                      priceInput.removeAttribute('readonly');
+                                      mainProductSelect.clear();
+                                      mainCompanySelect.clear();
+                                      quantityInput.value = '';
+                                      priceInput.value = '';
+                                      poSupplierSelect.clear();
+                                  }
+                              });
+                              
+                              console.log('[DEBUG] 3. Attaching event listeners...');
+
+                              // --- SUPPLIER CHANGE EVENT ---
+                              poSupplierSelect.on('change', function(supplierId) {
+                                  console.log(`[DEBUG] EVENT: Supplier changed! New ID: ${supplierId}`);
+                                  poSelect.clear(); poSelect.clearOptions(); poSelect.disable();
+                                  poItemSelect.clear(); poItemSelect.clearOptions(); poItemSelect.disable();
+
+                                  if (supplierId) {
+                                      const apiUrl = `/api/supplier/${supplierId}/open_pos/`;
+                                      console.log(`[DEBUG] Manually fetching POs from: ${apiUrl}`);
+                                      
+                                      poSelect.addOption({value: '', text: 'جاري تحميل أوامر الشراء...'});
+                                      poSelect.setValue('', true); // silent select
+
+                                      fetch(apiUrl)
+                                        .then(res => res.json())
+                                        .then(data => {
+                                            console.log('[DEBUG] POs received:', data);
+                                            poSelect.clear(); // Clear loading message
+                                            poSelect.enable();
+                                            if (data.length > 0) {
+                                                data.forEach(po => {
+                                                    poSelect.addOption({value: po.id, text: `${po.po_number} (${po.order_date})`});
+                                                });
+                                            } else {
+                                                poSelect.addOption({value: '', text: 'لا توجد أوامر شراء مفتوحة'});
+                                                poSelect.setValue('', true);
+                                            }
+                                        })
+                                        .catch(err => {
+                                            console.error('[DEBUG] FAILED to fetch POs:', err);
+                                            poSelect.clear();
+                                            poSelect.enable();
+                                            poSelect.addOption({value: '', text: 'خطأ في تحميل البيانات'});
+                                            poSelect.setValue('', true);
+                                        });
+                                  }
+                              });
+
+                              // --- PURCHASE ORDER CHANGE EVENT ---
+                              poSelect.on('change', function(poId) {
+                                  console.log(`[DEBUG] EVENT: PO changed! New ID: ${poId}`);
+                                  poItemSelect.clear(); poItemSelect.clearOptions(); poItemSelect.disable();
+                                  
+                                  if (poId) {
+                                      const apiUrl = `/api/po/${poId}/items/`;
+                                      console.log(`[DEBUG] Manually fetching PO Items from: ${apiUrl}`);
+                                      
+                                      poItemSelect.addOption({value: '', text: 'جاري تحميل المواد...'});
+                                      poItemSelect.setValue('', true);
+
+                                      fetch(apiUrl)
+                                        .then(res => res.json())
+                                        .then(data => {
+                                            console.log('[DEBUG] PO Items received:', data);
+                                            poItemSelect.clear();
+                                            poItemSelect.enable();
+                                            if (data.length > 0) {
+                                                data.forEach(item => {
+                                                    poItemSelect.addOption({
+                                                        value: item.id, 
+                                                        text: `${item.product_name} | متبقي: ${item.quantity_remaining}`,
+                                                        'data-product-id': item.product_id,
+                                                        'data-quantity': item.quantity_remaining,
+                                                        'data-price': item.unit_price,
+                                                    });
+                                                });
+                                            } else {
+                                                poItemSelect.addOption({value: '', text: 'لا توجد مواد متبقية'});
+                                                poItemSelect.setValue('', true);
+                                            }
+                                        })
+                                        .catch(err => {
+                                            console.error('[DEBUG] FAILED to fetch PO Items:', err);
+                                            poItemSelect.clear();
+                                            poItemSelect.enable();
+                                            poItemSelect.addOption({value: '', text: 'خطأ في تحميل البيانات'});
+                                            poItemSelect.setValue('', true);
+                                        });
+                                  }
+                              });
+                              
+                              // --- PO ITEM CHANGE EVENT ---
+                              poItemSelect.on('change', function(itemId) {
+                                  console.log(`[DEBUG] EVENT: PO Item changed! New ID: ${itemId}`);
+                                  const selectedOption = this.options[itemId];
+                                  if (itemId && selectedOption) {
+                                      const productId = selectedOption['data-product-id'];
+                                      console.log('[DEBUG] Populating form with data:', selectedOption);
+                                      
+                                      mainProductSelect.setValue(productId, true); 
+                                      mainCompanySelect.setValue(poSupplierSelect.getValue(), true);
+                                      quantityInput.value = selectedOption['data-quantity'];
+                                      priceInput.value = selectedOption['data-price'];
+
+                                      if (window.updateTagsForProduct) {
+                                          console.log(`[DEBUG] Triggering tag update for product ID: ${productId}`);
+                                          window.updateTagsForProduct(productId);
+                                      }
+                                  } else {
+                                      console.log('[DEBUG] PO Item cleared or not found.');
+                                      mainProductSelect.clear();
+                                      mainCompanySelect.clear();
+                                      quantityInput.value = '';
+                                      priceInput.value = '0.000';
+                                  }
+                              });
+                              
+                              console.log('[DEBUG] 4. Event listeners attached successfully.');
+                              
                           } catch (error) {
-                              console.error('Error fetching modal tags:', error);
+                              console.error('[DEBUG] A critical error occurred inside the PO workflow block:', error);
                           }
-                      };
-
-                      productSelect.on('change', (productId) => fetchAndSetTags(productId));
-
-                      editModal.addEventListener("show.bs.modal", function (event) {
-                          const button = event.relatedTarget;
-                          if (!button) return;
-
-                          const recordId = button.getAttribute("data-log-id");
-                          document.getElementById("editRecordForm").action = `/records/edit/${recordId}/`;
-
-                          document.getElementById("editQuantity").value = button.getAttribute("data-quantity");
-                          document.getElementById("editQcNo").value = button.getAttribute("data-qc-no");
-                          document.getElementById("editEntryDate").value = button.getAttribute("data-entry-date");
-
-                          const productId = button.getAttribute("data-product-id");
-                          const companyId = button.getAttribute("data-company-id");
-
-                          productSelect.setValue(productId, true);
-                          companySelect.setValue(companyId, true);
-
-                          const tagIds = button.getAttribute('data-tag-ids').split(',').filter(Boolean);
-                          fetchAndSetTags(productId, tagIds);
-                      });
-                  }
-      // =========================================================
-      //  DEBUGGING: Logic for dashboard.html (PO Workflow)
-      // =========================================================
-      const poCheck = container.querySelector('#receiveAgainstPoCheck');
-      if (poCheck && !poCheck.dataset.poLogicInitialized) {
-          console.log('[DEBUG] 1. Entered PO workflow logic block.');
-          poCheck.dataset.poLogicInitialized = 'true';
-
-          try {
-              // Get the RAW HTML elements
-              const poContainer = container.querySelector('#po-fields-container');
-              const poSupplierSelectEl = container.querySelector('#po_supplier_id');
-              const poSelectEl = container.querySelector('#purchase_order_id');
-              const poItemSelectEl = container.querySelector('#po_item_id');
-
-              // Get other form fields
-              const mainProductSelect = container.querySelector('#product_id').tomselect;
-              const mainCompanySelect = container.querySelector('#company_id').tomselect;
-              const quantityInput = container.querySelector('#quantity');
-              const priceInput = container.querySelector('#unit_price');
-
-              console.log('[DEBUG] 2. Found all necessary HTML elements.');
-
-              // Get or Create the TomSelect instance for the SUPPLIER dropdown
-              const poSupplierSelect = poSupplierSelectEl.tomselect || new TomSelect(poSupplierSelectEl, {
-                  rtl: true,
-                  placeholder: "ابحث أو اختر...",
-              });
-
-              // This is the most important check
-              console.log('[DEBUG] 3. Supplier dropdown TomSelect instance:', poSupplierSelect);
-              if (!poSupplierSelect) {
-                  console.error('[DEBUG] FATAL: poSupplierSelect instance is NULL or UNDEFINED. Cannot proceed.');
-              }
-
-              // Get or create the other instances
-              const poSelect = poSelectEl.tomselect || new TomSelect(poSelectEl, { rtl: true, placeholder: "اختر مورد أولاً..." });
-              const poItemSelect = poItemSelectEl.tomselect || new TomSelect(poItemSelectEl, { rtl: true, placeholder: "اختر أمر شراء أولاً..." });
-              // NEW, CORRECTED CODE
-poCheck.addEventListener('change', function() {
-    console.log(`[DEBUG] EVENT: PO Checkbox changed. Is checked: ${this.checked}`);
-    if (this.checked) {
-        poContainer.style.display = 'block';
-        mainProductSelect.lock(); // Use lock() instead of disable()
-        mainCompanySelect.lock(); // Use lock() instead of disable()
-    } else {
-        poContainer.style.display = 'none';
-        mainProductSelect.unlock(); // Use unlock() instead of enable()
-        mainCompanySelect.unlock(); // Use unlock() instead of enable()
-        // Clear everything when unchecking
-        mainProductSelect.clear();
-        mainCompanySelect.clear();
-        quantityInput.value = '';
-        priceInput.value = '';
-        poSupplierSelect.clear(); // This will trigger the chain to clear the others
-    }
-});
-              console.log('[DEBUG] 4. Attaching event listeners now...');
-
-      // This is the NEW, corrected code for layout.html
-      poSelect.on('change', function(poId) {
-          console.log(`[DEBUG] EVENT: PO changed! New ID: ${poId}`);
-
-          // Clear subsequent dropdowns
-          poItemSelect.clear();
-          poItemSelect.clearOptions();
-          poItemSelect.disable();
-
-          if (poId) {
-              const apiUrl = `/api/po/${poId}/items/`;
-              console.log(`[DEBUG] Manually fetching items from: ${apiUrl}`);
-
-              // --- Manual Fetch Logic ---
-              poItemSelect.addOption({value: '', text: 'جاري تحميل المواد...'});
-              poItemSelect.setValue('', true);
-              poItemSelect.disable();
-
-              fetch(apiUrl)
-                  .then(res => {
-                      if (!res.ok) {
-                          throw new Error(`Network response error: ${res.status} ${res.statusText}`);
                       }
-                      return res.json();
-                  })
-                  .then(data => {
-                      console.log('[DEBUG] Manual fetch items response received:', data);
+                      // ----- Logic for create_batch.html -----
+                      const createBatchTemplateSelect =
+                        document.getElementById("template_id");
+                      if (createBatchTemplateSelect) {
+                        console.log("Initializing create_batch.html dynamic logic...");
 
-                      poItemSelect.clear();
-                      poItemSelect.clearOptions();
-                      poItemSelect.enable();
+                        // Use the reliable data island helper function
+                        const templateData = getDataFromIsland("template-data") || {};
+                        const availableStockData =
+                          getDataFromIsland("available-stock-data") || {};
+                        const allPrimitiveProducts =
+                          getDataFromIsland("primitive-products-data") || [];
 
-                      if (data && data.length > 0) {
-                          data.forEach(item => {
-                              poItemSelect.addOption({
-                                  value: item.id,
-                                  text: `${item.product_name} | متبقي: ${item.quantity_remaining}`,
-                                  // We still need to store the data for the next step
-                                  'data-product-id': item.product_id,
-                                  'data-quantity': item.quantity_remaining,
-                                  'data-price': item.unit_price,
+                        const templateSelect = document.getElementById("template_id");
+                        const fromInput = document.getElementById("batch_number_from");
+                        const toInput = document.getElementById("batch_number_to");
+                        const materialsCard = document.getElementById("materials_card");
+                        const materialsTbody = document.getElementById("materials_tbody");
+                        const batchCountDisplay = document.getElementById(
+                          "batch_count_display"
+                        );
+                        const addManualBtn = document.getElementById(
+                          "add-material-manually-btn"
+                        );
+                        const creationDateInput = document.getElementById("creation_date");
+                        function validateRowQuantity(row) {
+                          const actualQtyInput = row.querySelector(".actual-qty");
+                          const qcSelect = row.querySelector(".qc-select");
+                          const feedbackDiv = actualQtyInput.nextElementSibling;
+                          const selectedOption = qcSelect.options[qcSelect.selectedIndex];
+                          actualQtyInput.classList.remove("is-invalid");
+                          feedbackDiv.textContent = "";
+                          if (!selectedOption || !selectedOption.value) return;
+                          const availableQty = parseFloat(selectedOption.dataset.available);
+                          const actualQty = parseFloat(actualQtyInput.value);
+                          if (
+                            !isNaN(availableQty) &&
+                            !isNaN(actualQty) &&
+                            actualQty > availableQty
+                          ) {
+                            actualQtyInput.classList.add("is-invalid");
+                            feedbackDiv.textContent = `الكمية أكبر من المتاح (${availableQty.toFixed(
+                              3
+                            )})`;
+                          }
+                        }
+                        function validateRowDate(row) {
+                          const qcSelect = row.querySelector(".qc-select");
+                          const feedbackDiv = qcSelect.nextElementSibling;
+                          const selectedOption = qcSelect.options[qcSelect.selectedIndex];
+                          qcSelect.classList.remove("is-invalid");
+                          feedbackDiv.textContent = "";
+                          if (
+                            !selectedOption ||
+                            !selectedOption.value ||
+                            !selectedOption.dataset.timestamp
+                          )
+                            return;
+                          const creationDateStr = creationDateInput.value;
+                          const qcTimestamp = selectedOption.dataset.timestamp;
+                          if (qcTimestamp > creationDateStr) {
+                            qcSelect.classList.add("is-invalid");
+                            feedbackDiv.textContent = "تاريخ المصدر أحدث من تاريخ الأمر.";
+                          }
+                        }
+                        function updateQuantitySummaries() {
+                          const productTotals = {};
+                          materialsTbody.querySelectorAll("tr").forEach((row) => {
+                            const productIdInput = row.querySelector(
+                              '[name="primitive_product_id"]'
+                            );
+                            if (!productIdInput) return;
+                            const productId = productIdInput.value;
+                            if (!productTotals[productId]) {
+                              productTotals[productId] = { theoretical: 0, actual: 0 };
+                            }
+                            productTotals[productId].theoretical +=
+                              parseFloat(row.querySelector(".theoretical-qty").value) || 0;
+                            productTotals[productId].actual +=
+                              parseFloat(row.querySelector(".actual-qty").value) || 0;
+                          });
+                          materialsTbody
+                            .querySelectorAll(".quantity-summary")
+                            .forEach((span) => (span.textContent = ""));
+                          Object.keys(productTotals).forEach((productId) => {
+                            const totals = productTotals[productId];
+                            const difference = totals.theoretical - totals.actual;
+                            const isMatch = Math.abs(difference) < 0.001;
+                            let summaryText = `(${totals.actual.toFixed(
+                              3
+                            )} / ${totals.theoretical.toFixed(3)})`;
+                            if (!isMatch) {
+                              summaryText += ` | متبقي: ${difference.toFixed(3)}`;
+                            }
+                            const badgeClass = isMatch ? "bg-success" : "bg-danger";
+                            materialsTbody
+                              .querySelectorAll(
+                                `input[name="primitive_product_id"][value="${productId}"]`
+                              )
+                              .forEach((input) => {
+                                const summarySpan = input
+                                  .closest("td")
+                                  .querySelector(".quantity-summary");
+                                if (summarySpan) {
+                                  summarySpan.textContent = summaryText;
+                                  summarySpan.className = `quantity-summary badge ${badgeClass}`;
+                                }
                               });
                           });
-                      } else {
-                          poItemSelect.addOption({value: '', text: 'لا توجد مواد متبقية في أمر الشراء هذا.'});
-                          poItemSelect.setValue('', true);
-                      }
-                  })
-                  .catch(error => {
-                      console.error("[DEBUG] Manual fetch for items FAILED:", error);
-                      poItemSelect.clear();
-                      poItemSelect.clearOptions();
-                      poItemSelect.enable();
-                      poItemSelect.addOption({value: '', text: 'خطأ في تحميل المواد.'});
-                      poItemSelect.setValue('', true);
-                  });
-
-          } else {
-              console.log('[DEBUG] PO ID is empty, not fetching items.');
-          }
-      });
-      poItemSelect.on('change', function(itemId) {
-    console.log(`[DEBUG] EVENT: PO Item changed! New ID: ${itemId}`);
-    
-    if (itemId) {
-        const selectedOptionData = this.options[itemId];
-        if (selectedOptionData) {
-            const productId = selectedOptionData['data-product-id'];
-            console.log('[DEBUG] Populating form with data:', selectedOptionData);
-            
-            // Populate the main form fields
-            mainProductSelect.setValue(productId, true); // Silent update
-            mainCompanySelect.setValue(poSupplierSelect.getValue(), true); // Silent update
-            quantityInput.value = selectedOptionData['data-quantity'];
-            priceInput.value = selectedOptionData['data-price'];
-
-            // Now, manually call the tag update function because the update above was silent
-            if (window.updateTagsForProduct) {
-                window.updateTagsForProduct(productId);
-            }
-
-        } else {
-             console.error(`[DEBUG] Could not find data for selected item ID: ${itemId}`);
-        }
-    }
-});
-
-              poSupplierSelect.on('change', function(supplierId) {
-                  console.log(`[DEBUG] EVENT: Supplier changed! New ID: ${supplierId}`);
-
-                  // Clear subsequent dropdowns immediately
-                  poSelect.clear();
-                  poSelect.clearOptions();
-                  poSelect.disable();
-                  poItemSelect.clear();
-                  poItemSelect.clearOptions();
-                  poItemSelect.disable();
-
-                  if (supplierId) {
-                      const apiUrl = `/api/supplier/${supplierId}/open_pos/`;
-                      console.log(`[DEBUG] Manually fetching data from: ${apiUrl}`);
-
-                      // --- BYPASSING .load() ---
-                      // 1. Show a loading message
-                      poSelect.addOption({value: '', text: 'جاري التحميل...'});
-                      poSelect.setValue('', true);
-                      poSelect.disable(); // Keep it disabled while loading
-
-                      fetch(apiUrl)
-                          .then(res => {
-                              if (!res.ok) {
-                                  throw new Error(`Network response error: ${res.status} ${res.statusText}`);
-                              }
-                              return res.json();
-                          })
-                          .then(data => {
-                              console.log('[DEBUG] Manual fetch API response received:', data);
-
-                              // 2. Clear the loading message and enable
-                              poSelect.clear();
-                              poSelect.clearOptions();
-                              poSelect.enable();
-
-                              // 3. Populate with new data
-                              if (data && data.length > 0) {
-                                  data.forEach(po => {
-                                      poSelect.addOption({
-                                          value: po.id,
-                                          text: `${po.po_number} (${po.order_date})`
-                                      });
-                                  });
-                              } else {
-                                  poSelect.addOption({value: '', text: 'لا توجد أوامر شراء مفتوحة لهذا المورد.'});
-                                  poSelect.setValue('', true); // Set it to the placeholder message
-                              }
-                          })
-                          .catch(error => {
-                              console.error("[DEBUG] Manual fetch API FAILED:", error);
-
-                              // Show an error message
-                              poSelect.clear();
-                              poSelect.clearOptions();
-                              poSelect.enable();
-                              poSelect.addOption({value: '', text: 'خطأ في تحميل أوامر الشراء.'});
-                              poSelect.setValue('', true);
+                        }
+                        if (materialsTbody.children.length > 0) {
+                          materialsTbody.querySelectorAll("tr").forEach((row) => {
+                            attachRowListeners(row);
+                            validateRowQuantity(row);
+                            validateRowDate(row);
                           });
-                      // --- END OF BYPASS ---
-
-                  } else {
-                      console.log('[DEBUG] Supplier ID is empty, not fetching.');
-                  }
-              });
-
-              console.log('[DEBUG] 5. All event listeners attached successfully.');
-
-          } catch (error) {
-              console.error('[DEBUG] A critical error occurred inside the PO workflow block:', error);
-          }
-      }
-                // ----- Logic for create_batch.html -----
-                const createBatchTemplateSelect =
-                  document.getElementById("template_id");
-                if (createBatchTemplateSelect) {
-                  console.log("Initializing create_batch.html dynamic logic...");
-
-                  // Use the reliable data island helper function
-                  const templateData = getDataFromIsland("template-data") || {};
-                  const availableStockData =
-                    getDataFromIsland("available-stock-data") || {};
-                  const allPrimitiveProducts =
-                    getDataFromIsland("primitive-products-data") || [];
-
-                  const templateSelect = document.getElementById("template_id");
-                  const fromInput = document.getElementById("batch_number_from");
-                  const toInput = document.getElementById("batch_number_to");
-                  const materialsCard = document.getElementById("materials_card");
-                  const materialsTbody = document.getElementById("materials_tbody");
-                  const batchCountDisplay = document.getElementById(
-                    "batch_count_display"
-                  );
-                  const addManualBtn = document.getElementById(
-                    "add-material-manually-btn"
-                  );
-                  const creationDateInput = document.getElementById("creation_date");
-                  function validateRowQuantity(row) {
-                    const actualQtyInput = row.querySelector(".actual-qty");
-                    const qcSelect = row.querySelector(".qc-select");
-                    const feedbackDiv = actualQtyInput.nextElementSibling;
-                    const selectedOption = qcSelect.options[qcSelect.selectedIndex];
-                    actualQtyInput.classList.remove("is-invalid");
-                    feedbackDiv.textContent = "";
-                    if (!selectedOption || !selectedOption.value) return;
-                    const availableQty = parseFloat(selectedOption.dataset.available);
-                    const actualQty = parseFloat(actualQtyInput.value);
-                    if (
-                      !isNaN(availableQty) &&
-                      !isNaN(actualQty) &&
-                      actualQty > availableQty
-                    ) {
-                      actualQtyInput.classList.add("is-invalid");
-                      feedbackDiv.textContent = `الكمية أكبر من المتاح (${availableQty.toFixed(
-                        3
-                      )})`;
-                    }
-                  }
-                  function validateRowDate(row) {
-                    const qcSelect = row.querySelector(".qc-select");
-                    const feedbackDiv = qcSelect.nextElementSibling;
-                    const selectedOption = qcSelect.options[qcSelect.selectedIndex];
-                    qcSelect.classList.remove("is-invalid");
-                    feedbackDiv.textContent = "";
-                    if (
-                      !selectedOption ||
-                      !selectedOption.value ||
-                      !selectedOption.dataset.timestamp
-                    )
-                      return;
-                    const creationDateStr = creationDateInput.value;
-                    const qcTimestamp = selectedOption.dataset.timestamp;
-                    if (qcTimestamp > creationDateStr) {
-                      qcSelect.classList.add("is-invalid");
-                      feedbackDiv.textContent = "تاريخ المصدر أحدث من تاريخ الأمر.";
-                    }
-                  }
-                  function updateQuantitySummaries() {
-                    const productTotals = {};
-                    materialsTbody.querySelectorAll("tr").forEach((row) => {
-                      const productIdInput = row.querySelector(
-                        '[name="primitive_product_id"]'
-                      );
-                      if (!productIdInput) return;
-                      const productId = productIdInput.value;
-                      if (!productTotals[productId]) {
-                        productTotals[productId] = { theoretical: 0, actual: 0 };
-                      }
-                      productTotals[productId].theoretical +=
-                        parseFloat(row.querySelector(".theoretical-qty").value) || 0;
-                      productTotals[productId].actual +=
-                        parseFloat(row.querySelector(".actual-qty").value) || 0;
-                    });
-                    materialsTbody
-                      .querySelectorAll(".quantity-summary")
-                      .forEach((span) => (span.textContent = ""));
-                    Object.keys(productTotals).forEach((productId) => {
-                      const totals = productTotals[productId];
-                      const difference = totals.theoretical - totals.actual;
-                      const isMatch = Math.abs(difference) < 0.001;
-                      let summaryText = `(${totals.actual.toFixed(
-                        3
-                      )} / ${totals.theoretical.toFixed(3)})`;
-                      if (!isMatch) {
-                        summaryText += ` | متبقي: ${difference.toFixed(3)}`;
-                      }
-                      const badgeClass = isMatch ? "bg-success" : "bg-danger";
-                      materialsTbody
-                        .querySelectorAll(
-                          `input[name="primitive_product_id"][value="${productId}"]`
-                        )
-                        .forEach((input) => {
-                          const summarySpan = input
-                            .closest("td")
-                            .querySelector(".quantity-summary");
-                          if (summarySpan) {
-                            summarySpan.textContent = summaryText;
-                            summarySpan.className = `quantity-summary badge ${badgeClass}`;
+                          recalculateQuantities();
+                        }
+                        materialsTbody.addEventListener("click", function (e) {
+                          if (e.target.closest(".remove-row-btn")) {
+                            e.target.closest("tr").remove();
+                            updateQuantitySummaries();
+                          }
+                          if (e.target.closest(".split-quantity-btn")) {
+                            handleSplitClick(e.target.closest("tr"));
                           }
                         });
-                    });
-                  }
-                  if (materialsTbody.children.length > 0) {
-                    materialsTbody.querySelectorAll("tr").forEach((row) => {
-                      attachRowListeners(row);
-                      validateRowQuantity(row);
-                      validateRowDate(row);
-                    });
-                    recalculateQuantities();
-                  }
-                  materialsTbody.addEventListener("click", function (e) {
-                    if (e.target.closest(".remove-row-btn")) {
-                      e.target.closest("tr").remove();
-                      updateQuantitySummaries();
-                    }
-                    if (e.target.closest(".split-quantity-btn")) {
-                      handleSplitClick(e.target.closest("tr"));
-                    }
-                  });
-                  materialsTbody.addEventListener("change", function (e) {
-                    if (e.target.classList.contains("qc-select")) {
-                      const row = e.target.closest("tr");
-                      validateRowQuantity(row);
-                      validateRowDate(row);
-                    }
-                    if (e.target.classList.contains("material-select")) {
-                      updateQuantitySummaries();
-                    }
-                  });
-                  materialsTbody.addEventListener("input", function (e) {
-                    if (
-                      e.target.classList.contains("actual-qty") ||
-                      e.target.classList.contains("theoretical-qty")
-                    ) {
-                      if (e.target.classList.contains("actual-qty"))
-                        validateRowQuantity(e.target.closest("tr"));
-                      updateQuantitySummaries();
-                    }
-                  });
-                  function handleSplitClick(currentRow) {
-                    const productId = currentRow.querySelector(
-                      '[name="primitive_product_id"]'
-                    )?.value;
-                    if (!productId) {
-                      alert("الرجاء اختيار مادة أولاً.");
-                      return;
-                    }
-                    const qcSelect = currentRow.querySelector(".qc-select");
-                    const selectedOption = qcSelect.options[qcSelect.selectedIndex];
-                    if (!selectedOption || !selectedOption.value) {
-                      alert("الرجاء اختيار مصدر مخزون أولاً.");
-                      return;
-                    }
-                    const availableInCurrentQC =
-                      parseFloat(selectedOption.dataset.available) || 0;
-                    const allQCsForProduct = Array.from(qcSelect.options)
-                      .slice(1)
-                      .map((opt) => ({
-                        id: opt.value,
-                        available: parseFloat(opt.dataset.available),
-                      }));
-                    const currentQCIndex = allQCsForProduct.findIndex(
-                      (qc) => qc.id === selectedOption.value
-                    );
-                    if (
-                      currentQCIndex === -1 ||
-                      currentQCIndex >= allQCsForProduct.length - 1
-                    ) {
-                      alert("لا يوجد مصدر مخزون تالي متاح لهذا المنتج.");
-                      return;
-                    }
-                    const nextQC = allQCsForProduct[currentQCIndex + 1];
-                    const actualInputCurrent =
-                      currentRow.querySelector(".actual-qty");
-                    actualInputCurrent.value = availableInCurrentQC.toFixed(3);
-                    let totalTheoretical = 0;
-                    let totalActual = 0;
-                    materialsTbody
-                      .querySelectorAll(
-                        `input[name="primitive_product_id"][value="${productId}"]`
-                      )
-                      .forEach((input) => {
-                        const row = input.closest("tr");
-                        totalTheoretical +=
-                          parseFloat(row.querySelector(".theoretical-qty").value) ||
-                          0;
-                        totalActual +=
-                          parseFloat(row.querySelector(".actual-qty").value) || 0;
-                      });
-                    const remainingNeeded = totalTheoretical - totalActual;
-                    if (remainingNeeded <= 0) {
-                      alert("الكمية المطلوبة تم تحقيقها بالفعل أو تجاوزها.");
-                      updateQuantitySummaries();
-                      return;
-                    }
-                    const productInfo = allPrimitiveProducts.find(
-                      (p) => p.id == productId
-                    );
-                    const newRow = createMaterialRow(
-                      { ...productInfo, primitive_product_id: productId },
-                      false,
-                      true
-                    );
-                    currentRow.after(newRow);
-                    newRow.querySelector(".theoretical-qty").value = "0.000";
-                    const qtyForNewRow = Math.min(remainingNeeded, nextQC.available);
-                    newRow.querySelector(".actual-qty").value =
-                      qtyForNewRow.toFixed(3);
-                    newRow.querySelector(".qc-select").value = nextQC.id;
-                    validateRowQuantity(currentRow);
-                    validateRowQuantity(newRow);
-                    validateRowDate(newRow);
-                    updateQuantitySummaries();
-                  }
-                  function createMaterialRow(
-                    item,
-                    isManualAdd = false,
-                    isSplit = false
-                  ) {
-                    const row = document.createElement("tr");
-                    const theoreticalQty =
-                      isManualAdd || isSplit ? 0 : item.theoretical_quantity;
-                    let materialCellHTML;
-                    if (isManualAdd) {
-                      let productOptions = '<option value="">اختر مادة...</option>';
-                      allPrimitiveProducts.forEach((p) => {
-                        productOptions += `<option value="${p.id}" data-unit="${p.unit}">${p.name} (${p.unit})</option>`;
-                      });
-                      materialCellHTML = `<select class="form-select material-select" name="primitive_product_id" required>${productOptions}</select>`;
-                    } else {
-                      materialCellHTML = `<strong>${item.name}</strong> (${item.unit}) <span class="quantity-summary badge"></span><input type="hidden" name="primitive_product_id" value="${item.primitive_product_id}">`;
-                    }
-                    const initialActualQty = isSplit ? 0 : theoreticalQty;
-                    row.innerHTML = `<td class="ps-3">${materialCellHTML}</td><td><input type="number" step="any" class="form-control text-center fw-bold theoretical-qty" name="theoretical_quantity" value="${theoreticalQty.toFixed(
-                      3
-                    )}" data-base-quantity="${theoreticalQty}" required></td><td><input type="number" step="any" class="form-control text-center fw-bold actual-qty" name="actual_quantity" value="${initialActualQty.toFixed(
-                      3
-                    )}" data-base-quantity="${theoreticalQty}" required><div class="invalid-feedback small text-center"></div></td><td class="qc-cell"><select class="form-select qc-select" name="source_log_id" disabled><option>اختر مادة أولاً</option></select><div class="invalid-feedback small"></div></td><td class="text-center pe-2"><button type="button" class="btn btn-sm btn-outline-info split-quantity-btn" title="تقسيم الكمية من المصدر التالي" data-bs-toggle="tooltip"><i class="bi bi-distribute-vertical"></i></button><button type="button" class="btn btn-sm btn-outline-danger remove-row-btn" title="حذف الصف"><i class="bi bi-trash"></i></button></td>`;
-                    materialsTbody.appendChild(row);
-                    attachRowListeners(row);
-                    if (!isManualAdd) {
-                      populateQcSelect(row, item.primitive_product_id);
-                    }
-                    return row;
-                  }
-                  function attachRowListeners(row) {
-                    const materialSelect = row.querySelector(".material-select");
-                    if (materialSelect) {
-                      new TomSelect(materialSelect, {
-                        create: false,
-                        dropdownParent: "body",
-                      });
-                      materialSelect.addEventListener("change", (e) => {
-                        populateQcSelect(row, e.target.value);
-                        updateQuantitySummaries();
-                      });
-                    }
-                  }
-                  function populateQcSelect(row, productId) {
-                    const qcSelect = row.querySelector(".qc-select");
-                    if (!productId) {
-                      qcSelect.innerHTML = "<option>اختر مادة أولاً</option>";
-                      qcSelect.disabled = true;
-                      return;
-                    }
-                    const stockForProduct = availableStockData[productId] || [];
-                    let optionsHTML = '<option value="">اختر مصدر...</option>';
-                    stockForProduct.forEach((stock) => {
-                      optionsHTML += `<option value="${stock.id}" data-available="${stock.remaining_quantity}" data-timestamp="${stock.timestamp}">QC: ${stock.qc_no} | متاح: ${stock.remaining_quantity} | ${stock.timestamp}</option>`;
-                    });
-                    if (stockForProduct.length === 0) {
-                      optionsHTML +=
-                        '<option value="" disabled>لا يوجد مخزون متاح</option>';
-                    }
-                    qcSelect.innerHTML = optionsHTML;
-                    qcSelect.disabled = false;
-                    validateRowQuantity(row);
-                    validateRowDate(row);
-                  }
-                  function recalculateQuantities() {
-                    const fromVal = parseInt(fromInput.value) || 0;
-                    const toVal = parseInt(toInput.value) || fromVal;
-                    const numBatches =
-                      fromVal > 0 && toVal >= fromVal
-                        ? toVal - fromVal + 1
-                        : fromVal > 0
-                        ? 1
-                        : 0;
-                    batchCountDisplay.textContent =
-                      numBatches > 0 ? `لـ ${numBatches} تشغيلة` : "";
-                    materialsTbody.querySelectorAll("tr").forEach((row) => {
-                      const theoreticalInput = row.querySelector(".theoretical-qty");
-                      const actualInput = row.querySelector(".actual-qty");
-                      const baseQuantity = parseFloat(
-                        theoreticalInput.dataset.baseQuantity
-                      );
-                      if (isNaN(baseQuantity)) return;
-                      const total = numBatches > 0 ? baseQuantity * numBatches : 0;
-                      if (theoreticalInput.dataset.baseQuantity) {
-                        theoreticalInput.value = total.toFixed(3);
-                        actualInput.value = total.toFixed(3);
-                      }
-                      validateRowQuantity(row);
-                    });
-                    updateQuantitySummaries();
-                  }
-                  function loadTemplate() {
-                    const selectedTemplateId = templateSelect.value;
-                    const items = templateData[selectedTemplateId];
-                    materialsTbody.innerHTML = "";
-                    if (!selectedTemplateId || !items) {
-                      materialsCard.style.display = "none";
-                      return;
-                    }
-                    materialsCard.style.display = "block";
-                    items.forEach((item) => {
-                      const newRow = createMaterialRow(item);
-                      const stockForThisItem =
-                        availableStockData[item.primitive_product_id] || [];
-                      if (stockForThisItem.length > 0) {
-                        const firstValidOption = stockForThisItem.find(
-                          (s) => s.timestamp <= creationDateInput.value
-                        );
-                        newRow.querySelector(".qc-select").value = firstValidOption
-                          ? firstValidOption.id
-                          : stockForThisItem[0].id;
-                        validateRowQuantity(newRow);
-                        validateRowDate(newRow);
-                      }
-                    });
-                    recalculateQuantities();
-                  }
-                  creationDateInput.addEventListener("change", () => {
-                    materialsTbody.querySelectorAll("tr").forEach((row) => {
-                      validateRowDate(row);
-                    });
-                  });
-                  templateSelect.addEventListener("change", loadTemplate);
-                  fromInput.addEventListener("input", recalculateQuantities);
-                  toInput.addEventListener("input", recalculateQuantities);
-                  addManualBtn.addEventListener("click", () =>
-                    createMaterialRow({}, true)
-                  );
-                }
-
-                // ----- Logic for batch_view.html -----
-                const batchViewForm = document.getElementById("batchEditForm");
-                if (batchViewForm) {
-                  console.log("Initializing batch_view.html logic...");
-
-                  // --- Recalculation logic for batch quantities ---
-                  const fromInput = document.getElementById("batch_number_from");
-                  const toInput = document.getElementById("batch_number_to");
-                  const materialsTbody = document.getElementById("materials_tbody");
-                  const batchCountDisplay = document.getElementById("batch_count_display");
-
-                  if(fromInput && toInput && materialsTbody) {
-                      const getNumBatches = () => {
-                        const fromVal = parseInt(fromInput.value) || 0;
-                        const toVal = parseInt(toInput.value) || fromVal;
-                        return fromVal > 0 && toVal >= fromVal
-                          ? toVal - fromVal + 1
-                          : fromVal > 0
-                          ? 1
-                          : 0;
-                      };
-                      const updateBatchCountDisplay = () => {
-                        const numBatches = getNumBatches();
-                        if (batchCountDisplay) {
+                        materialsTbody.addEventListener("change", function (e) {
+                          if (e.target.classList.contains("qc-select")) {
+                            const row = e.target.closest("tr");
+                            validateRowQuantity(row);
+                            validateRowDate(row);
+                          }
+                          if (e.target.classList.contains("material-select")) {
+                            updateQuantitySummaries();
+                          }
+                        });
+                        materialsTbody.addEventListener("input", function (e) {
+                          if (
+                            e.target.classList.contains("actual-qty") ||
+                            e.target.classList.contains("theoretical-qty")
+                          ) {
+                            if (e.target.classList.contains("actual-qty"))
+                              validateRowQuantity(e.target.closest("tr"));
+                            updateQuantitySummaries();
+                          }
+                        });
+                        function handleSplitClick(currentRow) {
+                          const productId = currentRow.querySelector(
+                            '[name="primitive_product_id"]'
+                          )?.value;
+                          if (!productId) {
+                            alert("الرجاء اختيار مادة أولاً.");
+                            return;
+                          }
+                          const qcSelect = currentRow.querySelector(".qc-select");
+                          const selectedOption = qcSelect.options[qcSelect.selectedIndex];
+                          if (!selectedOption || !selectedOption.value) {
+                            alert("الرجاء اختيار مصدر مخزون أولاً.");
+                            return;
+                          }
+                          const availableInCurrentQC =
+                            parseFloat(selectedOption.dataset.available) || 0;
+                          const allQCsForProduct = Array.from(qcSelect.options)
+                            .slice(1)
+                            .map((opt) => ({
+                              id: opt.value,
+                              available: parseFloat(opt.dataset.available),
+                            }));
+                          const currentQCIndex = allQCsForProduct.findIndex(
+                            (qc) => qc.id === selectedOption.value
+                          );
+                          if (
+                            currentQCIndex === -1 ||
+                            currentQCIndex >= allQCsForProduct.length - 1
+                          ) {
+                            alert("لا يوجد مصدر مخزون تالي متاح لهذا المنتج.");
+                            return;
+                          }
+                          const nextQC = allQCsForProduct[currentQCIndex + 1];
+                          const actualInputCurrent =
+                            currentRow.querySelector(".actual-qty");
+                          actualInputCurrent.value = availableInCurrentQC.toFixed(3);
+                          let totalTheoretical = 0;
+                          let totalActual = 0;
+                          materialsTbody
+                            .querySelectorAll(
+                              `input[name="primitive_product_id"][value="${productId}"]`
+                            )
+                            .forEach((input) => {
+                              const row = input.closest("tr");
+                              totalTheoretical +=
+                                parseFloat(row.querySelector(".theoretical-qty").value) ||
+                                0;
+                              totalActual +=
+                                parseFloat(row.querySelector(".actual-qty").value) || 0;
+                            });
+                          const remainingNeeded = totalTheoretical - totalActual;
+                          if (remainingNeeded <= 0) {
+                            alert("الكمية المطلوبة تم تحقيقها بالفعل أو تجاوزها.");
+                            updateQuantitySummaries();
+                            return;
+                          }
+                          const productInfo = allPrimitiveProducts.find(
+                            (p) => p.id == productId
+                          );
+                          const newRow = createMaterialRow(
+                            { ...productInfo, primitive_product_id: productId },
+                            false,
+                            true
+                          );
+                          currentRow.after(newRow);
+                          newRow.querySelector(".theoretical-qty").value = "0.000";
+                          const qtyForNewRow = Math.min(remainingNeeded, nextQC.available);
+                          newRow.querySelector(".actual-qty").value =
+                            qtyForNewRow.toFixed(3);
+                          newRow.querySelector(".qc-select").value = nextQC.id;
+                          validateRowQuantity(currentRow);
+                          validateRowQuantity(newRow);
+                          validateRowDate(newRow);
+                          updateQuantitySummaries();
+                        }
+                        function createMaterialRow(
+                          item,
+                          isManualAdd = false,
+                          isSplit = false
+                        ) {
+                          const row = document.createElement("tr");
+                          const theoreticalQty =
+                            isManualAdd || isSplit ? 0 : item.theoretical_quantity;
+                          let materialCellHTML;
+                          if (isManualAdd) {
+                            let productOptions = '<option value="">اختر مادة...</option>';
+                            allPrimitiveProducts.forEach((p) => {
+                              productOptions += `<option value="${p.id}" data-unit="${p.unit}">${p.name} (${p.unit})</option>`;
+                            });
+                            materialCellHTML = `<select class="form-select material-select" name="primitive_product_id" required>${productOptions}</select>`;
+                          } else {
+                            materialCellHTML = `<strong>${item.name}</strong> (${item.unit}) <span class="quantity-summary badge"></span><input type="hidden" name="primitive_product_id" value="${item.primitive_product_id}">`;
+                          }
+                          const initialActualQty = isSplit ? 0 : theoreticalQty;
+                          row.innerHTML = `<td class="ps-3">${materialCellHTML}</td><td><input type="number" step="any" class="form-control text-center fw-bold theoretical-qty" name="theoretical_quantity" value="${theoreticalQty.toFixed(
+                            3
+                          )}" data-base-quantity="${theoreticalQty}" required></td><td><input type="number" step="any" class="form-control text-center fw-bold actual-qty" name="actual_quantity" value="${initialActualQty.toFixed(
+                            3
+                          )}" data-base-quantity="${theoreticalQty}" required><div class="invalid-feedback small text-center"></div></td><td class="qc-cell"><select class="form-select qc-select" name="source_log_id" disabled><option>اختر مادة أولاً</option></select><div class="invalid-feedback small"></div></td><td class="text-center pe-2"><button type="button" class="btn btn-sm btn-outline-info split-quantity-btn" title="تقسيم الكمية من المصدر التالي" data-bs-toggle="tooltip"><i class="bi bi-distribute-vertical"></i></button><button type="button" class="btn btn-sm btn-outline-danger remove-row-btn" title="حذف الصف"><i class="bi bi-trash"></i></button></td>`;
+                          materialsTbody.appendChild(row);
+                          attachRowListeners(row);
+                          if (!isManualAdd) {
+                            populateQcSelect(row, item.primitive_product_id);
+                          }
+                          return row;
+                        }
+                        function attachRowListeners(row) {
+                          const materialSelect = row.querySelector(".material-select");
+                          if (materialSelect) {
+                            new TomSelect(materialSelect, {
+                              create: false,
+                              dropdownParent: "body",
+                            });
+                            materialSelect.addEventListener("change", (e) => {
+                              populateQcSelect(row, e.target.value);
+                              updateQuantitySummaries();
+                            });
+                          }
+                        }
+                        function populateQcSelect(row, productId) {
+                          const qcSelect = row.querySelector(".qc-select");
+                          if (!productId) {
+                            qcSelect.innerHTML = "<option>اختر مادة أولاً</option>";
+                            qcSelect.disabled = true;
+                            return;
+                          }
+                          const stockForProduct = availableStockData[productId] || [];
+                          let optionsHTML = '<option value="">اختر مصدر...</option>';
+                          stockForProduct.forEach((stock) => {
+                            optionsHTML += `<option value="${stock.id}" data-available="${stock.remaining_quantity}" data-timestamp="${stock.timestamp}">QC: ${stock.qc_no} | متاح: ${stock.remaining_quantity} | ${stock.timestamp}</option>`;
+                          });
+                          if (stockForProduct.length === 0) {
+                            optionsHTML +=
+                              '<option value="" disabled>لا يوجد مخزون متاح</option>';
+                          }
+                          qcSelect.innerHTML = optionsHTML;
+                          qcSelect.disabled = false;
+                          validateRowQuantity(row);
+                          validateRowDate(row);
+                        }
+                        function recalculateQuantities() {
+                          const fromVal = parseInt(fromInput.value) || 0;
+                          const toVal = parseInt(toInput.value) || fromVal;
+                          const numBatches =
+                            fromVal > 0 && toVal >= fromVal
+                              ? toVal - fromVal + 1
+                              : fromVal > 0
+                              ? 1
+                              : 0;
                           batchCountDisplay.textContent =
                             numBatches > 0 ? `لـ ${numBatches} تشغيلة` : "";
-                        }
-                      };
-                      const recalculateAllQuantities = () => {
-                        const numBatches = getNumBatches();
-                        materialsTbody.querySelectorAll("tr").forEach((row) => {
-                          const theoreticalInput = row.querySelector(".theoretical-qty");
-                          const actualInput = row.querySelector(".actual-qty");
-                          const baseTheoretical = parseFloat(
-                            theoreticalInput.dataset.baseTheoreticalQuantity
-                          );
-                          if (!isNaN(baseTheoretical)) {
-                            const totalTheoretical =
-                              numBatches > 0 ? baseTheoretical * numBatches : 0;
-                            theoreticalInput.value = totalTheoretical.toFixed(3);
-                          }
-                          const baseActual = parseFloat(
-                            actualInput.dataset.baseActualQuantity
-                          );
-                          if (!isNaN(baseActual)) {
-                            const totalActual =
-                              numBatches > 0 ? baseActual * numBatches : 0;
-                            actualInput.value = totalActual.toFixed(3);
-                          }
-                        });
-                      };
-                      const handleBatchNumberChange = () => {
-                        updateBatchCountDisplay();
-                        recalculateAllQuantities();
-                      };
-
-                      if (!fromInput.dataset.recalcInitialized) {
-                          fromInput.addEventListener("input", handleBatchNumberChange);
-                          toInput.addEventListener("input", handleBatchNumberChange);
-                          fromInput.dataset.recalcInitialized = 'true';
-                      }
-                      updateBatchCountDisplay(); // Run once on init
-                  }
-
-                  // --- Delete item logic (using event delegation) ---
-                  const batchItemsTable = document.getElementById('batchItemsTable');
-                  if (batchItemsTable && !batchItemsTable.dataset.deleteInitialized) {
-                      batchItemsTable.dataset.deleteInitialized = 'true';
-                      batchItemsTable.addEventListener('click', function(event) {
-                          const deleteButton = event.target.closest('.delete-item-btn');
-                          if (deleteButton) {
-                              event.preventDefault();
-                              if (confirm('هل أنت متأكد من حذف هذه المادة؟')) {
-                                  const form = document.getElementById('deleteItemForm');
-                                  if (form) {
-                                      form.action = deleteButton.dataset.formAction;
-                                      form.submit();
-                                  }
-                              }
-                          }
-                      });
-                  }
-                }
-
-                // ----- Logic for shop_order_template_edit.html -----
-                // NOTE: This logic has been moved to its own partial template
-                // (shop_order_template_edit_partial.html) to ensure it runs correctly
-                // after dynamic page loads.
-
-                // ----- Logic for shop_order_templates.html (Add/Copy Modal) -----
-                const addTemplateModalEl =
-                  document.getElementById("addTemplateModal");
-                if (addTemplateModalEl) {
-                  console.log(
-                    "Initializing shop_order_templates.html modal logic..."
-                  );
-                  if (document.body.hasAttribute("data-templates-page-initialized"))
-                    return;
-                  document.body.setAttribute(
-                    "data-templates-page-initialized",
-                    "true"
-                  );
-                  const container = addTemplateModalEl.querySelector(
-                    "#template-items-container"
-                  );
-                  const addItemBtn =
-                    addTemplateModalEl.querySelector("#add-item-btn");
-                  const primitiveProducts =
-                    getDataFromIsland("primitive-products-data") || [];
-                  const addTemplateModal = new bootstrap.Modal(addTemplateModalEl);
-                  const sourceTemplate =
-                    getDataFromIsland("source-template-data") || null;
-                  const sourceItems = getDataFromIsland("source-items-data") || [];
-                  function createItemRow(productId = "", quantity = "") {
-                    const row = document.createElement("div");
-                    row.className =
-                      "row g-3 align-items-center mb-3 template-item-row";
-                    const productCol = document.createElement("div");
-                    productCol.className = "col-md-7";
-                    const select = document.createElement("select");
-                    select.name = "primitive_product_id";
-                    select.className = "form-select";
-                    select.required = true;
-                    let options =
-                      '<option value="">اختر مادة خام أو تعبئة...</option>';
-                    primitiveProducts.forEach((p) => {
-                      const isSelected = p.id == productId ? "selected" : "";
-                      options += `<option value="${p.id}" ${isSelected}>${p.name} (${p.code})</option>`;
-                    });
-                    select.innerHTML = options;
-                    productCol.appendChild(select);
-                    const qtyCol = document.createElement("div");
-                    qtyCol.className = "col-md-4";
-                    const qtyInput = document.createElement("input");
-                    qtyInput.type = "number";
-                    qtyInput.step = "any";
-                    qtyInput.name = "theoretical_quantity";
-                    qtyInput.className = "form-control";
-                    qtyInput.placeholder = "الكمية النظرية";
-                    qtyInput.value = quantity;
-                    qtyInput.required = true;
-                    qtyCol.appendChild(qtyInput);
-                    const removeCol = document.createElement("div");
-                    removeCol.className = "col-md-1";
-                    const removeBtn = document.createElement("button");
-                    removeBtn.type = "button";
-                    removeBtn.className = "btn btn-sm btn-outline-danger";
-                    removeBtn.innerHTML = '<i class="bi bi-trash"></i>';
-                    removeBtn.onclick = () => row.remove();
-                    removeCol.appendChild(removeBtn);
-                    row.appendChild(productCol);
-                    row.appendChild(qtyCol);
-                    row.appendChild(removeCol);
-                    container.appendChild(row);
-                    new TomSelect(select, {
-                      create: false,
-                      sortField: { field: "text", direction: "asc" },
-                    });
-                  }
-                  addItemBtn.addEventListener("click", () => createItemRow());
-                  addTemplateModalEl.addEventListener("show.bs.modal", () => {
-                    container.innerHTML = "";
-                    let isCopying = getDataFromIsland("source-template-data") != null; // Check if we should be in copy mode
-                    if (isCopying) {
-                      const sourceTpl = getDataFromIsland("source-template-data");
-                      const sourceItms = getDataFromIsland("source-items-data");
-                      addTemplateModalEl.querySelector(
-                        "#addTemplateModalLabel"
-                      ).innerText = "إنشاء قالب جديد من نسخة";
-                      addTemplateModalEl.querySelector(
-                        "#template_name_input"
-                      ).value = `نسخة من - ${sourceTpl.name}`;
-                      if (sourceItms && sourceItms.length > 0) {
-                        sourceItms.forEach((item) => {
-                          createItemRow(
-                            item.primitive_product_id,
-                            item.theoretical_quantity
-                          );
-                        });
-                      } else {
-                        createItemRow();
-                      }
-                      // Important: Erase the data island content after use to prevent re-copying on next modal open
-                      const island1 = document.getElementById("source-template-data");
-                      if (island1) island1.textContent = "";
-                      const island2 = document.getElementById("source-items-data");
-                      if (island2) island2.textContent = "";
-                    } else {
-                      addTemplateModalEl.querySelector(
-                        "#addTemplateModalLabel"
-                      ).innerText = "إنشاء قالب جديد";
-                      addTemplateModalEl.querySelector("form").reset();
-                      addTemplateModalEl
-                        .querySelectorAll(".searchable-select")
-                        .forEach((sel) => {
-                          if (sel.tomselect) sel.tomselect.clear();
-                        });
-                      createItemRow();
-                    }
-                  });
-                  if (sourceTemplate) {
-                    addTemplateModal.show();
-                  }
-                } else {
-                  document.body.removeAttribute("data-templates-page-initialized");
-                }
-
-                // ----- Logic for ledger.html -----
-                const detailsModalEl = document.getElementById("detailsModal");
-                if (detailsModalEl) {
-                  if (document.body.hasAttribute("data-ledger-initialized")) return;
-                  document.body.setAttribute("data-ledger-initialized", "true");
-
-                  const detailsModal = new bootstrap.Modal(detailsModalEl);
-                  const batchDetailsModalEl = document.getElementById("batchDetailsModal");
-                  const batchDetailsModal = batchDetailsModalEl ? new bootstrap.Modal(batchDetailsModalEl) : null;
-
-                  // Logic for the FIRST modal (basic details)
-                  detailsModalEl.addEventListener("show.bs.modal", function (event) {
-                      const button = event.relatedTarget;
-                      const modal = this;
-                      const type = button.getAttribute("data-type");
-
-                      modal.querySelector("#modal-date").textContent = button.getAttribute("data-date");
-                      modal.querySelector("#modal-product").textContent = `${button.getAttribute("data-product-name")} (${button.getAttribute("data-product-code")})`;
-                      modal.querySelector("#modal-actual").textContent = button.getAttribute("data-actual-qty");
-
-                      const inDetails = modal.querySelectorAll(".in-details");
-                      const outDetails = modal.querySelectorAll(".out-details");
-                      const batchBtnContainer = modal.querySelector("#batch-details-btn-container");
-                      const viewFullBatchBtn = modal.querySelector("#viewFullBatchBtn");
-
-                      if (type === 'IN' || type === 'RETURN_IN') {
-                          inDetails.forEach((el) => (el.style.display = "table-row"));
-                          outDetails.forEach((el) => (el.style.display = "none"));
-                          batchBtnContainer.classList.add('d-none');
-                          modal.querySelector("#detailsModalLabel").textContent = "تفاصيل حركة وارد";
-                          modal.querySelector("#modal-company").textContent = button.getAttribute("data-company-name");
-                          modal.querySelector("#modal-qc").textContent = button.getAttribute("data-qc-no");
-                      } else { // type === 'OUT'
-                          inDetails.forEach((el) => (el.style.display = "none"));
-                          outDetails.forEach((el) => (el.style.display = "table-row"));
-                          modal.querySelector("#detailsModalLabel").textContent = "تفاصيل حركة منصرف";
-
-                          const shopOrderCell = modal.querySelector("#modal-shop-order");
-                          const batchId = button.getAttribute("data-batch-id");
-                          const shopOrderNumber = button.getAttribute("data-shop-order-no");
-
-                          if (batchId) {
-                              shopOrderCell.innerHTML = `<a href="/batch/${batchId}/" title="عرض تفاصيل أمر التشغيل">${shopOrderNumber} <i class="bi bi-box-arrow-up-right small"></i></a>`;
-                              batchBtnContainer.classList.remove('d-none');
-                              viewFullBatchBtn.dataset.batchId = batchId;
-                          } else {
-                              shopOrderCell.textContent = shopOrderNumber;
-                              batchBtnContainer.classList.add('d-none');
-                          }
-                          modal.querySelector("#modal-batch").textContent = button.getAttribute("data-batch-no");
-                          modal.querySelector("#modal-final-product").textContent = button.getAttribute("data-final-product");
-                          modal.querySelector("#modal-theoretical").textContent = button.getAttribute("data-theoretical-qty");
-                      }
-                  });
-
-                  // Logic for the SECOND modal (deep dive)
-                  if (batchDetailsModalEl) {
-                      const viewFullBatchBtn = document.getElementById("viewFullBatchBtn");
-                      if (viewFullBatchBtn) {
-                          viewFullBatchBtn.addEventListener('click', async function() {
-                              const batchId = this.dataset.batchId;
-                              if (!batchId) return;
-
-                              const loadingEl = batchDetailsModalEl.querySelector('#batch-details-content-loading');
-                              const mainEl = batchDetailsModalEl.querySelector('#batch-details-content-main');
-                              const tbody = batchDetailsModalEl.querySelector('#batch-modal-items-tbody');
-
-                              // Show loading spinner
-                              loadingEl.classList.remove('d-none');
-                              mainEl.classList.add('d-none');
-                              tbody.innerHTML = '';
-
-                              try {
-                                  const response = await fetch(`/api/batch_details/${batchId}/`);
-                                  const data = await response.json();
-
-                                  if (response.ok) {
-                                      // Populate header info
-                                      batchDetailsModalEl.querySelector('#batch-modal-so-num').textContent = data.shop_order_number;
-                                      batchDetailsModalEl.querySelector('#batch-modal-batch-num').textContent = data.batch_number;
-                                      batchDetailsModalEl.querySelector('#batch-modal-date').textContent = new Date(data.creation_date).toLocaleDateString('en-CA');
-                                      batchDetailsModalEl.querySelector('#batch-modal-final-prod').textContent = data.final_product_name;
-
-                                      // --- FIX: Change data.items to data.item_list ---
-                                      // Populate items table
-                                      data.item_list.forEach(item => {
-                                          const row = `
-                                              <tr>
-                                                  <td>${item.primitive_product_name}</td>
-                                                  <td>${item.source_qc_no || 'N/A'}</td>
-                                                  <td class="text-center">${parseFloat(item.theoretical_quantity).toFixed(3)} ${item.primitive_product_unit}</td>
-                                                  <td class="text-center">${parseFloat(item.actual_quantity).toFixed(3)} ${item.primitive_product_unit}</td>
-                                              </tr>
-                                          `;
-                                          tbody.insertAdjacentHTML('beforeend', row);
-                                      });
-
-                                      // Show main content
-                                      loadingEl.classList.add('d-none');
-                                      mainEl.classList.remove('d-none');
-
-                                  }  else {
-                                      tbody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">خطأ: ${data.error || 'فشل تحميل البيانات.'}</td></tr>`;
-                                      loadingEl.classList.add('d-none');
-                                      mainEl.classList.remove('d-none');
-                                  }
-                              } catch (error) {
-                                   tbody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">حدث خطأ في الشبكة.</td></tr>`;
-                                   loadingEl.classList.add('d-none');
-                                   mainEl.classList.remove('d-none');
-                              }
+                          materialsTbody.querySelectorAll("tr").forEach((row) => {
+                            const theoreticalInput = row.querySelector(".theoretical-qty");
+                            const actualInput = row.querySelector(".actual-qty");
+                            const baseQuantity = parseFloat(
+                              theoreticalInput.dataset.baseQuantity
+                            );
+                            if (isNaN(baseQuantity)) return;
+                            const total = numBatches > 0 ? baseQuantity * numBatches : 0;
+                            if (theoreticalInput.dataset.baseQuantity) {
+                              theoreticalInput.value = total.toFixed(3);
+                              actualInput.value = total.toFixed(3);
+                            }
+                            validateRowQuantity(row);
                           });
+                          updateQuantitySummaries();
+                        }
+                        function loadTemplate() {
+                          const selectedTemplateId = templateSelect.value;
+                          const items = templateData[selectedTemplateId];
+                          materialsTbody.innerHTML = "";
+                          if (!selectedTemplateId || !items) {
+                            materialsCard.style.display = "none";
+                            return;
+                          }
+                          materialsCard.style.display = "block";
+                          items.forEach((item) => {
+                            const newRow = createMaterialRow(item);
+                            const stockForThisItem =
+                              availableStockData[item.primitive_product_id] || [];
+                            if (stockForThisItem.length > 0) {
+                              const firstValidOption = stockForThisItem.find(
+                                (s) => s.timestamp <= creationDateInput.value
+                              );
+                              newRow.querySelector(".qc-select").value = firstValidOption
+                                ? firstValidOption.id
+                                : stockForThisItem[0].id;
+                              validateRowQuantity(newRow);
+                              validateRowDate(newRow);
+                            }
+                          });
+                          recalculateQuantities();
+                        }
+                        creationDateInput.addEventListener("change", () => {
+                          materialsTbody.querySelectorAll("tr").forEach((row) => {
+                            validateRowDate(row);
+                          });
+                        });
+                        templateSelect.addEventListener("change", loadTemplate);
+                        fromInput.addEventListener("input", recalculateQuantities);
+                        toInput.addEventListener("input", recalculateQuantities);
+                        addManualBtn.addEventListener("click", () =>
+                          createMaterialRow({}, true)
+                        );
                       }
-                  }
-                } else {
-                  document.body.removeAttribute("data-ledger-initialized");
-                }
 
-                // ----- Logic for production_returns.html -----
-                const productSelectForReturns = document.getElementById('product_id');
-                // Check if we are on the production returns page by looking for the form.
-                if (productSelectForReturns && productSelectForReturns.closest('#returnForm')) {
-                  // Use a guard on the element itself to prevent re-adding listeners if the script runs multiple times by mistake.
-                  if (!productSelectForReturns.dataset.returnsInitialized) {
-                      console.log("Initializing production_returns.html logic...");
-                      productSelectForReturns.dataset.returnsInitialized = 'true';
+                      // ----- Logic for batch_view.html -----
+                      const batchViewForm = document.getElementById("batchEditForm");
+                      if (batchViewForm) {
+                        console.log("Initializing batch_view.html logic...");
 
-                      const sourceSelect = document.getElementById('source_log_id');
-                      const quantityInput = document.getElementById('quantity');
-                      const maxHelpText = document.getElementById('maxReturnableHelp');
+                        // --- Recalculation logic for batch quantities ---
+                        const fromInput = document.getElementById("batch_number_from");
+                        const toInput = document.getElementById("batch_number_to");
+                        const materialsTbody = document.getElementById("materials_tbody");
+                        const batchCountDisplay = document.getElementById("batch_count_display");
 
-                      productSelectForReturns.addEventListener('change', async function() {
-                          const productId = this.value;
-                          sourceSelect.innerHTML = '<option>جاري التحميل...</option>';
-                          sourceSelect.disabled = true;
-                          maxHelpText.textContent = '';
-                          quantityInput.removeAttribute('max');
-
-                          if (!productId) {
-                              sourceSelect.innerHTML = '<option value="" selected disabled>-- اختر المادة أولاً --</option>';
-                              return;
-                          }
-
-                          try {
-                              const response = await fetch(`/api/get_used_qc_sources/${productId}/`);
-                              if (!response.ok) throw new Error('Network response was not ok');
-
-                              const sources = await response.json();
-
-                              sourceSelect.innerHTML = '<option value="" selected disabled>-- اختر المصدر --</option>';
-                              if (sources.length > 0) {
-                                  sources.forEach(source => {
-                                      const option = document.createElement('option');
-                                      option.value = source.id;
-                                      const date = new Date(source.timestamp).toLocaleDateString('en-CA'); // YYYY-MM-DD format
-                                      option.textContent = `${source.qc_no || 'N/A'} (تاريخ: ${date})`;
-                                      option.dataset.maxReturnable = source.max_returnable;
-                                      sourceSelect.appendChild(option);
-                                  });
-                                  sourceSelect.disabled = false;
-                              } else {
-                                  sourceSelect.innerHTML = '<option value="" selected disabled>-- لا توجد مصادر مستخدمة لهذه المادة --</option>';
+                        if(fromInput && toInput && materialsTbody) {
+                            const getNumBatches = () => {
+                              const fromVal = parseInt(fromInput.value) || 0;
+                              const toVal = parseInt(toInput.value) || fromVal;
+                              return fromVal > 0 && toVal >= fromVal
+                                ? toVal - fromVal + 1
+                                : fromVal > 0
+                                ? 1
+                                : 0;
+                            };
+                            const updateBatchCountDisplay = () => {
+                              const numBatches = getNumBatches();
+                              if (batchCountDisplay) {
+                                batchCountDisplay.textContent =
+                                  numBatches > 0 ? `لـ ${numBatches} تشغيلة` : "";
                               }
-                          } catch (error) {
-                              console.error('Failed to fetch sources:', error);
-                              sourceSelect.innerHTML = '<option value="" selected disabled>-- خطأ في التحميل --</option>';
-                          }
-                      });
+                            };
+                            const recalculateAllQuantities = () => {
+                              const numBatches = getNumBatches();
+                              materialsTbody.querySelectorAll("tr").forEach((row) => {
+                                const theoreticalInput = row.querySelector(".theoretical-qty");
+                                const actualInput = row.querySelector(".actual-qty");
+                                const baseTheoretical = parseFloat(
+                                  theoreticalInput.dataset.baseTheoreticalQuantity
+                                );
+                                if (!isNaN(baseTheoretical)) {
+                                  const totalTheoretical =
+                                    numBatches > 0 ? baseTheoretical * numBatches : 0;
+                                  theoreticalInput.value = totalTheoretical.toFixed(3);
+                                }
+                                const baseActual = parseFloat(
+                                  actualInput.dataset.baseActualQuantity
+                                );
+                                if (!isNaN(baseActual)) {
+                                  const totalActual =
+                                    numBatches > 0 ? baseActual * numBatches : 0;
+                                  actualInput.value = totalActual.toFixed(3);
+                                }
+                              });
+                            };
+                            const handleBatchNumberChange = () => {
+                              updateBatchCountDisplay();
+                              recalculateAllQuantities();
+                            };
 
-                      sourceSelect.addEventListener('change', function() {
-                          const selectedOption = this.options[this.selectedIndex];
-                          const maxReturnable = selectedOption.dataset.maxReturnable;
-                          if (maxReturnable) {
-                              const maxVal = parseFloat(maxReturnable).toFixed(3);
-                              quantityInput.setAttribute('max', maxVal);
-                              maxHelpText.textContent = `الكمية القصوى الممكن إرجاعها من هذا المصدر: ${maxVal}`;
+                            if (!fromInput.dataset.recalcInitialized) {
+                                fromInput.addEventListener("input", handleBatchNumberChange);
+                                toInput.addEventListener("input", handleBatchNumberChange);
+                                fromInput.dataset.recalcInitialized = 'true';
+                            }
+                            updateBatchCountDisplay(); // Run once on init
+                        }
+
+                        // --- Delete item logic (using event delegation) ---
+                        const batchItemsTable = document.getElementById('batchItemsTable');
+                        if (batchItemsTable && !batchItemsTable.dataset.deleteInitialized) {
+                            batchItemsTable.dataset.deleteInitialized = 'true';
+                            batchItemsTable.addEventListener('click', function(event) {
+                                const deleteButton = event.target.closest('.delete-item-btn');
+                                if (deleteButton) {
+                                    event.preventDefault();
+                                    if (confirm('هل أنت متأكد من حذف هذه المادة؟')) {
+                                        const form = document.getElementById('deleteItemForm');
+                                        if (form) {
+                                            form.action = deleteButton.dataset.formAction;
+                                            form.submit();
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                      }
+
+                      // ----- Logic for shop_order_template_edit.html -----
+                      // NOTE: This logic has been moved to its own partial template
+                      // (shop_order_template_edit_partial.html) to ensure it runs correctly
+                      // after dynamic page loads.
+
+                      // ----- Logic for shop_order_templates.html (Add/Copy Modal) -----
+                      const addTemplateModalEl =
+                        document.getElementById("addTemplateModal");
+                      if (addTemplateModalEl) {
+                        console.log(
+                          "Initializing shop_order_templates.html modal logic..."
+                        );
+                        if (document.body.hasAttribute("data-templates-page-initialized"))
+                          return;
+                        document.body.setAttribute(
+                          "data-templates-page-initialized",
+                          "true"
+                        );
+                        const container = addTemplateModalEl.querySelector(
+                          "#template-items-container"
+                        );
+                        const addItemBtn =
+                          addTemplateModalEl.querySelector("#add-item-btn");
+                        const primitiveProducts =
+                          getDataFromIsland("primitive-products-data") || [];
+                        const addTemplateModal = new bootstrap.Modal(addTemplateModalEl);
+                        const sourceTemplate =
+                          getDataFromIsland("source-template-data") || null;
+                        const sourceItems = getDataFromIsland("source-items-data") || [];
+                        function createItemRow(productId = "", quantity = "") {
+                          const row = document.createElement("div");
+                          row.className =
+                            "row g-3 align-items-center mb-3 template-item-row";
+                          const productCol = document.createElement("div");
+                          productCol.className = "col-md-7";
+                          const select = document.createElement("select");
+                          select.name = "primitive_product_id";
+                          select.className = "form-select";
+                          select.required = true;
+                          let options =
+                            '<option value="">اختر مادة خام أو تعبئة...</option>';
+                          primitiveProducts.forEach((p) => {
+                            const isSelected = p.id == productId ? "selected" : "";
+                            options += `<option value="${p.id}" ${isSelected}>${p.name} (${p.code})</option>`;
+                          });
+                          select.innerHTML = options;
+                          productCol.appendChild(select);
+                          const qtyCol = document.createElement("div");
+                          qtyCol.className = "col-md-4";
+                          const qtyInput = document.createElement("input");
+                          qtyInput.type = "number";
+                          qtyInput.step = "any";
+                          qtyInput.name = "theoretical_quantity";
+                          qtyInput.className = "form-control";
+                          qtyInput.placeholder = "الكمية النظرية";
+                          qtyInput.value = quantity;
+                          qtyInput.required = true;
+                          qtyCol.appendChild(qtyInput);
+                          const removeCol = document.createElement("div");
+                          removeCol.className = "col-md-1";
+                          const removeBtn = document.createElement("button");
+                          removeBtn.type = "button";
+                          removeBtn.className = "btn btn-sm btn-outline-danger";
+                          removeBtn.innerHTML = '<i class="bi bi-trash"></i>';
+                          removeBtn.onclick = () => row.remove();
+                          removeCol.appendChild(removeBtn);
+                          row.appendChild(productCol);
+                          row.appendChild(qtyCol);
+                          row.appendChild(removeCol);
+                          container.appendChild(row);
+                          new TomSelect(select, {
+                            create: false,
+                            sortField: { field: "text", direction: "asc" },
+                          });
+                        }
+                        addItemBtn.addEventListener("click", () => createItemRow());
+                        addTemplateModalEl.addEventListener("show.bs.modal", () => {
+                          container.innerHTML = "";
+                          let isCopying = getDataFromIsland("source-template-data") != null; // Check if we should be in copy mode
+                          if (isCopying) {
+                            const sourceTpl = getDataFromIsland("source-template-data");
+                            const sourceItms = getDataFromIsland("source-items-data");
+                            addTemplateModalEl.querySelector(
+                              "#addTemplateModalLabel"
+                            ).innerText = "إنشاء قالب جديد من نسخة";
+                            addTemplateModalEl.querySelector(
+                              "#template_name_input"
+                            ).value = `نسخة من - ${sourceTpl.name}`;
+                            if (sourceItms && sourceItms.length > 0) {
+                              sourceItms.forEach((item) => {
+                                createItemRow(
+                                  item.primitive_product_id,
+                                  item.theoretical_quantity
+                                );
+                              });
+                            } else {
+                              createItemRow();
+                            }
+                            // Important: Erase the data island content after use to prevent re-copying on next modal open
+                            const island1 = document.getElementById("source-template-data");
+                            if (island1) island1.textContent = "";
+                            const island2 = document.getElementById("source-items-data");
+                            if (island2) island2.textContent = "";
                           } else {
-                              quantityInput.removeAttribute('max');
-                              maxHelpText.textContent = '';
+                            addTemplateModalEl.querySelector(
+                              "#addTemplateModalLabel"
+                            ).innerText = "إنشاء قالب جديد";
+                            addTemplateModalEl.querySelector("form").reset();
+                            addTemplateModalEl
+                              .querySelectorAll(".searchable-select")
+                              .forEach((sel) => {
+                                if (sel.tomselect) sel.tomselect.clear();
+                              });
+                            createItemRow();
+                          }
+                        });
+                        if (sourceTemplate) {
+                          addTemplateModal.show();
+                        }
+                      } else {
+                        document.body.removeAttribute("data-templates-page-initialized");
+                      }
+
+                      // ----- Logic for ledger.html -----
+                      const detailsModalEl = document.getElementById("detailsModal");
+                      if (detailsModalEl) {
+                        if (document.body.hasAttribute("data-ledger-initialized")) return;
+                        document.body.setAttribute("data-ledger-initialized", "true");
+
+                        const detailsModal = new bootstrap.Modal(detailsModalEl);
+                        const batchDetailsModalEl = document.getElementById("batchDetailsModal");
+                        const batchDetailsModal = batchDetailsModalEl ? new bootstrap.Modal(batchDetailsModalEl) : null;
+
+                        // Logic for the FIRST modal (basic details)
+                        detailsModalEl.addEventListener("show.bs.modal", function (event) {
+                            const button = event.relatedTarget;
+                            const modal = this;
+                            const type = button.getAttribute("data-type");
+
+                            modal.querySelector("#modal-date").textContent = button.getAttribute("data-date");
+                            modal.querySelector("#modal-product").textContent = `${button.getAttribute("data-product-name")} (${button.getAttribute("data-product-code")})`;
+                            modal.querySelector("#modal-actual").textContent = button.getAttribute("data-actual-qty");
+
+                            const inDetails = modal.querySelectorAll(".in-details");
+                            const outDetails = modal.querySelectorAll(".out-details");
+                            const batchBtnContainer = modal.querySelector("#batch-details-btn-container");
+                            const viewFullBatchBtn = modal.querySelector("#viewFullBatchBtn");
+
+                            if (type === 'IN' || type === 'RETURN_IN') {
+                                inDetails.forEach((el) => (el.style.display = "table-row"));
+                                outDetails.forEach((el) => (el.style.display = "none"));
+                                batchBtnContainer.classList.add('d-none');
+                                modal.querySelector("#detailsModalLabel").textContent = "تفاصيل حركة وارد";
+                                modal.querySelector("#modal-company").textContent = button.getAttribute("data-company-name");
+                                modal.querySelector("#modal-qc").textContent = button.getAttribute("data-qc-no");
+                            } else { // type === 'OUT'
+                                inDetails.forEach((el) => (el.style.display = "none"));
+                                outDetails.forEach((el) => (el.style.display = "table-row"));
+                                modal.querySelector("#detailsModalLabel").textContent = "تفاصيل حركة منصرف";
+
+                                const shopOrderCell = modal.querySelector("#modal-shop-order");
+                                const batchId = button.getAttribute("data-batch-id");
+                                const shopOrderNumber = button.getAttribute("data-shop-order-no");
+
+                                if (batchId) {
+                                    shopOrderCell.innerHTML = `<a href="/batch/${batchId}/" title="عرض تفاصيل أمر التشغيل">${shopOrderNumber} <i class="bi bi-box-arrow-up-right small"></i></a>`;
+                                    batchBtnContainer.classList.remove('d-none');
+                                    viewFullBatchBtn.dataset.batchId = batchId;
+                                } else {
+                                    shopOrderCell.textContent = shopOrderNumber;
+                                    batchBtnContainer.classList.add('d-none');
+                                }
+                                modal.querySelector("#modal-batch").textContent = button.getAttribute("data-batch-no");
+                                modal.querySelector("#modal-final-product").textContent = button.getAttribute("data-final-product");
+                                modal.querySelector("#modal-theoretical").textContent = button.getAttribute("data-theoretical-qty");
+                            }
+                        });
+
+                        // Logic for the SECOND modal (deep dive)
+                        if (batchDetailsModalEl) {
+                            const viewFullBatchBtn = document.getElementById("viewFullBatchBtn");
+                            if (viewFullBatchBtn) {
+                                viewFullBatchBtn.addEventListener('click', async function() {
+                                    const batchId = this.dataset.batchId;
+                                    if (!batchId) return;
+
+                                    const loadingEl = batchDetailsModalEl.querySelector('#batch-details-content-loading');
+                                    const mainEl = batchDetailsModalEl.querySelector('#batch-details-content-main');
+                                    const tbody = batchDetailsModalEl.querySelector('#batch-modal-items-tbody');
+
+                                    // Show loading spinner
+                                    loadingEl.classList.remove('d-none');
+                                    mainEl.classList.add('d-none');
+                                    tbody.innerHTML = '';
+
+                                    try {
+                                        const response = await fetch(`/api/batch_details/${batchId}/`);
+                                        const data = await response.json();
+
+                                        if (response.ok) {
+                                            // Populate header info
+                                            batchDetailsModalEl.querySelector('#batch-modal-so-num').textContent = data.shop_order_number;
+                                            batchDetailsModalEl.querySelector('#batch-modal-batch-num').textContent = data.batch_number;
+                                            batchDetailsModalEl.querySelector('#batch-modal-date').textContent = new Date(data.creation_date).toLocaleDateString('en-CA');
+                                            batchDetailsModalEl.querySelector('#batch-modal-final-prod').textContent = data.final_product_name;
+
+                                            // --- FIX: Change data.items to data.item_list ---
+                                            // Populate items table
+                                            data.item_list.forEach(item => {
+                                                const row = `
+                                                    <tr>
+                                                        <td>${item.primitive_product_name}</td>
+                                                        <td>${item.source_qc_no || 'N/A'}</td>
+                                                        <td class="text-center">${parseFloat(item.theoretical_quantity).toFixed(3)} ${item.primitive_product_unit}</td>
+                                                        <td class="text-center">${parseFloat(item.actual_quantity).toFixed(3)} ${item.primitive_product_unit}</td>
+                                                    </tr>
+                                                `;
+                                                tbody.insertAdjacentHTML('beforeend', row);
+                                            });
+
+                                            // Show main content
+                                            loadingEl.classList.add('d-none');
+                                            mainEl.classList.remove('d-none');
+
+                                        }  else {
+                                            tbody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">خطأ: ${data.error || 'فشل تحميل البيانات.'}</td></tr>`;
+                                            loadingEl.classList.add('d-none');
+                                            mainEl.classList.remove('d-none');
+                                        }
+                                    } catch (error) {
+                                         tbody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">حدث خطأ في الشبكة.</td></tr>`;
+                                         loadingEl.classList.add('d-none');
+                                         mainEl.classList.remove('d-none');
+                                    }
+                                });
+                            }
+                        }
+                      } else {
+                        document.body.removeAttribute("data-ledger-initialized");
+                      }
+
+                      // ----- Logic for production_returns.html -----
+                      const productSelectForReturns = document.getElementById('product_id');
+                      // Check if we are on the production returns page by looking for the form.
+                      if (productSelectForReturns && productSelectForReturns.closest('#returnForm')) {
+                        // Use a guard on the element itself to prevent re-adding listeners if the script runs multiple times by mistake.
+                        if (!productSelectForReturns.dataset.returnsInitialized) {
+                            console.log("Initializing production_returns.html logic...");
+                            productSelectForReturns.dataset.returnsInitialized = 'true';
+
+                            const sourceSelect = document.getElementById('source_log_id');
+                            const quantityInput = document.getElementById('quantity');
+                            const maxHelpText = document.getElementById('maxReturnableHelp');
+
+                            productSelectForReturns.addEventListener('change', async function() {
+                                const productId = this.value;
+                                sourceSelect.innerHTML = '<option>جاري التحميل...</option>';
+                                sourceSelect.disabled = true;
+                                maxHelpText.textContent = '';
+                                quantityInput.removeAttribute('max');
+
+                                if (!productId) {
+                                    sourceSelect.innerHTML = '<option value="" selected disabled>-- اختر المادة أولاً --</option>';
+                                    return;
+                                }
+
+                                try {
+                                    const response = await fetch(`/api/get_used_qc_sources/${productId}/`);
+                                    if (!response.ok) throw new Error('Network response was not ok');
+
+                                    const sources = await response.json();
+
+                                    sourceSelect.innerHTML = '<option value="" selected disabled>-- اختر المصدر --</option>';
+                                    if (sources.length > 0) {
+                                        sources.forEach(source => {
+                                            const option = document.createElement('option');
+                                            option.value = source.id;
+                                            const date = new Date(source.timestamp).toLocaleDateString('en-CA'); // YYYY-MM-DD format
+                                            option.textContent = `${source.qc_no || 'N/A'} (تاريخ: ${date})`;
+                                            option.dataset.maxReturnable = source.max_returnable;
+                                            sourceSelect.appendChild(option);
+                                        });
+                                        sourceSelect.disabled = false;
+                                    } else {
+                                        sourceSelect.innerHTML = '<option value="" selected disabled>-- لا توجد مصادر مستخدمة لهذه المادة --</option>';
+                                    }
+                                } catch (error) {
+                                    console.error('Failed to fetch sources:', error);
+                                    sourceSelect.innerHTML = '<option value="" selected disabled>-- خطأ في التحميل --</option>';
+                                }
+                            });
+
+                            sourceSelect.addEventListener('change', function() {
+                                const selectedOption = this.options[this.selectedIndex];
+                                const maxReturnable = selectedOption.dataset.maxReturnable;
+                                if (maxReturnable) {
+                                    const maxVal = parseFloat(maxReturnable).toFixed(3);
+                                    quantityInput.setAttribute('max', maxVal);
+                                    maxHelpText.textContent = `الكمية القصوى الممكن إرجاعها من هذا المصدر: ${maxVal}`;
+                                } else {
+                                    quantityInput.removeAttribute('max');
+                                    maxHelpText.textContent = '';
+                                }
+                            });
+                        }
+                      }
+
+                      // ----- Logic for visuals.html -----
+                      const inventoryFlowChartCanvas =
+                        document.getElementById("inventoryFlowChart");
+                      if (inventoryFlowChartCanvas) {
+                        console.log("Initializing visuals.html chart logic...");
+                        if (document.body.hasAttribute("data-visuals-initialized")) return;
+                        document.body.setAttribute("data-visuals-initialized", "true");
+                        if (typeof Chart === "undefined") {
+                          console.error("Chart.js not loaded!");
+                          return;
+                        }
+                        const chartColors = [
+                          "#0d6efd",
+                          "#6f42c1",
+                          "#d63384",
+                          "#dc3545",
+                          "#fd7e14",
+                          "#ffc107",
+                          "#198754",
+                          "#20c997",
+                          "#0dcaf0",
+                          "#6c757d",
+                        ];
+                        const inOutData = getDataFromIsland("data-for-chart-1");
+                        if (
+                          inventoryFlowChartCanvas &&
+                          inOutData &&
+                          inOutData.labels &&
+                          inOutData.labels.length > 0
+                        ) {
+                          new Chart(inventoryFlowChartCanvas.getContext("2d"), {
+                            type: "line",
+                            data: inOutData,
+                            options: {
+                              responsive: true,
+                              maintainAspectRatio: false,
+                              interaction: { mode: "index", intersect: false },
+                              scales: {
+                                y: {
+                                  beginAtZero: true,
+                                  title: { display: true, text: "الكمية" },
+                                },
+                              },
+                            },
+                          });
+                        } else {
+                          showNoDataMessage("inventoryFlowChart");
+                        }
+                        const consumptionData = getDataFromIsland("data-for-chart-2");
+                        const consumptionCanvas =
+                          document.getElementById("consumptionChart");
+                        if (
+                          consumptionCanvas &&
+                          consumptionData &&
+                          consumptionData.labels &&
+                          consumptionData.labels.length > 0
+                        ) {
+                          consumptionData.datasets[0].backgroundColor = chartColors;
+                          new Chart(consumptionCanvas.getContext("2d"), {
+                            type: "doughnut",
+                            data: consumptionData,
+                            options: {
+                              responsive: true,
+                              maintainAspectRatio: false,
+                              plugins: { legend: { position: "top" } },
+                            },
+                          });
+                        } else {
+                          showNoDataMessage("consumptionChart");
+                        }
+                        const varianceData = getDataFromIsland("data-for-chart-3");
+                        const varianceCanvas = document.getElementById("varianceChart");
+                        if (
+                          varianceCanvas &&
+                          varianceData &&
+                          varianceData.labels &&
+                          varianceData.labels.length > 0
+                        ) {
+                          varianceData.datasets[0].backgroundColor =
+                            varianceData.datasets[0].data.map((v) =>
+                              v > 0 ? "rgba(220, 53, 69, 0.7)" : "rgba(25, 135, 84, 0.7)"
+                            );
+                          varianceData.datasets[0].borderColor =
+                            varianceData.datasets[0].data.map((v) =>
+                              v > 0 ? "#dc3545" : "#198754"
+                            );
+                          varianceData.datasets[0].borderWidth = 1;
+                          new Chart(varianceCanvas.getContext("2d"), {
+                            type: "bar",
+                            data: varianceData,
+                            options: {
+                              responsive: true,
+                              maintainAspectRatio: false,
+                              scales: {
+                                y: {
+                                  beginAtZero: true,
+                                  title: { display: true, text: "كمية الفرق" },
+                                },
+                              },
+                            },
+                          });
+                        } else {
+                          showNoDataMessage("varianceChart");
+                        }
+                      } else {
+                        document.body.removeAttribute("data-visuals-initialized");
+                      }
+                    }
+
+                    // --- Core Dynamic Loading Functions ---
+                    async function loadContent(url, pushState = true) {
+                      try {
+                        contentContainer.style.transition = "opacity 0.2s ease-in-out";
+                        contentContainer.style.opacity = "0.5";
+                        const response = await fetch(url, {
+                          headers: { "X-Partial-Request": "true" },
+                        });
+                        if (!response.ok) {
+                          window.location.href = url;
+                          return;
+                        }
+                        const html = await response.text();
+                        contentContainer.innerHTML = html;
+                        contentContainer.style.opacity = "1";
+                        if (pushState) {
+                          history.pushState({ path: url }, "", url);
+                        }
+                        const newTitle = contentContainer.querySelector("h1")?.innerText;
+                        document.title = newTitle ? `${newTitle} - GIPCCO` : "GIPCCO Warehouse System";
+                        initializePluginsInContent(contentContainer); // Pass container for targeted initialization
+                        updateActiveNav(url);
+                      } catch (error) {
+                        console.error("Failed to load dynamic content:", error);
+                        window.location.href = url;
+                      }
+                    }
+                    function updateActiveNav(url) {
+                      const path = new URL(url, window.location.origin).pathname;
+                      document.querySelectorAll(".nav-link, .dropdown-item").forEach((link) => {
+                          const linkPath = new URL(link.href).pathname;
+                          const isDirectMatch = linkPath === path;
+
+                          if (link.classList.contains("dropdown-item") && isDirectMatch) {
+                              link.classList.add("active");
+                              const dropdownToggle = link.closest(".dropdown").querySelector(".dropdown-toggle");
+                              if (dropdownToggle) dropdownToggle.classList.add("active");
+                          } else if (link.classList.contains("nav-link") && !link.classList.contains("dropdown-toggle")) {
+                              link.classList.toggle("active", isDirectMatch);
+                          } else {
+                               link.classList.remove("active");
                           }
                       });
-                  }
-                }
-
-                // ----- Logic for visuals.html -----
-                const inventoryFlowChartCanvas =
-                  document.getElementById("inventoryFlowChart");
-                if (inventoryFlowChartCanvas) {
-                  console.log("Initializing visuals.html chart logic...");
-                  if (document.body.hasAttribute("data-visuals-initialized")) return;
-                  document.body.setAttribute("data-visuals-initialized", "true");
-                  if (typeof Chart === "undefined") {
-                    console.error("Chart.js not loaded!");
-                    return;
-                  }
-                  const chartColors = [
-                    "#0d6efd",
-                    "#6f42c1",
-                    "#d63384",
-                    "#dc3545",
-                    "#fd7e14",
-                    "#ffc107",
-                    "#198754",
-                    "#20c997",
-                    "#0dcaf0",
-                    "#6c757d",
-                  ];
-                  const inOutData = getDataFromIsland("data-for-chart-1");
-                  if (
-                    inventoryFlowChartCanvas &&
-                    inOutData &&
-                    inOutData.labels &&
-                    inOutData.labels.length > 0
-                  ) {
-                    new Chart(inventoryFlowChartCanvas.getContext("2d"), {
-                      type: "line",
-                      data: inOutData,
-                      options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        interaction: { mode: "index", intersect: false },
-                        scales: {
-                          y: {
-                            beginAtZero: true,
-                            title: { display: true, text: "الكمية" },
-                          },
-                        },
-                      },
-                    });
-                  } else {
-                    showNoDataMessage("inventoryFlowChart");
-                  }
-                  const consumptionData = getDataFromIsland("data-for-chart-2");
-                  const consumptionCanvas =
-                    document.getElementById("consumptionChart");
-                  if (
-                    consumptionCanvas &&
-                    consumptionData &&
-                    consumptionData.labels &&
-                    consumptionData.labels.length > 0
-                  ) {
-                    consumptionData.datasets[0].backgroundColor = chartColors;
-                    new Chart(consumptionCanvas.getContext("2d"), {
-                      type: "doughnut",
-                      data: consumptionData,
-                      options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { position: "top" } },
-                      },
-                    });
-                  } else {
-                    showNoDataMessage("consumptionChart");
-                  }
-                  const varianceData = getDataFromIsland("data-for-chart-3");
-                  const varianceCanvas = document.getElementById("varianceChart");
-                  if (
-                    varianceCanvas &&
-                    varianceData &&
-                    varianceData.labels &&
-                    varianceData.labels.length > 0
-                  ) {
-                    varianceData.datasets[0].backgroundColor =
-                      varianceData.datasets[0].data.map((v) =>
-                        v > 0 ? "rgba(220, 53, 69, 0.7)" : "rgba(25, 135, 84, 0.7)"
-                      );
-                    varianceData.datasets[0].borderColor =
-                      varianceData.datasets[0].data.map((v) =>
-                        v > 0 ? "#dc3545" : "#198754"
-                      );
-                    varianceData.datasets[0].borderWidth = 1;
-                    new Chart(varianceCanvas.getContext("2d"), {
-                      type: "bar",
-                      data: varianceData,
-                      options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                          y: {
-                            beginAtZero: true,
-                            title: { display: true, text: "كمية الفرق" },
-                          },
-                        },
-                      },
-                    });
-                  } else {
-                    showNoDataMessage("varianceChart");
-                  }
-                } else {
-                  document.body.removeAttribute("data-visuals-initialized");
-                }
-              }
-
-              // --- Core Dynamic Loading Functions ---
-              async function loadContent(url, pushState = true) {
-                try {
-                  contentContainer.style.transition = "opacity 0.2s ease-in-out";
-                  contentContainer.style.opacity = "0.5";
-                  const response = await fetch(url, {
-                    headers: { "X-Partial-Request": "true" },
-                  });
-                  if (!response.ok) {
-                    window.location.href = url;
-                    return;
-                  }
-                  const html = await response.text();
-                  contentContainer.innerHTML = html;
-                  contentContainer.style.opacity = "1";
-                  if (pushState) {
-                    history.pushState({ path: url }, "", url);
-                  }
-                  const newTitle = contentContainer.querySelector("h1")?.innerText;
-                  document.title = newTitle ? `${newTitle} - GIPCCO` : "GIPCCO Warehouse System";
-                  initializePluginsInContent(contentContainer); // Pass container for targeted initialization
-                  updateActiveNav(url);
-                } catch (error) {
-                  console.error("Failed to load dynamic content:", error);
-                  window.location.href = url;
-                }
-              }
-              function updateActiveNav(url) {
-                const path = new URL(url, window.location.origin).pathname;
-                document.querySelectorAll(".nav-link, .dropdown-item").forEach((link) => {
-                    const linkPath = new URL(link.href).pathname;
-                    const isDirectMatch = linkPath === path;
-
-                    if (link.classList.contains("dropdown-item") && isDirectMatch) {
-                        link.classList.add("active");
-                        const dropdownToggle = link.closest(".dropdown").querySelector(".dropdown-toggle");
-                        if (dropdownToggle) dropdownToggle.classList.add("active");
-                    } else if (link.classList.contains("nav-link") && !link.classList.contains("dropdown-toggle")) {
-                        link.classList.toggle("active", isDirectMatch);
-                    } else {
-                         link.classList.remove("active");
+                      // Ensure parent dropdowns are active
+                       document.querySelectorAll(".nav-item.dropdown").forEach(dropdown => {
+                           const dropdownToggle = dropdown.querySelector(".nav-link.dropdown-toggle");
+                           const hasActiveItem = dropdown.querySelector(".dropdown-item.active");
+                           dropdownToggle.classList.toggle("active", !!hasActiveItem);
+                       });
                     }
-                });
-                // Ensure parent dropdowns are active
-                 document.querySelectorAll(".nav-item.dropdown").forEach(dropdown => {
-                     const dropdownToggle = dropdown.querySelector(".nav-link.dropdown-toggle");
-                     const hasActiveItem = dropdown.querySelector(".dropdown-item.active");
-                     dropdownToggle.classList.toggle("active", !!hasActiveItem);
-                 });
-              }
-              document.body.addEventListener("click", (event) => {
-                const link = event.target.closest("a");
-                if (
-                  link &&
-                  link.href &&
-                  link.target !== "_blank" &&
-                  new URL(link.href).origin === window.location.origin &&
-                  !link.hasAttribute("data-no-dynamic") &&
-                  !link.closest('.modal') // Do not intercept links inside modals
-                ) {
-                  event.preventDefault();
-                  loadContent(link.href);
-                }
-              });
-              window.addEventListener("popstate", (event) => {
-                if (event.state && event.state.path) {
-                  loadContent(event.state.path, false);
-                }
-              });
-              history.replaceState({ path: window.location.href }, "", window.location.href);
+                    document.body.addEventListener("click", (event) => {
+                      const link = event.target.closest("a");
+                      if (
+                        link &&
+                        link.href &&
+                        link.target !== "_blank" &&
+                        new URL(link.href).origin === window.location.origin &&
+                        !link.hasAttribute("data-no-dynamic") &&
+                        !link.closest('.modal') // Do not intercept links inside modals
+                      ) {
+                        event.preventDefault();
+                        loadContent(link.href);
+                      }
+                    });
+                    window.addEventListener("popstate", (event) => {
+                      if (event.state && event.state.path) {
+                        loadContent(event.state.path, false);
+                      }
+                    });
+                    history.replaceState({ path: window.location.href }, "", window.location.href);
 
-              // Initial call on first page load
-              initializePluginsInContent(document.body);
-            });
+                    // Initial call on first page load
+                    initializePluginsInContent(document.body);
+                  });
     </script>
     {% block scripts %}{% endblock %}
   </body>

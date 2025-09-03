@@ -272,9 +272,9 @@ class OpeningBalance(models.Model):
     quantity = models.FloatField(verbose_name=_("Quantity"))
     balance_date = models.DateTimeField(verbose_name=_("Balance Date"))
 
-    # --- NEW FIELD ---
-    unit_cost = models.DecimalField(
-        max_digits=12, decimal_places=3, default=Decimal('0.000'), verbose_name=_("Unit Cost")
+    # --- MODIFIED FIELD ---
+    total_value = models.DecimalField(
+        max_digits=14, decimal_places=3, default=Decimal('0.000'), verbose_name=_("Total Value")
     )
 
     class Meta:
@@ -285,6 +285,14 @@ class OpeningBalance(models.Model):
 
     def __str__(self):
         return f"Opening Balance for {self.product.name} on {self.balance_date.date()}: {self.quantity}"
+
+    # --- NEW PROPERTY ---
+    @property
+    def unit_cost(self):
+        """Calculates the effective unit cost from the total value and quantity."""
+        if self.quantity > 0:
+            return (self.total_value / Decimal(str(self.quantity))).quantize(Decimal('0.001'))
+        return Decimal('0.000')
 
 
 class ProductionReturn(models.Model):
@@ -366,8 +374,10 @@ class PurchaseOrderItem(models.Model):
         verbose_name=_("Product")
     )
     quantity_ordered = models.FloatField(verbose_name=_("Quantity Ordered"))
-    unit_price = models.DecimalField(
-        max_digits=12, decimal_places=3, verbose_name=_("Unit Price")
+    
+    # --- MODIFICATION: Store total price, not unit price ---
+    total_price = models.DecimalField(
+        max_digits=14, decimal_places=3, verbose_name=_("Total Price")
     )
 
     class Meta:
@@ -377,3 +387,25 @@ class PurchaseOrderItem(models.Model):
 
     def __str__(self):
         return f"{self.quantity_ordered} of {self.product.name} for PO #{self.purchase_order.po_number}"
+
+    # --- NEW: Property to calculate the effective unit price ---
+    @property
+    def effective_unit_price(self):
+        """
+        Calculates the unit price based on the total price and total quantity received.
+        This is the value that should be used for inventory costing.
+        """
+        # Sum up all quantities received against this specific PO item
+        # Note: self.receipts.all() might not be available if not prefetched.
+        # A manager method or a direct query is more robust.
+        total_quantity_received = InventoryLog.objects.filter(po_item=self).aggregate(total=models.Sum('quantity'))['total'] or 0.0
+        
+        if total_quantity_received > 0:
+            # The Decimal cast is crucial for precision
+            return (self.total_price / Decimal(str(total_quantity_received))).quantize(Decimal('0.001'))
+        
+        # If nothing received yet, return the expected unit price for display
+        if self.quantity_ordered > 0:
+             return (self.total_price / Decimal(str(self.quantity_ordered))).quantize(Decimal('0.001'))
+        
+        return Decimal('0.000')

@@ -1,12 +1,11 @@
-
-<!-- gipcco_project/inventory/templates/inventory/partials/purchase_order_create_content.html -->
+<!-- gipcco_project/inventory/templates/inventory/partials/purchase_order_edit_content.html -->
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h2 mb-0" style="font-weight: 700;">إنشاء أمر شراء جديد</h1>
-    <a href="{% url 'inventory:purchase_orders' %}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> العودة لقائمة الأوامر</a>
+    <h1 class="h2 mb-0" style="font-weight: 700;">تعديل أمر الشراء: {{ po.po_number }}</h1>
+    <a href="{% url 'inventory:view_purchase_order' pk=po.id %}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> العودة للتفاصيل</a>
 </div>
 
-<form method="post" action="{% url 'inventory:create_purchase_order' %}">
+<form method="post" action="{% url 'inventory:edit_purchase_order' pk=po.id %}">
     {% csrf_token %}
     <div class="row g-4">
         <!-- PO Header -->
@@ -19,20 +18,19 @@
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <label for="po_number" class="form-label fw-bold">رقم أمر الشراء</label>
-                            <input type="text" class="form-control" id="po_number" name="po_number" required>
+                            <input type="text" class="form-control" id="po_number" name="po_number" value="{{ po.po_number }}" required>
                         </div>
                         <div class="col-md-4 mb-3">
                             <label for="supplier_id" class="form-label fw-bold">المورد</label>
                             <select class="form-select searchable-select" id="supplier_id" name="supplier_id" required>
-                                <option value="">اختر مورد...</option>
                                 {% for s in suppliers %}
-                                <option value="{{ s.id }}">{{ s.name }}</option>
+                                <option value="{{ s.id }}" {% if s.id == po.supplier_id %}selected{% endif %}>{{ s.name }}</option>
                                 {% endfor %}
                             </select>
                         </div>
                         <div class="col-md-4 mb-3">
                             <label for="order_date" class="form-label fw-bold">تاريخ الطلب</label>
-                            <input type="text" class="form-control datepicker" id="order_date" name="order_date" required>
+                            <input type="text" class="form-control datepicker" id="order_date" name="order_date" value="{{ po.order_date|date:'Y-m-d' }}" required>
                         </div>
                     </div>
                 </div>
@@ -54,41 +52,43 @@
         
         <!-- Submit Button -->
         <div class="col-12 d-grid">
-            <button type="submit" class="btn btn-primary btn-lg"><i class="bi bi-save"></i> إنشاء وحفظ أمر الشراء</button>
+            <button type="submit" class="btn btn-primary btn-lg"><i class="bi bi-save"></i> حفظ التعديلات</button>
         </div>
     </div>
 </form>
 
 {{ products|json_script:"products-data" }}
+{{ po_items_json|json_script:"po-items-data" }}
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const container = document.getElementById('po-items-container');
     const addButton = document.getElementById('add-po-item-btn');
     const productsData = JSON.parse(document.getElementById('products-data').textContent);
+    const initialItemsData = JSON.parse(document.getElementById('po-items-data').textContent);
 
-    const createItemRow = () => {
+    const createItemRow = (itemData = null) => {
         const row = document.createElement('div');
         row.className = 'row g-3 align-items-center mb-3 border-bottom pb-3 po-item-row';
 
         let productOptions = '<option value="">اختر مادة...</option>';
         productsData.forEach(p => {
-            productOptions += `<option value="${p.id}">${p.name} (${p.code})</option>`;
+            const isSelected = itemData && p.id == itemData.product_id ? 'selected' : '';
+            productOptions += `<option value="${p.id}" ${isSelected}>${p.name} (${p.code})</option>`;
         });
+        
+        const quantityValue = itemData ? itemData.quantity : '';
+        const priceValue = itemData ? itemData.total_price : '';
 
         row.innerHTML = `
             <div class="col-md-5">
-                <label class="form-label visually-hidden">Product</label>
                 <select name="product_id" class="form-select" required>${productOptions}</select>
             </div>
             <div class="col-md-3">
-                <label class="form-label visually-hidden">Quantity</label>
-                <input type="number" step="any" name="quantity" class="form-control" placeholder="الكمية المطلوبة" required>
+                <input type="number" step="any" name="quantity" class="form-control" placeholder="الكمية المطلوبة" value="${quantityValue}" required>
             </div>
             <div class="col-md-3">
-                <label class="form-label visually-hidden">Total Price</label>
-                <!-- THIS IS THE FIX: Changed from unit_price to total_price -->
-                <input type="number" step="any" name="total_price" class="form-control" placeholder="السعر الإجمالي" required>
+                <input type="number" step="any" name="total_price" class="form-control" placeholder="السعر الإجمالي" value="${priceValue}" required>
             </div>
             <div class="col-md-1">
                 <button type="button" class="btn btn-sm btn-outline-danger w-100 remove-po-item-btn"><i class="bi bi-trash"></i></button>
@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     };
 
-    addButton.addEventListener('click', createItemRow);
+    addButton.addEventListener('click', () => createItemRow());
     
     container.addEventListener('click', function (e) {
         if (e.target.closest('.remove-po-item-btn')) {
@@ -110,7 +110,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Add one row to start with
-    createItemRow();
+    if (initialItemsData.length > 0) {
+        initialItemsData.forEach(item => createItemRow(item));
+    } else {
+        createItemRow();
+    }
 });
 </script>

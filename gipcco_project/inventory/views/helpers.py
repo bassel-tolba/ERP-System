@@ -1,3 +1,4 @@
+
 # gipcco_project/inventory/views/helpers.py
 
 import json
@@ -283,7 +284,7 @@ def get_inventory_state_at_datetime(product_id: int, target_datetime: timezone.d
 
     if most_recent_ob:
         running_qty = Decimal(str(most_recent_ob.quantity))
-        running_value = Decimal(str(most_recent_ob.quantity)) * most_recent_ob.unit_cost
+        running_value = most_recent_ob.total_value  # --- KEY CHANGE HERE ---
         effective_date = most_recent_ob.balance_date
     else:
         running_qty = Decimal('0.0')

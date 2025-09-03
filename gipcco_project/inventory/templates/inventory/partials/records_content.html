@@ -16,10 +16,9 @@
                     <tr>
                         <th class="ps-3">المنتج</th>
                         <th>QC No.</th>
-                        <th>الشركة</th>
+                        <th>الشركة / أمر الشراء</th>
                         <th>الكمية</th>
                         <th>التاريخ</th>
-                        <th>الوسوم</th>
                         <th class="text-end pe-3">إجراءات</th>
                     </tr>
                 </thead>
@@ -28,16 +27,20 @@
                     <tr>
                         <td class="ps-3"><strong>{{ log.product.name }}</strong><br><small class="text-muted font-monospace">{{ log.product.code }}</small></td>
                         <td><span class="badge bg-secondary font-monospace">{{ log.qc_no|default:"N/A" }}</span></td>
-                        <td>{% if log.company %}{{ log.company.name }}{% else %}---{% endif %}</td>
+                        <td>
+                            {% if log.po_item %}
+                                <a href="{% url 'inventory:view_purchase_order' pk=log.po_item.purchase_order.id %}" class="fw-bold">
+                                    PO: {{ log.po_item.purchase_order.po_number }}
+                                </a>
+                                <br><small class="text-muted">{{ log.po_item.purchase_order.supplier.name }}</small>
+                            {% elif log.company %}
+                                {{ log.company.name }}
+                            {% else %}
+                                ---
+                            {% endif %}
+                        </td>
                         <td class="fw-bold">{{ log.quantity|floatformat:3 }} <small class="text-muted">{{ log.product.unit }}</small></td>
                         <td class="text-nowrap">{{ log.timestamp|date:"Y-m-d" }}</td>
-                        <td>
-                            {% for tag in log.tags.all %}
-                                <span class="badge text-bg-secondary">{{ tag.name }}</span>
-                            {% empty %}
-                                <span class="text-muted">لا يوجد</span>
-                            {% endfor %}
-                        </td>
                         <td class="text-end pe-3">
                             <button 
                                 type="button" 
@@ -50,7 +53,11 @@
                                 data-quantity="{{ log.quantity|floatformat:3 }}"
                                 data-qc-no="{{ log.qc_no|default:'' }}"
                                 data-entry-date="{{ log.timestamp|date:'Y-m-d' }}"
+                                data-unit-price="{{ log.unit_price|floatformat:3|default:'' }}"
                                 data-tag-ids="{% for tag in log.tags.all %}{{ tag.id }},{% endfor %}"
+                                data-po-item-id="{{ log.po_item.id|default:'' }}"
+                                data-po-id="{{ log.po_item.purchase_order.id|default:'' }}"
+                                data-supplier-id="{{ log.po_item.purchase_order.supplier.id|default:'' }}"
                             >
                                 <i class="bi bi-pencil-square"></i> تعديل
                             </button>
@@ -76,44 +83,66 @@
                 <h5 class="modal-title">تعديل سجل</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <!-- Action will be set by JavaScript -->
             <form method="post" action="" id="editRecordForm">
                 {% csrf_token %}
                 <div class="modal-body">
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" role="switch" id="editLinkToPoCheck">
+                        <label class="form-check-label" for="editLinkToPoCheck">ربط بسجل أمر شراء؟</label>
+                    </div>
+                    <div id="edit-po-fields-container" class="border p-3 rounded mb-3 bg-light-subtle" style="display: none;">
+                         <div class="mb-3">
+                            <label for="edit_po_supplier_id" class="form-label fw-bold">1. اختر المورد</label>
+                            <select id="edit_po_supplier_id">
+                                <option value="">-- اختر مورد --</option>
+                                {% for c in all_companies %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
+                            </select>
+                        </div>
+                         <div class="mb-3">
+                            <label for="edit_purchase_order_id" class="form-label fw-bold">2. اختر أمر الشراء</label>
+                            <select id="edit_purchase_order_id" disabled>
+                                <option value="">-- اختر مورد أولاً --</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit_po_item_id" class="form-label fw-bold">3. اختر المادة</label>
+                            <select id="edit_po_item_id" name="po_item_id" disabled>
+                                <option value="">-- اختر أمر شراء أولاً --</option>
+                            </select>
+                        </div>
+                    </div>
+                    
                     <div class="mb-3">
                         <label class="form-label fw-bold">المنتج</label>
-                        <!-- Removed searchable-select class to let the main JS handle it -->
                         <select name="product_id" id="editProductId" required>
-                            {% for p in all_products %}
-                            <option value="{{ p.id }}">{{ p.name }} ({{ p.code }})</option>
-                            {% endfor %}
+                            <option value=""></option>
+                            {% for p in all_products %}<option value="{{ p.id }}">{{ p.name }} ({{ p.code }})</option>{% endfor %}
                         </select>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">الشركة</label>
-                         <!-- Removed searchable-select class -->
                         <select name="company_id" id="editCompanyId" required>
-                            {% for c in all_companies %}
-                            <option value="{{ c.id }}">{{ c.name }}</option>
-                            {% endfor %}
+                            <option value=""></option>
+                            {% for c in all_companies %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
                         </select>
                     </div>
                     <div class="row">
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label class="form-label fw-bold">الكمية</label>
                             <input type="number" step="any" class="form-control" name="quantity" id="editQuantity" required>
                         </div>
-                         <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label class="form-label fw-bold">QC Number</label>
                             <input type="text" class="form-control" name="qc_no" id="editQcNo">
+                        </div>
+                        <div class="col-md-4 mb-3" id="edit-manual-price-container">
+                            <label for="editUnitPrice" class="form-label fw-bold">سعر الوحدة</label>
+                            <input type="number" step="0.001" class="form-control" name="unit_price" id="editUnitPrice" required placeholder="0.000"/>
                         </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">الوسوم</label>
-                        <!-- Removed searchable-select class -->
-                        <select id="editTags" name="tags" multiple disabled>
-                            <option value="">يرجى اختيار منتج أولاً</option>
-                        </select>
+                        <select id="editTags" name="tags" multiple disabled><option value="">اختر منتج</option></select>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">التاريخ</label>

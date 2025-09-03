@@ -1,3 +1,4 @@
+
 <!-- gipcco_project/inventory/templates/inventory/partials/opening_balances_content.html -->
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -40,8 +41,10 @@
                         <table class="table table-striped table-hover mb-0">
                             <thead class="table-light">
                                 <tr>
-                                    <th style="width: 30%;">تاريخ الرصيد</th>
+                                    <th style="width: 25%;">تاريخ الرصيد</th>
                                     <th>الكمية الافتتاحية</th>
+                                    <th>القيمة الإجمالية</th>
+                                    <th>تكلفة الوحدة (محسوبة)</th>
                                     <th class="text-end pe-3">إجراءات</th>
                                 </tr>
                             </thead>
@@ -50,6 +53,8 @@
                                 <tr>
                                     <td><strong>{{ b.balance_date|date:"Y-m-d" }}</strong></td>
                                     <td>{{ b.quantity|floatformat:3 }} {{ b.product.unit }}</td>
+                                    <td>{{ b.total_value|floatformat:3 }}</td>
+                                    <td>{{ b.unit_cost|floatformat:3 }}</td>
                                     <td class="text-end pe-3">
                                         <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editBalanceModal-{{ b.id }}">
                                             <i class="bi bi-pencil-square"></i> تعديل
@@ -95,11 +100,15 @@
                         </select>
                     </div>
                     <div class="row">
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label for="add_quantity" class="form-label fw-bold">الكمية</label>
                             <input type="number" step="any" class="form-control" id="add_quantity" name="quantity" required>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
+                            <label for="add_total_value" class="form-label fw-bold">القيمة الإجمالية</label>
+                            <input type="number" step="any" class="form-control" id="add_total_value" name="total_value" value="0.000" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
                             <label class="form-label fw-bold">تاريخ الرصيد</label>
                             <input type="text" class="form-control datepicker" name="balance_date" value="{{ today_date }}" required>
                         </div>
@@ -128,11 +137,15 @@
                 <div class="modal-body">
                      <div class="alert alert-info small">أنت تقوم بتعديل سجل رصيد افتتاحي بتاريخ {{ b.balance_date|date:"Y-m-d" }}.</div>
                      <div class="row">
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label class="form-label fw-bold">الكمية</label>
-                            <input type="number" step="any" class="form-control" name="quantity" value="{{ b.quantity }}" required>
+                            <input type="number" step="any" class="form-control" name="quantity" value="{{ b.quantity|floatformat:3 }}" required>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">القيمة الإجمالية</label>
+                            <input type="number" step="any" class="form-control" name="total_value" value="{{ b.total_value|floatformat:3 }}" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
                             <label class="form-label fw-bold">تاريخ الرصيد</label>
                             <input type="text" class="form-control datepicker" name="balance_date" value="{{ b.balance_date|date:"Y-m-d" }}" required>
                         </div>

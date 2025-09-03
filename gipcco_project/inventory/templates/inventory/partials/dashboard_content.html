@@ -1,6 +1,12 @@
+
 <!-- gipcco_project/inventory/templates/inventory/partials/dashboard_content.html -->
 
 {% load static %}
+<!-- NEW: Data island for pre-filling the form -->
+{% if prefill_data_json %}
+{{ prefill_data_json|json_script:"prefill-po-data" }}
+{% endif %}
+
 <div class="row g-4">
   <div class="col-lg-5">
     <div class="card">
@@ -178,4 +184,3 @@
     </div>
   </div>
 </div>
-

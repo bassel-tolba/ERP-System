@@ -13614,3 +13614,1336 @@ INFO 2025-09-03 01:03:41,543 django.utils.autoreload autoreload 23388 32656 C:\U
 INFO 2025-09-03 01:03:42,730 django.utils.autoreload autoreload 3292 21124 Watching for file changes with StatReloader
 INFO 2025-09-03 01:03:45,401 django.utils.autoreload autoreload 3292 21124 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py changed, reloading.
 INFO 2025-09-03 01:03:46,672 django.utils.autoreload autoreload 24356 15568 Watching for file changes with StatReloader
+INFO 2025-09-03 01:06:49,744 django.server basehttp 24356 29924 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 271054
+INFO 2025-09-03 01:07:19,934 django.server basehttp 24356 29924 "GET /api/batch_details/35/ HTTP/1.1" 200 3687
+INFO 2025-09-03 01:07:19,946 django.server basehttp 24356 29924 "GET /api/batch_details/35/ HTTP/1.1" 200 3687
+INFO 2025-09-03 01:07:25,970 django.server basehttp 24356 29924 "GET /static/img/winter.png HTTP/1.1" 304 0
+INFO 2025-09-03 01:07:26,468 django.server basehttp 24356 29924 "GET /static/img/spring.png HTTP/1.1" 304 0
+INFO 2025-09-03 01:07:28,827 django.server basehttp 24356 29924 "GET /api/batch_details/35/ HTTP/1.1" 200 3687
+INFO 2025-09-03 01:07:28,835 django.server basehttp 24356 29924 "GET /api/batch_details/35/ HTTP/1.1" 200 3687
+INFO 2025-09-03 01:07:32,560 django.server basehttp 24356 29924 "GET /static/img/summer.png HTTP/1.1" 304 0
+INFO 2025-09-03 01:07:37,653 django.server basehttp 24356 29924 "GET /api/batch_details/36/ HTTP/1.1" 200 3765
+INFO 2025-09-03 01:07:37,666 django.server basehttp 24356 29924 "GET /api/batch_details/36/ HTTP/1.1" 200 3765
+INFO 2025-09-03 01:07:49,029 django.server basehttp 24356 29924 "GET /api/batch_details/33/ HTTP/1.1" 200 3835
+INFO 2025-09-03 01:07:49,037 django.server basehttp 24356 29924 "GET /api/batch_details/33/ HTTP/1.1" 200 3835
+ERROR 2025-09-03 01:08:10,067 django.request log 24356 29924 Internal Server Error: /ledger/print/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py", line 331, in print_ledger
+    return render(request, 'inventory/print_ledger_enhanced.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: inventory/print_ledger_enhanced.html
+ERROR 2025-09-03 01:08:10,076 django.server basehttp 24356 29924 "GET /ledger/print/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 500 119504
+INFO 2025-09-03 01:08:26,266 django.server basehttp 24356 29924 "GET /ledger/print/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 49504
+INFO 2025-09-03 13:12:02,749 django.server basehttp 24356 15512 "GET /api/batch_details/30/ HTTP/1.1" 200 3212
+INFO 2025-09-03 13:12:02,782 django.server basehttp 24356 15512 "GET /api/batch_details/30/ HTTP/1.1" 200 3212
+INFO 2025-09-03 13:28:22,745 django.server basehttp 24356 31776 "GET /records/ HTTP/1.1" 200 401651
+INFO 2025-09-03 13:29:01,214 django.server basehttp 24356 31776 "GET /records/ HTTP/1.1" 200 401651
+INFO 2025-09-03 13:29:01,546 django.server basehttp 24356 31776 "GET /purchase_orders/create/ HTTP/1.1" 200 10399
+INFO 2025-09-03 13:29:01,999 django.server basehttp 24356 1480 "GET /records/ HTTP/1.1" 200 401651
+INFO 2025-09-03 13:29:05,166 django.server basehttp 24356 1480 "GET /records/ HTTP/1.1" 200 401651
+INFO 2025-09-03 13:29:05,781 django.server basehttp 24356 31776 "GET /records/ HTTP/1.1" 200 401651
+INFO 2025-09-03 13:29:06,976 django.server basehttp 24356 31776 "GET /records/ HTTP/1.1" 200 401651
+INFO 2025-09-03 13:29:07,253 django.server basehttp 24356 31776 "GET /ledger/ HTTP/1.1" 200 13452
+INFO 2025-09-03 13:29:08,161 django.server basehttp 24356 31776 "GET /ledger/ HTTP/1.1" 200 13452
+INFO 2025-09-03 13:29:08,923 django.server basehttp 24356 31776 "GET /ledger/ HTTP/1.1" 200 13452
+INFO 2025-09-03 13:29:11,083 django.server basehttp 24356 31776 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 271054
+INFO 2025-09-03 13:29:11,149 django.server basehttp 24356 31776 "GET /static/css/style.css HTTP/1.1" 304 0
+INFO 2025-09-03 13:29:15,768 django.server basehttp 24356 31776 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 179862
+INFO 2025-09-03 13:29:16,401 django.server basehttp 24356 31776 "GET /purchase_orders/create/ HTTP/1.1" 200 10399
+INFO 2025-09-03 13:29:17,398 django.server basehttp 24356 31776 "GET /purchase_orders/create/ HTTP/1.1" 200 10399
+INFO 2025-09-03 13:29:18,056 django.server basehttp 24356 31776 "GET /purchase_orders/ HTTP/1.1" 200 3271
+INFO 2025-09-03 14:03:49,939 django.utils.autoreload autoreload 24356 15568 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-03 14:03:51,038 django.utils.autoreload autoreload 23476 22264 Watching for file changes with StatReloader
+INFO 2025-09-03 14:04:53,677 django.utils.autoreload autoreload 6168 32428 Watching for file changes with StatReloader
+INFO 2025-09-03 14:09:19,823 django.utils.autoreload autoreload 5360 15500 Watching for file changes with StatReloader
+INFO 2025-09-03 14:09:23,407 django.server basehttp 5360 16308 "GET / HTTP/1.1" 200 105906
+INFO 2025-09-03 14:09:31,103 django.server basehttp 5360 16308 "GET / HTTP/1.1" 200 21669
+INFO 2025-09-03 14:09:31,645 django.server basehttp 5360 16308 "GET /purchase_orders/create/ HTTP/1.1" 200 10399
+INFO 2025-09-03 14:09:33,288 django.server basehttp 5360 16308 "GET /purchase_orders/create/ HTTP/1.1" 200 10399
+INFO 2025-09-03 14:09:33,854 django.server basehttp 5360 16308 "GET /purchase_orders/ HTTP/1.1" 200 3271
+ERROR 2025-09-03 14:09:34,987 django.request log 5360 16308 Internal Server Error: /purchase_order/1/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such column: purchase_order_items.total_price
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\purchase_orders.py", line 104, in view_purchase_order
+    po = get_object_or_404(
+        PurchaseOrder.objects.select_related('supplier')
+        .prefetch_related('items__product', 'items__receipts'),
+        pk=pk
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 629, in get
+    num = len(clone)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 366, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1951, in _fetch_all
+    self._prefetch_related_objects()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1328, in _prefetch_related_objects
+    prefetch_related_objects(self._result_cache, *self._prefetch_related_lookups)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 2397, in prefetch_related_objects
+    obj_list, additional_lookups = prefetch_one_level(
+                                   ~~~~~~~~~~~~~~~~~~^
+        obj_to_fetch,
+        ^^^^^^^^^^^^^
+    ...<2 lines>...
+        level,
+        ^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 2561, in prefetch_one_level
+    ) = prefetcher.get_prefetch_querysets(
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        instances, lookup.get_current_querysets(level)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\fields\related_descriptors.py", line 800, in get_prefetch_querysets
+    for rel_obj in queryset:
+                   ^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 384, in __iter__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: no such column: purchase_order_items.total_price
+ERROR 2025-09-03 14:09:35,020 django.server basehttp 5360 16308 "GET /purchase_order/1/ HTTP/1.1" 500 169438
+ERROR 2025-09-03 14:09:35,117 django.request log 5360 16308 Internal Server Error: /purchase_order/1/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such column: purchase_order_items.total_price
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\purchase_orders.py", line 104, in view_purchase_order
+    po = get_object_or_404(
+        PurchaseOrder.objects.select_related('supplier')
+        .prefetch_related('items__product', 'items__receipts'),
+        pk=pk
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 629, in get
+    num = len(clone)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 366, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1951, in _fetch_all
+    self._prefetch_related_objects()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1328, in _prefetch_related_objects
+    prefetch_related_objects(self._result_cache, *self._prefetch_related_lookups)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 2397, in prefetch_related_objects
+    obj_list, additional_lookups = prefetch_one_level(
+                                   ~~~~~~~~~~~~~~~~~~^
+        obj_to_fetch,
+        ^^^^^^^^^^^^^
+    ...<2 lines>...
+        level,
+        ^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 2561, in prefetch_one_level
+    ) = prefetcher.get_prefetch_querysets(
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        instances, lookup.get_current_querysets(level)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\fields\related_descriptors.py", line 800, in get_prefetch_querysets
+    for rel_obj in queryset:
+                   ^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 384, in __iter__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: no such column: purchase_order_items.total_price
+ERROR 2025-09-03 14:09:35,173 django.server basehttp 5360 16308 "GET /purchase_order/1/ HTTP/1.1" 500 169713
+INFO 2025-09-03 14:09:40,012 django.server basehttp 5360 16308 "GET /purchase_orders/ HTTP/1.1" 200 87514
+ERROR 2025-09-03 14:09:47,575 django.request log 5360 16308 Internal Server Error: /purchase_order/1/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such column: purchase_order_items.total_price
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\purchase_orders.py", line 104, in view_purchase_order
+    po = get_object_or_404(
+        PurchaseOrder.objects.select_related('supplier')
+        .prefetch_related('items__product', 'items__receipts'),
+        pk=pk
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 629, in get
+    num = len(clone)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 366, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1951, in _fetch_all
+    self._prefetch_related_objects()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1328, in _prefetch_related_objects
+    prefetch_related_objects(self._result_cache, *self._prefetch_related_lookups)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 2397, in prefetch_related_objects
+    obj_list, additional_lookups = prefetch_one_level(
+                                   ~~~~~~~~~~~~~~~~~~^
+        obj_to_fetch,
+        ^^^^^^^^^^^^^
+    ...<2 lines>...
+        level,
+        ^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 2561, in prefetch_one_level
+    ) = prefetcher.get_prefetch_querysets(
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        instances, lookup.get_current_querysets(level)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\fields\related_descriptors.py", line 800, in get_prefetch_querysets
+    for rel_obj in queryset:
+                   ^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 384, in __iter__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: no such column: purchase_order_items.total_price
+ERROR 2025-09-03 14:09:47,601 django.server basehttp 5360 16308 "GET /purchase_order/1/ HTTP/1.1" 500 169438
+ERROR 2025-09-03 14:09:47,707 django.request log 5360 16308 Internal Server Error: /purchase_order/1/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such column: purchase_order_items.total_price
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\purchase_orders.py", line 104, in view_purchase_order
+    po = get_object_or_404(
+        PurchaseOrder.objects.select_related('supplier')
+        .prefetch_related('items__product', 'items__receipts'),
+        pk=pk
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 629, in get
+    num = len(clone)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 366, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1951, in _fetch_all
+    self._prefetch_related_objects()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1328, in _prefetch_related_objects
+    prefetch_related_objects(self._result_cache, *self._prefetch_related_lookups)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 2397, in prefetch_related_objects
+    obj_list, additional_lookups = prefetch_one_level(
+                                   ~~~~~~~~~~~~~~~~~~^
+        obj_to_fetch,
+        ^^^^^^^^^^^^^
+    ...<2 lines>...
+        level,
+        ^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 2561, in prefetch_one_level
+    ) = prefetcher.get_prefetch_querysets(
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        instances, lookup.get_current_querysets(level)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\fields\related_descriptors.py", line 800, in get_prefetch_querysets
+    for rel_obj in queryset:
+                   ^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 384, in __iter__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: no such column: purchase_order_items.total_price
+ERROR 2025-09-03 14:09:47,772 django.server basehttp 5360 16308 "GET /purchase_order/1/ HTTP/1.1" 500 169713
+ERROR 2025-09-03 14:09:58,273 django.request log 5360 16308 Internal Server Error: /purchase_order/1/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such column: purchase_order_items.total_price
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\purchase_orders.py", line 104, in view_purchase_order
+    po = get_object_or_404(
+        PurchaseOrder.objects.select_related('supplier')
+        .prefetch_related('items__product', 'items__receipts'),
+        pk=pk
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 629, in get
+    num = len(clone)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 366, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1951, in _fetch_all
+    self._prefetch_related_objects()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1328, in _prefetch_related_objects
+    prefetch_related_objects(self._result_cache, *self._prefetch_related_lookups)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 2397, in prefetch_related_objects
+    obj_list, additional_lookups = prefetch_one_level(
+                                   ~~~~~~~~~~~~~~~~~~^
+        obj_to_fetch,
+        ^^^^^^^^^^^^^
+    ...<2 lines>...
+        level,
+        ^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 2561, in prefetch_one_level
+    ) = prefetcher.get_prefetch_querysets(
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        instances, lookup.get_current_querysets(level)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\fields\related_descriptors.py", line 800, in get_prefetch_querysets
+    for rel_obj in queryset:
+                   ^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 384, in __iter__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: no such column: purchase_order_items.total_price
+ERROR 2025-09-03 14:09:58,300 django.server basehttp 5360 16308 "GET /purchase_order/1/ HTTP/1.1" 500 169438
+ERROR 2025-09-03 14:09:58,396 django.request log 5360 16308 Internal Server Error: /purchase_order/1/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such column: purchase_order_items.total_price
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\purchase_orders.py", line 104, in view_purchase_order
+    po = get_object_or_404(
+        PurchaseOrder.objects.select_related('supplier')
+        .prefetch_related('items__product', 'items__receipts'),
+        pk=pk
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 90, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 629, in get
+    num = len(clone)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 366, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1951, in _fetch_all
+    self._prefetch_related_objects()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1328, in _prefetch_related_objects
+    prefetch_related_objects(self._result_cache, *self._prefetch_related_lookups)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 2397, in prefetch_related_objects
+    obj_list, additional_lookups = prefetch_one_level(
+                                   ~~~~~~~~~~~~~~~~~~^
+        obj_to_fetch,
+        ^^^^^^^^^^^^^
+    ...<2 lines>...
+        level,
+        ^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 2561, in prefetch_one_level
+    ) = prefetcher.get_prefetch_querysets(
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        instances, lookup.get_current_querysets(level)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\fields\related_descriptors.py", line 800, in get_prefetch_querysets
+    for rel_obj in queryset:
+                   ^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 384, in __iter__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: no such column: purchase_order_items.total_price
+ERROR 2025-09-03 14:09:58,423 django.server basehttp 5360 16308 "GET /purchase_order/1/ HTTP/1.1" 500 169713
+INFO 2025-09-03 14:12:14,107 django.server basehttp 5360 16308 "GET /purchase_orders/ HTTP/1.1" 200 87514
+INFO 2025-09-03 14:13:58,991 django.utils.autoreload autoreload 12632 32324 Watching for file changes with StatReloader
+INFO 2025-09-03 14:13:59,649 django.server basehttp 12632 17024 "GET /purchase_order/1/ HTTP/1.1" 200 90472
+INFO 2025-09-03 14:13:59,699 django.server basehttp 12632 17024 "GET /static/css/bootstrap-icons.min.css HTTP/1.1" 304 0
+INFO 2025-09-03 14:14:05,286 django.server basehttp 12632 17024 "GET /?po_item_id=1 HTTP/1.1" 200 21669
+INFO 2025-09-03 14:14:09,457 django.server basehttp 12632 17024 "GET /api/supplier/7/open_pos/ HTTP/1.1" 200 61
+ERROR 2025-09-03 14:14:10,651 django.request log 12632 17024 Internal Server Error: /api/po/2/items/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\api.py", line 125, in api_get_po_items
+    'unit_price': item.unit_price
+                  ^^^^^^^^^^^^^^^
+AttributeError: 'PurchaseOrderItem' object has no attribute 'unit_price'
+ERROR 2025-09-03 14:14:10,653 django.server basehttp 12632 17024 "GET /api/po/2/items/ HTTP/1.1" 500 67298
+INFO 2025-09-03 14:14:14,440 django.server basehttp 12632 17024 "GET /api/supplier/13/open_pos/ HTTP/1.1" 200 2
+INFO 2025-09-03 14:14:16,459 django.server basehttp 12632 17024 "GET /api/supplier/7/open_pos/ HTTP/1.1" 200 61
+ERROR 2025-09-03 14:14:17,538 django.request log 12632 17024 Internal Server Error: /api/po/2/items/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\api.py", line 125, in api_get_po_items
+    'unit_price': item.unit_price
+                  ^^^^^^^^^^^^^^^
+AttributeError: 'PurchaseOrderItem' object has no attribute 'unit_price'
+ERROR 2025-09-03 14:14:17,540 django.server basehttp 12632 17024 "GET /api/po/2/items/ HTTP/1.1" 500 67298
+INFO 2025-09-03 14:14:41,668 django.server basehttp 12632 17024 "GET /api/supplier/2/open_pos/ HTTP/1.1" 200 2
+INFO 2025-09-03 14:14:53,518 django.server basehttp 12632 17024 "GET /?po_item_id=1 HTTP/1.1" 200 21669
+INFO 2025-09-03 14:14:56,024 django.server basehttp 12632 17024 "GET /?po_item_id=1 HTTP/1.1" 200 21669
+INFO 2025-09-03 14:14:57,393 django.server basehttp 12632 17024 "GET /?po_item_id=1 HTTP/1.1" 200 21669
+INFO 2025-09-03 14:15:10,564 django.server basehttp 12632 17024 "GET /static/img/fall.png HTTP/1.1" 304 0
+INFO 2025-09-03 14:15:15,077 django.server basehttp 12632 17024 "GET /static/css/google-fonts.css HTTP/1.1" 304 0
+WARNING 2025-09-03 14:15:15,182 django.request log 12632 17344 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 14:15:15,195 django.server basehttp 12632 17344 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 14216
+WARNING 2025-09-03 14:15:15,293 django.server basehttp 12632 17344 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 14:15:30,172 django.server basehttp 12632 17024 "GET /?po_item_id=1 HTTP/1.1" 200 105906
+WARNING 2025-09-03 14:15:30,259 django.request log 12632 17024 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 14:15:30,279 django.server basehttp 12632 17024 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 14216
+WARNING 2025-09-03 14:15:30,478 django.server basehttp 12632 17024 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 14:15:34,755 django.server basehttp 12632 30824 "GET /api/supplier/7/open_pos/ HTTP/1.1" 200 61
+ERROR 2025-09-03 14:15:35,950 django.request log 12632 30824 Internal Server Error: /api/po/2/items/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\api.py", line 125, in api_get_po_items
+    'unit_price': item.unit_price
+                  ^^^^^^^^^^^^^^^
+AttributeError: 'PurchaseOrderItem' object has no attribute 'unit_price'
+ERROR 2025-09-03 14:15:35,954 django.server basehttp 12632 30824 "GET /api/po/2/items/ HTTP/1.1" 500 67298
+INFO 2025-09-03 14:16:36,752 django.server basehttp 12632 30824 "GET /?po_item_id=1 HTTP/1.1" 200 105906
+WARNING 2025-09-03 14:16:36,842 django.request log 12632 30824 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 14:16:36,850 django.server basehttp 12632 30824 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 14216
+WARNING 2025-09-03 14:16:36,931 django.server basehttp 12632 30824 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 14:16:43,066 django.server basehttp 12632 26868 "GET /api/supplier/7/open_pos/ HTTP/1.1" 200 61
+ERROR 2025-09-03 14:16:43,923 django.request log 12632 26868 Internal Server Error: /api/po/2/items/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\api.py", line 125, in api_get_po_items
+    'unit_price': item.unit_price
+                  ^^^^^^^^^^^^^^^
+AttributeError: 'PurchaseOrderItem' object has no attribute 'unit_price'
+ERROR 2025-09-03 14:16:43,978 django.server basehttp 12632 26868 "GET /api/po/2/items/ HTTP/1.1" 500 67298
+INFO 2025-09-03 14:16:46,737 django.server basehttp 12632 26868 "GET /?po_item_id=1 HTTP/1.1" 200 105906
+WARNING 2025-09-03 14:16:46,826 django.request log 12632 26868 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 14:16:46,838 django.server basehttp 12632 26868 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 14216
+WARNING 2025-09-03 14:16:46,896 django.server basehttp 12632 26868 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 14:16:51,331 django.server basehttp 12632 11948 "GET / HTTP/1.1" 200 105906
+WARNING 2025-09-03 14:16:51,472 django.request log 12632 11948 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 14:16:51,478 django.server basehttp 12632 11948 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 14216
+INFO 2025-09-03 14:16:51,480 django.server basehttp 12632 17412 "GET /static/js/bootstrap.bundle.min.js HTTP/1.1" 304 0
+WARNING 2025-09-03 14:16:51,584 django.server basehttp 12632 17412 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 14:16:53,929 django.server basehttp 12632 11948 "GET /api/supplier/7/open_pos/ HTTP/1.1" 200 61
+ERROR 2025-09-03 14:16:54,719 django.request log 12632 11948 Internal Server Error: /api/po/2/items/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\api.py", line 125, in api_get_po_items
+    'unit_price': item.unit_price
+                  ^^^^^^^^^^^^^^^
+AttributeError: 'PurchaseOrderItem' object has no attribute 'unit_price'
+ERROR 2025-09-03 14:16:54,725 django.server basehttp 12632 11948 "GET /api/po/2/items/ HTTP/1.1" 500 67285
+INFO 2025-09-03 14:18:24,987 django.utils.autoreload autoreload 12632 32324 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\dashboard.py changed, reloading.
+INFO 2025-09-03 14:18:26,059 django.utils.autoreload autoreload 14968 24200 Watching for file changes with StatReloader
+INFO 2025-09-03 14:18:28,540 django.server basehttp 14968 33856 "GET / HTTP/1.1" 200 98546
+WARNING 2025-09-03 14:18:28,908 django.request log 14968 33856 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 14:18:28,931 django.server basehttp 14968 33856 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 14216
+INFO 2025-09-03 14:18:28,932 django.server basehttp 14968 14764 "GET /static/css/flatpickr.min.css HTTP/1.1" 304 0
+INFO 2025-09-03 14:18:29,000 django.server basehttp 14968 33908 "GET /static/css/tom-select.bootstrap5.min.css HTTP/1.1" 304 0
+INFO 2025-09-03 14:18:29,005 django.server basehttp 14968 27160 "GET /static/js/flatpickr.min.js HTTP/1.1" 304 0
+INFO 2025-09-03 14:18:29,170 django.server basehttp 14968 16212 "GET /static/js/flatpickr.l10n.ar.js HTTP/1.1" 304 0
+INFO 2025-09-03 14:18:29,246 django.server basehttp 14968 7852 "GET /static/js/tom-select.complete.min.js HTTP/1.1" 304 0
+WARNING 2025-09-03 14:18:29,250 django.server basehttp 14968 16212 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 14:18:32,958 django.server basehttp 14968 7852 "GET /api/supplier/7/open_pos/ HTTP/1.1" 200 61
+ERROR 2025-09-03 14:18:34,584 django.request log 14968 7852 Internal Server Error: /api/po/2/items/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\api.py", line 125, in api_get_po_items
+    'unit_price': item.unit_price
+                  ^^^^^^^^^^^^^^^
+AttributeError: 'PurchaseOrderItem' object has no attribute 'unit_price'
+ERROR 2025-09-03 14:18:34,607 django.server basehttp 14968 7852 "GET /api/po/2/items/ HTTP/1.1" 500 67285
+INFO 2025-09-03 14:19:13,135 django.utils.autoreload autoreload 14968 24200 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\dashboard.py changed, reloading.
+INFO 2025-09-03 14:19:15,085 django.utils.autoreload autoreload 32636 21916 Watching for file changes with StatReloader
+INFO 2025-09-03 14:19:15,534 django.server basehttp 32636 29224 "GET / HTTP/1.1" 200 105906
+WARNING 2025-09-03 14:19:15,619 django.request log 32636 29224 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 14:19:15,621 django.server basehttp 32636 29224 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 14216
+WARNING 2025-09-03 14:19:15,685 django.server basehttp 32636 29224 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 14:20:02,142 django.utils.autoreload autoreload 32636 21916 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\dashboard.py changed, reloading.
+INFO 2025-09-03 14:20:03,546 django.utils.autoreload autoreload 11672 16292 Watching for file changes with StatReloader
+INFO 2025-09-03 14:20:06,102 django.server basehttp 11672 16256 "GET / HTTP/1.1" 200 96141
+WARNING 2025-09-03 14:20:06,198 django.request log 11672 16256 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 14:20:06,214 django.server basehttp 11672 16256 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 14216
+WARNING 2025-09-03 14:20:06,313 django.server basehttp 11672 16256 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 14:20:14,161 django.server basehttp 11672 14776 "GET /api/product_tags/18/ HTTP/1.1" 200 177
+INFO 2025-09-03 14:20:18,510 django.server basehttp 11672 14776 "GET / HTTP/1.1" 200 11910
+INFO 2025-09-03 14:20:19,821 django.server basehttp 11672 14776 "GET /purchase_orders/ HTTP/1.1" 200 3271
+INFO 2025-09-03 14:20:21,031 django.server basehttp 11672 14776 "GET /purchase_order/1/ HTTP/1.1" 200 6225
+ERROR 2025-09-03 14:20:22,067 django.request log 11672 14776 Internal Server Error: /
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\dashboard.py", line 100, in index
+    total_received = po_item.receipts.aggregate(total=models.Sum('quantity'))['total'] or 0.0
+                                                      ^^^^^^
+NameError: name 'models' is not defined
+ERROR 2025-09-03 14:20:22,070 django.server basehttp 11672 14776 "GET /?po_item_id=1 HTTP/1.1" 500 70904
+ERROR 2025-09-03 14:20:22,195 django.request log 11672 14776 Internal Server Error: /
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\dashboard.py", line 100, in index
+    total_received = po_item.receipts.aggregate(total=models.Sum('quantity'))['total'] or 0.0
+                                                      ^^^^^^
+NameError: name 'models' is not defined
+ERROR 2025-09-03 14:20:22,222 django.server basehttp 11672 14776 "GET /?po_item_id=1 HTTP/1.1" 500 71179
+WARNING 2025-09-03 14:20:22,361 django.request log 11672 14776 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 14:20:22,415 django.server basehttp 11672 14776 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 14216
+INFO 2025-09-03 14:21:29,502 django.utils.autoreload autoreload 11672 16292 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\dashboard.py changed, reloading.
+INFO 2025-09-03 14:21:30,460 django.utils.autoreload autoreload 15924 22104 Watching for file changes with StatReloader
+ERROR 2025-09-03 14:21:36,686 django.request log 15924 24060 Internal Server Error: /
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\dashboard.py", line 99, in index
+    total_received = po_item.receipts.aggregate(total=models.Sum('quantity'))['total'] or 0.0
+                                                      ^^^^^^
+NameError: name 'models' is not defined
+ERROR 2025-09-03 14:21:36,689 django.server basehttp 15924 24060 "GET /?po_item_id=1 HTTP/1.1" 500 71311
+WARNING 2025-09-03 14:21:36,761 django.request log 15924 24060 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 14:21:36,762 django.server basehttp 15924 24060 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 14216
+INFO 2025-09-03 14:22:05,150 django.server basehttp 15924 24060 "GET /records/ HTTP/1.1" 200 401651
+INFO 2025-09-03 14:22:05,390 django.server basehttp 15924 24060 "GET /purchase_orders/create/ HTTP/1.1" 200 10399
+INFO 2025-09-03 14:23:20,187 django.server basehttp 15924 24060 "GET /purchase_orders/create/ HTTP/1.1" 200 94648
+INFO 2025-09-03 14:23:20,320 django.server basehttp 15924 24060 "GET /static/webfonts/28.woff2 HTTP/1.1" 304 0
+INFO 2025-09-03 14:23:20,333 django.server basehttp 15924 25996 "GET /static/webfonts/21.woff2 HTTP/1.1" 304 0
+INFO 2025-09-03 14:23:20,334 django.server basehttp 15924 34600 "GET /static/webfonts/14.woff2 HTTP/1.1" 304 0
+INFO 2025-09-03 14:23:20,342 django.server basehttp 15924 34600 "GET /static/webfonts/35.woff2 HTTP/1.1" 304 0
+INFO 2025-09-03 14:23:22,615 django.server basehttp 15924 34600 "GET /static/webfonts/07.woff2 HTTP/1.1" 304 0
+INFO 2025-09-03 14:33:06,806 django.utils.autoreload autoreload 15924 22104 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\dashboard.py changed, reloading.
+INFO 2025-09-03 14:33:08,600 django.utils.autoreload autoreload 14396 15664 Watching for file changes with StatReloader
+INFO 2025-09-03 14:33:11,183 django.utils.autoreload autoreload 14396 15664 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\dashboard.py changed, reloading.
+INFO 2025-09-03 14:33:12,324 django.utils.autoreload autoreload 28468 15068 Watching for file changes with StatReloader
+INFO 2025-09-03 15:02:40,574 django.server basehttp 28468 13980 "GET /?po_item_id=1 HTTP/1.1" 200 105906
+WARNING 2025-09-03 15:02:40,683 django.request log 28468 13980 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 15:02:40,693 django.server basehttp 28468 13980 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 14216
+WARNING 2025-09-03 15:02:40,846 django.server basehttp 28468 13980 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 15:02:44,364 django.server basehttp 28468 19524 "GET /api/supplier/7/open_pos/ HTTP/1.1" 200 61
+ERROR 2025-09-03 15:02:45,235 django.request log 28468 19524 Internal Server Error: /api/po/2/items/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\api.py", line 125, in api_get_po_items
+    'unit_price': item.unit_price
+                  ^^^^^^^^^^^^^^^
+AttributeError: 'PurchaseOrderItem' object has no attribute 'unit_price'
+ERROR 2025-09-03 15:02:45,240 django.server basehttp 28468 19524 "GET /api/po/2/items/ HTTP/1.1" 500 67298
+INFO 2025-09-03 15:04:37,540 django.utils.autoreload autoreload 28468 15068 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-03 15:04:38,935 django.utils.autoreload autoreload 28500 25348 Watching for file changes with StatReloader
+INFO 2025-09-03 15:05:10,665 django.utils.autoreload autoreload 28500 25348 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\purchase_orders.py changed, reloading.
+INFO 2025-09-03 15:05:11,838 django.utils.autoreload autoreload 17200 20092 Watching for file changes with StatReloader
+INFO 2025-09-03 15:05:32,300 django.utils.autoreload autoreload 17200 20092 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\api.py changed, reloading.
+INFO 2025-09-03 15:05:33,520 django.utils.autoreload autoreload 23884 22928 Watching for file changes with StatReloader
+INFO 2025-09-03 15:06:59,535 django.utils.autoreload autoreload 23884 22928 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\dashboard.py changed, reloading.
+INFO 2025-09-03 15:07:01,132 django.utils.autoreload autoreload 5700 26344 Watching for file changes with StatReloader
+INFO 2025-09-03 15:08:33,898 django.server basehttp 5700 16328 "GET /?po_item_id=1 HTTP/1.1" 200 103622
+WARNING 2025-09-03 15:08:33,998 django.request log 5700 16328 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 15:08:34,016 django.server basehttp 5700 16328 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 14216
+WARNING 2025-09-03 15:08:34,118 django.server basehttp 5700 16328 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 15:08:36,304 django.server basehttp 5700 772 "GET /?po_item_id=1 HTTP/1.1" 200 21840
+INFO 2025-09-03 15:08:37,052 django.server basehttp 5700 772 "GET /purchase_orders/ HTTP/1.1" 200 3271
+ERROR 2025-09-03 15:08:37,974 django.request log 5700 772 Internal Server Error: /purchase_order/1/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\purchase_orders.py", line 120, in view_purchase_order
+    item.unit_price = (item.total_price / Decimal(str(item.quantity_ordered))).quantize(Decimal('0.001'))
+    ^^^^^^^^^^^^^^^
+AttributeError: property 'unit_price' of 'PurchaseOrderItem' object has no setter
+ERROR 2025-09-03 15:08:37,977 django.server basehttp 5700 772 "GET /purchase_order/1/ HTTP/1.1" 500 68450
+ERROR 2025-09-03 15:08:38,042 django.request log 5700 772 Internal Server Error: /purchase_order/1/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\purchase_orders.py", line 120, in view_purchase_order
+    item.unit_price = (item.total_price / Decimal(str(item.quantity_ordered))).quantize(Decimal('0.001'))
+    ^^^^^^^^^^^^^^^
+AttributeError: property 'unit_price' of 'PurchaseOrderItem' object has no setter
+ERROR 2025-09-03 15:08:38,059 django.server basehttp 5700 772 "GET /purchase_order/1/ HTTP/1.1" 500 68725
+WARNING 2025-09-03 15:08:38,236 django.request log 5700 772 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 15:08:38,237 django.server basehttp 5700 772 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 14216
+WARNING 2025-09-03 15:08:42,575 django.server basehttp 5700 772 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+WARNING 2025-09-03 15:08:42,855 django.request log 5700 32196 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 15:08:42,923 django.server basehttp 5700 32196 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 14216
+WARNING 2025-09-03 15:08:42,928 django.server basehttp 5700 33996 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+WARNING 2025-09-03 15:08:42,945 django.request log 5700 32196 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 15:08:42,946 django.server basehttp 5700 32196 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 14216
+INFO 2025-09-03 15:08:42,982 django.server basehttp 5700 32196 "GET /purchase_orders/create/ HTTP/1.1" 200 10399
+INFO 2025-09-03 15:08:54,788 django.server basehttp 5700 32196 "GET /purchase_orders/create/ HTTP/1.1" 200 92193
+WARNING 2025-09-03 15:08:54,898 django.request log 5700 32196 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 15:08:54,906 django.server basehttp 5700 32196 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 14216
+WARNING 2025-09-03 15:08:55,070 django.server basehttp 5700 32196 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 15:09:28,554 django.server basehttp 5700 5408 "POST /purchase_orders/create/ HTTP/1.1" 302 0
+INFO 2025-09-03 15:09:28,569 django.server basehttp 5700 5408 "GET /purchase_orders/ HTTP/1.1" 200 86361
+WARNING 2025-09-03 15:09:28,668 django.request log 5700 5408 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 15:09:28,670 django.server basehttp 5700 5408 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 14216
+WARNING 2025-09-03 15:09:28,736 django.server basehttp 5700 5408 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+ERROR 2025-09-03 15:09:32,410 django.request log 5700 27224 Internal Server Error: /purchase_order/3/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\purchase_orders.py", line 120, in view_purchase_order
+    item.unit_price = (item.total_price / Decimal(str(item.quantity_ordered))).quantize(Decimal('0.001'))
+    ^^^^^^^^^^^^^^^
+AttributeError: property 'unit_price' of 'PurchaseOrderItem' object has no setter
+ERROR 2025-09-03 15:09:32,412 django.server basehttp 5700 27224 "GET /purchase_order/3/ HTTP/1.1" 500 68452
+ERROR 2025-09-03 15:09:32,494 django.request log 5700 27224 Internal Server Error: /purchase_order/3/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\purchase_orders.py", line 120, in view_purchase_order
+    item.unit_price = (item.total_price / Decimal(str(item.quantity_ordered))).quantize(Decimal('0.001'))
+    ^^^^^^^^^^^^^^^
+AttributeError: property 'unit_price' of 'PurchaseOrderItem' object has no setter
+ERROR 2025-09-03 15:09:32,499 django.server basehttp 5700 27224 "GET /purchase_order/3/ HTTP/1.1" 500 68727
+WARNING 2025-09-03 15:09:32,607 django.request log 5700 27224 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 15:09:32,608 django.server basehttp 5700 27224 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 14216
+INFO 2025-09-03 15:11:15,815 django.utils.autoreload autoreload 5700 26344 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\purchase_orders.py changed, reloading.
+INFO 2025-09-03 15:11:16,838 django.utils.autoreload autoreload 17556 22148 Watching for file changes with StatReloader
+INFO 2025-09-03 15:11:41,470 django.server basehttp 17556 20988 "GET /purchase_orders/ HTTP/1.1" 200 4045
+INFO 2025-09-03 15:11:42,700 django.server basehttp 17556 20988 "GET /purchase_order/3/ HTTP/1.1" 200 4808
+INFO 2025-09-03 15:11:45,704 django.server basehttp 17556 20988 "GET /?po_item_id=4 HTTP/1.1" 200 21840
+INFO 2025-09-03 15:11:56,134 django.server basehttp 17556 20988 "GET /api/supplier/7/open_pos/ HTTP/1.1" 200 120
+INFO 2025-09-03 15:11:58,539 django.server basehttp 17556 20988 "GET /api/po/3/items/ HTTP/1.1" 200 167
+INFO 2025-09-03 15:12:05,024 django.server basehttp 17556 20988 "GET /api/product_tags/17/ HTTP/1.1" 200 177
+INFO 2025-09-03 15:12:23,324 django.server basehttp 17556 20988 "GET /?po_item_id=4 HTTP/1.1" 200 103622
+INFO 2025-09-03 15:12:30,723 django.server basehttp 17556 20988 "GET / HTTP/1.1" 200 103503
+INFO 2025-09-03 15:12:33,706 django.server basehttp 17556 20988 "GET /api/supplier/7/open_pos/ HTTP/1.1" 200 120
+INFO 2025-09-03 15:12:37,525 django.server basehttp 17556 20988 "GET / HTTP/1.1" 200 103503
+INFO 2025-09-03 15:12:39,721 django.server basehttp 17556 20988 "GET /api/supplier/7/open_pos/ HTTP/1.1" 200 120
+INFO 2025-09-03 15:12:44,739 django.server basehttp 17556 20988 "GET / HTTP/1.1" 200 21721
+INFO 2025-09-03 15:12:45,301 django.server basehttp 17556 20988 "GET /batches/ HTTP/1.1" 200 31955
+INFO 2025-09-03 15:12:45,871 django.server basehttp 17556 20988 "GET /batches/ HTTP/1.1" 200 31955
+INFO 2025-09-03 15:12:46,794 django.server basehttp 17556 20988 "GET /purchase_orders/create/ HTTP/1.1" 200 10399
+INFO 2025-09-03 15:12:47,276 django.server basehttp 17556 20988 "GET /purchase_orders/create/ HTTP/1.1" 200 10399
+INFO 2025-09-03 15:12:47,662 django.server basehttp 17556 20988 "GET /purchase_orders/ HTTP/1.1" 200 4045
+INFO 2025-09-03 15:12:49,335 django.server basehttp 17556 20988 "GET /purchase_order/3/ HTTP/1.1" 200 4808
+INFO 2025-09-03 15:12:50,802 django.server basehttp 17556 20988 "GET /?po_item_id=4 HTTP/1.1" 200 21840
+INFO 2025-09-03 15:12:56,973 django.server basehttp 17556 20988 "GET /api/supplier/7/open_pos/ HTTP/1.1" 200 120
+INFO 2025-09-03 15:13:02,845 django.server basehttp 17556 20988 "GET /?po_item_id=4 HTTP/1.1" 200 103622
+INFO 2025-09-03 15:13:04,398 django.server basehttp 17556 20988 "GET /api/supplier/7/open_pos/ HTTP/1.1" 200 120
+INFO 2025-09-03 15:13:16,776 django.utils.autoreload autoreload 25052 18912 Watching for file changes with StatReloader
+INFO 2025-09-03 15:13:36,920 django.utils.autoreload autoreload 30208 6736 Watching for file changes with StatReloader
+INFO 2025-09-03 15:13:39,474 django.server basehttp 30208 17460 "GET /?po_item_id=4 HTTP/1.1" 200 103622
+INFO 2025-09-03 15:13:41,109 django.server basehttp 30208 17460 "GET /api/supplier/7/open_pos/ HTTP/1.1" 200 120
+INFO 2025-09-03 15:13:42,547 django.server basehttp 30208 17460 "GET /?po_item_id=4 HTTP/1.1" 200 21840
+INFO 2025-09-03 15:13:43,137 django.server basehttp 30208 17460 "GET /purchase_orders/ HTTP/1.1" 200 4045
+INFO 2025-09-03 15:13:46,161 django.server basehttp 30208 17460 "GET /purchase_order/3/ HTTP/1.1" 200 4808
+INFO 2025-09-03 15:13:47,368 django.server basehttp 30208 17460 "GET /?po_item_id=4 HTTP/1.1" 200 21840
+INFO 2025-09-03 15:13:48,910 django.server basehttp 30208 17460 "GET /api/supplier/7/open_pos/ HTTP/1.1" 200 120
+INFO 2025-09-03 15:13:54,185 django.server basehttp 30208 17460 "GET /?po_item_id=4 HTTP/1.1" 200 103622
+INFO 2025-09-03 15:13:56,178 django.server basehttp 30208 17460 "GET /api/supplier/7/open_pos/ HTTP/1.1" 200 120
+INFO 2025-09-03 15:14:02,168 django.server basehttp 30208 17460 "GET /?po_item_id=4 HTTP/1.1" 200 103622
+INFO 2025-09-03 15:14:04,315 django.server basehttp 30208 17460 "GET /?po_item_id=4 HTTP/1.1" 200 103622
+INFO 2025-09-03 15:14:06,092 django.server basehttp 30208 17460 "GET /api/supplier/7/open_pos/ HTTP/1.1" 200 120
+INFO 2025-09-03 15:14:10,124 django.server basehttp 30208 17460 "GET / HTTP/1.1" 200 103503
+INFO 2025-09-03 15:14:13,945 django.server basehttp 30208 17460 "GET /api/supplier/7/open_pos/ HTTP/1.1" 200 120
+INFO 2025-09-03 15:14:17,473 django.server basehttp 30208 17460 "GET / HTTP/1.1" 200 21721
+INFO 2025-09-03 15:14:20,573 django.server basehttp 30208 17460 "GET /api/product_tags/18/ HTTP/1.1" 200 177
+INFO 2025-09-03 15:14:21,883 django.server basehttp 30208 17460 "GET / HTTP/1.1" 200 21721
+INFO 2025-09-03 15:14:22,343 django.server basehttp 30208 17460 "GET /purchase_orders/ HTTP/1.1" 200 4045
+INFO 2025-09-03 15:14:25,875 django.server basehttp 30208 17460 "GET /purchase_order/1/ HTTP/1.1" 200 6318
+INFO 2025-09-03 15:14:28,404 django.server basehttp 30208 17460 "GET /?po_item_id=2 HTTP/1.1" 200 21840
+INFO 2025-09-03 15:14:30,743 django.server basehttp 30208 17460 "GET /api/supplier/7/open_pos/ HTTP/1.1" 200 120
+INFO 2025-09-03 15:14:37,627 django.server basehttp 30208 17460 "GET /?po_item_id=2 HTTP/1.1" 200 21840
+INFO 2025-09-03 15:14:39,907 django.server basehttp 30208 17460 "GET /api/supplier/7/open_pos/ HTTP/1.1" 200 120
+INFO 2025-09-03 15:14:43,340 django.server basehttp 30208 17460 "GET /?po_item_id=2 HTTP/1.1" 200 21840
+INFO 2025-09-03 15:14:46,593 django.server basehttp 30208 17460 "GET /batches/ HTTP/1.1" 200 31955
+INFO 2025-09-03 15:14:48,189 django.server basehttp 30208 33804 "GET /batches/ HTTP/1.1" 200 31955
+INFO 2025-09-03 15:14:48,595 django.server basehttp 30208 17460 "GET /records/ HTTP/1.1" 200 401651
+INFO 2025-09-03 15:14:50,303 django.server basehttp 30208 17460 "GET /records/ HTTP/1.1" 200 401651
+INFO 2025-09-03 15:14:50,506 django.server basehttp 30208 17460 "GET /ledger/ HTTP/1.1" 200 13452
+INFO 2025-09-03 15:14:53,731 django.server basehttp 30208 17460 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 268599
+INFO 2025-09-03 15:20:30,727 django.server basehttp 30208 23344 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 179862
+INFO 2025-09-03 15:20:30,859 django.server basehttp 30208 23344 "GET /purchase_orders/create/ HTTP/1.1" 200 10399
+INFO 2025-09-03 15:20:31,842 django.server basehttp 30208 23344 "GET /purchase_orders/create/ HTTP/1.1" 200 10399
+INFO 2025-09-03 15:20:32,412 django.server basehttp 30208 23344 "GET /purchase_orders/ HTTP/1.1" 200 4045
+WARNING 2025-09-03 15:20:43,172 django.request log 30208 23344 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 15:20:43,175 django.server basehttp 30208 23344 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 14216
+WARNING 2025-09-03 15:20:43,352 django.server basehttp 30208 23344 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 15:20:57,107 django.server basehttp 30208 13448 "GET /purchase_orders/ HTTP/1.1" 200 85833
+WARNING 2025-09-03 15:20:57,239 django.request log 30208 13448 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 15:20:57,254 django.server basehttp 30208 13448 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 14216
+WARNING 2025-09-03 15:20:57,408 django.server basehttp 30208 13448 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 15:21:00,233 django.server basehttp 30208 17412 "GET /purchase_order/3/ HTTP/1.1" 200 4808
+INFO 2025-09-03 15:21:01,768 django.server basehttp 30208 17412 "GET /purchase_order/3/ HTTP/1.1" 200 4808
+INFO 2025-09-03 15:21:02,566 django.server basehttp 30208 17412 "GET /purchase_order/3/ HTTP/1.1" 200 4808
+INFO 2025-09-03 15:21:03,196 django.server basehttp 30208 17412 "GET /ledger/ HTTP/1.1" 200 13452
+INFO 2025-09-03 15:21:03,795 django.server basehttp 30208 17412 "GET /ledger/ HTTP/1.1" 200 13452
+INFO 2025-09-03 15:21:04,674 django.server basehttp 30208 17412 "GET /production_returns/ HTTP/1.1" 200 19606
+INFO 2025-09-03 15:21:05,585 django.server basehttp 30208 17412 "GET /production_returns/ HTTP/1.1" 200 19606
+INFO 2025-09-03 15:21:06,282 django.server basehttp 30208 17412 "GET /ledger/ HTTP/1.1" 200 13452
+INFO 2025-09-03 15:21:12,234 django.server basehttp 30208 17412 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 268599
+INFO 2025-09-03 15:21:16,356 django.server basehttp 30208 17412 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 268599
+INFO 2025-09-03 15:21:18,039 django.server basehttp 30208 17412 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 268599
+INFO 2025-09-03 15:21:29,909 django.server basehttp 30208 17412 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 268599
+INFO 2025-09-03 15:21:39,170 django.server basehttp 30208 17412 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 179862
+INFO 2025-09-03 15:26:11,560 django.utils.autoreload autoreload 30208 6736 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-03 15:26:12,929 django.utils.autoreload autoreload 10388 15140 Watching for file changes with StatReloader
+INFO 2025-09-03 15:26:54,040 django.utils.autoreload autoreload 10388 15140 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-03 15:26:55,168 django.utils.autoreload autoreload 22824 24828 Watching for file changes with StatReloader
+INFO 2025-09-03 15:27:42,708 django.utils.autoreload autoreload 22824 24828 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\purchase_orders.py changed, reloading.
+INFO 2025-09-03 15:27:43,975 django.utils.autoreload autoreload 21312 20176 Watching for file changes with StatReloader
+INFO 2025-09-03 15:28:09,696 django.utils.autoreload autoreload 21312 20176 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\purchase_orders.py changed, reloading.
+INFO 2025-09-03 15:28:10,945 django.utils.autoreload autoreload 14240 20828 Watching for file changes with StatReloader
+INFO 2025-09-03 15:28:15,974 django.utils.autoreload autoreload 14240 20828 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\dashboard.py changed, reloading.
+INFO 2025-09-03 15:28:17,337 django.utils.autoreload autoreload 27836 15704 Watching for file changes with StatReloader
+INFO 2025-09-03 15:28:29,750 django.utils.autoreload autoreload 27836 15704 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\api.py changed, reloading.
+INFO 2025-09-03 15:28:30,860 django.utils.autoreload autoreload 15764 32508 Watching for file changes with StatReloader
+INFO 2025-09-03 15:29:43,250 django.utils.autoreload autoreload 32404 14672 Watching for file changes with StatReloader
+INFO 2025-09-03 15:29:47,537 django.server basehttp 32404 17324 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 179862
+INFO 2025-09-03 15:29:48,262 django.server basehttp 32404 17324 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 179862
+INFO 2025-09-03 15:29:48,590 django.server basehttp 32404 17324 "GET /purchase_orders/create/ HTTP/1.1" 200 10410
+INFO 2025-09-03 15:29:50,091 django.server basehttp 32404 17324 "GET /purchase_orders/create/ HTTP/1.1" 200 10410
+INFO 2025-09-03 15:29:51,574 django.server basehttp 32404 17324 "GET /purchase_orders/ HTTP/1.1" 200 4045
+INFO 2025-09-03 15:29:53,347 django.server basehttp 32404 17324 "GET /purchase_order/3/ HTTP/1.1" 200 4803
+INFO 2025-09-03 15:30:01,548 django.server basehttp 32404 17324 "GET /purchase_order/3/ HTTP/1.1" 200 4803
+INFO 2025-09-03 15:30:02,095 django.server basehttp 32404 17324 "GET /purchase_orders/ HTTP/1.1" 200 4045
+INFO 2025-09-03 15:30:03,229 django.server basehttp 32404 17324 "GET /purchase_orders/ HTTP/1.1" 200 85890
+INFO 2025-09-03 15:30:06,108 django.server basehttp 32404 17324 "GET /purchase_orders/create/ HTTP/1.1" 200 10410
+INFO 2025-09-03 15:30:08,873 django.server basehttp 32404 17324 "GET /purchase_orders/create/ HTTP/1.1" 200 92261
+INFO 2025-09-03 15:30:24,790 django.server basehttp 32404 17324 "POST /purchase_orders/create/ HTTP/1.1" 302 0
+INFO 2025-09-03 15:30:24,816 django.server basehttp 32404 17324 "GET /purchase_orders/ HTTP/1.1" 200 87195
+INFO 2025-09-03 15:30:30,192 django.server basehttp 32404 17324 "GET /purchase_order/4/ HTTP/1.1" 200 4807
+INFO 2025-09-03 15:30:35,920 django.server basehttp 32404 17324 "GET /purchase_orders/ HTTP/1.1" 200 4822
+INFO 2025-09-03 15:30:37,837 django.server basehttp 32404 17324 "GET / HTTP/1.1" 200 21721
+INFO 2025-09-03 15:30:43,874 django.server basehttp 32404 17324 "GET /purchase_orders/ HTTP/1.1" 200 4822
+INFO 2025-09-03 15:30:44,344 django.server basehttp 32404 17324 "GET / HTTP/1.1" 200 21721
+INFO 2025-09-03 15:30:44,972 django.server basehttp 32404 17324 "GET /purchase_orders/ HTTP/1.1" 200 4822
+INFO 2025-09-03 15:30:46,455 django.server basehttp 32404 17324 "GET /purchase_orders/create/ HTTP/1.1" 200 92261
+INFO 2025-09-03 15:30:47,255 django.server basehttp 32404 17324 "GET / HTTP/1.1" 200 21721
+INFO 2025-09-03 15:30:48,361 django.server basehttp 32404 17324 "GET / HTTP/1.1" 200 103560
+INFO 2025-09-03 15:30:49,658 django.server basehttp 32404 17324 "GET /api/product_tags/18/ HTTP/1.1" 200 177
+WARNING 2025-09-03 15:30:56,423 django.request log 32404 17324 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 15:30:56,425 django.server basehttp 32404 17324 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 14216
+WARNING 2025-09-03 15:30:57,534 django.server basehttp 32404 17324 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 15:32:01,086 django.server basehttp 32404 31016 "GET / HTTP/1.1" 200 103560
+WARNING 2025-09-03 15:32:01,239 django.request log 32404 31016 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 15:32:01,444 django.server basehttp 32404 31016 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 14216
+WARNING 2025-09-03 15:32:01,740 django.server basehttp 32404 16192 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 15:32:29,473 django.server basehttp 32404 31016 "GET / HTTP/1.1" 200 21721
+INFO 2025-09-03 15:32:30,346 django.server basehttp 32404 31016 "GET /purchase_orders/ HTTP/1.1" 200 4822
+INFO 2025-09-03 15:32:31,701 django.server basehttp 32404 31016 "GET /purchase_orders/create/ HTTP/1.1" 200 10410
+INFO 2025-09-03 15:32:33,911 django.server basehttp 32404 31016 "GET /purchase_orders/create/ HTTP/1.1" 200 92261
+WARNING 2025-09-03 15:32:33,992 django.request log 32404 31016 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 15:32:34,004 django.server basehttp 32404 31016 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 14216
+WARNING 2025-09-03 15:32:34,051 django.server basehttp 32404 31016 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 15:37:46,018 django.utils.autoreload autoreload 32404 14672 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\purchase_orders.py changed, reloading.
+INFO 2025-09-03 15:37:47,477 django.utils.autoreload autoreload 31960 28108 Watching for file changes with StatReloader
+INFO 2025-09-03 15:40:06,116 django.utils.autoreload autoreload 31960 28108 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\dashboard.py changed, reloading.
+INFO 2025-09-03 15:40:07,945 django.utils.autoreload autoreload 25568 33952 Watching for file changes with StatReloader
+INFO 2025-09-03 15:40:10,661 django.server basehttp 25568 1652 "GET /purchase_orders/create/ HTTP/1.1" 200 99159
+WARNING 2025-09-03 15:40:10,740 django.request log 25568 1652 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 15:40:10,741 django.server basehttp 25568 1652 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 14216
+WARNING 2025-09-03 15:40:10,806 django.server basehttp 25568 1652 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 15:40:42,610 django.server basehttp 25568 26228 "POST /purchase_orders/create/ HTTP/1.1" 302 0
+INFO 2025-09-03 15:40:42,628 django.server basehttp 25568 26228 "GET /purchase_orders/ HTTP/1.1" 200 94790
+WARNING 2025-09-03 15:40:42,717 django.request log 25568 26228 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 15:40:42,737 django.server basehttp 25568 26228 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 14216
+WARNING 2025-09-03 15:40:42,797 django.server basehttp 25568 26228 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 15:40:43,802 django.server basehttp 25568 1136 "GET / HTTP/1.1" 200 21721
+INFO 2025-09-03 15:40:52,308 django.server basehttp 25568 1136 "GET / HTTP/1.1" 200 110377
+WARNING 2025-09-03 15:40:52,412 django.request log 25568 1136 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 15:40:52,414 django.server basehttp 25568 1136 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 14216
+WARNING 2025-09-03 15:40:52,460 django.server basehttp 25568 1136 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 15:45:45,226 django.server basehttp 25568 29036 "GET / HTTP/1.1" 200 110745
+WARNING 2025-09-03 15:45:45,320 django.request log 25568 29036 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 15:45:45,324 django.server basehttp 25568 29036 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 14216
+WARNING 2025-09-03 15:45:45,748 django.server basehttp 25568 29036 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 15:45:46,892 django.server basehttp 25568 16396 "GET /api/product_tags/18/ HTTP/1.1" 200 177
+INFO 2025-09-03 15:45:49,634 django.server basehttp 25568 16396 "GET /api/supplier/7/open_pos/ HTTP/1.1" 200 245
+INFO 2025-09-03 15:45:54,965 django.server basehttp 25568 16396 "GET /api/po/5/items/ HTTP/1.1" 200 167
+INFO 2025-09-03 15:45:58,604 django.server basehttp 25568 16396 "GET /api/po/3/items/ HTTP/1.1" 200 167
+INFO 2025-09-03 15:56:57,076 django.server basehttp 25568 23924 "GET /purchase_order/3/ HTTP/1.1" 200 93837
+WARNING 2025-09-03 15:56:57,163 django.request log 25568 23924 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 15:56:57,177 django.server basehttp 25568 23924 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 14216
+WARNING 2025-09-03 15:56:57,266 django.server basehttp 25568 23924 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 16:05:26,123 django.server basehttp 25568 28748 "GET /api/product_tags/17/ HTTP/1.1" 200 177
+INFO 2025-09-03 16:05:41,114 django.server basehttp 25568 28748 "POST / HTTP/1.1" 302 0
+INFO 2025-09-03 16:05:41,196 django.server basehttp 25568 28748 "GET / HTTP/1.1" 200 111269
+WARNING 2025-09-03 16:05:41,321 django.request log 25568 28748 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 16:05:41,390 django.server basehttp 25568 28748 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 14216
+WARNING 2025-09-03 16:05:41,712 django.server basehttp 25568 1104 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 16:05:42,875 django.server basehttp 25568 28748 "GET / HTTP/1.1" 200 21713
+INFO 2025-09-03 16:05:43,470 django.server basehttp 25568 28748 "GET /purchase_orders/ HTTP/1.1" 200 5600
+INFO 2025-09-03 16:05:45,265 django.server basehttp 25568 28748 "GET /purchase_order/3/ HTTP/1.1" 200 7119
+INFO 2025-09-03 16:06:03,484 django.server basehttp 25568 28748 "GET /purchase_orders/ HTTP/1.1" 200 5600
+INFO 2025-09-03 16:06:06,103 django.server basehttp 25568 28748 "GET /purchase_order/5/ HTTP/1.1" 200 4811
+INFO 2025-09-03 16:06:11,028 django.server basehttp 25568 28748 "GET /purchase_orders/ HTTP/1.1" 200 5600
+INFO 2025-09-03 16:06:12,197 django.server basehttp 25568 28748 "GET /purchase_order/4/ HTTP/1.1" 200 4807
+INFO 2025-09-03 16:06:13,644 django.server basehttp 25568 28748 "GET /purchase_orders/ HTTP/1.1" 200 5600
+INFO 2025-09-03 16:06:14,377 django.server basehttp 25568 28748 "GET /purchase_order/1/ HTTP/1.1" 200 6308
+INFO 2025-09-03 16:06:16,277 django.server basehttp 25568 28748 "GET /purchase_orders/ HTTP/1.1" 200 5600
+INFO 2025-09-03 16:06:17,084 django.server basehttp 25568 28748 "GET /purchase_order/2/ HTTP/1.1" 200 4818
+INFO 2025-09-03 16:06:20,181 django.server basehttp 25568 28748 "GET /purchase_orders/ HTTP/1.1" 200 5600
+INFO 2025-09-03 16:06:21,026 django.server basehttp 25568 28748 "GET /purchase_order/3/ HTTP/1.1" 200 7119
+INFO 2025-09-03 16:08:58,400 django.utils.autoreload autoreload 25568 33952 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\purchase_orders.py changed, reloading.
+INFO 2025-09-03 16:08:59,621 django.utils.autoreload autoreload 24236 14672 Watching for file changes with StatReloader
+INFO 2025-09-03 16:09:13,815 django.utils.autoreload autoreload 24236 14672 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\dashboard.py changed, reloading.
+INFO 2025-09-03 16:09:15,244 django.utils.autoreload autoreload 13424 29596 Watching for file changes with StatReloader
+INFO 2025-09-03 16:09:31,395 django.utils.autoreload autoreload 13424 29596 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\urls.py changed, reloading.
+INFO 2025-09-03 16:09:32,874 django.utils.autoreload autoreload 15540 23172 Watching for file changes with StatReloader
+INFO 2025-09-03 16:11:23,986 django.server basehttp 15540 15980 "GET /purchase_order/3/ HTTP/1.1" 200 96445
+WARNING 2025-09-03 16:11:24,061 django.request log 15540 15980 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 16:11:24,063 django.server basehttp 15540 15980 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 14812
+WARNING 2025-09-03 16:11:24,137 django.server basehttp 15540 15980 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 16:11:33,171 django.server basehttp 15540 15608 "GET /purchase_orders/ HTTP/1.1" 200 5600
+INFO 2025-09-03 16:11:35,343 django.server basehttp 15540 15608 "GET /purchase_order/5/ HTTP/1.1" 200 5614
+INFO 2025-09-03 16:11:38,415 django.server basehttp 15540 15608 "POST /purchase_order/5/delete/ HTTP/1.1" 302 0
+INFO 2025-09-03 16:11:38,440 django.server basehttp 15540 15608 "GET /purchase_orders/ HTTP/1.1" 200 94392
+WARNING 2025-09-03 16:11:38,534 django.request log 15540 15608 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 16:11:38,644 django.server basehttp 15540 15608 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 14812
+WARNING 2025-09-03 16:11:38,991 django.server basehttp 15540 34508 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 16:11:40,200 django.server basehttp 15540 15608 "GET /purchase_order/1/ HTTP/1.1" 200 7052
+INFO 2025-09-03 16:11:42,369 django.server basehttp 15540 15608 "POST /purchase_order/1/delete/ HTTP/1.1" 302 0
+INFO 2025-09-03 16:11:42,388 django.server basehttp 15540 15608 "GET /purchase_orders/ HTTP/1.1" 200 93623
+WARNING 2025-09-03 16:11:42,463 django.request log 15540 15608 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 16:11:42,477 django.server basehttp 15540 15608 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 14812
+WARNING 2025-09-03 16:11:42,664 django.server basehttp 15540 15608 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 16:11:43,717 django.server basehttp 15540 7512 "GET /purchase_order/4/ HTTP/1.1" 200 5607
+INFO 2025-09-03 16:11:45,499 django.server basehttp 15540 7512 "POST /purchase_order/4/delete/ HTTP/1.1" 302 0
+INFO 2025-09-03 16:11:45,516 django.server basehttp 15540 7512 "GET /purchase_orders/ HTTP/1.1" 200 92848
+WARNING 2025-09-03 16:11:45,618 django.request log 15540 7512 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 16:11:45,629 django.server basehttp 15540 7512 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 14812
+WARNING 2025-09-03 16:11:45,806 django.server basehttp 15540 7512 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 16:11:46,584 django.server basehttp 15540 19404 "GET /purchase_order/2/ HTTP/1.1" 200 5618
+INFO 2025-09-03 16:11:48,303 django.server basehttp 15540 19404 "POST /purchase_order/2/delete/ HTTP/1.1" 302 0
+INFO 2025-09-03 16:11:48,329 django.server basehttp 15540 19404 "GET /purchase_orders/ HTTP/1.1" 200 92071
+WARNING 2025-09-03 16:11:48,432 django.request log 15540 19404 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 16:11:48,441 django.server basehttp 15540 19404 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 14812
+WARNING 2025-09-03 16:11:48,600 django.server basehttp 15540 19404 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 16:11:50,534 django.server basehttp 15540 9724 "GET /purchase_order/3/ HTTP/1.1" 200 7411
+INFO 2025-09-03 16:11:53,279 django.server basehttp 15540 9724 "GET / HTTP/1.1" 200 21713
+INFO 2025-09-03 16:11:57,908 django.server basehttp 15540 9724 "GET /api/supplier/7/open_pos/ HTTP/1.1" 200 2
+INFO 2025-09-03 16:12:08,163 django.server basehttp 15540 9724 "GET /records/ HTTP/1.1" 200 403126
+INFO 2025-09-03 16:12:13,458 django.server basehttp 15540 9724 "POST /records/delete/199/ HTTP/1.1" 302 0
+INFO 2025-09-03 16:12:13,917 django.server basehttp 15540 9724 "GET /records/ HTTP/1.1" 200 490566
+INFO 2025-09-03 16:12:15,967 django.server basehttp 15540 9724 "GET /records/ HTTP/1.1" 200 400988
+INFO 2025-09-03 16:12:16,601 django.server basehttp 15540 9724 "GET /purchase_orders/ HTTP/1.1" 200 2503
+INFO 2025-09-03 16:12:18,214 django.server basehttp 15540 9724 "GET /purchase_order/3/ HTTP/1.1" 200 5606
+INFO 2025-09-03 16:12:34,186 django.server basehttp 15540 9724 "GET /?po_item_id=4 HTTP/1.1" 200 21840
+INFO 2025-09-03 16:12:37,116 django.server basehttp 15540 9724 "GET /api/supplier/7/open_pos/ HTTP/1.1" 200 59
+INFO 2025-09-03 16:12:38,457 django.server basehttp 15540 9724 "GET /api/po/3/items/ HTTP/1.1" 200 167
+INFO 2025-09-03 16:12:39,992 django.server basehttp 15540 9724 "GET /api/product_tags/17/ HTTP/1.1" 200 177
+INFO 2025-09-03 16:12:52,925 django.server basehttp 15540 9724 "GET /?po_item_id=4 HTTP/1.1" 200 110864
+INFO 2025-09-03 16:12:58,000 django.server basehttp 15540 9724 "GET /api/supplier/7/open_pos/ HTTP/1.1" 200 59
+INFO 2025-09-03 16:12:59,797 django.server basehttp 15540 9724 "GET /api/po/3/items/ HTTP/1.1" 200 167
+INFO 2025-09-03 16:13:00,973 django.server basehttp 15540 9724 "GET /api/product_tags/17/ HTTP/1.1" 200 177
+INFO 2025-09-03 16:13:11,746 django.server basehttp 15540 9724 "POST / HTTP/1.1" 302 0
+INFO 2025-09-03 16:13:11,768 django.server basehttp 15540 9724 "GET / HTTP/1.1" 200 111269
+INFO 2025-09-03 16:13:13,541 django.server basehttp 15540 9724 "GET / HTTP/1.1" 200 21713
+INFO 2025-09-03 16:13:14,140 django.server basehttp 15540 9724 "GET /purchase_orders/ HTTP/1.1" 200 2503
+INFO 2025-09-03 16:13:15,111 django.server basehttp 15540 9724 "GET /purchase_order/3/ HTTP/1.1" 200 7411
+INFO 2025-09-03 16:13:33,842 django.server basehttp 15540 9724 "GET /purchase_orders/ HTTP/1.1" 200 2503
+INFO 2025-09-03 16:13:34,305 django.server basehttp 15540 9724 "GET /purchase_orders/ HTTP/1.1" 200 2503
+INFO 2025-09-03 16:13:34,704 django.server basehttp 15540 9724 "GET /purchase_orders/ HTTP/1.1" 200 2503
+INFO 2025-09-03 16:13:35,220 django.server basehttp 15540 9724 "GET /ledger/ HTTP/1.1" 200 13452
+INFO 2025-09-03 16:13:37,631 django.server basehttp 15540 9724 "GET /ledger/ HTTP/1.1" 200 109431
+INFO 2025-09-03 16:13:42,258 django.server basehttp 15540 9724 "GET /ledger/?product_id=17&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 163184
+INFO 2025-09-03 16:14:05,315 django.server basehttp 15540 9724 "GET /records/ HTTP/1.1" 200 403126
+INFO 2025-09-03 16:14:05,577 django.server basehttp 15540 9724 "GET /products/ HTTP/1.1" 200 260821
+INFO 2025-09-03 16:14:05,942 django.server basehttp 15540 9724 "GET /companies/ HTTP/1.1" 200 41077
+INFO 2025-09-03 16:14:12,845 django.server basehttp 15540 9724 "POST /companies/edit/7/ HTTP/1.1" 302 0
+INFO 2025-09-03 16:14:12,867 django.server basehttp 15540 9724 "GET /companies/ HTTP/1.1" 200 130627
+INFO 2025-09-03 16:14:13,888 django.server basehttp 15540 9724 "GET /companies/ HTTP/1.1" 200 41075
+INFO 2025-09-03 16:14:14,179 django.server basehttp 15540 9724 "GET /companies/ HTTP/1.1" 200 41075
+INFO 2025-09-03 16:14:15,252 django.server basehttp 15540 9724 "GET /companies/ HTTP/1.1" 200 41075
+INFO 2025-09-03 16:14:15,632 django.server basehttp 15540 9724 "GET /ledger/ HTTP/1.1" 200 13451
+INFO 2025-09-03 16:14:18,460 django.server basehttp 15540 9724 "GET /ledger/?product_id=17&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 163181
+INFO 2025-09-03 16:15:07,108 django.server basehttp 15540 9724 "GET /ledger/?product_id=17&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 67202
+INFO 2025-09-03 16:15:07,505 django.server basehttp 15540 9724 "GET /ledger/?product_id=17&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 67202
+INFO 2025-09-03 16:15:08,183 django.server basehttp 15540 9724 "GET /ledger/?product_id=17&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 67202
+INFO 2025-09-03 16:15:09,875 django.server basehttp 15540 9724 "GET /opening_balances/ HTTP/1.1" 200 115678
+INFO 2025-09-03 16:15:16,901 django.server basehttp 15540 9724 "GET /opening_balances/ HTTP/1.1" 200 204709
+INFO 2025-09-03 16:16:12,197 django.server basehttp 15540 9724 "GET /opening_balances/ HTTP/1.1" 200 204709
+INFO 2025-09-03 16:16:43,047 django.server basehttp 15540 9724 "GET /purchase_order/3/ HTTP/1.1" 200 7410
+INFO 2025-09-03 16:16:43,989 django.server basehttp 15540 9724 "GET /purchase_orders/ HTTP/1.1" 200 2502
+INFO 2025-09-03 16:18:00,058 django.server basehttp 15540 9724 "GET /records/ HTTP/1.1" 200 403121
+INFO 2025-09-03 16:18:00,931 django.server basehttp 15540 9724 "GET / HTTP/1.1" 200 21710
+INFO 2025-09-03 16:18:05,277 django.server basehttp 15540 9724 "GET /records/ HTTP/1.1" 200 403121
+INFO 2025-09-03 16:18:08,250 django.server basehttp 15540 9724 "GET /api/product_tags/17/ HTTP/1.1" 200 177
+INFO 2025-09-03 16:18:20,918 django.server basehttp 15540 9724 "GET /records/ HTTP/1.1" 200 492143
+INFO 2025-09-03 16:18:21,467 django.server basehttp 15540 9724 "GET / HTTP/1.1" 200 21710
+INFO 2025-09-03 16:18:23,823 django.server basehttp 15540 9724 "GET /records/ HTTP/1.1" 200 403121
+INFO 2025-09-03 16:18:24,863 django.server basehttp 15540 9724 "GET /records/ HTTP/1.1" 200 492143
+INFO 2025-09-03 16:18:26,088 django.server basehttp 15540 9724 "GET /api/product_tags/17/ HTTP/1.1" 200 177
+INFO 2025-09-03 16:25:05,463 django.server basehttp 15540 27224 "GET /records/ HTTP/1.1" 200 424685
+INFO 2025-09-03 16:25:06,792 django.server basehttp 15540 27224 "GET /records/ HTTP/1.1" 200 520533
+INFO 2025-09-03 16:25:15,550 django.server basehttp 15540 27224 "GET /purchase_order/3/ HTTP/1.1" 200 7410
+INFO 2025-09-03 16:25:17,184 django.server basehttp 15540 27224 "GET /purchase_orders/ HTTP/1.1" 200 2502
+INFO 2025-09-03 16:25:18,929 django.server basehttp 15540 27224 "GET /products/ HTTP/1.1" 200 260821
+INFO 2025-09-03 16:25:19,801 django.server basehttp 15540 27224 "GET /records/ HTTP/1.1" 200 424685
+INFO 2025-09-03 16:25:34,457 django.server basehttp 15540 27224 "GET /api/product_tags/18/ HTTP/1.1" 200 177
+INFO 2025-09-03 16:25:45,457 django.server basehttp 15540 27224 "GET /api/product_tags/18/ HTTP/1.1" 200 177
+INFO 2025-09-03 16:25:55,261 django.server basehttp 15540 27224 "GET /records/ HTTP/1.1" 200 424685
+INFO 2025-09-03 16:25:55,448 django.server basehttp 15540 27224 "GET /purchase_orders/ HTTP/1.1" 200 2502
+INFO 2025-09-03 16:25:56,469 django.server basehttp 15540 27224 "GET /purchase_orders/create/ HTTP/1.1" 200 10490
+INFO 2025-09-03 16:26:20,048 django.server basehttp 15540 27224 "GET /purchase_orders/create/ HTTP/1.1" 200 106352
+INFO 2025-09-03 16:26:54,265 django.server basehttp 15540 27224 "GET /records/ HTTP/1.1" 200 424685
+INFO 2025-09-03 16:27:32,859 django.server basehttp 15540 27224 "POST /purchase_orders/create/ HTTP/1.1" 302 0
+INFO 2025-09-03 16:27:32,892 django.server basehttp 15540 27224 "GET /purchase_orders/ HTTP/1.1" 200 99650
+INFO 2025-09-03 16:27:36,562 django.server basehttp 15540 27224 "GET /api/product_tags/18/ HTTP/1.1" 200 177
+INFO 2025-09-03 16:27:42,142 django.server basehttp 15540 27224 "GET /records/ HTTP/1.1" 200 520533
+INFO 2025-09-03 16:27:44,131 django.server basehttp 15540 27224 "GET /api/product_tags/18/ HTTP/1.1" 200 177
+WARNING 2025-09-03 16:27:55,781 django.request log 15540 27224 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 16:27:55,783 django.server basehttp 15540 27224 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 14812
+WARNING 2025-09-03 16:27:55,951 django.server basehttp 15540 27224 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 16:34:04,195 django.server basehttp 15540 12648 "GET /records/ HTTP/1.1" 200 523610
+WARNING 2025-09-03 16:34:04,286 django.request log 15540 12648 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 16:34:04,292 django.server basehttp 15540 12648 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 14812
+WARNING 2025-09-03 16:34:04,384 django.server basehttp 15540 12648 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 16:34:06,858 django.server basehttp 15540 20624 "GET /api/product_tags/18/ HTTP/1.1" 200 177
+INFO 2025-09-03 16:34:13,315 django.server basehttp 15540 20624 "GET /api/supplier/8/open_pos/ HTTP/1.1" 200 64
+INFO 2025-09-03 16:34:14,386 django.server basehttp 15540 20624 "GET /api/po/6/items/ HTTP/1.1" 200 189
+INFO 2025-09-03 16:34:15,727 django.server basehttp 15540 20624 "GET /api/product_tags/18/ HTTP/1.1" 200 177
+INFO 2025-09-03 16:34:22,615 django.server basehttp 15540 20624 "POST /records/edit/195/ HTTP/1.1" 302 0
+INFO 2025-09-03 16:34:23,124 django.server basehttp 15540 20624 "GET /records/ HTTP/1.1" 200 524382
+WARNING 2025-09-03 16:34:23,260 django.request log 15540 20624 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 16:34:23,263 django.server basehttp 15540 20624 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 14812
+WARNING 2025-09-03 16:34:23,308 django.server basehttp 15540 20624 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 16:34:37,070 django.server basehttp 15540 14040 "GET /purchase_order/6/ HTTP/1.1" 200 7429
+INFO 2025-09-03 16:34:52,666 django.server basehttp 15540 14040 "GET /purchase_orders/ HTTP/1.1" 200 3266
+INFO 2025-09-03 16:34:55,238 django.server basehttp 15540 14040 "GET /purchase_orders/ HTTP/1.1" 200 3266
+INFO 2025-09-03 16:34:56,144 django.server basehttp 15540 14040 "GET /purchase_orders/ HTTP/1.1" 200 3266
+INFO 2025-09-03 16:34:56,998 django.server basehttp 15540 14040 "GET /ledger/ HTTP/1.1" 200 13451
+INFO 2025-09-03 16:35:03,815 django.server basehttp 15540 14040 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 280129
+INFO 2025-09-03 16:35:49,517 django.server basehttp 15540 14040 "GET /records/ HTTP/1.1" 200 424893
+INFO 2025-09-03 16:35:58,531 django.server basehttp 15540 14040 "GET /api/product_tags/18/ HTTP/1.1" 200 177
+INFO 2025-09-03 16:36:05,083 django.server basehttp 15540 14040 "POST /records/edit/195/ HTTP/1.1" 302 0
+INFO 2025-09-03 16:36:05,527 django.server basehttp 15540 14040 "GET /records/ HTTP/1.1" 200 524180
+INFO 2025-09-03 16:36:14,301 django.server basehttp 15540 14040 "GET /records/ HTTP/1.1" 200 424691
+INFO 2025-09-03 16:36:14,630 django.server basehttp 15540 14040 "GET /purchase_orders/ HTTP/1.1" 200 3266
+INFO 2025-09-03 16:36:17,132 django.server basehttp 15540 14040 "GET /purchase_orders/ HTTP/1.1" 200 3266
+INFO 2025-09-03 16:36:17,497 django.server basehttp 15540 14040 "GET /purchase_orders/ HTTP/1.1" 200 3266
+INFO 2025-09-03 16:36:18,403 django.server basehttp 15540 14040 "GET /purchase_orders/ HTTP/1.1" 200 3266
+INFO 2025-09-03 16:36:19,782 django.server basehttp 15540 14040 "GET /purchase_orders/ HTTP/1.1" 200 3266
+INFO 2025-09-03 16:36:22,067 django.server basehttp 15540 14040 "GET /records/ HTTP/1.1" 200 424691
+INFO 2025-09-03 16:36:25,730 django.server basehttp 15540 14040 "GET /api/product_tags/18/ HTTP/1.1" 200 177
+INFO 2025-09-03 16:36:38,637 django.server basehttp 15540 14040 "GET /api/supplier/8/open_pos/ HTTP/1.1" 200 64
+INFO 2025-09-03 16:36:39,828 django.server basehttp 15540 14040 "GET /api/po/6/items/ HTTP/1.1" 200 189
+INFO 2025-09-03 16:36:40,721 django.server basehttp 15540 14040 "GET /api/product_tags/18/ HTTP/1.1" 200 177
+INFO 2025-09-03 16:36:47,686 django.server basehttp 15540 14040 "POST /records/edit/195/ HTTP/1.1" 302 0
+INFO 2025-09-03 16:36:48,247 django.server basehttp 15540 14040 "GET /records/ HTTP/1.1" 200 524385
+INFO 2025-09-03 16:36:50,630 django.server basehttp 15540 14040 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 287383
+INFO 2025-09-03 16:37:56,017 django.server basehttp 15540 14040 "GET /ledger/print/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 51147
+INFO 2025-09-03 16:39:05,752 django.server basehttp 15540 14040 "GET /ledger/?product_id=18&company_id=&tags=10&qc_no=&start_date=&end_date= HTTP/1.1" 200 183510
+INFO 2025-09-03 18:18:09,433 django.utils.autoreload autoreload 15540 23172 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-03 18:18:10,848 django.utils.autoreload autoreload 15748 22764 Watching for file changes with StatReloader
+INFO 2025-09-03 18:19:06,095 django.utils.autoreload autoreload 15748 22764 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-03 18:19:07,042 django.utils.autoreload autoreload 9836 17232 Watching for file changes with StatReloader
+INFO 2025-09-03 18:19:09,525 django.utils.autoreload autoreload 9836 17232 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-03 18:19:10,715 django.utils.autoreload autoreload 26600 15404 Watching for file changes with StatReloader
+INFO 2025-09-03 18:20:00,910 django.utils.autoreload autoreload 26600 15404 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\opening_balances.py changed, reloading.
+INFO 2025-09-03 18:20:02,092 django.utils.autoreload autoreload 27624 31120 Watching for file changes with StatReloader
+INFO 2025-09-03 18:20:20,781 django.utils.autoreload autoreload 27624 31120 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\opening_balances.py changed, reloading.
+INFO 2025-09-03 18:20:22,185 django.utils.autoreload autoreload 19844 1408 Watching for file changes with StatReloader
+INFO 2025-09-03 18:20:23,858 django.utils.autoreload autoreload 19844 1408 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\opening_balances.py changed, reloading.
+INFO 2025-09-03 18:20:24,808 django.utils.autoreload autoreload 10068 29940 Watching for file changes with StatReloader
+INFO 2025-09-03 18:21:44,908 django.utils.autoreload autoreload 10068 29940 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\helpers.py changed, reloading.
+INFO 2025-09-03 18:21:46,850 django.utils.autoreload autoreload 26900 23920 Watching for file changes with StatReloader
+INFO 2025-09-03 18:21:49,604 django.server basehttp 26900 744 "GET /records/ HTTP/1.1" 200 523821
+INFO 2025-09-03 18:21:53,545 django.server basehttp 26900 744 "GET /records/ HTTP/1.1" 200 424896
+INFO 2025-09-03 18:21:54,607 django.server basehttp 26900 744 "GET /opening_balances/ HTTP/1.1" 200 125700
+INFO 2025-09-03 18:25:22,222 django.utils.autoreload autoreload 26900 23920 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-03 18:25:24,211 django.utils.autoreload autoreload 28048 13340 Watching for file changes with StatReloader
+INFO 2025-09-03 18:26:16,975 django.utils.autoreload autoreload 28048 13340 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\opening_balances.py changed, reloading.
+INFO 2025-09-03 18:26:18,331 django.utils.autoreload autoreload 27492 24304 Watching for file changes with StatReloader
+INFO 2025-09-03 18:26:20,212 django.utils.autoreload autoreload 27492 24304 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\opening_balances.py changed, reloading.
+INFO 2025-09-03 18:26:21,228 django.utils.autoreload autoreload 16872 30424 Watching for file changes with StatReloader
+INFO 2025-09-03 18:27:06,636 django.utils.autoreload autoreload 16872 30424 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\opening_balances.py changed, reloading.
+INFO 2025-09-03 18:27:07,537 django.utils.autoreload autoreload 31000 28788 Watching for file changes with StatReloader
+INFO 2025-09-03 18:27:20,960 django.utils.autoreload autoreload 32608 6728 Watching for file changes with StatReloader
+INFO 2025-09-03 18:28:52,718 django.utils.autoreload autoreload 32608 6728 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\helpers.py changed, reloading.
+INFO 2025-09-03 18:28:53,988 django.utils.autoreload autoreload 23232 33464 Watching for file changes with StatReloader
+INFO 2025-09-03 18:29:45,476 django.utils.autoreload autoreload 23232 33464 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\helpers.py changed, reloading.
+INFO 2025-09-03 18:29:46,487 django.utils.autoreload autoreload 26464 16004 Watching for file changes with StatReloader
+INFO 2025-09-03 18:29:53,155 django.utils.autoreload autoreload 26464 16004 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\helpers.py changed, reloading.
+INFO 2025-09-03 18:29:54,357 django.utils.autoreload autoreload 31692 16576 Watching for file changes with StatReloader
+INFO 2025-09-03 18:29:59,434 django.server basehttp 31692 20272 "GET /opening_balances/ HTTP/1.1" 200 228167
+INFO 2025-09-03 18:31:48,028 django.server basehttp 31692 20272 "POST /opening_balances/edit/27/ HTTP/1.1" 302 0
+INFO 2025-09-03 18:31:48,073 django.server basehttp 31692 20272 "GET /opening_balances/ HTTP/1.1" 200 228770
+INFO 2025-09-03 18:31:52,958 django.server basehttp 31692 20272 "GET /opening_balances/ HTTP/1.1" 200 129242
+INFO 2025-09-03 18:31:54,237 django.server basehttp 31692 20272 "GET /opening_balances/ HTTP/1.1" 200 129242
+INFO 2025-09-03 18:31:55,127 django.server basehttp 31692 20272 "GET /ledger/ HTTP/1.1" 200 13451
+INFO 2025-09-03 18:32:04,920 django.server basehttp 31692 20272 "GET /ledger/?product_id=45&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 151347
+INFO 2025-09-03 18:32:09,802 django.server basehttp 31692 20272 "GET /ledger/?product_id=45&company_id=&qc_no=&start_date=2025-01-01&end_date= HTTP/1.1" 200 151509
+WARNING 2025-09-03 18:32:50,725 django.request log 31692 20272 Not Found: /purchase_order/1/
+WARNING 2025-09-03 18:32:50,725 django.server basehttp 31692 20272 "GET /purchase_order/1/ HTTP/1.1" 404 6869
+WARNING 2025-09-03 18:32:51,905 django.request log 31692 20272 Not Found: /purchase_order/1/
+WARNING 2025-09-03 18:32:51,906 django.server basehttp 31692 20272 "GET /purchase_order/1/ HTTP/1.1" 404 6869
+WARNING 2025-09-03 18:32:57,693 django.request log 31692 20272 Not Found: /purchase_order/
+WARNING 2025-09-03 18:32:57,694 django.server basehttp 31692 20272 "GET /purchase_order/ HTTP/1.1" 404 14713
+INFO 2025-09-03 18:43:19,087 django.server basehttp 31692 30904 "GET /ledger/?product_id=45&company_id=&qc_no=&start_date=2025-01-01&end_date= HTTP/1.1" 200 45627
+INFO 2025-09-03 18:43:19,616 django.server basehttp 31692 30904 "GET /ledger/?product_id=45&company_id=&qc_no=&start_date=2025-01-01&end_date= HTTP/1.1" 200 45627
+INFO 2025-09-03 18:43:22,201 django.server basehttp 31692 30904 "GET /ledger/?product_id=45&company_id=&qc_no=&start_date=2025-01-01&end_date= HTTP/1.1" 200 45627
+INFO 2025-09-03 18:43:22,788 django.server basehttp 31692 30904 "GET /batches/ HTTP/1.1" 200 31955
+INFO 2025-09-03 18:43:25,122 django.server basehttp 31692 30904 "GET /batches/?page=6 HTTP/1.1" 200 17794
+INFO 2025-09-03 18:43:27,883 django.server basehttp 31692 30904 "GET /batches/?page=5 HTTP/1.1" 200 31845
+INFO 2025-09-03 18:43:30,938 django.server basehttp 31692 30904 "GET /batch/74/ HTTP/1.1" 200 43601
+INFO 2025-09-03 18:50:52,455 django.server basehttp 31692 2788 "GET /batch/74/ HTTP/1.1" 200 142463
+INFO 2025-09-03 18:53:16,138 django.server basehttp 31692 2788 "GET /batch/74/ HTTP/1.1" 200 43601
+INFO 2025-09-03 18:53:17,381 django.server basehttp 31692 2788 "GET /opening_balances/ HTTP/1.1" 200 129242
+INFO 2025-09-03 18:59:58,280 django.server basehttp 31692 3724 "GET /opening_balances/ HTTP/1.1" 200 129242
+INFO 2025-09-03 18:59:58,775 django.server basehttp 31692 3724 "GET /batches/ HTTP/1.1" 200 31955
+INFO 2025-09-03 19:00:00,606 django.server basehttp 31692 3724 "GET /batches/?page=6 HTTP/1.1" 200 17794
+INFO 2025-09-03 19:00:04,906 django.server basehttp 31692 3724 "GET /batches/?page=5 HTTP/1.1" 200 31845
+INFO 2025-09-03 19:00:09,164 django.server basehttp 31692 3724 "GET /batch/74/ HTTP/1.1" 200 43601
+INFO 2025-09-03 19:00:13,693 django.server basehttp 31692 3724 "POST /batch/74/update_all/ HTTP/1.1" 302 0
+INFO 2025-09-03 19:00:14,127 django.server basehttp 31692 3724 "GET /batch/74/ HTTP/1.1" 200 143060
+INFO 2025-09-03 19:00:19,652 django.server basehttp 31692 3724 "GET /batch/74/ HTTP/1.1" 200 142498
+INFO 2025-09-03 19:00:24,893 django.server basehttp 31692 3724 "GET /batch/74/ HTTP/1.1" 200 43636
+INFO 2025-09-03 19:00:26,508 django.server basehttp 31692 3724 "GET /batch/74/ HTTP/1.1" 200 43636
+INFO 2025-09-03 19:00:28,229 django.server basehttp 31692 14648 "GET /batches/ HTTP/1.1" 200 31955
+INFO 2025-09-03 19:00:28,396 django.server basehttp 31692 3724 "GET /batch/74/ HTTP/1.1" 200 43636
+INFO 2025-09-03 19:00:30,852 django.server basehttp 31692 3724 "GET /batches/ HTTP/1.1" 200 31955
+INFO 2025-09-03 19:00:38,230 django.server basehttp 31692 3724 "GET /batches/?page=5 HTTP/1.1" 200 31845
+INFO 2025-09-03 19:00:41,775 django.server basehttp 31692 3724 "GET /batch/41/ HTTP/1.1" 200 43263
+INFO 2025-09-03 19:00:46,990 django.server basehttp 31692 3724 "GET /batches/?page=5 HTTP/1.1" 200 31845
+INFO 2025-09-03 19:00:50,737 django.server basehttp 31692 3724 "GET /batches/?page=4 HTTP/1.1" 200 32423
+INFO 2025-09-03 19:00:54,776 django.server basehttp 31692 3724 "GET /batch/89/ HTTP/1.1" 200 50020
+INFO 2025-09-03 19:01:01,838 django.server basehttp 31692 3724 "GET /batches/?page=4 HTTP/1.1" 200 32423
+INFO 2025-09-03 19:01:05,927 django.server basehttp 31692 3724 "GET /batches/?page=3 HTTP/1.1" 200 32610
+INFO 2025-09-03 19:01:10,373 django.server basehttp 31692 3724 "GET /batch/106/ HTTP/1.1" 200 47248
+INFO 2025-09-03 19:21:20,917 django.server basehttp 31692 20880 "GET /records/ HTTP/1.1" 200 424896
+INFO 2025-09-03 19:21:21,999 django.server basehttp 31692 18116 "GET /batch/106/ HTTP/1.1" 200 47248
+INFO 2025-09-03 19:21:23,115 django.server basehttp 31692 18116 "GET /opening_balances/ HTTP/1.1" 200 129242
+INFO 2025-09-03 19:45:39,988 django.utils.autoreload autoreload 31604 32472 Watching for file changes with StatReloader
+INFO 2025-09-03 20:10:58,035 django.utils.autoreload autoreload 20156 16012 Watching for file changes with StatReloader
+INFO 2025-09-03 20:11:28,045 django.server basehttp 20156 22684 "GET / HTTP/1.1" 200 120637
+INFO 2025-09-03 20:12:56,337 django.server basehttp 20156 22684 "GET /ledger/?product_id=18&company_id=&tags=10&qc_no=&start_date=&end_date= HTTP/1.1" 200 183510
+INFO 2025-09-03 20:13:04,677 django.server basehttp 20156 22684 "GET /ledger/?product_id=45&company_id=&tags=10&qc_no=&start_date=&end_date= HTTP/1.1" 200 119340
+INFO 2025-09-03 20:13:09,422 django.server basehttp 20156 22684 "GET /ledger/?product_id=45&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 151588
+INFO 2025-09-03 20:13:16,671 django.server basehttp 20156 22684 "GET /ledger/?product_id=45&company_id=&qc_no=&start_date=2025-01-01&end_date= HTTP/1.1" 200 151648
+INFO 2025-09-03 20:13:53,940 django.server basehttp 20156 22684 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=2025-01-01&end_date= HTTP/1.1" 200 278441
+INFO 2025-09-03 20:14:36,603 django.server basehttp 20156 22684 "GET /api/batch_details/120/ HTTP/1.1" 200 4696
+INFO 2025-09-03 20:14:36,612 django.server basehttp 20156 22684 "GET /api/batch_details/120/ HTTP/1.1" 200 4696
+INFO 2025-09-03 20:15:03,173 django.server basehttp 20156 22684 "GET /api/batch_details/125/ HTTP/1.1" 200 4136
+INFO 2025-09-03 20:15:03,185 django.server basehttp 20156 22684 "GET /api/batch_details/125/ HTTP/1.1" 200 4136
+INFO 2025-09-03 20:15:13,674 django.server basehttp 20156 22684 "GET /api/batch_details/125/ HTTP/1.1" 200 4136
+INFO 2025-09-03 20:15:13,685 django.server basehttp 20156 19216 "GET /api/batch_details/125/ HTTP/1.1" 200 4136
+INFO 2025-09-03 20:18:43,059 django.server basehttp 20156 19216 "GET /ledger/print/?product_id=18&company_id=&qc_no=&start_date=2025-01-01&end_date= HTTP/1.1" 200 48627
+INFO 2025-09-03 20:30:03,456 django.server basehttp 20156 23716 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=2025-01-01&end_date= HTTP/1.1" 200 172559
+INFO 2025-09-03 20:30:04,879 django.server basehttp 20156 23716 "GET /purchase_orders/ HTTP/1.1" 200 3266
+INFO 2025-09-03 20:30:56,877 django.server basehttp 20156 23716 "GET /purchase_orders/ HTTP/1.1" 200 3266
+INFO 2025-09-03 20:30:57,578 django.server basehttp 20156 23716 "GET /opening_balances/ HTTP/1.1" 200 129242
+INFO 2025-09-03 20:34:40,928 django.utils.autoreload autoreload 20156 16012 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\helpers.py changed, reloading.
+INFO 2025-09-03 20:34:42,344 django.utils.autoreload autoreload 1896 24184 Watching for file changes with StatReloader
