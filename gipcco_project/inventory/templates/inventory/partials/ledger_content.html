@@ -11,6 +11,7 @@
     </div>
     <div class="card-body">
         <form id="ledgerFilterForm" method="GET" action="{% url 'inventory:ledger' %}">
+            <!-- Filter form remains unchanged -->
             <div class="row g-3 align-items-end">
                 <div class="col-md-3">
                     <label for="product_id" class="form-label">المنتج</label>
@@ -30,12 +31,11 @@
                         {% endfor %}
                     </select>
                 </div>
-                <!-- CORRECTED: Tag filter is now for LOGS -->
                 <div class="col-md-3">
                     <label for="tags" class="form-label">وسوم السجلات</label>
                     <select name="tags" id="tags" class="form-select searchable-select" multiple>
                         {% for tag in all_tags %}
-                        <option value="{{ tag.id }}" {% if tag.id|stringformat:"s" in request.GET.getlist('tags') %}selected{% endif %}>{{ tag.name }}</option>
+                        <option value="{{ tag.id }}" {% if tag.id|stringformat:"s" in selected_tags %} selected{% endif %}>{{ tag.name }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -63,45 +63,66 @@
 {% if request.GET %}
     {% if transactions %}
     <div class="card shadow-sm">
-        <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="card-header">
              <h5 class="mb-0">نتائج البحث</h5>
              {% if request.GET.product_id %}
-             <span>الرصيد الافتتاحي للفترة: <strong>{{ opening_balance_for_period|floatformat:3 }}</strong> {{ unit }}</span>
+             <div class="d-flex justify-content-between align-items-center small text-muted mt-2">
+                <span>الرصيد الافتتاحي (كمية): <strong>{{ opening_balance_for_period|floatformat:3 }}</strong> {{ unit }}</span>
+                <span>الرصيد الافتتاحي (قيمة): <strong>{{ opening_value_for_period|floatformat:3 }}</strong></span>
+             </div>
              {% endif %}
         </div>
         <div class="table-responsive">
-            <table class="table table-hover table-striped mb-0">
+            <table class="table table-hover table-striped table-bordered mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th>التاريخ</th>
-                        <th>المنتج</th>
-                        <th>البيان / السبب</th>
-                        <th>الوسوم</th>
+                        <th rowspan="2" class="align-middle">التاريخ</th>
+                        <th rowspan="2" class="align-middle">البيان / السبب</th>
+                        <th colspan="3" class="text-center border-start border-end">الكمية</th>
+                        <th colspan="3" class="text-center border-start border-end">القيمة</th>
+                        <th rowspan="2" class="align-middle text-center">متوسط التكلفة</th>
+                        <th rowspan="2" class="align-middle"></th>
+                    </tr>
+                    <tr class="table-light">
                         <th class="text-center">التغيير</th>
-                        <th class="text-center">رصيد قبل</th>
-                        <th class="text-center">رصيد بعد</th>
-                        <th></th>
+                        <th class="text-center border-start">قبل</th>
+                        <th class="text-center border-end">بعد</th>
+                        <th class="text-center">التغيير</th>
+                        <th class="text-center border-start">قبل</th>
+                        <th class="text-center border-end">بعد</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for t in transactions %}
                     <tr>
                         <td>{{ t.date|date:"Y-m-d H:i" }}</td>
-                        <td>{{ t.product_name }}</td>
                         <td>
                             {{ t.description }}
-                            {% if t.type == 'OUT' and t.batch_id %}
-                                <a href="{% url 'inventory:view_batch' t.batch_id %}" target="_blank"><i class="bi bi-box-arrow-up-right small"></i></a>
+                            {% if not request.GET.product_id %}
+                                <span class="d-block small text-muted">{{ t.product_name }}</span>
+                            {% endif %}
+                            {% if t.tags %}
+                                <div class="mt-1">
+                                {% for tag in t.tags %}
+                                    <span class="badge text-bg-secondary">{{ tag.name }}</span>
+                                {% endfor %}
+                                </div>
                             {% endif %}
                         </td>
-                        <td>
-                            {% for tag in t.tags %}
-                                <span class="badge text-bg-secondary">{{ tag.name }}</span>
-                            {% endfor %}
-                        </td>
+                        
+                        <!-- Quantity Block -->
                         <td class="text-center fw-bold {% if t.quantity_change > 0 %}text-success{% else %}text-danger{% endif %}">{{ t.quantity_change|floatformat:3 }}</td>
-                        <td class="text-center text-muted">{{ t.balance_before|floatformat:3 }}</td>
-                        <td class="text-center fw-bold">{{ t.balance_after|floatformat:3 }}</td>
+                        <td class="text-center text-muted border-start">{{ t.balance_before|floatformat:3|default:"---" }}</td>
+                        <td class="text-center fw-bold border-end">{{ t.balance_after|floatformat:3|default:"---" }}</td>
+                        
+                        <!-- Value Block -->
+                        <td class="text-center fw-bold {% if t.value_change > 0 %}text-success{% elif t.value_change < 0 %}text-danger{% endif %}">{{ t.value_change|floatformat:3|default:"---" }}</td>
+                        <td class="text-center text-muted border-start">{{ t.value_before|floatformat:3|default:"---" }}</td>
+                        <td class="text-center fw-bold border-end">{{ t.value_after|floatformat:3|default:"---" }}</td>
+
+                        <!-- Moving Average Cost (THE KEY INFO) -->
+                        <td class="text-center fw-bold table-info">{{ t.moving_average_cost_after|floatformat:3|default:"---" }}</td>
+                        
                         <td class="text-end">
                              <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#detailsModal"
                                 data-type="{{ t.type }}" data-date="{{ t.date|date:'Y-m-d H:i' }}"
@@ -111,7 +132,7 @@
                                 data-batch-no="{{ t.batch_number|default:'N/A' }}" data-final-product="{{ t.final_product_name|default:'N/A' }}"
                                 data-theoretical-qty="{{ t.theoretical_quantity|floatformat:3|default:'N/A' }}"
                                 data-batch-id="{{ t.batch_id|default:'' }}">
-                                <i class="bi bi-info-circle"></i> تفاصيل
+                                <i class="bi bi-info-circle"></i>
                             </button>
                         </td>
                     </tr>
@@ -127,130 +148,4 @@
  <div class="alert alert-secondary"><i class="bi bi-info-circle-fill me-2"></i> الرجاء استخدام الفلاتر أعلاه لعرض كشف حساب.</div>
 {% endif %}
 
-<!-- The Modals and Script block remain exactly the same as before. -->
 {% include "inventory/partials/ledger_modals.html" %}
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-     const filterForm = document.getElementById('ledgerFilterForm');
-    const printBtn = document.getElementById('printReportBtn');
-    if (filterForm && printBtn) {
-        function updatePrintLink() {
-            // Using URLSearchParams correctly handles multi-select fields
-            const params = new URLSearchParams(new FormData(filterForm));
-            printBtn.href = `{% url 'inventory:print_ledger' %}?${params.toString()}`;
-        }
-        filterForm.addEventListener('change', updatePrintLink);
-        // Initial update on page load
-        updatePrintLink();
-    }
-    
-    
-    // Modal logic for transaction details
-    const detailsModal = document.getElementById('detailsModal');
-    if (detailsModal) {
-        detailsModal.addEventListener('show.bs.modal', function(event) {
-            const button = event.relatedTarget;
-            const modal = this;
-            const type = button.getAttribute('data-type');
-            
-            modal.querySelector('#modal-date').textContent = button.getAttribute('data-date');
-            modal.querySelector('#modal-product').textContent = `${button.getAttribute('data-product-name')} (${button.getAttribute('data-product-code')})`;
-            modal.querySelector('#modal-actual').textContent = button.getAttribute('data-actual-qty');
-            
-            const inDetails = modal.querySelectorAll('.in-details');
-            const outDetails = modal.querySelectorAll('.out-details');
-            const batchBtnContainer = modal.querySelector('#batch-details-btn-container');
-            const viewFullBatchBtn = modal.querySelector('#viewFullBatchBtn');
-            
-            if (type === 'IN' || type === 'RETURN_IN') {
-                inDetails.forEach(el => el.style.display = "table-row");
-                outDetails.forEach(el => el.style.display = "none");
-                batchBtnContainer.classList.add('d-none');
-                modal.querySelector('#detailsModalLabel').textContent = "تفاصيل حركة وارد";
-                modal.querySelector('#modal-company').textContent = button.getAttribute('data-company-name');
-                modal.querySelector('#modal-qc').textContent = button.getAttribute('data-qc-no');
-            } else { // type === 'OUT'
-                inDetails.forEach(el => el.style.display = "none");
-                outDetails.forEach(el => el.style.display = "table-row");
-                modal.querySelector('#detailsModalLabel').textContent = "تفاصيل حركة منصرف";
-                
-                const shopOrderCell = modal.querySelector('#modal-shop-order');
-                const batchId = button.getAttribute('data-batch-id');
-                const shopOrderNumber = button.getAttribute('data-shop-order-no');
-                
-                if (batchId) {
-                    shopOrderCell.innerHTML = `<a href="/batch/${batchId}/" title="عرض تفاصيل أمر التشغيل">${shopOrderNumber} <i class="bi bi-box-arrow-up-right small"></i></a>`;
-                    batchBtnContainer.classList.remove('d-none');
-                    viewFullBatchBtn.dataset.batchId = batchId;
-                } else {
-                    shopOrderCell.textContent = shopOrderNumber;
-                    batchBtnContainer.classList.add('d-none');
-                }
-                modal.querySelector('#modal-batch').textContent = button.getAttribute('data-batch-no');
-                modal.querySelector('#modal-final-product').textContent = button.getAttribute('data-final-product');
-                modal.querySelector('#modal-theoretical').textContent = button.getAttribute('data-theoretical-qty');
-            }
-        });
-    }
-    
-    // Modal logic for batch details
-    const batchDetailsModal = document.getElementById('batchDetailsModal');
-    if (batchDetailsModal) {
-        const viewFullBatchBtn = document.getElementById('viewFullBatchBtn');
-        if (viewFullBatchBtn) {
-            viewFullBatchBtn.addEventListener('click', async function() {
-                const batchId = this.dataset.batchId;
-                if (!batchId) return;
-                
-                const loadingEl = batchDetailsModal.querySelector('#batch-details-content-loading');
-                const mainEl = batchDetailsModal.querySelector('#batch-details-content-main');
-                const tbody = batchDetailsModal.querySelector('#batch-modal-items-tbody');
-                
-                // Show loading spinner
-                loadingEl.classList.remove('d-none');
-                mainEl.classList.add('d-none');
-                tbody.innerHTML = '';
-                
-                try {
-                    const response = await fetch(`/api/batch_details/${batchId}/`);
-                    const data = await response.json();
-                    
-                    if (response.ok) {
-                        // Populate header info
-                        batchDetailsModal.querySelector('#batch-modal-so-num').textContent = data.shop_order_number;
-                        batchDetailsModal.querySelector('#batch-modal-batch-num').textContent = data.batch_number;
-                        batchDetailsModal.querySelector('#batch-modal-date').textContent = new Date(data.creation_date).toLocaleDateString('en-CA');
-                        batchDetailsModal.querySelector('#batch-modal-final-prod').textContent = data.final_product_name;
-                        
-                        // Populate items table
-                        data.item_list.forEach(item => {
-                            const row = `
-                                <tr>
-                                    <td>${item.primitive_product_name}</td>
-                                    <td>${item.source_qc_no || 'N/A'}</td>
-                                    <td class="text-center">${parseFloat(item.theoretical_quantity).toFixed(3)} ${item.primitive_product_unit}</td>
-                                    <td class="text-center">${parseFloat(item.actual_quantity).toFixed(3)} ${item.primitive_product_unit}</td>
-                                </tr>
-                            `;
-                            tbody.insertAdjacentHTML('beforeend', row);
-                        });
-                        
-                        // Show main content
-                        loadingEl.classList.add('d-none');
-                        mainEl.classList.remove('d-none');
-                    } else {
-                        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">خطأ: ${data.error || 'فشل تحميل البيانات.'}</td></tr>`;
-                        loadingEl.classList.add('d-none');
-                        mainEl.classList.remove('d-none');
-                    }
-                } catch (error) {
-                    tbody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">حدث خطأ في الشبكة.</td></tr>`;
-                    loadingEl.classList.add('d-none');
-                    mainEl.classList.remove('d-none');
-                }
-            });
-        }
-    }
-});
-</script>

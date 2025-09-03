@@ -1,6 +1,8 @@
+
 import json
 import math
 from datetime import datetime, timedelta, time
+from decimal import Decimal
 
 from django.contrib import messages
 from django.core.paginator import Paginator
@@ -16,7 +18,8 @@ import logging
 
 from ..models import (Batch, BatchItem, Company, InventoryLog, OpeningBalance,
                      Product, ProductionReturn, ShopOrderTemplate, TemplateItem)
-from .helpers import check_and_update_batch_customization, get_opening_balance_for_period, validate_stock_availability, _get_ledger_transactions
+# --- NEW: Import costing helper ---
+from .helpers import check_and_update_batch_customization, get_opening_balance_for_period, validate_stock_availability, _get_ledger_transactions, recalculate_cost_history_for_product
 
 ITEMS_PER_PAGE = 20
 
@@ -118,8 +121,8 @@ def create_batch(request: HttpRequest) -> HttpResponse:
             return redirect('inventory:create_batch')
 
         try:
-            # --- CONSISTENCY FIX: Ensure we use .date() here as well ---
             creation_date_for_validation = datetime.strptime(creation_date_str, '%Y-%m-%d').date()
+            creation_datetime = timezone.make_aware(datetime.combine(creation_date_for_validation, time.min))
         except (ValueError, TypeError):
             messages.error(request, 'تاريخ الإنشاء غير صالح.')
             return redirect('inventory:create_batch')
@@ -127,11 +130,12 @@ def create_batch(request: HttpRequest) -> HttpResponse:
         is_valid, error_msg = validate_stock_availability(
             product_ids, actual_quantities, source_log_ids, creation_date_for_validation
         )
-        # if not is_valid:
-        #     messages.error(request, error_msg)
-        #     return redirect('inventory:create_batch')
+        if not is_valid:
+            messages.error(request, error_msg)
+            return redirect('inventory:create_batch')
         
         try:
+            batch = None
             with transaction.atomic():
                 final_batch_number_str = batch_from_str
                 if batch_to_str and batch_to_str.strip() and int(batch_to_str) >= int(batch_from_str):
@@ -141,7 +145,7 @@ def create_batch(request: HttpRequest) -> HttpResponse:
                     template_id=template_id,
                     shop_order_number=shop_order_number,
                     batch_number=final_batch_number_str,
-                    creation_date=creation_date_for_validation,
+                    creation_date=creation_datetime, # Use datetime object
                     is_customized=True,
                     is_continuation=is_continuation,
                     notes=notes
@@ -161,10 +165,16 @@ def create_batch(request: HttpRequest) -> HttpResponse:
                             source_log_id=source_log_id
                         ))
                 BatchItem.objects.bulk_create(items_to_create)
+
+            # --- COSTING ENGINE TRIGGER ---
+            product_ids_to_recalc = {int(pid) for pid in product_ids if pid}
+            for pid in product_ids_to_recalc:
+                recalculate_cost_history_for_product(pid, creation_datetime)
             
-            messages.success(request, f"تم إنشاء أمر التشغيل '{shop_order_number}' بنجاح.")
+            messages.success(request, f"تم إنشاء أمر التشغيل '{shop_order_number}' وتحديث التكاليف بنجاح.")
             return redirect('inventory:view_batch', pk=batch.pk)
         except Exception as e:
+            logger.error(f"Error creating batch: {e}", exc_info=True)
             messages.error(request, f"حدث خطأ غير متوقع: {e}")
             return redirect('inventory:create_batch')
 
@@ -203,9 +213,19 @@ def view_batch(request: HttpRequest, pk: int) -> HttpResponse:
             batch_from = batch_info.batch_number
             batch_to = ''
     if num_batches <= 0: num_batches = 1
+
     batch_items_with_stock = []
+    total_batch_cost = Decimal('0.0')
     batch_items = batch_info.items.select_related('primitive_product').order_by('primitive_product__name')
+
     for item in batch_items:
+        # Calculate line cost
+        item_cost = item.cost_at_consumption or Decimal('0.0')
+        item_qty = Decimal(str(item.actual_quantity or 0.0))
+        item.line_total = item_qty * item_cost
+        total_batch_cost += item.line_total
+
+        # Prepare other data for template
         item.base_theoretical_quantity = item.theoretical_quantity / num_batches
         item.base_actual_quantity = (item.actual_quantity or 0) / num_batches
         product = item.primitive_product
@@ -225,10 +245,12 @@ def view_batch(request: HttpRequest, pk: int) -> HttpResponse:
                 available_stock_rows.append({'id': log.id, 'qc_no': log.qc_no, 'timestamp': log.timestamp, 'remaining_quantity': remaining_log_qty})
         item.available_stock = sorted(available_stock_rows, key=lambda x: x['timestamp'])
         batch_items_with_stock.append(item)
+        
     context = {
         'active_page': 'shop_orders',
         'batch': batch_info,
         'items': batch_items_with_stock,
+        'total_batch_cost': total_batch_cost,
         'primitive_products': Product.objects.filter(~Q(product_type=Product.ProductType.FINAL_PRODUCT)),
         'batch_from': batch_from,
         'batch_to': batch_to,
@@ -241,9 +263,18 @@ def view_batch(request: HttpRequest, pk: int) -> HttpResponse:
 
 @require_POST
 def delete_batch(request: HttpRequest, pk: int) -> HttpResponse:
-    batch = get_object_or_404(Batch, pk=pk)
+    batch = get_object_or_404(Batch.objects.prefetch_related('items'), pk=pk)
+    
+    # --- COSTING ENGINE TRIGGER ---
+    product_ids_to_recalc = {item.primitive_product_id for item in batch.items.all()}
+    recalc_start_date = batch.creation_date
+    
     batch.delete()
-    messages.info(request, 'تم حذف أمر التشغيل وجميع بياناته بنجاح.')
+    
+    for pid in product_ids_to_recalc:
+        recalculate_cost_history_for_product(pid, recalc_start_date)
+
+    messages.info(request, 'تم حذف أمر التشغيل وتحديث التكاليف بنجاح.')
     return redirect('inventory:batches')
 
 
@@ -256,6 +287,7 @@ def add_batch_item(request: HttpRequest, batch_pk: int) -> HttpResponse:
         if not product_id or theoretical_quantity <= 0:
             messages.warning(request, "الرجاء اختيار منتج وتحديد كمية صالحة.")
             return redirect('inventory:view_batch', pk=batch_pk)
+        
         BatchItem.objects.create(
             batch=batch,
             primitive_product_id=product_id,
@@ -265,7 +297,11 @@ def add_batch_item(request: HttpRequest, batch_pk: int) -> HttpResponse:
             source_log=None
         )
         check_and_update_batch_customization(batch_pk)
-        messages.success(request, "تمت إضافة المادة بنجاح.")
+
+        # --- COSTING ENGINE TRIGGER ---
+        recalculate_cost_history_for_product(int(product_id), batch.creation_date)
+        
+        messages.success(request, "تمت إضافة المادة وتحديث التكاليف.")
     except Exception as e:
         messages.error(request, f"حدث خطأ أثناء إضافة المادة: {e}")
     return redirect('inventory:view_batch', pk=batch_pk)
@@ -274,8 +310,8 @@ def add_batch_item(request: HttpRequest, batch_pk: int) -> HttpResponse:
 @require_POST
 def update_batch_items_bulk(request: HttpRequest, batch_pk: int) -> HttpResponse:
     batch = get_object_or_404(Batch, pk=batch_pk)
+    original_creation_date = batch.creation_date
     
-    # --- Batch Header Update ---
     shop_order_number = request.POST.get('shop_order_number')
     creation_date_str = request.POST.get('creation_date')
     batch_from_str = request.POST.get('batch_number_from')
@@ -287,19 +323,10 @@ def update_batch_items_bulk(request: HttpRequest, batch_pk: int) -> HttpResponse
         messages.error(request, "الرجاء تعبئة بيانات أمر التشغيل الأساسية (رقم الأمر، التاريخ، رقم التشغيلة).")
         return redirect('inventory:view_batch', pk=batch_pk)
 
-    # --- Item Data Processing & Validation (Corrected Logic) ---
     item_ids = request.POST.getlist('item_id')
-    if not item_ids:
-        messages.info(request, "لا توجد مواد لحفظها.")
-        # Fall through to save header changes if needed.
-
-    # --- THE NEW, ROBUST LOGIC TO PREVENT DATA MIX-UP ---
-    # 1. Fetch all relevant BatchItem objects from the DB at once.
-    #    Create a dictionary for quick lookups.
     items_in_db = {str(item.id): item for item in BatchItem.objects.filter(id__in=item_ids)}
+    original_product_ids = {item.primitive_product_id for item in items_in_db.values()}
 
-    # 2. Build the parallel lists in the correct, guaranteed order by iterating
-    #    through the item_ids as they were submitted by the form.
     product_ids_for_validation = []
     actual_quantities_for_validation = []
     source_log_ids_for_validation = []
@@ -307,23 +334,19 @@ def update_batch_items_bulk(request: HttpRequest, batch_pk: int) -> HttpResponse
     for item_id in item_ids: 
         if item_id in items_in_db:
             item = items_in_db[item_id]
-            # Append the product ID from our reliable DB object
             product_ids_for_validation.append(item.primitive_product_id)
-            
-            # Append the quantity and source from the request, corresponding to this item_id
             actual_qty = request.POST.get(f'actual_quantity_{item_id}', '0')
             source_id = request.POST.get(f'source_log_id_{item_id}', '')
             actual_quantities_for_validation.append(actual_qty)
             source_log_ids_for_validation.append(source_id)
-    # --- END OF ROBUST LOGIC ---
 
     try:
         creation_date_for_validation = datetime.strptime(creation_date_str, '%Y-%m-%d').date()
+        creation_datetime = timezone.make_aware(datetime.combine(creation_date_for_validation, time.min))
     except (ValueError, TypeError):
         messages.error(request, 'تاريخ الإنشاء غير صالح.')
         return redirect('inventory:view_batch', pk=batch_pk)
 
-    # 3. Now call the validation function with perfectly synchronized lists.
     is_valid, error_msg = validate_stock_availability(
         product_ids_for_validation, 
         actual_quantities_for_validation, 
@@ -331,36 +354,30 @@ def update_batch_items_bulk(request: HttpRequest, batch_pk: int) -> HttpResponse
         creation_date_for_validation, 
         batch_id_to_exclude=batch_pk
     )
-    # if not is_valid:
-    #     messages.error(request, error_msg)
-    #     return redirect('inventory:view_batch', pk=batch_pk)
+    if not is_valid:
+        messages.error(request, error_msg)
+        return redirect('inventory:view_batch', pk=batch_pk)
 
-    # --- Perform Update in a Transaction ---
     try:
         with transaction.atomic():
-            # Update batch header
             final_batch_number_str = batch_from_str
             if batch_to_str and batch_to_str.strip() and int(batch_to_str) >= int(batch_from_str):
                 final_batch_number_str = f"{batch_from_str}-{batch_to_str}"
             batch.shop_order_number = shop_order_number
-            batch.creation_date = creation_date_for_validation
+            batch.creation_date = creation_datetime
             batch.batch_number = final_batch_number_str
             batch.is_continuation = is_continuation
             batch.notes = notes
             batch.save()
 
-            # Update batch items
             for item_id in item_ids:
                 item = items_in_db.get(item_id)
-                if not item: continue # Should not happen, but a good safeguard
-                
+                if not item: continue
                 theoretical_qty = request.POST.get(f'theoretical_quantity_{item_id}')
                 actual_qty = request.POST.get(f'actual_quantity_{item_id}')
                 source_id_str = request.POST.get(f'source_log_id_{item_id}')
-                
                 item.theoretical_quantity = float(theoretical_qty or 0)
                 item.actual_quantity = float(actual_qty or 0)
-                
                 if source_id_str:
                     source_id_from_form = int(source_id_str)
                     item.source_type = BatchItem.SourceType.OPENING_BALANCE if source_id_from_form == -1 else BatchItem.SourceType.INVENTORY_LOG
@@ -370,7 +387,14 @@ def update_batch_items_bulk(request: HttpRequest, batch_pk: int) -> HttpResponse
                 item.save()
 
         check_and_update_batch_customization(batch_pk)
-        messages.success(request, "تم حفظ جميع التعديلات بنجاح.")
+        
+        # --- COSTING ENGINE TRIGGER ---
+        all_affected_product_ids = original_product_ids.union(product_ids_for_validation)
+        recalc_start_date = min(original_creation_date, creation_datetime)
+        for pid in all_affected_product_ids:
+            recalculate_cost_history_for_product(int(pid), recalc_start_date)
+
+        messages.success(request, "تم حفظ جميع التعديلات وتحديث التكاليف بنجاح.")
     except Exception as e:
         logger.error(f"Error updating batch {batch_pk}: {e}", exc_info=True)
         messages.error(request, f"حدث خطأ أثناء حفظ التعديلات: {e}")
@@ -381,10 +405,16 @@ def update_batch_items_bulk(request: HttpRequest, batch_pk: int) -> HttpResponse
 def delete_batch_item(request: HttpRequest, item_pk: int) -> HttpResponse:
     item = get_object_or_404(BatchItem, pk=item_pk)
     batch_id = item.batch.id
+    
+    # --- COSTING ENGINE TRIGGER ---
+    product_id_to_recalc = item.primitive_product_id
+    recalc_start_date = item.batch.creation_date
+
     try:
         item.delete()
         check_and_update_batch_customization(batch_id)
-        messages.info(request, "تم حذف المادة من أمر التشغيل.")
+        recalculate_cost_history_for_product(product_id_to_recalc, recalc_start_date)
+        messages.info(request, "تم حذف المادة وتحديث التكاليف.")
     except Exception as e:
         messages.error(request, f"حدث خطأ أثناء الحذف: {e}")
     return redirect('inventory:view_batch', pk=batch_id)

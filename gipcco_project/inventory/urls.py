@@ -1,5 +1,3 @@
-# gipcco_project/inventory/urls.py
-
 from django.urls import path
 
 # Import views from their specific modules
@@ -9,8 +7,11 @@ from .views.templates import shop_order_templates, delete_shop_order_template, v
 from .views.batches import batches, create_batch, view_batch, delete_batch, add_batch_item, update_batch_items_bulk, delete_batch_item
 from .views.production_returns import production_returns, delete_production_return
 from .views.opening_balances import opening_balances, edit_opening_balance, delete_opening_balance
-from .views.analysis_ledger_visuals import analysis, ledger, visuals, print_ledger
-from .views.api import get_used_qc_sources, api_batch_details, get_product_tags
+# --- MODIFIED: Import new stock_valuation view ---
+from .views.analysis_ledger_visuals import analysis, ledger, visuals, print_ledger, stock_valuation
+from .views.purchase_orders import purchase_orders, create_purchase_order, view_purchase_order
+from .views.api import get_used_qc_sources, api_batch_details, get_product_tags, api_get_open_pos_for_supplier, api_get_po_items
+
 
 app_name = 'inventory'
 
@@ -35,6 +36,11 @@ urlpatterns = [
     path('products/tags/create/', create_tag, name='create_tag'),
     path('products/tags/edit/<int:pk>/', edit_tag, name='edit_tag'),
     path('products/tags/delete/<int:pk>/', delete_tag, name='delete_tag'),
+    
+    # Purchase Order Routes
+    path('purchase_orders/', purchase_orders, name='purchase_orders'),
+    path('purchase_orders/create/', create_purchase_order, name='create_purchase_order'),
+    path('purchase_order/<int:pk>/', view_purchase_order, name='view_purchase_order'),
 
     # Template Routes
     path('shop_order_templates/', shop_order_templates, name='shop_order_templates'),
@@ -64,10 +70,15 @@ urlpatterns = [
     path('ledger/', ledger, name='ledger'),
     path('ledger/print/', print_ledger, name='print_ledger'),
     path('analysis/', analysis, name='analysis'),
+    # --- NEW: Stock Valuation Report Route ---
+    path('stock_valuation/', stock_valuation, name='stock_valuation'),
     path('visuals/', visuals, name='visuals'),
 
     # API Routes
     path('api/get_used_qc_sources/<int:product_pk>/', get_used_qc_sources, name='api_get_used_qc_sources'),
     path('api/batch_details/<int:batch_pk>/', api_batch_details, name='api_batch_details'),
     path('api/product_tags/<int:product_id>/', get_product_tags, name='api_product_tags'),
+    path('api/supplier/<int:supplier_id>/open_pos/', api_get_open_pos_for_supplier, name='api_get_open_pos_for_supplier'),
+    path('api/po/<int:po_id>/items/', api_get_po_items, name='api_get_po_items'),
+
 ]

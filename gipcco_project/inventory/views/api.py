@@ -1,9 +1,11 @@
+# gipcco_project/inventory/views/api.py
+
 from django.db.models import Sum, F, FloatField
 from django.db.models.functions import Coalesce
 from django.http import HttpRequest, JsonResponse
 from django.shortcuts import get_object_or_404
 
-from ..models import Batch, BatchItem, Product, ProductTag
+from ..models import Batch, BatchItem, Product, ProductTag, PurchaseOrder, PurchaseOrderItem
 
 
 # --- API Views ---
@@ -14,7 +16,6 @@ def get_used_qc_sources(request: HttpRequest, product_pk: int) -> JsonResponse:
     """
     get_object_or_404(Product, pk=product_pk)
     
-    # Get all inventory logs that have been used as a source at least once for this product.
     source_logs = Product.objects.get(pk=product_pk).inventory_logs.filter(
         batch_items__isnull=False
     ).distinct().annotate(
@@ -84,3 +85,44 @@ def get_product_tags(request: HttpRequest, product_id: int) -> JsonResponse:
     return JsonResponse({
         'tags': [{'id': tag.id, 'name': tag.name} for tag in tags]
     })
+
+# --- NEW API VIEWS FOR POs ---
+
+def api_get_open_pos_for_supplier(request: HttpRequest, supplier_id: int) -> JsonResponse:
+    """
+    API endpoint to get open Purchase Orders for a specific supplier.
+    """
+    open_pos = PurchaseOrder.objects.filter(
+        supplier_id=supplier_id,
+        status__in=[PurchaseOrder.Status.PENDING, PurchaseOrder.Status.PARTIALLY_RECEIVED]
+    ).order_by('-order_date')
+    
+    data = [
+        {'id': po.id, 'po_number': po.po_number, 'order_date': po.order_date}
+        for po in open_pos
+    ]
+    return JsonResponse(data, safe=False)
+
+
+def api_get_po_items(request: HttpRequest, po_id: int) -> JsonResponse:
+    """
+    API endpoint to get items for a specific Purchase Order, calculating remaining quantity.
+    """
+    po_items = PurchaseOrderItem.objects.filter(
+        purchase_order_id=po_id
+    ).select_related('product').annotate(
+        total_received=Coalesce(Sum('receipts__quantity'), 0.0, output_field=FloatField())
+    ).annotate(
+        quantity_remaining=F('quantity_ordered') - F('total_received')
+    ).filter(quantity_remaining__gt=0.001)
+
+    data = [
+        {
+            'id': item.id,
+            'product_id': item.product.id,
+            'product_name': f"{item.product.name} ({item.product.code})",
+            'quantity_remaining': item.quantity_remaining,
+            'unit_price': item.unit_price
+        } for item in po_items
+    ]
+    return JsonResponse(data, safe=False)

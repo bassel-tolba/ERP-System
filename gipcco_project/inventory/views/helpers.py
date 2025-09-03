@@ -3,6 +3,7 @@
 import json
 import math
 from datetime import datetime, timedelta, time
+from decimal import Decimal, ROUND_HALF_UP
 
 from django.contrib import messages
 from django.core.paginator import Paginator
@@ -47,42 +48,6 @@ def check_and_update_batch_customization(batch_id: int):
     except Batch.DoesNotExist:
         pass
 
-def get_opening_balance_for_period(product_id: int, start_date: datetime) -> float:
-    # This function remains unchanged
-    most_recent_balance_entry = OpeningBalance.objects.filter(
-        product_id=product_id,
-        balance_date__lte=start_date
-    ).order_by('-balance_date').first()
-
-    opening_base_qty = 0.0
-    effective_balance_date = datetime(1, 1, 1, tzinfo=timezone.get_current_timezone())
-
-    if most_recent_balance_entry:
-        opening_base_qty = most_recent_balance_entry.quantity
-        effective_balance_date = most_recent_balance_entry.balance_date
-
-    sum_expression = Coalesce(Sum('quantity', output_field=FloatField()), 0.0)
-    
-    prior_period_in_log = InventoryLog.objects.filter(
-        product_id=product_id,
-        timestamp__gte=effective_balance_date,
-        timestamp__lt=start_date
-    ).aggregate(total=sum_expression)['total']
-
-    prior_period_in_returns = ProductionReturn.objects.filter(
-        product_id=product_id,
-        return_date__gte=effective_balance_date,
-        return_date__lt=start_date
-    ).aggregate(total=sum_expression)['total']
-
-    prior_period_out = BatchItem.objects.filter(
-        primitive_product_id=product_id,
-        batch__creation_date__gte=effective_balance_date,
-        batch__creation_date__lt=start_date
-    ).aggregate(total=Coalesce(Sum('actual_quantity', output_field=FloatField()), 0.0))['total']
-
-    return opening_base_qty + prior_period_in_log + prior_period_in_returns - prior_period_out
-
 
 def validate_stock_availability(product_ids, actual_quantities, source_log_ids, batch_creation_date, batch_id_to_exclude=None):
     """
@@ -122,9 +87,6 @@ def validate_stock_availability(product_ids, actual_quantities, source_log_ids, 
             if not latest_balance:
                 return (False, f"لا يوجد رصيد افتتاحي للمنتج '{product.name}'.")
 
-            # --- THE FIX IS HERE ---
-            # We must convert the `balance_date` (a DateTimeField) to a `date` object
-            # before comparing it with `batch_creation_date` (a date object).
             if latest_balance.balance_date.date() > batch_creation_date:
                 return False, f"خطأ في مادة '{product.name}': تاريخ الرصيد الافتتاحي ({latest_balance.balance_date.date()}) أحدث من تاريخ أمر التشغيل ({batch_creation_date})."
             
@@ -141,7 +103,6 @@ def validate_stock_availability(product_ids, actual_quantities, source_log_ids, 
             except InventoryLog.DoesNotExist:
                 return (False, f"مصدر المخزون برقم {source_id} غير موجود.")
 
-            # This part was already correct, ensuring we compare date vs date.
             if log_entry.timestamp.date() > batch_creation_date:
                 return False, f"خطأ في مادة '{log_entry.product.name}': تاريخ المصدر ({log_entry.timestamp.date()}) أحدث من تاريخ أمر التشغيل ({batch_creation_date})."
             
@@ -159,28 +120,56 @@ def validate_stock_availability(product_ids, actual_quantities, source_log_ids, 
     return (True, None)
 
 
-# ==============================================================================
-#  CORRECTED Helper Function
-# ==============================================================================
+def get_opening_balance_for_period(product_id: int, start_date: datetime) -> float:
+    # This function remains unchanged
+    most_recent_balance_entry = OpeningBalance.objects.filter(
+        product_id=product_id,
+        balance_date__lte=start_date
+    ).order_by('-balance_date').first()
+
+    opening_base_qty = 0.0
+    effective_balance_date = datetime(1, 1, 1, tzinfo=timezone.get_current_timezone())
+
+    if most_recent_balance_entry:
+        opening_base_qty = most_recent_balance_entry.quantity
+        effective_balance_date = most_recent_balance_entry.balance_date
+
+    sum_expression = Coalesce(Sum('quantity', output_field=FloatField()), 0.0)
+    
+    prior_period_in_log = InventoryLog.objects.filter(
+        product_id=product_id,
+        timestamp__gte=effective_balance_date,
+        timestamp__lt=start_date
+    ).aggregate(total=sum_expression)['total']
+
+    prior_period_in_returns = ProductionReturn.objects.filter(
+        product_id=product_id,
+        return_date__gte=effective_balance_date,
+        return_date__lt=start_date
+    ).aggregate(total=sum_expression)['total']
+
+    prior_period_out = BatchItem.objects.filter(
+        primitive_product_id=product_id,
+        batch__creation_date__gte=effective_balance_date,
+        batch__creation_date__lt=start_date
+    ).aggregate(total=Coalesce(Sum('actual_quantity', output_field=FloatField()), 0.0))['total']
+
+    return opening_base_qty + prior_period_in_log + prior_period_in_returns - prior_period_out
+
+
+# --- MODIFIED: Added deterministic sorting for transactions ---
 def _get_ledger_transactions(product_id, company_id, qc_no, start_date, end_date_inclusive, tag_ids=None):
     """
     A private helper to fetch and consolidate all transaction types for the ledger.
-    NOW CORRECTLY FILTERS LOGS BY TAGS, not products by tags.
     """
     transactions = []
     
-    # Base querysets with CORRECT optimization
     in_logs_qs = InventoryLog.objects.select_related('product', 'company').prefetch_related('tags').filter(timestamp__gte=start_date, timestamp__lt=end_date_inclusive)
-    
-    # --- FIX 1: Added prefetch_related for the tags on the source log ---
     returns_qs = ProductionReturn.objects.select_related('product', 'source_log').prefetch_related('source_log__tags').filter(return_date__gte=start_date, return_date__lt=end_date_inclusive)
-    
-    # --- FIX 2: Moved 'source_log__tags' from select_related to prefetch_related ---
     out_items_qs = BatchItem.objects.select_related(
         'primitive_product', 'batch', 'source_log', 'batch__template__final_product'
     ).prefetch_related('source_log__tags').filter(batch__creation_date__gte=start_date, batch__creation_date__lt=end_date_inclusive)
 
-    # Apply standard filters
     if product_id: 
         in_logs_qs = in_logs_qs.filter(product_id=product_id)
         returns_qs = returns_qs.filter(product_id=product_id)
@@ -199,7 +188,6 @@ def _get_ledger_transactions(product_id, company_id, qc_no, start_date, end_date
         returns_qs = returns_qs.filter(source_log__tags__id__in=tag_ids).distinct()
         out_items_qs = out_items_qs.filter(source_log__tags__id__in=tag_ids).distinct()
 
-    # Process INCOMING from suppliers
     for log in in_logs_qs:
         transactions.append({
             'date': log.timestamp, 'type': 'IN', 'quantity_change': log.quantity,
@@ -208,9 +196,9 @@ def _get_ledger_transactions(product_id, company_id, qc_no, start_date, end_date
             'description': f"استلام من {log.company.name if log.company else '---'} (QC: {log.qc_no or 'N/A'})",
             'shop_order_number': None, 'batch_number': None, 'final_product_name': None, 'theoretical_quantity': None,
             'tags': log.tags.all(),
+            'unit_price': log.unit_price, 'cost_at_consumption': None,
         })
 
-    # Process INCOMING from production returns
     for ret in returns_qs:
         transactions.append({
             'date': ret.return_date, 'type': 'RETURN_IN', 'quantity_change': ret.quantity,
@@ -219,165 +207,181 @@ def _get_ledger_transactions(product_id, company_id, qc_no, start_date, end_date
             'description': f"إرجاع من الإنتاج (مصدر QC الأصلي: {ret.source_log.qc_no or 'N/A'})",
             'shop_order_number': None, 'batch_number': None, 'final_product_name': None, 'theoretical_quantity': None,
             'tags': ret.source_log.tags.all(),
+            'unit_price': None, 'cost_at_consumption': None,
         })
 
-    # Process OUTGOING to production
     for item in out_items_qs:
         source_desc = item.source_log.qc_no or 'N/A' if item.source_log else 'رصيد افتتاحي'
         continuation_str = ' (تكملة)' if item.batch.is_continuation else ''
         transactions.append({
-            'date': item.batch.creation_date, 'type': 'OUT', 'quantity_change': -item.actual_quantity,
+            'date': item.batch.creation_date, 'type': 'OUT', 'quantity_change': -(item.actual_quantity or 0.0),
             'product_id': item.primitive_product.id, 'product_name': item.primitive_product.name, 'product_code': item.primitive_product.code, 'unit': item.primitive_product.unit,
             'company_name': None, 'qc_no': source_desc, 'batch_id': item.batch.id,
             'description': f"صرف لأمر تشغيل {item.batch.shop_order_number}{continuation_str} (مصدر: {source_desc})",
             'shop_order_number': item.batch.shop_order_number, 'batch_number': item.batch.batch_number,
             'final_product_name': item.batch.template.final_product.name, 'theoretical_quantity': item.theoretical_quantity,
             'tags': item.source_log.tags.all() if item.source_log else [],
+            'unit_price': None, 'cost_at_consumption': item.cost_at_consumption,
         })
 
-    transactions.sort(key=lambda x: x['date'])
+    # --- FIX: Ensure deterministic sorting for same-timestamp transactions ---
+    def get_sort_key(trx):
+        # Sort by date, then by type (IN -> RETURN_IN -> OUT) to process logically
+        type_order = {'IN': 1, 'RETURN_IN': 2, 'OUT': 3}
+        return (trx['date'], type_order.get(trx['type'], 99))
+
+    transactions.sort(key=get_sort_key)
     return transactions
+
+
+# ==============================================================================
+#  Costing Engine Helper Functions
+# ==============================================================================
+
+def update_moving_average_cost(product_id: int, log_entry: InventoryLog):
     """
-    A private helper to fetch and consolidate all transaction types for the ledger.
-    NOW CORRECTLY FILTERS LOGS BY TAGS, not products by tags.
+    Updates the moving average cost for a product based on a new incoming shipment.
+    This is for simple, forward-moving transactions ONLY (date is today or future).
     """
-    transactions = []
+    with transaction.atomic():
+        product = Product.objects.select_for_update().get(pk=product_id)
+        
+        incoming_qty = Decimal(log_entry.quantity)
+        incoming_price = log_entry.unit_price or Decimal('0.000')
+
+        total_in = Decimal(product.inventory_logs.aggregate(q=Coalesce(Sum('quantity'), 0.0))['q'])
+        total_out = Decimal(product.batch_items.aggregate(q=Coalesce(Sum('actual_quantity'), 0.0))['q'])
+        total_ret = Decimal(product.production_returns.aggregate(q=Coalesce(Sum('quantity'), 0.0))['q'])
+        
+        qty_after_receipt = total_in - total_out + total_ret
+        qty_before_receipt = qty_after_receipt - incoming_qty
+        
+        value_before_receipt = qty_before_receipt * product.moving_average_cost
+        value_of_receipt = incoming_qty * incoming_price
+        
+        total_value_after = value_before_receipt + value_of_receipt
+        total_qty_after = qty_before_receipt + incoming_qty
+        
+        if total_qty_after > 0:
+            new_mac = total_value_after / total_qty_after
+        else:
+            new_mac = incoming_price
+        
+        product.moving_average_cost = new_mac.quantize(Decimal('0.001'), rounding=ROUND_HALF_UP)
+        product.save(update_fields=['moving_average_cost'])
+        logger.info(f"Updated MAC for '{product.name}' to {product.moving_average_cost} via simple update.")
+
+
+def get_inventory_state_at_datetime(product_id: int, target_datetime: timezone.datetime) -> dict:
+    """
+    Calculates the total stock quantity and its total value for a product up to a specific datetime.
+    Used by the recalculation engine and ledger to find a starting point.
+    """
+    most_recent_ob = OpeningBalance.objects.filter(
+        product_id=product_id, balance_date__lt=target_datetime
+    ).order_by('-balance_date').first()
+
+    if most_recent_ob:
+        running_qty = Decimal(str(most_recent_ob.quantity))
+        running_value = Decimal(str(most_recent_ob.quantity)) * most_recent_ob.unit_cost
+        effective_date = most_recent_ob.balance_date
+    else:
+        running_qty = Decimal('0.0')
+        running_value = Decimal('0.0')
+        effective_date = timezone.make_aware(datetime.min)
     
-    # Base querysets
-    in_logs_qs = InventoryLog.objects.select_related('product', 'company').prefetch_related('tags').filter(timestamp__gte=start_date, timestamp__lt=end_date_inclusive)
-    returns_qs = ProductionReturn.objects.select_related('product', 'source_log').filter(return_date__gte=start_date, return_date__lt=end_date_inclusive)
-    out_items_qs = BatchItem.objects.select_related(
-        'primitive_product', 'batch', 'source_log', 'source_log__tags', 'batch__template__final_product'
-    ).filter(batch__creation_date__gte=start_date, batch__creation_date__lt=end_date_inclusive)
-
-    # Apply standard filters
-    if product_id: 
-        in_logs_qs = in_logs_qs.filter(product_id=product_id)
-        returns_qs = returns_qs.filter(product_id=product_id)
-        out_items_qs = out_items_qs.filter(primitive_product_id=product_id)
-    if company_id: 
-        in_logs_qs = in_logs_qs.filter(company_id=company_id)
-        returns_qs = returns_qs.none()
-        out_items_qs = out_items_qs.none()
-    if qc_no: 
-        in_logs_qs = in_logs_qs.filter(qc_no__icontains=qc_no)
-        returns_qs = returns_qs.filter(source_log__qc_no__icontains=qc_no)
-        out_items_qs = out_items_qs.filter(source_log__qc_no__icontains=qc_no)
+    logs = InventoryLog.objects.filter(product_id=product_id, timestamp__gte=effective_date, timestamp__lt=target_datetime)
+    consumptions = BatchItem.objects.filter(primitive_product_id=product_id, batch__creation_date__gte=effective_date, batch__creation_date__lt=target_datetime)
+    returns = ProductionReturn.objects.filter(product_id=product_id, return_date__gte=effective_date, return_date__lt=target_datetime)
     
-    # --- CORRECTED: Apply tag filter to the LOGS and BATCH ITEMS ---
-    if tag_ids:
-        # Filter INCOMING logs that have at least one of the selected tags
-        in_logs_qs = in_logs_qs.filter(tags__id__in=tag_ids).distinct()
-        # Filter RETURNS based on the tags of their original source log
-        returns_qs = returns_qs.filter(source_log__tags__id__in=tag_ids).distinct()
-        # Filter OUTGOING items based on the tags of their source log
-        out_items_qs = out_items_qs.filter(source_log__tags__id__in=tag_ids).distinct()
+    transactions = sorted(
+        list(logs) + list(consumptions) + list(returns),
+        key=lambda x: (
+            x.timestamp if isinstance(x, InventoryLog) else
+            x.batch.creation_date if isinstance(x, BatchItem) else
+            x.return_date,
+            1 if isinstance(x, InventoryLog) else 2 if isinstance(x, ProductionReturn) else 3
+        )
+    )
 
-    # Process INCOMING from suppliers
-    for log in in_logs_qs:
-        transactions.append({
-            'date': log.timestamp, 'type': 'IN', 'quantity_change': log.quantity,
-            'product_id': log.product.id, 'product_name': log.product.name, 'product_code': log.product.code, 'unit': log.product.unit,
-            'company_name': log.company.name if log.company else '---', 'qc_no': log.qc_no, 'batch_id': None,
-            'description': f"استلام من {log.company.name if log.company else '---'} (QC: {log.qc_no or 'N/A'})",
-            'shop_order_number': None, 'batch_number': None, 'final_product_name': None, 'theoretical_quantity': None,
-            'tags': log.tags.all(), # Include tags for display
-        })
+    for trx in transactions:
+        current_avg_cost = (running_value / running_qty) if running_qty > 0 else Decimal('0.0')
 
-    # Process INCOMING from production returns
-    for ret in returns_qs:
-        transactions.append({
-            'date': ret.return_date, 'type': 'RETURN_IN', 'quantity_change': ret.quantity,
-            'product_id': ret.product.id, 'product_name': ret.product.name, 'product_code': ret.product.code, 'unit': ret.product.unit,
-            'company_name': 'إرجاع من الإنتاج', 'qc_no': ret.source_log.qc_no, 'batch_id': None,
-            'description': f"إرجاع من الإنتاج (مصدر QC الأصلي: {ret.source_log.qc_no or 'N/A'})",
-            'shop_order_number': None, 'batch_number': None, 'final_product_name': None, 'theoretical_quantity': None,
-            'tags': ret.source_log.tags.all(), # Include tags for display
-        })
+        if isinstance(trx, InventoryLog):
+            incoming_qty = Decimal(str(trx.quantity))
+            incoming_price = trx.unit_price or Decimal('0.0')
+            running_value += incoming_qty * incoming_price
+            running_qty += incoming_qty
+        
+        elif isinstance(trx, ProductionReturn):
+            return_qty = Decimal(str(trx.quantity))
+            running_value += return_qty * current_avg_cost
+            running_qty += return_qty
+        
+        elif isinstance(trx, BatchItem):
+            consumed_qty = Decimal(str(trx.actual_quantity or 0.0))
+            running_value -= consumed_qty * current_avg_cost
+            running_qty -= consumed_qty
+            
+    return {'quantity': running_qty, 'value': running_value}
 
-    # Process OUTGOING to production
-    for item in out_items_qs:
-        source_desc = item.source_log.qc_no or 'N/A' if item.source_log else 'رصيد افتتاحي'
-        continuation_str = ' (تكملة)' if item.batch.is_continuation else ''
-        transactions.append({
-            'date': item.batch.creation_date, 'type': 'OUT', 'quantity_change': -item.actual_quantity,
-            'product_id': item.primitive_product.id, 'product_name': item.primitive_product.name, 'product_code': item.primitive_product.code, 'unit': item.primitive_product.unit,
-            'company_name': None, 'qc_no': source_desc, 'batch_id': item.batch.id,
-            'description': f"صرف لأمر تشغيل {item.batch.shop_order_number}{continuation_str} (مصدر: {source_desc})",
-            'shop_order_number': item.batch.shop_order_number, 'batch_number': item.batch.batch_number,
-            'final_product_name': item.batch.template.final_product.name, 'theoretical_quantity': item.theoretical_quantity,
-            'tags': item.source_log.tags.all() if item.source_log else [], # Include tags for display
-        })
-
-    transactions.sort(key=lambda x: x['date'])
-    return transactions
+def recalculate_cost_history_for_product(product_id: int, start_datetime: timezone.datetime):
     """
-    A private helper to fetch and consolidate all transaction types for the ledger.
-    NOW INCLUDES FILTERING BY TAGS.
+    Recalculates the entire cost and consumption history for a product from a specific point in time.
     """
-    transactions = []
-    
-    # Base querysets
-    in_logs_qs = InventoryLog.objects.select_related('product', 'company').filter(timestamp__gte=start_date, timestamp__lt=end_date_inclusive)
-    returns_qs = ProductionReturn.objects.select_related('product', 'source_log').filter(return_date__gte=start_date, return_date__lt=end_date_inclusive)
-    out_items_qs = BatchItem.objects.select_related(
-        'primitive_product', 'batch', 'source_log', 'batch__template__final_product'
-    ).filter(batch__creation_date__gte=start_date, batch__creation_date__lt=end_date_inclusive)
+    with transaction.atomic():
+        product = Product.objects.select_for_update().get(pk=product_id)
+        logger.info(f"Starting cost recalculation for '{product.name}' from {start_datetime.date()}...")
+        
+        state = get_inventory_state_at_datetime(product_id, start_datetime)
+        running_qty = state['quantity']
+        running_value = state['value']
 
-    # Apply filters
-    if product_id: 
-        in_logs_qs = in_logs_qs.filter(product_id=product_id)
-        returns_qs = returns_qs.filter(product_id=product_id)
-        out_items_qs = out_items_qs.filter(primitive_product_id=product_id)
-    # --- NEW: Apply tag filter only if no specific product is chosen ---
-    elif tag_ids:
-        in_logs_qs = in_logs_qs.filter(product__tags__id__in=tag_ids).distinct()
-        returns_qs = returns_qs.filter(product__tags__id__in=tag_ids).distinct()
-        out_items_qs = out_items_qs.filter(primitive_product__tags__id__in=tag_ids).distinct()
+        logs = InventoryLog.objects.filter(product_id=product_id, timestamp__gte=start_datetime)
+        consumptions = BatchItem.objects.filter(primitive_product_id=product_id, batch__creation_date__gte=start_datetime)
+        returns = ProductionReturn.objects.filter(product_id=product_id, return_date__gte=start_datetime)
+        
+        transactions = sorted(
+            list(logs) + list(consumptions) + list(returns),
+            key=lambda x: (
+                x.timestamp if isinstance(x, InventoryLog) else
+                x.batch.creation_date if isinstance(x, BatchItem) else
+                x.return_date,
+                1 if isinstance(x, InventoryLog) else 2 if isinstance(x, ProductionReturn) else 3
+            )
+        )
+        
+        items_to_update = []
+        
+        for trx in transactions:
+            current_avg_cost = (running_value / running_qty) if running_qty > 0 else Decimal('0.0')
 
-    if company_id: 
-        in_logs_qs = in_logs_qs.filter(company_id=company_id)
-        # Cannot filter returns or outgoing by company
-        returns_qs = returns_qs.none()
-        out_items_qs = out_items_qs.none()
+            if isinstance(trx, InventoryLog):
+                incoming_qty = Decimal(str(trx.quantity))
+                incoming_price = trx.unit_price or Decimal('0.0')
+                running_value += incoming_qty * incoming_price
+                running_qty += incoming_qty
+            
+            elif isinstance(trx, ProductionReturn):
+                return_qty = Decimal(str(trx.quantity))
+                running_value += return_qty * current_avg_cost
+                running_qty += return_qty
+            
+            elif isinstance(trx, BatchItem):
+                new_cost = current_avg_cost.quantize(Decimal('0.001'), rounding=ROUND_HALF_UP)
+                if trx.cost_at_consumption != new_cost:
+                    trx.cost_at_consumption = new_cost
+                    items_to_update.append(trx)
+                
+                consumed_qty = Decimal(str(trx.actual_quantity or 0.0))
+                running_value -= consumed_qty * new_cost
+                running_qty -= consumed_qty
 
-    if qc_no: 
-        in_logs_qs = in_logs_qs.filter(qc_no__icontains=qc_no)
-        returns_qs = returns_qs.filter(source_log__qc_no__icontains=qc_no)
-        out_items_qs = out_items_qs.filter(source_log__qc_no__icontains=qc_no)
+        if items_to_update:
+            BatchItem.objects.bulk_update(items_to_update, ['cost_at_consumption'])
+            logger.info(f"Updated cost_at_consumption for {len(items_to_update)} batch items of '{product.name}'.")
 
-    # Process INCOMING from suppliers
-    for log in in_logs_qs:
-        transactions.append({
-            'date': log.timestamp, 'type': 'IN', 'quantity_change': log.quantity,
-            'product_id': log.product.id, 'product_name': log.product.name, 'product_code': log.product.code, 'unit': log.product.unit,
-            'company_name': log.company.name if log.company else '---', 'qc_no': log.qc_no, 'batch_id': None,
-            'description': f"استلام من {log.company.name if log.company else '---'} (QC: {log.qc_no or 'N/A'})",
-            'shop_order_number': None, 'batch_number': None, 'final_product_name': None, 'theoretical_quantity': None,
-        })
-
-    # Process INCOMING from production returns
-    for ret in returns_qs:
-        transactions.append({
-            'date': ret.return_date, 'type': 'RETURN_IN', 'quantity_change': ret.quantity,
-            'product_id': ret.product.id, 'product_name': ret.product.name, 'product_code': ret.product.code, 'unit': ret.product.unit,
-            'company_name': 'إرجاع من الإنتاج', 'qc_no': ret.source_log.qc_no, 'batch_id': None,
-            'description': f"إرجاع من الإنتاج (مصدر QC الأصلي: {ret.source_log.qc_no or 'N/A'})",
-            'shop_order_number': None, 'batch_number': None, 'final_product_name': None, 'theoretical_quantity': None,
-        })
-
-    # Process OUTGOING to production
-    for item in out_items_qs:
-        source_desc = item.source_log.qc_no or 'N/A' if item.source_log else 'رصيد افتتاحي'
-        continuation_str = ' (تكملة)' if item.batch.is_continuation else ''
-        transactions.append({
-            'date': item.batch.creation_date, 'type': 'OUT', 'quantity_change': -item.actual_quantity,
-            'product_id': item.primitive_product.id, 'product_name': item.primitive_product.name, 'product_code': item.primitive_product.code, 'unit': item.primitive_product.unit,
-            'company_name': None, 'qc_no': source_desc, 'batch_id': item.batch.id,
-            'description': f"صرف لأمر تشغيل {item.batch.shop_order_number}{continuation_str} (مصدر: {source_desc})",
-            'shop_order_number': item.batch.shop_order_number, 'batch_number': item.batch.batch_number,
-            'final_product_name': item.batch.template.final_product.name, 'theoretical_quantity': item.theoretical_quantity,
-        })
-
-    transactions.sort(key=lambda x: x['date'])
-    return transactions
+        final_avg_cost = (running_value / running_qty) if running_qty > 0 else Decimal('0.0')
+        product.moving_average_cost = final_avg_cost.quantize(Decimal('0.001'), rounding=ROUND_HALF_UP)
+        product.save(update_fields=['moving_average_cost'])
+        logger.info(f"Finished recalculating cost history for '{product.name}'. New MAC: {product.moving_average_cost}")

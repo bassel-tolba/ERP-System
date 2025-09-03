@@ -11259,3 +11259,2358 @@ INFO 2025-09-02 20:27:17,255 django.utils.autoreload autoreload 30088 24776 C:\U
 INFO 2025-09-02 20:27:18,335 django.utils.autoreload autoreload 21792 30612 Watching for file changes with StatReloader
 INFO 2025-09-02 20:27:29,497 django.utils.autoreload autoreload 21792 30612 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
 INFO 2025-09-02 20:27:30,770 django.utils.autoreload autoreload 32088 30324 Watching for file changes with StatReloader
+INFO 2025-09-02 20:28:31,544 django.utils.autoreload autoreload 32088 30324 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-02 20:28:32,687 django.utils.autoreload autoreload 31840 8676 Watching for file changes with StatReloader
+INFO 2025-09-02 20:30:56,965 django.utils.autoreload autoreload 31840 8676 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-02 20:30:57,989 django.utils.autoreload autoreload 17968 15180 Watching for file changes with StatReloader
+INFO 2025-09-02 20:30:59,442 django.utils.autoreload autoreload 17968 15180 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-02 20:31:00,688 django.utils.autoreload autoreload 16768 33628 Watching for file changes with StatReloader
+INFO 2025-09-02 20:31:58,161 django.utils.autoreload autoreload 16768 33628 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-02 20:31:59,051 django.utils.autoreload autoreload 31024 12412 Watching for file changes with StatReloader
+INFO 2025-09-02 20:32:38,135 django.utils.autoreload autoreload 31024 12412 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-02 20:32:39,094 django.utils.autoreload autoreload 21032 21336 Watching for file changes with StatReloader
+INFO 2025-09-02 20:36:36,233 django.utils.autoreload autoreload 21032 21336 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\helpers.py changed, reloading.
+INFO 2025-09-02 20:36:37,359 django.utils.autoreload autoreload 22840 32512 Watching for file changes with StatReloader
+INFO 2025-09-02 20:36:39,938 django.utils.autoreload autoreload 22840 32512 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\helpers.py changed, reloading.
+INFO 2025-09-02 20:36:41,017 django.utils.autoreload autoreload 22524 17380 Watching for file changes with StatReloader
+INFO 2025-09-02 20:37:19,202 django.utils.autoreload autoreload 23708 29676 Watching for file changes with StatReloader
+INFO 2025-09-02 20:41:14,525 django.utils.autoreload autoreload 23708 29676 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\urls.py changed, reloading.
+INFO 2025-09-02 20:41:15,876 django.utils.autoreload autoreload 31116 32180 Watching for file changes with StatReloader
+INFO 2025-09-02 20:41:39,578 django.utils.autoreload autoreload 31116 32180 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\api.py changed, reloading.
+INFO 2025-09-02 20:41:40,707 django.utils.autoreload autoreload 15704 23516 Watching for file changes with StatReloader
+INFO 2025-09-02 20:45:47,639 django.utils.autoreload autoreload 15704 23516 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\dashboard.py changed, reloading.
+INFO 2025-09-02 20:45:48,619 django.utils.autoreload autoreload 26420 21176 Watching for file changes with StatReloader
+INFO 2025-09-02 20:52:03,129 django.utils.autoreload autoreload 26420 21176 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\dashboard.py changed, reloading.
+INFO 2025-09-02 20:52:04,121 django.utils.autoreload autoreload 80 16816 Watching for file changes with StatReloader
+ERROR 2025-09-02 20:52:58,109 django.request log 80 18324 Internal Server Error: /ledger/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\smartif.py", line 180, in translate_token
+    op = OPERATORS[token]
+         ~~~~~~~~~^^^^^^^
+KeyError: "request.GET.getlist('tags')"
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py", line 136, in ledger
+    return render(request, template_name, context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 196, in compile_nodelist
+    nodelist = parser.parse()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 862, in do_for
+    nodelist_loop = parser.parse(
+        (
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 961, in do_if
+    condition = TemplateIfParser(parser, bits).parse()
+                ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 894, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\smartif.py", line 171, in __init__
+    mapped_tokens.append(self.translate_token(token))
+                         ~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\smartif.py", line 182, in translate_token
+    return self.create_var(token)
+           ~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 897, in create_var
+    return TemplateLiteral(self.template_parser.compile_filter(value), value)
+                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 609, in compile_filter
+    return FilterExpression(token, self)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 710, in __init__
+    raise TemplateSyntaxError(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Could not parse the remainder: '('tags')' from 'request.GET.getlist('tags')'
+ERROR 2025-09-02 20:52:58,210 django.server basehttp 80 18324 "GET /ledger/?product_id=18&company_id=&tags=9&qc_no=&start_date=&end_date= HTTP/1.1" 500 296424
+INFO 2025-09-02 20:52:58,476 django.server basehttp 80 18324 "GET /batches/ HTTP/1.1" 200 31955
+INFO 2025-09-02 20:52:59,122 django.server basehttp 80 18324 "GET / HTTP/1.1" 200 25128
+INFO 2025-09-02 20:53:03,678 django.server basehttp 80 18324 "GET /api/product_tags/18/ HTTP/1.1" 200 177
+INFO 2025-09-02 20:56:10,213 django.server basehttp 80 18324 "GET /ledger/?product_id=18&company_id=&tags=10&qc_no=&start_date=&end_date= HTTP/1.1" 200 136136
+INFO 2025-09-02 20:56:10,713 django.server basehttp 80 18324 "GET /static/img/favicon.ico HTTP/1.1" 304 0
+INFO 2025-09-02 20:56:12,281 django.server basehttp 80 18324 "GET / HTTP/1.1" 200 25128
+INFO 2025-09-02 20:56:14,285 django.server basehttp 80 18324 "GET / HTTP/1.1" 200 25128
+INFO 2025-09-02 20:56:16,027 django.server basehttp 80 18324 "GET / HTTP/1.1" 200 25128
+INFO 2025-09-02 20:56:16,903 django.server basehttp 80 18324 "GET /companies/ HTTP/1.1" 200 41077
+INFO 2025-09-02 20:56:17,598 django.server basehttp 80 18324 "GET /products/ HTTP/1.1" 200 260821
+INFO 2025-09-02 20:56:18,643 django.server basehttp 80 18324 "GET /records/ HTTP/1.1" 200 401651
+INFO 2025-09-02 20:56:20,620 django.server basehttp 80 18324 "GET /records/ HTTP/1.1" 200 401651
+INFO 2025-09-02 20:56:24,394 django.server basehttp 80 18324 "GET /records/ HTTP/1.1" 200 401651
+INFO 2025-09-02 20:56:25,205 django.server basehttp 80 18324 "GET / HTTP/1.1" 200 25128
+INFO 2025-09-02 20:56:30,270 django.server basehttp 80 18324 "GET /companies/ HTTP/1.1" 200 41077
+INFO 2025-09-02 20:56:31,174 django.server basehttp 80 18324 "GET /companies/ HTTP/1.1" 200 107483
+INFO 2025-09-02 20:56:41,359 django.utils.autoreload autoreload 19132 16908 Watching for file changes with StatReloader
+INFO 2025-09-02 20:56:43,106 django.server basehttp 19132 29960 "GET / HTTP/1.1" 200 91534
+INFO 2025-09-02 20:56:46,294 django.server basehttp 19132 29960 "GET / HTTP/1.1" 200 25128
+INFO 2025-09-02 20:56:49,955 django.server basehttp 19132 29960 "GET / HTTP/1.1" 200 25128
+INFO 2025-09-02 20:56:55,742 django.server basehttp 19132 29960 "GET / HTTP/1.1" 200 25128
+INFO 2025-09-02 20:56:56,728 django.server basehttp 19132 29960 "GET /companies/ HTTP/1.1" 200 41077
+INFO 2025-09-02 20:56:57,773 django.server basehttp 19132 29960 "GET /products/ HTTP/1.1" 200 260821
+INFO 2025-09-02 20:56:59,744 django.server basehttp 19132 29960 "GET /records/ HTTP/1.1" 200 401651
+INFO 2025-09-02 20:57:01,624 django.server basehttp 19132 29960 "GET /records/ HTTP/1.1" 200 401651
+INFO 2025-09-02 20:57:02,251 django.server basehttp 19132 29960 "GET /analysis/ HTTP/1.1" 200 21002
+INFO 2025-09-02 20:57:02,761 django.server basehttp 19132 29960 "GET /analysis/ HTTP/1.1" 200 21002
+INFO 2025-09-02 20:57:02,978 django.server basehttp 19132 29960 "GET /opening_balances/ HTTP/1.1" 200 115678
+INFO 2025-09-02 20:57:04,295 django.server basehttp 19132 29960 "GET /opening_balances/ HTTP/1.1" 200 115678
+INFO 2025-09-02 20:57:08,601 django.server basehttp 19132 29960 "GET /opening_balances/ HTTP/1.1" 200 115678
+INFO 2025-09-02 20:57:09,335 django.server basehttp 19132 29960 "GET /visuals/ HTTP/1.1" 200 5513
+INFO 2025-09-02 20:57:09,909 django.server basehttp 19132 29960 "GET /visuals/ HTTP/1.1" 200 5513
+ERROR 2025-09-02 20:57:13,352 django.request log 19132 29960 Internal Server Error: /ledger/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\smartif.py", line 180, in translate_token
+    op = OPERATORS[token]
+         ~~~~~~~~~^^^^^^^
+KeyError: "request.GET.getlist('tags')"
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py", line 94, in ledger
+    return render(request, template_name, context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 196, in compile_nodelist
+    nodelist = parser.parse()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 862, in do_for
+    nodelist_loop = parser.parse(
+        (
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 961, in do_if
+    condition = TemplateIfParser(parser, bits).parse()
+                ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 894, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\smartif.py", line 171, in __init__
+    mapped_tokens.append(self.translate_token(token))
+                         ~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\smartif.py", line 182, in translate_token
+    return self.create_var(token)
+           ~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 897, in create_var
+    return TemplateLiteral(self.template_parser.compile_filter(value), value)
+                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 609, in compile_filter
+    return FilterExpression(token, self)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 710, in __init__
+    raise TemplateSyntaxError(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Could not parse the remainder: '('tags')' from 'request.GET.getlist('tags')'
+ERROR 2025-09-02 20:57:13,381 django.server basehttp 19132 29960 "GET /ledger/ HTTP/1.1" 500 268491
+INFO 2025-09-02 20:57:13,428 django.server basehttp 19132 29960 "GET /ledger/ HTTP/1.1" 200 86073
+ERROR 2025-09-02 20:57:16,212 django.request log 19132 29960 Internal Server Error: /ledger/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\smartif.py", line 180, in translate_token
+    op = OPERATORS[token]
+         ~~~~~~~~~^^^^^^^
+KeyError: "request.GET.getlist('tags')"
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py", line 94, in ledger
+    return render(request, template_name, context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 196, in compile_nodelist
+    nodelist = parser.parse()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 862, in do_for
+    nodelist_loop = parser.parse(
+        (
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 961, in do_if
+    condition = TemplateIfParser(parser, bits).parse()
+                ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 894, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\smartif.py", line 171, in __init__
+    mapped_tokens.append(self.translate_token(token))
+                         ~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\smartif.py", line 182, in translate_token
+    return self.create_var(token)
+           ~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 897, in create_var
+    return TemplateLiteral(self.template_parser.compile_filter(value), value)
+                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 609, in compile_filter
+    return FilterExpression(token, self)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 710, in __init__
+    raise TemplateSyntaxError(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Could not parse the remainder: '('tags')' from 'request.GET.getlist('tags')'
+ERROR 2025-09-02 20:57:16,242 django.server basehttp 19132 29960 "GET /ledger/ HTTP/1.1" 500 268490
+INFO 2025-09-02 20:57:16,680 django.server basehttp 19132 29960 "GET /batches/ HTTP/1.1" 200 31955
+INFO 2025-09-02 20:57:17,124 django.server basehttp 19132 29960 "GET / HTTP/1.1" 200 25128
+INFO 2025-09-02 20:58:28,819 django.server basehttp 19132 29960 "GET /companies/ HTTP/1.1" 200 41077
+INFO 2025-09-02 20:58:29,493 django.server basehttp 19132 29960 "GET /products/ HTTP/1.1" 200 260821
+INFO 2025-09-02 20:58:30,696 django.server basehttp 19132 25988 "GET / HTTP/1.1" 200 25128
+INFO 2025-09-02 20:58:31,119 django.server basehttp 19132 29960 "GET /records/ HTTP/1.1" 200 401651
+INFO 2025-09-02 20:58:34,176 django.server basehttp 19132 29960 "GET / HTTP/1.1" 200 25128
+INFO 2025-09-02 21:24:19,690 django.server basehttp 19132 21352 "GET / HTTP/1.1" 200 92297
+INFO 2025-09-02 21:24:21,000 django.server basehttp 19132 21352 "GET / HTTP/1.1" 200 25128
+ERROR 2025-09-02 21:24:21,803 django.request log 19132 21352 Internal Server Error: /purchase_orders/create/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\purchase_orders.py", line 92, in create_purchase_order
+    return render(request, 'inventory/partials/purchase_order_create_content.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1075, in render
+    output = self.filter_expression.resolve(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 749, in resolve
+    new_obj = func(obj, *arg_vals)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaultfilters.py", line 91, in json_script
+    return _json_script(value, element_id)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\utils\html.py", line 102, in json_script
+    json_str = json.dumps(value, cls=encoder or DjangoJSONEncoder).translate(
+               ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\json\__init__.py", line 238, in dumps
+    **kw).encode(obj)
+          ~~~~~~^^^^^
+  File "C:\Python313\Lib\json\encoder.py", line 200, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "C:\Python313\Lib\json\encoder.py", line 261, in iterencode
+    return _iterencode(o, 0)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\serializers\json.py", line 114, in default
+    return super().default(o)
+           ~~~~~~~~~~~~~~~^^^
+  File "C:\Python313\Lib\json\encoder.py", line 180, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+                    f'is not JSON serializable')
+TypeError: Object of type QuerySet is not JSON serializable
+ERROR 2025-09-02 21:24:21,823 django.server basehttp 19132 21352 "GET /purchase_orders/create/ HTTP/1.1" 500 194049
+ERROR 2025-09-02 21:24:21,894 django.request log 19132 21352 Internal Server Error: /purchase_orders/create/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\purchase_orders.py", line 93, in create_purchase_order
+    return render(request, 'inventory/purchase_order_create.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: inventory/purchase_order_create.html
+ERROR 2025-09-02 21:24:21,897 django.server basehttp 19132 21352 "GET /purchase_orders/create/ HTTP/1.1" 500 93395
+ERROR 2025-09-02 21:25:53,314 django.request log 19132 21352 Internal Server Error: /purchase_orders/create/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\purchase_orders.py", line 93, in create_purchase_order
+    return render(request, 'inventory/purchase_order_create.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: inventory/purchase_order_create.html
+ERROR 2025-09-02 21:25:53,320 django.server basehttp 19132 21352 "GET /purchase_orders/create/ HTTP/1.1" 500 93532
+INFO 2025-09-02 21:27:13,556 django.utils.autoreload autoreload 19132 16908 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\purchase_orders.py changed, reloading.
+INFO 2025-09-02 21:27:14,454 django.utils.autoreload autoreload 17512 9376 Watching for file changes with StatReloader
+ERROR 2025-09-02 21:27:42,355 django.request log 17512 13436 Internal Server Error: /purchase_orders/create/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\purchase_orders.py", line 93, in create_purchase_order
+    return render(request, 'inventory/purchase_order_create.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: inventory/purchase_order_create.html
+ERROR 2025-09-02 21:27:42,359 django.server basehttp 17512 13436 "GET /purchase_orders/create/ HTTP/1.1" 500 93532
+INFO 2025-09-02 21:28:37,513 django.utils.autoreload autoreload 17512 9376 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\purchase_orders.py changed, reloading.
+INFO 2025-09-02 21:28:38,510 django.utils.autoreload autoreload 1080 9088 Watching for file changes with StatReloader
+INFO 2025-09-02 21:28:41,663 django.server basehttp 1080 20348 "GET / HTTP/1.1" 200 92297
+INFO 2025-09-02 21:28:42,705 django.server basehttp 1080 20348 "GET / HTTP/1.1" 200 25128
+ERROR 2025-09-02 21:28:43,442 django.request log 1080 20348 Internal Server Error: /purchase_orders/create/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\purchase_orders.py", line 92, in create_purchase_order
+    return render(request, 'inventory/partials/purchase_order_create_content.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1075, in render
+    output = self.filter_expression.resolve(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 749, in resolve
+    new_obj = func(obj, *arg_vals)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaultfilters.py", line 91, in json_script
+    return _json_script(value, element_id)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\utils\html.py", line 102, in json_script
+    json_str = json.dumps(value, cls=encoder or DjangoJSONEncoder).translate(
+               ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\json\__init__.py", line 238, in dumps
+    **kw).encode(obj)
+          ~~~~~~^^^^^
+  File "C:\Python313\Lib\json\encoder.py", line 200, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "C:\Python313\Lib\json\encoder.py", line 261, in iterencode
+    return _iterencode(o, 0)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\serializers\json.py", line 114, in default
+    return super().default(o)
+           ~~~~~~~~~~~~~~~^^^
+  File "C:\Python313\Lib\json\encoder.py", line 180, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+                    f'is not JSON serializable')
+TypeError: Object of type QuerySet is not JSON serializable
+ERROR 2025-09-02 21:28:43,460 django.server basehttp 1080 20348 "GET /purchase_orders/create/ HTTP/1.1" 500 194064
+ERROR 2025-09-02 21:28:43,531 django.request log 1080 20348 Internal Server Error: /purchase_orders/create/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\purchase_orders.py", line 93, in create_purchase_order
+    return render(request, 'inventory/purchase_order_create.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: inventory/purchase_order_create.html
+ERROR 2025-09-02 21:28:43,537 django.server basehttp 1080 20348 "GET /purchase_orders/create/ HTTP/1.1" 500 93410
+INFO 2025-09-02 21:28:46,201 django.server basehttp 1080 20348 "GET / HTTP/1.1" 200 25128
+INFO 2025-09-02 21:28:46,778 django.server basehttp 1080 20348 "GET / HTTP/1.1" 200 25128
+INFO 2025-09-02 21:28:47,290 django.server basehttp 1080 20348 "GET /purchase_orders/ HTTP/1.1" 200 1591
+ERROR 2025-09-02 21:28:49,255 django.request log 1080 20348 Internal Server Error: /purchase_orders/create/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\purchase_orders.py", line 92, in create_purchase_order
+    return render(request, 'inventory/partials/purchase_order_create_content.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1075, in render
+    output = self.filter_expression.resolve(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 749, in resolve
+    new_obj = func(obj, *arg_vals)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaultfilters.py", line 91, in json_script
+    return _json_script(value, element_id)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\utils\html.py", line 102, in json_script
+    json_str = json.dumps(value, cls=encoder or DjangoJSONEncoder).translate(
+               ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\json\__init__.py", line 238, in dumps
+    **kw).encode(obj)
+          ~~~~~~^^^^^
+  File "C:\Python313\Lib\json\encoder.py", line 200, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "C:\Python313\Lib\json\encoder.py", line 261, in iterencode
+    return _iterencode(o, 0)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\serializers\json.py", line 114, in default
+    return super().default(o)
+           ~~~~~~~~~~~~~~~^^^
+  File "C:\Python313\Lib\json\encoder.py", line 180, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+                    f'is not JSON serializable')
+TypeError: Object of type QuerySet is not JSON serializable
+ERROR 2025-09-02 21:28:49,264 django.server basehttp 1080 20348 "GET /purchase_orders/create/ HTTP/1.1" 500 194080
+ERROR 2025-09-02 21:28:49,344 django.request log 1080 20348 Internal Server Error: /purchase_orders/create/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\purchase_orders.py", line 93, in create_purchase_order
+    return render(request, 'inventory/purchase_order_create.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: inventory/purchase_order_create.html
+ERROR 2025-09-02 21:28:49,349 django.server basehttp 1080 20348 "GET /purchase_orders/create/ HTTP/1.1" 500 93426
+ERROR 2025-09-02 21:30:48,827 django.request log 1080 20348 Internal Server Error: /purchase_orders/create/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\purchase_orders.py", line 93, in create_purchase_order
+    return render(request, 'inventory/purchase_order_create.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 210, in render
+    return template.render(context)
+           ~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 173, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1075, in render
+    output = self.filter_expression.resolve(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 749, in resolve
+    new_obj = func(obj, *arg_vals)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaultfilters.py", line 91, in json_script
+    return _json_script(value, element_id)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\utils\html.py", line 102, in json_script
+    json_str = json.dumps(value, cls=encoder or DjangoJSONEncoder).translate(
+               ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\json\__init__.py", line 238, in dumps
+    **kw).encode(obj)
+          ~~~~~~^^^^^
+  File "C:\Python313\Lib\json\encoder.py", line 200, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "C:\Python313\Lib\json\encoder.py", line 261, in iterencode
+    return _iterencode(o, 0)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\serializers\json.py", line 114, in default
+    return super().default(o)
+           ~~~~~~~~~~~~~~~^^^
+  File "C:\Python313\Lib\json\encoder.py", line 180, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+                    f'is not JSON serializable')
+TypeError: Object of type QuerySet is not JSON serializable
+ERROR 2025-09-02 21:30:48,846 django.server basehttp 1080 20348 "GET /purchase_orders/create/ HTTP/1.1" 500 290081
+ERROR 2025-09-02 21:30:51,287 django.request log 1080 20348 Internal Server Error: /purchase_orders/create/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\purchase_orders.py", line 93, in create_purchase_order
+    return render(request, 'inventory/purchase_order_create.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 210, in render
+    return template.render(context)
+           ~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 173, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1075, in render
+    output = self.filter_expression.resolve(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 749, in resolve
+    new_obj = func(obj, *arg_vals)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaultfilters.py", line 91, in json_script
+    return _json_script(value, element_id)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\utils\html.py", line 102, in json_script
+    json_str = json.dumps(value, cls=encoder or DjangoJSONEncoder).translate(
+               ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\json\__init__.py", line 238, in dumps
+    **kw).encode(obj)
+          ~~~~~~^^^^^
+  File "C:\Python313\Lib\json\encoder.py", line 200, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "C:\Python313\Lib\json\encoder.py", line 261, in iterencode
+    return _iterencode(o, 0)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\serializers\json.py", line 114, in default
+    return super().default(o)
+           ~~~~~~~~~~~~~~~^^^
+  File "C:\Python313\Lib\json\encoder.py", line 180, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+                    f'is not JSON serializable')
+TypeError: Object of type QuerySet is not JSON serializable
+ERROR 2025-09-02 21:30:51,303 django.server basehttp 1080 20348 "GET /purchase_orders/create/ HTTP/1.1" 500 290081
+INFO 2025-09-02 21:30:52,788 django.server basehttp 1080 20348 "GET / HTTP/1.1" 200 92297
+INFO 2025-09-02 21:30:54,140 django.server basehttp 1080 20348 "GET / HTTP/1.1" 200 25128
+INFO 2025-09-02 21:30:54,685 django.server basehttp 1080 20348 "GET / HTTP/1.1" 200 25128
+ERROR 2025-09-02 21:30:55,191 django.request log 1080 20348 Internal Server Error: /purchase_orders/create/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\purchase_orders.py", line 92, in create_purchase_order
+    return render(request, 'inventory/partials/purchase_order_create_content.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1075, in render
+    output = self.filter_expression.resolve(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 749, in resolve
+    new_obj = func(obj, *arg_vals)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaultfilters.py", line 91, in json_script
+    return _json_script(value, element_id)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\utils\html.py", line 102, in json_script
+    json_str = json.dumps(value, cls=encoder or DjangoJSONEncoder).translate(
+               ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\json\__init__.py", line 238, in dumps
+    **kw).encode(obj)
+          ~~~~~~^^^^^
+  File "C:\Python313\Lib\json\encoder.py", line 200, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "C:\Python313\Lib\json\encoder.py", line 261, in iterencode
+    return _iterencode(o, 0)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\serializers\json.py", line 114, in default
+    return super().default(o)
+           ~~~~~~~~~~~~~~~^^^
+  File "C:\Python313\Lib\json\encoder.py", line 180, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+                    f'is not JSON serializable')
+TypeError: Object of type QuerySet is not JSON serializable
+ERROR 2025-09-02 21:30:55,200 django.server basehttp 1080 20348 "GET /purchase_orders/create/ HTTP/1.1" 500 194064
+ERROR 2025-09-02 21:30:55,325 django.request log 1080 20348 Internal Server Error: /purchase_orders/create/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\purchase_orders.py", line 93, in create_purchase_order
+    return render(request, 'inventory/purchase_order_create.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 210, in render
+    return template.render(context)
+           ~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 173, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1075, in render
+    output = self.filter_expression.resolve(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 749, in resolve
+    new_obj = func(obj, *arg_vals)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaultfilters.py", line 91, in json_script
+    return _json_script(value, element_id)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\utils\html.py", line 102, in json_script
+    json_str = json.dumps(value, cls=encoder or DjangoJSONEncoder).translate(
+               ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\json\__init__.py", line 238, in dumps
+    **kw).encode(obj)
+          ~~~~~~^^^^^
+  File "C:\Python313\Lib\json\encoder.py", line 200, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "C:\Python313\Lib\json\encoder.py", line 261, in iterencode
+    return _iterencode(o, 0)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\serializers\json.py", line 114, in default
+    return super().default(o)
+           ~~~~~~~~~~~~~~~^^^
+  File "C:\Python313\Lib\json\encoder.py", line 180, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+                    f'is not JSON serializable')
+TypeError: Object of type QuerySet is not JSON serializable
+ERROR 2025-09-02 21:30:55,344 django.server basehttp 1080 20348 "GET /purchase_orders/create/ HTTP/1.1" 500 289944
+INFO 2025-09-02 21:33:21,413 django.utils.autoreload autoreload 1080 9088 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\purchase_orders.py changed, reloading.
+INFO 2025-09-02 21:33:22,640 django.utils.autoreload autoreload 18996 23068 Watching for file changes with StatReloader
+INFO 2025-09-02 21:33:24,778 django.server basehttp 18996 26844 "GET /purchase_orders/create/ HTTP/1.1" 200 77580
+INFO 2025-09-02 21:34:32,996 django.server basehttp 18996 26844 "POST /purchase_orders/create/ HTTP/1.1" 302 0
+INFO 2025-09-02 21:34:33,016 django.server basehttp 18996 26844 "GET /purchase_orders/ HTTP/1.1" 200 70212
+INFO 2025-09-02 21:34:35,373 django.server basehttp 18996 26844 "GET / HTTP/1.1" 200 25128
+INFO 2025-09-02 21:34:38,726 django.server basehttp 18996 26844 "GET /api/product_tags/18/ HTTP/1.1" 200 177
+INFO 2025-09-02 21:34:53,344 django.server basehttp 18996 26844 "GET / HTTP/1.1" 200 25128
+INFO 2025-09-02 21:34:54,364 django.server basehttp 18996 26844 "GET /purchase_orders/ HTTP/1.1" 200 2495
+ERROR 2025-09-02 21:34:57,632 django.request log 18996 26844 Internal Server Error: /purchase_order/1/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\purchase_orders.py", line 122, in view_purchase_order
+    return render(request, 'inventory/partials/purchase_order_view_content.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 196, in compile_nodelist
+    nodelist = parser.parse()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 862, in do_for
+    nodelist_loop = parser.parse(
+        (
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 489, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 487, in parse
+    filter_expression = self.compile_filter(token.contents)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 609, in compile_filter
+    return FilterExpression(token, self)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 705, in __init__
+    filter_func = parser.find_filter(filter_name)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 615, in find_filter
+    raise TemplateSyntaxError("Invalid filter: '%s'" % filter_name)
+django.template.exceptions.TemplateSyntaxError: Invalid filter: 'sub'
+ERROR 2025-09-02 21:34:57,647 django.server basehttp 18996 26844 "GET /purchase_order/1/ HTTP/1.1" 500 202878
+ERROR 2025-09-02 21:34:57,747 django.request log 18996 26844 Internal Server Error: /purchase_order/1/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\purchase_orders.py", line 123, in view_purchase_order
+    return render(request, 'inventory/purchase_order_view.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 199, in render
+    template = context.template.engine.select_template(template_name)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 208, in select_template
+    return self.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 196, in compile_nodelist
+    nodelist = parser.parse()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 862, in do_for
+    nodelist_loop = parser.parse(
+        (
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 489, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 487, in parse
+    filter_expression = self.compile_filter(token.contents)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 609, in compile_filter
+    return FilterExpression(token, self)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 705, in __init__
+    filter_func = parser.find_filter(filter_name)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 615, in find_filter
+    raise TemplateSyntaxError("Invalid filter: '%s'" % filter_name)
+django.template.exceptions.TemplateSyntaxError: Invalid filter: 'sub'
+ERROR 2025-09-02 21:34:57,767 django.server basehttp 18996 26844 "GET /purchase_order/1/ HTTP/1.1" 500 263738
+ERROR 2025-09-02 21:49:27,289 django.request log 18996 3444 Internal Server Error: /purchase_order/1/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\purchase_orders.py", line 123, in view_purchase_order
+    return render(request, 'inventory/purchase_order_view.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 199, in render
+    template = context.template.engine.select_template(template_name)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 208, in select_template
+    return self.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 196, in compile_nodelist
+    nodelist = parser.parse()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 862, in do_for
+    nodelist_loop = parser.parse(
+        (
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 489, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 487, in parse
+    filter_expression = self.compile_filter(token.contents)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 609, in compile_filter
+    return FilterExpression(token, self)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 705, in __init__
+    filter_func = parser.find_filter(filter_name)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 615, in find_filter
+    raise TemplateSyntaxError("Invalid filter: '%s'" % filter_name)
+django.template.exceptions.TemplateSyntaxError: Invalid filter: 'sub'
+ERROR 2025-09-02 21:49:27,306 django.server basehttp 18996 3444 "GET /purchase_order/1/ HTTP/1.1" 500 263875
+ERROR 2025-09-02 22:20:39,740 django.request log 18996 22980 Internal Server Error: /purchase_order/1/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\purchase_orders.py", line 123, in view_purchase_order
+    return render(request, 'inventory/purchase_order_view.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 199, in render
+    template = context.template.engine.select_template(template_name)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 208, in select_template
+    return self.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 196, in compile_nodelist
+    nodelist = parser.parse()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 862, in do_for
+    nodelist_loop = parser.parse(
+        (
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 489, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 487, in parse
+    filter_expression = self.compile_filter(token.contents)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 609, in compile_filter
+    return FilterExpression(token, self)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 705, in __init__
+    filter_func = parser.find_filter(filter_name)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 615, in find_filter
+    raise TemplateSyntaxError("Invalid filter: '%s'" % filter_name)
+django.template.exceptions.TemplateSyntaxError: Invalid filter: 'sub'
+ERROR 2025-09-02 22:20:39,763 django.server basehttp 18996 22980 "GET /purchase_order/1/ HTTP/1.1" 500 263875
+ERROR 2025-09-02 22:27:41,173 django.request log 18996 25704 Internal Server Error: /purchase_order/1/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\purchase_orders.py", line 123, in view_purchase_order
+    return render(request, 'inventory/purchase_order_view.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 199, in render
+    template = context.template.engine.select_template(template_name)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 208, in select_template
+    return self.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 196, in compile_nodelist
+    nodelist = parser.parse()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 862, in do_for
+    nodelist_loop = parser.parse(
+        (
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 489, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 487, in parse
+    filter_expression = self.compile_filter(token.contents)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 609, in compile_filter
+    return FilterExpression(token, self)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 705, in __init__
+    filter_func = parser.find_filter(filter_name)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 615, in find_filter
+    raise TemplateSyntaxError("Invalid filter: '%s'" % filter_name)
+django.template.exceptions.TemplateSyntaxError: Invalid filter: 'sub'
+ERROR 2025-09-02 22:27:41,190 django.server basehttp 18996 25704 "GET /purchase_order/1/ HTTP/1.1" 500 263875
+ERROR 2025-09-02 22:33:32,866 django.request log 18996 21212 Internal Server Error: /purchase_order/1/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\purchase_orders.py", line 123, in view_purchase_order
+    return render(request, 'inventory/purchase_order_view.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 199, in render
+    template = context.template.engine.select_template(template_name)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 208, in select_template
+    return self.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 196, in compile_nodelist
+    nodelist = parser.parse()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 862, in do_for
+    nodelist_loop = parser.parse(
+        (
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 489, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 487, in parse
+    filter_expression = self.compile_filter(token.contents)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 609, in compile_filter
+    return FilterExpression(token, self)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 705, in __init__
+    filter_func = parser.find_filter(filter_name)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 615, in find_filter
+    raise TemplateSyntaxError("Invalid filter: '%s'" % filter_name)
+django.template.exceptions.TemplateSyntaxError: Invalid filter: 'sub'
+ERROR 2025-09-02 22:33:32,932 django.server basehttp 18996 21212 "GET /purchase_order/1/ HTTP/1.1" 500 263875
+INFO 2025-09-02 22:35:03,768 django.utils.autoreload autoreload 18996 23068 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-02 22:35:05,126 django.utils.autoreload autoreload 26492 30632 Watching for file changes with StatReloader
+INFO 2025-09-02 22:35:33,541 django.utils.autoreload autoreload 26492 30632 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\urls.py changed, reloading.
+INFO 2025-09-02 22:35:34,387 django.utils.autoreload autoreload 28492 1408 Watching for file changes with StatReloader
+INFO 2025-09-02 22:36:08,159 django.utils.autoreload autoreload 28492 1408 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\helpers.py changed, reloading.
+INFO 2025-09-02 22:36:09,097 django.utils.autoreload autoreload 20088 18264 Watching for file changes with StatReloader
+INFO 2025-09-02 22:36:21,050 django.utils.autoreload autoreload 20088 18264 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\helpers.py changed, reloading.
+INFO 2025-09-02 22:36:21,973 django.utils.autoreload autoreload 32688 20248 Watching for file changes with StatReloader
+INFO 2025-09-02 22:36:51,949 django.utils.autoreload autoreload 32688 20248 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\batches.py changed, reloading.
+INFO 2025-09-02 22:36:53,055 django.utils.autoreload autoreload 33724 31520 Watching for file changes with StatReloader
+INFO 2025-09-02 22:37:17,502 django.utils.autoreload autoreload 33724 31520 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py changed, reloading.
+INFO 2025-09-02 22:37:18,827 django.utils.autoreload autoreload 30596 10592 Watching for file changes with StatReloader
+ERROR 2025-09-02 22:39:15,230 django.request log 30596 13932 Internal Server Error: /purchase_order/1/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\purchase_orders.py", line 123, in view_purchase_order
+    return render(request, 'inventory/purchase_order_view.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 199, in render
+    template = context.template.engine.select_template(template_name)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 208, in select_template
+    return self.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 196, in compile_nodelist
+    nodelist = parser.parse()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 862, in do_for
+    nodelist_loop = parser.parse(
+        (
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 489, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 487, in parse
+    filter_expression = self.compile_filter(token.contents)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 609, in compile_filter
+    return FilterExpression(token, self)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 705, in __init__
+    filter_func = parser.find_filter(filter_name)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 615, in find_filter
+    raise TemplateSyntaxError("Invalid filter: '%s'" % filter_name)
+django.template.exceptions.TemplateSyntaxError: Invalid filter: 'sub'
+ERROR 2025-09-02 22:39:15,252 django.server basehttp 30596 13932 "GET /purchase_order/1/ HTTP/1.1" 500 263875
+INFO 2025-09-02 22:39:18,678 django.server basehttp 30596 13932 "GET /purchase_orders/ HTTP/1.1" 200 69670
+INFO 2025-09-02 22:39:18,727 django.server basehttp 30596 13932 "GET /static/css/bootstrap.css HTTP/1.1" 304 0
+INFO 2025-09-02 22:39:20,948 django.server basehttp 30596 13932 "GET / HTTP/1.1" 200 25128
+INFO 2025-09-02 22:39:22,870 django.server basehttp 30596 13932 "GET /api/product_tags/18/ HTTP/1.1" 200 177
+INFO 2025-09-02 22:39:34,432 django.server basehttp 30596 13932 "GET / HTTP/1.1" 200 25128
+INFO 2025-09-02 22:39:40,120 django.server basehttp 30596 13932 "GET / HTTP/1.1" 200 25128
+INFO 2025-09-02 22:39:42,661 django.server basehttp 30596 13932 "GET /visuals/ HTTP/1.1" 200 5513
+INFO 2025-09-02 22:39:44,560 django.server basehttp 30596 13932 "GET /visuals/?product_id=18&start_date=2025-09-01&end_date=2025-09-02 HTTP/1.1" 200 74302
+INFO 2025-09-02 22:39:50,756 django.server basehttp 30596 13932 "GET /visuals/?product_id=18&start_date=2025-09-01&end_date=2025-09-02 HTTP/1.1" 200 7141
+INFO 2025-09-02 22:39:51,152 django.server basehttp 30596 13932 "GET /visuals/?product_id=18&start_date=2025-09-01&end_date=2025-09-02 HTTP/1.1" 200 7141
+INFO 2025-09-02 22:39:51,940 django.server basehttp 30596 13932 "GET /analysis/ HTTP/1.1" 200 21003
+INFO 2025-09-02 22:39:53,957 django.server basehttp 30596 13932 "GET /analysis/ HTTP/1.1" 200 21003
+ERROR 2025-09-02 22:39:54,285 django.request log 30596 13932 Internal Server Error: /ledger/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\smartif.py", line 180, in translate_token
+    op = OPERATORS[token]
+         ~~~~~~~~~^^^^^^^
+KeyError: "request.GET.getlist('tags')"
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py", line 95, in ledger
+    return render(request, template_name, context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 196, in compile_nodelist
+    nodelist = parser.parse()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 862, in do_for
+    nodelist_loop = parser.parse(
+        (
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 961, in do_if
+    condition = TemplateIfParser(parser, bits).parse()
+                ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 894, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\smartif.py", line 171, in __init__
+    mapped_tokens.append(self.translate_token(token))
+                         ~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\smartif.py", line 182, in translate_token
+    return self.create_var(token)
+           ~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 897, in create_var
+    return TemplateLiteral(self.template_parser.compile_filter(value), value)
+                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 609, in compile_filter
+    return FilterExpression(token, self)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 710, in __init__
+    raise TemplateSyntaxError(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Could not parse the remainder: '('tags')' from 'request.GET.getlist('tags')'
+ERROR 2025-09-02 22:39:54,306 django.server basehttp 30596 13932 "GET /ledger/ HTTP/1.1" 500 268581
+INFO 2025-09-02 22:39:54,355 django.server basehttp 30596 13932 "GET /ledger/ HTTP/1.1" 200 86836
+INFO 2025-09-02 22:39:57,511 django.server basehttp 30596 13932 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 217329
+INFO 2025-09-02 22:40:18,844 django.server basehttp 30596 13932 "GET /ledger/print/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 413686
+INFO 2025-09-02 22:55:02,571 django.server basehttp 30596 25308 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 217329
+INFO 2025-09-02 22:55:57,124 django.utils.autoreload autoreload 30596 10592 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\urls.py changed, reloading.
+INFO 2025-09-02 22:55:58,768 django.utils.autoreload autoreload 11672 34612 Watching for file changes with StatReloader
+INFO 2025-09-02 22:57:55,477 django.utils.autoreload autoreload 11672 34612 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\dashboard.py changed, reloading.
+INFO 2025-09-02 22:57:56,589 django.utils.autoreload autoreload 11828 24772 Watching for file changes with StatReloader
+INFO 2025-09-02 22:58:19,000 django.utils.autoreload autoreload 11828 24772 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\dashboard.py changed, reloading.
+INFO 2025-09-02 22:58:20,358 django.utils.autoreload autoreload 25256 15544 Watching for file changes with StatReloader
+INFO 2025-09-02 23:14:43,192 django.utils.autoreload autoreload 25256 15544 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\helpers.py changed, reloading.
+INFO 2025-09-02 23:14:44,770 django.utils.autoreload autoreload 24536 34760 Watching for file changes with StatReloader
+INFO 2025-09-02 23:28:22,468 django.utils.autoreload autoreload 24536 34760 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\helpers.py changed, reloading.
+INFO 2025-09-02 23:28:23,402 django.utils.autoreload autoreload 12448 30860 Watching for file changes with StatReloader
+ERROR 2025-09-02 23:28:33,124 django.request log 12448 28036 Internal Server Error: /ledger/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\smartif.py", line 180, in translate_token
+    op = OPERATORS[token]
+         ~~~~~~~~~^^^^^^^
+KeyError: "request.GET.getlist('tags')"
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py", line 159, in ledger
+    return render(request, template_name, context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 199, in render
+    template = context.template.engine.select_template(template_name)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 208, in select_template
+    return self.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 196, in compile_nodelist
+    nodelist = parser.parse()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 862, in do_for
+    nodelist_loop = parser.parse(
+        (
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 961, in do_if
+    condition = TemplateIfParser(parser, bits).parse()
+                ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 894, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\smartif.py", line 171, in __init__
+    mapped_tokens.append(self.translate_token(token))
+                         ~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\smartif.py", line 182, in translate_token
+    return self.create_var(token)
+           ~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 897, in create_var
+    return TemplateLiteral(self.template_parser.compile_filter(value), value)
+                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 609, in compile_filter
+    return FilterExpression(token, self)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 710, in __init__
+    raise TemplateSyntaxError(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Could not parse the remainder: '('tags')' from 'request.GET.getlist('tags')'
+ERROR 2025-09-02 23:28:33,158 django.server basehttp 12448 28036 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 500 447562
+INFO 2025-09-02 23:28:48,477 django.server basehttp 12448 28036 "GET /ledger/print/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 52268
+INFO 2025-09-02 23:29:04,430 django.server basehttp 12448 28036 "GET / HTTP/1.1" 200 92217
+INFO 2025-09-02 23:29:22,262 django.server basehttp 12448 28036 "GET / HTTP/1.1" 200 25048
+INFO 2025-09-02 23:29:22,926 django.server basehttp 12448 28036 "GET /purchase_orders/create/ HTTP/1.1" 200 10399
+INFO 2025-09-02 23:29:23,334 django.server basehttp 12448 28036 "GET /purchase_orders/create/ HTTP/1.1" 200 10399
+INFO 2025-09-02 23:29:23,722 django.server basehttp 12448 28036 "GET /purchase_orders/ HTTP/1.1" 200 2495
+INFO 2025-09-02 23:29:26,394 django.server basehttp 12448 28036 "GET / HTTP/1.1" 200 25048
+INFO 2025-09-02 23:29:29,173 django.server basehttp 12448 28036 "GET /api/product_tags/18/ HTTP/1.1" 200 177
+INFO 2025-09-02 23:29:36,697 django.server basehttp 12448 28036 "GET / HTTP/1.1" 200 92217
+INFO 2025-09-02 23:29:43,291 django.server basehttp 12448 28036 "GET /api/product_tags/18/ HTTP/1.1" 200 177
+INFO 2025-09-02 23:30:11,990 django.server basehttp 12448 28036 "GET / HTTP/1.1" 200 25048
+INFO 2025-09-02 23:30:13,948 django.server basehttp 12448 28036 "GET /purchase_orders/ HTTP/1.1" 200 2495
+INFO 2025-09-02 23:30:15,956 django.server basehttp 12448 28036 "GET /purchase_order/1/ HTTP/1.1" 200 5271
+INFO 2025-09-02 23:30:24,528 django.server basehttp 12448 28036 "GET /purchase_orders/ HTTP/1.1" 200 2495
+INFO 2025-09-02 23:30:26,084 django.server basehttp 12448 28036 "GET /purchase_orders/create/ HTTP/1.1" 200 10399
+INFO 2025-09-02 23:30:42,552 django.server basehttp 12448 28036 "GET /purchase_orders/create/ HTTP/1.1" 200 77580
+INFO 2025-09-02 23:30:53,411 django.server basehttp 12448 28036 "GET /purchase_orders/create/ HTTP/1.1" 200 77580
+INFO 2025-09-02 23:31:07,343 django.server basehttp 12448 28036 "POST /purchase_orders/create/ HTTP/1.1" 302 0
+INFO 2025-09-02 23:31:07,361 django.server basehttp 12448 28036 "GET /purchase_orders/ HTTP/1.1" 200 70988
+INFO 2025-09-02 23:31:09,605 django.server basehttp 12448 28036 "GET / HTTP/1.1" 200 25048
+INFO 2025-09-02 23:31:14,259 django.server basehttp 12448 28036 "GET / HTTP/1.1" 200 92217
+INFO 2025-09-02 23:31:18,608 django.server basehttp 12448 28036 "GET / HTTP/1.1" 200 92217
+INFO 2025-09-02 23:32:17,696 django.utils.autoreload autoreload 12448 30860 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\helpers.py changed, reloading.
+INFO 2025-09-02 23:32:18,702 django.utils.autoreload autoreload 3684 27324 Watching for file changes with StatReloader
+INFO 2025-09-02 23:40:08,307 django.server basehttp 3684 17448 "GET / HTTP/1.1" 200 93584
+INFO 2025-09-02 23:40:09,650 django.server basehttp 3684 17448 "GET / HTTP/1.1" 200 21669
+INFO 2025-09-02 23:40:10,076 django.server basehttp 3684 17448 "GET /shop_order_templates/ HTTP/1.1" 200 80966
+INFO 2025-09-02 23:40:11,378 django.server basehttp 3684 17448 "GET / HTTP/1.1" 200 21669
+INFO 2025-09-02 23:44:56,873 django.server basehttp 3684 17448 "GET / HTTP/1.1" 200 94899
+INFO 2025-09-02 23:44:58,410 django.server basehttp 3684 17448 "GET /api/product_tags/18/ HTTP/1.1" 200 177
+WARNING 2025-09-02 23:45:07,540 django.request log 3684 17448 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-02 23:45:07,553 django.server basehttp 3684 17448 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 13943
+WARNING 2025-09-02 23:45:07,832 django.server basehttp 3684 17448 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-02 23:46:51,607 django.server basehttp 3684 19608 "GET / HTTP/1.1" 200 95284
+WARNING 2025-09-02 23:46:51,827 django.request log 3684 19608 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-02 23:46:51,942 django.server basehttp 3684 19608 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 13943
+WARNING 2025-09-02 23:46:52,045 django.server basehttp 3684 19608 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-02 23:46:52,814 django.server basehttp 3684 26480 "GET /static/img/fall.png HTTP/1.1" 200 1463923
+INFO 2025-09-02 23:46:59,242 django.server basehttp 3684 30204 "GET / HTTP/1.1" 200 95284
+WARNING 2025-09-02 23:46:59,337 django.request log 3684 30204 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-02 23:46:59,339 django.server basehttp 3684 30204 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 13943
+WARNING 2025-09-02 23:46:59,600 django.server basehttp 3684 30204 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-02 23:47:05,354 django.server basehttp 3684 21632 "GET /api/product_tags/17/ HTTP/1.1" 200 177
+INFO 2025-09-02 23:47:10,208 django.server basehttp 3684 21632 "GET / HTTP/1.1" 200 95284
+WARNING 2025-09-02 23:47:10,293 django.request log 3684 21632 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-02 23:47:10,302 django.server basehttp 3684 21632 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 13943
+WARNING 2025-09-02 23:47:10,473 django.server basehttp 3684 21632 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+ERROR 2025-09-02 23:52:02,311 django.request log 3684 4816 Internal Server Error: /ledger/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\smartif.py", line 180, in translate_token
+    op = OPERATORS[token]
+         ~~~~~~~~~^^^^^^^
+KeyError: "request.GET.getlist('tags')"
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py", line 159, in ledger
+    return render(request, template_name, context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 199, in render
+    template = context.template.engine.select_template(template_name)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 208, in select_template
+    return self.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 196, in compile_nodelist
+    nodelist = parser.parse()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 862, in do_for
+    nodelist_loop = parser.parse(
+        (
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 961, in do_if
+    condition = TemplateIfParser(parser, bits).parse()
+                ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 894, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\smartif.py", line 171, in __init__
+    mapped_tokens.append(self.translate_token(token))
+                         ~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\smartif.py", line 182, in translate_token
+    return self.create_var(token)
+           ~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 897, in create_var
+    return TemplateLiteral(self.template_parser.compile_filter(value), value)
+                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 609, in compile_filter
+    return FilterExpression(token, self)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 710, in __init__
+    raise TemplateSyntaxError(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Could not parse the remainder: '('tags')' from 'request.GET.getlist('tags')'
+ERROR 2025-09-02 23:52:02,340 django.server basehttp 3684 4816 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 500 447562
+INFO 2025-09-02 23:52:04,252 django.server basehttp 3684 4816 "GET / HTTP/1.1" 200 95387
+WARNING 2025-09-02 23:52:04,338 django.request log 3684 4816 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-02 23:52:04,394 django.server basehttp 3684 4816 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 13943
+WARNING 2025-09-02 23:52:04,434 django.server basehttp 3684 4816 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-02 23:52:22,260 django.server basehttp 3684 15884 "GET / HTTP/1.1" 200 95387
+WARNING 2025-09-02 23:52:22,383 django.request log 3684 15884 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-02 23:52:22,386 django.server basehttp 3684 15884 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 13943
+WARNING 2025-09-02 23:52:22,676 django.server basehttp 3684 15884 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-02 23:52:24,654 django.server basehttp 3684 20696 "GET /api/product_tags/23/ HTTP/1.1" 200 177
+INFO 2025-09-02 23:55:33,784 django.server basehttp 3684 20696 "GET / HTTP/1.1" 200 95387
+WARNING 2025-09-02 23:55:34,211 django.request log 3684 20696 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-02 23:55:34,217 django.server basehttp 3684 20696 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 13943
+WARNING 2025-09-02 23:55:34,375 django.server basehttp 3684 20696 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-02 23:56:31,530 django.server basehttp 3684 29864 "GET / HTTP/1.1" 200 95387
+WARNING 2025-09-02 23:56:31,619 django.request log 3684 29864 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-02 23:56:31,622 django.server basehttp 3684 29864 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 13943
+WARNING 2025-09-02 23:56:31,863 django.server basehttp 3684 29864 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 00:01:04,847 django.server basehttp 3684 31176 "GET / HTTP/1.1" 200 95589
+WARNING 2025-09-03 00:01:04,943 django.request log 3684 31176 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 00:01:04,955 django.server basehttp 3684 31176 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 13943
+WARNING 2025-09-03 00:01:05,047 django.server basehttp 3684 31176 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 00:01:17,794 django.server basehttp 3684 29704 "GET / HTTP/1.1" 200 95589
+WARNING 2025-09-03 00:01:17,937 django.request log 3684 29704 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 00:01:17,955 django.server basehttp 3684 29704 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 13943
+WARNING 2025-09-03 00:01:18,225 django.server basehttp 3684 29704 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 00:02:30,221 django.server basehttp 3684 24596 "GET / HTTP/1.1" 200 93933
+WARNING 2025-09-03 00:02:30,309 django.request log 3684 24596 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 00:02:30,310 django.server basehttp 3684 24596 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 13943
+WARNING 2025-09-03 00:02:30,458 django.server basehttp 3684 24596 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 00:05:48,722 django.server basehttp 3684 16268 "GET / HTTP/1.1" 200 95033
+WARNING 2025-09-03 00:05:48,853 django.request log 3684 16268 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 00:05:48,855 django.server basehttp 3684 16268 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 13943
+WARNING 2025-09-03 00:05:49,228 django.server basehttp 3684 16268 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 00:05:53,005 django.server basehttp 3684 31420 "GET /api/supplier/5/open_pos/ HTTP/1.1" 200 60
+INFO 2025-09-03 00:08:08,327 django.server basehttp 3684 31420 "GET / HTTP/1.1" 200 94869
+WARNING 2025-09-03 00:08:08,414 django.request log 3684 31420 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 00:08:08,424 django.server basehttp 3684 31420 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 13943
+WARNING 2025-09-03 00:08:08,530 django.server basehttp 3684 31420 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 00:08:12,812 django.server basehttp 3684 11408 "GET /api/supplier/5/open_pos/ HTTP/1.1" 200 60
+INFO 2025-09-03 00:10:27,858 django.server basehttp 3684 11408 "GET / HTTP/1.1" 200 96600
+WARNING 2025-09-03 00:10:27,936 django.request log 3684 11408 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 00:10:27,939 django.server basehttp 3684 11408 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 13943
+WARNING 2025-09-03 00:10:28,238 django.server basehttp 3684 11408 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 00:10:34,571 django.server basehttp 3684 5300 "GET / HTTP/1.1" 200 96600
+WARNING 2025-09-03 00:10:34,646 django.request log 3684 5300 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 00:10:34,653 django.server basehttp 3684 5300 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 13943
+WARNING 2025-09-03 00:10:34,740 django.server basehttp 3684 5300 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 00:10:48,803 django.server basehttp 3684 29648 "GET / HTTP/1.1" 200 96600
+WARNING 2025-09-03 00:10:48,907 django.request log 3684 29648 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 00:10:48,909 django.server basehttp 3684 29648 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 13943
+WARNING 2025-09-03 00:10:48,992 django.server basehttp 3684 29648 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 00:11:20,813 django.server basehttp 3684 26744 "GET / HTTP/1.1" 200 96600
+WARNING 2025-09-03 00:11:20,881 django.request log 3684 26744 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 00:11:20,892 django.server basehttp 3684 26744 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 13943
+WARNING 2025-09-03 00:11:21,004 django.server basehttp 3684 26744 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 00:12:54,877 django.server basehttp 3684 33668 "GET / HTTP/1.1" 200 104847
+WARNING 2025-09-03 00:12:54,970 django.request log 3684 33668 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 00:12:54,975 django.server basehttp 3684 33668 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 13943
+WARNING 2025-09-03 00:12:55,098 django.server basehttp 3684 33668 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 00:12:58,239 django.server basehttp 3684 17240 "GET /api/supplier/5/open_pos/ HTTP/1.1" 200 60
+INFO 2025-09-03 00:12:59,451 django.server basehttp 3684 17240 "GET /api/po/1/items/ HTTP/1.1" 200 353
+INFO 2025-09-03 00:14:33,678 django.server basehttp 3684 17240 "GET /api/supplier/5/open_pos/ HTTP/1.1" 200 60
+INFO 2025-09-03 00:14:34,896 django.server basehttp 3684 17240 "GET /api/po/1/items/ HTTP/1.1" 200 353
+INFO 2025-09-03 00:15:18,161 django.server basehttp 3684 17240 "POST / HTTP/1.1" 302 0
+INFO 2025-09-03 00:15:18,190 django.server basehttp 3684 17240 "GET / HTTP/1.1" 200 105423
+INFO 2025-09-03 00:15:27,034 django.server basehttp 3684 17240 "GET /api/supplier/5/open_pos/ HTTP/1.1" 200 60
+INFO 2025-09-03 00:15:28,328 django.server basehttp 3684 17240 "GET /api/po/1/items/ HTTP/1.1" 200 353
+INFO 2025-09-03 00:15:46,911 django.server basehttp 3684 17240 "GET / HTTP/1.1" 200 104847
+INFO 2025-09-03 00:15:51,364 django.server basehttp 3684 17240 "GET /api/supplier/5/open_pos/ HTTP/1.1" 200 60
+INFO 2025-09-03 00:15:52,586 django.server basehttp 3684 17240 "GET /api/po/1/items/ HTTP/1.1" 200 353
+INFO 2025-09-03 00:16:06,892 django.server basehttp 3684 17240 "POST / HTTP/1.1" 302 0
+INFO 2025-09-03 00:16:06,917 django.server basehttp 3684 17240 "GET / HTTP/1.1" 200 105423
+INFO 2025-09-03 00:24:47,712 django.server basehttp 3684 20392 "GET / HTTP/1.1" 200 105985
+INFO 2025-09-03 00:24:51,644 django.server basehttp 3684 20392 "GET /api/supplier/5/open_pos/ HTTP/1.1" 200 60
+INFO 2025-09-03 00:24:52,883 django.server basehttp 3684 20392 "GET /api/po/1/items/ HTTP/1.1" 200 353
+INFO 2025-09-03 00:24:54,383 django.server basehttp 3684 20392 "GET /api/product_tags/17/ HTTP/1.1" 200 177
+INFO 2025-09-03 00:25:26,881 django.server basehttp 3684 20392 "POST / HTTP/1.1" 302 0
+INFO 2025-09-03 00:25:26,914 django.server basehttp 3684 20392 "GET / HTTP/1.1" 200 106561
+INFO 2025-09-03 00:27:38,811 django.server basehttp 3684 20392 "GET /api/product_tags/18/ HTTP/1.1" 200 177
+INFO 2025-09-03 00:27:45,233 django.server basehttp 3684 20392 "GET /api/supplier/5/open_pos/ HTTP/1.1" 200 60
+INFO 2025-09-03 00:27:46,480 django.server basehttp 3684 20392 "GET /api/po/1/items/ HTTP/1.1" 200 353
+INFO 2025-09-03 00:27:52,016 django.server basehttp 3684 20392 "GET /api/product_tags/18/ HTTP/1.1" 200 177
+INFO 2025-09-03 00:28:13,143 django.server basehttp 3684 20392 "POST / HTTP/1.1" 302 0
+INFO 2025-09-03 00:28:13,183 django.server basehttp 3684 20392 "GET / HTTP/1.1" 200 106482
+WARNING 2025-09-03 00:28:17,903 django.request log 3684 20392 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 00:28:17,905 django.server basehttp 3684 20392 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 13943
+WARNING 2025-09-03 00:28:18,222 django.server basehttp 3684 20392 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 00:28:23,762 django.server basehttp 3684 24184 "GET / HTTP/1.1" 200 105906
+WARNING 2025-09-03 00:28:23,840 django.request log 3684 24184 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 00:28:23,842 django.server basehttp 3684 24184 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 13943
+WARNING 2025-09-03 00:28:23,976 django.server basehttp 3684 24184 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 00:28:29,879 django.server basehttp 3684 14372 "GET /api/supplier/5/open_pos/ HTTP/1.1" 200 60
+INFO 2025-09-03 00:28:31,199 django.server basehttp 3684 14372 "GET /api/po/1/items/ HTTP/1.1" 200 353
+INFO 2025-09-03 00:28:32,886 django.server basehttp 3684 14372 "GET /api/product_tags/18/ HTTP/1.1" 200 177
+INFO 2025-09-03 00:28:47,886 django.server basehttp 3684 14372 "POST / HTTP/1.1" 302 0
+INFO 2025-09-03 00:28:47,909 django.server basehttp 3684 14372 "GET / HTTP/1.1" 200 106438
+WARNING 2025-09-03 00:28:47,988 django.request log 3684 14372 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 00:28:47,993 django.server basehttp 3684 14372 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 13943
+WARNING 2025-09-03 00:28:48,242 django.server basehttp 3684 14372 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 00:29:02,432 django.server basehttp 3684 25788 "GET /api/supplier/5/open_pos/ HTTP/1.1" 200 60
+INFO 2025-09-03 00:29:03,515 django.server basehttp 3684 25788 "GET /api/po/1/items/ HTTP/1.1" 200 167
+INFO 2025-09-03 00:29:08,141 django.server basehttp 3684 25788 "GET / HTTP/1.1" 200 21669
+INFO 2025-09-03 00:29:09,468 django.server basehttp 3684 25788 "GET /purchase_orders/ HTTP/1.1" 200 3277
+INFO 2025-09-03 00:29:14,527 django.server basehttp 3684 25788 "GET /purchase_order/1/ HTTP/1.1" 200 7918
+INFO 2025-09-03 00:29:33,738 django.server basehttp 3684 25788 "GET /purchase_order/1/ HTTP/1.1" 200 7918
+INFO 2025-09-03 00:29:36,632 django.server basehttp 3684 25788 "GET /records/ HTTP/1.1" 200 403800
+INFO 2025-09-03 00:29:39,686 django.server basehttp 3684 25788 "GET /records/ HTTP/1.1" 200 403800
+ERROR 2025-09-03 00:29:39,994 django.request log 3684 25788 Internal Server Error: /ledger/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\smartif.py", line 180, in translate_token
+    op = OPERATORS[token]
+         ~~~~~~~~~^^^^^^^
+KeyError: "request.GET.getlist('tags')"
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py", line 93, in ledger
+    return render(request, template_name, context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 196, in compile_nodelist
+    nodelist = parser.parse()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 862, in do_for
+    nodelist_loop = parser.parse(
+        (
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 961, in do_if
+    condition = TemplateIfParser(parser, bits).parse()
+                ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 894, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\smartif.py", line 171, in __init__
+    mapped_tokens.append(self.translate_token(token))
+                         ~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\smartif.py", line 182, in translate_token
+    return self.create_var(token)
+           ~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 897, in create_var
+    return TemplateLiteral(self.template_parser.compile_filter(value), value)
+                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 609, in compile_filter
+    return FilterExpression(token, self)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 710, in __init__
+    raise TemplateSyntaxError(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Could not parse the remainder: '('tags')' from 'request.GET.getlist('tags')'
+ERROR 2025-09-03 00:29:40,013 django.server basehttp 3684 25788 "GET /ledger/ HTTP/1.1" 500 276381
+ERROR 2025-09-03 00:29:40,192 django.request log 3684 25788 Internal Server Error: /ledger/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\smartif.py", line 180, in translate_token
+    op = OPERATORS[token]
+         ~~~~~~~~~^^^^^^^
+KeyError: "request.GET.getlist('tags')"
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py", line 93, in ledger
+    return render(request, template_name, context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 199, in render
+    template = context.template.engine.select_template(template_name)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 208, in select_template
+    return self.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 196, in compile_nodelist
+    nodelist = parser.parse()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 862, in do_for
+    nodelist_loop = parser.parse(
+        (
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 961, in do_if
+    condition = TemplateIfParser(parser, bits).parse()
+                ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 894, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\smartif.py", line 171, in __init__
+    mapped_tokens.append(self.translate_token(token))
+                         ~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\smartif.py", line 182, in translate_token
+    return self.create_var(token)
+           ~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 897, in create_var
+    return TemplateLiteral(self.template_parser.compile_filter(value), value)
+                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 609, in compile_filter
+    return FilterExpression(token, self)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 710, in __init__
+    raise TemplateSyntaxError(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Could not parse the remainder: '('tags')' from 'request.GET.getlist('tags')'
+ERROR 2025-09-03 00:29:40,216 django.server basehttp 3684 25788 "GET /ledger/ HTTP/1.1" 500 363159
+INFO 2025-09-03 00:30:52,416 django.utils.autoreload autoreload 3684 27324 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py changed, reloading.
+INFO 2025-09-03 00:30:53,459 django.utils.autoreload autoreload 3100 11920 Watching for file changes with StatReloader
+INFO 2025-09-03 00:32:21,056 django.utils.autoreload autoreload 3100 11920 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py changed, reloading.
+INFO 2025-09-03 00:32:22,041 django.utils.autoreload autoreload 17876 10068 Watching for file changes with StatReloader
+ERROR 2025-09-03 00:33:39,847 django.request log 17876 22536 Internal Server Error: /ledger/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 210, in render
+    return template.render(context)
+           ~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 173, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 199, in render
+    template = context.template.engine.select_template(template_name)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 214, in select_template
+    raise TemplateDoesNotExist(", ".join(not_found))
+django.template.exceptions.TemplateDoesNotExist: inventory/partials/ledger_modals.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py", line 94, in ledger
+    return render(request, template_name, context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 109, in render
+    reraise(exc, self.backend)
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 130, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: inventory/partials/ledger_modals.html
+ERROR 2025-09-03 00:33:39,867 django.server basehttp 17876 22536 "GET /ledger/ HTTP/1.1" 500 227314
+INFO 2025-09-03 00:34:43,600 django.server basehttp 17876 22536 "GET /ledger/ HTTP/1.1" 200 104594
+INFO 2025-09-03 00:34:54,981 django.server basehttp 17876 22536 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 267725
+INFO 2025-09-03 00:38:39,757 django.server basehttp 17876 22536 "GET /ledger/print/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 53839
+INFO 2025-09-03 00:39:27,892 django.server basehttp 17876 22536 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 267725
+INFO 2025-09-03 00:39:44,900 django.server basehttp 17876 22536 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=2025-09-01&end_date= HTTP/1.1" 200 104602
+INFO 2025-09-03 00:39:46,232 django.server basehttp 17876 22536 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=2025-09-01&end_date= HTTP/1.1" 200 104602
+INFO 2025-09-03 00:39:50,017 django.server basehttp 17876 22536 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=2025-01-01&end_date= HTTP/1.1" 200 259679
+INFO 2025-09-03 00:39:57,783 django.server basehttp 17876 22536 "GET /ledger/?product_id=17&company_id=&qc_no=&start_date=2025-01-01&end_date= HTTP/1.1" 200 153603
+INFO 2025-09-03 00:40:03,798 django.server basehttp 17876 22536 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=2025-01-01&end_date= HTTP/1.1" 200 259679
+INFO 2025-09-03 00:42:36,828 django.server basehttp 17876 22536 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=2025-01-01&end_date= HTTP/1.1" 200 168487
+INFO 2025-09-03 00:42:37,980 django.server basehttp 17876 22536 "GET /batches/ HTTP/1.1" 200 31955
+INFO 2025-09-03 00:42:40,146 django.server basehttp 17876 22536 "GET /batch/151/ HTTP/1.1" 200 35250
+INFO 2025-09-03 00:46:30,361 django.server basehttp 17876 22536 "POST /batch/151/update_all/ HTTP/1.1" 302 0
+INFO 2025-09-03 00:46:30,962 django.server basehttp 17876 22536 "GET /batch/151/ HTTP/1.1" 200 120020
+INFO 2025-09-03 00:46:33,398 django.server basehttp 17876 22536 "GET /batch/151/ HTTP/1.1" 200 35286
+INFO 2025-09-03 00:46:36,352 django.server basehttp 17876 22536 "GET /batch/151/ HTTP/1.1" 200 35286
+INFO 2025-09-03 00:46:36,677 django.server basehttp 17876 22536 "GET /purchase_orders/create/ HTTP/1.1" 200 10399
+INFO 2025-09-03 00:46:37,194 django.server basehttp 17876 22536 "GET /purchase_orders/create/ HTTP/1.1" 200 10399
+INFO 2025-09-03 00:46:38,132 django.server basehttp 17876 22536 "GET /purchase_orders/ HTTP/1.1" 200 3277
+INFO 2025-09-03 00:46:41,464 django.server basehttp 17876 22536 "GET /purchase_orders/ HTTP/1.1" 200 3277
+INFO 2025-09-03 00:46:46,231 django.server basehttp 17876 22536 "GET /purchase_orders/ HTTP/1.1" 200 3277
+INFO 2025-09-03 00:46:47,433 django.server basehttp 17876 22536 "GET /ledger/ HTTP/1.1" 200 13402
+INFO 2025-09-03 00:46:51,433 django.server basehttp 17876 22536 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 267725
+INFO 2025-09-03 00:47:49,296 django.server basehttp 17876 22536 "GET /ledger/?product_id=&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 104584
+INFO 2025-09-03 00:47:54,729 django.server basehttp 17876 22536 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 267725
+INFO 2025-09-03 00:48:01,611 django.server basehttp 17876 22536 "GET /ledger/?product_id=18&company_id=&tags=9&qc_no=&start_date=&end_date= HTTP/1.1" 200 142654
+INFO 2025-09-03 00:48:16,898 django.server basehttp 17876 22536 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 267725
+INFO 2025-09-03 00:48:19,062 django.server basehttp 17876 22536 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 176533
+INFO 2025-09-03 00:48:19,648 django.server basehttp 17876 22536 "GET / HTTP/1.1" 200 21669
+INFO 2025-09-03 00:48:20,042 django.server basehttp 17876 22536 "GET / HTTP/1.1" 200 21669
+INFO 2025-09-03 00:48:20,314 django.server basehttp 17876 22536 "GET / HTTP/1.1" 200 21669
+INFO 2025-09-03 00:48:20,868 django.server basehttp 17876 22536 "GET /batches/ HTTP/1.1" 200 31955
+INFO 2025-09-03 00:48:22,404 django.server basehttp 17876 22536 "GET /batches/ HTTP/1.1" 200 31955
+INFO 2025-09-03 00:48:24,451 django.server basehttp 17876 14708 "GET /batches/ HTTP/1.1" 200 31955
+INFO 2025-09-03 00:48:24,547 django.server basehttp 17876 22536 "GET /records/ HTTP/1.1" 200 403800
+INFO 2025-09-03 00:48:26,111 django.server basehttp 17876 22536 "GET /records/ HTTP/1.1" 200 403800
+INFO 2025-09-03 00:48:28,318 django.server basehttp 17876 22536 "GET /products/ HTTP/1.1" 200 260821
+INFO 2025-09-03 00:48:30,180 django.server basehttp 17876 22536 "GET /products/ HTTP/1.1" 200 260821
+INFO 2025-09-03 00:48:31,116 django.server basehttp 17876 22536 "GET /products/ HTTP/1.1" 200 260821
+INFO 2025-09-03 00:48:32,743 django.server basehttp 17876 22536 "GET /products/ HTTP/1.1" 200 260821
+INFO 2025-09-03 00:48:37,116 django.server basehttp 17876 22536 "GET /products/ HTTP/1.1" 200 260821
+INFO 2025-09-03 00:48:38,160 django.server basehttp 17876 22536 "GET /records/ HTTP/1.1" 200 403800
+INFO 2025-09-03 00:48:45,341 django.server basehttp 17876 22536 "GET /api/product_tags/18/ HTTP/1.1" 200 177
+INFO 2025-09-03 00:49:03,371 django.server basehttp 17876 22536 "GET /ledger/?product_id=18&company_id=&tags=9&qc_no=&start_date=&end_date= HTTP/1.1" 200 51462
+INFO 2025-09-03 00:49:04,105 django.server basehttp 17876 22536 "GET /purchase_orders/ HTTP/1.1" 200 3277
+INFO 2025-09-03 00:49:07,586 django.server basehttp 17876 22536 "GET /purchase_order/1/ HTTP/1.1" 200 7918
+INFO 2025-09-03 00:49:09,208 django.server basehttp 17876 22536 "GET /purchase_orders/ HTTP/1.1" 200 3277
+INFO 2025-09-03 00:49:10,232 django.server basehttp 17876 22536 "GET /purchase_order/2/ HTTP/1.1" 200 4230
+INFO 2025-09-03 00:49:13,393 django.server basehttp 17876 22536 "GET /purchase_orders/ HTTP/1.1" 200 3277
+INFO 2025-09-03 00:49:17,011 django.server basehttp 17876 22536 "GET / HTTP/1.1" 200 21669
+INFO 2025-09-03 00:49:17,492 django.server basehttp 17876 22536 "GET / HTTP/1.1" 200 21669
+INFO 2025-09-03 00:49:21,428 django.server basehttp 17876 22536 "GET /records/ HTTP/1.1" 200 403800
+INFO 2025-09-03 00:49:34,145 django.server basehttp 17876 22536 "GET /api/product_tags/18/ HTTP/1.1" 200 177
+INFO 2025-09-03 00:49:38,102 django.server basehttp 17876 22536 "POST /records/delete/199/ HTTP/1.1" 302 0
+INFO 2025-09-03 00:49:38,765 django.server basehttp 17876 22536 "GET /records/ HTTP/1.1" 200 486442
+INFO 2025-09-03 00:50:53,661 django.utils.autoreload autoreload 17876 10068 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\urls.py changed, reloading.
+INFO 2025-09-03 00:50:55,256 django.utils.autoreload autoreload 9484 25712 Watching for file changes with StatReloader
+INFO 2025-09-03 00:51:23,133 django.utils.autoreload autoreload 9484 25712 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\helpers.py changed, reloading.
+INFO 2025-09-03 00:51:24,585 django.utils.autoreload autoreload 5340 23788 Watching for file changes with StatReloader
+INFO 2025-09-03 00:52:39,033 django.utils.autoreload autoreload 5340 23788 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py changed, reloading.
+INFO 2025-09-03 00:52:40,358 django.utils.autoreload autoreload 30268 13668 Watching for file changes with StatReloader
+INFO 2025-09-03 00:53:30,195 django.server basehttp 30268 20016 "GET /records/ HTTP/1.1" 200 485886
+INFO 2025-09-03 00:53:31,514 django.server basehttp 30268 20016 "GET /records/ HTTP/1.1" 200 401651
+INFO 2025-09-03 00:53:32,211 django.server basehttp 30268 20016 "GET /ledger/ HTTP/1.1" 200 13401
+INFO 2025-09-03 00:53:34,499 django.server basehttp 30268 20016 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 264640
+INFO 2025-09-03 00:53:34,967 django.server basehttp 30268 20016 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 264640
+INFO 2025-09-03 01:02:59,143 django.utils.autoreload autoreload 30268 13668 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py changed, reloading.
+INFO 2025-09-03 01:03:00,192 django.utils.autoreload autoreload 31296 16112 Watching for file changes with StatReloader
+INFO 2025-09-03 01:03:01,728 django.utils.autoreload autoreload 31296 16112 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py changed, reloading.
+INFO 2025-09-03 01:03:02,713 django.utils.autoreload autoreload 32708 6640 Watching for file changes with StatReloader
+INFO 2025-09-03 01:03:23,043 django.utils.autoreload autoreload 32708 6640 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py changed, reloading.
+INFO 2025-09-03 01:03:24,380 django.utils.autoreload autoreload 23388 32656 Watching for file changes with StatReloader
+INFO 2025-09-03 01:03:41,543 django.utils.autoreload autoreload 23388 32656 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py changed, reloading.
+INFO 2025-09-03 01:03:42,730 django.utils.autoreload autoreload 3292 21124 Watching for file changes with StatReloader
+INFO 2025-09-03 01:03:45,401 django.utils.autoreload autoreload 3292 21124 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py changed, reloading.
+INFO 2025-09-03 01:03:46,672 django.utils.autoreload autoreload 24356 15568 Watching for file changes with StatReloader

@@ -1,0 +1,127 @@
+{% load static inventory_extras %}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ report_title }}</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'css/google-fonts.css' %}">
+    <style>
+        :root {
+            --bs-border-color: #dee2e6;
+        }
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #FFF;
+        }
+        .page {
+            width: 29.7cm; /* A4 landscape */
+            min-height: 21cm;
+            padding: 1.5cm;
+            margin: 1cm auto;
+            border: 1px #D3D3D3 solid;
+            background: white;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .report-header h1 { font-size: 1.5rem; font-weight: bold; }
+        .report-header p { font-size: 1rem; margin: 0; }
+        .report-meta {
+            border: 1px solid var(--bs-border-color);
+            border-radius: .25rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+        }
+        .table { font-size: 0.8rem; border-color: #999; }
+        .table th, .table td { padding: 0.4rem; vertical-align: middle; border-color: #999;}
+        .table th { background-color: #e9ecef; text-align: center; }
+        .page-footer { text-align: center; font-size: 0.75rem; color: #6c757d; margin-top: 1rem; padding-top: 0.5rem; border-top: 1px solid var(--bs-border-color); }
+        @media print {
+            body, .page { margin: 0; box-shadow: none; border: none; }
+        }
+        @page { size: A4 landscape; margin: 1.5cm; }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="report-header">
+            <div>
+                <h1>{{ report_title }}</h1>
+                <p>الفترة من: {{ start_date|default:"البداية" }} إلى: {{ end_date|default:"النهاية" }}</p>
+            </div>
+            <div class="text-end">
+                <p><strong>شركة جيبكو للصناعات الكيماوية</strong></p>
+                <p>قسم المخازن</p>
+            </div>
+        </div>
+        
+        {% if product_details %}
+        <div class="report-meta">
+            <div class="row">
+                <div class="col-3"><strong>الرصيد الافتتاحي (كمية):</strong> {{ opening_balance|floatformat:3 }} {{ product_details.unit }}</div>
+                <div class="col-3"><strong>الرصيد الافتتاحي (قيمة):</strong> {{ opening_value|floatformat:3 }}</div>
+                <div class="col-3"><strong>الرصيد الختامي (كمية):</strong> {{ closing_balance|floatformat:3 }} {{ product_details.unit }}</div>
+                <div class="col-3"><strong>الرصيد الختامي (قيمة):</strong> {{ closing_value|floatformat:3 }}</div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <table class="table table-sm table-bordered">
+            <thead class="table-light">
+                <tr>
+                    <th rowspan="2" class="align-middle">التاريخ</th>
+                    <th rowspan="2" class="align-middle" style="width: 25%;">البيان</th>
+                    <th colspan="3" class="text-center">الكمية</th>
+                    <th colspan="3" class="text-center">القيمة</th>
+                </tr>
+                <tr class="table-light">
+                    <th>التغيير</th>
+                    <th>قبل</th>
+                    <th>بعد</th>
+                    <th>التغيير</th>
+                    <th>قبل</th>
+                    <th>بعد</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in transactions %}
+                <tr>
+                    <td>{{ t.date|date:"Y-m-d H:i" }}</td>
+                    <td>
+                        {{ t.description }}
+                        {% if not product_details %}
+                            <br><small class="text-muted">{{ t.product_name }}</small>
+                        {% endif %}
+                    </td>
+                    <td class="text-center {% if t.quantity_change > 0 %}text-success{% else %}text-danger{% endif %}">{{ t.quantity_change|floatformat:3 }}</td>
+                    <td class="text-center">{{ t.balance_before|floatformat:3 }}</td>
+                    <td class="text-center fw-bold">{{ t.balance_after|floatformat:3 }}</td>
+                    <td class="text-center {% if t.value_change > 0 %}text-success{% elif t.value_change < 0 %}text-danger{% endif %}">{{ t.value_change|floatformat:3 }}</td>
+                    <td class="text-center">{{ t.value_before|floatformat:3 }}</td>
+                    <td class="text-center fw-bold">{{ t.value_after|floatformat:3 }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center p-4">لا توجد حركات في الفترة المحددة.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="page-footer">
+            <span>تاريخ الطباعة: {{ print_date|date:"Y-m-d H:i:s" }}</span>
+        </div>
+    </div>
+    <script>
+        window.onload = function() { window.print(); };
+    </script>
+</body>
+</html>

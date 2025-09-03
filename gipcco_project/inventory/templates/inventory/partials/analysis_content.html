@@ -1,62 +1,78 @@
-<!-- gipcco_project/inventory/templates/inventory/partials/analysis_content.html -->
-
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h2 mb-0" style="font-weight: 700;">تحليل حركة المخزون</h1>
+    <h1 class="mb-0 h2">تحليل حركة المخزون</h1>
+    <span class="text-muted">للفترة من {{ start_date }} إلى {{ end_date }}</span>
 </div>
 
-<div class="card mb-4">
+<div class="card shadow-sm mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-filter-circle-fill me-2"></i>تحديد فترة التحليل</h5>
+    </div>
     <div class="card-body">
-        <form method="post" class="row g-3 align-items-end" action="{% url 'inventory:analysis' %}">
+        <form method="POST" action="{% url 'inventory:analysis' %}" class="htmx-post-form">
             {% csrf_token %}
-            <div class="col-md-5">
-                <label for="start_date" class="form-label">من تاريخ</label>
-                <input type="text" class="form-control datepicker" id="start_date" name="start_date" value="{{ start_date }}">
-            </div>
-            <div class="col-md-5">
-                <label for="end_date" class="form-label">إلى تاريخ</label>
-                <input type="text" class="form-control datepicker" id="end_date" name="end_date" value="{{ end_date }}">
-            </div>
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search"></i> عرض</button>
+            <div class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    <label for="start_date" class="form-label">من تاريخ</label>
+                    <input type="text" name="start_date" id="start_date" class="form-control datepicker" value="{{ start_date }}">
+                </div>
+                <div class="col-md-5">
+                    <label for="end_date" class="form-label">إلى تاريخ</label>
+                    <input type="text" name="end_date" id="end_date" class="form-control datepicker" value="{{ end_date }}">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-check-lg me-2"></i>تطبيق</button>
+                </div>
             </div>
         </form>
     </div>
 </div>
-<div class="card">
-    <div class="card-header">
-        <h3><i class="bi bi-bar-chart-line"></i> نتائج التحليل للفترة من {{ start_date }} إلى {{ end_date }}</h3>
-    </div>
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-striped table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th class="ps-3">المنتج</th>
-                        <th class="text-center">الرصيد الافتتاحي</th>
-                        <th class="text-center text-success">إجمالي الوارد</th>
-                        <th class="text-center text-danger">إجمالي الصادر</th>
-                        <th class="text-center">الرصيد الختامي</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in data %}
-                    <tr>
-                        <td class="ps-3">
-                            <strong>{{ item.name }}</strong><br>
-                            <small class="text-muted font-monospace">{{ item.code }}</small>
-                        </td>
-                        <td class="text-center">{{ item.opening_balance|floatformat:3 }} {{ item.unit }}</td>
-                        <td class="text-center text-success fw-bold">+ {{ item.total_in|floatformat:3 }} {{ item.unit }}</td>
-                        <td class="text-center text-danger fw-bold">- {{ item.total_out|floatformat:3 }} {{ item.unit }}</td>
-                        <td class="text-center fw-bolder fs-5">{{ item.closing_balance|floatformat:3 }} {{ item.unit }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" class="text-center p-5 text-muted">لا توجد منتجات خام أو مواد تعبئة وتغليف لعرضها.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover table-striped table-bordered mb-0">
+            <thead class="table-light">
+                <tr class="text-center">
+                    <th rowspan="2" class="align-middle">المنتج</th>
+                    <th colspan="2" class="border-start">الرصيد الافتتاحي</th>
+                    <th colspan="2" class="border-start">إجمالي الوارد</th>
+                    <th colspan="2" class="border-start">إجمالي المنصرف</th>
+                    <th colspan="2" class="border-start">الرصيد الختامي</th>
+                </tr>
+                <tr class="text-center table-light">
+                    <th class="border-start">الكمية</th>
+                    <th>القيمة</th>
+                    <th class="border-start">الكمية</th>
+                    <th>القيمة</th>
+                    <th class="border-start">الكمية</th>
+                    <th>القيمة</th>
+                    <th class="border-start">الكمية</th>
+                    <th>القيمة</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in data %}
+                <tr>
+                    <td>
+                        <a href="{% url 'inventory:ledger' %}?product_id={{ item.id }}&start_date={{ start_date }}&end_date={{ end_date }}">
+                            {{ item.name }} ({{ item.code }})
+                        </a>
+                        <small class="text-muted d-block">{{ item.unit }}</small>
+                    </td>
+                    <td class="text-center">{{ item.opening_balance|floatformat:3 }}</td>
+                    <td class="text-center">{{ item.opening_value|floatformat:3 }}</td>
+                    <td class="text-center text-success">{{ item.total_in_qty|floatformat:3 }}</td>
+                    <td class="text-center text-success">{{ item.total_in_value|floatformat:3 }}</td>
+                    <td class="text-center text-danger">{{ item.total_out_qty|floatformat:3 }}</td>
+                    <td class="text-center text-danger">{{ item.total_out_value|floatformat:3 }}</td>
+                    <td class="text-center fw-bold">{{ item.closing_balance|floatformat:3 }}</td>
+                    <td class="text-center fw-bold">{{ item.closing_value|floatformat:3 }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="text-center p-4">لا توجد بيانات لعرضها.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>

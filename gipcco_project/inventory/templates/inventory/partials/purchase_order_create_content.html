@@ -1,0 +1,114 @@
+<!-- gipcco_project/inventory/templates/inventory/partials/purchase_order_create_content.html -->
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0" style="font-weight: 700;">إنشاء أمر شراء جديد</h1>
+    <a href="{% url 'inventory:purchase_orders' %}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> العودة لقائمة الأوامر</a>
+</div>
+
+<form method="post" action="{% url 'inventory:create_purchase_order' %}">
+    {% csrf_token %}
+    <div class="row g-4">
+        <!-- PO Header -->
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="bi bi-file-earmark-text"></i> 1. بيانات أمر الشراء الأساسية</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="po_number" class="form-label fw-bold">رقم أمر الشراء</label>
+                            <input type="text" class="form-control" id="po_number" name="po_number" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="supplier_id" class="form-label fw-bold">المورد</label>
+                            <select class="form-select searchable-select" id="supplier_id" name="supplier_id" required>
+                                <option value="">اختر مورد...</option>
+                                {% for s in suppliers %}
+                                <option value="{{ s.id }}">{{ s.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="order_date" class="form-label fw-bold">تاريخ الطلب</label>
+                            <input type="text" class="form-control datepicker" id="order_date" name="order_date" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PO Items -->
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0"><i class="bi bi-list-check"></i> 2. بنود أمر الشراء</h3>
+                    <button type="button" class="btn btn-success" id="add-po-item-btn"><i class="bi bi-plus-lg"></i> إضافة بند</button>
+                </div>
+                <div class="card-body" id="po-items-container">
+                    <!-- Dynamic rows will be inserted here by JavaScript -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Submit Button -->
+        <div class="col-12 d-grid">
+            <button type="submit" class="btn btn-primary btn-lg"><i class="bi bi-save"></i> إنشاء وحفظ أمر الشراء</button>
+        </div>
+    </div>
+</form>
+
+{{ products|json_script:"products-data" }}
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const container = document.getElementById('po-items-container');
+    const addButton = document.getElementById('add-po-item-btn');
+    const productsData = JSON.parse(document.getElementById('products-data').textContent);
+
+    const createItemRow = () => {
+        const row = document.createElement('div');
+        row.className = 'row g-3 align-items-center mb-3 border-bottom pb-3 po-item-row';
+
+        let productOptions = '<option value="">اختر مادة...</option>';
+        productsData.forEach(p => {
+            productOptions += `<option value="${p.id}">${p.name} (${p.code})</option>`;
+        });
+
+        row.innerHTML = `
+            <div class="col-md-5">
+                <label class="form-label visually-hidden">Product</label>
+                <select name="product_id" class="form-select" required>${productOptions}</select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label visually-hidden">Quantity</label>
+                <input type="number" step="any" name="quantity" class="form-control" placeholder="الكمية المطلوبة" required>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label visually-hidden">Unit Price</label>
+                <input type="number" step="any" name="unit_price" class="form-control" placeholder="سعر الوحدة" required>
+            </div>
+            <div class="col-md-1">
+                <button type="button" class="btn btn-sm btn-outline-danger w-100 remove-po-item-btn"><i class="bi bi-trash"></i></button>
+            </div>
+        `;
+
+        container.appendChild(row);
+        new TomSelect(row.querySelector('select'), {
+            create: false,
+            dropdownParent: 'body'
+        });
+    };
+
+    addButton.addEventListener('click', createItemRow);
+    
+    container.addEventListener('click', function (e) {
+        if (e.target.closest('.remove-po-item-btn')) {
+            e.target.closest('.po-item-row').remove();
+        }
+    });
+
+    // Add one row to start with
+    createItemRow();
+});
+</script>

@@ -1,6 +1,7 @@
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-
+from decimal import Decimal
 
 class Company(models.Model):
     """
@@ -39,6 +40,10 @@ class Product(models.Model):
     )
     unit = models.CharField(max_length=50, verbose_name=_("Unit of Measurement"))
     tags = models.ManyToManyField('ProductTag', blank=True, verbose_name=_("Tags"))
+    # --- NEW FIELD ---
+    moving_average_cost = models.DecimalField(
+        max_digits=12, decimal_places=3, default=Decimal('0.000'), verbose_name=_("Moving Average Cost")
+    )
 
     class Meta:
         db_table = 'products'  # Explicitly map to the existing table
@@ -92,6 +97,19 @@ class InventoryLog(models.Model):
         null=True,
         blank=True,
         verbose_name=_("QC Number")
+    )
+    # --- NEW FIELD ---
+    unit_price = models.DecimalField(
+        max_digits=12, decimal_places=3, null=True, blank=True, verbose_name=_("Unit Price")
+    )
+    # --- NEW FIELD ---
+    po_item = models.ForeignKey(
+        'PurchaseOrderItem',
+        on_delete=models.SET_NULL, # Set to PROTECT after data migration
+        null=True,
+        blank=True,
+        related_name='receipts',
+        verbose_name=_("Purchase Order Item")
     )
     tags = models.ManyToManyField(
         'ProductTag',
@@ -226,6 +244,11 @@ class BatchItem(models.Model):
         verbose_name=_("Source Inventory Log")
     )
 
+    # --- NEW FIELD ---
+    cost_at_consumption = models.DecimalField(
+        max_digits=12, decimal_places=3, null=True, blank=True, verbose_name=_("Cost at Consumption")
+    )
+
     class Meta:
         db_table = 'batch_items'  # Explicitly map to the existing table
         verbose_name = _("Batch Item")
@@ -248,6 +271,11 @@ class OpeningBalance(models.Model):
     )
     quantity = models.FloatField(verbose_name=_("Quantity"))
     balance_date = models.DateTimeField(verbose_name=_("Balance Date"))
+
+    # --- NEW FIELD ---
+    unit_cost = models.DecimalField(
+        max_digits=12, decimal_places=3, default=Decimal('0.000'), verbose_name=_("Unit Cost")
+    )
 
     class Meta:
         db_table = 'opening_balances'  # Explicitly map to the existing table
@@ -288,3 +316,64 @@ class ProductionReturn(models.Model):
 
     def __str__(self):
         return f"Return of {self.quantity} {self.product.unit} of {self.product.name}"
+    
+    
+# --- NEW MODELS ---
+
+class PurchaseOrder(models.Model):
+    class Status(models.TextChoices):
+        PENDING = 'pending', _('Pending')
+        PARTIALLY_RECEIVED = 'partially_received', _('Partially Received')
+        COMPLETED = 'completed', _('Completed')
+        CANCELLED = 'cancelled', _('Cancelled')
+
+    po_number = models.CharField(max_length=100, unique=True, verbose_name=_("PO Number"))
+    supplier = models.ForeignKey(
+        Company,
+        on_delete=models.PROTECT,
+        related_name='purchase_orders',
+        verbose_name=_("Supplier")
+    )
+    order_date = models.DateField(verbose_name=_("Order Date"))
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.PENDING,
+        verbose_name=_("Status")
+    )
+
+    class Meta:
+        db_table = 'purchase_orders'
+        verbose_name = _("Purchase Order")
+        verbose_name_plural = _("Purchase Orders")
+        ordering = ['-order_date']
+
+    def __str__(self):
+        return f"PO #{self.po_number} from {self.supplier.name}"
+
+
+class PurchaseOrderItem(models.Model):
+    purchase_order = models.ForeignKey(
+        PurchaseOrder,
+        on_delete=models.CASCADE,
+        related_name='items',
+        verbose_name=_("Purchase Order")
+    )
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.PROTECT,
+        related_name='po_items',
+        verbose_name=_("Product")
+    )
+    quantity_ordered = models.FloatField(verbose_name=_("Quantity Ordered"))
+    unit_price = models.DecimalField(
+        max_digits=12, decimal_places=3, verbose_name=_("Unit Price")
+    )
+
+    class Meta:
+        db_table = 'purchase_order_items'
+        verbose_name = _("Purchase Order Item")
+        verbose_name_plural = _("Purchase Order Items")
+
+    def __str__(self):
+        return f"{self.quantity_ordered} of {self.product.name} for PO #{self.purchase_order.po_number}"

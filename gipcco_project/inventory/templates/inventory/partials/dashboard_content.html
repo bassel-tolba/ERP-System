@@ -8,8 +8,40 @@
         <h3><i class="bi bi-plus-circle-fill"></i> إضافة حركة مخزون جديدة</h3>
       </div>
       <div class="card-body p-4">
-        <form method="post" action="{% url 'inventory:index' %}">
+        <form method="post" action="{% url 'inventory:index' %}" id="add-log-form">
           {% csrf_token %}
+          
+          <!-- PO Workflow Fields -->
+          <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" role="switch" id="receiveAgainstPoCheck">
+              <label class="form-check-label" for="receiveAgainstPoCheck">
+                استلام مقابل أمر شراء؟
+              </label>
+          </div>
+          
+          <div id="po-fields-container" class="border p-3 rounded mb-3 bg-light" style="display: none;">
+              <div class="mb-3">
+                  <label for="po_supplier_id" class="form-label fw-bold">1. اختر المورد</label>
+                  <select id="po_supplier_id" name="po_supplier_id" class="form-select searchable-select">
+                    <option value="">-- اختر مورد --</option>
+                    {% for c in all_companies %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
+                  </select>
+              </div>
+              <div class="mb-3">
+                  <label for="purchase_order_id" class="form-label fw-bold">2. اختر أمر الشراء</label>
+                  <select id="purchase_order_id" name="purchase_order_id" class="form-select searchable-select" disabled>
+                    <option value="">-- اختر مورد أولاً --</option>
+                  </select>
+              </div>
+              <div class="mb-3">
+                  <label for="po_item_id" class="form-label fw-bold">3. اختر المادة من أمر الشراء</label>
+                  <select id="po_item_id" name="po_item_id" class="form-select searchable-select" disabled>
+                    <option value="">-- اختر أمر شراء أولاً --</option>
+                  </select>
+              </div>
+          </div>
+          
+          <!-- Standard Fields -->
           <div class="mb-3">
             <label for="product_id" class="form-label fw-bold">المنتج</label>
             <select
@@ -42,25 +74,20 @@
           </div>
           <div class="row g-3">
             <div class="col-md-6 mb-3">
-              <label for="quantity" class="form-label fw-bold">الكمية</label>
+              <label for="quantity" class="form-label fw-bold">الكمية المستلمة</label>
               <input
-                type="number"
-                step="any"
-                class="form-control form-control-lg"
-                id="quantity"
-                name="quantity"
-                required
-              />
+                type="number" step="any" class="form-control form-control-lg"
+                id="quantity" name="quantity" required />
             </div>
             <div class="col-md-6 mb-3">
-              <label for="qc_no" class="form-label fw-bold">QC Number</label>
-              <input
-                type="text"
-                class="form-control form-control-lg"
-                id="qc_no"
-                name="qc_no"
-              />
+                <label for="unit_price" class="form-label fw-bold">سعر الوحدة</label>
+                <input type="number" step="0.001" class="form-control form-control-lg"
+                    id="unit_price" name="unit_price" required placeholder="0.000"/>
             </div>
+          </div>
+          <div class="mb-3">
+              <label for="qc_no" class="form-label fw-bold">QC Number</label>
+              <input type="text" class="form-control form-control-lg" id="qc_no" name="qc_no" />
           </div>
           <div class="mb-3">
             <label for="tags" class="form-label fw-bold">الوسوم</label>
@@ -68,8 +95,6 @@
               <option value="">يرجى اختيار منتج أولاً</option>
             </select>
           </div>
-
-          <!-- The entire <script> block has been REMOVED from here and moved to layout.html -->
 
           <div class="mb-3">
             <label for="entry_date" class="form-label fw-bold">التاريخ</label>
@@ -153,3 +178,4 @@
     </div>
   </div>
 </div>
+

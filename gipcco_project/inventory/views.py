@@ -11,3 +11,4 @@ from .views.production_returns import *
 from .views.opening_balances import *
 from .views.analysis_ledger_visuals import *
 from .views.api import *
+from .views.purchase_orders import *

@@ -1,0 +1,108 @@
+<!-- Transaction Details Modal -->
+<div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="detailsModalLabel">تفاصيل الحركة</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-bordered">
+            <tbody>
+                <tr>
+                    <th style="width: 30%;">التاريخ</th>
+                    <td id="modal-date"></td>
+                </tr>
+                <tr>
+                    <th>المنتج</th>
+                    <td id="modal-product"></td>
+                </tr>
+                <tr>
+                    <th>الكمية الفعلية</th>
+                    <td id="modal-actual" class="fw-bold"></td>
+                </tr>
+                <tr class="in-details">
+                    <th>الشركة الموردة</th>
+                    <td id="modal-company"></td>
+                </tr>
+                <tr class="in-details">
+                    <th>رقم QC</th>
+                    <td id="modal-qc"></td>
+                </tr>
+                <tr class="out-details" style="display: none;">
+                    <th>رقم أمر التشغيل</th>
+                    <td id="modal-shop-order"></td>
+                </tr>
+                 <tr class="out-details" style="display: none;">
+                    <th>رقم التشغيلة</th>
+                    <td id="modal-batch"></td>
+                </tr>
+                 <tr class="out-details" style="display: none;">
+                    <th>المنتج النهائي</th>
+                    <td id="modal-final-product"></td>
+                </tr>
+                 <tr class="out-details" style="display: none;">
+                    <th>الكمية النظرية</th>
+                    <td id="modal-theoretical"></td>
+                </tr>
+            </tbody>
+        </table>
+      </div>
+      <div class="modal-footer justify-content-between">
+        <div id="batch-details-btn-container" class="d-none">
+            <button class="btn btn-primary" id="viewFullBatchBtn" data-bs-target="#batchDetailsModal" data-bs-toggle="modal">
+                <i class="bi bi-zoom-in me-2"></i>عرض تفاصيل التشغيلة كاملة
+            </button>
+        </div>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Batch Deep Dive Modal -->
+<div class="modal fade" id="batchDetailsModal" aria-hidden="true" aria-labelledby="batchDetailsModalLabel" tabindex="-1">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="batchDetailsModalLabel">تفاصيل تشغيلة كاملة</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="batch-details-content-loading" class="text-center p-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">جاري تحميل البيانات...</p>
+        </div>
+        <div id="batch-details-content-main" class="d-none">
+            <div class="row bg-light p-3 rounded mb-3">
+                <div class="col-md-3"><strong>أمر تشغيل:</strong> <span id="batch-modal-so-num"></span></div>
+                <div class="col-md-3"><strong>رقم التشغيلة:</strong> <span id="batch-modal-batch-num"></span></div>
+                <div class="col-md-3"><strong>تاريخ الإنشاء:</strong> <span id="batch-modal-date"></span></div>
+                <div class="col-md-3"><strong>المنتج النهائي:</strong> <span id="batch-modal-final-prod"></span></div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>المادة الخام</th>
+                            <th>مصدر QC</th>
+                            <th class="text-center">الكمية النظرية</th>
+                            <th class="text-center">الكمية الفعلية</th>
+                        </tr>
+                    </thead>
+                    <tbody id="batch-modal-items-tbody">
+                        <!-- Items will be injected here by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-target="#detailsModal" data-bs-toggle="modal">العودة</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">إغلاق</button>
+      </div>
+    </div>
+  </div>
+</div>
