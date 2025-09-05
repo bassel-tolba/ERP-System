@@ -1,3 +1,4 @@
+
 # gipcco_project/inventory/views/analysis_ledger_visuals.py
 
 import json
@@ -35,17 +36,22 @@ def get_final_product_state_at_datetime(product_id: int, target_datetime: timezo
         'value': aggregates['total_val']
     }
 
-# --- MODIFIED: _get_ledger_transactions to include final products ---
+# --- MODIFIED: _get_ledger_transactions to include final products and QC status ---
 def _get_ledger_transactions(product_id, company_id, qc_no, start_date, end_date_inclusive, tag_ids=None, final_product_id=None):
     """
     A private helper to fetch and consolidate all transaction types for the ledger.
-    Now includes Finished Product Receipts.
+    Now includes Finished Product Receipts and only shows RELEASED raw materials.
     """
     transactions = []
     
-    # --- RAW MATERIAL TRANSACTIONS (Unchanged) ---
+    # --- RAW MATERIAL TRANSACTIONS (MODIFIED FOR QC) ---
     if not final_product_id:
-        in_logs_qs = InventoryLog.objects.select_related('product', 'company').prefetch_related('tags').filter(timestamp__gte=start_date, timestamp__lt=end_date_inclusive)
+        # --- MODIFIED: Filter by RELEASED and use release_timestamp ---
+        in_logs_qs = InventoryLog.objects.select_related('product', 'company').prefetch_related('tags').filter(
+            status=InventoryLog.Status.RELEASED,
+            release_timestamp__gte=start_date,
+            release_timestamp__lt=end_date_inclusive
+        )
         returns_qs = ProductionReturn.objects.select_related('product', 'source_log').prefetch_related('source_log__tags').filter(return_date__gte=start_date, return_date__lt=end_date_inclusive)
         out_items_qs = BatchItem.objects.select_related(
             'primitive_product', 'batch', 'source_log', 'batch__template__final_product'
@@ -71,7 +77,7 @@ def _get_ledger_transactions(product_id, company_id, qc_no, start_date, end_date
 
         for log in in_logs_qs:
             transactions.append({
-                'date': log.timestamp, 'type': 'IN', 'quantity_change': log.quantity,
+                'date': log.release_timestamp, 'type': 'IN', 'quantity_change': log.quantity, # Use release_timestamp
                 'product_id': log.product.id, 'product_name': log.product.name, 'product_code': log.product.code, 'unit': log.product.unit,
                 'company_name': log.company.name if log.company else '---', 'qc_no': log.qc_no, 'batch_id': None,
                 'description': f"استلام من {log.company.name if log.company else '---'} (QC: {log.qc_no or 'N/A'})",
@@ -459,7 +465,13 @@ def visuals(request: HttpRequest) -> HttpResponse:
         product = get_object_or_404(Product, pk=product_id)
 
         # --- 2. CREATE BASE QUERYSETS WITH FILTERS APPLIED ---
-        receipts = InventoryLog.objects.filter(product_id=product_id, timestamp__gte=start_date, timestamp__lt=end_date_inclusive)
+        # --- MODIFIED: Filter by status and use release_timestamp ---
+        receipts = InventoryLog.objects.filter(
+            product_id=product_id, 
+            status=InventoryLog.Status.RELEASED,
+            release_timestamp__gte=start_date, 
+            release_timestamp__lt=end_date_inclusive
+        )
         consumptions = BatchItem.objects.filter(primitive_product_id=product_id, batch__creation_date__gte=start_date, batch__creation_date__lt=end_date_inclusive)
 
         if company_id:

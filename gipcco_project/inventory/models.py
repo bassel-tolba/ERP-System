@@ -1,5 +1,6 @@
 
 
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from decimal import Decimal
@@ -77,6 +78,12 @@ class InventoryLog(models.Model):
     Represents a single transaction in the inventory log, such as receiving materials.
     Maps to the 'inventory_log' table.
     """
+    # --- NEW: Status Choices ---
+    class Status(models.TextChoices):
+        QUARANTINED = 'quarantined', _('تحت الفحص')
+        RELEASED = 'released', _('مفرج عنه')
+        REJECTED = 'rejected', _('مرفوض')
+        
     product = models.ForeignKey(
         Product,
         on_delete=models.CASCADE,
@@ -98,6 +105,19 @@ class InventoryLog(models.Model):
         null=True,
         blank=True,
         verbose_name=_("QC Number")
+    )
+    # --- NEW FIELD ---
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.QUARANTINED,
+        verbose_name=_("Status")
+    )
+    # --- NEW FIELD ---
+    release_timestamp = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name=_("Release Timestamp")
     )
     # --- NEW FIELD ---
     unit_price = models.DecimalField(

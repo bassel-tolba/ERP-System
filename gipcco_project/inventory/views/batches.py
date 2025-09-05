@@ -85,8 +85,11 @@ def create_batch(request: HttpRequest) -> HttpResponse:
                 ).aggregate(total=Coalesce(Sum('actual_quantity'), 0.0))['total']
                 remaining_ob_qty = latest_balance.quantity - used_from_ob
                 if remaining_ob_qty > 0.001:
+                    # --- MODIFIED: Use release_timestamp for sorting consistency ---
                     stock_list.append({'id': -1, 'qc_no': 'رصيد افتتاحي', 'timestamp': latest_balance.balance_date, 'remaining_quantity': remaining_ob_qty})
-            inventory_logs = prod.inventory_logs.annotate(
+            
+            # --- MODIFIED: Only fetch RELEASED inventory logs ---
+            inventory_logs = prod.inventory_logs.filter(status=InventoryLog.Status.RELEASED).annotate(
                 total_used=Coalesce(Sum('batch_items__actual_quantity'), 0.0, output_field=FloatField()),
                 total_returned=Coalesce(Sum('production_returns__quantity'), 0.0, output_field=FloatField())
             ).annotate(
@@ -94,7 +97,9 @@ def create_batch(request: HttpRequest) -> HttpResponse:
             )
             for log in inventory_logs:
                 if log.remaining_quantity > 0.001:
-                    stock_list.append({'id': log.id, 'qc_no': log.qc_no or 'N/A', 'timestamp': log.timestamp, 'remaining_quantity': log.remaining_quantity})
+                    # --- MODIFIED: Use release_timestamp for sorting ---
+                    stock_list.append({'id': log.id, 'qc_no': log.qc_no or 'N/A', 'timestamp': log.release_timestamp, 'remaining_quantity': log.remaining_quantity})
+            
             stock_list.sort(key=lambda x: x['timestamp'])
             all_available_stock[prod.id] = stock_list
         return {
@@ -268,13 +273,17 @@ def view_batch(request: HttpRequest, pk: int) -> HttpResponse:
             remaining_ob_qty = latest_balance.quantity - used_from_ob
             if remaining_ob_qty > 0.001 or item.source_type == BatchItem.SourceType.OPENING_BALANCE:
                 available_stock_rows.append({'id': -1, 'qc_no': 'رصيد افتتاحي', 'timestamp': latest_balance.balance_date, 'remaining_quantity': remaining_ob_qty})
-        all_logs = product.inventory_logs.all()
+        
+        # --- MODIFIED: Only query RELEASED logs for available stock ---
+        all_logs = product.inventory_logs.filter(status=InventoryLog.Status.RELEASED)
         for log in all_logs:
             used_from_log = BatchItem.objects.filter(source_log=log).exclude(pk=item.pk).aggregate(total=Coalesce(Sum('actual_quantity'), 0.0))['total']
             returned_to_log = log.production_returns.aggregate(total=Coalesce(Sum('quantity'), 0.0))['total']
             remaining_log_qty = log.quantity - used_from_log + returned_to_log
             if remaining_log_qty > 0.001 or item.source_log_id == log.id:
-                available_stock_rows.append({'id': log.id, 'qc_no': log.qc_no, 'timestamp': log.timestamp, 'remaining_quantity': remaining_log_qty})
+                # --- MODIFIED: Use release_timestamp for sorting ---
+                available_stock_rows.append({'id': log.id, 'qc_no': log.qc_no, 'timestamp': log.release_timestamp, 'remaining_quantity': remaining_log_qty})
+        
         item.available_stock = sorted(available_stock_rows, key=lambda x: x['timestamp'])
         batch_items_with_stock.append(item)
         

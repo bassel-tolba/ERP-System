@@ -1,24 +1,43 @@
+
 <!-- gipcco_project/inventory/templates/inventory/partials/records_content.html -->
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h2 mb-0" style="font-weight: 700;">إدارة سجلات المخزون</h1>
-    <a href="{% url 'inventory:index' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> إضافة سجل جديد</a>
+    <div>
+        <a href="{% url 'inventory:quarantine_list' %}" class="btn btn-warning"><i class="bi bi-shield-slash"></i> إدارة المواد تحت الفحص</a>
+        <a href="{% url 'inventory:index' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> إضافة سجل جديد</a>
+    </div>
 </div>
 <div class="card">
-    <div class="card-header"><h3><i class="bi bi-receipt-cutoff"></i> كل السجلات</h3></div>
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h3><i class="bi bi-receipt-cutoff"></i> كل السجلات</h3>
+            <ul class="nav nav-pills">
+                <li class="nav-item">
+                    <a class="nav-link {% if status_filter == 'all' %}active{% endif %}" href="{% url 'inventory:records' %}?status=all">الكل</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if status_filter == 'quarantined' %}active{% endif %}" href="{% url 'inventory:records' %}?status=quarantined">تحت الفحص</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if status_filter == 'released' %}active{% endif %}" href="{% url 'inventory:records' %}?status=released">مفرج عنه</a>
+                </li>
+            </ul>
+        </div>
+    </div>
     <div class="card-body p-0">
         {% if not logs %}
-        <div class="text-center p-5"><i class="bi bi-journal-x display-4 text-secondary"></i><h5 class="mt-3">لا توجد سجلات</h5><p class="text-muted">اذهب إلى لوحة التحكم لإضافة أول سجل.</p><a href="{% url 'inventory:index' %}" class="btn btn-primary mt-2"><i class="bi bi-plus-lg"></i> إضافة سجل</a></div>
+        <div class="text-center p-5"><i class="bi bi-journal-x display-4 text-secondary"></i><h5 class="mt-3">لا توجد سجلات تطابق الفلتر</h5><p class="text-muted">اذهب إلى لوحة التحكم لإضافة سجل جديد.</p><a href="{% url 'inventory:index' %}" class="btn btn-primary mt-2"><i class="bi bi-plus-lg"></i> إضافة سجل</a></div>
         {% else %}
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
                         <th class="ps-3">المنتج</th>
-                        <th>QC No.</th>
+                        <th>الحالة / QC No.</th>
                         <th>الشركة / أمر الشراء</th>
                         <th>الكمية</th>
-                        <th>التاريخ</th>
+                        <th>تاريخ الاستلام / الإفراج</th>
                         <th class="text-end pe-3">إجراءات</th>
                     </tr>
                 </thead>
@@ -26,7 +45,16 @@
                     {% for log in logs %}
                     <tr>
                         <td class="ps-3"><strong>{{ log.product.name }}</strong><br><small class="text-muted font-monospace">{{ log.product.code }}</small></td>
-                        <td><span class="badge bg-secondary font-monospace">{{ log.qc_no|default:"N/A" }}</span></td>
+                        <td>
+                            {% if log.status == 'quarantined' %}
+                                <span class="badge text-bg-warning">{{ log.get_status_display }}</span>
+                            {% elif log.status == 'released' %}
+                                <span class="badge text-bg-success">{{ log.get_status_display }}</span>
+                                <br><small class="text-muted font-monospace">{{ log.qc_no|default:"N/A" }}</small>
+                            {% else %}
+                                <span class="badge text-bg-danger">{{ log.get_status_display }}</span>
+                            {% endif %}
+                        </td>
                         <td>
                             {% if log.po_item %}
                                 <a href="{% url 'inventory:view_purchase_order' pk=log.po_item.purchase_order.id %}" class="fw-bold">
@@ -40,7 +68,12 @@
                             {% endif %}
                         </td>
                         <td class="fw-bold">{{ log.quantity|floatformat:3 }} <small class="text-muted">{{ log.product.unit }}</small></td>
-                        <td class="text-nowrap">{{ log.timestamp|date:"Y-m-d" }}</td>
+                        <td class="text-nowrap">
+                            <span title="تاريخ الاستلام">Rec: {{ log.timestamp|date:"Y-m-d" }}</span>
+                            {% if log.release_timestamp %}
+                            <br><strong class="text-success" title="تاريخ الإفراج">Rel: {{ log.release_timestamp|date:"Y-m-d" }}</strong>
+                            {% endif %}
+                        </td>
                         <td class="text-end pe-3">
                             <button 
                                 type="button" 
@@ -51,7 +84,6 @@
                                 data-product-id="{{ log.product.id }}"
                                 data-company-id="{{ log.company.id }}"
                                 data-quantity="{{ log.quantity|floatformat:3 }}"
-                                data-qc-no="{{ log.qc_no|default:'' }}"
                                 data-entry-date="{{ log.timestamp|date:'Y-m-d' }}"
                                 data-unit-price="{{ log.unit_price|floatformat:3|default:'' }}"
                                 data-tag-ids="{% for tag in log.tags.all %}{{ tag.id }},{% endfor %}"
@@ -80,12 +112,13 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">تعديل سجل</h5>
+                <h5 class="modal-title">تعديل بيانات الاستلام المبدئي</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form method="post" action="" id="editRecordForm">
                 {% csrf_token %}
                 <div class="modal-body">
+                    <div class="alert alert-info"><strong>ملاحظة:</strong> هذا النموذج لتعديل بيانات الاستلام الأساسية (كمية، سعر، مورد). للإفراج عن المواد من الفحص، يرجى استخدام صفحة <a href="{% url 'inventory:quarantine_list' %}">إدارة المواد تحت الفحص</a>.</div>
                     <div class="form-check form-switch mb-3">
                         <input class="form-check-input" type="checkbox" role="switch" id="editLinkToPoCheck">
                         <label class="form-check-label" for="editLinkToPoCheck">ربط بسجل أمر شراء؟</label>
@@ -127,15 +160,11 @@
                         </select>
                     </div>
                     <div class="row">
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">الكمية</label>
                             <input type="number" step="any" class="form-control" name="quantity" id="editQuantity" required>
                         </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label fw-bold">QC Number</label>
-                            <input type="text" class="form-control" name="qc_no" id="editQcNo">
-                        </div>
-                        <div class="col-md-4 mb-3" id="edit-manual-price-container">
+                        <div class="col-md-6 mb-3" id="edit-manual-price-container">
                             <label for="editUnitPrice" class="form-label fw-bold">سعر الوحدة</label>
                             <input type="number" step="0.001" class="form-control" name="unit_price" id="editUnitPrice" required placeholder="0.000"/>
                         </div>
@@ -145,7 +174,7 @@
                         <select id="editTags" name="tags" multiple disabled><option value="">اختر منتج</option></select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-bold">التاريخ</label>
+                        <label class="form-label fw-bold">تاريخ الاستلام الأصلي</label>
                         <input type="text" class="form-control datepicker" name="entry_date" id="editEntryDate" required>
                     </div>
                 </div>

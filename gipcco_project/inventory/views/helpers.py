@@ -1,3 +1,4 @@
+
 # gipcco_project/inventory/views/helpers.py
 
 import json
@@ -52,7 +53,7 @@ def check_and_update_batch_customization(batch_id: int):
 def validate_stock_availability(product_ids, actual_quantities, source_log_ids, batch_creation_date, batch_id_to_exclude=None):
     """
     Validates stock availability by first aggregating all requests from the same source.
-    This is a more robust version that handles multiple lines drawing from the same QC.
+    MODIFIED to only consider RELEASED stock and validate against release_timestamp.
     - `batch_creation_date` is expected to be a `datetime.date` object.
     """
     requests = {}
@@ -103,8 +104,12 @@ def validate_stock_availability(product_ids, actual_quantities, source_log_ids, 
             except InventoryLog.DoesNotExist:
                 return (False, f"مصدر المخزون برقم {source_id} غير موجود.")
 
-            if log_entry.timestamp.date() > batch_creation_date:
-                return False, f"خطأ في مادة '{log_entry.product.name}': تاريخ المصدر ({log_entry.timestamp.date()}) أحدث من تاريخ أمر التشغيل ({batch_creation_date})."
+            # --- QC VALIDATION ---
+            if log_entry.status != InventoryLog.Status.RELEASED:
+                return (False, f"خطأ في مادة '{log_entry.product.name}': المصدر (QC: {log_entry.qc_no or 'N/A'}) لم يتم الإفراج عنه بعد وهو تحت الفحص.")
+            
+            if not log_entry.release_timestamp or log_entry.release_timestamp.date() > batch_creation_date:
+                return False, f"خطأ في مادة '{log_entry.product.name}': تاريخ الإفراج عن المصدر ({log_entry.release_timestamp.date()}) أحدث من تاريخ أمر التشغيل ({batch_creation_date})."
             
             if product_id != log_entry.product_id:
                 return (False, f"عدم تطابق المنتج. تم طلب '{product.name}' من مصدر QC '{log_entry.qc_no}' الذي يخص منتج '{log_entry.product.name}'.")
@@ -121,50 +126,26 @@ def validate_stock_availability(product_ids, actual_quantities, source_log_ids, 
 
 
 def get_opening_balance_for_period(product_id: int, start_date: datetime) -> float:
-    # This function remains unchanged
-    most_recent_balance_entry = OpeningBalance.objects.filter(
-        product_id=product_id,
-        balance_date__lte=start_date
-    ).order_by('-balance_date').first()
-
-    opening_base_qty = 0.0
-    effective_balance_date = datetime(1, 1, 1, tzinfo=timezone.get_current_timezone())
-
-    if most_recent_balance_entry:
-        opening_base_qty = most_recent_balance_entry.quantity
-        effective_balance_date = most_recent_balance_entry.balance_date
-
-    sum_expression = Coalesce(Sum('quantity', output_field=FloatField()), 0.0)
-    
-    prior_period_in_log = InventoryLog.objects.filter(
-        product_id=product_id,
-        timestamp__gte=effective_balance_date,
-        timestamp__lt=start_date
-    ).aggregate(total=sum_expression)['total']
-
-    prior_period_in_returns = ProductionReturn.objects.filter(
-        product_id=product_id,
-        return_date__gte=effective_balance_date,
-        return_date__lt=start_date
-    ).aggregate(total=sum_expression)['total']
-
-    prior_period_out = BatchItem.objects.filter(
-        primitive_product_id=product_id,
-        batch__creation_date__gte=effective_balance_date,
-        batch__creation_date__lt=start_date
-    ).aggregate(total=Coalesce(Sum('actual_quantity', output_field=FloatField()), 0.0))['total']
-
-    return opening_base_qty + prior_period_in_log + prior_period_in_returns - prior_period_out
+    # This function is now OBSOLETE as get_inventory_state_at_datetime provides a more accurate value.
+    # It remains here for potential compatibility but should be phased out.
+    # The new ledger and analysis reports use get_inventory_state_at_datetime.
+    state = get_inventory_state_at_datetime(product_id, start_date)
+    return float(state['quantity'])
 
 
-# --- MODIFIED: Added original unit price to returns for ledger display ---
 def _get_ledger_transactions(product_id, company_id, qc_no, start_date, end_date_inclusive, tag_ids=None):
     """
     A private helper to fetch and consolidate all transaction types for the ledger.
+    MODIFIED to only use RELEASED logs and their release_timestamp.
     """
     transactions = []
     
-    in_logs_qs = InventoryLog.objects.select_related('product', 'company').prefetch_related('tags').filter(timestamp__gte=start_date, timestamp__lt=end_date_inclusive)
+    # --- MODIFIED: Filter by RELEASED status ---
+    in_logs_qs = InventoryLog.objects.select_related('product', 'company').prefetch_related('tags').filter(
+        status=InventoryLog.Status.RELEASED,
+        release_timestamp__gte=start_date, 
+        release_timestamp__lt=end_date_inclusive
+    )
     returns_qs = ProductionReturn.objects.select_related('product', 'source_log').prefetch_related('source_log__tags').filter(return_date__gte=start_date, return_date__lt=end_date_inclusive)
     out_items_qs = BatchItem.objects.select_related(
         'primitive_product', 'batch', 'source_log', 'batch__template__final_product'
@@ -190,7 +171,8 @@ def _get_ledger_transactions(product_id, company_id, qc_no, start_date, end_date
 
     for log in in_logs_qs:
         transactions.append({
-            'date': log.timestamp, 'type': 'IN', 'quantity_change': log.quantity,
+            # --- MODIFIED: Use release_timestamp as the transaction date ---
+            'date': log.release_timestamp, 'type': 'IN', 'quantity_change': log.quantity,
             'product_id': log.product.id, 'product_name': log.product.name, 'product_code': log.product.code, 'unit': log.product.unit,
             'company_name': log.company.name if log.company else '---', 'qc_no': log.qc_no, 'batch_id': None,
             'description': f"استلام من {log.company.name if log.company else '---'} (QC: {log.qc_no or 'N/A'})",
@@ -207,7 +189,6 @@ def _get_ledger_transactions(product_id, company_id, qc_no, start_date, end_date
             'description': f"إرجاع من الإنتاج (مصدر QC الأصلي: {ret.source_log.qc_no or 'N/A'})",
             'shop_order_number': None, 'batch_number': None, 'final_product_name': None, 'theoretical_quantity': None,
             'tags': ret.source_log.tags.all(),
-            # --- KEY CHANGE: Pass the original unit price from the source log ---
             'unit_price': ret.source_log.unit_price, 
             'cost_at_consumption': None,
         })
@@ -248,10 +229,16 @@ def update_moving_average_cost(product_id: int, log_entry: InventoryLog):
     with transaction.atomic():
         product = Product.objects.select_for_update().get(pk=product_id)
         
+        # --- MODIFICATION: Only released items affect MAC ---
+        if log_entry.status != InventoryLog.Status.RELEASED:
+            logger.info(f"Skipping MAC update for '{product.name}'; log entry #{log_entry.id} is not released.")
+            return
+
         incoming_qty = Decimal(log_entry.quantity)
         incoming_price = log_entry.unit_price or Decimal('0.000')
 
-        total_in = Decimal(product.inventory_logs.aggregate(q=Coalesce(Sum('quantity'), 0.0))['q'])
+        # --- MODIFICATION: Only count released logs ---
+        total_in = Decimal(product.inventory_logs.filter(status=InventoryLog.Status.RELEASED).aggregate(q=Coalesce(Sum('quantity'), 0.0))['q'])
         total_out = Decimal(product.batch_items.aggregate(q=Coalesce(Sum('actual_quantity'), 0.0))['q'])
         total_ret = Decimal(product.production_returns.aggregate(q=Coalesce(Sum('quantity'), 0.0))['q'])
         
@@ -274,12 +261,10 @@ def update_moving_average_cost(product_id: int, log_entry: InventoryLog):
         logger.info(f"Updated MAC for '{product.name}' to {product.moving_average_cost} via simple update.")
 
 
-# --- MODIFIED: Implemented accountant's logic for returns ---
 def get_inventory_state_at_datetime(product_id: int, target_datetime: timezone.datetime) -> dict:
     """
     Calculates the total stock quantity and its total value for a product up to a specific datetime.
-    Used by the recalculation engine and ledger to find a starting point.
-    *** MODIFIED to use original purchase price for returns. ***
+    MODIFIED to only consider RELEASED stock and use release_timestamp.
     """
     most_recent_ob = OpeningBalance.objects.filter(
         product_id=product_id, balance_date__lt=target_datetime
@@ -294,10 +279,15 @@ def get_inventory_state_at_datetime(product_id: int, target_datetime: timezone.d
         running_value = Decimal('0.0')
         effective_date = timezone.make_aware(datetime.min)
     
-    logs = InventoryLog.objects.filter(product_id=product_id, timestamp__gte=effective_date, timestamp__lt=target_datetime)
+    # --- MODIFIED: Filter by status and use release_timestamp ---
+    logs = InventoryLog.objects.filter(
+        product_id=product_id, 
+        status=InventoryLog.Status.RELEASED,
+        release_timestamp__gte=effective_date, 
+        release_timestamp__lt=target_datetime
+    )
     consumptions = BatchItem.objects.filter(primitive_product_id=product_id, batch__creation_date__gte=effective_date, batch__creation_date__lt=target_datetime)
     
-    # Pre-fetch the related source_log for returns to avoid N+1 queries.
     returns = ProductionReturn.objects.select_related('source_log').filter(
         product_id=product_id, 
         return_date__gte=effective_date, 
@@ -307,7 +297,8 @@ def get_inventory_state_at_datetime(product_id: int, target_datetime: timezone.d
     transactions = sorted(
         list(logs) + list(consumptions) + list(returns),
         key=lambda x: (
-            x.timestamp if isinstance(x, InventoryLog) else
+            # --- MODIFIED: Use release_timestamp for sorting logs ---
+            x.release_timestamp if isinstance(x, InventoryLog) else
             x.batch.creation_date if isinstance(x, BatchItem) else
             x.return_date,
             1 if isinstance(x, InventoryLog) else 2 if isinstance(x, ProductionReturn) else 3
@@ -325,14 +316,10 @@ def get_inventory_state_at_datetime(product_id: int, target_datetime: timezone.d
         
         elif isinstance(trx, ProductionReturn):
             return_qty = Decimal(str(trx.quantity))
-            
-            # --- NEW LOGIC: Value returns at their original purchase price ---
             cost_of_return = Decimal('0.0')
             if trx.source_log and trx.source_log.unit_price is not None:
-                # Use the unit price from the original inventory log.
                 cost_of_return = trx.source_log.unit_price
             else:
-                # Fallback to the current MAC if the source log or its price is missing.
                 cost_of_return = current_avg_cost
             
             running_value += return_qty * cost_of_return
@@ -346,11 +333,10 @@ def get_inventory_state_at_datetime(product_id: int, target_datetime: timezone.d
     return {'quantity': running_qty, 'value': running_value}
 
 
-# --- MODIFIED: Implemented accountant's logic for returns ---
 def recalculate_cost_history_for_product(product_id: int, start_datetime: timezone.datetime):
     """
     Recalculates the entire cost and consumption history for a product from a specific point in time.
-    *** MODIFIED to use original purchase price for returns. ***
+    MODIFIED to only use RELEASED logs and their release_timestamp.
     """
     with transaction.atomic():
         product = Product.objects.select_for_update().get(pk=product_id)
@@ -360,10 +346,14 @@ def recalculate_cost_history_for_product(product_id: int, start_datetime: timezo
         running_qty = state['quantity']
         running_value = state['value']
 
-        logs = InventoryLog.objects.filter(product_id=product_id, timestamp__gte=start_datetime)
+        # --- MODIFIED: Filter by status and use release_timestamp ---
+        logs = InventoryLog.objects.filter(
+            product_id=product_id, 
+            status=InventoryLog.Status.RELEASED,
+            release_timestamp__gte=start_datetime
+        )
         consumptions = BatchItem.objects.filter(primitive_product_id=product_id, batch__creation_date__gte=start_datetime)
         
-        # Pre-fetch the related source_log for returns to avoid N+1 queries.
         returns = ProductionReturn.objects.select_related('source_log').filter(
             product_id=product_id, 
             return_date__gte=start_datetime
@@ -372,7 +362,8 @@ def recalculate_cost_history_for_product(product_id: int, start_datetime: timezo
         transactions = sorted(
             list(logs) + list(consumptions) + list(returns),
             key=lambda x: (
-                x.timestamp if isinstance(x, InventoryLog) else
+                # --- MODIFIED: Use release_timestamp for sorting ---
+                x.release_timestamp if isinstance(x, InventoryLog) else
                 x.batch.creation_date if isinstance(x, BatchItem) else
                 x.return_date,
                 1 if isinstance(x, InventoryLog) else 2 if isinstance(x, ProductionReturn) else 3
@@ -392,14 +383,10 @@ def recalculate_cost_history_for_product(product_id: int, start_datetime: timezo
             
             elif isinstance(trx, ProductionReturn):
                 return_qty = Decimal(str(trx.quantity))
-                
-                # --- NEW LOGIC: Value returns at their original purchase price ---
                 cost_of_return = Decimal('0.0')
                 if trx.source_log and trx.source_log.unit_price is not None:
-                    # Use the unit price from the original inventory log.
                     cost_of_return = trx.source_log.unit_price
                 else:
-                    # Fallback to the current MAC if the source log or its price is missing.
                     cost_of_return = current_avg_cost
                 
                 running_value += return_qty * cost_of_return

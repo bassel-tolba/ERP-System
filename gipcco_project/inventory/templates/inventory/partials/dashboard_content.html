@@ -1,4 +1,5 @@
 
+
 <!-- gipcco_project/inventory/templates/inventory/partials/dashboard_content.html -->
 
 {% load static %}
@@ -11,7 +12,7 @@
   <div class="col-lg-5">
     <div class="card">
       <div class="card-header">
-        <h3><i class="bi bi-plus-circle-fill"></i> إضافة حركة مخزون جديدة</h3>
+        <h3><i class="bi bi-plus-circle-fill"></i> إضافة استلام مبدئي</h3>
       </div>
       <div class="card-body p-4">
         <form method="post" action="{% url 'inventory:index' %}" id="add-log-form">
@@ -91,10 +92,7 @@
                     id="unit_price" name="unit_price" required placeholder="0.000"/>
             </div>
           </div>
-          <div class="mb-3">
-              <label for="qc_no" class="form-label fw-bold">QC Number</label>
-              <input type="text" class="form-control form-control-lg" id="qc_no" name="qc_no" />
-          </div>
+          
           <div class="mb-3">
             <label for="tags" class="form-label fw-bold">الوسوم</label>
             <select class="form-select form-select-lg" id="tags" name="tags" multiple>
@@ -103,7 +101,7 @@
           </div>
 
           <div class="mb-3">
-            <label for="entry_date" class="form-label fw-bold">التاريخ</label>
+            <label for="entry_date" class="form-label fw-bold">تاريخ الاستلام</label>
             <input
               type="text"
               class="form-control form-control-lg datepicker"
@@ -115,7 +113,7 @@
           </div>
           <div class="d-grid mt-2">
             <button type="submit" class="btn btn-primary btn-lg">
-              <i class="bi bi-check2-circle"></i> تسجيل الإدخال
+              <i class="bi bi-check2-circle"></i> تسجيل للاستلام
             </button>
           </div>
         </form>
@@ -146,10 +144,10 @@
             <thead class="table-light">
               <tr>
                 <th class="ps-3">المنتج</th>
-                <th>QC No.</th>
+                <th>الحالة</th>
                 <th>الشركة</th>
                 <th>الكمية</th>
-                <th>التاريخ</th>
+                <th>تاريخ الاستلام</th>
               </tr>
             </thead>
             <tbody>
@@ -162,9 +160,13 @@
                   >
                 </td>
                 <td>
-                  <span class="badge bg-secondary"
-                    >{{ log.qc_no|default:"N/A" }}</span
-                  >
+                    {% if log.status == 'quarantined' %}
+                        <span class="badge text-bg-warning">{{ log.get_status_display }}</span>
+                    {% elif log.status == 'released' %}
+                        <span class="badge text-bg-success">{{ log.get_status_display }}</span>
+                    {% else %}
+                        <span class="badge text-bg-danger">{{ log.get_status_display }}</span>
+                    {% endif %}
                 </td>
                 <td>{% if log.company %}{{ log.company.name }}{% else %}---{% endif %}</td>
                 <td class="fw-bold fs-5">

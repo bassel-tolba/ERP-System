@@ -37,6 +37,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -200,4 +201,105 @@ LOGGING = {
             'propagate': False, # Prevent logs from being passed to the root logger
         },
     },
+}
+
+
+
+
+JAZZMIN_SETTINGS = {
+    # TITLE AND LOGO
+    "site_title": "Inventory Admin",
+    "site_header": "Inventory Management",
+    "site_brand": "IMS",
+    "site_icon": "fas fa-warehouse", # Example: FontAwesome icon for your site
+    # Add a logo
+    "welcome_sign": "Welcome to the Inventory Management System Admin!",
+    "logo": "img/ims_logo.png", # Path to your logo in static files
+    "logo_max_height": "50px", # Max height for the logo in the top bar
+
+    # UI THEME
+    "ui_styling": "bootstrap4", # Options: "bootstrap4", "bootstrap5"
+    "navbar_small_text": False,
+    "footer_small_text": False,
+    "body_small_text": False,
+    "brand_small_text": False,
+    "brand_colour": "navbar-dark", # Options: "navbar-primary", "navbar-dark", etc.
+    "accent": "accent-primary", # Accent color for links, buttons
+    "login_logo": "img/ims_logo.png", # Logo for the login page
+    "login_logo_max_height": "120px",
+
+    # SIDEBAR
+    "sidebar_fixed": True,
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": True,
+    "sidebar_nav_compact_style": False,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": True,
+
+    # TOPNAV
+    "topnav_right_bar": False, # Show/hide right-side navbar items (e.g., messages)
+    "show_sidebar": True,
+    "navigation_expanded": False, # Start with sidebar collapsed
+
+    # User Menu
+    "user_menu_avatar": "img/default_avatar.png", # Path to a default user avatar
+
+    # Custom Icons for models (using FontAwesome)
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "auth.Group": "fas fa-users",
+        "companies.Company": "fas fa-building",
+        "products.Product": "fas fa-box-open",
+        "products.ProductTag": "fas fa-tag",
+        "inventory.InventoryLog": "fas fa-clipboard-list",
+        "inventory.ShopOrderTemplate": "fas fa-receipt",
+        "inventory.TemplateItem": "fas fa-clipboard-list",
+        "inventory.Batch": "fas fa-boxes",
+        "inventory.BatchItem": "fas fa-box",
+        "inventory.OpeningBalance": "fas fa-balance-scale",
+        "inventory.ProductionReturn": "fas fa-undo-alt",
+        "inventory.PurchaseOrder": "fas fa-shopping-cart",
+        "inventory.PurchaseOrderItem": "fas fa-cart-plus",
+        "inventory.FinishedProductReceipt": "fas fa-dolly-flatbed",
+        "inventory.ReceiptSubBatch": "fas fa-pallet",
+    },
+
+    # Optional: Order your apps/models in the sidebar
+    "order_with_respect_to": ["inventory", "products", "companies", "auth"],
+
+    # UI Tweaks (buttons, dark mode, etc.)
+    "actions_sticky_top": True,
+    "search_model_names": ["products.Product", "inventory.Batch", "inventory.PurchaseOrder"], # Models to include in global search
+}
+
+# Add UI Tweaks for a more granular look and feel
+JAZZMIN_UI_TWEAKS = {
+    "navbar_variants": ["navbar-dark", "navbar-primary", "navbar-white", "navbar-light"],
+    "sidebar_variants": ["sidebar-dark-primary", "sidebar-light-primary", "sidebar-dark-info"],
+    "theme": "united", # Example: "united", "materia", "flatly", "darkly", "cosmo", "yeti", "lumen", "litera", "simplex", "solar", "superhero", "spacelab"
+    "no_navbar_border": False,
+    "navbar_fixed": True,
+    "layout_boxed": False,
+    "footer_fixed": False,
+    "sidebar_nav_accordion": True,
+    "body_classes": "text-sm", # Adjust font size globally
+    "button_classes": {
+        "primary": "btn-outline-primary",
+        "secondary": "btn-outline-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success"
+    },
+    "alert_classes": {
+        "success": "alert-success",
+        "info": "alert-info",
+        "warning": "alert-warning",
+        "danger": "alert-danger"
+    },
+    "dark_mode_theme": "darkly", # Or any other dark theme
+    "dark_mode_active": True, # Set to True for default dark mode
+    "dark_mode_toggle_builtin": True, # Shows a toggle for dark mode in the navbar
 }

@@ -140,7 +140,7 @@
             </li>
             <li class="nav-item dropdown">
               <a
-                class="nav-link dropdown-toggle {% if active_page == 'analysis' or active_page == 'production_returns' or active_page == 'opening_balances' or active_page == 'ledger' or active_page == 'visuals'%}active{% endif %}"
+                class="nav-link dropdown-toggle {% if active_page == 'analysis' or active_page == 'production_returns' or active_page == 'opening_balances' or active_page == 'ledger' or active_page == 'visuals' or active_page == 'quarantine' %}active{% endif %}"
                 href="#"
                 role="button"
                 data-bs-toggle="dropdown"
@@ -149,6 +149,14 @@
                 <i class="bi bi-bar-chart-line-fill me-2"></i>التحليل والمخزون
               </a>
               <ul class="dropdown-menu">
+                 <li>
+                  <a
+                    class="dropdown-item"
+                    href="{% url 'inventory:quarantine_list' %}"
+                  >
+                    <i class="bi bi-shield-slash-fill me-2"></i>إدارة المواد تحت الفحص
+                  </a>
+                </li>
                 <li>
                   <a class="dropdown-item" href="{% url 'inventory:analysis' %}"
                     >تحليل حركة المخزون</a
@@ -173,6 +181,11 @@
                 <li>
                   <a class="dropdown-item" href="{% url 'inventory:ledger' %}"
                     >كشف حساب منتج/شركة</a
+                  >
+                </li>
+                 <li>
+                  <a class="dropdown-item" href="{% url 'inventory:stock_valuation' %}"
+                    >تقييم المخزون الحالي</a
                   >
                 </li>
                 <li>

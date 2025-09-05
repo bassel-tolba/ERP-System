@@ -1,8 +1,9 @@
+
 # gipcco_project/inventory/urls.py
 
 from django.urls import path
 
-from .views.dashboard import index, records, edit_record, delete_record
+from .views.dashboard import index, records, edit_record, delete_record, quarantine_list, release_from_quarantine # --- MODIFIED
 from .views.companies_products import companies, edit_company, delete_company, products, edit_product, delete_product, create_tag, edit_tag, delete_tag
 from .views.templates import shop_order_templates, delete_shop_order_template, view_shop_order_template, edit_shop_order_template
 from .views.batches import batches, create_batch, view_batch, delete_batch, add_batch_item, update_batch_items_bulk, delete_batch_item
@@ -23,6 +24,10 @@ urlpatterns = [
     path('records/', records, name='records'),
     path('records/edit/<int:pk>/', edit_record, name='edit_record'),
     path('records/delete/<int:pk>/', delete_record, name='delete_record'),
+    
+    # --- NEW: Quality Control Routes ---
+    path('quarantine/', quarantine_list, name='quarantine_list'),
+    path('quarantine/release/<int:pk>/', release_from_quarantine, name='release_from_quarantine'),
 
     # Company Routes
     path('companies/', companies, name='companies'),
