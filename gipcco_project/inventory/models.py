@@ -1,4 +1,5 @@
 
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from decimal import Decimal
@@ -206,6 +207,24 @@ class Batch(models.Model):
     def __str__(self):
         return f"Batch {self.batch_number} (SO: {self.shop_order_number})"
 
+    # --- NEW PROPERTY ---
+    @property
+    def number_of_batches_in_plan(self):
+        """Calculates how many individual batches are represented by this record."""
+        parts = str(self.batch_number).split('-')
+        try:
+            # Handle non-numeric parts gracefully if they exist but are not part of the range
+            start_str = parts[0]
+            end_str = parts[-1]
+            start = int(''.join(filter(str.isdigit, start_str)))
+            end = int(''.join(filter(str.isdigit, end_str))) if len(parts) > 1 and parts[-1] else start
+            
+            if end >= start:
+                return (end - start) + 1
+            return 1 # Fallback for malformed ranges like 105-101
+        except (ValueError, IndexError):
+            return 1 # If parsing fails, assume it's a single batch
+
 
 class BatchItem(models.Model):
     """
@@ -285,7 +304,6 @@ class OpeningBalance(models.Model):
 
     def __str__(self):
         return f"Opening Balance for {self.product.name} on {self.balance_date.date()}: {self.quantity}"
-
     # --- NEW PROPERTY ---
     @property
     def unit_cost(self):
@@ -326,8 +344,6 @@ class ProductionReturn(models.Model):
         return f"Return of {self.quantity} {self.product.unit} of {self.product.name}"
     
     
-# --- NEW MODELS ---
-
 class PurchaseOrder(models.Model):
     class Status(models.TextChoices):
         PENDING = 'pending', _('Pending')
@@ -375,7 +391,6 @@ class PurchaseOrderItem(models.Model):
     )
     quantity_ordered = models.FloatField(verbose_name=_("Quantity Ordered"))
     
-    # --- MODIFICATION: Store total price, not unit price ---
     total_price = models.DecimalField(
         max_digits=14, decimal_places=3, verbose_name=_("Total Price")
     )
@@ -388,24 +403,101 @@ class PurchaseOrderItem(models.Model):
     def __str__(self):
         return f"{self.quantity_ordered} of {self.product.name} for PO #{self.purchase_order.po_number}"
 
-    # --- NEW: Property to calculate the effective unit price ---
     @property
     def effective_unit_price(self):
         """
         Calculates the unit price based on the total price and total quantity received.
         This is the value that should be used for inventory costing.
         """
-        # Sum up all quantities received against this specific PO item
-        # Note: self.receipts.all() might not be available if not prefetched.
-        # A manager method or a direct query is more robust.
         total_quantity_received = InventoryLog.objects.filter(po_item=self).aggregate(total=models.Sum('quantity'))['total'] or 0.0
         
         if total_quantity_received > 0:
-            # The Decimal cast is crucial for precision
             return (self.total_price / Decimal(str(total_quantity_received))).quantize(Decimal('0.001'))
         
-        # If nothing received yet, return the expected unit price for display
         if self.quantity_ordered > 0:
              return (self.total_price / Decimal(str(self.quantity_ordered))).quantize(Decimal('0.001'))
         
         return Decimal('0.000')
+
+# --- NEW FINISHED PRODUCT MODELS ---
+
+class FinishedProductReceipt(models.Model):
+    """
+    Represents the receipt of a finished product from a production run.
+    """
+    class MarketType(models.TextChoices):
+        LOCAL = 'local', _('محلي')
+        EXPORT = 'export', _('تصدير')
+
+    class Status(models.TextChoices):
+        QUARANTINED = 'quarantined', _('تحت الفحص')
+        RELEASED = 'released', _('مفرج عنه')
+        REJECTED = 'rejected', _('مرفوض')
+
+    batch = models.ForeignKey(
+        Batch,
+        on_delete=models.PROTECT,
+        related_name='receipts',
+        verbose_name=_("Production Plan")
+    )
+    individual_batch_number = models.CharField(
+        max_length=255, verbose_name=_("Individual Batch Number")
+    )
+    receipt_date = models.DateField(verbose_name=_("Receipt Date"))
+    total_cost = models.DecimalField(
+        max_digits=14, decimal_places=3, verbose_name=_("Total Cost of Batch")
+    )
+    total_quantity_produced = models.FloatField(
+        verbose_name=_("Total Quantity Produced")
+    )
+    market_type = models.CharField(
+        max_length=10,
+        choices=MarketType.choices,
+        default=MarketType.LOCAL,
+        verbose_name=_("Market Type")
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.QUARANTINED,
+        verbose_name=_("Status")
+    )
+    release_date = models.DateField(
+        null=True, blank=True, verbose_name=_("Release Date")
+    )
+    notes = models.TextField(null=True, blank=True, verbose_name=_("Notes"))
+
+    class Meta:
+        db_table = 'finished_product_receipts'
+        verbose_name = _("Finished Product Receipt")
+        verbose_name_plural = _("Finished Product Receipts")
+        ordering = ['-receipt_date', '-id']
+        unique_together = ['batch', 'individual_batch_number']
+
+    def __str__(self):
+        return f"Receipt for Batch #{self.individual_batch_number} from Plan {self.batch.shop_order_number}"
+
+
+class ReceiptSubBatch(models.Model):
+    """
+
+    Represents a physical sub-batch (e.g., a pallet or container) of a finished product receipt.
+    """
+    receipt = models.ForeignKey(
+        FinishedProductReceipt,
+        on_delete=models.CASCADE,
+        related_name='sub_batches',
+        verbose_name=_("Parent Receipt")
+    )
+    sub_batch_identifier = models.CharField(
+        max_length=100, verbose_name=_("Sub-Batch Identifier")
+    )
+    quantity = models.FloatField(verbose_name=_("Quantity in Sub-Batch"))
+
+    class Meta:
+        db_table = 'receipt_sub_batches'
+        verbose_name = _("Receipt Sub-Batch")
+        verbose_name_plural = _("Receipt Sub-Batches")
+
+    def __str__(self):
+        return f"{self.quantity} units in {self.sub_batch_identifier} for {self.receipt}"

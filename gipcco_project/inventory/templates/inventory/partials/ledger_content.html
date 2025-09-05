@@ -11,20 +11,31 @@
     </div>
     <div class="card-body">
         <form id="ledgerFilterForm" method="GET" action="{% url 'inventory:ledger' %}">
-            <!-- Filter form remains unchanged -->
             <div class="row g-3 align-items-end">
+                <!-- Raw Material Selector -->
                 <div class="col-md-3">
-                    <label for="product_id" class="form-label">المنتج</label>
+                    <label for="product_id" class="form-label">المادة الخام / التعبئة</label>
                     <select name="product_id" id="product_id" class="form-select searchable-select">
-                        <option value="">-- كل المنتجات --</option>
+                        <option value="">-- اختر مادة --</option>
                         {% for product in all_primitive_products %}
                         <option value="{{ product.id }}" {% if request.GET.product_id == product.id|stringformat:"s" %}selected{% endif %}>{{ product.name }} ({{ product.code }})</option>
                         {% endfor %}
                     </select>
                 </div>
+                <!-- Final Product Selector (NEW) -->
+                <div class="col-md-3">
+                    <label for="final_product_id" class="form-label">المنتج النهائي</label>
+                    <select name="final_product_id" id="final_product_id" class="form-select searchable-select">
+                        <option value="">-- اختر منتج نهائي --</option>
+                        {% for product in all_final_products %}
+                        <option value="{{ product.id }}" {% if request.GET.final_product_id == product.id|stringformat:"s" %}selected{% endif %}>{{ product.name }} ({{ product.code }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <!-- Other filters -->
                 <div class="col-md-3">
                     <label for="company_id" class="form-label">الشركة الموردة</label>
-                    <select name="company_id" id="company_id" class="form-select searchable-select">
+                    <select name="company_id" id="company_id" class="form-select searchable-select" {% if is_final_product_ledger %}disabled{% endif %}>
                         <option value="">-- كل الشركات --</option>
                         {% for company in all_companies %}
                         <option value="{{ company.id }}" {% if request.GET.company_id == company.id|stringformat:"s" %}selected{% endif %}>{{ company.name }}</option>
@@ -32,26 +43,26 @@
                     </select>
                 </div>
                 <div class="col-md-3">
+                    <label for="qc_no" class="form-label">رقم QC</label>
+                    <input type="text" name="qc_no" id="qc_no" class="form-control" value="{{ request.GET.qc_no|default:'' }}" {% if is_final_product_ledger %}disabled{% endif %}>
+                </div>
+                <div class="col-md-3">
                     <label for="tags" class="form-label">وسوم السجلات</label>
-                    <select name="tags" id="tags" class="form-select searchable-select" multiple>
+                    <select name="tags" id="tags" class="form-select searchable-select" multiple {% if is_final_product_ledger %}disabled{% endif %}>
                         {% for tag in all_tags %}
                         <option value="{{ tag.id }}" {% if tag.id|stringformat:"s" in selected_tags %} selected{% endif %}>{{ tag.name }}</option>
                         {% endfor %}
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <label for="qc_no" class="form-label">رقم QC</label>
-                    <input type="text" name="qc_no" id="qc_no" class="form-control" value="{{ request.GET.qc_no|default:'' }}">
-                </div>
-                <div class="col-md-4">
                     <label for="start_date" class="form-label">من تاريخ</label>
                     <input type="text" name="start_date" id="start_date" class="form-control datepicker" value="{{ request.GET.start_date|default:'' }}">
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label for="end_date" class="form-label">إلى تاريخ</label>
                     <input type="text" name="end_date" id="end_date" class="form-control datepicker" value="{{ request.GET.end_date|default:'' }}">
                 </div>
-                <div class="col-md-4 d-flex align-items-end">
+                <div class="col-md-3 d-flex align-items-end">
                     <button type="submit" class="btn btn-primary w-50 me-2"><i class="bi bi-search me-2"></i>بحث</button>
                     <a href="{% url 'inventory:ledger' %}" class="btn btn-secondary w-50"><i class="bi bi-eraser-fill me-2"></i>مسح</a>
                 </div>
@@ -65,7 +76,7 @@
     <div class="card shadow-sm">
         <div class="card-header">
              <h5 class="mb-0">نتائج البحث</h5>
-             {% if request.GET.product_id %}
+             {% if request.GET.product_id or request.GET.final_product_id %}
              <div class="d-flex justify-content-between align-items-center small text-muted mt-2">
                 <span>الرصيد الافتتاحي (كمية): <strong>{{ opening_balance_for_period|floatformat:3 }}</strong> {{ unit }}</span>
                 <span>الرصيد الافتتاحي (قيمة): <strong>{{ opening_value_for_period|floatformat:3 }}</strong></span>
@@ -98,8 +109,11 @@
                         <td>{{ t.date|date:"Y-m-d H:i" }}</td>
                         <td>
                             {{ t.description }}
-                            {% if not request.GET.product_id %}
+                            {% if not request.GET.product_id and not request.GET.final_product_id %}
                                 <span class="d-block small text-muted">{{ t.product_name }}</span>
+                            {% endif %}
+                            {% if t.market_type %}
+                                <span class="d-block small text-info">السوق: {{ t.market_type }}</span>
                             {% endif %}
                             {% if t.tags %}
                                 <div class="mt-1">
@@ -120,7 +134,7 @@
                         <td class="text-center text-muted border-start">{{ t.value_before|floatformat:3|default:"---" }}</td>
                         <td class="text-center fw-bold border-end">{{ t.value_after|floatformat:3|default:"---" }}</td>
 
-                        <!-- Moving Average Cost (THE KEY INFO) -->
+                        <!-- Moving Average Cost -->
                         <td class="text-center fw-bold table-info">{{ t.moving_average_cost_after|floatformat:3|default:"---" }}</td>
                         
                         <td class="text-end">

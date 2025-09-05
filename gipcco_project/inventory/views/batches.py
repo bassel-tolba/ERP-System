@@ -1,4 +1,5 @@
 
+
 import json
 import math
 from datetime import datetime, timedelta, time
@@ -7,7 +8,7 @@ from decimal import Decimal
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Sum, Q, F, FloatField
+from django.db.models import Sum, Q, F, FloatField, Value
 from django.db.models.functions import Coalesce
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -17,7 +18,7 @@ from django.views.decorators.http import require_POST
 import logging
 
 from ..models import (Batch, BatchItem, Company, InventoryLog, OpeningBalance,
-                     Product, ProductionReturn, ShopOrderTemplate, TemplateItem)
+                     Product, ProductionReturn, ShopOrderTemplate, TemplateItem, FinishedProductReceipt) # --- MODIFIED: Import FinishedProductReceipt
 # --- NEW: Import costing helper ---
 from .helpers import check_and_update_batch_customization, get_opening_balance_for_period, validate_stock_availability, _get_ledger_transactions, recalculate_cost_history_for_product
 
@@ -201,31 +202,62 @@ def view_batch(request: HttpRequest, pk: int) -> HttpResponse:
     Displays the details of a single batch, allowing for edits.
     """
     batch_info = get_object_or_404(Batch.objects.select_related('template__final_product'), pk=pk)
-    batch_from, batch_to, num_batches = None, None, 1
+    
+    # --- MODIFIED: Logic to handle batch ranges for receiving finished products ---
+    batch_from, batch_to = None, None
+    individual_batch_numbers_in_plan = []
+    
     if batch_info.batch_number:
         parts = str(batch_info.batch_number).split('-')
         try:
-            batch_from = int(parts[0])
+            # Attempt to parse start and end as integers for ranging
+            start_num_str = ''.join(filter(str.isdigit, parts[0]))
+            start_num = int(start_num_str)
+            prefix = parts[0].replace(start_num_str, '')
+
             if len(parts) > 1 and parts[1]:
-                batch_to = int(parts[1])
-                num_batches = (batch_to - batch_from) + 1
+                end_num_str = ''.join(filter(str.isdigit, parts[1]))
+                end_num = int(end_num_str)
+                batch_from = parts[0]
+                batch_to = parts[1]
+                if end_num >= start_num:
+                    for i in range(start_num, end_num + 1):
+                        individual_batch_numbers_in_plan.append(f"{prefix}{i}")
+            else:
+                 batch_from = batch_info.batch_number
+                 individual_batch_numbers_in_plan.append(batch_info.batch_number)
         except (ValueError, IndexError):
+            # Fallback for non-standard batch numbers
             batch_from = batch_info.batch_number
-            batch_to = ''
-    if num_batches <= 0: num_batches = 1
+            individual_batch_numbers_in_plan.append(batch_info.batch_number)
+
+    num_batches = len(individual_batch_numbers_in_plan) if len(individual_batch_numbers_in_plan) > 0 else 1
+    
+    # Check status of each individual batch in the plan
+    received_receipts = {
+        r.individual_batch_number: r 
+        for r in FinishedProductReceipt.objects.filter(batch=batch_info)
+    }
+    
+    plan_status_list = []
+    for num_str in individual_batch_numbers_in_plan:
+        receipt = received_receipts.get(num_str)
+        plan_status_list.append({
+            'number': num_str,
+            'status': 'RECEIVED' if receipt else 'PENDING',
+            'receipt': receipt
+        })
+    # --- END MODIFICATION ---
 
     batch_items_with_stock = []
     total_batch_cost = Decimal('0.0')
     batch_items = batch_info.items.select_related('primitive_product').order_by('primitive_product__name')
 
     for item in batch_items:
-        # Calculate line cost
         item_cost = item.cost_at_consumption or Decimal('0.0')
         item_qty = Decimal(str(item.actual_quantity or 0.0))
         item.line_total = item_qty * item_cost
         total_batch_cost += item.line_total
-
-        # Prepare other data for template
         item.base_theoretical_quantity = item.theoretical_quantity / num_batches
         item.base_actual_quantity = (item.actual_quantity or 0) / num_batches
         product = item.primitive_product
@@ -254,6 +286,7 @@ def view_batch(request: HttpRequest, pk: int) -> HttpResponse:
         'primitive_products': Product.objects.filter(~Q(product_type=Product.ProductType.FINAL_PRODUCT)),
         'batch_from': batch_from,
         'batch_to': batch_to,
+        'plan_status_list': plan_status_list, # --- NEW CONTEXT VARIABLE ---
         'is_partial_request': 'X-Partial-Request' in request.headers
     }
     if 'X-Partial-Request' in request.headers:

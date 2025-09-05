@@ -1,0 +1,53 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0" style="font-weight: 700;">سجل المنتجات النهائية المستلمة</h1>
+    <!-- We can add a search bar here later if needed -->
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">رقم التشغيلة</th>
+                        <th>المنتج النهائي</th>
+                        <th>أمر التشغيل</th>
+                        <th class="text-center">الكمية المستلمة</th>
+                        <th class="text-center">تاريخ الاستلام</th>
+                        <th class="text-center">الحالة</th>
+                        <th class="text-center pe-3"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for receipt in receipts %}
+                    <tr>
+                        <td class="ps-3 fw-bold">{{ receipt.individual_batch_number }}</td>
+                        <td>{{ receipt.batch.template.final_product.name }}</td>
+                        <td>{{ receipt.batch.shop_order_number }}</td>
+                        <td class="text-center">{{ receipt.total_quantity_produced|floatformat:0 }}</td>
+                        <td class="text-center">{{ receipt.receipt_date|date:"Y-m-d" }}</td>
+                        <td class="text-center">
+                            {% if receipt.status == 'QUARANTINED' %}
+                            <span class="badge bg-warning text-dark">{{ receipt.get_status_display }}</span>
+                            {% elif receipt.status == 'RELEASED' %}
+                            <span class="badge bg-success">{{ receipt.get_status_display }}</span>
+                            {% else %}
+                            <span class="badge bg-danger">{{ receipt.get_status_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center pe-3">
+                            <a href="{% url 'inventory:view_finished_product' receipt.pk %}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i> عرض التفاصيل
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center p-4">لم يتم استلام أي منتجات نهائية بعد.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

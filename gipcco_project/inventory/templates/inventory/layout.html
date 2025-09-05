@@ -122,6 +122,13 @@
                     >عرض أوامر التشغيل</a
                   >
                 </li>
+                <!-- ===== NEW LINK ===== -->
+                <li>
+                  <a class="dropdown-item" href="{% url 'inventory:finished_goods_status' %}"
+                    >حالة المنتج النهائي</a
+                  >
+                </li>
+                <!-- ===== END NEW LINK ===== -->
                 <li>
                   <a
                     class="dropdown-item"
@@ -133,7 +140,7 @@
             </li>
             <li class="nav-item dropdown">
               <a
-                class="nav-link dropdown-toggle {% if active_page == 'analysis' or active_page == 'production_returns' or active_page == 'opening_balances' %}active{% endif %}"
+                class="nav-link dropdown-toggle {% if active_page == 'analysis' or active_page == 'production_returns' or active_page == 'opening_balances' or active_page == 'ledger' or active_page == 'visuals'%}active{% endif %}"
                 href="#"
                 role="button"
                 data-bs-toggle="dropdown"
@@ -218,45 +225,47 @@
         </div>
       </div>
     </header>
-    <main class="container py-4 flex-grow-1">
-      {% if messages %} {% for message in messages %}
-      <div
-        class="alert alert-{{ message.tags }} alert-dismissible fade show d-flex align-items-center shadow-sm"
-        role="alert"
-      >
-        {% if 'success' in message.tags %}
-        <i
-          class="bi bi-check-circle-fill"
-          style="margin-inline-end: 0.75rem; font-size: 1.2rem"
-        ></i>
-        {% elif 'danger' in message.tags %}
-        <i
-          class="bi bi-exclamation-triangle-fill"
-          style="margin-inline-end: 0.75rem; font-size: 1.2rem"
-        ></i>
-        {% elif 'warning' in message.tags %}
-        <i
-          class="bi bi-exclamation-triangle-fill"
-          style="margin-inline-end: 0.75rem; font-size: 1.2rem"
-        ></i>
-        {% else %}
-        <i
-          class="bi bi-info-circle-fill"
-          style="margin-inline-end: 0.75rem; font-size: 1.2rem"
-        ></i>
-        {% endif %}
-        <div>{{ message }}</div>
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="alert"
-          aria-label="Close"
-        ></button>
-      </div>
-      {% endfor %} {% endif %}
+    <div class="content-container">
+      <main class="container py-4 flex-grow-1 ">
+        {% if messages %} {% for message in messages %}
+        <div
+          class="alert alert-{{ message.tags }} alert-dismissible fade show d-flex align-items-center shadow-sm"
+          role="alert"
+        >
+          {% if 'success' in message.tags %}
+          <i
+            class="bi bi-check-circle-fill"
+            style="margin-inline-end: 0.75rem; font-size: 1.2rem"
+          ></i>
+          {% elif 'danger' in message.tags %}
+          <i
+            class="bi bi-exclamation-triangle-fill"
+            style="margin-inline-end: 0.75rem; font-size: 1.2rem"
+          ></i>
+          {% elif 'warning' in message.tags %}
+          <i
+            class="bi bi-exclamation-triangle-fill"
+            style="margin-inline-end: 0.75rem; font-size: 1.2rem"
+          ></i>
+          {% else %}
+          <i
+            class="bi bi-info-circle-fill"
+            style="margin-inline-end: 0.75rem; font-size: 1.2rem"
+          ></i>
+          {% endif %}
+          <div>{{ message }}</div>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+          ></button>
+        </div>
+        {% endfor %} {% endif %}
 
-      <div id="page-content">{% block content %}{% endblock %}</div>
-    </main>
+        <div id="page-content">{% block content %}{% endblock %}</div>
+      </main>
+    </div>
 
     <footer class="footer mt-auto py-3 text-center">
       <div class="container">
@@ -269,8 +278,8 @@
     <script src="{% static 'js/flatpickr.min.js' %}"></script>
     <script src="{% static 'js/flatpickr.l10n.ar.js' %}"></script>
     <script src="{% static 'js/tom-select.complete.min.js' %}"></script>
-
-    <!-- The entire JavaScript block is preserved as-is because it contains no server-side template code -->
+    
+    <!-- MASTER JAVASCRIPT (Unchanged) -->
     <script>
                   document.addEventListener("DOMContentLoaded", function () {
                     // --- Theme Switcher & Seasonal Logic (Unchanged from your original file) ---
@@ -432,6 +441,9 @@
                                 });
                             }
                         });
+                        
+                        // Add tooltips
+                        container.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
 
                         // =========================================================
                         //  FIXED AND CENTRALIZED TAGS LOGIC
@@ -1231,6 +1243,47 @@
                             });
                         }
                       }
+                      // =========================================================================
+                      //  NEW JAVASCRIPT FOR RECEIVE FINISHED PRODUCT PAGE
+                      // =========================================================================
+                      const addSubBatchBtn = container.querySelector('#add-sub-batch-btn');
+                      if (addSubBatchBtn && !addSubBatchBtn.dataset.logicInitialized) {
+                          console.log("Initializing receive_finished_product.html dynamic logic...");
+                          addSubBatchBtn.dataset.logicInitialized = 'true';
+
+                          const subBatchesTbody = container.querySelector('#sub-batches-tbody');
+
+                          // Function to create a new row
+                          const createSubBatchRow = () => {
+                              const row = document.createElement('tr');
+                              row.innerHTML = `
+                                  <td class="ps-3">
+                                      <input type="text" name="sub_batch_id" class="form-control" placeholder="مثال: A2, P-002" required>
+                                  </td>
+                                  <td>
+                                      <input type="number" step="any" name="sub_batch_qty" class="form-control text-center" required>
+                                  </td>
+                                  <td class="text-center pe-2">
+                                      <button type="button" class="btn btn-sm btn-outline-danger remove-sub-batch-btn" title="حذف الصف">
+                                          <i class="bi bi-trash"></i>
+                                      </button>
+                                  </td>
+                              `;
+                              subBatchesTbody.appendChild(row);
+                          };
+
+                          // Add row button event
+                          addSubBatchBtn.addEventListener('click', createSubBatchRow);
+
+                          // Use event delegation for remove buttons
+                          subBatchesTbody.addEventListener('click', function(e) {
+                              const removeBtn = e.target.closest('.remove-sub-batch-btn');
+                              if (removeBtn) {
+                                  removeBtn.closest('tr').remove();
+                              }
+                          });
+                      }
+
 
                       // ----- Logic for shop_order_template_edit.html -----
                       // NOTE: This logic has been moved to its own partial template
@@ -1400,7 +1453,7 @@
                                     shopOrderCell.innerHTML = `<a href="/batch/${batchId}/" title="عرض تفاصيل أمر التشغيل">${shopOrderNumber} <i class="bi bi-box-arrow-up-right small"></i></a>`;
                                     batchBtnContainer.classList.remove('d-none');
                                     viewFullBatchBtn.dataset.batchId = batchId;
-                                } else {
+                                 } else {
                                     shopOrderCell.textContent = shopOrderNumber;
                                     batchBtnContainer.classList.add('d-none');
                                 }
@@ -1538,10 +1591,26 @@
                             });
                         }
                       }
+                      
+                      //===========================================================
+                      // BUG FIX & ENHANCEMENT FOR VISUALS PAGE
+                      //===========================================================
+
+                      // ----- **FIX**: Define the missing helper function -----
+                      function showNoDataMessage(canvasId) {
+                        const canvas = document.getElementById(canvasId);
+                        if (canvas && canvas.parentElement) {
+                            const parent = canvas.parentElement;
+                            const messageDiv = document.createElement('div');
+                            messageDiv.className = 'alert alert-info text-center p-4 d-flex align-items-center justify-content-center';
+                            messageDiv.innerHTML = '<i class="bi bi-bar-chart-line-fill me-2"></i> لا توجد بيانات كافية لعرض هذا الرسم البياني.';
+                            parent.replaceChild(messageDiv, canvas);
+                        }
+                      }
+
 
                       // ----- Logic for visuals.html -----
-                      const inventoryFlowChartCanvas =
-                        document.getElementById("inventoryFlowChart");
+                      const inventoryFlowChartCanvas = document.getElementById("inventoryFlowChart");
                       if (inventoryFlowChartCanvas) {
                         console.log("Initializing visuals.html chart logic...");
                         if (document.body.hasAttribute("data-visuals-initialized")) return;
@@ -1550,102 +1619,68 @@
                           console.error("Chart.js not loaded!");
                           return;
                         }
-                        const chartColors = [
-                          "#0d6efd",
-                          "#6f42c1",
-                          "#d63384",
-                          "#dc3545",
-                          "#fd7e14",
-                          "#ffc107",
-                          "#198754",
-                          "#20c997",
-                          "#0dcaf0",
-                          "#6c757d",
-                        ];
-                        const inOutData = getDataFromIsland("data-for-chart-1");
-                        if (
-                          inventoryFlowChartCanvas &&
-                          inOutData &&
-                          inOutData.labels &&
-                          inOutData.labels.length > 0
-                        ) {
-                          new Chart(inventoryFlowChartCanvas.getContext("2d"), {
-                            type: "line",
-                            data: inOutData,
-                            options: {
-                              responsive: true,
-                              maintainAspectRatio: false,
-                              interaction: { mode: "index", intersect: false },
-                              scales: {
-                                y: {
-                                  beginAtZero: true,
-                                  title: { display: true, text: "الكمية" },
-                                },
-                              },
-                            },
-                          });
-                        } else {
-                          showNoDataMessage("inventoryFlowChart");
+                        const chartColors = [ "#0d6efd", "#6f42c1", "#d63384", "#dc3545", "#fd7e14", "#ffc107", "#198754", "#20c997", "#0dcaf0", "#6c757d" ];
+                        
+                        function showNoDataMessage(canvasId) {
+                            const canvas = document.getElementById(canvasId);
+                            if (canvas && canvas.parentElement) {
+                                const parent = canvas.parentElement;
+                                const messageDiv = document.createElement('div');
+                                messageDiv.className = 'alert alert-info text-center p-4 d-flex align-items-center justify-content-center h-100';
+                                messageDiv.innerHTML = '<i class="bi bi-bar-chart-line-fill me-2"></i> لا توجد بيانات كافية لعرض هذا الرسم البياني.';
+                                parent.replaceChild(messageDiv, canvas);
+                            }
                         }
+
+                        // Chart 1: Inventory Flow
+                        const inOutData = getDataFromIsland("data-for-chart-1");
+                        if ( inventoryFlowChartCanvas && inOutData && inOutData.labels && inOutData.labels.length > 0 ) {
+                          new Chart(inventoryFlowChartCanvas.getContext("2d"), {
+                            type: "line", data: inOutData, options: { responsive: true, maintainAspectRatio: false, interaction: { mode: "index", intersect: false }, scales: { y: { beginAtZero: true, title: { display: true, text: "الكمية" }, }, }, },
+                          });
+                        } else { showNoDataMessage("inventoryFlowChart"); }
+                        
+                        // Chart 2: Consumption by Final Product
                         const consumptionData = getDataFromIsland("data-for-chart-2");
-                        const consumptionCanvas =
-                          document.getElementById("consumptionChart");
-                        if (
-                          consumptionCanvas &&
-                          consumptionData &&
-                          consumptionData.labels &&
-                          consumptionData.labels.length > 0
-                        ) {
+                        const consumptionCanvas = document.getElementById("consumptionChart");
+                        if ( consumptionCanvas && consumptionData && consumptionData.labels && consumptionData.labels.length > 0 ) {
                           consumptionData.datasets[0].backgroundColor = chartColors;
                           new Chart(consumptionCanvas.getContext("2d"), {
-                            type: "doughnut",
-                            data: consumptionData,
-                            options: {
-                              responsive: true,
-                              maintainAspectRatio: false,
-                              plugins: { legend: { position: "top" } },
-                            },
+                            type: "doughnut", data: consumptionData, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "top" } }, },
                           });
-                        } else {
-                          showNoDataMessage("consumptionChart");
-                        }
+                        } else { showNoDataMessage("consumptionChart"); }
+                        
+                        // Chart 3: Production Variance (ENHANCED)
                         const varianceData = getDataFromIsland("data-for-chart-3");
                         const varianceCanvas = document.getElementById("varianceChart");
-                        if (
-                          varianceCanvas &&
-                          varianceData &&
-                          varianceData.labels &&
-                          varianceData.labels.length > 0
-                        ) {
-                          varianceData.datasets[0].backgroundColor =
-                            varianceData.datasets[0].data.map((v) =>
-                              v > 0 ? "rgba(220, 53, 69, 0.7)" : "rgba(25, 135, 84, 0.7)"
-                            );
-                          varianceData.datasets[0].borderColor =
-                            varianceData.datasets[0].data.map((v) =>
-                              v > 0 ? "#dc3545" : "#198754"
-                            );
+                        if ( varianceCanvas && varianceData && varianceData.labels && varianceData.labels.length > 0 ) {
+                          // Color bars based on positive (waste) or negative (saving)
+                          varianceData.datasets[0].backgroundColor = varianceData.datasets[0].data.map((v) => v > 0 ? "rgba(220, 53, 69, 0.7)" : "rgba(25, 135, 84, 0.7)");
+                          varianceData.datasets[0].borderColor = varianceData.datasets[0].data.map((v) => v > 0 ? "#dc3545" : "#198754");
                           varianceData.datasets[0].borderWidth = 1;
                           new Chart(varianceCanvas.getContext("2d"), {
-                            type: "bar",
-                            data: varianceData,
-                            options: {
-                              responsive: true,
-                              maintainAspectRatio: false,
-                              scales: {
-                                y: {
-                                  beginAtZero: true,
-                                  title: { display: true, text: "كمية الفرق" },
-                                },
-                              },
-                            },
+                            // The type is 'bar' by default, but individual datasets can override it.
+                            type: "bar", 
+                            data: varianceData, 
+                            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, title: { display: true, text: "كمية الفرق" }, }, }, },
                           });
-                        } else {
-                          showNoDataMessage("varianceChart");
-                        }
+                        } else { showNoDataMessage("varianceChart"); }
+
+                        // Chart 4: Supplier Contribution
+                        const supplierData = getDataFromIsland("data-for-chart-4");
+                        const supplierCanvas = document.getElementById("supplierChart");
+                        if ( supplierCanvas && supplierData && supplierData.labels && supplierData.labels.length > 0) {
+                            supplierData.datasets[0].backgroundColor = chartColors.slice().reverse(); 
+                            new Chart(supplierCanvas.getContext("2d"), {
+                                type: "pie", data: supplierData, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "top" } }, },
+                            });
+                        } else { showNoDataMessage("supplierChart"); }
+
                       } else {
                         document.body.removeAttribute("data-visuals-initialized");
                       }
+
+                      
                     }
 
                     // --- Core Dynamic Loading Functions ---

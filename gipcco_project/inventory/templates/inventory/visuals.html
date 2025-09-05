@@ -1,8 +1,12 @@
-<!-- gipcco_project/inventory/templates/inventory/visuals.html -->
-
 {% extends "inventory/layout.html" %}
 {% load static %}
 
 {% block content %}
-  {% include "inventory/partials/visuals_content.html" %}
+    {# This template loads the dynamic content partial #}
+    {% include "inventory/partials/visuals_content.html" %}
 {% endblock content %}
+
+{% block scripts %}
+    {# We need to include Chart.js library for this page to work #}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}

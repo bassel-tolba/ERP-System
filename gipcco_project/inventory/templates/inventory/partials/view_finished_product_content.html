@@ -1,0 +1,81 @@
+<div id="content-area">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-0" style="font-weight: 700;">تفاصيل استلام تشغيلة: {{ receipt.individual_batch_number }}</h1>
+             <p class="mb-0 text-muted">
+                المنتج: <strong>{{ receipt.batch.template.final_product.name }}</strong>
+            </p>
+        </div>
+        <div>
+            <a href="{% url 'inventory:view_batch' receipt.batch.pk %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> العودة لأمر التشغيل</a>
+            <a href="{% url 'inventory:finished_products_list' %}" class="btn btn-secondary"><i class="bi bi-list-ul"></i> قائمة المستلم</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between">
+                     <h5 class="mb-0">التشغيلات الفرعية (البالتات)</h5>
+                     <span class="badge bg-primary fs-6">{{ receipt.sub_batches.count }} تشغيلة فرعية</span>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">رقم التشغيلة الفرعية</th>
+                                <th class="text-end pe-3">الكمية</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for sub in receipt.sub_batches.all %}
+                            <tr>
+                                <td class="ps-3">{{ sub.sub_batch_identifier }}</td>
+                                <td class="text-end pe-3">{{ sub.quantity|floatformat:0 }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot class="table-light">
+                            <tr>
+                                <th class="ps-3">الإجمالي</th>
+                                <th class="text-end pe-3 fw-bold">{{ receipt.total_quantity_produced|floatformat:0 }}</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">بيانات الاستلام</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-5">تاريخ الاستلام</dt>
+                        <dd class="col-sm-7">{{ receipt.receipt_date|date:"Y-m-d" }}</dd>
+
+                        <dt class="col-sm-5">نوع السوق</dt>
+                        <dd class="col-sm-7">{{ receipt.get_market_type_display }}</dd>
+                        
+                        <dt class="col-sm-5">الحالة الحالية</dt>
+                        <dd class="col-sm-7">
+                            {% if receipt.status == 'QUARANTINED' %}<span class="badge bg-warning text-dark">{{ receipt.get_status_display }}</span>
+                            {% elif receipt.status == 'RELEASED' %}<span class="badge bg-success">{{ receipt.get_status_display }}</span>
+                            {% else %}<span class="badge bg-danger">{{ receipt.get_status_display }}</span>
+                            {% endif %}
+                        </dd>
+                        
+                        <dt class="col-sm-5">تكلفة التشغيلة</dt>
+                        <dd class="col-sm-7 fw-bold">{{ receipt.total_cost }}</dd>
+                        
+                        {% if receipt.notes %}
+                        <dt class="col-sm-12 mt-2">ملاحظات</dt>
+                        <dd class="col-sm-12"><p class="p-2 bg-light rounded-2 mb-0">{{ receipt.notes|linebreaksbr }}</p></dd>
+                        {% endif %}
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

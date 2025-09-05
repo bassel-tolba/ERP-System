@@ -1,4 +1,3 @@
-
 # gipcco_project/inventory/views/helpers.py
 
 import json
@@ -158,7 +157,7 @@ def get_opening_balance_for_period(product_id: int, start_date: datetime) -> flo
     return opening_base_qty + prior_period_in_log + prior_period_in_returns - prior_period_out
 
 
-# --- MODIFIED: Added deterministic sorting for transactions ---
+# --- MODIFIED: Added original unit price to returns for ledger display ---
 def _get_ledger_transactions(product_id, company_id, qc_no, start_date, end_date_inclusive, tag_ids=None):
     """
     A private helper to fetch and consolidate all transaction types for the ledger.
@@ -208,7 +207,9 @@ def _get_ledger_transactions(product_id, company_id, qc_no, start_date, end_date
             'description': f"إرجاع من الإنتاج (مصدر QC الأصلي: {ret.source_log.qc_no or 'N/A'})",
             'shop_order_number': None, 'batch_number': None, 'final_product_name': None, 'theoretical_quantity': None,
             'tags': ret.source_log.tags.all(),
-            'unit_price': None, 'cost_at_consumption': None,
+            # --- KEY CHANGE: Pass the original unit price from the source log ---
+            'unit_price': ret.source_log.unit_price, 
+            'cost_at_consumption': None,
         })
 
     for item in out_items_qs:
@@ -225,7 +226,7 @@ def _get_ledger_transactions(product_id, company_id, qc_no, start_date, end_date
             'unit_price': None, 'cost_at_consumption': item.cost_at_consumption,
         })
 
-    # --- FIX: Ensure deterministic sorting for same-timestamp transactions ---
+    # Ensure deterministic sorting for same-timestamp transactions
     def get_sort_key(trx):
         # Sort by date, then by type (IN -> RETURN_IN -> OUT) to process logically
         type_order = {'IN': 1, 'RETURN_IN': 2, 'OUT': 3}
@@ -273,10 +274,12 @@ def update_moving_average_cost(product_id: int, log_entry: InventoryLog):
         logger.info(f"Updated MAC for '{product.name}' to {product.moving_average_cost} via simple update.")
 
 
+# --- MODIFIED: Implemented accountant's logic for returns ---
 def get_inventory_state_at_datetime(product_id: int, target_datetime: timezone.datetime) -> dict:
     """
     Calculates the total stock quantity and its total value for a product up to a specific datetime.
     Used by the recalculation engine and ledger to find a starting point.
+    *** MODIFIED to use original purchase price for returns. ***
     """
     most_recent_ob = OpeningBalance.objects.filter(
         product_id=product_id, balance_date__lt=target_datetime
@@ -284,7 +287,7 @@ def get_inventory_state_at_datetime(product_id: int, target_datetime: timezone.d
 
     if most_recent_ob:
         running_qty = Decimal(str(most_recent_ob.quantity))
-        running_value = most_recent_ob.total_value  # --- KEY CHANGE HERE ---
+        running_value = most_recent_ob.total_value
         effective_date = most_recent_ob.balance_date
     else:
         running_qty = Decimal('0.0')
@@ -293,7 +296,13 @@ def get_inventory_state_at_datetime(product_id: int, target_datetime: timezone.d
     
     logs = InventoryLog.objects.filter(product_id=product_id, timestamp__gte=effective_date, timestamp__lt=target_datetime)
     consumptions = BatchItem.objects.filter(primitive_product_id=product_id, batch__creation_date__gte=effective_date, batch__creation_date__lt=target_datetime)
-    returns = ProductionReturn.objects.filter(product_id=product_id, return_date__gte=effective_date, return_date__lt=target_datetime)
+    
+    # Pre-fetch the related source_log for returns to avoid N+1 queries.
+    returns = ProductionReturn.objects.select_related('source_log').filter(
+        product_id=product_id, 
+        return_date__gte=effective_date, 
+        return_date__lt=target_datetime
+    )
     
     transactions = sorted(
         list(logs) + list(consumptions) + list(returns),
@@ -316,7 +325,17 @@ def get_inventory_state_at_datetime(product_id: int, target_datetime: timezone.d
         
         elif isinstance(trx, ProductionReturn):
             return_qty = Decimal(str(trx.quantity))
-            running_value += return_qty * current_avg_cost
+            
+            # --- NEW LOGIC: Value returns at their original purchase price ---
+            cost_of_return = Decimal('0.0')
+            if trx.source_log and trx.source_log.unit_price is not None:
+                # Use the unit price from the original inventory log.
+                cost_of_return = trx.source_log.unit_price
+            else:
+                # Fallback to the current MAC if the source log or its price is missing.
+                cost_of_return = current_avg_cost
+            
+            running_value += return_qty * cost_of_return
             running_qty += return_qty
         
         elif isinstance(trx, BatchItem):
@@ -326,9 +345,12 @@ def get_inventory_state_at_datetime(product_id: int, target_datetime: timezone.d
             
     return {'quantity': running_qty, 'value': running_value}
 
+
+# --- MODIFIED: Implemented accountant's logic for returns ---
 def recalculate_cost_history_for_product(product_id: int, start_datetime: timezone.datetime):
     """
     Recalculates the entire cost and consumption history for a product from a specific point in time.
+    *** MODIFIED to use original purchase price for returns. ***
     """
     with transaction.atomic():
         product = Product.objects.select_for_update().get(pk=product_id)
@@ -340,7 +362,12 @@ def recalculate_cost_history_for_product(product_id: int, start_datetime: timezo
 
         logs = InventoryLog.objects.filter(product_id=product_id, timestamp__gte=start_datetime)
         consumptions = BatchItem.objects.filter(primitive_product_id=product_id, batch__creation_date__gte=start_datetime)
-        returns = ProductionReturn.objects.filter(product_id=product_id, return_date__gte=start_datetime)
+        
+        # Pre-fetch the related source_log for returns to avoid N+1 queries.
+        returns = ProductionReturn.objects.select_related('source_log').filter(
+            product_id=product_id, 
+            return_date__gte=start_datetime
+        )
         
         transactions = sorted(
             list(logs) + list(consumptions) + list(returns),
@@ -365,7 +392,17 @@ def recalculate_cost_history_for_product(product_id: int, start_datetime: timezo
             
             elif isinstance(trx, ProductionReturn):
                 return_qty = Decimal(str(trx.quantity))
-                running_value += return_qty * current_avg_cost
+                
+                # --- NEW LOGIC: Value returns at their original purchase price ---
+                cost_of_return = Decimal('0.0')
+                if trx.source_log and trx.source_log.unit_price is not None:
+                    # Use the unit price from the original inventory log.
+                    cost_of_return = trx.source_log.unit_price
+                else:
+                    # Fallback to the current MAC if the source log or its price is missing.
+                    cost_of_return = current_avg_cost
+                
+                running_value += return_qty * cost_of_return
                 running_qty += return_qty
             
             elif isinstance(trx, BatchItem):

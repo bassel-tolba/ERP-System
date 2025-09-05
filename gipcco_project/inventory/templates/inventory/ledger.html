@@ -11,6 +11,52 @@
 document.addEventListener('DOMContentLoaded', function() {
     // This script block ensures the print button and modal logic are initialized
     // even on a full page load, complementing the dynamic loading script in layout.html.
+
+    // --- NEW: Logic for mutually exclusive product dropdowns ---
+    const rawProductSelectEl = document.getElementById('product_id');
+    const finalProductSelectEl = document.getElementById('final_product_id');
+
+    if (rawProductSelectEl && finalProductSelectEl) {
+        const rawProductSelect = rawProductSelectEl.tomselect;
+        const finalProductSelect = finalProductSelectEl.tomselect;
+        const dependentFilters = ['company_id', 'qc_no', 'tags'].map(id => document.getElementById(id));
+
+        const toggleDependentFilters = (disabled) => {
+            dependentFilters.forEach(el => {
+                if (el) {
+                    el.disabled = disabled;
+                    if (el.tomselect) {
+                        disabled ? el.tomselect.disable() : el.tomselect.enable();
+                    }
+                }
+            });
+        };
+
+        if(rawProductSelect) {
+            rawProductSelect.on('change', function(value) {
+                if (value) {
+                    finalProductSelect.clear();
+                    finalProductSelect.disable();
+                    toggleDependentFilters(false);
+                } else {
+                    finalProductSelect.enable();
+                }
+            });
+        }
+        
+        if(finalProductSelect) {
+            finalProductSelect.on('change', function(value) {
+                if (value) {
+                    rawProductSelect.clear();
+                    rawProductSelect.disable();
+                    toggleDependentFilters(true);
+                } else {
+                    rawProductSelect.enable();
+                    toggleDependentFilters(false);
+                }
+            });
+        }
+    }
     
     // Logic for print button
     const filterForm = document.getElementById('ledgerFilterForm');

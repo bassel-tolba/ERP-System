@@ -14947,3 +14947,1081 @@ INFO 2025-09-03 20:30:56,877 django.server basehttp 20156 23716 "GET /purchase_o
 INFO 2025-09-03 20:30:57,578 django.server basehttp 20156 23716 "GET /opening_balances/ HTTP/1.1" 200 129242
 INFO 2025-09-03 20:34:40,928 django.utils.autoreload autoreload 20156 16012 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\helpers.py changed, reloading.
 INFO 2025-09-03 20:34:42,344 django.utils.autoreload autoreload 1896 24184 Watching for file changes with StatReloader
+INFO 2025-09-03 23:29:22,779 django.utils.autoreload autoreload 1896 24184 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-03 23:29:23,962 django.utils.autoreload autoreload 14024 13108 Watching for file changes with StatReloader
+INFO 2025-09-03 23:29:32,533 django.utils.autoreload autoreload 14024 13108 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-03 23:29:33,831 django.utils.autoreload autoreload 25028 17216 Watching for file changes with StatReloader
+INFO 2025-09-03 23:30:55,436 django.utils.autoreload autoreload 25028 17216 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\urls.py changed, reloading.
+INFO 2025-09-03 23:30:56,453 django.utils.autoreload autoreload 11604 16020 Watching for file changes with StatReloader
+INFO 2025-09-03 23:31:11,613 django.utils.autoreload autoreload 11604 16020 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\urls.py changed, reloading.
+INFO 2025-09-03 23:31:12,783 django.utils.autoreload autoreload 11516 11452 Watching for file changes with StatReloader
+INFO 2025-09-03 23:32:22,122 django.utils.autoreload autoreload 11516 11452 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\batches.py changed, reloading.
+INFO 2025-09-03 23:32:23,490 django.utils.autoreload autoreload 25176 30920 Watching for file changes with StatReloader
+INFO 2025-09-03 23:41:19,060 django.utils.autoreload autoreload 15728 22156 Watching for file changes with StatReloader
+INFO 2025-09-03 23:41:26,238 django.server basehttp 15728 30320 "GET / HTTP/1.1" 200 120637
+INFO 2025-09-03 23:41:26,741 django.server basehttp 15728 30320 "GET /static/img/favicon.ico HTTP/1.1" 304 0
+INFO 2025-09-03 23:41:27,653 django.server basehttp 15728 30320 "GET / HTTP/1.1" 200 21710
+INFO 2025-09-03 23:41:28,809 django.server basehttp 15728 30320 "GET / HTTP/1.1" 200 21710
+INFO 2025-09-03 23:41:30,154 django.server basehttp 15728 30320 "GET /batches/ HTTP/1.1" 200 31955
+ERROR 2025-09-03 23:41:33,225 django.request log 15728 30320 Internal Server Error: /batch/151/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 1035, in find_library
+    return parser.libraries[name]
+           ~~~~~~~~~~~~~~~~^^^^^^
+KeyError: 'mathfilters'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\batches.py", line 293, in view_batch
+    return render(request, 'inventory/partials/batch_view_content.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 196, in compile_nodelist
+    nodelist = parser.parse()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 1097, in load
+    lib = find_library(parser, name)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 1037, in find_library
+    raise TemplateSyntaxError(
+    ...<5 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: 'mathfilters' is not a registered tag library. Must be one of:
+admin_list
+admin_modify
+admin_urls
+cache
+i18n
+inventory_extras
+l10n
+log
+static
+tz
+ERROR 2025-09-03 23:41:33,249 django.server basehttp 15728 30320 "GET /batch/151/ HTTP/1.1" 500 223764
+ERROR 2025-09-03 23:41:33,953 django.request log 15728 30320 Internal Server Error: /batch/151/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 1035, in find_library
+    return parser.libraries[name]
+           ~~~~~~~~~~~~~~~~^^^^^^
+KeyError: 'mathfilters'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\batches.py", line 294, in view_batch
+    return render(request, 'inventory/batch_view.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 199, in render
+    template = context.template.engine.select_template(template_name)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 208, in select_template
+    return self.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 196, in compile_nodelist
+    nodelist = parser.parse()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 1097, in load
+    lib = find_library(parser, name)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 1037, in find_library
+    raise TemplateSyntaxError(
+    ...<5 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: 'mathfilters' is not a registered tag library. Must be one of:
+admin_list
+admin_modify
+admin_urls
+cache
+i18n
+inventory_extras
+l10n
+log
+static
+tz
+ERROR 2025-09-03 23:41:33,985 django.server basehttp 15728 30320 "GET /batch/151/ HTTP/1.1" 500 330207
+INFO 2025-09-03 23:44:29,373 django.utils.autoreload autoreload 28748 34752 Watching for file changes with StatReloader
+ERROR 2025-09-03 23:44:43,675 django.request log 28748 25116 Internal Server Error: /batch/151/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 1035, in find_library
+    return parser.libraries[name]
+           ~~~~~~~~~~~~~~~~^^^^^^
+KeyError: 'mathfilters'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\batches.py", line 294, in view_batch
+    return render(request, 'inventory/batch_view.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 199, in render
+    template = context.template.engine.select_template(template_name)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 208, in select_template
+    return self.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 196, in compile_nodelist
+    nodelist = parser.parse()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 1097, in load
+    lib = find_library(parser, name)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 1037, in find_library
+    raise TemplateSyntaxError(
+    ...<5 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: 'mathfilters' is not a registered tag library. Must be one of:
+admin_list
+admin_modify
+admin_urls
+cache
+i18n
+inventory_extras
+l10n
+log
+static
+tz
+ERROR 2025-09-03 23:44:43,694 django.server basehttp 28748 25116 "GET /batch/151/ HTTP/1.1" 500 330113
+ERROR 2025-09-03 23:44:51,029 django.request log 28748 25116 Internal Server Error: /batch/151/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 1035, in find_library
+    return parser.libraries[name]
+           ~~~~~~~~~~~~~~~~^^^^^^
+KeyError: 'mathfilters'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\batches.py", line 294, in view_batch
+    return render(request, 'inventory/batch_view.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 199, in render
+    template = context.template.engine.select_template(template_name)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 208, in select_template
+    return self.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 196, in compile_nodelist
+    nodelist = parser.parse()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 1097, in load
+    lib = find_library(parser, name)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 1037, in find_library
+    raise TemplateSyntaxError(
+    ...<5 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: 'mathfilters' is not a registered tag library. Must be one of:
+admin_list
+admin_modify
+admin_urls
+cache
+i18n
+inventory_extras
+l10n
+log
+static
+tz
+ERROR 2025-09-03 23:44:51,053 django.server basehttp 28748 25116 "GET /batch/151/ HTTP/1.1" 500 330113
+INFO 2025-09-03 23:45:12,360 django.server basehttp 28748 25116 "GET /batch/151/ HTTP/1.1" 200 145215
+INFO 2025-09-03 23:45:20,156 django.server basehttp 28748 25116 "GET /batch/151/receive/250511/ HTTP/1.1" 200 105458
+INFO 2025-09-03 23:45:31,352 django.server basehttp 28748 25116 "GET /batch/151/receive/250511/ HTTP/1.1" 200 105458
+INFO 2025-09-03 23:47:26,450 django.server basehttp 28748 25116 "GET /batch/151/receive/250511/ HTTP/1.1" 200 105458
+WARNING 2025-09-03 23:47:47,153 django.request log 28748 25116 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-03 23:47:47,155 django.server basehttp 28748 25116 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 15727
+WARNING 2025-09-03 23:47:47,498 django.server basehttp 28748 25116 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-03 23:49:28,344 django.utils.autoreload autoreload 28748 34752 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\finished_products.py changed, reloading.
+INFO 2025-09-03 23:49:29,296 django.utils.autoreload autoreload 22892 33408 Watching for file changes with StatReloader
+INFO 2025-09-03 23:49:32,963 django.utils.autoreload autoreload 22892 33408 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\finished_products.py changed, reloading.
+INFO 2025-09-03 23:49:34,069 django.utils.autoreload autoreload 15364 16232 Watching for file changes with StatReloader
+INFO 2025-09-03 23:54:35,043 django.server basehttp 15364 31424 "GET /batch/151/receive/250511/ HTTP/1.1" 200 107948
+INFO 2025-09-03 23:55:33,176 django.server basehttp 15364 31424 "POST /batch/151/receive/250511/ HTTP/1.1" 302 0
+INFO 2025-09-03 23:55:33,754 django.server basehttp 15364 31424 "GET /batch/151/ HTTP/1.1" 200 148245
+INFO 2025-09-03 23:55:39,347 django.server basehttp 15364 31424 "GET /finished_product/1/ HTTP/1.1" 200 4195
+INFO 2025-09-03 23:55:58,441 django.server basehttp 15364 31424 "GET /batch/151/ HTTP/1.1" 200 46340
+INFO 2025-09-03 23:56:04,574 django.server basehttp 15364 31424 "GET /finished_product/1/ HTTP/1.1" 200 4195
+INFO 2025-09-03 23:56:07,092 django.server basehttp 15364 31424 "GET /finished_products/ HTTP/1.1" 200 2017
+INFO 2025-09-03 23:56:07,992 django.server basehttp 15364 31424 "GET /finished_product/1/ HTTP/1.1" 200 4195
+INFO 2025-09-03 23:56:25,549 django.server basehttp 15364 31424 "GET /batch/151/ HTTP/1.1" 200 46340
+INFO 2025-09-03 23:56:50,290 django.server basehttp 15364 31424 "GET /batch/151/receive/250512/ HTTP/1.1" 200 6599
+INFO 2025-09-03 23:57:04,213 django.server basehttp 15364 31424 "GET /batch/151/ HTTP/1.1" 200 46340
+INFO 2025-09-03 23:57:09,176 django.server basehttp 15364 31424 "GET /batch/151/ HTTP/1.1" 200 46340
+INFO 2025-09-03 23:57:10,992 django.server basehttp 15364 31424 "GET /batch/151/ HTTP/1.1" 200 46340
+INFO 2025-09-03 23:57:11,157 django.server basehttp 15364 31424 "GET /batches/ HTTP/1.1" 200 31955
+INFO 2025-09-03 23:57:12,293 django.server basehttp 15364 31424 "GET /batches/ HTTP/1.1" 200 31955
+INFO 2025-09-03 23:57:13,203 django.server basehttp 15364 31424 "GET /ledger/ HTTP/1.1" 200 13451
+INFO 2025-09-03 23:57:19,043 django.server basehttp 15364 31424 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 289873
+INFO 2025-09-03 23:57:34,277 django.server basehttp 15364 31424 "GET /ledger/print/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 51147
+INFO 2025-09-04 00:01:36,927 django.server basehttp 15364 31424 "GET /opening_balances/ HTTP/1.1" 200 129242
+INFO 2025-09-04 00:01:38,433 django.server basehttp 15364 31424 "GET /visuals/ HTTP/1.1" 200 5513
+INFO 2025-09-04 00:01:40,192 django.server basehttp 15364 31424 "GET /visuals/?product_id=18&start_date=2025-09-01&end_date=2025-09-03 HTTP/1.1" 200 108550
+INFO 2025-09-04 00:01:42,365 django.server basehttp 15364 31424 "GET /visuals/?product_id=18&start_date=2025-09-01&end_date=2025-09-03 HTTP/1.1" 200 108550
+INFO 2025-09-04 00:01:46,190 django.server basehttp 15364 31424 "GET /visuals/?product_id=18&start_date=2025-01-01&end_date=2025-09-03 HTTP/1.1" 200 113797
+WARNING 2025-09-04 00:01:49,276 django.request log 15364 31424 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-04 00:01:49,277 django.server basehttp 15364 31424 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 15727
+WARNING 2025-09-04 00:01:49,669 django.server basehttp 15364 31424 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-04 00:23:50,644 django.utils.autoreload autoreload 15364 16232 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py changed, reloading.
+INFO 2025-09-04 00:23:52,477 django.utils.autoreload autoreload 25512 22860 Watching for file changes with StatReloader
+ERROR 2025-09-04 00:24:47,693 django.request log 25512 11480 Internal Server Error: /visuals/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py", line 232, in visuals
+    total_in_qty = receipts.aggregate(total=Coalesce(Sum('quantity'), Decimal('0.0')))['total']
+                   ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 588, in aggregate
+    return self.query.chain().get_aggregation(self.db, kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\query.py", line 626, in get_aggregation
+    result = compiler.execute_sql(SINGLE)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1610, in execute_sql
+    sql, params = self.as_sql()
+                  ~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 766, in as_sql
+    extra_select, order_by, group_by = self.pre_sql_setup(
+                                       ~~~~~~~~~~~~~~~~~~^
+        with_col_aliases=with_col_aliases or bool(combinator),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 85, in pre_sql_setup
+    self.setup_query(with_col_aliases=with_col_aliases)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 74, in setup_query
+    self.select, self.klass_info, self.annotation_col_map = self.get_select(
+                                                            ~~~~~~~~~~~~~~~^
+        with_col_aliases=with_col_aliases,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 329, in get_select
+    sql, params = col.select_format(self, sql, params)
+                  ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 498, in select_format
+    if hasattr(self.output_field, "select_format"):
+               ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\utils\functional.py", line 47, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+                                         ~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 327, in output_field
+    output_field = self._resolve_output_field()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 365, in _resolve_output_field
+    raise FieldError(
+    ...<6 lines>...
+    )
+django.core.exceptions.FieldError: Expression contains mixed types: FloatField, DecimalField. You must set output_field.
+ERROR 2025-09-04 00:24:47,870 django.server basehttp 25512 11480 "GET /visuals/?product_id=18&start_date=2025-01-01&end_date=2025-09-03 HTTP/1.1" 500 130119
+WARNING 2025-09-04 00:24:48,191 django.request log 25512 11480 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-04 00:24:48,218 django.server basehttp 25512 11480 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 15727
+INFO 2025-09-04 00:27:30,353 django.utils.autoreload autoreload 25512 22860 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py changed, reloading.
+INFO 2025-09-04 00:27:31,770 django.utils.autoreload autoreload 32024 15252 Watching for file changes with StatReloader
+INFO 2025-09-04 00:27:33,376 django.server basehttp 32024 20336 "GET /visuals/?product_id=18&start_date=2025-01-01&end_date=2025-09-03 HTTP/1.1" 200 116396
+WARNING 2025-09-04 00:27:33,483 django.request log 32024 20336 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-04 00:27:33,523 django.server basehttp 32024 20336 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 15727
+WARNING 2025-09-04 00:27:33,613 django.server basehttp 32024 20336 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-04 00:28:30,996 django.server basehttp 32024 17644 "GET /visuals/?product_id=17&start_date=2025-01-01&end_date=2025-09-03 HTTP/1.1" 200 113011
+WARNING 2025-09-04 00:37:03,722 django.request log 32024 16972 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-04 00:37:03,745 django.server basehttp 32024 16972 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 15727
+WARNING 2025-09-04 00:37:03,997 django.server basehttp 32024 16972 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-04 00:37:12,692 django.server basehttp 32024 28776 "GET /visuals/?product_id=17&start_date=2025-01-01&end_date=2025-09-03 HTTP/1.1" 200 113011
+WARNING 2025-09-04 00:37:12,798 django.request log 32024 28776 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-04 00:37:12,825 django.server basehttp 32024 28776 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 15727
+WARNING 2025-09-04 00:37:13,026 django.server basehttp 32024 28776 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-04 00:41:46,473 django.server basehttp 32024 25156 "GET /visuals/?product_id=17&start_date=2025-01-01&end_date=2025-09-03 HTTP/1.1" 200 11313
+INFO 2025-09-04 00:41:49,670 django.server basehttp 32024 25156 "GET /analysis/ HTTP/1.1" 200 28638
+INFO 2025-09-04 00:41:53,547 django.server basehttp 32024 25156 "GET /ledger/?product_id=18&start_date=2025-09-01&end_date=2025-09-03 HTTP/1.1" 200 13469
+INFO 2025-09-04 00:41:59,486 django.server basehttp 32024 25156 "GET /analysis/ HTTP/1.1" 200 28638
+INFO 2025-09-04 00:42:00,794 django.server basehttp 32024 25156 "GET /analysis/ HTTP/1.1" 200 28638
+INFO 2025-09-04 00:42:02,487 django.server basehttp 32024 25156 "GET /analysis/ HTTP/1.1" 200 28638
+INFO 2025-09-04 01:05:20,025 django.utils.autoreload autoreload 32024 15252 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py changed, reloading.
+INFO 2025-09-04 01:05:21,311 django.utils.autoreload autoreload 8828 21812 Watching for file changes with StatReloader
+INFO 2025-09-04 01:05:22,947 django.utils.autoreload autoreload 8828 21812 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py changed, reloading.
+INFO 2025-09-04 01:05:24,435 django.utils.autoreload autoreload 10744 19132 Watching for file changes with StatReloader
+INFO 2025-09-04 01:06:33,873 django.server basehttp 10744 10136 "POST /analysis/ HTTP/1.1" 200 131352
+INFO 2025-09-04 01:06:42,649 django.server basehttp 10744 10136 "POST /analysis/ HTTP/1.1" 200 131352
+INFO 2025-09-04 01:07:05,700 django.server basehttp 10744 10136 "POST /analysis/ HTTP/1.1" 200 131398
+INFO 2025-09-04 01:07:20,532 django.server basehttp 10744 29616 "GET /visuals/ HTTP/1.1" 200 8447
+INFO 2025-09-04 01:07:21,066 django.server basehttp 10744 10136 "GET /analysis/ HTTP/1.1" 200 28638
+INFO 2025-09-04 01:07:23,647 django.server basehttp 10744 10136 "GET /analysis/ HTTP/1.1" 200 28638
+INFO 2025-09-04 01:07:23,877 django.server basehttp 10744 29616 "GET /visuals/ HTTP/1.1" 200 8447
+INFO 2025-09-04 01:07:25,093 django.server basehttp 10744 10136 "GET /analysis/ HTTP/1.1" 200 28638
+INFO 2025-09-04 01:07:26,617 django.server basehttp 10744 10136 "GET /analysis/ HTTP/1.1" 200 28638
+INFO 2025-09-04 01:07:29,528 django.server basehttp 10744 10136 "GET /analysis/ HTTP/1.1" 200 131398
+INFO 2025-09-04 01:07:30,833 django.server basehttp 10744 10136 "GET /analysis HTTP/1.1" 301 0
+INFO 2025-09-04 01:07:32,349 django.server basehttp 10744 29616 "GET /analysis/ HTTP/1.1" 200 131398
+INFO 2025-09-04 01:07:35,209 django.server basehttp 10744 19176 "GET /batches/ HTTP/1.1" 200 31955
+INFO 2025-09-04 01:07:35,596 django.server basehttp 10744 29616 "GET /analysis/ HTTP/1.1" 200 28638
+INFO 2025-09-04 01:07:37,152 django.server basehttp 10744 29616 "GET /analysis/ HTTP/1.1" 200 28638
+INFO 2025-09-04 01:07:37,163 django.server basehttp 10744 19176 "GET /batches/ HTTP/1.1" 200 31955
+INFO 2025-09-04 01:07:38,554 django.server basehttp 10744 29616 "GET /analysis/ HTTP/1.1" 200 28638
+INFO 2025-09-04 01:07:40,165 django.server basehttp 10744 19176 "GET /analysis/ HTTP/1.1" 200 28638
+INFO 2025-09-04 01:07:42,277 django.server basehttp 10744 19176 "POST /analysis/ HTTP/1.1" 200 131398
+INFO 2025-09-04 01:07:47,395 django.server basehttp 10744 19176 "GET /analysis/ HTTP/1.1" 200 131398
+INFO 2025-09-04 01:07:47,579 django.server basehttp 10744 19176 "GET /static/css/google-fonts.css HTTP/1.1" 200 12053
+INFO 2025-09-04 01:07:47,595 django.server basehttp 10744 19176 "GET /static/js/bootstrap.bundle.min.js HTTP/1.1" 200 80663
+INFO 2025-09-04 01:07:47,598 django.server basehttp 10744 29616 "GET /static/css/bootstrap.css HTTP/1.1" 200 287759
+INFO 2025-09-04 01:07:47,625 django.server basehttp 10744 22668 "GET /static/css/style.css HTTP/1.1" 200 36176
+INFO 2025-09-04 01:07:47,631 django.server basehttp 10744 19176 "GET /static/js/flatpickr.min.js HTTP/1.1" 200 50679
+INFO 2025-09-04 01:07:47,670 django.server basehttp 10744 29616 "GET /static/js/tom-select.complete.min.js HTTP/1.1" 200 50720
+INFO 2025-09-04 01:07:47,674 django.server basehttp 10744 6116 "GET /static/css/flatpickr.min.css HTTP/1.1" 200 16166
+INFO 2025-09-04 01:07:47,687 django.server basehttp 10744 31464 "GET /static/css/bootstrap-icons.min.css HTTP/1.1" 200 85887
+INFO 2025-09-04 01:07:47,696 django.server basehttp 10744 22668 "GET /static/js/flatpickr.l10n.ar.js HTTP/1.1" 200 1928
+INFO 2025-09-04 01:07:47,745 django.server basehttp 10744 15636 "GET /static/css/tom-select.bootstrap5.min.css HTTP/1.1" 200 15345
+INFO 2025-09-04 01:07:47,786 django.server basehttp 10744 15636 "GET /static/webfonts/bootstrap-icons.woff2?dd67030699838ea613ee6dbda90effa6 HTTP/1.1" 200 130396
+INFO 2025-09-04 01:07:47,787 django.server basehttp 10744 22668 "GET /static/webfonts/28.woff2 HTTP/1.1" 200 48256
+INFO 2025-09-04 01:07:47,787 django.server basehttp 10744 31464 "GET /static/webfonts/14.woff2 HTTP/1.1" 200 48256
+INFO 2025-09-04 01:07:47,787 django.server basehttp 10744 29616 "GET /static/webfonts/21.woff2 HTTP/1.1" 200 48256
+INFO 2025-09-04 01:07:47,789 django.server basehttp 10744 6116 "GET /static/webfonts/35.woff2 HTTP/1.1" 200 48256
+INFO 2025-09-04 01:07:48,029 django.server basehttp 10744 6116 "GET /static/img/favicon.ico HTTP/1.1" 200 41001
+INFO 2025-09-04 01:07:49,875 django.server basehttp 10744 6116 "GET / HTTP/1.1" 200 21710
+INFO 2025-09-04 01:07:52,598 django.server basehttp 10744 6116 "GET / HTTP/1.1" 200 124471
+INFO 2025-09-04 01:07:52,651 django.server basehttp 10744 6116 "GET /static/css/google-fonts.css HTTP/1.1" 200 12053
+INFO 2025-09-04 01:07:52,659 django.server basehttp 10744 31464 "GET /static/css/tom-select.bootstrap5.min.css HTTP/1.1" 200 15345
+INFO 2025-09-04 01:07:52,659 django.server basehttp 10744 29616 "GET /static/css/flatpickr.min.css HTTP/1.1" 200 16166
+INFO 2025-09-04 01:07:52,659 django.server basehttp 10744 19176 "GET /static/css/style.css HTTP/1.1" 200 36176
+INFO 2025-09-04 01:07:52,660 django.server basehttp 10744 6116 "GET /static/js/bootstrap.bundle.min.js HTTP/1.1" 200 80663
+INFO 2025-09-04 01:07:52,660 django.server basehttp 10744 22668 "GET /static/css/bootstrap-icons.min.css HTTP/1.1" 200 85887
+INFO 2025-09-04 01:07:52,661 django.server basehttp 10744 15636 "GET /static/css/bootstrap.css HTTP/1.1" 200 287759
+INFO 2025-09-04 01:07:52,666 django.server basehttp 10744 31464 "GET /static/js/flatpickr.l10n.ar.js HTTP/1.1" 200 1928
+INFO 2025-09-04 01:07:52,667 django.server basehttp 10744 19176 "GET /static/js/flatpickr.min.js HTTP/1.1" 200 50679
+INFO 2025-09-04 01:07:52,670 django.server basehttp 10744 22668 "GET /static/js/tom-select.complete.min.js HTTP/1.1" 200 50720
+INFO 2025-09-04 01:07:52,912 django.server basehttp 10744 6116 "GET /static/webfonts/21.woff2 HTTP/1.1" 200 48256
+INFO 2025-09-04 01:07:52,912 django.server basehttp 10744 15636 "GET /static/webfonts/28.woff2 HTTP/1.1" 200 48256
+INFO 2025-09-04 01:07:52,912 django.server basehttp 10744 31464 "GET /static/webfonts/35.woff2 HTTP/1.1" 200 48256
+INFO 2025-09-04 01:07:52,913 django.server basehttp 10744 22668 "GET /static/webfonts/14.woff2 HTTP/1.1" 200 48256
+INFO 2025-09-04 01:07:52,913 django.server basehttp 10744 19176 "GET /static/webfonts/bootstrap-icons.woff2?dd67030699838ea613ee6dbda90effa6 HTTP/1.1" 200 130396
+INFO 2025-09-04 01:07:53,278 django.server basehttp 10744 19176 "GET /static/img/favicon.ico HTTP/1.1" 200 41001
+INFO 2025-09-04 01:07:54,393 django.server basehttp 10744 19176 "GET /records/ HTTP/1.1" 200 424896
+INFO 2025-09-04 01:07:55,393 django.server basehttp 10744 19176 "GET /records/ HTTP/1.1" 200 424896
+INFO 2025-09-04 01:07:56,269 django.server basehttp 10744 19176 "GET /visuals/ HTTP/1.1" 200 8447
+INFO 2025-09-04 01:07:58,834 django.server basehttp 10744 19176 "GET /static/webfonts/07.woff2 HTTP/1.1" 200 48256
+ERROR 2025-09-04 01:08:00,832 django.request log 10744 19176 Internal Server Error: /visuals/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py", line 249, in visuals
+    total_in_value = receipts.annotate(line_total=F('quantity') * F('unit_price')).aggregate(total=Coalesce(Sum('line_total'), Decimal('0.0')))['total']
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 588, in aggregate
+    return self.query.chain().get_aggregation(self.db, kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\query.py", line 626, in get_aggregation
+    result = compiler.execute_sql(SINGLE)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1610, in execute_sql
+    sql, params = self.as_sql()
+                  ~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 766, in as_sql
+    extra_select, order_by, group_by = self.pre_sql_setup(
+                                       ~~~~~~~~~~~~~~~~~~^
+        with_col_aliases=with_col_aliases or bool(combinator),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 85, in pre_sql_setup
+    self.setup_query(with_col_aliases=with_col_aliases)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 74, in setup_query
+    self.select, self.klass_info, self.annotation_col_map = self.get_select(
+                                                            ~~~~~~~~~~~~~~~^
+        with_col_aliases=with_col_aliases,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 329, in get_select
+    sql, params = col.select_format(self, sql, params)
+                  ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 498, in select_format
+    if hasattr(self.output_field, "select_format"):
+               ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\utils\functional.py", line 47, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+                                         ~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 327, in output_field
+    output_field = self._resolve_output_field()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 360, in _resolve_output_field
+    source for source in self.get_source_fields() if source is not None
+                         ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 469, in get_source_fields
+    return [e._output_field_or_none for e in self.get_source_expressions()]
+            ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 341, in _output_field_or_none
+    return self.output_field
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\utils\functional.py", line 47, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+                                         ~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 327, in output_field
+    output_field = self._resolve_output_field()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 360, in _resolve_output_field
+    source for source in self.get_source_fields() if source is not None
+                         ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\aggregates.py", line 49, in get_source_fields
+    return [e._output_field_or_none for e in super().get_source_expressions()]
+            ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 341, in _output_field_or_none
+    return self.output_field
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\utils\functional.py", line 47, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+                                         ~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 327, in output_field
+    output_field = self._resolve_output_field()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 750, in _resolve_output_field
+    raise FieldError(
+    ...<4 lines>...
+    )
+django.core.exceptions.FieldError: Cannot infer type of '*' expression involving these types: FloatField, DecimalField. You must set output_field.
+ERROR 2025-09-04 01:08:00,857 django.server basehttp 10744 19176 "GET /visuals/?product_id=18&company_id=&qc_no=&start_date=2025-09-01&end_date=2025-09-03 HTTP/1.1" 500 169576
+WARNING 2025-09-04 01:08:01,058 django.request log 10744 19176 Not Found: /favicon.ico
+WARNING 2025-09-04 01:08:01,060 django.server basehttp 10744 19176 "GET /favicon.ico HTTP/1.1" 404 15616
+ERROR 2025-09-04 01:08:32,116 django.request log 10744 19176 Internal Server Error: /visuals/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py", line 249, in visuals
+    total_in_value = receipts.annotate(line_total=F('quantity') * F('unit_price')).aggregate(total=Coalesce(Sum('line_total'), Decimal('0.0')))['total']
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 588, in aggregate
+    return self.query.chain().get_aggregation(self.db, kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\query.py", line 626, in get_aggregation
+    result = compiler.execute_sql(SINGLE)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1610, in execute_sql
+    sql, params = self.as_sql()
+                  ~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 766, in as_sql
+    extra_select, order_by, group_by = self.pre_sql_setup(
+                                       ~~~~~~~~~~~~~~~~~~^
+        with_col_aliases=with_col_aliases or bool(combinator),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 85, in pre_sql_setup
+    self.setup_query(with_col_aliases=with_col_aliases)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 74, in setup_query
+    self.select, self.klass_info, self.annotation_col_map = self.get_select(
+                                                            ~~~~~~~~~~~~~~~^
+        with_col_aliases=with_col_aliases,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 329, in get_select
+    sql, params = col.select_format(self, sql, params)
+                  ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 498, in select_format
+    if hasattr(self.output_field, "select_format"):
+               ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\utils\functional.py", line 47, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+                                         ~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 327, in output_field
+    output_field = self._resolve_output_field()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 360, in _resolve_output_field
+    source for source in self.get_source_fields() if source is not None
+                         ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 469, in get_source_fields
+    return [e._output_field_or_none for e in self.get_source_expressions()]
+            ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 341, in _output_field_or_none
+    return self.output_field
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\utils\functional.py", line 47, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+                                         ~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 327, in output_field
+    output_field = self._resolve_output_field()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 360, in _resolve_output_field
+    source for source in self.get_source_fields() if source is not None
+                         ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\aggregates.py", line 49, in get_source_fields
+    return [e._output_field_or_none for e in super().get_source_expressions()]
+            ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 341, in _output_field_or_none
+    return self.output_field
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\utils\functional.py", line 47, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+                                         ~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 327, in output_field
+    output_field = self._resolve_output_field()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 750, in _resolve_output_field
+    raise FieldError(
+    ...<4 lines>...
+    )
+django.core.exceptions.FieldError: Cannot infer type of '*' expression involving these types: FloatField, DecimalField. You must set output_field.
+ERROR 2025-09-04 01:08:32,132 django.server basehttp 10744 19176 "GET /visuals/?product_id=18&company_id=&qc_no=&start_date=2025-09-01&end_date=2025-09-03 HTTP/1.1" 500 169713
+INFO 2025-09-04 01:10:13,098 django.utils.autoreload autoreload 10744 19132 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py changed, reloading.
+INFO 2025-09-04 01:10:14,247 django.utils.autoreload autoreload 29468 29484 Watching for file changes with StatReloader
+ERROR 2025-09-04 01:10:18,693 django.request log 29468 24408 Internal Server Error: /visuals/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py", line 280, in visuals
+    receipt_count=Count('id'),
+                  ^^^^^
+NameError: name 'Count' is not defined. Did you mean: 'round'?
+ERROR 2025-09-04 01:10:18,696 django.server basehttp 29468 24408 "GET /visuals/?product_id=18&company_id=&qc_no=&start_date=2025-09-01&end_date=2025-09-03 HTTP/1.1" 500 75272
+INFO 2025-09-04 01:11:57,312 django.utils.autoreload autoreload 29468 29484 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py changed, reloading.
+INFO 2025-09-04 01:11:58,794 django.utils.autoreload autoreload 28440 15488 Watching for file changes with StatReloader
+INFO 2025-09-04 01:12:01,715 django.server basehttp 28440 24164 "GET /visuals/?product_id=18&company_id=&qc_no=&start_date=2025-09-01&end_date=2025-09-03 HTTP/1.1" 200 114864
+INFO 2025-09-04 01:12:04,258 django.server basehttp 28440 24164 "GET /visuals/?product_id=18&company_id=&qc_no=&start_date=2025-09-01&end_date=2025-09-03 HTTP/1.1" 200 114864
+INFO 2025-09-04 01:12:19,089 django.server basehttp 28440 24164 "GET /visuals/?product_id=17&company_id=&qc_no=&start_date=2025-01-01&end_date=2025-09-03 HTTP/1.1" 200 119333
+INFO 2025-09-04 01:14:33,019 django.server basehttp 28440 24164 "GET /visuals/?product_id=1&company_id=&qc_no=&start_date=2025-01-01&end_date=2025-09-03 HTTP/1.1" 200 124381
+INFO 2025-09-04 01:15:48,946 django.server basehttp 28440 24164 "GET /visuals/?product_id=45&company_id=&qc_no=&start_date=2025-01-01&end_date=2025-09-03 HTTP/1.1" 200 117658
+INFO 2025-09-04 08:05:12,047 django.utils.autoreload autoreload 9100 9844 Watching for file changes with StatReloader
+INFO 2025-09-04 08:05:23,131 django.server basehttp 9100 5728 "GET /visuals/?product_id=45&company_id=&qc_no=&start_date=2025-01-01&end_date=2025-09-03 HTTP/1.1" 200 117658
+INFO 2025-09-04 08:05:23,273 django.server basehttp 9100 5728 "GET /static/css/google-fonts.css HTTP/1.1" 200 12053
+INFO 2025-09-04 08:05:23,275 django.server basehttp 9100 2828 "GET /static/css/bootstrap.css HTTP/1.1" 200 287759
+INFO 2025-09-04 08:05:23,283 django.server basehttp 9100 3024 "GET /static/css/bootstrap-icons.min.css HTTP/1.1" 200 85887
+INFO 2025-09-04 08:05:23,297 django.server basehttp 9100 3024 "GET /static/css/flatpickr.min.css HTTP/1.1" 200 16166
+INFO 2025-09-04 08:05:23,300 django.server basehttp 9100 2828 "GET /static/css/tom-select.bootstrap5.min.css HTTP/1.1" 200 15345
+INFO 2025-09-04 08:05:23,318 django.server basehttp 9100 2828 "GET /static/css/style.css HTTP/1.1" 200 36176
+INFO 2025-09-04 08:05:23,332 django.server basehttp 9100 2828 "GET /static/js/bootstrap.bundle.min.js HTTP/1.1" 200 80663
+INFO 2025-09-04 08:05:23,338 django.server basehttp 9100 2828 "GET /static/js/flatpickr.min.js HTTP/1.1" 200 50679
+INFO 2025-09-04 08:05:23,344 django.server basehttp 9100 2828 "GET /static/js/flatpickr.l10n.ar.js HTTP/1.1" 200 1928
+INFO 2025-09-04 08:05:23,351 django.server basehttp 9100 2828 "GET /static/js/tom-select.complete.min.js HTTP/1.1" 200 50720
+INFO 2025-09-04 08:05:26,206 django.server basehttp 9100 3024 "GET /static/webfonts/28.woff2 HTTP/1.1" 200 48256
+INFO 2025-09-04 08:05:26,206 django.server basehttp 9100 2828 "GET /static/webfonts/bootstrap-icons.woff2?dd67030699838ea613ee6dbda90effa6 HTTP/1.1" 200 130396
+INFO 2025-09-04 08:05:26,207 django.server basehttp 9100 5728 "GET /static/webfonts/21.woff2 HTTP/1.1" 200 48256
+INFO 2025-09-04 08:05:26,322 django.server basehttp 9100 2828 "GET /static/webfonts/35.woff2 HTTP/1.1" 200 48256
+INFO 2025-09-04 08:05:26,323 django.server basehttp 9100 5728 "GET /static/webfonts/14.woff2 HTTP/1.1" 200 48256
+INFO 2025-09-04 08:05:26,501 django.server basehttp 9100 5728 "GET /static/img/favicon.ico HTTP/1.1" 200 41001
+INFO 2025-09-04 08:05:57,438 django.server basehttp 9100 11328 "GET /static/webfonts/07.woff2 HTTP/1.1" 200 48256
+INFO 2025-09-04 08:06:11,769 django.server basehttp 9100 11328 "GET /visuals/?product_id=45&company_id=&qc_no=&start_date=2025-01-01&end_date=2025-09-03 HTTP/1.1" 200 117658
+INFO 2025-09-04 08:06:23,159 django.server basehttp 9100 11328 "GET /visuals/?product_id=45&company_id=&qc_no=&start_date=2024-01-01&end_date=2025-09-03 HTTP/1.1" 200 117652
+INFO 2025-09-04 08:06:32,320 django.server basehttp 9100 11328 "GET /ledger/print/?product_id=18&company_id=&qc_no=&start_date=2025-01-01&end_date= HTTP/1.1" 200 48627
+INFO 2025-09-04 08:06:36,485 django.server basehttp 9100 11328 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 291223
+INFO 2025-09-04 08:06:39,470 django.server basehttp 9100 11328 "GET /ledger/print/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 51147
+INFO 2025-09-04 08:06:39,943 django.server basehttp 9100 11328 "GET /visuals/?product_id=45&company_id=&qc_no=&start_date=2025-01-01&end_date=2025-09-03 HTTP/1.1" 200 117658
+INFO 2025-09-04 08:07:21,294 django.server basehttp 9100 11328 "GET /visuals/?product_id=45&company_id=&tags=9&qc_no=&start_date=2025-01-01&end_date=2025-09-03 HTTP/1.1" 200 114871
+INFO 2025-09-04 08:07:32,185 django.server basehttp 9100 11328 "GET /visuals/?product_id=7&company_id=&qc_no=&start_date=2025-01-01&end_date=2025-09-03 HTTP/1.1" 200 124451
+INFO 2025-09-04 08:10:59,043 django.server basehttp 9100 11328 "GET /visuals/?product_id=7&company_id=&qc_no=&start_date=2025-01-01&end_date=2025-09-03 HTTP/1.1" 200 21681
+WARNING 2025-09-04 08:59:29,542 django.request log 9100 7896 Not Found: /favicon.ico
+WARNING 2025-09-04 08:59:29,543 django.server basehttp 9100 7896 "GET /favicon.ico HTTP/1.1" 404 15616
+INFO 2025-09-04 09:18:57,582 django.server basehttp 9100 10920 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 181501
+INFO 2025-09-04 09:18:59,397 django.server basehttp 9100 10920 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 181501
+INFO 2025-09-04 09:19:00,232 django.server basehttp 9100 10920 "GET /ledger/ HTTP/1.1" 200 13451
+INFO 2025-09-04 09:19:18,136 django.server basehttp 9100 10920 "GET /ledger/?product_id=45&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 155428
+INFO 2025-09-04 09:19:24,351 django.server basehttp 9100 10920 "GET /ledger/?product_id=45&company_id=&qc_no=&start_date=2025-01-01&end_date= HTTP/1.1" 200 155488
+INFO 2025-09-04 09:41:32,388 django.server basehttp 9100 1788 "GET /visuals/?product_id=7&company_id=&qc_no=&start_date=2025-01-01&end_date=2025-09-03 HTTP/1.1" 200 21681
+INFO 2025-09-04 09:42:51,357 django.utils.autoreload autoreload 9100 9844 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-04 09:42:52,236 django.utils.autoreload autoreload 12944 7204 Watching for file changes with StatReloader
+INFO 2025-09-04 12:16:04,758 django.server basehttp 12944 10912 "GET /visuals/?product_id=7&company_id=&qc_no=&start_date=2025-01-01&end_date=2025-09-03 HTTP/1.1" 200 124451
+INFO 2025-09-04 17:41:30,146 django.server basehttp 12944 10836 "GET /visuals/?product_id=5&company_id=&qc_no=&start_date=2025-01-01&end_date=2025-09-03 HTTP/1.1" 200 121628
+INFO 2025-09-04 17:43:43,748 django.server basehttp 12944 10836 "GET /visuals/?product_id=49&company_id=&qc_no=&start_date=2025-01-01&end_date=2025-09-03 HTTP/1.1" 200 116879
+INFO 2025-09-04 17:43:58,316 django.server basehttp 12944 10836 "GET /visuals/?product_id=45&company_id=&qc_no=&start_date=2025-01-01&end_date=2025-09-03 HTTP/1.1" 200 117658
+INFO 2025-09-04 17:44:07,496 django.server basehttp 12944 10836 "GET /visuals/?product_id=45&company_id=&qc_no=&start_date=2025-01-01&end_date=2025-09-03 HTTP/1.1" 200 14888
+INFO 2025-09-04 17:44:11,537 django.server basehttp 12944 10836 "GET /visuals/?product_id=45&company_id=&qc_no=&start_date=2025-01-01&end_date=2025-09-03 HTTP/1.1" 200 117658
+INFO 2025-09-04 17:44:16,229 django.server basehttp 12944 10836 "GET /visuals/?product_id=45&company_id=&qc_no=&start_date=2025-01-01&end_date=2025-09-03 HTTP/1.1" 200 14888
+INFO 2025-09-04 17:44:17,076 django.server basehttp 12944 10836 "GET /visuals/?product_id=45&company_id=&qc_no=&start_date=2025-01-01&end_date=2025-09-03 HTTP/1.1" 200 14888
+INFO 2025-09-04 17:44:17,907 django.server basehttp 12944 10836 "GET /ledger/ HTTP/1.1" 200 13451
+INFO 2025-09-04 17:44:22,557 django.server basehttp 12944 10836 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 291223
+INFO 2025-09-04 17:44:25,127 django.server basehttp 12944 10836 "GET /ledger/print/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 51147
+WARNING 2025-09-04 17:45:48,375 django.request log 12944 10836 Not Found: /favicon.ico
+WARNING 2025-09-04 17:45:48,375 django.server basehttp 12944 10836 "GET /favicon.ico HTTP/1.1" 404 15616
+INFO 2025-09-04 17:45:56,158 django.server basehttp 12944 10836 "GET /ledger/print/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 51147
+INFO 2025-09-04 18:59:22,013 django.server basehttp 12944 10772 "GET /static/img/spring.png HTTP/1.1" 200 1238993
+INFO 2025-09-04 18:59:22,540 django.server basehttp 12944 10772 "GET /static/img/summer.png HTTP/1.1" 200 1222590
+INFO 2025-09-04 18:59:22,966 django.server basehttp 12944 10772 "GET /static/img/fall.png HTTP/1.1" 200 1463923
+INFO 2025-09-04 19:54:13,630 django.server basehttp 12944 10248 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 291223
+INFO 2025-09-04 19:54:14,378 django.server basehttp 12944 10248 "GET /static/img/favicon.ico HTTP/1.1" 200 41001
+INFO 2025-09-04 20:14:52,870 django.server basehttp 12944 7340 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 181501
+INFO 2025-09-04 20:14:54,353 django.server basehttp 12944 7340 "GET /visuals/ HTTP/1.1" 200 8447
+INFO 2025-09-04 20:14:58,063 django.server basehttp 12944 7340 "GET /visuals/?product_id=18&company_id=&qc_no=&start_date=2025-09-01&end_date=2025-09-04 HTTP/1.1" 200 114864
+INFO 2025-09-04 20:15:02,677 django.server basehttp 12944 7340 "GET /visuals/?product_id=18&company_id=&qc_no=&start_date=2025-01-01&end_date=2025-09-04 HTTP/1.1" 200 122974
+INFO 2025-09-04 20:16:19,229 django.server basehttp 12944 7340 "GET /visuals/?product_id=18&company_id=&qc_no=&start_date=2025-01-01&end_date=2025-09-04 HTTP/1.1" 200 20204
+INFO 2025-09-04 20:16:19,797 django.server basehttp 12944 7340 "GET /batches/ HTTP/1.1" 200 31955
+INFO 2025-09-04 20:16:22,535 django.server basehttp 12944 7340 "GET /batches/?page=6 HTTP/1.1" 200 17794
+INFO 2025-09-04 20:16:25,443 django.server basehttp 12944 7340 "GET /batches/?page=5 HTTP/1.1" 200 31845
+INFO 2025-09-04 20:16:32,509 django.server basehttp 12944 7340 "GET /batch/74/ HTTP/1.1" 200 53930
+INFO 2025-09-04 20:17:07,658 django.server basehttp 12944 7340 "POST /batch/74/update_all/ HTTP/1.1" 302 0
+INFO 2025-09-04 20:17:08,010 django.server basehttp 12944 7340 "GET /batch/74/ HTTP/1.1" 200 157170
+INFO 2025-09-04 20:17:09,823 django.server basehttp 12944 7340 "GET /batch/74/ HTTP/1.1" 200 53912
+INFO 2025-09-04 20:17:10,214 django.server basehttp 12944 7340 "GET /visuals/ HTTP/1.1" 200 8447
+INFO 2025-09-04 20:17:13,478 django.server basehttp 12944 7340 "GET /visuals/?product_id=18&company_id=&qc_no=&start_date=2025-09-01&end_date=2025-09-04 HTTP/1.1" 200 114864
+INFO 2025-09-04 20:17:17,357 django.server basehttp 12944 7340 "GET /visuals/?product_id=18&company_id=&qc_no=&start_date=2025-01-01&end_date=2025-09-04 HTTP/1.1" 200 122911
+INFO 2025-09-04 20:18:21,832 django.server basehttp 12944 7340 "GET /visuals/?product_id=18&company_id=&qc_no=&start_date=2025-01-01&end_date=2025-09-04 HTTP/1.1" 200 20141
+INFO 2025-09-04 20:18:25,941 django.server basehttp 12944 7340 "GET /analysis/ HTTP/1.1" 200 28638
+INFO 2025-09-04 20:18:36,699 django.server basehttp 12944 7340 "POST /analysis/ HTTP/1.1" 200 131585
+INFO 2025-09-05 09:38:26,580 django.server basehttp 12944 15820 "GET /batches/ HTTP/1.1" 200 31955
+INFO 2025-09-05 09:38:26,829 django.server basehttp 12944 5368 "GET /analysis/ HTTP/1.1" 200 28638
+INFO 2025-09-05 09:38:28,610 django.server basehttp 12944 15820 "GET /shop_order_templates/ HTTP/1.1" 200 80966
+INFO 2025-09-05 09:38:29,464 django.server basehttp 12944 5368 "GET /analysis/ HTTP/1.1" 200 28638
+INFO 2025-09-05 09:38:29,514 django.server basehttp 12944 5368 "GET /shop_order_templates/ HTTP/1.1" 200 80966
+INFO 2025-09-05 09:38:30,209 django.server basehttp 12944 5368 "GET /purchase_orders/create/ HTTP/1.1" 200 10490
+INFO 2025-09-05 09:38:31,135 django.server basehttp 12944 5368 "GET /purchase_orders/create/ HTTP/1.1" 200 10490
+INFO 2025-09-05 09:38:32,016 django.server basehttp 12944 5368 "GET /purchase_orders/ HTTP/1.1" 200 3266
+INFO 2025-09-05 09:38:32,456 django.server basehttp 12944 5368 "GET /purchase_orders/ HTTP/1.1" 200 3266
+INFO 2025-09-05 09:38:33,039 django.server basehttp 12944 5368 "GET /purchase_orders/create/ HTTP/1.1" 200 10490
+INFO 2025-09-05 09:53:57,608 django.server basehttp 12944 4668 "GET /purchase_orders/create/ HTTP/1.1" 200 113297
+INFO 2025-09-05 09:54:05,693 django.server basehttp 12944 4668 "GET /purchase_orders/create/ HTTP/1.1" 200 113297
+INFO 2025-09-05 09:54:06,521 django.server basehttp 12944 4668 "GET /purchase_orders/create/ HTTP/1.1" 200 113297
+INFO 2025-09-05 09:54:07,182 django.server basehttp 12944 4668 "GET /purchase_orders/create/ HTTP/1.1" 200 113297
+INFO 2025-09-05 09:54:08,281 django.server basehttp 12944 4668 "GET /static/img/winter.png HTTP/1.1" 200 1439973
+INFO 2025-09-05 09:54:11,178 django.server basehttp 12944 4668 "GET /purchase_orders/create/ HTTP/1.1" 200 113297
+INFO 2025-09-05 09:54:11,222 django.server basehttp 12944 4668 "GET /static/css/google-fonts.css HTTP/1.1" 200 12053
+INFO 2025-09-05 09:54:11,235 django.server basehttp 12944 4668 "GET /static/js/bootstrap.bundle.min.js HTTP/1.1" 200 80663
+INFO 2025-09-05 09:54:11,236 django.server basehttp 12944 15868 "GET /static/css/tom-select.bootstrap5.min.css HTTP/1.1" 200 15345
+INFO 2025-09-05 09:54:11,237 django.server basehttp 12944 13736 "GET /static/css/flatpickr.min.css HTTP/1.1" 200 16166
+INFO 2025-09-05 09:54:11,237 django.server basehttp 12944 11156 "GET /static/css/style.css HTTP/1.1" 200 14956
+INFO 2025-09-05 09:54:11,237 django.server basehttp 12944 12728 "GET /static/css/bootstrap-icons.min.css HTTP/1.1" 200 85887
+INFO 2025-09-05 09:54:11,239 django.server basehttp 12944 15708 "GET /static/css/bootstrap.css HTTP/1.1" 200 287759
+INFO 2025-09-05 09:54:11,241 django.server basehttp 12944 4668 "GET /static/js/flatpickr.min.js HTTP/1.1" 200 50679
+INFO 2025-09-05 09:54:11,245 django.server basehttp 12944 13736 "GET /static/js/flatpickr.l10n.ar.js HTTP/1.1" 200 1928
+INFO 2025-09-05 09:54:11,245 django.server basehttp 12944 15868 "GET /static/js/tom-select.complete.min.js HTTP/1.1" 200 50720
+INFO 2025-09-05 09:54:11,385 django.server basehttp 12944 4668 "GET /static/img/fall.png HTTP/1.1" 200 1463923
+INFO 2025-09-05 09:54:11,393 django.server basehttp 12944 15868 "GET /static/webfonts/21.woff2 HTTP/1.1" 200 48256
+INFO 2025-09-05 09:54:11,393 django.server basehttp 12944 13736 "GET /static/webfonts/bootstrap-icons.woff2?dd67030699838ea613ee6dbda90effa6 HTTP/1.1" 200 130396
+INFO 2025-09-05 09:54:11,398 django.server basehttp 12944 15708 "GET /static/webfonts/28.woff2 HTTP/1.1" 200 48256
+INFO 2025-09-05 09:54:11,398 django.server basehttp 12944 12728 "GET /static/webfonts/35.woff2 HTTP/1.1" 200 48256
+INFO 2025-09-05 09:54:11,399 django.server basehttp 12944 11156 "GET /static/webfonts/14.woff2 HTTP/1.1" 200 48256
+INFO 2025-09-05 09:54:11,592 django.server basehttp 12944 4668 "GET /static/img/favicon.ico HTTP/1.1" 200 41001
+INFO 2025-09-05 09:54:35,101 django.server basehttp 12944 4668 "GET /purchase_orders/create/ HTTP/1.1" 200 10490
+INFO 2025-09-05 09:54:36,016 django.server basehttp 12944 4668 "GET /batches/ HTTP/1.1" 200 31955
+INFO 2025-09-05 09:54:36,602 django.server basehttp 12944 4668 "GET /batches/ HTTP/1.1" 200 31955
+INFO 2025-09-05 09:54:37,656 django.server basehttp 12944 4668 "GET /shop_order_templates/ HTTP/1.1" 200 80966
+INFO 2025-09-05 09:54:38,925 django.server basehttp 12944 4668 "GET /shop_order_templates/ HTTP/1.1" 200 80966
+INFO 2025-09-05 09:54:39,773 django.server basehttp 12944 4668 "GET /shop_order_templates/ HTTP/1.1" 200 80966
+INFO 2025-09-05 09:54:40,482 django.server basehttp 12944 4668 "GET /shop_order_templates/ HTTP/1.1" 200 80966
+INFO 2025-09-05 09:54:41,262 django.server basehttp 12944 4668 "GET /batches/ HTTP/1.1" 200 31955
+INFO 2025-09-05 09:54:42,200 django.server basehttp 12944 4668 "GET /batches/ HTTP/1.1" 200 31955
+INFO 2025-09-05 09:54:43,629 django.server basehttp 12944 4668 "GET /ledger/ HTTP/1.1" 200 13451
+INFO 2025-09-05 09:54:45,229 django.server basehttp 12944 4668 "GET /static/webfonts/07.woff2 HTTP/1.1" 200 48256
+INFO 2025-09-05 09:55:04,913 django.server basehttp 12944 4668 "GET /records/ HTTP/1.1" 200 424896
+INFO 2025-09-05 09:55:06,393 django.server basehttp 12944 4668 "GET / HTTP/1.1" 200 21710
+INFO 2025-09-05 09:55:09,083 django.server basehttp 12944 4668 "GET / HTTP/1.1" 200 21710
+INFO 2025-09-05 09:55:09,671 django.server basehttp 12944 4668 "GET /purchase_orders/create/ HTTP/1.1" 200 10490
+INFO 2025-09-05 09:55:10,249 django.server basehttp 12944 4668 "GET /purchase_orders/create/ HTTP/1.1" 200 10490
+INFO 2025-09-05 09:55:10,732 django.server basehttp 12944 4668 "GET /batches/ HTTP/1.1" 200 31955
+INFO 2025-09-05 10:01:12,825 django.server basehttp 12944 13416 "GET /batches/ HTTP/1.1" 200 134748
+INFO 2025-09-05 10:01:12,865 django.server basehttp 12944 13416 "GET /static/css/style.css HTTP/1.1" 200 13375
+WARNING 2025-09-05 10:01:12,880 django.server basehttp 12944 13416 "GET /static/images/fall.png HTTP/1.1" 404 1859
+INFO 2025-09-05 10:01:21,919 django.server basehttp 12944 16064 "GET /batches/ HTTP/1.1" 200 31955
+INFO 2025-09-05 10:01:24,269 django.server basehttp 12944 16064 "GET /batches/ HTTP/1.1" 200 31955
+INFO 2025-09-05 10:01:25,561 django.server basehttp 12944 16064 "GET /batches/ HTTP/1.1" 200 31955
+INFO 2025-09-05 10:01:28,805 django.server basehttp 12944 16064 "GET /batches/create/ HTTP/1.1" 200 52817
+INFO 2025-09-05 10:01:40,584 django.server basehttp 12944 16064 "GET / HTTP/1.1" 200 21710
+INFO 2025-09-05 10:01:51,279 django.server basehttp 12944 16064 "GET / HTTP/1.1" 200 21710
+INFO 2025-09-05 10:01:51,980 django.server basehttp 12944 16064 "GET /purchase_orders/ HTTP/1.1" 200 3266
+INFO 2025-09-05 10:01:55,166 django.server basehttp 12944 16064 "GET /purchase_orders/ HTTP/1.1" 200 3266
+INFO 2025-09-05 10:01:55,671 django.server basehttp 12944 16064 "GET /shop_order_templates/ HTTP/1.1" 200 80966
+INFO 2025-09-05 10:01:57,585 django.server basehttp 12944 16064 "GET /shop_order_template/18/ HTTP/1.1" 200 1952
+INFO 2025-09-05 10:01:59,041 django.server basehttp 12944 16064 "GET /records/ HTTP/1.1" 200 424896
+INFO 2025-09-05 10:02:02,864 django.server basehttp 12944 16064 "GET /products/ HTTP/1.1" 200 260821
+INFO 2025-09-05 10:02:04,159 django.server basehttp 12944 16064 "GET /companies/ HTTP/1.1" 200 41075
+INFO 2025-09-05 10:02:04,994 django.server basehttp 12944 16064 "GET /companies/ HTTP/1.1" 200 41075
+INFO 2025-09-05 10:02:06,010 django.server basehttp 12944 16064 "GET /opening_balances/ HTTP/1.1" 200 129242
+INFO 2025-09-05 10:02:06,565 django.server basehttp 12944 16064 "GET /opening_balances/ HTTP/1.1" 200 129242
+INFO 2025-09-05 10:02:07,106 django.server basehttp 12944 16064 "GET /opening_balances/ HTTP/1.1" 200 129242
+INFO 2025-09-05 10:02:07,604 django.server basehttp 12944 16064 "GET /opening_balances/ HTTP/1.1" 200 129242
+INFO 2025-09-05 10:02:08,091 django.server basehttp 12944 16064 "GET /production_returns/ HTTP/1.1" 200 19606
+INFO 2025-09-05 10:08:09,135 django.server basehttp 12944 3296 "GET /production_returns/ HTTP/1.1" 200 122432
+INFO 2025-09-05 10:08:09,183 django.server basehttp 12944 3296 "GET /static/css/style.css HTTP/1.1" 200 7396
+WARNING 2025-09-05 10:08:09,212 django.server basehttp 12944 3296 "GET /static/images/fall.png HTTP/1.1" 404 1859
+INFO 2025-09-05 10:08:24,435 django.server basehttp 12944 15336 "GET / HTTP/1.1" 200 21710
+INFO 2025-09-05 10:08:27,739 django.server basehttp 12944 15336 "GET / HTTP/1.1" 200 21710
+INFO 2025-09-05 10:08:28,467 django.server basehttp 12944 15336 "GET /purchase_orders/create/ HTTP/1.1" 200 10490
+INFO 2025-09-05 10:10:17,026 django.server basehttp 12944 15336 "GET /companies/ HTTP/1.1" 200 41075
+INFO 2025-09-05 10:10:17,881 django.server basehttp 12944 15336 "GET /products/ HTTP/1.1" 200 260821
+INFO 2025-09-05 10:10:23,068 django.server basehttp 12944 15336 "GET /companies/ HTTP/1.1" 200 41075
+INFO 2025-09-05 10:10:25,073 django.server basehttp 12944 15336 "GET /companies/ HTTP/1.1" 200 143892
+INFO 2025-09-05 10:10:25,124 django.server basehttp 12944 15336 "GET /static/css/style.css HTTP/1.1" 304 0
+INFO 2025-09-05 10:15:51,806 django.server basehttp 12944 10092 "GET /companies/ HTTP/1.1" 200 143892
+INFO 2025-09-05 10:15:51,852 django.server basehttp 12944 10092 "GET /static/css/style.css HTTP/1.1" 200 28691
+WARNING 2025-09-05 10:15:51,899 django.server basehttp 12944 10092 "GET /static/images/fall.png HTTP/1.1" 404 1859
+INFO 2025-09-05 10:15:57,465 django.server basehttp 12944 12324 "GET / HTTP/1.1" 200 21710
+INFO 2025-09-05 10:16:06,139 django.server basehttp 12944 12324 "GET / HTTP/1.1" 200 21710
+INFO 2025-09-05 10:16:07,119 django.server basehttp 12944 12324 "GET / HTTP/1.1" 200 21710
+INFO 2025-09-05 10:16:08,370 django.server basehttp 12944 12324 "GET / HTTP/1.1" 200 21710
+INFO 2025-09-05 10:16:08,897 django.server basehttp 12944 12324 "GET /purchase_orders/create/ HTTP/1.1" 200 10490
+INFO 2025-09-05 10:16:19,478 django.server basehttp 12944 12324 "GET /purchase_orders/create/ HTTP/1.1" 200 113319
+INFO 2025-09-05 10:16:19,526 django.server basehttp 12944 12324 "GET /static/css/style.css HTTP/1.1" 304 0
+INFO 2025-09-05 10:16:24,331 django.server basehttp 12944 12324 "GET /purchase_orders/create/ HTTP/1.1" 200 10490
+INFO 2025-09-05 10:16:25,167 django.server basehttp 12944 12324 "GET /purchase_orders/ HTTP/1.1" 200 3266
+INFO 2025-09-05 10:16:26,544 django.server basehttp 12944 12324 "GET /purchase_order/3/ HTTP/1.1" 200 7410
+INFO 2025-09-05 10:16:27,918 django.server basehttp 12944 12324 "GET /purchase_order/3/ HTTP/1.1" 200 7410
+INFO 2025-09-05 10:16:30,559 django.server basehttp 12944 12324 "GET /analysis/ HTTP/1.1" 200 28638
+INFO 2025-09-05 10:16:42,281 django.server basehttp 12944 6884 "GET /opening_balances/ HTTP/1.1" 200 129242
+INFO 2025-09-05 10:16:44,576 django.server basehttp 12944 12324 "GET /analysis/ HTTP/1.1" 200 28638
+INFO 2025-09-05 10:16:47,184 django.server basehttp 12944 6884 "GET /production_returns/ HTTP/1.1" 200 19606
+INFO 2025-09-05 10:16:49,000 django.server basehttp 12944 12324 "GET /analysis/ HTTP/1.1" 200 28638
+INFO 2025-09-05 10:16:54,926 django.server basehttp 12944 12324 "GET /analysis/ HTTP/1.1" 200 131454
+INFO 2025-09-05 10:16:55,010 django.server basehttp 12944 12324 "GET /static/css/style.css HTTP/1.1" 304 0
+INFO 2025-09-05 10:16:57,251 django.server basehttp 12944 12324 "GET / HTTP/1.1" 200 124527
+INFO 2025-09-05 10:16:58,513 django.server basehttp 12944 12324 "GET / HTTP/1.1" 200 21710
+INFO 2025-09-05 10:17:00,090 django.server basehttp 12944 12324 "GET /ledger/ HTTP/1.1" 200 13451
+INFO 2025-09-05 10:17:03,912 django.server basehttp 12944 12324 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 291276
+INFO 2025-09-05 10:17:03,957 django.server basehttp 12944 12324 "GET /static/css/style.css HTTP/1.1" 304 0
+INFO 2025-09-05 10:17:22,077 django.server basehttp 12944 12324 "GET /ledger/ HTTP/1.1" 200 13451
+INFO 2025-09-05 10:17:22,980 django.server basehttp 12944 12324 "GET /visuals/ HTTP/1.1" 200 8447
+INFO 2025-09-05 10:17:26,432 django.server basehttp 12944 12324 "GET /visuals/?product_id=18&company_id=&qc_no=&start_date=2025-09-01&end_date=2025-09-05 HTTP/1.1" 200 114920
+INFO 2025-09-05 10:17:26,476 django.server basehttp 12944 12324 "GET /static/css/style.css HTTP/1.1" 304 0
+INFO 2025-09-05 10:17:34,973 django.server basehttp 12944 12324 "GET /visuals/?product_id=18&company_id=&qc_no=&start_date=2025-01-01&end_date=2025-09-05 HTTP/1.1" 200 122967
+INFO 2025-09-05 10:19:25,610 django.server basehttp 12944 12324 "GET /visuals/?product_id=18&company_id=&qc_no=&start_date=2025-01-01&end_date=2025-09-05 HTTP/1.1" 200 20141
+INFO 2025-09-05 10:19:25,944 django.server basehttp 12944 12324 "GET /purchase_orders/ HTTP/1.1" 200 3266
+INFO 2025-09-05 10:19:27,410 django.server basehttp 12944 12324 "GET /purchase_orders/create/ HTTP/1.1" 200 10490
+INFO 2025-09-05 10:19:29,551 django.server basehttp 12944 12324 "GET /purchase_orders/create/ HTTP/1.1" 200 10490
+INFO 2025-09-05 10:19:29,939 django.server basehttp 12944 12324 "GET /batches/ HTTP/1.1" 200 31955
+INFO 2025-09-05 10:19:31,141 django.server basehttp 12944 12324 "GET /batches/create/ HTTP/1.1" 200 52817
+INFO 2025-09-05 10:19:43,648 django.server basehttp 12944 12324 "GET /batches/create/ HTTP/1.1" 200 52817
+INFO 2025-09-05 10:19:46,330 django.server basehttp 12944 12324 "GET /analysis/ HTTP/1.1" 200 28638
+INFO 2025-09-05 10:19:55,175 django.server basehttp 12944 12324 "GET /analysis/ HTTP/1.1" 200 131454
+INFO 2025-09-05 10:19:55,226 django.server basehttp 12944 12324 "GET /static/css/style.css HTTP/1.1" 304 0
+INFO 2025-09-05 10:20:12,619 django.server basehttp 12944 12324 "GET /analysis/ HTTP/1.1" 200 131454
+INFO 2025-09-05 10:20:13,558 django.server basehttp 12944 12324 "GET /records/ HTTP/1.1" 200 424896
+INFO 2025-09-05 10:20:14,513 django.server basehttp 12944 12324 "GET /products/ HTTP/1.1" 200 260821
+INFO 2025-09-05 10:20:17,018 django.server basehttp 12944 12324 "GET /products/ HTTP/1.1" 200 363637
+INFO 2025-09-05 10:20:17,099 django.server basehttp 12944 12324 "GET /static/css/google-fonts.css HTTP/1.1" 200 12053
+INFO 2025-09-05 10:20:17,119 django.server basehttp 12944 8632 "GET /static/css/bootstrap-icons.min.css HTTP/1.1" 200 85887
+INFO 2025-09-05 10:20:17,121 django.server basehttp 12944 12324 "GET /static/js/bootstrap.bundle.min.js HTTP/1.1" 200 80663
+INFO 2025-09-05 10:20:17,123 django.server basehttp 12944 6884 "GET /static/css/bootstrap.css HTTP/1.1" 200 287759
+INFO 2025-09-05 10:20:17,125 django.server basehttp 12944 14220 "GET /static/css/flatpickr.min.css HTTP/1.1" 200 16166
+INFO 2025-09-05 10:20:17,128 django.server basehttp 12944 15208 "GET /static/css/tom-select.bootstrap5.min.css HTTP/1.1" 200 15345
+INFO 2025-09-05 10:20:17,132 django.server basehttp 12944 8632 "GET /static/js/flatpickr.min.js HTTP/1.1" 200 50679
+INFO 2025-09-05 10:20:17,133 django.server basehttp 12944 14220 "GET /static/js/flatpickr.l10n.ar.js HTTP/1.1" 200 1928
+INFO 2025-09-05 10:20:17,136 django.server basehttp 12944 12324 "GET /static/js/tom-select.complete.min.js HTTP/1.1" 200 50720
+INFO 2025-09-05 10:20:17,141 django.server basehttp 12944 12396 "GET /static/css/style.css HTTP/1.1" 200 36176
+INFO 2025-09-05 10:20:17,227 django.server basehttp 12944 14220 "GET /static/webfonts/21.woff2 HTTP/1.1" 200 48256
+INFO 2025-09-05 10:20:17,227 django.server basehttp 12944 12324 "GET /static/webfonts/28.woff2 HTTP/1.1" 200 48256
+INFO 2025-09-05 10:20:17,227 django.server basehttp 12944 8632 "GET /static/webfonts/35.woff2 HTTP/1.1" 200 48256
+INFO 2025-09-05 10:20:17,229 django.server basehttp 12944 12396 "GET /static/webfonts/bootstrap-icons.woff2?dd67030699838ea613ee6dbda90effa6 HTTP/1.1" 200 130396
+INFO 2025-09-05 10:20:17,232 django.server basehttp 12944 15208 "GET /static/webfonts/14.woff2 HTTP/1.1" 200 48256
+INFO 2025-09-05 10:20:17,372 django.server basehttp 12944 15208 "GET /static/img/fall.png HTTP/1.1" 200 1463923
+INFO 2025-09-05 10:20:17,506 django.server basehttp 12944 15208 "GET /static/img/favicon.ico HTTP/1.1" 200 41001
+INFO 2025-09-05 10:20:21,151 django.server basehttp 12944 15208 "GET /products/ HTTP/1.1" 200 260821
+INFO 2025-09-05 10:20:21,669 django.server basehttp 12944 15208 "GET /batches/ HTTP/1.1" 200 31955
+INFO 2025-09-05 10:20:22,244 django.server basehttp 12944 15208 "GET /batches/ HTTP/1.1" 200 31955
+INFO 2025-09-05 10:20:22,946 django.server basehttp 12944 15208 "GET /shop_order_templates/ HTTP/1.1" 200 80966
+INFO 2025-09-05 10:20:23,476 django.server basehttp 12944 15208 "GET /shop_order_templates/ HTTP/1.1" 200 80966
+INFO 2025-09-05 10:20:23,976 django.server basehttp 12944 15208 "GET /batches/ HTTP/1.1" 200 31955
+INFO 2025-09-05 10:20:29,164 django.server basehttp 12944 15208 "GET /batches/?page=2 HTTP/1.1" 200 31965
+INFO 2025-09-05 10:20:30,090 django.server basehttp 12944 15208 "GET /batches/?page=3 HTTP/1.1" 200 32610
+INFO 2025-09-05 10:20:31,242 django.server basehttp 12944 15208 "GET /batches/?page=4 HTTP/1.1" 200 32423
+INFO 2025-09-05 10:20:31,824 django.server basehttp 12944 15208 "GET /batches/?page=5 HTTP/1.1" 200 31845
+INFO 2025-09-05 10:20:33,119 django.server basehttp 12944 15208 "GET /batches/?page=6 HTTP/1.1" 200 17794
+INFO 2025-09-05 10:20:34,285 django.server basehttp 12944 15208 "GET /batches/?page=1 HTTP/1.1" 200 31955
+INFO 2025-09-05 10:20:37,238 django.server basehttp 12944 15208 "GET /batches/?page=2 HTTP/1.1" 200 31965
+INFO 2025-09-05 10:20:38,119 django.server basehttp 12944 15208 "GET /batches/?page=4 HTTP/1.1" 200 32423
+INFO 2025-09-05 10:20:38,643 django.server basehttp 12944 15208 "GET /batches/?page=5 HTTP/1.1" 200 31845
+INFO 2025-09-05 10:20:38,984 django.server basehttp 12944 15208 "GET /batches/?page=6 HTTP/1.1" 200 17794
+INFO 2025-09-05 10:20:39,870 django.server basehttp 12944 15208 "GET /batches/?page=5 HTTP/1.1" 200 31845
+INFO 2025-09-05 10:20:41,715 django.server basehttp 12944 15208 "GET /batches/?page=1 HTTP/1.1" 200 31955
+INFO 2025-09-05 10:20:42,277 django.server basehttp 12944 15208 "GET /batches/?page=2 HTTP/1.1" 200 31965
+INFO 2025-09-05 10:20:42,606 django.server basehttp 12944 15208 "GET /batches/?page=3 HTTP/1.1" 200 32610
+INFO 2025-09-05 10:20:43,019 django.server basehttp 12944 15208 "GET /batches/?page=4 HTTP/1.1" 200 32423
+INFO 2025-09-05 10:20:43,425 django.server basehttp 12944 15208 "GET /batches/?page=5 HTTP/1.1" 200 31845
+INFO 2025-09-05 10:20:43,651 django.server basehttp 12944 15208 "GET /batches/?page=6 HTTP/1.1" 200 17794
+INFO 2025-09-05 10:20:47,881 django.server basehttp 12944 15208 "GET /batches/?page=1 HTTP/1.1" 200 31955
+INFO 2025-09-05 10:20:56,767 django.server basehttp 12944 15208 "GET /batches/?page=6 HTTP/1.1" 200 17794
+INFO 2025-09-05 10:21:13,264 django.server basehttp 12944 15208 "GET /batches/?page=6 HTTP/1.1" 200 17794
+INFO 2025-09-05 10:21:13,748 django.server basehttp 12944 15208 "GET /purchase_orders/create/ HTTP/1.1" 200 10490
+INFO 2025-09-05 10:21:14,700 django.server basehttp 12944 15208 "GET /purchase_orders/create/ HTTP/1.1" 200 10490
+INFO 2025-09-05 10:21:15,207 django.server basehttp 12944 15208 "GET /purchase_orders/ HTTP/1.1" 200 3266
+INFO 2025-09-05 10:21:17,732 django.server basehttp 12944 15208 "GET /static/webfonts/07.woff2 HTTP/1.1" 200 48256
+INFO 2025-09-05 10:57:06,938 django.utils.autoreload autoreload 12944 7204 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\helpers.py changed, reloading.
+INFO 2025-09-05 10:57:08,028 django.utils.autoreload autoreload 14644 15208 Watching for file changes with StatReloader
+INFO 2025-09-05 11:02:06,874 django.utils.autoreload autoreload 14644 15208 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py changed, reloading.
+INFO 2025-09-05 11:02:07,802 django.utils.autoreload autoreload 14468 5368 Watching for file changes with StatReloader
+INFO 2025-09-05 11:02:14,605 django.server basehttp 14468 6104 "GET /purchase_orders/ HTTP/1.1" 200 3266
+INFO 2025-09-05 11:02:15,336 django.server basehttp 14468 6104 "GET /ledger/ HTTP/1.1" 200 13451
+INFO 2025-09-05 11:02:16,522 django.server basehttp 14468 6104 "GET /ledger/ HTTP/1.1" 200 123229
+INFO 2025-09-05 11:02:16,579 django.server basehttp 14468 6104 "GET /static/css/style.css HTTP/1.1" 304 0
+INFO 2025-09-05 11:02:19,178 django.server basehttp 14468 6104 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 291277
+INFO 2025-09-05 11:37:43,495 django.server basehttp 14468 10412 "GET /static/css/style.css HTTP/1.1" 304 0
+WARNING 2025-09-05 11:37:43,548 django.request log 14468 10412 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-05 11:37:43,549 django.server basehttp 14468 10412 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 15727
+WARNING 2025-09-05 11:37:43,668 django.server basehttp 14468 10412 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-05 11:37:48,834 django.server basehttp 14468 15812 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 291277
+WARNING 2025-09-05 11:37:48,895 django.request log 14468 15812 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-05 11:37:48,897 django.server basehttp 14468 15812 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 15727
+WARNING 2025-09-05 11:37:48,991 django.server basehttp 14468 15812 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-05 11:37:56,009 django.server basehttp 14468 15632 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 291277
+WARNING 2025-09-05 11:37:56,064 django.request log 14468 15632 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-05 11:37:56,067 django.server basehttp 14468 15632 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 15727
+WARNING 2025-09-05 11:37:56,175 django.server basehttp 14468 15632 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-05 11:38:32,748 django.server basehttp 14468 4776 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 181499
+INFO 2025-09-05 11:38:33,427 django.server basehttp 14468 4776 "GET /visuals/ HTTP/1.1" 200 8447
+INFO 2025-09-05 11:38:35,963 django.server basehttp 14468 4776 "GET /visuals/?product_id=18&company_id=&qc_no=&start_date=2025-09-01&end_date=2025-09-05 HTTP/1.1" 200 114920
+INFO 2025-09-05 11:41:27,590 django.server basehttp 14468 7224 "GET /visuals/?product_id=18&company_id=&qc_no=&start_date=2025-09-01&end_date=2025-09-05 HTTP/1.1" 200 12094
+INFO 2025-09-05 11:41:28,670 django.server basehttp 14468 7224 "GET /visuals/?product_id=18&company_id=&qc_no=&start_date=2025-09-01&end_date=2025-09-05 HTTP/1.1" 200 12094
+INFO 2025-09-05 11:41:29,765 django.server basehttp 14468 7224 "GET /visuals/?product_id=18&company_id=&qc_no=&start_date=2025-09-01&end_date=2025-09-05 HTTP/1.1" 200 12094
+INFO 2025-09-05 11:41:31,130 django.server basehttp 14468 7224 "GET /visuals/?product_id=18&company_id=&qc_no=&start_date=2025-09-01&end_date=2025-09-05 HTTP/1.1" 200 12094
+INFO 2025-09-05 11:41:31,420 django.server basehttp 14468 7224 "GET /batches/ HTTP/1.1" 200 31955
+INFO 2025-09-05 11:41:33,662 django.server basehttp 14468 7224 "GET /batch/151/ HTTP/1.1" 200 46340
+INFO 2025-09-05 11:41:36,738 django.server basehttp 14468 7224 "GET /finished_product/1/ HTTP/1.1" 200 4195
+INFO 2025-09-05 11:43:49,280 django.server basehttp 14468 7224 "GET /batch/151/ HTTP/1.1" 200 46340
+INFO 2025-09-05 11:43:53,882 django.server basehttp 14468 7224 "GET /finished_product/1/ HTTP/1.1" 200 4195
+INFO 2025-09-05 12:14:46,577 django.utils.autoreload autoreload 14468 5368 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\urls.py changed, reloading.
+INFO 2025-09-05 12:14:47,540 django.utils.autoreload autoreload 1020 4536 Watching for file changes with StatReloader
+INFO 2025-09-05 12:15:07,486 django.utils.autoreload autoreload 1020 4536 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\finished_products.py changed, reloading.
+INFO 2025-09-05 12:15:08,468 django.utils.autoreload autoreload 5872 11540 Watching for file changes with StatReloader
+INFO 2025-09-05 12:17:51,830 django.server basehttp 5872 15248 "GET /finished_product/1/ HTTP/1.1" 200 107364
+INFO 2025-09-05 12:17:51,872 django.server basehttp 5872 15248 "GET /static/css/style.css HTTP/1.1" 304 0
+INFO 2025-09-05 12:17:54,670 django.server basehttp 5872 15248 "GET /finished_product/1/ HTTP/1.1" 200 4195
+INFO 2025-09-05 12:17:57,319 django.server basehttp 5872 15248 "GET /finished_product/1/ HTTP/1.1" 200 4195
+INFO 2025-09-05 12:17:58,408 django.server basehttp 5872 15248 "GET /finished_product/1/ HTTP/1.1" 200 4195
+INFO 2025-09-05 12:18:01,305 django.server basehttp 5872 15248 "GET /finished_goods_status/ HTTP/1.1" 200 91544
+INFO 2025-09-05 12:18:48,489 django.server basehttp 5872 15248 "GET /finished_product/1/ HTTP/1.1" 200 4195
+INFO 2025-09-05 12:18:53,779 django.server basehttp 5872 15248 "GET /finished_goods_status/ HTTP/1.1" 200 91544
+INFO 2025-09-05 12:19:23,624 django.server basehttp 5872 15248 "POST /finished_product/1/release/ HTTP/1.1" 302 0
+INFO 2025-09-05 12:19:23,673 django.server basehttp 5872 15248 "GET /finished_goods_status/ HTTP/1.1" 200 194623
+INFO 2025-09-05 12:19:29,267 django.server basehttp 5872 15248 "GET /finished_product/1/ HTTP/1.1" 200 4193
+INFO 2025-09-05 12:37:14,738 django.utils.autoreload autoreload 5872 11540 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py changed, reloading.
+INFO 2025-09-05 12:37:15,976 django.utils.autoreload autoreload 9112 16224 Watching for file changes with StatReloader
+INFO 2025-09-05 12:39:02,358 django.server basehttp 9112 13700 "GET /finished_product/1/ HTTP/1.1" 200 107362
+INFO 2025-09-05 12:39:02,391 django.server basehttp 9112 13700 "GET /static/css/style.css HTTP/1.1" 304 0
+INFO 2025-09-05 12:39:03,850 django.server basehttp 9112 13700 "GET /finished_product/1/ HTTP/1.1" 200 4193
+INFO 2025-09-05 12:39:04,659 django.server basehttp 9112 13700 "GET /ledger/ HTTP/1.1" 200 16912
+INFO 2025-09-05 12:39:10,846 django.server basehttp 9112 13700 "GET /ledger/?product_id=&final_product_id=46&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 128837
+INFO 2025-09-05 12:39:11,746 django.server basehttp 9112 13700 "GET /ledger/?product_id=&final_product_id=46&start_date=&end_date= HTTP/1.1" 200 128837
+INFO 2025-09-05 12:39:15,718 django.server basehttp 9112 13700 "GET /ledger/?final_product_id=26&start_date=&end_date= HTTP/1.1" 200 128837
+INFO 2025-09-05 12:39:18,255 django.server basehttp 9112 13700 "GET /ledger/?final_product_id=30&start_date=&end_date= HTTP/1.1" 200 128837
+INFO 2025-09-05 12:39:20,020 django.server basehttp 9112 13700 "GET /ledger/?final_product_id=40&start_date=&end_date= HTTP/1.1" 200 128837
+INFO 2025-09-05 12:39:25,712 django.server basehttp 9112 13700 "GET /ledger/?final_product_id=32&start_date=2025-01-01&end_date= HTTP/1.1" 200 128847
+INFO 2025-09-05 12:39:30,567 django.server basehttp 9112 13700 "GET /ledger/?product_id=&final_product_id=32&start_date=2025-01-01&end_date= HTTP/1.1" 200 128847
+INFO 2025-09-05 12:39:34,938 django.server basehttp 9112 13700 "GET /ledger/?product_id=&final_product_id=32&start_date=2025-01-01&end_date= HTTP/1.1" 200 16944
+INFO 2025-09-05 12:39:35,717 django.server basehttp 9112 13700 "GET /finished_goods_status/ HTTP/1.1" 200 90860
+INFO 2025-09-05 12:40:00,402 django.server basehttp 9112 13700 "GET /ledger/?final_product_id=27&start_date=2025-01-01&end_date= HTTP/1.1" 200 132718
+INFO 2025-09-05 12:40:35,618 django.server basehttp 9112 13700 "GET /ledger/?product_id=&final_product_id=27&start_date=2025-01-01&end_date= HTTP/1.1" 200 132718
+INFO 2025-09-05 12:41:10,920 django.server basehttp 9112 13700 "GET /batch/151/ HTTP/1.1" 200 46340
+INFO 2025-09-05 12:41:16,889 django.server basehttp 9112 13700 "GET /batch/151/receive/250512/ HTTP/1.1" 200 6599
+INFO 2025-09-05 12:41:56,347 django.server basehttp 9112 13700 "POST /batch/151/receive/250512/ HTTP/1.1" 302 0
+INFO 2025-09-05 12:41:56,838 django.server basehttp 9112 13700 "GET /batch/151/ HTTP/1.1" 200 150121
+INFO 2025-09-05 12:42:01,633 django.server basehttp 9112 13700 "GET /ledger/?product_id=&final_product_id=27&start_date=2025-01-01&end_date= HTTP/1.1" 200 134864
+INFO 2025-09-05 12:43:53,955 django.server basehttp 9112 13700 "GET /ledger/print/?product_id=&final_product_id=27&start_date=2025-01-01&end_date= HTTP/1.1" 200 5479
+WARNING 2025-09-05 12:45:04,338 django.request log 9112 13700 Not Found: /favicon.ico
+WARNING 2025-09-05 12:45:04,339 django.server basehttp 9112 13700 "GET /favicon.ico HTTP/1.1" 404 16206
+INFO 2025-09-05 12:45:46,692 django.server basehttp 9112 13700 "GET /ledger/?final_product_id=48&start_date=2025-01-01&end_date= HTTP/1.1" 200 128847
+INFO 2025-09-05 12:45:54,274 django.server basehttp 9112 13700 "GET /ledger/?final_product_id=27&start_date=2025-01-01&end_date= HTTP/1.1" 200 134864
+INFO 2025-09-05 12:46:06,901 django.server basehttp 9112 13700 "GET /ledger/?product_id=&final_product_id=27&start_date=2025-01-01&end_date= HTTP/1.1" 200 134864
+INFO 2025-09-05 12:46:18,648 django.server basehttp 9112 13700 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=2025-01-01&end_date= HTTP/1.1" 200 288873
+INFO 2025-09-05 12:46:31,203 django.server basehttp 9112 13700 "GET /ledger/?final_product_id=51&start_date=2025-01-01&end_date= HTTP/1.1" 200 128847
+INFO 2025-09-05 15:47:51,354 django.server basehttp 9112 15648 "GET /ledger/?final_product_id=27&start_date=2025-01-01&end_date= HTTP/1.1" 200 134864
+INFO 2025-09-05 15:47:51,395 django.server basehttp 9112 15648 "GET /static/css/style.css HTTP/1.1" 304 0
+INFO 2025-09-05 15:48:13,811 django.server basehttp 9112 15648 "GET /ledger/?product_id=&final_product_id=27&start_date=2025-01-01&end_date= HTTP/1.1" 200 134864
+INFO 2025-09-05 15:49:04,905 django.server basehttp 9112 15648 "GET /ledger/print/?product_id=&final_product_id=27&start_date=2025-01-01&end_date= HTTP/1.1" 200 5479
+INFO 2025-09-05 15:50:26,760 django.server basehttp 9112 15648 "GET /ledger/?product_id=18&company_id=&qc_no=&start_date=2025-01-01&end_date= HTTP/1.1" 200 288873
+INFO 2025-09-05 15:50:28,353 django.server basehttp 9112 15648 "GET /ledger/print/?product_id=18&final_product_id=&company_id=&qc_no=&start_date=2025-01-01&end_date= HTTP/1.1" 200 48628
+INFO 2025-09-05 16:40:55,027 django.utils.autoreload autoreload 9112 16224 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-05 16:40:57,629 django.utils.autoreload autoreload 5368 11724 Watching for file changes with StatReloader
+INFO 2025-09-05 16:41:08,745 django.utils.autoreload autoreload 5368 11724 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-05 16:41:10,290 django.utils.autoreload autoreload 9980 15228 Watching for file changes with StatReloader

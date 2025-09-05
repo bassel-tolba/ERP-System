@@ -1,0 +1,115 @@
+{% comment %} {% load mathfilters %} {% endcomment %}
+
+<div id="content-area">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-0" style="font-weight: 700;">استلام المنتج النهائي</h1>
+            <p class="mb-0 text-muted">
+                أمر تشغيل: <strong>{{ plan.shop_order_number }}</strong> | المنتج: <strong>{{ plan.template.final_product.name }}</strong>
+            </p>
+        </div>
+        <a href="{% url 'inventory:view_batch' plan.pk %}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> العودة لأمر التشغيل</a>
+    </div>
+
+    <form method="post" action="{% url 'inventory:receive_finished_product' plan.pk individual_batch_number %}">
+        {% csrf_token %}
+        <div class="row">
+            <!-- Left Column: Receipt Details -->
+            <div class="col-lg-7">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-input-cursor-text"></i> 1. تفاصيل الاستلام</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">رقم التشغيلة المستلمة</label>
+                                <input type="text" class="form-control" value="{{ individual_batch_number }}" readonly disabled>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="receipt_date" class="form-label fw-bold">تاريخ الاستلام</label>
+                                <input type="text" class="form-control datepicker" id="receipt_date" name="receipt_date" value="{{ today_date }}" required>
+                            </div>
+                        </div>
+                         <div class="mb-3">
+                            <label for="market_type" class="form-label fw-bold">نوع السوق</label>
+                            <select class="form-select" id="market_type" name="market_type" required>
+                                {% for value, name in market_type_choices %}
+                                <option value="{{ value }}">{{ name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="notes" class="form-label fw-bold">ملاحظات (اختياري)</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-4">
+                     <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-boxes"></i> 2. التشغيلات الفرعية (البالتات)</h5>
+                        <button type="button" class="btn btn-sm btn-outline-success" id="add-sub-batch-btn"><i class="bi bi-plus-circle"></i> إضافة صف</button>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table mb-0 align-middle">
+                                <thead>
+                                    <tr>
+                                        <th class="ps-3" style="width: 50%;">رقم التشغيلة الفرعية</th>
+                                        <th class="text-center" style="width: 35%;">الكمية</th>
+                                        <th class="text-center pe-2" style="width: 15%;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="sub-batches-tbody">
+                                    <!-- First row is here by default. JS will add more. -->
+                                    <tr>
+                                        <td class="ps-3">
+                                            <input type="text" name="sub_batch_id" class="form-control" placeholder="مثال: A1, P-001" required>
+                                        </td>
+                                        <td>
+                                             <input type="number" step="any" name="sub_batch_qty" class="form-control text-center" required>
+                                        </td>
+                                        <td class="text-center pe-2">
+                                            <!-- Remove button should be disabled for the first row -->
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Column: Summary -->
+            <div class="col-lg-5">
+                <div class="card sticky-top" style="top: 20px;">
+                    <div class="card-header">
+                        <h5><i class="bi bi-receipt"></i> ملخص التكلفة</h5>
+                    </div>
+                    <div class="card-body">
+                         <div class="alert alert-info">
+                            هذه التكلفة محسوبة بناءً على المواد الخام الفعلية المستخدمة في أمر التشغيل.
+                         </div>
+                         <dl class="row mb-0">
+                            <dt class="col-sm-5">التكلفة الإجمالية للأمر</dt>
+                            <dd class="col-sm-7 text-end">{{ total_batch_cost|floatformat:3 }}</dd>
+
+                            <dt class="col-sm-5">عدد التشغيلات في الأمر</dt>
+                            <dd class="col-sm-7 text-end">{{ plan.number_of_batches_in_plan }}</dd>
+
+                            <hr class="my-2">
+                            
+                            <dt class="col-sm-5 fs-5">تكلفة هذه التشغيلة</dt>
+                            <dd class="col-sm-7 text-end fs-5 fw-bold text-primary">{{ proportional_cost }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="d-grid mt-4">
+            <button type="submit" class="btn btn-primary btn-lg"><i class="bi bi-save"></i> حفظ الاستلام</button>
+        </div>
+    </form>
+</div>

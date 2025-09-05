@@ -9,8 +9,9 @@ from .views.batches import batches, create_batch, view_batch, delete_batch, add_
 from .views.production_returns import production_returns, delete_production_return
 from .views.opening_balances import opening_balances, edit_opening_balance, delete_opening_balance
 from .views.analysis_ledger_visuals import analysis, ledger, visuals, print_ledger, stock_valuation
-# --- MODIFIED: Import new PO views ---
 from .views.purchase_orders import purchase_orders, create_purchase_order, view_purchase_order, edit_purchase_order, delete_purchase_order
+# --- MODIFIED: Import new finished product views ---
+from .views.finished_products import finished_goods_status, receive_finished_product, view_finished_product, release_from_quarantine
 from .views.api import get_used_qc_sources, api_batch_details, get_product_tags, api_get_open_pos_for_supplier, api_get_po_items
 
 
@@ -42,7 +43,6 @@ urlpatterns = [
     path('purchase_orders/', purchase_orders, name='purchase_orders'),
     path('purchase_orders/create/', create_purchase_order, name='create_purchase_order'),
     path('purchase_order/<int:pk>/', view_purchase_order, name='view_purchase_order'),
-    # --- NEW PO ROUTES ---
     path('purchase_order/<int:pk>/edit/', edit_purchase_order, name='edit_purchase_order'),
     path('purchase_order/<int:pk>/delete/', delete_purchase_order, name='delete_purchase_order'),
 
@@ -52,7 +52,7 @@ urlpatterns = [
     path('shop_order_template/<int:pk>/', view_shop_order_template, name='view_shop_order_template'),
     path('shop_order_template/edit/<int:pk>/', edit_shop_order_template, name='edit_shop_order_template'),
 
-    # Batch Routes
+    # Batch Routes (Production Plans)
     path('batches/', batches, name='batches'),
     path('batches/create/', create_batch, name='create_batch'),
     path('batch/<int:pk>/', view_batch, name='view_batch'),
@@ -60,6 +60,13 @@ urlpatterns = [
     path('batch/item/add/<int:batch_pk>/', add_batch_item, name='add_batch_item'),
     path('batch/<int:batch_pk>/update_all/', update_batch_items_bulk, name='update_batch_items_bulk'),
     path('batch/item/delete/<int:item_pk>/', delete_batch_item, name='delete_batch_item'),
+
+    # --- MODIFIED & NEW: Finished Product Routes ---
+    path('finished_products/', finished_goods_status, name='finished_products_list'), # Renamed for clarity
+    path('finished_goods_status/', finished_goods_status, name='finished_goods_status'), # New unified view
+    path('batch/<int:batch_pk>/receive/<path:individual_batch_number>/', receive_finished_product, name='receive_finished_product'),
+    path('finished_product/<int:pk>/', view_finished_product, name='view_finished_product'),
+    path('finished_product/<int:pk>/release/', release_from_quarantine, name='release_from_quarantine'), # New release action
 
     # Production Returns Routes
     path('production_returns/', production_returns, name='production_returns'),
