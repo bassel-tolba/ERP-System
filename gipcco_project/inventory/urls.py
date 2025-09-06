@@ -1,4 +1,3 @@
-
 # gipcco_project/inventory/urls.py
 
 from django.urls import path
@@ -20,7 +19,7 @@ from .views.api import get_used_qc_sources, api_batch_details, get_product_tags,
 # --- MODIFIED: Import new API views and sales views ---
 from .views.sales import customers, edit_customer, delete_customer, sales_orders, create_sales_order, view_sales_order, dispatch_from_sales_order
 # --- NEW: Import new expense views ---
-from .views.expenses import expenses_dashboard
+from .views.expenses import expenses_dashboard, manage_expenses, edit_inventory_consumption, delete_inventory_consumption, edit_general_expense, delete_general_expense
 
 
 app_name = 'inventory'
@@ -101,6 +100,13 @@ urlpatterns = [
 
     # --- NEW: Expense & Reporting Routes ---
     path('expenses/', expenses_dashboard, name='expenses_dashboard'),
+    # --- NEW EXPENSE MANAGEMENT URLS ---
+    path('expenses/manage/', manage_expenses, name='manage_expenses'),
+    path('expenses/consumption/edit/<int:pk>/', edit_inventory_consumption, name='edit_inventory_consumption'),
+    path('expenses/consumption/delete/<int:pk>/', delete_inventory_consumption, name='delete_inventory_consumption'),
+    path('expenses/general/edit/<int:pk>/', edit_general_expense, name='edit_general_expense'),
+    path('expenses/general/delete/<int:pk>/', delete_general_expense, name='delete_general_expense'),
+    # --- END NEW ---
     path('reports/sales-margin/', sales_margin_analysis, name='sales_margin_analysis'),
     path('reports/p-and-l/', profit_and_loss_statement, name='profit_and_loss_statement'),
     

@@ -1,6 +1,4 @@
 
-# gipcco_project/inventory/views/helpers.py
-
 import json
 import math
 from datetime import datetime, timedelta, time
@@ -19,7 +17,8 @@ from django.views.decorators.http import require_POST
 import logging
 
 from ..models import (Batch, BatchItem, Company, InventoryLog, OpeningBalance,
-                     Product, ProductionReturn, ShopOrderTemplate, TemplateItem)
+                     Product, ProductionReturn, ShopOrderTemplate, TemplateItem,
+                     InventoryConsumption) # --- MODIFIED: Import InventoryConsumption
 
 # Get an instance of the logger for this module
 logger = logging.getLogger(__name__)
@@ -264,7 +263,7 @@ def update_moving_average_cost(product_id: int, log_entry: InventoryLog):
 def get_inventory_state_at_datetime(product_id: int, target_datetime: timezone.datetime) -> dict:
     """
     Calculates the total stock quantity and its total value for a product up to a specific datetime.
-    MODIFIED to only consider RELEASED stock and use release_timestamp.
+    MODIFIED to include internal inventory consumption.
     """
     most_recent_ob = OpeningBalance.objects.filter(
         product_id=product_id, balance_date__lt=target_datetime
@@ -286,20 +285,32 @@ def get_inventory_state_at_datetime(product_id: int, target_datetime: timezone.d
         release_timestamp__gte=effective_date, 
         release_timestamp__lt=target_datetime
     )
-    consumptions = BatchItem.objects.filter(primitive_product_id=product_id, batch__creation_date__gte=effective_date, batch__creation_date__lt=target_datetime)
+    consumptions = BatchItem.objects.filter(
+        primitive_product_id=product_id, 
+        batch__creation_date__gte=effective_date, 
+        batch__creation_date__lt=target_datetime
+    )
     
     returns = ProductionReturn.objects.select_related('source_log').filter(
         product_id=product_id, 
         return_date__gte=effective_date, 
         return_date__lt=target_datetime
     )
+
+    # --- NEW: Query for internal consumptions ---
+    internal_consumptions = InventoryConsumption.objects.filter(
+        product_id=product_id,
+        consumption_date__gte=effective_date,
+        consumption_date__lt=target_datetime
+    )
     
     transactions = sorted(
-        list(logs) + list(consumptions) + list(returns),
+        list(logs) + list(consumptions) + list(returns) + list(internal_consumptions), # --- MODIFIED: Add internal consumptions
         key=lambda x: (
-            # --- MODIFIED: Use release_timestamp for sorting logs ---
+            # --- MODIFIED: Use release_timestamp for sorting logs and add consumption_date ---
             x.release_timestamp if isinstance(x, InventoryLog) else
             x.batch.creation_date if isinstance(x, BatchItem) else
+            x.consumption_date if isinstance(x, InventoryConsumption) else
             x.return_date,
             1 if isinstance(x, InventoryLog) else 2 if isinstance(x, ProductionReturn) else 3
         )
@@ -328,6 +339,13 @@ def get_inventory_state_at_datetime(product_id: int, target_datetime: timezone.d
         elif isinstance(trx, BatchItem):
             consumed_qty = Decimal(str(trx.actual_quantity or 0.0))
             running_value -= consumed_qty * current_avg_cost
+            running_qty -= consumed_qty
+        
+        # --- NEW: Handle internal consumptions ---
+        elif isinstance(trx, InventoryConsumption):
+            consumed_qty = Decimal(str(trx.quantity_consumed))
+            # Use the pre-calculated cost stored at the time of consumption
+            running_value -= trx.cost_at_consumption
             running_qty -= consumed_qty
             
     return {'quantity': running_qty, 'value': running_value}

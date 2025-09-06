@@ -145,7 +145,8 @@
                                 data-qc-no="{{ t.qc_no|default:'N/A' }}" data-shop-order-no="{{ t.shop_order_number|default:'N/A' }}"
                                 data-batch-no="{{ t.batch_number|default:'N/A' }}" data-final-product="{{ t.final_product_name|default:'N/A' }}"
                                 data-theoretical-qty="{{ t.theoretical_quantity|floatformat:3|default:'N/A' }}"
-                                data-batch-id="{{ t.batch_id|default:'' }}">
+                                data-batch-id="{{ t.batch_id|default:'' }}"
+                                data-department="{{ t.department|default:'N/A' }}" data-notes="{{ t.notes|default:'N/A' }}">
                                 <i class="bi bi-info-circle"></i>
                             </button>
                         </td>

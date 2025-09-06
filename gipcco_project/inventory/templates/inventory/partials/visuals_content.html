@@ -1,3 +1,4 @@
+<!-- gipcco_project/inventory/templates/inventory/partials/visuals_content.html -->
 {% load static inventory_extras %}
 
 {# Data Islands for Raw Material Analysis #}
@@ -11,6 +12,11 @@
 <script id="fp-data-for-chart-2" type="application/json">{{ cost_trend_data_json|safe }}</script>
 <script id="fp-data-for-chart-3" type="application/json">{{ market_share_data_json|safe }}</script>
 <script id="fp-data-for-chart-4" type="application/json">{{ product_mix_data_json|safe }}</script>
+
+{# NEW: Data Islands for Expense Analysis #}
+<script id="exp-data-for-chart-1" type="application/json">{{ department_data_json|safe }}</script>
+<script id="exp-data-for-chart-2" type="application/json">{{ category_trend_data_json|safe }}</script>
+<script id="exp-data-for-chart-3" type="application/json">{{ top_items_data_json|safe }}</script>
 
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -27,6 +33,12 @@
   <li class="nav-item" role="presentation">
     <button class="nav-link {% if analysis_type == 'finished_product' %}active{% endif %}" id="finished-product-tab" data-bs-toggle="tab" data-bs-target="#finished-product-panel" type="button" role="tab">
         <i class="bi bi-box2-heart-fill me-2"></i>تحليل المنتج النهائي
+    </button>
+  </li>
+  {# NEW: Expense Analysis Tab #}
+  <li class="nav-item" role="presentation">
+    <button class="nav-link {% if analysis_type == 'expense' %}active{% endif %}" id="expense-tab" data-bs-toggle="tab" data-bs-target="#expense-panel" type="button" role="tab">
+        <i class="bi bi-cash-coin me-2"></i>تحليل المصروفات
     </button>
   </li>
 </ul>
@@ -83,16 +95,36 @@
                     </select>
                 </div>
 
+                <!-- NEW: Expense Filters -->
+                <div class="col-lg-3 col-md-6 analysis-filter" data-type="expense">
+                    <label for="expense_product_type" class="form-label">نوع المستهلك</label>
+                    <select name="expense_product_type" id="expense_product_type" class="form-select searchable-select">
+                        <option value="">-- كل الأنواع --</option>
+                        {% for type_val, type_name in expense_product_types %}
+                        <option value="{{ type_val }}" {% if type_val == selected_expense_product_type %}selected{% endif %}>{{ type_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                 <div class="col-lg-3 col-md-6 analysis-filter" data-type="expense">
+                    <label for="expense_product_id" class="form-label">منتج معين</label>
+                    <select name="expense_product_id" id="expense_product_id" class="form-select searchable-select">
+                        <option value="">-- كل المنتجات --</option>
+                        {% for product in consumable_products %}
+                        <option value="{{ product.id }}" {% if product.id == selected_expense_product_id %}selected{% endif %}>{{ product.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
                 <!-- Common Filters -->
-                <div class="col-lg-4 col-md-6">
+                <div class="col-lg-3 col-md-6">
                     <label for="start_date" class="form-label">من تاريخ</label>
                     <input type="text" name="start_date" id="start_date" class="form-control datepicker" value="{{ start_date }}">
                 </div>
-                <div class="col-lg-4 col-md-6">
+                <div class="col-lg-3 col-md-6">
                     <label for="end_date" class="form-label">إلى تاريخ</label>
                     <input type="text" name="end_date" id="end_date" class="form-control datepicker" value="{{ end_date }}">
                 </div>
-                <div class="col-lg-4 col-md-12 d-flex align-items-end">
+                <div class="col-12 d-flex align-items-end">
                     <button type="submit" class="btn btn-primary w-100"><i class="bi bi-graph-up-arrow me-2"></i>تحليل</button>
                 </div>
             </div>
@@ -152,5 +184,25 @@
     {% else %}
         <div class="alert alert-info"><i class="bi bi-info-circle-fill me-2"></i>الرجاء تحديد فترة زمنية (واختيار منتج) لبدء تحليل الإنتاج.</div>
     {% endif %}
+  </div>
+
+  {# NEW: Expense Analysis Panel #}
+  <div class="tab-pane fade {% if analysis_type == 'expense' %}show active{% endif %}" id="expense-panel" role="tabpanel">
+     {% if request.GET.type == 'expense' %}
+        <!-- KPIs -->
+        <div class="row g-4 mb-4">
+            <div class="col"><div class="card h-100 shadow-sm"><div class="card-body text-center"><h6 class="card-subtitle text-muted">إجمالي المصروفات</h6><p class="card-text fs-4 fw-bold text-danger mb-0">{{ expense_kpi_data.total_expense|floatformat:3 }}</p></div></div></div>
+            <div class="col"><div class="card h-100 shadow-sm"><div class="card-body text-center"><h6 class="card-subtitle text-muted">أعلى بند مستهلك (قيمة)</h6><p class="card-text fs-5 fw-bold text-primary mb-0">{{ expense_kpi_data.top_item_name }}</p><small class="text-muted">{{ expense_kpi_data.top_item_value|floatformat:3 }}</small></div></div></div>
+            <div class="col"><div class="card h-100 shadow-sm"><div class="card-body text-center"><h6 class="card-subtitle text-muted">أعلى قسم مستهلك (قيمة)</h6><p class="card-text fs-5 fw-bold text-info mb-0">{{ expense_kpi_data.top_dept_name }}</p><small class="text-muted">{{ expense_kpi_data.top_dept_value|floatformat:3 }}</small></div></div></div>
+        </div>
+        <!-- Charts -->
+        <div class="row g-4">
+            <div class="col-md-6"><div class="card shadow-sm"><div class="card-header"><h5 class="mb-0">توزيع استهلاك المخزون حسب القسم</h5></div><div class="card-body"><div style="height: 300px;"><canvas id="departmentExpenseChart"></canvas></div></div></div></div>
+            <div class="col-md-6"><div class="card shadow-sm"><div class="card-header"><h5 class="mb-0">أعلى 20 بند مستهلك (بالقيمة)</h5></div><div class="card-body"><div style="height: 300px;"><canvas id="topItemsChart"></canvas></div></div></div></div>
+            <div class="col-lg-12"><div class="card shadow-sm"><div class="card-header"><h5 class="mb-0">تطور المصروفات العامة اليومية</h5></div><div class="card-body"><div style="height: 350px;"><canvas id="categoryTrendChart"></canvas></div></div></div></div>
+        </div>
+     {% else %}
+        <div class="alert alert-info"><i class="bi bi-info-circle-fill me-2"></i>الرجاء تحديد فترة زمنية لبدء تحليل المصروفات.</div>
+     {% endif %}
   </div>
 </div>

@@ -21,6 +21,7 @@
                     <th>الكمية الفعلية</th>
                     <td id="modal-actual" class="fw-bold"></td>
                 </tr>
+                <!-- Receiving Details -->
                 <tr class="in-details">
                     <th>الشركة الموردة</th>
                     <td id="modal-company"></td>
@@ -29,6 +30,7 @@
                     <th>رقم QC</th>
                     <td id="modal-qc"></td>
                 </tr>
+                <!-- Production Details -->
                 <tr class="out-details" style="display: none;">
                     <th>رقم أمر التشغيل</th>
                     <td id="modal-shop-order"></td>
@@ -45,11 +47,19 @@
                     <th>الكمية النظرية</th>
                     <td id="modal-theoretical"></td>
                 </tr>
+                <!-- NEW: Internal Consumption Details -->
+                <tr class="consume-details" style="display: none;">
+                    <th>القسم المستهلك</th>
+                    <td id="modal-department"></td>
+                </tr>
+                 <tr class="consume-details" style="display: none;">
+                    <th>ملاحظات الصرف</th>
+                    <td id="modal-notes"></td>
+                </tr>
             </tbody>
         </table>
       </div>
       <div class="modal-footer justify-content-between">
-        <!-- MODIFIED: Changed button to trigger the new deep-dive modal -->
         <div id="batch-details-btn-container" class="d-none">
             <button class="btn btn-primary" id="viewFullBatchAnalysisBtn" data-bs-target="#batchAnalysisModal" data-bs-toggle="modal">
                 <i class="bi bi-zoom-in me-2"></i>تحليل التشغيلة بالكامل
@@ -61,7 +71,7 @@
   </div>
 </div>
 
-<!-- NEW: Batch Deep Dive Analysis Modal -->
+<!-- Batch Deep Dive Analysis Modal (Unchanged) -->
 <div class="modal fade" id="batchAnalysisModal" aria-hidden="true" aria-labelledby="batchAnalysisModalLabel" tabindex="-1">
   <div class="modal-dialog modal-xl modal-dialog-scrollable">
     <div class="modal-content">

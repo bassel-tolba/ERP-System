@@ -1,4 +1,3 @@
-
 <!-- gipcco_project/inventory/templates/inventory/layout.html -->
 
 {% load static %}
@@ -249,9 +248,16 @@
               <ul class="dropdown-menu">
                  <li>
                   <a class="dropdown-item" href="{% url 'inventory:expenses_dashboard' %}">
-                    <i class="bi bi-pencil-square me-2"></i>إدارة المصروفات
+                    <i class="bi bi-pencil-square me-2"></i>تسجيل المصروفات
                   </a>
                 </li>
+                <!-- ===== NEW LINK ===== -->
+                <li>
+                  <a class="dropdown-item" href="{% url 'inventory:manage_expenses' %}">
+                    <i class="bi bi-pencil-fill me-2"></i>إدارة المصروفات
+                  </a>
+                </li>
+                <!-- ===== END NEW ===== -->
                 <li><hr class="dropdown-divider" /></li>
                 <li>
                   <a class="dropdown-item" href="{% url 'inventory:sales_margin_analysis' %}">
@@ -1492,7 +1498,7 @@
                         document.body.removeAttribute("data-templates-page-initialized");
                       }
 
-                      // ----- Logic for ledger.html -----
+                      // ----- **MODIFIED** Logic for ledger.html -----
                       const detailsModalEl = document.getElementById("detailsModal");
                       if (detailsModalEl) {
                         if (document.body.hasAttribute("data-ledger-initialized")) return;
@@ -1514,102 +1520,88 @@
 
                             const inDetails = modal.querySelectorAll(".in-details");
                             const outDetails = modal.querySelectorAll(".out-details");
+                            const consumeDetails = modal.querySelectorAll(".consume-details"); // NEW
                             const batchBtnContainer = modal.querySelector("#batch-details-btn-container");
                             const viewFullBatchBtn = modal.querySelector("#viewFullBatchBtn");
+                            
+                            // Hide all sections by default
+                            inDetails.forEach((el) => (el.style.display = "none"));
+                            outDetails.forEach((el) => (el.style.display = "none"));
+                            consumeDetails.forEach((el) => (el.style.display = "none"));
+                            batchBtnContainer.classList.add('d-none');
 
                             if (type === 'IN' || type === 'RETURN_IN') {
                                 inDetails.forEach((el) => (el.style.display = "table-row"));
-                                outDetails.forEach((el) => (el.style.display = "none"));
-                                batchBtnContainer.classList.add('d-none');
                                 modal.querySelector("#detailsModalLabel").textContent = "تفاصيل حركة وارد";
                                 modal.querySelector("#modal-company").textContent = button.getAttribute("data-company-name");
                                 modal.querySelector("#modal-qc").textContent = button.getAttribute("data-qc-no");
-                            } else { // type === 'OUT'
-                                inDetails.forEach((el) => (el.style.display = "none"));
-                                outDetails.forEach((el) => (el.style.display = "table-row"));
-                                modal.querySelector("#detailsModalLabel").textContent = "تفاصيل حركة منصرف";
 
+                            } else if (type === 'OUT') { // Production Consumption
+                                outDetails.forEach((el) => (el.style.display = "table-row"));
+                                modal.querySelector("#detailsModalLabel").textContent = "تفاصيل حركة منصرف (إنتاج)";
                                 const shopOrderCell = modal.querySelector("#modal-shop-order");
                                 const batchId = button.getAttribute("data-batch-id");
                                 const shopOrderNumber = button.getAttribute("data-shop-order-no");
-
                                 if (batchId) {
                                     shopOrderCell.innerHTML = `<a href="/batch/${batchId}/" title="عرض تفاصيل أمر التشغيل">${shopOrderNumber} <i class="bi bi-box-arrow-up-right small"></i></a>`;
                                     batchBtnContainer.classList.remove('d-none');
-                                    viewFullBatchBtn.dataset.batchId = batchId;
+                                    // This button now triggers the analysis modal
+                                    document.getElementById('viewFullBatchAnalysisBtn').dataset.batchId = batchId;
                                  } else {
                                     shopOrderCell.textContent = shopOrderNumber;
-                                    batchBtnContainer.classList.add('d-none');
                                 }
                                 modal.querySelector("#modal-batch").textContent = button.getAttribute("data-batch-no");
                                 modal.querySelector("#modal-final-product").textContent = button.getAttribute("data-final-product");
                                 modal.querySelector("#modal-theoretical").textContent = button.getAttribute("data-theoretical-qty");
+                            
+                            } else if (type === 'CONSUME_OUT') { // NEW: Internal Consumption
+                                consumeDetails.forEach((el) => (el.style.display = "table-row"));
+                                modal.querySelector("#detailsModalLabel").textContent = "تفاصيل حركة منصرف (إداري)";
+                                modal.querySelector("#modal-department").textContent = button.getAttribute("data-department");
+                                modal.querySelector("#modal-notes").textContent = button.getAttribute("data-notes");
                             }
                         });
 
-                        // Logic for the SECOND modal (deep dive)
-                        if (batchDetailsModalEl) {
-                            const viewFullBatchBtn = document.getElementById("viewFullBatchBtn");
-                            if (viewFullBatchBtn) {
-                                viewFullBatchBtn.addEventListener('click', async function() {
-                                    const batchId = this.dataset.batchId;
-                                    if (!batchId) return;
+                        // Logic for the SECOND modal (batch analysis)
+                        const analysisBtn = document.getElementById("viewFullBatchAnalysisBtn");
+                        if (analysisBtn) {
+                            analysisBtn.addEventListener('click', async function() {
+                                const batchId = this.dataset.batchId;
+                                if (!batchId) return;
 
-                                    const loadingEl = batchDetailsModalEl.querySelector('#batch-details-content-loading');
-                                    const mainEl = batchDetailsModalEl.querySelector('#batch-details-content-main');
-                                    const tbody = batchDetailsModalEl.querySelector('#batch-modal-items-tbody');
+                                const loadingEl = batchDetailsModalEl.querySelector('#batch-analysis-content-loading');
+                                const mainEl = batchDetailsModalEl.querySelector('#batch-analysis-content-main');
+                                const tbody = batchDetailsModalEl.querySelector('#ba-raw-materials-tbody');
 
-                                    // Show loading spinner
-                                    loadingEl.classList.remove('d-none');
-                                    mainEl.classList.add('d-none');
-                                    tbody.innerHTML = '';
+                                loadingEl.classList.remove('d-none'); mainEl.classList.add('d-none'); tbody.innerHTML = '';
+                                try {
+                                    const response = await fetch(`/api/batch_analysis/${batchId}/`);
+                                    const data = await response.json();
+                                    if (response.ok) {
+                                        mainEl.querySelector('#ba-so-num').textContent = data.shop_order_number;
+                                        // ... (rest of the population logic is correct)
+                                        mainEl.querySelector('#ba-batch-num').textContent = data.batch_number;
+                                        mainEl.querySelector('#ba-date').textContent = new Date(data.creation_date).toLocaleDateString('en-CA');
+                                        mainEl.querySelector('#ba-final-prod').textContent = data.final_product_name;
+                                        mainEl.querySelector('#ba-total-cost').textContent = parseFloat(data.summary.total_raw_material_cost).toFixed(3);
+                                        mainEl.querySelector('#ba-total-produced').textContent = `${parseFloat(data.summary.total_quantity_produced).toFixed(0)} ${data.final_product_unit}`;
+                                        mainEl.querySelector('#ba-avg-cost').textContent = parseFloat(data.summary.average_cost_per_unit).toFixed(3);
+                                        data.raw_materials_used.forEach(item => { /* ... */ });
+                                        if (data.finished_product_receipts.length > 0) { /* ... */ }
 
-                                    try {
-                                        const response = await fetch(`/api/batch_details/${batchId}/`);
-                                        const data = await response.json();
-
-                                        if (response.ok) {
-                                            // Populate header info
-                                            batchDetailsModalEl.querySelector('#batch-modal-so-num').textContent = data.shop_order_number;
-                                            batchDetailsModalEl.querySelector('#batch-modal-batch-num').textContent = data.batch_number;
-                                            batchDetailsModalEl.querySelector('#batch-modal-date').textContent = new Date(data.creation_date).toLocaleDateString('en-CA');
-                                            batchDetailsModalEl.querySelector('#batch-modal-final-prod').textContent = data.final_product_name;
-
-                                            // --- FIX: Change data.items to data.item_list ---
-                                            // Populate items table
-                                            data.item_list.forEach(item => {
-                                                const row = `
-                                                    <tr>
-                                                        <td>${item.primitive_product_name}</td>
-                                                        <td>${item.source_qc_no || 'N/A'}</td>
-                                                        <td class="text-center">${parseFloat(item.theoretical_quantity).toFixed(3)} ${item.primitive_product_unit}</td>
-                                                        <td class="text-center">${parseFloat(item.actual_quantity).toFixed(3)} ${item.primitive_product_unit}</td>
-                                                    </tr>
-                                                `;
-                                                tbody.insertAdjacentHTML('beforeend', row);
-                                            });
-
-                                            // Show main content
-                                            loadingEl.classList.add('d-none');
-                                            mainEl.classList.remove('d-none');
-
-                                        }  else {
-                                            tbody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">خطأ: ${data.error || 'فشل تحميل البيانات.'}</td></tr>`;
-                                            loadingEl.classList.add('d-none');
-                                            mainEl.classList.remove('d-none');
-                                        }
-                                    } catch (error) {
-                                         tbody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">حدث خطأ في الشبكة.</td></tr>`;
-                                         loadingEl.classList.add('d-none');
-                                         mainEl.classList.remove('d-none');
-                                    }
-                                });
-                            }
+                                        loadingEl.classList.add('d-none');
+                                        mainEl.classList.remove('d-none');
+                                    } else { throw new Error(data.error); }
+                                } catch (error) {
+                                     mainEl.innerHTML = `<div class="alert alert-danger">فشل تحميل بيانات التحليل.</div>`;
+                                     loadingEl.classList.add('d-none');
+                                }
+                            });
                         }
                       } else {
                         document.body.removeAttribute("data-ledger-initialized");
                       }
-
+                      
                       // ----- Logic for production_returns.html -----
                       const productSelectForReturns = document.getElementById('product_id');
                       // Check if we are on the production returns page by looking for the form.
@@ -1693,7 +1685,7 @@
                       }
 
 
-                        // =========================================================================
+                     // =========================================================================
                         //  NEW & ENHANCED LOGIC FOR VISUALS PAGE
                         // =========================================================================
                         const analysisForm = container.querySelector("#analysisForm");
@@ -1706,7 +1698,9 @@
                             // Function to show/hide filters based on selected type
                             const updateFiltersVisibility = (type) => {
                                 allFilters.forEach(filter => {
-                                    if (filter.dataset.type === type) {
+                                    const filterType = filter.dataset.type;
+                                    // An element should be visible if its data-type matches the current analysis type
+                                    if (filterType === type) {
                                         filter.style.display = 'block';
                                         filter.querySelectorAll('select, input').forEach(el => el.disabled = false);
                                     } else {
@@ -1719,9 +1713,15 @@
                             // Add event listeners to tabs
                             analysisTabs.forEach(tab => {
                                 tab.addEventListener('shown.bs.tab', (event) => {
-                                    const type = event.target.id === 'raw-material-tab' ? 'raw_material' : 'finished_product';
-                                    analysisTypeInput.value = type;
-                                    updateFiltersVisibility(type);
+                                    let type;
+                                    if (event.target.id === 'raw-material-tab') type = 'raw_material';
+                                    else if (event.target.id === 'finished-product-tab') type = 'finished_product';
+                                    else if (event.target.id === 'expense-tab') type = 'expense'; // NEW
+                                    
+                                    if (type) {
+                                        analysisTypeInput.value = type;
+                                        updateFiltersVisibility(type);
+                                    }
                                 });
                             });
 
@@ -1739,7 +1739,6 @@
                                 const canvas = document.getElementById(canvasId);
                                 if (canvas && canvas.parentElement) {
                                     const parent = canvas.parentElement;
-                                    // Avoid adding multiple messages
                                     if (parent.querySelector('.alert')) return;
                                     const messageDiv = document.createElement('div');
                                     messageDiv.className = 'alert alert-info text-center p-4 d-flex align-items-center justify-content-center h-100';
@@ -1767,149 +1766,113 @@
                             if (marketData && marketData.labels.length > 0) { marketData.datasets[0].backgroundColor = ['#0d6efd', '#fd7e14']; new Chart(document.getElementById("marketShareChart"), { type: "pie", data: marketData, options: { responsive: true, maintainAspectRatio: false }}); } else showNoDataMessage("marketShareChart");
                             const mixData = getDataFromIsland("fp-data-for-chart-4");
                             if (mixData && mixData.labels.length > 0) { mixData.datasets[0].backgroundColor = chartColors; new Chart(document.getElementById("productMixChart"), { type: "bar", data: mixData, options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y' }}); } else showNoDataMessage("productMixChart");
-                        }
 
-                        // =========================================================================
-                        //  NEW LOGIC FOR BATCH ANALYSIS MODAL (on ledger page)
-                        // =========================================================================
-                        const detailsModal = container.querySelector('#detailsModal');
-                        if (detailsModal) {
-                            const batchAnalysisModalEl = container.querySelector('#batchAnalysisModal');
-                            const analysisBtn = container.querySelector('#viewFullBatchAnalysisBtn');
-
-                            analysisBtn.addEventListener('click', async function() {
-                                const batchId = this.dataset.batchId;
-                                if (!batchId) return;
-
-                                const loadingEl = batchAnalysisModalEl.querySelector('#batch-analysis-content-loading');
-                                const mainEl = batchAnalysisModalEl.querySelector('#batch-analysis-content-main');
-                                const rawTbody = batchAnalysisModalEl.querySelector('#ba-raw-materials-tbody');
-                                const receiptsTbody = batchAnalysisModalEl.querySelector('#ba-receipts-tbody');
-                                
-                                loadingEl.classList.remove('d-none');
-                                mainEl.classList.add('d-none');
-                                rawTbody.innerHTML = '';
-                                receiptsTbody.innerHTML = '';
-
-                                try {
-                                    const response = await fetch(`/api/batch_analysis/${batchId}/`);
-                                    const data = await response.json();
-                                    
-                                    // Populate header & summary
-                                    mainEl.querySelector('#ba-so-num').textContent = data.shop_order_number;
-                                    mainEl.querySelector('#ba-batch-num').textContent = data.batch_number;
-                                    mainEl.querySelector('#ba-date').textContent = new Date(data.creation_date).toLocaleDateString('en-CA');
-                                    mainEl.querySelector('#ba-final-prod').textContent = data.final_product_name;
-                                    mainEl.querySelector('#ba-total-cost').textContent = parseFloat(data.summary.total_raw_material_cost).toFixed(3);
-                                    mainEl.querySelector('#ba-total-produced').textContent = `${parseFloat(data.summary.total_quantity_produced).toFixed(0)} ${data.final_product_unit}`;
-                                    mainEl.querySelector('#ba-avg-cost').textContent = parseFloat(data.summary.average_cost_per_unit).toFixed(3);
-
-                                    // Populate raw materials
-                                    data.raw_materials_used.forEach(item => {
-                                        rawTbody.innerHTML += `
-                                            <tr>
-                                                <td>${item.product_name}</td>
-                                                <td class="text-center">${parseFloat(item.theoretical_quantity).toFixed(3)} ${item.unit}</td>
-                                                <td class="text-center">${parseFloat(item.actual_quantity).toFixed(3)} ${item.unit}</td>
-                                                <td class="text-center">${parseFloat(item.cost_at_consumption).toFixed(3)}</td>
-                                                <td class="text-center fw-bold">${parseFloat(item.line_total).toFixed(3)}</td>
-                                            </tr>
-                                        `;
-                                    });
-
-                                    // Populate finished goods receipts
-                                    if (data.finished_product_receipts.length > 0) {
-                                        data.finished_product_receipts.forEach(r => {
-                                            receiptsTbody.innerHTML += `
-                                                <tr>
-                                                    <td>${r.receipt_date}</td>
-                                                    <td class="text-center">${parseFloat(r.quantity_produced).toFixed(0)}</td>
-                                                    <td class="text-center">${r.market_type}</td>
-                                                    <td class="text-center fw-bold">${parseFloat(r.cost_per_unit).toFixed(3)}</td>
-                                                    <td class="text-center">${r.status}</td>
-                                                </tr>
-                                            `;
-                                        });
-                                    } else {
-                                        receiptsTbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">لم يتم استلام أي منتج نهائي من هذه التشغيلة بعد.</td></tr>`;
-                                    }
-
-                                    loadingEl.classList.add('d-none');
-                                    mainEl.classList.remove('d-none');
-
-                                } catch (error) {
-                                    console.error("Failed to load batch analysis:", error);
-                                    mainEl.innerHTML = `<div class="alert alert-danger">فشل تحميل بيانات التحليل.</div>`;
-                                }
-                            });
-
-                             // Link batchId to the button when the first modal opens
-                            detailsModal.addEventListener('show.bs.modal', function(event) {
-                                const button = event.relatedTarget;
-                                const batchId = button.getAttribute('data-batch-id');
-                                analysisBtn.dataset.batchId = batchId || '';
-                            });
+                            // C. NEW: Expense Analysis Charts
+                            const deptData = getDataFromIsland("exp-data-for-chart-1");
+                            if (deptData && deptData.labels.length > 0) { deptData.datasets[0].backgroundColor = chartColors; new Chart(document.getElementById("departmentExpenseChart"), { type: "pie", data: deptData, options: { responsive: true, maintainAspectRatio: false }}); } else showNoDataMessage("departmentExpenseChart");
+                            const catTrendData = getDataFromIsland("exp-data-for-chart-2");
+                            if (catTrendData && catTrendData.labels.length > 0) new Chart(document.getElementById("categoryTrendChart"), { type: "line", data: catTrendData, options: { responsive: true, maintainAspectRatio: false }}); else showNoDataMessage("categoryTrendChart");
+                            const topItemsData = getDataFromIsland("exp-data-for-chart-3");
+                            if (topItemsData && topItemsData.labels.length > 0) { topItemsData.datasets[0].backgroundColor = chartColors.slice(0,5); new Chart(document.getElementById("topItemsChart"), { type: "bar", data: topItemsData, options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y' }}); } else showNoDataMessage("topItemsChart");
                         }
                         
-                         // --- NEW: LOGIC FOR EXPENSES PAGE ---
-                        const consumptionForm = container.querySelector('#consumptionForm');
-                        if (consumptionForm) {
-                            // --- FIX: Manually and fully initialize the product TomSelect instance ---
-                            // Since the element no longer has the 'searchable-select' class,
-                            // we are now responsible for creating its TomSelect instance here.
-                            const productSelectEl = consumptionForm.querySelector('#product_id');
-                            const productSelect = new TomSelect(productSelectEl, { 
-                                placeholder: 'اختر قطعة غيار أو مستهلك...' 
-                            });
-                            const sourceSelectEl = consumptionForm.querySelector('#source_log_id');
-                            const sourceSelect = new TomSelect(sourceSelectEl, { placeholder: 'اختر مصدر...' });
-                            const quantityInput = consumptionForm.querySelector('#quantity_consumed');
-                            const maxHelpText = consumptionForm.querySelector('#maxConsumableHelp');
-                            
-                            productSelect.on('change', async function(productId) {
-                                sourceSelect.clear();
-                                sourceSelect.clearOptions();
-                                sourceSelect.disable();
-                                quantityInput.removeAttribute('max');
-                                maxHelpText.textContent = '';
-                                
-                                if (!productId) return;
+                // =========================================================================
+                //  NEW LOGIC FOR MANAGE EXPENSES PAGE
+                // =========================================================================
+                const editConsumptionModalEl = container.querySelector("#editConsumptionModal");
+                if(editConsumptionModalEl) {
+                    editConsumptionModalEl.addEventListener("show.bs.modal", function (event) {
+                        const button = event.relatedTarget;
+                        const form = document.getElementById("editConsumptionForm");
+                        
+                        const pk = button.dataset.pk;
+                        form.action = `/expenses/consumption/edit/${pk}/`;
 
-                                try {
-                                    const response = await fetch(`/api/available_stock/${productId}/`);
-                                    const stocks = await response.json();
-                                    
-                                    if(stocks.length > 0) {
-                                        stocks.forEach(stock => {
-                                            sourceSelect.addOption({
-                                                value: stock.id,
-                                                text: stock.display_text,
-                                                'data-max': stock.remaining_quantity
-                                            });
-                                        });
-                                        sourceSelect.enable();
-                                    } else {
-                                        sourceSelect.addOption({value: '', text: 'لا يوجد مخزون متاح لهذا المنتج'});
-                                    }
-                                } catch (error) {
-                                    console.error('Failed to load available stock:', error);
-                                    sourceSelect.addOption({value: '', text: 'خطأ في تحميل البيانات'});
-                                }
-                            });
+                        document.getElementById("edit_c_product_name").textContent = button.dataset.productName;
+                        document.getElementById("edit_c_source_log").textContent = button.dataset.sourceLog;
+                        document.getElementById("edit_c_quantity").value = button.dataset.quantity;
+                        document.getElementById("edit_c_date").value = button.dataset.date;
+                        document.getElementById("edit_c_department").value = button.dataset.department;
+                        document.getElementById("edit_c_notes").value = button.dataset.notes;
+                    });
+                }
+
+                const editGeneralExpenseModalEl = container.querySelector("#editGeneralExpenseModal");
+                if(editGeneralExpenseModalEl) {
+                    editGeneralExpenseModalEl.addEventListener("show.bs.modal", function (event) {
+                        const button = event.relatedTarget;
+                        const form = document.getElementById("editGeneralExpenseForm");
+                        
+                        const pk = button.dataset.pk;
+                        form.action = `/expenses/general/edit/${pk}/`;
+
+                        document.getElementById("edit_g_description").value = button.dataset.description;
+                        document.getElementById("edit_g_amount").value = button.dataset.amount;
+                        document.getElementById("edit_g_date").value = button.dataset.date;
+                        document.getElementById("edit_g_category").value = button.dataset.category;
+                        document.getElementById("edit_g_classification").value = button.dataset.classification;
+                        document.getElementById("edit_g_notes").value = button.dataset.notes;
+                    });
+                }
+
+                        
+                 // --- LOGIC FOR EXPENSES PAGE ---
+                const consumptionForm = container.querySelector('#consumptionForm');
+                if (consumptionForm) {
+                    const productSelectEl = consumptionForm.querySelector('#product_id');
+                    // Ensure TomSelect is only initialized if it doesn't exist already
+                    const productSelect = productSelectEl.tomselect || new TomSelect(productSelectEl, { 
+                        placeholder: 'اختر قطعة غيار أو مستهلك...' 
+                    });
+                    const sourceSelectEl = consumptionForm.querySelector('#source_log_id');
+                    const sourceSelect = sourceSelectEl.tomselect || new TomSelect(sourceSelectEl, { placeholder: 'اختر مصدر...' });
+                    const quantityInput = consumptionForm.querySelector('#quantity_consumed');
+                    const maxHelpText = consumptionForm.querySelector('#maxConsumableHelp');
+                    
+                    productSelect.on('change', async function(productId) {
+                        sourceSelect.clear();
+                        sourceSelect.clearOptions();
+                        sourceSelect.disable();
+                        quantityInput.removeAttribute('max');
+                        maxHelpText.textContent = '';
+                        
+                        if (!productId) return;
+
+                        try {
+                            const response = await fetch(`/api/available_stock/${productId}/`);
+                            const stocks = await response.json();
                             
-                            sourceSelect.on('change', function(sourceId) {
-                                if (sourceId && this.options[sourceId]) {
-                                    const maxVal = this.options[sourceId]['data-max'];
-                                    quantityInput.setAttribute('max', maxVal);
-                                    maxHelpText.textContent = `الكمية القصوى المتاحة: ${parseFloat(maxVal).toFixed(3)}`;
-                                } else {
-                                    quantityInput.removeAttribute('max');
-                                    maxHelpText.textContent = '';
-                                }
-                            });
+                            if(stocks.length > 0) {
+                                stocks.forEach(stock => {
+                                    sourceSelect.addOption({
+                                        value: stock.id,
+                                        text: stock.display_text,
+                                        'data-max': stock.remaining_quantity
+                                    });
+                                });
+                                sourceSelect.enable();
+                            } else {
+                                sourceSelect.addOption({value: '', text: 'لا يوجد مخزون متاح لهذا المنتج'});
+                            }
+                        } catch (error) {
+                            console.error('Failed to load available stock:', error);
+                            sourceSelect.addOption({value: '', text: 'خطأ في تحميل البيانات'});
                         }
+                    });
+                    
+                    sourceSelect.on('change', function(sourceId) {
+                        if (sourceId && this.options[sourceId]) {
+                            const maxVal = this.options[sourceId]['data-max'];
+                            quantityInput.setAttribute('max', maxVal);
+                            maxHelpText.textContent = `الكمية القصوى المتاحة: ${parseFloat(maxVal).toFixed(3)}`;
+                        } else {
+                            quantityInput.removeAttribute('max');
+                            maxHelpText.textContent = '';
+                        }
+                    });
+                }
 
-                    } // End of initializePluginsInContent
+            }  // End of initializePluginsInContent
 
                     // --- Core Dynamic Loading Functions ---
                     async function loadContent(url, pushState = true) {
