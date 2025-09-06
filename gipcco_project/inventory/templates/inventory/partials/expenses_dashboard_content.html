@@ -1,0 +1,156 @@
+<!-- gipcco_project/inventory/templates/inventory/partials/expenses_dashboard_content.html -->
+
+<h1 class="h2 mb-4">إدارة المصروفات</h1>
+
+<div class="row">
+    <!-- Left Column: Inventory Consumption -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-tools me-2"></i>صرف مستهلكات ومستلزمات من المخزن</h5>
+            </div>
+            <form method="POST" action="{% url 'inventory:expenses_dashboard' %}" id="consumptionForm">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="inventory_consumption">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="product_id" class="form-label">المنتج</label>
+                            <select name="product_id" id="product_id" class="form-select" required>
+                                <option value="">-- اختر منتج --</option>
+                                {% for p in consumable_products %}
+                                <option value="{{ p.id }}">{{ p.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                             <label for="source_log_id" class="form-label">المصدر (رقم الفحص)</label>
+                            <select name="source_log_id" id="source_log_id" class="form-select" disabled required>
+                                <option value="">-- اختر المنتج أولاً --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="quantity_consumed" class="form-label">الكمية المصروفة</label>
+                            <input type="number" step="any" min="0" name="quantity_consumed" id="quantity_consumed" class="form-control" required>
+                             <small id="maxConsumableHelp" class="form-text text-muted"></small>
+                        </div>
+                         <div class="col-md-6">
+                            <label for="department" class="form-label">القسم المستهلك</label>
+                            <select name="department" id="department" class="form-select" required>
+                                {% for val, name in departments %}<option value="{{ val }}">{{ name }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-12">
+                             <label for="consumption_date" class="form-label">تاريخ الصرف</label>
+                            <input type="text" name="consumption_date" id="consumption_date" class="form-control datepicker" value="{{ today_date }}" required>
+                        </div>
+                         <div class="col-12">
+                            <label for="notes_consumption" class="form-label">ملاحظات</label>
+                            <textarea name="notes" id="notes_consumption" class="form-control" rows="2"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-primary w-100">تسجيل الصرف</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Right Column: General Expenses -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-receipt-cutoff me-2"></i>تسجيل مصروف عام (فواتير، خدمات)</h5>
+            </div>
+             <form method="POST" action="{% url 'inventory:expenses_dashboard' %}">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="general_expense">
+                <div class="card-body">
+                   <div class="row g-3">
+                        <div class="col-12">
+                            <label for="description" class="form-label">البيان</label>
+                            <input type="text" name="description" id="description" class="form-control" placeholder="مثال: فاتورة كهرباء شهر يناير" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="amount" class="form-label">المبلغ</label>
+                            <input type="number" step="any" min="0" name="amount" id="amount" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="expense_date" class="form-label">تاريخ المصروف</label>
+                            <input type="text" name="expense_date" id="expense_date" class="form-control datepicker" value="{{ today_date }}" required>
+                        </div>
+                        <div class="col-md-6">
+                             <label for="category" class="form-label">الفئة</label>
+                            <select name="category" id="category" class="form-select" required>
+                                {% for val, name in expense_categories %}<option value="{{ val }}">{{ name }}</option>{% endfor %}
+                            </select>
+                        </div>
+                         <div class="col-md-6">
+                             <label for="classification" class="form-label">التصنيف المحاسبي</label>
+                            <select name="classification" id="classification" class="form-select" required>
+                                {% for val, name in expense_classifications %}<option value="{{ val }}">{{ name }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label for="notes_general" class="form-label">ملاحظات</label>
+                            <textarea name="notes" id="notes_general" class="form-control" rows="2"></textarea>
+                        </div>
+                   </div>
+                </div>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-success w-100">حفظ المصروف</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-2">
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header"><h5 class="mb-0">آخر عمليات صرف المستهلكات</h5></div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped mb-0">
+                        <tbody>
+                            {% for item in all_consumptions %}
+                            <tr>
+                                <td>{{ item.consumption_date|date:"Y-m-d" }}</td>
+                                <td>{{ item.product.name }}</td>
+                                <td>{{ item.get_department_display }}</td>
+                                <td class="text-end fw-bold">{{ item.quantity_consumed|floatformat:3 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="4" class="text-center p-3">لا توجد سجلات.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+     <div class="col-lg-6 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header"><h5 class="mb-0">آخر المصروفات العامة</h5></div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped mb-0">
+                        <tbody>
+                            {% for item in all_general_expenses %}
+                            <tr>
+                                <td>{{ item.expense_date|date:"Y-m-d" }}</td>
+                                <td>{{ item.description }}</td>
+                                <td>{{ item.get_category_display }}</td>
+                                <td class="text-end fw-bold">{{ item.amount|floatformat:3 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="4" class="text-center p-3">لا توجد سجلات.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

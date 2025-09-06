@@ -1,3 +1,4 @@
+
 # gipcco_project/inventory/views/analysis_ledger_visuals.py
 
 import json
@@ -12,7 +13,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 from ..models import (Batch, BatchItem, Company, InventoryLog, Product, ProductTag, 
-                     ProductionReturn, FinishedProductReceipt, FinishedProductDispatch) # --- NEW: Import FinishedProductReceipt
+                     ProductionReturn, FinishedProductReceipt, FinishedProductDispatch,
+                     SalesOrderItem, InventoryConsumption, ExpenseLog) # --- NEW: Import new models
 from .helpers import get_inventory_state_at_datetime
 
 # --- NEW HELPER FUNCTION FOR FINAL PRODUCTS ---
@@ -651,4 +653,130 @@ def visuals(request: HttpRequest) -> HttpResponse:
     template_name = 'inventory/visuals.html'
     if 'X-Partial-Request' in request.headers:
         template_name = 'inventory/partials/visuals_content.html'
+    return render(request, template_name, context)
+
+# --- NEW REPORTING VIEWS ---
+
+def sales_margin_analysis(request: HttpRequest) -> HttpResponse:
+    """
+    Analyzes sales data within a date range to calculate revenue, COGS, gross profit, and margin.
+    """
+    today = timezone.now()
+    default_start_date = today.replace(day=1)
+    
+    start_date_str = request.GET.get('start_date', default_start_date.strftime('%Y-%m-%d'))
+    end_date_str = request.GET.get('end_date', today.strftime('%Y-%m-%d'))
+    
+    start_date = datetime.strptime(start_date_str, '%Y-%m-%d').replace(tzinfo=timezone.get_current_timezone())
+    end_date = datetime.strptime(end_date_str, '%Y-%m-%d').replace(tzinfo=timezone.get_current_timezone())
+    end_date_inclusive = end_date + timedelta(days=1)
+
+    # Get all dispatches within the date range
+    dispatches = FinishedProductDispatch.objects.filter(
+        dispatch_date__gte=start_date,
+        dispatch_date__lt=end_date_inclusive
+    ).select_related(
+        'sales_order_item__sales_order__customer',
+        'sales_order_item__finished_product__batch__template__final_product'
+    )
+    
+    # Calculate revenue and COGS
+    total_revenue = dispatches.annotate(
+        revenue=ExpressionWrapper(F('quantity') * F('sales_order_item__unit_price'), output_field=DecimalField())
+    ).aggregate(total=Coalesce(Sum('revenue'), Decimal('0.0')))['total']
+
+    total_cogs = dispatches.aggregate(total=Coalesce(Sum('cost_at_dispatch'), Decimal('0.0')))['total']
+    
+    gross_profit = total_revenue - total_cogs
+    gross_margin = (gross_profit / total_revenue * 100) if total_revenue > 0 else Decimal('0.0')
+    
+    context = {
+        'active_page': 'expenses_reports',
+        'start_date': start_date_str,
+        'end_date': end_date_str,
+        'dispatches': dispatches,
+        'total_revenue': total_revenue,
+        'total_cogs': total_cogs,
+        'gross_profit': gross_profit,
+        'gross_margin': gross_margin,
+    }
+
+    template_name = 'inventory/sales_margin_analysis.html'
+    if 'X-Partial-Request' in request.headers:
+        template_name = 'inventory/partials/sales_margin_analysis_content.html'
+    return render(request, template_name, context)
+
+def profit_and_loss_statement(request: HttpRequest) -> HttpResponse:
+    """
+    Generates a full Profit & Loss statement for a given period.
+    """
+    today = timezone.now()
+    default_start_date = today.replace(day=1)
+    
+    start_date_str = request.GET.get('start_date', default_start_date.strftime('%Y-%m-%d'))
+    end_date_str = request.GET.get('end_date', today.strftime('%Y-%m-%d'))
+    
+    start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+    end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+    
+    # --- 1. Gross Profit Calculation ---
+    dispatches = FinishedProductDispatch.objects.filter(
+        dispatch_date__date__gte=start_date,
+        dispatch_date__date__lte=end_date
+    )
+    total_revenue = dispatches.annotate(
+        revenue=ExpressionWrapper(F('quantity') * F('sales_order_item__unit_price'), output_field=DecimalField())
+    ).aggregate(total=Coalesce(Sum('revenue'), Decimal('0.0')))['total']
+    total_cogs = dispatches.aggregate(total=Coalesce(Sum('cost_at_dispatch'), Decimal('0.0')))['total']
+    gross_profit = total_revenue - total_cogs
+    
+    # --- 2. Operating Expenses Calculation ---
+    inventory_expenses = InventoryConsumption.objects.filter(
+        consumption_date__date__gte=start_date,
+        consumption_date__date__lte=end_date
+    )
+    
+    general_expenses = ExpenseLog.objects.filter(
+        expense_date__gte=start_date,
+        expense_date__lte=end_date
+    )
+
+    # Manufacturing Overhead
+    mfg_overhead_from_inventory = inventory_expenses.aggregate(
+        total=Coalesce(Sum('cost_at_consumption'), Decimal('0.0'))
+    )['total']
+    
+    mfg_overhead_from_general = general_expenses.filter(
+        classification=ExpenseLog.Classification.MANUFACTURING_OVERHEAD
+    ).aggregate(total=Coalesce(Sum('amount'), Decimal('0.0')))['total']
+    
+    total_mfg_overhead = mfg_overhead_from_inventory + mfg_overhead_from_general
+    
+    # SG&A Expenses
+    sg_a_expenses = general_expenses.filter(
+        classification=ExpenseLog.Classification.SG_A
+    )
+    total_sg_a = sg_a_expenses.aggregate(total=Coalesce(Sum('amount'), Decimal('0.0')))['total']
+
+    # --- 3. Final Calculation ---
+    net_operating_profit = gross_profit - total_mfg_overhead - total_sg_a
+
+    context = {
+        'active_page': 'expenses_reports',
+        'start_date': start_date_str,
+        'end_date': end_date_str,
+        'total_revenue': total_revenue,
+        'total_cogs': total_cogs,
+        'gross_profit': gross_profit,
+        'inventory_expenses': inventory_expenses,
+        'mfg_overhead_from_general': general_expenses.filter(classification=ExpenseLog.Classification.MANUFACTURING_OVERHEAD),
+        'sg_a_expenses': sg_a_expenses,
+        'total_mfg_overhead': total_mfg_overhead,
+        'total_sg_a': total_sg_a,
+        'net_operating_profit': net_operating_profit,
+    }
+    
+    template_name = 'inventory/profit_and_loss_statement.html'
+    if 'X-Partial-Request' in request.headers:
+        template_name = 'inventory/partials/profit_and_loss_statement_content.html'
     return render(request, template_name, context)

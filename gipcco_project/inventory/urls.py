@@ -1,3 +1,4 @@
+
 # gipcco_project/inventory/urls.py
 
 from django.urls import path
@@ -9,14 +10,17 @@ from .views.templates import shop_order_templates, delete_shop_order_template, v
 from .views.batches import batches, create_batch, view_batch, delete_batch, add_batch_item, update_batch_items_bulk, delete_batch_item
 from .views.production_returns import production_returns, delete_production_return
 from .views.opening_balances import opening_balances, edit_opening_balance, delete_opening_balance
-from .views.analysis_ledger_visuals import analysis, ledger, visuals, print_ledger, stock_valuation
+# --- MODIFIED: Import new report views ---
+from .views.analysis_ledger_visuals import analysis, ledger, visuals, print_ledger, stock_valuation, sales_margin_analysis, profit_and_loss_statement
 from .views.purchase_orders import purchase_orders, create_purchase_order, view_purchase_order, edit_purchase_order, delete_purchase_order
 # --- MODIFIED: Use aliases for release_from_quarantine to avoid name collision ---
 from .views.finished_products import finished_goods_status, receive_finished_product, view_finished_product, release_from_quarantine as release_fg_from_quarantine
 # --- MODIFIED: Import new API view ---
-from .views.api import get_used_qc_sources, api_batch_details, get_product_tags, api_get_open_pos_for_supplier, api_get_po_items, api_get_full_batch_analysis, api_get_sellable_stock
+from .views.api import get_used_qc_sources, api_batch_details, get_product_tags, api_get_open_pos_for_supplier, api_get_po_items, api_get_full_batch_analysis, api_get_sellable_stock, api_get_available_stock
 # --- MODIFIED: Import new API views and sales views ---
 from .views.sales import customers, edit_customer, delete_customer, sales_orders, create_sales_order, view_sales_order, dispatch_from_sales_order
+# --- NEW: Import new expense views ---
+from .views.expenses import expenses_dashboard
 
 
 app_name = 'inventory'
@@ -95,16 +99,22 @@ urlpatterns = [
     path('stock_valuation/', stock_valuation, name='stock_valuation'),
     path('visuals/', visuals, name='visuals'),
 
+    # --- NEW: Expense & Reporting Routes ---
+    path('expenses/', expenses_dashboard, name='expenses_dashboard'),
+    path('reports/sales-margin/', sales_margin_analysis, name='sales_margin_analysis'),
+    path('reports/p-and-l/', profit_and_loss_statement, name='profit_and_loss_statement'),
+    
     # API Routes
     path('api/get_used_qc_sources/<int:product_pk>/', get_used_qc_sources, name='api_get_used_qc_sources'),
     path('api/batch_details/<int:batch_pk>/', api_batch_details, name='api_batch_details'),
-    # --- NEW API ROUTE ---
     path('api/batch_analysis/<int:batch_pk>/', api_get_full_batch_analysis, name='api_get_full_batch_analysis'),
     path('api/product_tags/<int:product_id>/', get_product_tags, name='api_product_tags'),
     path('api/supplier/<int:supplier_id>/open_pos/', api_get_open_pos_for_supplier, name='api_get_open_pos_for_supplier'),
     path('api/po/<int:po_id>/items/', api_get_po_items, name='api_get_po_items'),
     path('api/sellable_stock/', api_get_sellable_stock, name='api_get_sellable_stock'),
     path('api/get_used_qc_sources/<int:product_pk>/', get_used_qc_sources, name='api_get_used_qc_sources'),
+    # --- NEW API ROUTE ---
+    path('api/available_stock/<int:product_pk>/', api_get_available_stock, name='api_get_available_stock'),
     
      # --- NEW: Customer Routes ---
     path('customers/', customers, name='customers'),

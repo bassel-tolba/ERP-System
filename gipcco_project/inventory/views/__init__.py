@@ -9,3 +9,4 @@ from .sales import *
 from .finished_products import *  # New import for finished products views
 from .purchase_orders import *
 from .templates import *
+from .expenses import *  # New import for expenses views

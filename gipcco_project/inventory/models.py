@@ -1,6 +1,7 @@
 
 
 
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from decimal import Decimal
@@ -32,6 +33,9 @@ class Product(models.Model):
         RAW_MATERIAL = 'مواد خام', _('مواد خام')
         PACKAGING = 'تعبئه و تغليف', _('تعبئه و تغليف')
         FINAL_PRODUCT = 'منتج نهائي', _('منتج نهائي')
+        # --- NEW PRODUCT TYPES ---
+        MRO = 'قطع غيار و صيانة', _('قطع غيار و صيانة') # Maintenance, Repair, Operations
+        CONSUMABLE = 'مستهلكات', _('مستهلكات') # Office supplies, etc.
 
     name = models.CharField(max_length=255, verbose_name=_("Product Name"))
     code = models.CharField(max_length=100, unique=True, verbose_name=_("Product Code"))
@@ -637,3 +641,88 @@ class FinishedProductDispatch(models.Model):
 
     def __str__(self):
         return f"Dispatched {self.quantity} for {self.sales_order_item}"
+
+# --- NEW EXPENSE & PROFITABILITY MODELS ---
+
+class InventoryConsumption(models.Model):
+    """Records the internal consumption of MRO and Consumable inventory items."""
+    class Department(models.TextChoices):
+        PRODUCTION = 'production', _('الإنتاج')
+        ENGINEERING = 'engineering', _('الهندسة والصيانة')
+        ADMIN = 'admin', _('الإدارة')
+        QC = 'qc', _('الجودة')
+        OTHER = 'other', _('أخرى')
+
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.PROTECT,
+        related_name='consumptions',
+        verbose_name=_("Product")
+    )
+    source_log = models.ForeignKey(
+        InventoryLog,
+        on_delete=models.PROTECT,
+        related_name='consumptions',
+        verbose_name=_("Source Inventory Log")
+    )
+    quantity_consumed = models.FloatField(verbose_name=_("Quantity Consumed"))
+    consumption_date = models.DateTimeField(verbose_name=_("Consumption Date"))
+    department = models.CharField(
+        max_length=50,
+        choices=Department.choices,
+        verbose_name=_("Department")
+    )
+    cost_at_consumption = models.DecimalField(
+        max_digits=14, decimal_places=3, verbose_name=_("Cost at Consumption")
+    )
+    notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
+    
+    class Meta:
+        db_table = 'inventory_consumptions'
+        verbose_name = _("Inventory Consumption")
+        verbose_name_plural = _("Inventory Consumptions")
+        ordering = ['-consumption_date']
+
+    def __str__(self):
+        return f"Consumed {self.quantity_consumed} of {self.product.name} by {self.get_department_display()}"
+
+
+class ExpenseLog(models.Model):
+    """Records non-inventory expenses like services, bills, and salaries."""
+    class Classification(models.TextChoices):
+        MANUFACTURING_OVERHEAD = 'manufacturing_overhead', _('تكاليف صناعية غير مباشرة')
+        SG_A = 'sg_a', _('مصاريف بيعية وعمومية وإدارية')
+
+    class Category(models.TextChoices):
+        SALARIES = 'salaries', _('رواتب وأجور')
+        UTILITIES = 'utilities', _('كهرباء ومياه واتصالات')
+        RENT = 'rent', _('إيجارات')
+        MARKETING = 'marketing', _('تسويق وإعلان')
+        TRANSPORT = 'transport', _('نقل وشحن')
+        MAINTENANCE = 'maintenance', _('صيانة (خدمات خارجية)')
+        FEES = 'fees', _('رسوم حكومية وتراخيص')
+        OTHER = 'other', _('مصاريف أخرى')
+
+    description = models.CharField(max_length=255, verbose_name=_("Description"))
+    expense_date = models.DateField(verbose_name=_("Expense Date"))
+    amount = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Amount"))
+    category = models.CharField(
+        max_length=50,
+        choices=Category.choices,
+        verbose_name=_("Category")
+    )
+    classification = models.CharField(
+        max_length=50,
+        choices=Classification.choices,
+        verbose_name=_("Classification")
+    )
+    notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
+
+    class Meta:
+        db_table = 'expense_logs'
+        verbose_name = _("General Expense Log")
+        verbose_name_plural = _("General Expense Logs")
+        ordering = ['-expense_date']
+
+    def __str__(self):
+        return f"Expense: {self.description} for {self.amount} on {self.expense_date}"

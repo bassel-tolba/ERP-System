@@ -17984,3 +17984,462 @@ django.template.exceptions.TemplateSyntaxError: Invalid filter: 'so_status_badge
 ERROR 2025-09-06 15:08:35,678 django.server basehttp 11472 12068 "GET /sales_orders/ HTTP/1.1" 500 249683
 INFO 2025-09-06 15:08:43,923 django.utils.autoreload autoreload 11472 11228 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\templatetags\inventory_extras.py changed, reloading.
 INFO 2025-09-06 15:08:45,113 django.utils.autoreload autoreload 2740 14448 Watching for file changes with StatReloader
+INFO 2025-09-06 15:09:17,585 django.server basehttp 2740 15344 "GET /sales_orders/ HTTP/1.1" 200 114813
+INFO 2025-09-06 15:09:22,315 django.server basehttp 2740 15344 "GET /sales_order/1/ HTTP/1.1" 200 4622
+INFO 2025-09-06 15:10:59,276 django.server basehttp 2740 15344 "GET / HTTP/1.1" 200 134613
+INFO 2025-09-06 15:11:03,701 django.server basehttp 2740 15344 "GET /admin/ HTTP/1.1" 200 35805
+INFO 2025-09-06 15:11:03,744 django.server basehttp 2740 15344 "GET /static/vendor/fontawesome-free/css/all.min.css HTTP/1.1" 304 0
+INFO 2025-09-06 15:11:03,766 django.server basehttp 2740 15344 "GET /static/vendor/adminlte/css/adminlte.min.css HTTP/1.1" 304 0
+INFO 2025-09-06 15:11:03,779 django.server basehttp 2740 15344 "GET /static/vendor/bootstrap/js/bootstrap.min.js HTTP/1.1" 304 0
+INFO 2025-09-06 15:11:03,779 django.server basehttp 2740 13728 "GET /static/jazzmin/css/main.css HTTP/1.1" 304 0
+INFO 2025-09-06 15:11:03,784 django.server basehttp 2740 12140 "GET /static/vendor/bootswatch/united/bootstrap.min.css HTTP/1.1" 304 0
+INFO 2025-09-06 15:11:03,789 django.server basehttp 2740 13728 "GET /static/vendor/adminlte/js/adminlte.min.js HTTP/1.1" 304 0
+INFO 2025-09-06 15:11:03,789 django.server basehttp 2740 12140 "GET /static/jazzmin/js/main.js HTTP/1.1" 304 0
+INFO 2025-09-06 15:11:03,790 django.server basehttp 2740 15344 "GET /static/vendor/bootswatch/darkly/bootstrap.min.css HTTP/1.1" 304 0
+INFO 2025-09-06 15:11:03,791 django.server basehttp 2740 13976 "GET /static/vendor/adminlte/img/AdminLTELogo.png HTTP/1.1" 304 0
+INFO 2025-09-06 15:11:03,908 django.server basehttp 2740 13976 "GET /static/vendor/fontawesome-free/webfonts/fa-solid-900.woff2 HTTP/1.1" 304 0
+INFO 2025-09-06 15:11:03,910 django.server basehttp 2740 15344 "GET /static/vendor/fontawesome-free/webfonts/fa-regular-400.woff2 HTTP/1.1" 304 0
+WARNING 2025-09-06 15:11:04,029 django.server basehttp 2740 15344 "GET /static/fas%20fa-warehouse HTTP/1.1" 404 1864
+INFO 2025-09-06 15:11:11,778 django.server basehttp 2740 13976 "GET /admin/inventory/shopordertemplate/ HTTP/1.1" 200 34047
+INFO 2025-09-06 15:11:11,818 django.server basehttp 2740 13976 "GET /static/vendor/select2/css/select2.min.css HTTP/1.1" 304 0
+INFO 2025-09-06 15:11:11,860 django.server basehttp 2740 13976 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-09-06 15:11:11,866 django.server basehttp 2740 13728 "GET /static/jazzmin/js/change_list.js HTTP/1.1" 304 0
+INFO 2025-09-06 15:11:11,866 django.server basehttp 2740 12140 "GET /static/vendor/select2/js/select2.min.js HTTP/1.1" 304 0
+INFO 2025-09-06 15:11:21,088 django.server basehttp 2740 12140 "POST /sales_order/1/dispatch/ HTTP/1.1" 302 0
+INFO 2025-09-06 15:11:21,108 django.server basehttp 2740 12140 "GET /sales_order/1/ HTTP/1.1" 200 116402
+INFO 2025-09-06 15:11:24,097 django.server basehttp 2740 12140 "GET /sales_orders/ HTTP/1.1" 200 2020
+INFO 2025-09-06 15:11:38,060 django.server basehttp 2740 12140 "GET /sales_orders/?q=%D8%AD%D9%88%D8%B1%D8%B3 HTTP/1.1" 200 114814
+INFO 2025-09-06 15:11:42,238 django.server basehttp 2740 12140 "GET /sales_orders/?q=%D8%AD%D9%88%D8%B1%D8%B3 HTTP/1.1" 200 2028
+INFO 2025-09-06 15:11:43,123 django.server basehttp 2740 12140 "GET /customers/ HTTP/1.1" 200 4537
+INFO 2025-09-06 15:11:43,960 django.server basehttp 2740 12140 "GET /customers/ HTTP/1.1" 200 4537
+INFO 2025-09-06 15:11:44,442 django.server basehttp 2740 12140 "GET /sales_orders/create/ HTTP/1.1" 200 3263
+INFO 2025-09-06 15:11:45,860 django.server basehttp 2740 12140 "GET /sales_orders/create/ HTTP/1.1" 200 3263
+INFO 2025-09-06 15:11:46,746 django.server basehttp 2740 12140 "GET /purchase_orders/ HTTP/1.1" 200 2493
+INFO 2025-09-06 15:11:47,376 django.server basehttp 2740 12140 "GET /purchase_orders/ HTTP/1.1" 200 2493
+INFO 2025-09-06 15:11:48,204 django.server basehttp 2740 12140 "GET /purchase_orders/create/ HTTP/1.1" 200 10490
+INFO 2025-09-06 15:11:48,636 django.server basehttp 2740 12140 "GET / HTTP/1.1" 200 21757
+INFO 2025-09-06 15:11:49,805 django.server basehttp 2740 12140 "GET / HTTP/1.1" 200 21757
+INFO 2025-09-06 15:11:51,091 django.server basehttp 2740 12140 "GET /batches/ HTTP/1.1" 200 31955
+INFO 2025-09-06 15:11:53,696 django.server basehttp 2740 12140 "GET /batches/ HTTP/1.1" 200 31955
+INFO 2025-09-06 15:11:54,972 django.server basehttp 2740 12140 "GET /batches/ HTTP/1.1" 200 31955
+INFO 2025-09-06 15:11:56,726 django.server basehttp 2740 12140 "GET /finished_goods_status/ HTTP/1.1" 200 92142
+INFO 2025-09-06 15:11:57,810 django.server basehttp 2740 12140 "GET /finished_goods_status/ HTTP/1.1" 200 92142
+INFO 2025-09-06 15:12:15,261 django.server basehttp 2740 12140 "GET /finished_goods_status/ HTTP/1.1" 200 92142
+INFO 2025-09-06 15:12:15,927 django.server basehttp 2740 12140 "GET /quarantine/ HTTP/1.1" 200 3394
+INFO 2025-09-06 15:12:16,537 django.server basehttp 2740 12140 "GET /quarantine/ HTTP/1.1" 200 3394
+INFO 2025-09-06 15:12:17,958 django.server basehttp 2740 12140 "GET /quarantine/ HTTP/1.1" 200 3394
+INFO 2025-09-06 15:12:19,830 django.server basehttp 2740 13728 "GET /quarantine/ HTTP/1.1" 200 3394
+INFO 2025-09-06 15:12:20,545 django.server basehttp 2740 13728 "GET /opening_balances/ HTTP/1.1" 200 129242
+INFO 2025-09-06 15:12:21,135 django.server basehttp 2740 13728 "GET /opening_balances/ HTTP/1.1" 200 129242
+INFO 2025-09-06 15:12:21,371 django.server basehttp 2740 12140 "GET /analysis/ HTTP/1.1" 200 28629
+INFO 2025-09-06 15:12:23,079 django.server basehttp 2740 12140 "GET /analysis/ HTTP/1.1" 200 28629
+INFO 2025-09-06 15:12:30,986 django.server basehttp 2740 13728 "GET /visuals/ HTTP/1.1" 200 13756
+INFO 2025-09-06 15:12:31,202 django.server basehttp 2740 13728 "GET /visuals/ HTTP/1.1" 200 126621
+INFO 2025-09-06 15:12:31,872 django.server basehttp 2740 12140 - Broken pipe from ('127.0.0.1', 58244)
+INFO 2025-09-06 15:12:32,183 django.server basehttp 2740 13728 "GET /visuals/ HTTP/1.1" 200 13756
+INFO 2025-09-06 15:12:33,284 django.server basehttp 2740 13728 "GET /ledger/ HTTP/1.1" 200 19099
+INFO 2025-09-06 15:12:39,926 django.server basehttp 2740 13728 "GET /ledger/?product_id=&final_product_id=27&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 150822
+INFO 2025-09-06 15:16:12,084 django.server basehttp 2740 13728 "GET /ledger/?product_id=&final_product_id=27&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 29300
+INFO 2025-09-06 15:22:07,625 django.server basehttp 2740 11000 "GET /ledger/?product_id=&final_product_id=27&start_date=2025-01-01&end_date= HTTP/1.1" 200 150832
+INFO 2025-09-06 15:22:10,404 django.server basehttp 2740 11000 "GET /ledger/?product_id=&final_product_id=27&start_date=2025-01-01&end_date= HTTP/1.1" 200 29310
+INFO 2025-09-06 15:22:10,791 django.server basehttp 2740 11000 "GET /ledger/?product_id=&final_product_id=27&start_date=2025-01-01&end_date= HTTP/1.1" 200 29310
+INFO 2025-09-06 15:22:11,693 django.server basehttp 2740 11000 "GET /ledger/?product_id=&final_product_id=27&start_date=2025-01-01&end_date= HTTP/1.1" 200 29310
+INFO 2025-09-06 15:22:12,647 django.server basehttp 2740 11000 "GET /ledger/?product_id=&final_product_id=27&start_date=2025-01-01&end_date= HTTP/1.1" 200 29310
+INFO 2025-09-06 15:22:14,895 django.server basehttp 2740 11000 "GET /opening_balances/ HTTP/1.1" 200 129242
+INFO 2025-09-06 15:22:26,493 django.server basehttp 2740 11000 "GET /opening_balances/ HTTP/1.1" 200 129242
+INFO 2025-09-06 15:22:27,371 django.server basehttp 2740 11000 "GET /visuals/ HTTP/1.1" 200 13756
+INFO 2025-09-06 15:22:27,441 django.server basehttp 2740 11000 "GET /visuals/ HTTP/1.1" 200 126621
+INFO 2025-09-06 15:22:28,094 django.server basehttp 2740 11000 "GET /visuals/ HTTP/1.1" 200 13756
+INFO 2025-09-06 15:22:29,005 django.server basehttp 2740 11000 "GET /ledger/ HTTP/1.1" 200 19099
+INFO 2025-09-06 15:22:29,538 django.server basehttp 2740 11000 "GET /ledger/ HTTP/1.1" 200 19099
+INFO 2025-09-06 15:22:32,681 django.server basehttp 2740 11000 "GET /ledger/?product_id=18&final_product_id=&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 309677
+INFO 2025-09-06 15:22:59,924 django.server basehttp 2740 11000 "GET /ledger/?final_product_id=25&start_date=&end_date= HTTP/1.1" 200 140643
+INFO 2025-09-06 15:23:08,748 django.server basehttp 2740 11000 "GET /ledger/?product_id=&final_product_id=25&start_date=&end_date= HTTP/1.1" 200 140643
+INFO 2025-09-06 15:23:12,032 django.server basehttp 2740 11000 "GET /ledger/?final_product_id=30&start_date=&end_date= HTTP/1.1" 200 140643
+INFO 2025-09-06 15:23:13,087 django.server basehttp 2740 11000 "GET /ledger/?final_product_id=30&start_date=&end_date= HTTP/1.1" 200 19121
+INFO 2025-09-06 15:23:13,771 django.server basehttp 2740 11000 "GET /batches/ HTTP/1.1" 200 31955
+INFO 2025-09-06 15:23:18,412 django.server basehttp 2740 11000 "GET /batches/ HTTP/1.1" 200 31955
+INFO 2025-09-06 15:23:18,891 django.server basehttp 2740 11000 "GET /sales_orders/create/ HTTP/1.1" 200 3263
+INFO 2025-09-06 15:23:30,674 django.server basehttp 2740 11000 "GET /sales_orders/create/ HTTP/1.1" 200 119625
+INFO 2025-09-06 15:23:30,758 django.server basehttp 2740 11000 "GET /api/sellable_stock/ HTTP/1.1" 200 738
+INFO 2025-09-06 15:23:37,141 django.server basehttp 2740 11000 "GET /sales_orders/create/ HTTP/1.1" 200 3263
+INFO 2025-09-06 15:23:38,008 django.server basehttp 2740 11000 "GET /sales_orders/ HTTP/1.1" 200 2020
+INFO 2025-09-06 15:23:51,145 django.server basehttp 2740 11000 "GET /sales_order/1/ HTTP/1.1" 200 3048
+INFO 2025-09-06 15:23:58,449 django.server basehttp 2740 11000 "GET /sales_orders/ HTTP/1.1" 200 2020
+INFO 2025-09-06 15:23:59,179 django.server basehttp 2740 11000 "GET /sales_orders/ HTTP/1.1" 200 2020
+INFO 2025-09-06 15:23:59,945 django.server basehttp 2740 11000 "GET /sales_orders/ HTTP/1.1" 200 2020
+INFO 2025-09-06 15:24:00,639 django.server basehttp 2740 11000 "GET /sales_order/1/ HTTP/1.1" 200 3048
+INFO 2025-09-06 16:10:34,655 django.server basehttp 2740 12072 "GET /sales_order/1/ HTTP/1.1" 200 115834
+INFO 2025-09-06 16:16:59,811 django.utils.autoreload autoreload 2740 14448 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\urls.py changed, reloading.
+INFO 2025-09-06 16:17:01,760 django.utils.autoreload autoreload 15644 14328 Watching for file changes with StatReloader
+INFO 2025-09-06 18:07:37,691 django.utils.autoreload autoreload 15644 14328 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-06 18:07:39,225 django.utils.autoreload autoreload 16160 12952 Watching for file changes with StatReloader
+INFO 2025-09-06 18:07:55,317 django.utils.autoreload autoreload 15584 10508 Watching for file changes with StatReloader
+INFO 2025-09-06 18:09:24,886 django.utils.autoreload autoreload 15584 10508 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\api.py changed, reloading.
+INFO 2025-09-06 18:09:25,855 django.utils.autoreload autoreload 16356 14676 Watching for file changes with StatReloader
+INFO 2025-09-06 18:09:27,261 django.utils.autoreload autoreload 16356 14676 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\api.py changed, reloading.
+INFO 2025-09-06 18:09:28,234 django.utils.autoreload autoreload 13856 12556 Watching for file changes with StatReloader
+INFO 2025-09-06 18:10:06,738 django.utils.autoreload autoreload 13856 12556 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-06 18:10:07,725 django.utils.autoreload autoreload 12572 15988 Watching for file changes with StatReloader
+INFO 2025-09-06 18:11:40,690 django.utils.autoreload autoreload 12572 15988 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py changed, reloading.
+INFO 2025-09-06 18:11:41,768 django.utils.autoreload autoreload 13828 14764 Watching for file changes with StatReloader
+INFO 2025-09-06 18:12:08,690 django.utils.autoreload autoreload 13828 14764 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\urls.py changed, reloading.
+INFO 2025-09-06 18:12:09,688 django.utils.autoreload autoreload 7180 10944 Watching for file changes with StatReloader
+INFO 2025-09-06 18:12:32,092 django.utils.autoreload autoreload 7180 10944 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\urls.py changed, reloading.
+INFO 2025-09-06 18:12:33,179 django.utils.autoreload autoreload 10508 14636 Watching for file changes with StatReloader
+INFO 2025-09-06 18:12:52,501 django.utils.autoreload autoreload 10508 14636 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\__init__.py changed, reloading.
+INFO 2025-09-06 18:12:53,425 django.utils.autoreload autoreload 15652 4576 Watching for file changes with StatReloader
+INFO 2025-09-06 18:13:26,316 django.utils.autoreload autoreload 15652 4576 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\api.py changed, reloading.
+INFO 2025-09-06 18:13:27,360 django.utils.autoreload autoreload 13828 14764 Watching for file changes with StatReloader
+INFO 2025-09-06 18:18:24,739 django.server basehttp 13828 1328 "GET /sales_order/1/ HTTP/1.1" 200 120495
+INFO 2025-09-06 18:18:24,799 django.server basehttp 13828 1328 "GET /static/css/style.css HTTP/1.1" 304 0
+INFO 2025-09-06 18:18:27,606 django.server basehttp 13828 1328 "GET /sales_order/1/ HTTP/1.1" 200 3048
+INFO 2025-09-06 18:18:28,394 django.server basehttp 13828 1328 "GET /sales_order/1/ HTTP/1.1" 200 3048
+INFO 2025-09-06 18:18:29,461 django.server basehttp 13828 1328 "GET /sales_order/1/ HTTP/1.1" 200 3048
+INFO 2025-09-06 18:18:30,960 django.server basehttp 13828 1328 "GET /expenses/ HTTP/1.1" 200 8584
+INFO 2025-09-06 18:24:36,472 django.server basehttp 13828 4388 "GET /expenses/ HTTP/1.1" 200 8584
+INFO 2025-09-06 18:24:41,991 django.server basehttp 13828 4388 "GET /expenses/ HTTP/1.1" 200 8584
+INFO 2025-09-06 18:24:44,517 django.server basehttp 13828 4388 "GET /reports/p-and-l/ HTTP/1.1" 200 3437
+INFO 2025-09-06 18:25:18,140 django.server basehttp 13828 4388 "GET /reports/p-and-l/ HTTP/1.1" 200 3437
+ERROR 2025-09-06 18:25:18,975 django.request log 13828 4388 Internal Server Error: /reports/sales-margin/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py", line 707, in sales_margin_analysis
+    return render(request, template_name, context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 196, in compile_nodelist
+    nodelist = parser.parse()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 862, in do_for
+    nodelist_loop = parser.parse(
+        (
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 489, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 487, in parse
+    filter_expression = self.compile_filter(token.contents)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 609, in compile_filter
+    return FilterExpression(token, self)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 705, in __init__
+    filter_func = parser.find_filter(filter_name)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 615, in find_filter
+    raise TemplateSyntaxError("Invalid filter: '%s'" % filter_name)
+django.template.exceptions.TemplateSyntaxError: Invalid filter: 'multiply'
+ERROR 2025-09-06 18:25:18,988 django.server basehttp 13828 4388 "GET /reports/sales-margin/ HTTP/1.1" 500 206254
+ERROR 2025-09-06 18:25:19,142 django.request log 13828 4388 Internal Server Error: /reports/sales-margin/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py", line 707, in sales_margin_analysis
+    return render(request, template_name, context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 199, in render
+    template = context.template.engine.select_template(template_name)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 208, in select_template
+    return self.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 177, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 196, in compile_nodelist
+    nodelist = parser.parse()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 518, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 516, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 862, in do_for
+    nodelist_loop = parser.parse(
+        (
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 489, in parse
+    raise self.error(token, e)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 487, in parse
+    filter_expression = self.compile_filter(token.contents)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 609, in compile_filter
+    return FilterExpression(token, self)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 705, in __init__
+    filter_func = parser.find_filter(filter_name)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 615, in find_filter
+    raise TemplateSyntaxError("Invalid filter: '%s'" % filter_name)
+django.template.exceptions.TemplateSyntaxError: Invalid filter: 'multiply'
+ERROR 2025-09-06 18:25:19,161 django.server basehttp 13828 4388 "GET /reports/sales-margin/ HTTP/1.1" 500 273207
+INFO 2025-09-06 18:26:33,517 django.server basehttp 13828 4388 "GET /admin/inventory/shopordertemplate/?o=2.1 HTTP/1.1" 200 35223
+INFO 2025-09-06 18:26:33,568 django.server basehttp 13828 4388 "GET /static/vendor/fontawesome-free/css/all.min.css HTTP/1.1" 304 0
+INFO 2025-09-06 18:26:33,581 django.server basehttp 13828 4388 "GET /static/vendor/adminlte/css/adminlte.min.css HTTP/1.1" 304 0
+INFO 2025-09-06 18:26:33,584 django.server basehttp 13828 4388 "GET /static/admin/js/core.js HTTP/1.1" 304 0
+INFO 2025-09-06 18:26:33,588 django.server basehttp 13828 4388 "GET /static/admin/js/admin/RelatedObjectLookups.js HTTP/1.1" 304 0
+INFO 2025-09-06 18:26:33,588 django.server basehttp 13828 7256 "GET /static/vendor/bootswatch/united/bootstrap.min.css HTTP/1.1" 304 0
+INFO 2025-09-06 18:26:33,593 django.server basehttp 13828 4388 "GET /static/admin/js/actions.js HTTP/1.1" 304 0
+INFO 2025-09-06 18:26:33,599 django.server basehttp 13828 7256 "GET /static/admin/js/urlify.js HTTP/1.1" 304 0
+INFO 2025-09-06 18:26:33,601 django.server basehttp 13828 4388 "GET /static/admin/js/prepopulate.js HTTP/1.1" 304 0
+INFO 2025-09-06 18:26:33,605 django.server basehttp 13828 7256 "GET /static/admin/js/vendor/xregexp/xregexp.js HTTP/1.1" 304 0
+INFO 2025-09-06 18:26:33,606 django.server basehttp 13828 14280 "GET /static/jazzmin/css/main.css HTTP/1.1" 304 0
+INFO 2025-09-06 18:26:33,616 django.server basehttp 13828 2680 "GET /static/vendor/select2/css/select2.min.css HTTP/1.1" 304 0
+INFO 2025-09-06 18:26:33,618 django.server basehttp 13828 14280 "GET /static/vendor/adminlte/img/AdminLTELogo.png HTTP/1.1" 304 0
+INFO 2025-09-06 18:26:33,626 django.server basehttp 13828 14280 "GET /static/vendor/bootstrap/js/bootstrap.min.js HTTP/1.1" 304 0
+INFO 2025-09-06 18:26:33,633 django.server basehttp 13828 14816 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-09-06 18:26:33,645 django.server basehttp 13828 14816 "GET /static/vendor/adminlte/js/adminlte.min.js HTTP/1.1" 304 0
+INFO 2025-09-06 18:26:33,649 django.server basehttp 13828 14280 "GET /static/jazzmin/js/main.js HTTP/1.1" 304 0
+INFO 2025-09-06 18:26:33,654 django.server basehttp 13828 12976 "GET /static/admin/js/jquery.init.js HTTP/1.1" 304 0
+INFO 2025-09-06 18:26:33,661 django.server basehttp 13828 12976 "GET /static/vendor/select2/js/select2.min.js HTTP/1.1" 304 0
+INFO 2025-09-06 18:26:33,662 django.server basehttp 13828 14280 "GET /static/jazzmin/js/change_list.js HTTP/1.1" 304 0
+INFO 2025-09-06 18:26:33,671 django.server basehttp 13828 14280 "GET /static/vendor/bootswatch/darkly/bootstrap.min.css HTTP/1.1" 304 0
+INFO 2025-09-06 18:26:33,736 django.server basehttp 13828 14280 "GET /static/vendor/fontawesome-free/webfonts/fa-solid-900.woff2 HTTP/1.1" 304 0
+INFO 2025-09-06 18:26:33,736 django.server basehttp 13828 12976 "GET /static/vendor/fontawesome-free/webfonts/fa-regular-400.woff2 HTTP/1.1" 304 0
+INFO 2025-09-06 18:26:35,691 django.server basehttp 13828 12976 "GET /admin/inventory/shopordertemplate/?o=-1.2 HTTP/1.1" 200 35243
+INFO 2025-09-06 18:26:35,756 django.server basehttp 13828 12976 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-09-06 18:26:36,745 django.server basehttp 13828 12976 "GET /admin/inventory/shopordertemplate/?o=1.2 HTTP/1.1" 200 35223
+INFO 2025-09-06 18:26:36,791 django.server basehttp 13828 12976 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-09-06 18:26:37,424 django.server basehttp 13828 12976 "GET /admin/inventory/shopordertemplate/?o=-1.2 HTTP/1.1" 200 35243
+INFO 2025-09-06 18:26:37,482 django.server basehttp 13828 12976 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-09-06 18:26:37,941 django.server basehttp 13828 12976 "GET /admin/inventory/shopordertemplate/?o=1.2 HTTP/1.1" 200 35223
+INFO 2025-09-06 18:26:37,988 django.server basehttp 13828 12976 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-09-06 18:26:38,315 django.server basehttp 13828 12976 "GET /admin/inventory/shopordertemplate/?o=-1.2 HTTP/1.1" 200 35243
+INFO 2025-09-06 18:26:38,378 django.server basehttp 13828 12976 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-09-06 18:26:39,028 django.server basehttp 13828 12976 "GET /admin/inventory/shopordertemplate/?o=1.2 HTTP/1.1" 200 35223
+INFO 2025-09-06 18:26:39,067 django.server basehttp 13828 12976 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-09-06 18:26:39,332 django.server basehttp 13828 12976 "GET /admin/inventory/shopordertemplate/?o=-1.2 HTTP/1.1" 200 35243
+INFO 2025-09-06 18:26:39,389 django.server basehttp 13828 12976 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-09-06 18:26:39,834 django.server basehttp 13828 12976 "GET /admin/inventory/shopordertemplate/?o=1.2 HTTP/1.1" 200 35223
+INFO 2025-09-06 18:26:39,871 django.server basehttp 13828 12976 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-09-06 18:26:40,218 django.server basehttp 13828 12976 "GET /admin/inventory/shopordertemplate/?o=-1.2 HTTP/1.1" 200 35243
+INFO 2025-09-06 18:26:40,267 django.server basehttp 13828 12976 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-09-06 18:26:40,660 django.server basehttp 13828 12976 "GET /admin/inventory/shopordertemplate/?o=1.2 HTTP/1.1" 200 35223
+INFO 2025-09-06 18:26:40,699 django.server basehttp 13828 12976 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-09-06 18:26:41,023 django.server basehttp 13828 12976 "GET /admin/inventory/shopordertemplate/?o=-1.2 HTTP/1.1" 200 35243
+INFO 2025-09-06 18:26:41,072 django.server basehttp 13828 12976 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-09-06 18:26:41,686 django.server basehttp 13828 12976 "GET /admin/inventory/shopordertemplate/?o=1.2 HTTP/1.1" 200 35223
+INFO 2025-09-06 18:26:41,724 django.server basehttp 13828 12976 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-09-06 18:26:42,046 django.server basehttp 13828 12976 "GET /admin/inventory/shopordertemplate/?o=-1.2 HTTP/1.1" 200 35243
+INFO 2025-09-06 18:26:42,103 django.server basehttp 13828 12976 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-09-06 18:26:42,724 django.server basehttp 13828 12976 "GET /admin/inventory/shopordertemplate/?o=1.2 HTTP/1.1" 200 35223
+INFO 2025-09-06 18:26:42,766 django.server basehttp 13828 12976 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-09-06 18:26:43,057 django.server basehttp 13828 12976 "GET /admin/inventory/shopordertemplate/?o=-1.2 HTTP/1.1" 200 35243
+INFO 2025-09-06 18:26:43,110 django.server basehttp 13828 12976 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-09-06 18:26:43,854 django.server basehttp 13828 12976 "GET /admin/inventory/shopordertemplate/?o=1.2 HTTP/1.1" 200 35223
+INFO 2025-09-06 18:26:43,894 django.server basehttp 13828 12976 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-09-06 18:26:44,591 django.server basehttp 13828 12976 "GET /admin/inventory/shopordertemplate/?o=-1.2 HTTP/1.1" 200 35243
+INFO 2025-09-06 18:26:44,656 django.server basehttp 13828 12976 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-09-06 18:26:44,974 django.server basehttp 13828 12976 "GET /admin/inventory/shopordertemplate/?o=1.2 HTTP/1.1" 200 35223
+INFO 2025-09-06 18:26:45,015 django.server basehttp 13828 12976 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-09-06 18:26:48,816 django.server basehttp 13828 12976 "GET /admin/ HTTP/1.1" 200 35794
+INFO 2025-09-06 18:26:53,702 django.server basehttp 13828 12976 "GET /admin/auth/user/1/change/ HTTP/1.1" 200 43214
+INFO 2025-09-06 18:26:53,751 django.server basehttp 13828 12976 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-09-06 18:26:53,769 django.server basehttp 13828 14280 "GET /static/admin/js/admin/DateTimeShortcuts.js HTTP/1.1" 304 0
+INFO 2025-09-06 18:26:53,770 django.server basehttp 13828 4388 "GET /static/admin/js/prepopulate_init.js HTTP/1.1" 304 0
+INFO 2025-09-06 18:26:53,770 django.server basehttp 13828 12976 "GET /static/admin/js/calendar.js HTTP/1.1" 304 0
+INFO 2025-09-06 18:26:53,770 django.server basehttp 13828 14816 "GET /static/admin/js/SelectBox.js HTTP/1.1" 304 0
+INFO 2025-09-06 18:26:53,770 django.server basehttp 13828 7256 "GET /static/admin/js/change_form.js HTTP/1.1" 304 0
+INFO 2025-09-06 18:26:53,770 django.server basehttp 13828 2680 "GET /static/admin/js/SelectFilter2.js HTTP/1.1" 304 0
+INFO 2025-09-06 18:26:53,782 django.server basehttp 13828 2680 "GET /static/jazzmin/js/change_form.js HTTP/1.1" 304 0
+INFO 2025-09-06 18:26:53,782 django.server basehttp 13828 7256 "GET /static/admin/img/icon-addlink.svg HTTP/1.1" 304 0
+INFO 2025-09-06 18:26:55,844 django.server basehttp 13828 7256 "GET /admin/auth/user/1/change/ HTTP/1.1" 200 43214
+INFO 2025-09-06 18:26:55,890 django.server basehttp 13828 7256 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-09-06 18:26:56,561 django.server basehttp 13828 7256 "GET /admin/ HTTP/1.1" 200 35794
+INFO 2025-09-06 18:27:36,838 django.utils.autoreload autoreload 13828 14764 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\templatetags\inventory_extras.py changed, reloading.
+INFO 2025-09-06 18:27:38,261 django.utils.autoreload autoreload 4576 13444 Watching for file changes with StatReloader
+INFO 2025-09-06 18:27:56,630 django.utils.autoreload autoreload 4576 13444 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\templatetags\inventory_extras.py changed, reloading.
+INFO 2025-09-06 18:27:57,651 django.utils.autoreload autoreload 16112 8604 Watching for file changes with StatReloader
+INFO 2025-09-06 18:28:05,319 django.server basehttp 16112 1572 "GET /reports/sales-margin/ HTTP/1.1" 200 121492
+INFO 2025-09-06 18:28:27,101 django.server basehttp 16112 1572 "GET /reports/sales-margin/?start_date=2025-09-01&end_date=2025-09-06 HTTP/1.1" 200 121492
+INFO 2025-09-06 18:28:31,194 django.server basehttp 16112 1572 "GET /reports/sales-margin/?start_date=2024-12-30&end_date=2025-09-06 HTTP/1.1" 200 121492
+INFO 2025-09-06 18:29:06,996 django.server basehttp 16112 1572 "GET /sales_order/1/ HTTP/1.1" 200 3048
+INFO 2025-09-06 18:29:14,181 django.server basehttp 16112 1572 "GET /reports/sales-margin/?start_date=2024-12-30&end_date=2025-09-06 HTTP/1.1" 200 3964
+INFO 2025-09-06 18:29:17,439 django.server basehttp 16112 1572 "GET /reports/sales-margin/?start_date=2024-12-30&end_date=2025-09-06 HTTP/1.1" 200 3964
+INFO 2025-09-06 18:29:18,354 django.server basehttp 16112 1572 "GET /reports/p-and-l/ HTTP/1.1" 200 3437
+INFO 2025-09-06 18:29:31,489 django.server basehttp 16112 1572 "GET /reports/p-and-l/ HTTP/1.1" 200 3437
+INFO 2025-09-06 18:29:34,059 django.server basehttp 16112 1572 "GET /stock_valuation/ HTTP/1.1" 200 22987
+INFO 2025-09-06 18:30:23,840 django.server basehttp 16112 1572 "GET /stock_valuation/ HTTP/1.1" 200 22987
+INFO 2025-09-06 18:30:47,334 django.server basehttp 16112 1572 "GET /stock_valuation/ HTTP/1.1" 200 22987
+INFO 2025-09-06 18:30:47,461 django.server basehttp 16112 1572 "GET /ledger/ HTTP/1.1" 200 19099
+INFO 2025-09-06 18:30:50,756 django.server basehttp 16112 1572 "GET /ledger/?product_id=18&final_product_id=&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 314338
+INFO 2025-09-06 18:30:51,321 django.server basehttp 16112 1572 "GET /ledger/?product_id=18&final_product_id=&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 314338
+INFO 2025-09-06 18:30:54,943 django.server basehttp 16112 1572 "GET /ledger/?product_id=18&final_product_id=&company_id=&qc_no=&start_date=&end_date= HTTP/1.1" 200 188155
+INFO 2025-09-06 18:30:56,127 django.server basehttp 16112 1572 "GET /production_returns/ HTTP/1.1" 200 19606
+INFO 2025-09-06 18:30:56,803 django.server basehttp 16112 1572 "GET /production_returns/ HTTP/1.1" 200 19606
+INFO 2025-09-06 18:30:59,636 django.server basehttp 16112 1572 "GET /production_returns/ HTTP/1.1" 200 19606
+INFO 2025-09-06 18:31:00,378 django.server basehttp 16112 1572 "GET /opening_balances/ HTTP/1.1" 200 129242
+INFO 2025-09-06 18:31:56,584 django.server basehttp 16112 1572 "GET /opening_balances/ HTTP/1.1" 200 129242
+INFO 2025-09-06 18:31:59,379 django.server basehttp 16112 1572 "GET /opening_balances/ HTTP/1.1" 200 129242
+INFO 2025-09-06 18:32:00,179 django.server basehttp 16112 1572 "GET /opening_balances/ HTTP/1.1" 200 129242
+INFO 2025-09-06 18:32:01,534 django.server basehttp 16112 1572 "GET /customers/ HTTP/1.1" 200 4537
+INFO 2025-09-06 18:32:02,918 django.server basehttp 16112 1572 "GET /customers/ HTTP/1.1" 200 4537
+INFO 2025-09-06 18:32:03,650 django.server basehttp 16112 1572 "GET /sales_orders/ HTTP/1.1" 200 2020
+INFO 2025-09-06 18:32:04,027 django.server basehttp 16112 1572 "GET /sales_orders/ HTTP/1.1" 200 2020
+INFO 2025-09-06 18:32:06,429 django.server basehttp 16112 1572 "GET /sales_orders/create/ HTTP/1.1" 200 3263
+INFO 2025-09-06 18:32:08,726 django.server basehttp 16112 1572 "GET /sales_orders/create/ HTTP/1.1" 200 3263
+INFO 2025-09-06 18:32:09,878 django.server basehttp 16112 1572 "GET /visuals/ HTTP/1.1" 200 13756
+INFO 2025-09-06 18:32:10,008 django.server basehttp 16112 1572 "GET /visuals/ HTTP/1.1" 200 131282
+INFO 2025-09-06 18:32:10,556 django.server basehttp 16112 1572 "GET /visuals/ HTTP/1.1" 200 13756
+INFO 2025-09-06 18:32:15,298 django.server basehttp 16112 1572 "GET /visuals/?type=finished_product&final_product_id=46&start_date=2025-09-01&end_date=2025-09-06 HTTP/1.1" 200 132861
+INFO 2025-09-06 18:32:22,011 django.server basehttp 16112 1572 "GET /visuals/?type=finished_product&final_product_id=24&start_date=2025-09-01&end_date=2025-09-06 HTTP/1.1" 200 132861
+INFO 2025-09-06 18:32:24,856 django.server basehttp 16112 1572 "GET /visuals/?type=finished_product&final_product_id=24&start_date=2025-09-01&end_date=2025-09-06 HTTP/1.1" 200 15335
+INFO 2025-09-06 18:32:27,246 django.server basehttp 16112 1572 "GET /production_returns/ HTTP/1.1" 200 19606
+INFO 2025-09-06 18:32:28,154 django.server basehttp 16112 1572 "GET /production_returns/ HTTP/1.1" 200 19606
+INFO 2025-09-06 18:32:28,793 django.server basehttp 16112 1572 "GET /opening_balances/ HTTP/1.1" 200 129242
+INFO 2025-09-06 18:32:29,276 django.server basehttp 16112 1572 "GET /opening_balances/ HTTP/1.1" 200 129242
+INFO 2025-09-06 18:32:32,194 django.server basehttp 16112 1572 "GET /quarantine/ HTTP/1.1" 200 3394
+INFO 2025-09-06 18:32:33,788 django.server basehttp 16112 1572 "GET /quarantine/ HTTP/1.1" 200 3394
+INFO 2025-09-06 18:32:52,874 django.server basehttp 16112 1572 "GET /quarantine/ HTTP/1.1" 200 3394
+INFO 2025-09-06 18:32:53,772 django.server basehttp 16112 1572 "GET /expenses/ HTTP/1.1" 200 8584
+INFO 2025-09-06 18:32:54,561 django.server basehttp 16112 1572 "GET /expenses/ HTTP/1.1" 200 8584
+INFO 2025-09-06 18:32:55,370 django.server basehttp 16112 1572 "GET /reports/sales-margin/ HTTP/1.1" 200 3964
+INFO 2025-09-06 18:32:56,158 django.server basehttp 16112 1572 "GET /reports/sales-margin/ HTTP/1.1" 200 3964
+INFO 2025-09-06 18:32:58,145 django.server basehttp 16112 1572 "GET /reports/p-and-l/ HTTP/1.1" 200 3437
+INFO 2025-09-06 18:32:59,439 django.server basehttp 16112 1572 "GET /reports/p-and-l/ HTTP/1.1" 200 3437
+INFO 2025-09-06 18:33:00,413 django.server basehttp 16112 1572 "GET /expenses/ HTTP/1.1" 200 8584
+WARNING 2025-09-06 18:33:08,051 django.request log 16112 1572 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-06 18:33:08,051 django.server basehttp 16112 1572 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 20914
+WARNING 2025-09-06 18:33:08,180 django.server basehttp 16112 1572 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-06 18:33:12,962 django.server basehttp 16112 4372 "GET /expenses/ HTTP/1.1" 200 126113
+WARNING 2025-09-06 18:33:13,044 django.request log 16112 4372 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-06 18:33:13,048 django.server basehttp 16112 4372 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 20914
+WARNING 2025-09-06 18:33:13,265 django.server basehttp 16112 4372 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-06 18:34:05,810 django.server basehttp 16112 8068 "GET /static/img/fall.png HTTP/1.1" 200 1463923
+INFO 2025-09-06 18:34:07,627 django.server basehttp 16112 10040 "GET /expenses/ HTTP/1.1" 200 126113
+WARNING 2025-09-06 18:34:07,750 django.request log 16112 10040 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-06 18:34:07,754 django.server basehttp 16112 10040 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 20914
+WARNING 2025-09-06 18:34:07,995 django.server basehttp 16112 10040 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-06 18:45:42,128 django.server basehttp 16112 10100 "GET /expenses/ HTTP/1.1" 200 126561
+WARNING 2025-09-06 18:45:42,197 django.request log 16112 10100 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-06 18:45:42,203 django.server basehttp 16112 10100 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 20914
+WARNING 2025-09-06 18:45:42,450 django.server basehttp 16112 10100 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-06 18:50:13,307 django.server basehttp 16112 1844 "GET /expenses/ HTTP/1.1" 200 126594
+WARNING 2025-09-06 18:50:13,458 django.request log 16112 1844 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-06 18:50:13,525 django.server basehttp 16112 1844 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 20914
+WARNING 2025-09-06 18:50:14,049 django.server basehttp 16112 1844 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-06 18:50:37,759 django.server basehttp 16112 5624 "GET /expenses/ HTTP/1.1" 200 8566
+INFO 2025-09-06 18:50:40,279 django.server basehttp 16112 5624 "GET /expenses/ HTTP/1.1" 200 8566
+INFO 2025-09-06 18:50:43,517 django.server basehttp 16112 5624 "GET /products/ HTTP/1.1" 200 275179
+INFO 2025-09-06 18:50:44,725 django.server basehttp 16112 5624 "GET /records/ HTTP/1.1" 200 502470
+INFO 2025-09-06 18:50:45,004 django.server basehttp 16112 5624 "GET /products/ HTTP/1.1" 200 275179
+INFO 2025-09-06 18:51:20,417 django.server basehttp 16112 5624 "POST /products/ HTTP/1.1" 302 0
+INFO 2025-09-06 18:51:20,579 django.server basehttp 16112 5624 "GET /products/ HTTP/1.1" 200 398966
+INFO 2025-09-06 18:51:23,724 django.server basehttp 16112 5624 "GET /products/ HTTP/1.1" 200 280352
+INFO 2025-09-06 18:51:24,962 django.server basehttp 16112 5624 "GET /expenses/ HTTP/1.1" 200 8685
+INFO 2025-09-06 18:51:29,753 django.server basehttp 16112 5624 "GET /api/available_stock/52/ HTTP/1.1" 200 2
+INFO 2025-09-06 18:51:44,863 django.server basehttp 16112 5624 "GET /expenses/ HTTP/1.1" 200 8685
+INFO 2025-09-06 18:51:47,436 django.server basehttp 16112 5624 "GET /expenses/ HTTP/1.1" 200 8685
+INFO 2025-09-06 18:51:49,090 django.server basehttp 16112 5624 "GET /records/ HTTP/1.1" 200 502540
+INFO 2025-09-06 18:51:51,742 django.server basehttp 16112 5624 "GET / HTTP/1.1" 200 21857
+INFO 2025-09-06 18:51:58,388 django.server basehttp 16112 5624 "GET /api/product_tags/52/ HTTP/1.1" 200 177
+INFO 2025-09-06 18:52:05,485 django.server basehttp 16112 5624 "GET /companies/ HTTP/1.1" 200 159091
+INFO 2025-09-06 18:52:15,065 django.server basehttp 16112 5624 "POST /companies/ HTTP/1.1" 302 0
+INFO 2025-09-06 18:52:15,094 django.server basehttp 16112 5624 "GET /companies/ HTTP/1.1" 200 162013
+INFO 2025-09-06 18:52:20,729 django.server basehttp 16112 5624 "GET / HTTP/1.1" 200 140023
+INFO 2025-09-06 18:52:24,959 django.server basehttp 16112 5624 "GET /api/product_tags/52/ HTTP/1.1" 200 177
+INFO 2025-09-06 18:52:51,629 django.server basehttp 16112 5624 "POST / HTTP/1.1" 302 0
+INFO 2025-09-06 18:52:51,662 django.server basehttp 16112 5624 "GET / HTTP/1.1" 200 140640
+INFO 2025-09-06 18:52:58,371 django.server basehttp 16112 5624 "GET / HTTP/1.1" 200 22007
+INFO 2025-09-06 18:52:59,640 django.server basehttp 16112 5624 "GET /quarantine/ HTTP/1.1" 200 4925
+INFO 2025-09-06 18:53:26,210 django.server basehttp 16112 5624 "POST /quarantine/ HTTP/1.1" 200 122873
+INFO 2025-09-06 18:53:27,998 django.server basehttp 16112 5624 "GET /quarantine/ HTTP/1.1" 200 4925
+INFO 2025-09-06 18:53:29,438 django.server basehttp 16112 5624 "GET /quarantine/ HTTP/1.1" 200 4925
+INFO 2025-09-06 18:53:33,689 django.server basehttp 16112 5624 "GET /quarantine/ HTTP/1.1" 200 4925
+INFO 2025-09-06 18:53:34,580 django.server basehttp 16112 5624 "GET /expenses/ HTTP/1.1" 200 8685
+INFO 2025-09-06 18:53:36,230 django.server basehttp 16112 5624 "GET /api/available_stock/52/ HTTP/1.1" 200 2
+INFO 2025-09-06 18:53:47,327 django.server basehttp 16112 5624 "GET /expenses/ HTTP/1.1" 200 126713
+INFO 2025-09-06 18:53:48,977 django.server basehttp 16112 5624 "GET /api/available_stock/52/ HTTP/1.1" 200 2
+WARNING 2025-09-06 18:53:51,943 django.request log 16112 5624 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-09-06 18:53:51,949 django.server basehttp 16112 5624 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 20914
+WARNING 2025-09-06 18:53:52,289 django.server basehttp 16112 5624 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-09-06 18:59:45,942 django.server basehttp 16112 14092 "GET /companies/ HTTP/1.1" 200 43395
+INFO 2025-09-06 18:59:46,446 django.server basehttp 16112 14092 "GET /companies/ HTTP/1.1" 200 43395
+INFO 2025-09-06 18:59:47,015 django.server basehttp 16112 14092 "GET /expenses/ HTTP/1.1" 200 8685
+INFO 2025-09-06 18:59:54,489 django.server basehttp 16112 14092 "GET /expenses/ HTTP/1.1" 200 8685
+INFO 2025-09-06 18:59:55,230 django.server basehttp 16112 14092 "GET / HTTP/1.1" 200 22007
+INFO 2025-09-06 19:04:27,885 django.utils.autoreload autoreload 16112 8604 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\api.py changed, reloading.
+INFO 2025-09-06 19:04:29,133 django.utils.autoreload autoreload 3644 11948 Watching for file changes with StatReloader
+INFO 2025-09-06 19:04:30,813 django.utils.autoreload autoreload 3644 11948 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\api.py changed, reloading.
+INFO 2025-09-06 19:04:33,759 django.utils.autoreload autoreload 15804 9320 Watching for file changes with StatReloader
+INFO 2025-09-06 19:04:41,074 django.utils.autoreload autoreload 15804 9320 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\api.py changed, reloading.
+INFO 2025-09-06 19:04:42,197 django.utils.autoreload autoreload 8580 6572 Watching for file changes with StatReloader

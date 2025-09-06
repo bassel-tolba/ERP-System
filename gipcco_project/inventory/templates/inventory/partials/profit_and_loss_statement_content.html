@@ -1,0 +1,95 @@
+<!-- gipcco_project/inventory/templates/inventory/partials/profit_and_loss_statement_content.html -->
+{% load inventory_extras %}
+
+<h1 class="h2 mb-4">قائمة الدخل (الأرباح والخسائر)</h1>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="GET" action="{% url 'inventory:profit_and_loss_statement' %}" class="row g-3 align-items-center">
+            <div class="col-auto">
+                <label for="start_date" class="form-label">من تاريخ</label>
+                <input type="text" class="form-control datepicker" id="start_date" name="start_date" value="{{ start_date }}">
+            </div>
+            <div class="col-auto">
+                <label for="end_date" class="form-label">إلى تاريخ</label>
+                <input type="text" class="form-control datepicker" id="end_date" name="end_date" value="{{ end_date }}">
+            </div>
+            <div class="col-auto mt-auto">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-funnel-fill me-2"></i>عرض التقرير</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header">
+        <h5 class="mb-0">ملخص الفترة من {{ start_date }} إلى {{ end_date }}</h5>
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-bordered mb-0 fs-5">
+            <tbody>
+                <!-- Revenue -->
+                <tr class="table-light">
+                    <td class="ps-3 fw-bold">الإيرادات (المبيعات)</td>
+                    <td class="text-end fw-bold">{{ total_revenue|floatformat:3 }}</td>
+                </tr>
+                <!-- COGS -->
+                <tr>
+                    <td class="ps-4">(-) تكلفة البضاعة المباعة (COGS)</td>
+                    <td class="text-end text-danger">({{ total_cogs|floatformat:3 }})</td>
+                </tr>
+                <!-- Gross Profit -->
+                <tr class="table-success">
+                    <td class="ps-3 fw-bolder">مجمل الربح</td>
+                    <td class="text-end fw-bolder">{{ gross_profit|floatformat:3 }}</td>
+                </tr>
+
+                <!-- Spacer -->
+                <tr class="table-light"><td colspan="2"></td></tr>
+
+                <!-- Operating Expenses Header -->
+                <tr class="table-light">
+                    <td class="ps-3 fw-bold">المصروفات التشغيلية</td>
+                    <td></td>
+                </tr>
+                <!-- Manufacturing Overhead -->
+                <tr>
+                    <td class="ps-4 fw-semibold">(-) التكاليف الصناعية غير المباشرة</td>
+                    <td class="text-end text-danger">({{ total_mfg_overhead|floatformat:3 }})</td>
+                </tr>
+                 {% for expense in inventory_expenses %}
+                <tr>
+                    <td class="ps-5 small">صرف مخزون: {{ expense.product.name }} ({{expense.get_department_display}})</td>
+                    <td class="text-end small text-danger">({{ expense.cost_at_consumption|floatformat:3 }})</td>
+                </tr>
+                {% endfor %}
+                {% for expense in mfg_overhead_from_general %}
+                <tr>
+                    <td class="ps-5 small">{{ expense.description }}</td>
+                    <td class="text-end small text-danger">({{ expense.amount|floatformat:3 }})</td>
+                </tr>
+                {% endfor %}
+                <!-- SG&A Expenses -->
+                <tr>
+                    <td class="ps-4 fw-semibold">(-) المصاريف البيعية والعمومية والإدارية</td>
+                    <td class="text-end text-danger">({{ total_sg_a|floatformat:3 }})</td>
+                </tr>
+                 {% for expense in sg_a_expenses %}
+                <tr>
+                    <td class="ps-5 small">{{ expense.description }}</td>
+                    <td class="text-end small text-danger">({{ expense.amount|floatformat:3 }})</td>
+                </tr>
+                {% endfor %}
+
+                <!-- Spacer -->
+                <tr class="table-light"><td colspan="2"></td></tr>
+                
+                <!-- Net Operating Profit -->
+                <tr class="table-primary">
+                    <td class="ps-3 fw-bolder">صافي الربح التشغيلي</td>
+                    <td class="text-end fw-bolder">{{ net_operating_profit|floatformat:3 }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

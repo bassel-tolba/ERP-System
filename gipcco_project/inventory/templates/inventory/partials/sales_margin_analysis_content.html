@@ -1,0 +1,106 @@
+<!-- gipcco_project/inventory/templates/inventory/partials/sales_margin_analysis_content.html -->
+{% load inventory_extras %}
+
+<h1 class="h2 mb-4">تحليل المبيعات وهامش الربح</h1>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="GET" action="{% url 'inventory:sales_margin_analysis' %}" class="row g-3 align-items-center">
+            <div class="col-auto">
+                <label for="start_date" class="form-label">من تاريخ</label>
+                <input type="text" class="form-control datepicker" id="start_date" name="start_date" value="{{ start_date }}">
+            </div>
+            <div class="col-auto">
+                <label for="end_date" class="form-label">إلى تاريخ</label>
+                <input type="text" class="form-control datepicker" id="end_date" name="end_date" value="{{ end_date }}">
+            </div>
+            <div class="col-auto mt-auto">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-funnel-fill me-2"></i>تطبيق الفلتر</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="card text-bg-primary mb-3 shadow-sm">
+            <div class="card-body">
+                <h6 class="card-title">إجمالي الإيرادات</h6>
+                <p class="card-text fs-4 fw-bold">{{ total_revenue|floatformat:3 }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-bg-warning mb-3 shadow-sm">
+            <div class="card-body">
+                <h6 class="card-title">تكلفة البضاعة المباعة (COGS)</h6>
+                <p class="card-text fs-4 fw-bold">{{ total_cogs|floatformat:3 }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-bg-success mb-3 shadow-sm">
+            <div class="card-body">
+                <h6 class="card-title">مجمل الربح</h6>
+                <p class="card-text fs-4 fw-bold">{{ gross_profit|floatformat:3 }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-bg-info mb-3 shadow-sm">
+            <div class="card-body">
+                <h6 class="card-title">هامش مجمل الربح</h6>
+                <p class="card-text fs-4 fw-bold">{{ gross_margin|floatformat:2 }}%</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="card shadow-sm">
+    <div class="card-header">
+        <h5 class="mb-0">تفاصيل المبيعات</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>التاريخ</th>
+                        <th>العميل</th>
+                        <th>أمر البيع</th>
+                        <th>المنتج</th>
+                        <th class="text-end">الإيراد</th>
+                        <th class="text-end">التكلفة</th>
+                        <th class="text-end">الربح</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for dispatch in dispatches %}
+                    <tr>
+                        <td>{{ dispatch.dispatch_date|date:"Y-m-d" }}</td>
+                        <td>{{ dispatch.sales_order_item.sales_order.customer.name }}</td>
+                        <td>
+                            <a href="{% url 'inventory:view_sales_order' dispatch.sales_order_item.sales_order.pk %}">
+                                {{ dispatch.sales_order_item.sales_order.so_number }}
+                            </a>
+                        </td>
+                        <td>{{ dispatch.sales_order_item.finished_product.batch.template.final_product.name }}</td>
+                        <td class="text-end">{{ dispatch.quantity|my_abs|multiply:dispatch.sales_order_item.unit_price|floatformat:3 }}</td>
+                        <td class="text-end text-danger">{{ dispatch.cost_at_dispatch|floatformat:3 }}</td>
+                        <td class="text-end fw-bold {% if dispatch.quantity|my_abs|multiply:dispatch.sales_order_item.unit_price > dispatch.cost_at_dispatch %}text-success{% else %}text-danger{% endif %}">
+                           {% with revenue=dispatch.quantity|my_abs|multiply:dispatch.sales_order_item.unit_price cost=dispatch.cost_at_dispatch %}
+                                {% with profit=revenue|subtract:cost %}{{ profit|floatformat:3 }}{% endwith %}
+                           {% endwith %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center p-4">لا توجد مبيعات في الفترة المحددة.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

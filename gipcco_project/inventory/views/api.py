@@ -5,7 +5,7 @@ from django.db.models.functions import Coalesce
 from django.http import HttpRequest, JsonResponse
 from django.shortcuts import get_object_or_404
 
-from ..models import Batch, BatchItem, Product, ProductTag, PurchaseOrder, PurchaseOrderItem, FinishedProductReceipt
+from ..models import Batch, BatchItem, Product, ProductTag, PurchaseOrder, PurchaseOrderItem, FinishedProductReceipt, InventoryLog
 
 
 # --- API Views ---
@@ -209,5 +209,75 @@ def api_get_sellable_stock(request: HttpRequest) -> JsonResponse:
             'available_qty': receipt.quantity_available,
             'unit': receipt.batch.template.final_product.unit
         } for receipt in sellable_receipts
+    ]
+    return JsonResponse(data, safe=False)
+
+
+
+# --- CORRECTED API ENDPOINT ---
+def api_get_available_stock(request, product_pk):
+    """
+    API endpoint to get all available, released stock logs for a given product.
+    Used for the internal consumption form.
+    THIS VERSION IS CORRECTED for MRO/Consumable items.
+    """
+    product = get_object_or_404(Product, pk=product_pk)
+    
+    # Find all released logs for this product
+    released_logs = InventoryLog.objects.filter(
+        product=product,
+        status=InventoryLog.Status.RELEASED
+    ).annotate(
+        # For MRO/Consumables, we ONLY care about internal consumptions.
+        total_consumed=Coalesce(Sum('consumptions__quantity_consumed'), 0.0, output_field=FloatField())
+    ).annotate(
+        # The calculation is simpler: initial quantity minus what's been internally consumed.
+        remaining_quantity=F('quantity') - F('total_consumed')
+    ).filter(
+        remaining_quantity__gt=0.001  # Only show logs with stock left
+    ).order_by('release_timestamp')
+
+    data = [
+        {
+            'id': log.id,
+            'display_text': f"QC: {log.qc_no or 'N/A'} | متاح: {log.remaining_quantity:.3f} | السعر: {log.unit_price or 'N/A'}",
+            'remaining_quantity': log.remaining_quantity,
+            'unit_price': log.unit_price
+        }
+        for log in released_logs
+    ]
+    return JsonResponse(data, safe=False)
+    """
+    API endpoint to get all available, released stock logs for a given product.
+    Used for the internal consumption form.
+    """
+    product = get_object_or_404(Product, pk=product_pk)
+    
+    # Find all released logs for this product
+    released_logs = InventoryLog.objects.filter(
+        product=product,
+        status=InventoryLog.Status.RELEASED
+    ).annotate(
+        # Calculate total used from production batches
+        total_used_in_prod=Coalesce(Sum('batch_items__actual_quantity'), 0.0, output_field=FloatField()),
+        # Calculate total used from internal consumptions
+        total_used_in_consumption=Coalesce(Sum('consumptions__quantity_consumed'), 0.0, output_field=FloatField()),
+        # Calculate total returned from production
+        total_returned=Coalesce(Sum('production_returns__quantity'), 0.0, output_field=FloatField())
+    ).annotate(
+        # Calculate final remaining quantity
+        remaining_quantity=F('quantity') - F('total_used_in_prod') - F('total_used_in_consumption') + F('total_returned')
+    ).filter(
+        remaining_quantity__gt=0.001  # Only show logs with stock left
+    ).order_by('release_timestamp')
+
+    data = [
+        {
+            'id': log.id,
+            'display_text': f"QC: {log.qc_no or 'N/A'} | متاح: {log.remaining_quantity:.3f} | السعر: {log.unit_price or 'N/A'}",
+            'remaining_quantity': log.remaining_quantity,
+            'unit_price': log.unit_price
+        }
+        for log in released_logs
     ]
     return JsonResponse(data, safe=False)
