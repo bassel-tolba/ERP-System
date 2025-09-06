@@ -104,6 +104,43 @@
                 </li>
               </ul>
             </li>
+                        <!-- ===== NEW: SALES DROPDOWN ===== -->
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle {% if active_page == 'sales' %}active{% endif %}"
+                href="#"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                <i class="bi bi-truck me-2"></i>المبيعات
+              </a>
+              <ul class="dropdown-menu">
+                 <li>
+                  <a
+                    class="dropdown-item"
+                    href="{% url 'inventory:create_sales_order' %}"
+                    >إنشاء أمر بيع جديد</a
+                  >
+                </li>
+                <li>
+                  <a
+                    class="dropdown-item"
+                    href="{% url 'inventory:sales_orders' %}"
+                    >عرض أوامر البيع</a
+                  >
+                </li>
+                 <li><hr class="dropdown-divider" /></li>
+                 <li>
+                  <a
+                    class="dropdown-item"
+                    href="{% url 'inventory:customers' %}"
+                    >إدارة العملاء</a
+                  >
+                </li>
+              </ul>
+            </li>
+            <!-- ===== END NEW ===== -->
             <!-- END NEW -->
 
             <li class="nav-item dropdown">

@@ -1,0 +1,95 @@
+{% extends "inventory/layout.html" %}
+
+{% block content %}
+  {% include "inventory/partials/sales_order_create_content.html" %}
+{% endblock content %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const itemTableBody = document.getElementById("so-items-tbody");
+    const addItemBtn = document.getElementById("add-so-item-btn");
+    let availableStock = [];
+    let tomSelectInstances = [];
+
+    // Fetch all sellable stock once on page load
+    async function fetchSellableStock() {
+        try {
+            const response = await fetch("{% url 'inventory:api_get_sellable_stock' %}");
+            const data = await response.json();
+            availableStock = data.map(item => ({
+                value: item.id,
+                text: `${item.product_name} | تشغيلة: ${item.batch_number} | متاح: ${item.available_qty} ${item.unit}`,
+                available_qty: item.available_qty
+            }));
+        } catch (error) {
+            console.error("Failed to load sellable stock:", error);
+            alert("فشل تحميل مخزون المنتجات الجاهزة. الرجاء تحديث الصفحة.");
+        }
+    }
+
+    function createItemRow() {
+        const rowCount = itemTableBody.rows.length;
+        const newRow = itemTableBody.insertRow();
+        newRow.innerHTML = `
+            <td class="ps-3">
+                <select name="receipt_id" class="form-select so-item-select" placeholder="ابحث عن منتج/تشغيلة..." required></select>
+            </td>
+            <td>
+                <input type="number" step="any" name="quantity" class="form-control quantity-input" required>
+                <div class="form-text text-muted small available-qty-text"></div>
+            </td>
+            <td>
+                <input type="number" step="any" name="unit_price" class="form-control" required>
+            </td>
+            <td class="text-center pe-2">
+                <button type="button" class="btn btn-sm btn-outline-danger remove-item-btn" title="حذف البند">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </td>
+        `;
+        
+        const selectEl = newRow.querySelector('.so-item-select');
+        const ts = new TomSelect(selectEl, {
+            options: availableStock,
+            create: false,
+            placeholder: "ابحث عن منتج/تشغيلة..."
+        });
+        tomSelectInstances.push(ts);
+
+        // Update available quantity text on selection
+        ts.on('change', function(value) {
+            const selectedOption = this.options[value];
+            const availableQtyText = newRow.querySelector('.available-qty-text');
+            const qtyInput = newRow.querySelector('.quantity-input');
+            if (selectedOption) {
+                availableQtyText.textContent = `المتاح: ${selectedOption.available_qty}`;
+                qtyInput.max = selectedOption.available_qty;
+            } else {
+                availableQtyText.textContent = '';
+                qtyInput.removeAttribute('max');
+            }
+        });
+    }
+
+    addItemBtn.addEventListener("click", createItemRow);
+
+    itemTableBody.addEventListener("click", function (e) {
+        if (e.target.closest(".remove-item-btn")) {
+            const row = e.target.closest("tr");
+            const select = row.querySelector('.so-item-select');
+            // Clean up TomSelect instance to prevent memory leaks
+            if (select && select.tomselect) {
+                select.tomselect.destroy();
+            }
+            row.remove();
+        }
+    });
+
+    // Initialize
+    fetchSellableStock().then(() => {
+        createItemRow(); // Add the first row after stock is loaded
+    });
+});
+</script>
+{% endblock scripts %}

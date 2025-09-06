@@ -1,0 +1,52 @@
+<!-- gipcco_project/inventory/templates/inventory/partials/sales_orders_content.html -->
+{% load inventory_extras %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0">أوامر البيع</h1>
+    <a href="{% url 'inventory:create_sales_order' %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-2"></i>إنشاء أمر بيع جديد
+    </a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <form method="GET" action="{% url 'inventory:sales_orders' %}" class="mb-3">
+            <div class="input-group">
+                <input type="text" name="q" class="form-control" placeholder="ابحث برقم الأمر أو اسم العميل..." value="{{ search_query|default:'' }}">
+                <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-search"></i></button>
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>رقم أمر البيع</th>
+                        <th>العميل</th>
+                        <th>تاريخ الأمر</th>
+                        <th>الحالة</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for so in sales_orders %}
+                    <tr>
+                        <td><a href="{% url 'inventory:view_sales_order' so.id %}"><strong>{{ so.so_number }}</strong></a></td>
+                        <td>{{ so.customer.name }}</td>
+                        <td>{{ so.order_date|date:"Y-m-d" }}</td>
+                        <td><span class="badge text-bg-{{ so.status|so_status_badge }}">{{ so.get_status_display }}</span></td>
+                        <td class="text-end">
+                            <a href="{% url 'inventory:view_sales_order' so.id %}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye-fill me-1"></i> عرض وتعديل
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center p-4">لا توجد أوامر بيع مسجلة.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

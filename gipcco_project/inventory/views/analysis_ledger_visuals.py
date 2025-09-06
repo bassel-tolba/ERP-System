@@ -12,7 +12,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 from ..models import (Batch, BatchItem, Company, InventoryLog, Product, ProductTag, 
-                     ProductionReturn, FinishedProductReceipt) # --- NEW: Import FinishedProductReceipt
+                     ProductionReturn, FinishedProductReceipt, FinishedProductDispatch) # --- NEW: Import FinishedProductReceipt
 from .helpers import get_inventory_state_at_datetime
 
 # --- NEW HELPER FUNCTION FOR FINAL PRODUCTS ---
@@ -138,8 +138,34 @@ def _get_ledger_transactions(product_id, company_id, qc_no, start_date, end_date
                 'tags': [], 
             })
 
+            # --- NEW: Add Sales Dispatches to the ledger ---
+        dispatch_qs = FinishedProductDispatch.objects.select_related(
+            'sales_order_item__sales_order__customer',
+            'sales_order_item__finished_product__batch__template__final_product'
+        ).filter(
+            sales_order_item__finished_product__batch__template__final_product_id=final_product_id,
+            dispatch_date__gte=start_date,
+            dispatch_date__lt=end_date_inclusive,
+        )
+
+        for dispatch in dispatch_qs:
+            final_product = dispatch.sales_order_item.finished_product.batch.template.final_product
+            transactions.append({
+                'date': dispatch.dispatch_date,
+                'type': 'SALE_OUT',
+                'quantity_change': -dispatch.quantity,
+                'product_id': final_product.id,
+                'product_name': final_product.name,
+                'product_code': final_product.code,
+                'unit': final_product.unit,
+                'description': f"صرف للعميل: {dispatch.sales_order_item.sales_order.customer.name} (أمر بيع #{dispatch.sales_order_item.sales_order.so_number})",
+                'shop_order_number': None,
+                'batch_number': dispatch.sales_order_item.finished_product.individual_batch_number,
+                'total_cost': -dispatch.cost_at_dispatch, # This is the value change (Cost of Goods Sold)
+                'tags': [],
+            })
     def get_sort_key(trx):
-        type_order = {'IN': 1, 'RETURN_IN': 2, 'PROD_IN': 3, 'OUT': 4}
+        type_order = {'IN': 1, 'RETURN_IN': 2, 'PROD_IN': 3, 'OUT': 4, 'SALE_OUT': 5}
         return (trx['date'], type_order.get(trx['type'], 99))
 
     transactions.sort(key=get_sort_key)
@@ -220,8 +246,8 @@ def ledger(request: HttpRequest) -> HttpResponse:
             elif trx_type == 'RETURN_IN':
                 original_price = trx.get('unit_price') or Decimal('0.0')
                 value_change = qty_change * (original_price if original_price > 0 else (current_value / current_qty if current_qty > 0 else Decimal('0.0')))
-            elif trx_type == 'PROD_IN':
-                value_change = trx['total_cost']
+            elif trx_type in ['PROD_IN', 'SALE_OUT']:
+                value_change = trx['total_cost'] # This now handles both production IN and sales OUT costs
             
             trx['value_change'] = value_change
             current_qty += qty_change

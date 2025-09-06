@@ -526,3 +526,114 @@ class ReceiptSubBatch(models.Model):
         return f"{self.quantity} units in {self.sub_batch_identifier} for {self.receipt}"
     
     
+
+# --- NEW SALES & CUSTOMER MODELS ---
+
+class Customer(models.Model):
+    """Represents a customer who buys finished products."""
+    name = models.CharField(max_length=255, unique=True, verbose_name=_("Customer Name"))
+    address = models.TextField(blank=True, null=True, verbose_name=_("Address"))
+    contact_info = models.TextField(blank=True, null=True, verbose_name=_("Contact Info"))
+
+    class Meta:
+        db_table = 'customers'
+        verbose_name = _("Customer")
+        verbose_name_plural = _("Customers")
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
+class SalesOrder(models.Model):
+    """Represents a sales order from a customer."""
+    class Status(models.TextChoices):
+        DRAFT = 'draft', _('Draft')
+        PENDING = 'pending', _('Pending Shipment')
+        PARTIALLY_SHIPPED = 'partially_shipped', _('Partially Shipped')
+        COMPLETED = 'completed', _('Completed')
+        CANCELLED = 'cancelled', _('Cancelled')
+
+    customer = models.ForeignKey(
+        Customer,
+        on_delete=models.PROTECT,
+        related_name='sales_orders',
+        verbose_name=_("Customer")
+    )
+    order_date = models.DateField(verbose_name=_("Order Date"))
+    so_number = models.CharField(max_length=100, unique=True, verbose_name=_("Sales Order Number"))
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.PENDING,
+        verbose_name=_("Status")
+    )
+    notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
+
+    class Meta:
+        db_table = 'sales_orders'
+        verbose_name = _("Sales Order")
+        verbose_name_plural = _("Sales Orders")
+        ordering = ['-order_date']
+
+    def __str__(self):
+        return f"SO #{self.so_number} for {self.customer.name}"
+
+
+class SalesOrderItem(models.Model):
+    """Represents a line item in a Sales Order, linked to a specific batch."""
+    sales_order = models.ForeignKey(
+        SalesOrder,
+        on_delete=models.CASCADE,
+        related_name='items',
+        verbose_name=_("Sales Order")
+    )
+    # This is the key: we sell from a specific FinishedProductReceipt (batch)
+    finished_product = models.ForeignKey(
+        FinishedProductReceipt,
+        on_delete=models.PROTECT,
+        related_name='sales_items',
+        verbose_name=_("Finished Product Batch")
+    )
+    quantity_ordered = models.FloatField(verbose_name=_("Quantity Ordered"))
+    unit_price = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Unit Price"))
+
+    @property
+    def total_price(self):
+        return (Decimal(str(self.quantity_ordered)) * self.unit_price).quantize(Decimal('0.001'))
+
+    class Meta:
+        db_table = 'sales_order_items'
+        verbose_name = _("Sales Order Item")
+        verbose_name_plural = _("Sales Order Items")
+
+    def __str__(self):
+        return f"{self.quantity_ordered} of Batch #{self.finished_product.individual_batch_number} for {self.sales_order}"
+
+
+class FinishedProductDispatch(models.Model):
+    """
+    Represents the actual transaction of a finished product leaving inventory.
+    This is the model that generates the ledger entry.
+    """
+    sales_order_item = models.ForeignKey(
+        SalesOrderItem,
+        on_delete=models.PROTECT,
+        related_name='dispatches',
+        verbose_name=_("Sales Order Item")
+    )
+    quantity = models.FloatField(verbose_name=_("Quantity Dispatched"))
+    dispatch_date = models.DateTimeField(verbose_name=_("Dispatch Date"))
+    # The cost is copied at the time of dispatch for accurate COGS reporting
+    cost_at_dispatch = models.DecimalField(
+        max_digits=14, decimal_places=3, verbose_name=_("Cost at Dispatch")
+    )
+
+    class Meta:
+        db_table = 'finished_product_dispatches'
+        verbose_name = _("Finished Product Dispatch")
+        verbose_name_plural = _("Finished Product Dispatches")
+        ordering = ['-dispatch_date']
+
+    def __str__(self):
+        return f"Dispatched {self.quantity} for {self.sales_order_item}"

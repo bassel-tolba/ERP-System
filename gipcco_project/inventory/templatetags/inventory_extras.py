@@ -22,3 +22,16 @@ def absolute_value(value):
     except (ValueError, TypeError):
         return value
 
+@register.filter
+def so_status_badge(status):
+    """
+    Returns a Bootstrap badge color class based on the Sales Order status string.
+    """
+    status_map = {
+        'draft': 'secondary',
+        'pending': 'warning',
+        'partially_shipped': 'info',
+        'completed': 'success',
+        'cancelled': 'danger',
+    }
+    return status_map.get(status, 'secondary') # Return 'secondary' as a default

@@ -185,3 +185,29 @@ def api_get_po_items(request: HttpRequest, po_id: int) -> JsonResponse:
         } for item in po_items
     ]
     return JsonResponse(data, safe=False)
+
+
+def api_get_sellable_stock(request: HttpRequest) -> JsonResponse:
+    """API endpoint to get released, in-stock finished product batches."""
+    sellable_receipts = FinishedProductReceipt.objects.filter(
+        status=FinishedProductReceipt.Status.RELEASED
+    ).select_related(
+        'batch__template__final_product'
+    ).annotate(
+        total_dispatched=Coalesce(Sum('sales_items__dispatches__quantity'), 0.0, output_field=FloatField())
+    ).annotate(
+        quantity_available=F('total_quantity_produced') - F('total_dispatched')
+    ).filter(
+        quantity_available__gt=0.001
+    )
+
+    data = [
+        {
+            'id': receipt.id,
+            'product_name': receipt.batch.template.final_product.name,
+            'batch_number': receipt.individual_batch_number,
+            'available_qty': receipt.quantity_available,
+            'unit': receipt.batch.template.final_product.unit
+        } for receipt in sellable_receipts
+    ]
+    return JsonResponse(data, safe=False)

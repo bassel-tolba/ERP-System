@@ -14,7 +14,10 @@ from .views.purchase_orders import purchase_orders, create_purchase_order, view_
 # --- MODIFIED: Use aliases for release_from_quarantine to avoid name collision ---
 from .views.finished_products import finished_goods_status, receive_finished_product, view_finished_product, release_from_quarantine as release_fg_from_quarantine
 # --- MODIFIED: Import new API view ---
-from .views.api import get_used_qc_sources, api_batch_details, get_product_tags, api_get_open_pos_for_supplier, api_get_po_items, api_get_full_batch_analysis
+from .views.api import get_used_qc_sources, api_batch_details, get_product_tags, api_get_open_pos_for_supplier, api_get_po_items, api_get_full_batch_analysis, api_get_sellable_stock
+# --- MODIFIED: Import new API views and sales views ---
+from .views.sales import customers, edit_customer, delete_customer, sales_orders, create_sales_order, view_sales_order, dispatch_from_sales_order
+
 
 app_name = 'inventory'
 
@@ -100,5 +103,18 @@ urlpatterns = [
     path('api/product_tags/<int:product_id>/', get_product_tags, name='api_product_tags'),
     path('api/supplier/<int:supplier_id>/open_pos/', api_get_open_pos_for_supplier, name='api_get_open_pos_for_supplier'),
     path('api/po/<int:po_id>/items/', api_get_po_items, name='api_get_po_items'),
+    path('api/sellable_stock/', api_get_sellable_stock, name='api_get_sellable_stock'),
+    path('api/get_used_qc_sources/<int:product_pk>/', get_used_qc_sources, name='api_get_used_qc_sources'),
+    
+     # --- NEW: Customer Routes ---
+    path('customers/', customers, name='customers'),
+    path('customers/edit/<int:pk>/', edit_customer, name='edit_customer'),
+    path('customers/delete/<int:pk>/', delete_customer, name='delete_customer'),
+
+    # --- NEW: Sales Order Routes ---
+    path('sales_orders/', sales_orders, name='sales_orders'),
+    path('sales_orders/create/', create_sales_order, name='create_sales_order'),
+    path('sales_order/<int:pk>/', view_sales_order, name='view_sales_order'),
+    path('sales_order/<int:pk>/dispatch/', dispatch_from_sales_order, name='dispatch_from_sales_order'),
 
 ]

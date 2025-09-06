@@ -1,0 +1,103 @@
+<!-- gipcco_project/inventory/templates/inventory/partials/sales_order_view_content.html -->
+{% load inventory_extras %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0">تفاصيل أمر البيع: {{ so.so_number }}</h1>
+    <a href="{% url 'inventory:sales_orders' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-right me-2"></i>العودة لقائمة الأوامر
+    </a>
+</div>
+
+<div class="row">
+    <!-- Left Column: Order Details -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-file-earmark-text-fill me-2"></i>بنود أمر البيع</h5>
+                 <span class="badge fs-6 text-bg-{{ so.status|so_status_badge }}">{{ so.get_status_display }}</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">المنتج</th>
+                                <th>تشغيلة رقم</th>
+                                <th class="text-center">الكمية المطلوبة</th>
+                                <th class="text-center">الكمية المصروفة</th>
+                                <th class="text-center">الكمية المتبقية</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in so_items %}
+                            <tr>
+                                <td class="ps-3">{{ item.finished_product.batch.template.final_product.name }}</td>
+                                <td>{{ item.finished_product.individual_batch_number }}</td>
+                                <td class="text-center">{{ item.quantity_ordered|floatformat:0 }}</td>
+                                <td class="text-center">{{ item.total_dispatched|floatformat:0 }}</td>
+                                <td class="text-center fw-bold {% if item.quantity_remaining > 0 %}text-danger{% else %}text-success{% endif %}">
+                                    {{ item.quantity_remaining|floatformat:0 }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Info & Dispatch Form -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm mb-4">
+             <div class="card-body">
+                <h5 class="card-title">بيانات أساسية</h5>
+                <ul class="list-unstyled">
+                    <li><strong>العميل:</strong> {{ so.customer.name }}</li>
+                    <li><strong>تاريخ الأمر:</strong> {{ so.order_date|date:"Y-m-d" }}</li>
+                    <li><strong>ملاحظات:</strong> {{ so.notes|default:"لا يوجد" }}</li>
+                </ul>
+            </div>
+        </div>
+
+        {% if not is_fully_dispatched %}
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-box-arrow-up me-2"></i>صرف البضاعة</h5>
+            </div>
+            <form method="POST" action="{% url 'inventory:dispatch_from_sales_order' pk=so.pk %}">
+                {% csrf_token %}
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="dispatch_date" class="form-label">تاريخ الصرف</label>
+                        <input type="text" name="dispatch_date" id="dispatch_date" class="form-control datepicker" value="{{ today_date }}" required>
+                    </div>
+                    <hr>
+                    <h6>الكميات المراد صرفها:</h6>
+                    {% for item in so_items %}
+                        {% if item.quantity_remaining > 0 %}
+                        <div class="mb-2">
+                            <label class="form-label small">
+                                {{ item.finished_product.batch.template.final_product.name }} (تشغيلة {{ item.finished_product.individual_batch_number }})
+                            </label>
+                            <input type="hidden" name="item_id" value="{{ item.id }}">
+                            <input type="number" name="dispatch_quantity" class="form-control" step="any" min="0" max="{{ item.quantity_remaining }}" placeholder="المتبقي: {{ item.quantity_remaining|floatformat:0 }}">
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="bi bi-check-circle-fill me-2"></i>تأكيد الصرف
+                    </button>
+                </div>
+            </form>
+        </div>
+        {% else %}
+        <div class="alert alert-success text-center">
+            <i class="bi bi-check-all fs-3"></i>
+            <h5 class="mt-2">تم صرف هذا الأمر بالكامل.</h5>
+        </div>
+        {% endif %}
+    </div>
+</div>
