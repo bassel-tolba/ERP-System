@@ -75,16 +75,18 @@ def release_from_quarantine(request, pk):
 def receive_finished_product(request, batch_pk, individual_batch_number):
     """
     Handles the form for receiving a single batch from a production plan.
-    (This view remains unchanged)
     """
     production_plan = get_object_or_404(
         Batch.objects.select_related('template__final_product').prefetch_related('items'), 
         pk=batch_pk
     )
 
-    if FinishedProductReceipt.objects.filter(batch=production_plan, individual_batch_number=individual_batch_number).exists():
-        messages.error(request, f"تشغيلة رقم '{individual_batch_number}' تم استلامها بالفعل.")
-        return redirect('inventory:view_batch', pk=batch_pk)
+    # --- MODIFICATION ---
+    # The check for existing receipts has been removed to allow multiple receipts
+    # for the same batch number, as requested.
+    # if FinishedProductReceipt.objects.filter(batch=production_plan, individual_batch_number=individual_batch_number).exists():
+    #     messages.error(request, f"تشغيلة رقم '{individual_batch_number}' تم استلامها بالفعل.")
+    #     return redirect('inventory:view_batch', pk=batch_pk)
 
     total_plan_cost = sum(
         (item.cost_at_consumption or Decimal('0')) * Decimal(str(item.actual_quantity or 0.0))
@@ -165,7 +167,6 @@ def receive_finished_product(request, batch_pk, individual_batch_number):
 def view_finished_product(request, pk):
     """
     Displays the details of a single finished product receipt.
-    (This view remains unchanged)
     """
     receipt = get_object_or_404(
         FinishedProductReceipt.objects.select_related(

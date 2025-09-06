@@ -1,4 +1,3 @@
-
 # gipcco_project/inventory/views/api.py
 from decimal import Decimal
 from django.db.models import Sum, F, FloatField
@@ -6,7 +5,7 @@ from django.db.models.functions import Coalesce
 from django.http import HttpRequest, JsonResponse
 from django.shortcuts import get_object_or_404
 
-from ..models import Batch, BatchItem, Product, ProductTag, PurchaseOrder, PurchaseOrderItem
+from ..models import Batch, BatchItem, Product, ProductTag, PurchaseOrder, PurchaseOrderItem, FinishedProductReceipt
 
 
 # --- API Views ---
@@ -72,6 +71,65 @@ def api_batch_details(request: HttpRequest, batch_pk: int) -> JsonResponse:
     }
     return JsonResponse(batch_details)
 
+# --- NEW: BATCH ANALYSIS API ---
+def api_get_full_batch_analysis(request: HttpRequest, batch_pk: int) -> JsonResponse:
+    """
+    API endpoint that returns a comprehensive analysis of a single production batch,
+    including raw material costs, finished product receipts, and calculated costs.
+    """
+    batch = get_object_or_404(
+        Batch.objects.select_related('template__final_product').prefetch_related(
+            'items__primitive_product', 'receipts'
+        ), pk=batch_pk
+    )
+
+    total_actual_cost = sum(
+        Decimal(str(item.actual_quantity or 0.0)) * (item.cost_at_consumption or Decimal('0.0'))
+        for item in batch.items.all()
+    )
+
+    total_quantity_produced = sum(r.total_quantity_produced for r in batch.receipts.all())
+
+    analysis_data = {
+        'id': batch.id,
+        'shop_order_number': batch.shop_order_number,
+        'batch_number': batch.batch_number,
+        'creation_date': batch.creation_date.isoformat(),
+        'final_product_name': batch.template.final_product.name,
+        'final_product_unit': batch.template.final_product.unit,
+        'notes': batch.notes,
+
+        'summary': {
+            'total_raw_material_cost': total_actual_cost,
+            'total_quantity_produced': total_quantity_produced,
+            'average_cost_per_unit': (total_actual_cost / Decimal(str(total_quantity_produced))) if total_quantity_produced > 0 else Decimal('0.0'),
+        },
+
+        'raw_materials_used': [
+            {
+                'product_name': item.primitive_product.name,
+                'unit': item.primitive_product.unit,
+                'theoretical_quantity': item.theoretical_quantity,
+                'actual_quantity': item.actual_quantity,
+                'cost_at_consumption': item.cost_at_consumption,
+                'line_total': (item.cost_at_consumption or Decimal('0.0')) * Decimal(str(item.actual_quantity or 0.0)),
+            } for item in batch.items.all()
+        ],
+
+        'finished_product_receipts': [
+            {
+                'receipt_id': receipt.id,
+                'receipt_date': receipt.receipt_date.isoformat(),
+                'quantity_produced': receipt.total_quantity_produced,
+                'market_type': receipt.get_market_type_display(),
+                'proportional_cost': receipt.total_cost,
+                'cost_per_unit': (receipt.total_cost / Decimal(str(receipt.total_quantity_produced))) if receipt.total_quantity_produced > 0 else Decimal('0.0'),
+                'status': receipt.get_status_display(),
+            } for receipt in batch.receipts.all()
+        ]
+    }
+    return JsonResponse(analysis_data)
+
 
 def get_product_tags(request: HttpRequest, product_id: int) -> JsonResponse:
     """
@@ -123,7 +181,6 @@ def api_get_po_items(request: HttpRequest, po_id: int) -> JsonResponse:
             'product_id': item.product.id,
             'product_name': f"{item.product.name} ({item.product.code})",
             'quantity_remaining': item.quantity_remaining,
-            # --- MODIFIED: Use the effective_unit_price property from the model ---
             'unit_price': item.effective_unit_price
         } for item in po_items
     ]

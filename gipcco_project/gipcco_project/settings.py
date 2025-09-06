@@ -210,7 +210,7 @@ JAZZMIN_SETTINGS = {
     # TITLE AND LOGO
     "site_title": "Inventory Admin",
     "site_header": "Inventory Management",
-    "site_brand": "IMS",
+    "site_brand": "GIPCCO ADMIN",
     "site_icon": "fas fa-warehouse", # Example: FontAwesome icon for your site
     # Add a logo
     "welcome_sign": "Welcome to the Inventory Management System Admin!",
@@ -218,7 +218,7 @@ JAZZMIN_SETTINGS = {
     "logo_max_height": "50px", # Max height for the logo in the top bar
 
     # UI THEME
-    "ui_styling": "bootstrap4", # Options: "bootstrap4", "bootstrap5"
+    "ui_styling": "bootstrap5", # Options: "bootstrap4", "bootstrap5"
     "navbar_small_text": False,
     "footer_small_text": False,
     "body_small_text": False,

@@ -1,4 +1,3 @@
-
 # gipcco_project/inventory/views/analysis_ledger_visuals.py
 
 import json
@@ -6,8 +5,8 @@ from datetime import datetime, timedelta, time
 from decimal import Decimal
 
 from django.contrib import messages
-from django.db.models import Sum, Q, F, FloatField, Value, ExpressionWrapper, DecimalField, Count
-from django.db.models.functions import Coalesce
+from django.db.models import Sum, Q, F, FloatField, Value, ExpressionWrapper, DecimalField, Count, Avg
+from django.db.models.functions import Coalesce, TruncDay
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -23,7 +22,8 @@ def get_final_product_state_at_datetime(product_id: int, target_datetime: timezo
     """
     receipts_before = FinishedProductReceipt.objects.filter(
         batch__template__final_product_id=product_id,
-        receipt_date__lt=target_datetime.date()
+        receipt_date__lt=target_datetime.date(),
+        status=FinishedProductReceipt.Status.RELEASED, # Only count released stock
     )
     
     aggregates = receipts_before.aggregate(
@@ -115,7 +115,8 @@ def _get_ledger_transactions(product_id, company_id, qc_no, start_date, end_date
         ).filter(
             batch__template__final_product_id=final_product_id,
             receipt_date__gte=start_date.date(),
-            receipt_date__lt=end_date_inclusive.date()
+            receipt_date__lt=end_date_inclusive.date(),
+            status=FinishedProductReceipt.Status.RELEASED, # Only show released products in ledger
         ).order_by('receipt_date')
         
         for receipt in receipts_qs:
@@ -134,10 +135,9 @@ def _get_ledger_transactions(product_id, company_id, qc_no, start_date, end_date
                 'batch_number': receipt.individual_batch_number, # The specific batch number
                 'market_type': receipt.get_market_type_display(),
                 'total_cost': receipt.total_cost, # Store total cost for value change
-                'tags': [], # Finished products don't have tags in this system
+                'tags': [], 
             })
 
-    # Ensure deterministic sorting for same-timestamp transactions
     def get_sort_key(trx):
         type_order = {'IN': 1, 'RETURN_IN': 2, 'PROD_IN': 3, 'OUT': 4}
         return (trx['date'], type_order.get(trx['type'], 99))
@@ -152,7 +152,6 @@ def ledger(request: HttpRequest) -> HttpResponse:
     Now supports filtering by final products.
     """
     product_id = request.GET.get('product_id')
-    # --- NEW ---
     final_product_id = request.GET.get('final_product_id')
     company_id = request.GET.get('company_id')
     tag_ids = request.GET.getlist('tags')
@@ -161,7 +160,6 @@ def ledger(request: HttpRequest) -> HttpResponse:
     end_date_str = request.GET.get('end_date')
 
     all_primitive_products = Product.objects.filter(~Q(product_type=Product.ProductType.FINAL_PRODUCT))
-    # --- NEW ---
     all_final_products = Product.objects.filter(product_type=Product.ProductType.FINAL_PRODUCT)
     all_companies = Company.objects.all()
     all_tags = ProductTag.objects.all()
@@ -169,13 +167,12 @@ def ledger(request: HttpRequest) -> HttpResponse:
     context = {
         'active_page': 'ledger',
         'all_primitive_products': all_primitive_products,
-        'all_final_products': all_final_products, # --- NEW ---
+        'all_final_products': all_final_products,
         'all_companies': all_companies,
         'all_tags': all_tags,
         'selected_tags': tag_ids, 
     }
     
-    # If no filters are applied, just render the form
     if not any([product_id, final_product_id, company_id, qc_no, start_date_str, end_date_str, tag_ids]):
         template_name = 'inventory/ledger.html'
         if 'X-Partial-Request' in request.headers:
@@ -197,7 +194,6 @@ def ledger(request: HttpRequest) -> HttpResponse:
     product_unit = ""
     is_final_product_ledger = bool(final_product_id)
 
-    # Calculate opening balance based on which product type is selected
     if product_id:
         opening_state = get_inventory_state_at_datetime(int(product_id), start_date)
         product_unit = get_object_or_404(Product, pk=product_id).unit
@@ -206,7 +202,6 @@ def ledger(request: HttpRequest) -> HttpResponse:
         product_unit = get_object_or_404(Product, pk=final_product_id).unit
     
     processed_transactions = []
-    # Only process balances if a single product is selected
     if product_id or final_product_id:
         current_qty = opening_state['quantity']
         current_value = opening_state['value']
@@ -225,7 +220,6 @@ def ledger(request: HttpRequest) -> HttpResponse:
             elif trx_type == 'RETURN_IN':
                 original_price = trx.get('unit_price') or Decimal('0.0')
                 value_change = qty_change * (original_price if original_price > 0 else (current_value / current_qty if current_qty > 0 else Decimal('0.0')))
-            # --- NEW CASE ---
             elif trx_type == 'PROD_IN':
                 value_change = trx['total_cost']
             
@@ -238,7 +232,7 @@ def ledger(request: HttpRequest) -> HttpResponse:
             trx['moving_average_cost_after'] = (current_value / current_qty) if current_qty > 0 else Decimal('0.0')
             
             processed_transactions.append(trx)
-    else: # Fallback for generic, multi-product views
+    else:
         for trx in transactions:
             trx.update({
                 'balance_before': '---', 'balance_after': '---',
@@ -262,10 +256,8 @@ def ledger(request: HttpRequest) -> HttpResponse:
 
 
 def print_ledger(request: HttpRequest) -> HttpResponse:
-    """
-    Generates a printable ledger report.
-    Now supports filtering by final products.
-    """
+    # This function remains largely the same but will now correctly handle final products
+    # due to the modifications in _get_ledger_transactions and get_final_product_state_at_datetime
     product_id = request.GET.get('product_id')
     final_product_id = request.GET.get('final_product_id')
     company_id = request.GET.get('company_id')
@@ -350,7 +342,7 @@ def print_ledger(request: HttpRequest) -> HttpResponse:
     return render(request, 'inventory/print_ledger_enhanced.html', context)
 
 
-# --- The rest of the file (stock_valuation, analysis, visuals) remains unchanged ---
+# --- The rest of the file (stock_valuation, analysis) remains unchanged ---
 def stock_valuation(request: HttpRequest) -> HttpResponse:
     """
     Displays a stock valuation report showing current stock, cost, and total value.
@@ -442,13 +434,15 @@ def analysis(request: HttpRequest) -> HttpResponse:
     return render(request, 'inventory/analysis.html', context)
 
 
+# --- MODIFIED: Complete overhaul of the visuals view ---
 def visuals(request: HttpRequest) -> HttpResponse:
-    # --- 1. GET ALL FILTERS (SAME AS LEDGER) ---
-    product_id_str = request.GET.get('product_id')
-    company_id = request.GET.get('company_id')
-    tag_ids = request.GET.getlist('tags')
-    qc_no = request.GET.get('qc_no', '').strip()
+    """
+    Displays a powerful analysis dashboard with selectable modes for
+    raw materials and finished products, each with relevant KPIs and charts.
+    """
+    analysis_type = request.GET.get('type', 'raw_material')
     
+    # --- Common Filters ---
     today = timezone.now()
     default_start = today.replace(day=1)
     start_date_str = request.GET.get('start_date', default_start.strftime('%Y-%m-%d'))
@@ -456,125 +450,178 @@ def visuals(request: HttpRequest) -> HttpResponse:
     start_date = datetime.strptime(start_date_str, '%Y-%m-%d').replace(tzinfo=timezone.get_current_timezone())
     end_date = datetime.strptime(end_date_str, '%Y-%m-%d').replace(tzinfo=timezone.get_current_timezone())
     end_date_inclusive = end_date + timedelta(days=1)
-    
-    kpi_data, supplier_analysis_data = {}, []
-    in_out_data, consumption_data, variance_data, supplier_data = ({'labels': [], 'datasets': []} for _ in range(4))
-    product_id = int(product_id_str) if product_id_str else None
 
-    if product_id:
-        product = get_object_or_404(Product, pk=product_id)
-
-        # --- 2. CREATE BASE QUERYSETS WITH FILTERS APPLIED ---
-        # --- MODIFIED: Filter by status and use release_timestamp ---
-        receipts = InventoryLog.objects.filter(
-            product_id=product_id, 
-            status=InventoryLog.Status.RELEASED,
-            release_timestamp__gte=start_date, 
-            release_timestamp__lt=end_date_inclusive
-        )
-        consumptions = BatchItem.objects.filter(primitive_product_id=product_id, batch__creation_date__gte=start_date, batch__creation_date__lt=end_date_inclusive)
-
-        if company_id:
-            receipts = receipts.filter(company_id=company_id)
-            consumptions = consumptions.none() 
-        if qc_no:
-            receipts = receipts.filter(qc_no__icontains=qc_no)
-            consumptions = consumptions.filter(source_log__qc_no__icontains=qc_no)
-        if tag_ids:
-            receipts = receipts.filter(tags__id__in=tag_ids).distinct()
-            consumptions = consumptions.filter(source_log__tags__id__in=tag_ids).distinct()
-
-        # --- 3. CALCULATE ADVANCED KPIs ---
-        total_in_qty = receipts.aggregate(total=Coalesce(Sum('quantity', output_field=DecimalField()), Decimal('0.0')))['total']
-        
-        total_in_value = receipts.annotate(
-            line_total=ExpressionWrapper(F('quantity') * F('unit_price'), output_field=DecimalField())
-        ).aggregate(total=Coalesce(Sum('line_total'), Decimal('0.0')))['total']
-        
-        total_out_qty = consumptions.aggregate(total=Coalesce(Sum('actual_quantity', output_field=DecimalField()), Decimal('0.0')))['total']
-        
-        total_out_value = consumptions.annotate(
-            line_total=ExpressionWrapper(F('actual_quantity') * F('cost_at_consumption'), output_field=DecimalField())
-        ).aggregate(total=Coalesce(Sum('line_total'), Decimal('0.0')))['total']
-
-        total_theoretical_qty = consumptions.aggregate(total=Coalesce(Sum('theoretical_quantity', output_field=DecimalField()), Decimal('0.0')))['total']
-        total_variance_qty = total_out_qty - total_theoretical_qty
-        
-        num_days = (end_date - start_date).days + 1
-        avg_daily_consumption = total_out_qty / num_days if num_days > 0 else 0
-        current_stock = get_inventory_state_at_datetime(product_id, timezone.now())['quantity']
-
-        kpi_data = {
-            'avg_purchase_price': (total_in_value / total_in_qty) if total_in_qty > 0 else Decimal('0.0'),
-            'avg_consumption_cost': (total_out_value / total_out_qty) if total_out_qty > 0 else Decimal('0.0'),
-            'total_variance_qty': total_variance_qty,
-            'total_variance_percent': (total_variance_qty / total_theoretical_qty * 100) if total_theoretical_qty > 0 else 0,
-            'days_of_supply': (current_stock / avg_daily_consumption) if avg_daily_consumption > 0 else float('inf'),
-            'product_unit': product.unit,
-        }
-
-        # --- 4. DATA FOR CHARTS & TABLES ---
-        
-        supplier_analysis_data = receipts.filter(company__isnull=False).values('company__name').annotate(
-            receipt_count=Count('id'),
-            total_qty=Sum('quantity', output_field=DecimalField()),
-            total_val=Sum(ExpressionWrapper(F('quantity') * F('unit_price'), output_field=DecimalField()))
-        ).annotate(
-            avg_price=F('total_val') / F('total_qty')
-        ).order_by('-total_val')
-        
-        # Chart 1: Inventory Flow (Running Balance)
-        all_transactions = _get_ledger_transactions(product_id, company_id, qc_no, start_date, end_date_inclusive, tag_ids)
-        opening_balance = get_inventory_state_at_datetime(product_id, start_date)['quantity']
-        running_balance = float(opening_balance)
-        chart_labels = [start_date.strftime('%Y-%m-%d (Start)')]; balance_data = [round(running_balance, 3)]
-        for trx in all_transactions:
-            running_balance += float(trx['quantity_change'])
-            chart_labels.append(trx['date'].strftime('%Y-%m-%d %H:%M')); balance_data.append(round(running_balance, 3))
-        in_out_data = {'labels': chart_labels, 'datasets': [{'label': 'الرصيد المتراكم', 'data': balance_data, 'borderColor': '#0d6efd', 'backgroundColor': 'rgba(13, 110, 253, 0.2)', 'fill': True, 'tension': 0.1}]}
-        
-        # Chart 2: Consumption by Final Product
-        consumption_rows = consumptions.values('batch__template__final_product__name').annotate(total_consumed=Sum('actual_quantity')).order_by('-total_consumed')
-        if consumption_rows:
-            consumption_data = {'labels': [r['batch__template__final_product__name'] for r in consumption_rows], 'datasets': [{'data': [float(r['total_consumed']) for r in consumption_rows]}]}
-
-        # Chart 3: Production Variance (with Cumulative Trend)
-        variance_rows = consumptions.filter(actual_quantity__isnull=False, theoretical_quantity__isnull=False).annotate(variance=F('actual_quantity') - F('theoretical_quantity')).order_by('batch__creation_date', 'batch__id')
-        if variance_rows:
-            cumulative_variance = 0
-            cumulative_data = []
-            for r in variance_rows:
-                cumulative_variance += r.variance
-                cumulative_data.append(float(cumulative_variance))
-            variance_data = {
-                'labels': [f"{r.batch.batch_number} ({r.batch.creation_date.strftime('%d-%m')})" for r in variance_rows], 
-                'datasets': [
-                    {'type': 'bar', 'label': 'الفرق بالتشغيلة', 'data': [float(r.variance) for r in variance_rows]},
-                    {'type': 'line', 'label': 'الفرق التراكمي', 'data': cumulative_data, 'borderColor': '#ffc107', 'backgroundColor': 'rgba(255, 193, 7, 0.5)', 'fill': False}
-                ]}
-
-        # Chart 4: Supplier Contribution (by Value)
-        if supplier_analysis_data:
-            supplier_data = {'labels': [r['company__name'] for r in supplier_analysis_data], 'datasets': [{'data': [r['total_val'] for r in supplier_analysis_data]}]}
-
+    # --- Initialize context with shared data ---
     context = {
-        'active_page': 'visuals', 
-        'all_primitive_products': Product.objects.filter(~Q(product_type=Product.ProductType.FINAL_PRODUCT)), 
+        'active_page': 'visuals',
+        'analysis_type': analysis_type,
+        'all_primitive_products': Product.objects.filter(~Q(product_type=Product.ProductType.FINAL_PRODUCT)),
+        'all_final_products': Product.objects.filter(product_type=Product.ProductType.FINAL_PRODUCT),
         'all_companies': Company.objects.all(),
         'all_tags': ProductTag.objects.all(),
-        'kpi_data': kpi_data,
-        'supplier_analysis_data': supplier_analysis_data,
-        'in_out_data_json': json.dumps(in_out_data, default=str), 
-        'consumption_data_json': json.dumps(consumption_data, default=str), 
-        'variance_data_json': json.dumps(variance_data, default=str),
-        'supplier_data_json': json.dumps(supplier_data, default=str),
-        'selected_product_id': product_id,
-        'selected_company_id': company_id,
-        'selected_tags': tag_ids,
-        'start_date': start_date_str, 
-        'end_date': end_date_str
+        'start_date': start_date_str,
+        'end_date': end_date_str,
     }
+
+    if analysis_type == 'raw_material':
+        # --- RAW MATERIAL ANALYSIS LOGIC (EXISTING, BUT REFINED) ---
+        product_id_str = request.GET.get('product_id')
+        company_id = request.GET.get('company_id')
+        tag_ids = request.GET.getlist('tags')
+        qc_no = request.GET.get('qc_no', '').strip()
+        
+        kpi_data, supplier_analysis_data = {}, []
+        in_out_data, consumption_data, variance_data, supplier_data = ({'labels': [], 'datasets': []} for _ in range(4))
+        product_id = int(product_id_str) if product_id_str else None
+
+        if product_id:
+            product = get_object_or_404(Product, pk=product_id)
+            receipts = InventoryLog.objects.filter(
+                product_id=product_id, status=InventoryLog.Status.RELEASED,
+                release_timestamp__gte=start_date, release_timestamp__lt=end_date_inclusive
+            )
+            consumptions = BatchItem.objects.filter(
+                primitive_product_id=product_id, batch__creation_date__gte=start_date,
+                batch__creation_date__lt=end_date_inclusive
+            )
+            if company_id: receipts = receipts.filter(company_id=company_id); consumptions = consumptions.none()
+            if qc_no:
+                receipts = receipts.filter(qc_no__icontains=qc_no)
+                consumptions = consumptions.filter(source_log__qc_no__icontains=qc_no)
+            if tag_ids:
+                receipts = receipts.filter(tags__id__in=tag_ids).distinct()
+                consumptions = consumptions.filter(source_log__tags__id__in=tag_ids).distinct()
+
+            total_in_qty = receipts.aggregate(total=Coalesce(Sum('quantity', output_field=DecimalField()), Decimal('0.0')))['total']
+            total_out_qty = consumptions.aggregate(total=Coalesce(Sum('actual_quantity', output_field=DecimalField()), Decimal('0.0')))['total']
+            
+            # KPI calculations... (Same as your original code)
+            total_in_value = receipts.annotate(line_total=ExpressionWrapper(F('quantity') * F('unit_price'), output_field=DecimalField())).aggregate(total=Coalesce(Sum('line_total'), Decimal('0.0')))['total']
+            total_out_value = consumptions.annotate(line_total=ExpressionWrapper(F('actual_quantity') * F('cost_at_consumption'), output_field=DecimalField())).aggregate(total=Coalesce(Sum('line_total'), Decimal('0.0')))['total']
+            total_theoretical_qty = consumptions.aggregate(total=Coalesce(Sum('theoretical_quantity', output_field=DecimalField()), Decimal('0.0')))['total']
+            total_variance_qty = total_out_qty - total_theoretical_qty
+            num_days = (end_date - start_date).days + 1
+            avg_daily_consumption = total_out_qty / num_days if num_days > 0 else 0
+            current_stock = get_inventory_state_at_datetime(product_id, timezone.now())['quantity']
+
+            kpi_data = {
+                'avg_purchase_price': (total_in_value / total_in_qty) if total_in_qty > 0 else Decimal('0.0'),
+                'avg_consumption_cost': (total_out_value / total_out_qty) if total_out_qty > 0 else Decimal('0.0'),
+                'total_variance_qty': total_variance_qty,
+                'total_variance_percent': (total_variance_qty / total_theoretical_qty * 100) if total_theoretical_qty > 0 else 0,
+                'days_of_supply': (current_stock / avg_daily_consumption) if avg_daily_consumption > 0 else float('inf'),
+                'product_unit': product.unit,
+            }
+            # Chart data generation... (Same as your original code)
+            supplier_analysis_data = receipts.filter(company__isnull=False).values('company__name').annotate(receipt_count=Count('id'), total_qty=Sum('quantity', output_field=DecimalField()), total_val=Sum(ExpressionWrapper(F('quantity') * F('unit_price'), output_field=DecimalField()))).annotate(avg_price=F('total_val') / F('total_qty')).order_by('-total_val')
+            all_transactions = _get_ledger_transactions(product_id, company_id, qc_no, start_date, end_date_inclusive, tag_ids)
+            opening_balance = get_inventory_state_at_datetime(product_id, start_date)['quantity']
+            running_balance = float(opening_balance)
+            chart_labels = [start_date.strftime('%Y-%m-%d (Start)')]; balance_data = [round(running_balance, 3)]
+            for trx in all_transactions:
+                running_balance += float(trx['quantity_change'])
+                chart_labels.append(trx['date'].strftime('%Y-%m-%d %H:%M')); balance_data.append(round(running_balance, 3))
+            in_out_data = {'labels': chart_labels, 'datasets': [{'label': 'الرصيد المتراكم', 'data': balance_data, 'borderColor': '#0d6efd', 'backgroundColor': 'rgba(13, 110, 253, 0.2)', 'fill': True, 'tension': 0.1}]}
+            consumption_rows = consumptions.values('batch__template__final_product__name').annotate(total_consumed=Sum('actual_quantity')).order_by('-total_consumed')
+            if consumption_rows: consumption_data = {'labels': [r['batch__template__final_product__name'] for r in consumption_rows], 'datasets': [{'data': [float(r['total_consumed']) for r in consumption_rows]}]}
+            variance_rows = consumptions.filter(actual_quantity__isnull=False, theoretical_quantity__isnull=False).annotate(variance=F('actual_quantity') - F('theoretical_quantity')).order_by('batch__creation_date', 'batch__id')
+            if variance_rows:
+                cumulative_variance = 0; cumulative_data = []
+                for r in variance_rows: cumulative_variance += r.variance; cumulative_data.append(float(cumulative_variance))
+                variance_data = {'labels': [f"{r.batch.batch_number} ({r.batch.creation_date.strftime('%d-%m')})" for r in variance_rows], 'datasets': [{'type': 'bar', 'label': 'الفرق بالتشغيلة', 'data': [float(r.variance) for r in variance_rows]}, {'type': 'line', 'label': 'الفرق التراكمي', 'data': cumulative_data, 'borderColor': '#ffc107', 'backgroundColor': 'rgba(255, 193, 7, 0.5)', 'fill': False}]}
+            if supplier_analysis_data: supplier_data = {'labels': [r['company__name'] for r in supplier_analysis_data], 'datasets': [{'data': [r['total_val'] for r in supplier_analysis_data]}]}
+
+        context.update({
+            'kpi_data': kpi_data,
+            'supplier_analysis_data': supplier_analysis_data,
+            'in_out_data_json': json.dumps(in_out_data, default=str),
+            'consumption_data_json': json.dumps(consumption_data, default=str),
+            'variance_data_json': json.dumps(variance_data, default=str),
+            'supplier_data_json': json.dumps(supplier_data, default=str),
+            'selected_product_id': product_id,
+            'selected_company_id': company_id,
+            'selected_tags': tag_ids,
+        })
     
+    elif analysis_type == 'finished_product':
+        # --- FINISHED PRODUCT ANALYSIS LOGIC (NEW) ---
+        final_product_id_str = request.GET.get('final_product_id')
+        final_product_id = int(final_product_id_str) if final_product_id_str else None
+        
+        fp_kpi_data = {}
+        prod_volume_data, cost_trend_data, market_share_data, product_mix_data = ({'labels': [], 'datasets': []} for _ in range(4))
+
+        base_receipts = FinishedProductReceipt.objects.filter(
+            status=FinishedProductReceipt.Status.RELEASED,
+            release_date__gte=start_date.date(),
+            release_date__lt=end_date_inclusive.date()
+        )
+        if final_product_id:
+            base_receipts = base_receipts.filter(batch__template__final_product_id=final_product_id)
+
+        # KPIs
+        aggregates = base_receipts.aggregate(
+            total_produced=Coalesce(Sum('total_quantity_produced'), 0.0, output_field=FloatField()),
+            total_cost=Coalesce(Sum('total_cost'), Decimal('0.0'))
+        )
+        total_produced = aggregates['total_produced']
+        total_cost = aggregates['total_cost']
+        avg_cost_per_unit = (total_cost / Decimal(str(total_produced))) if total_produced > 0 else Decimal('0.0')
+        fp_kpi_data = {
+            'total_produced': total_produced,
+            'total_value': total_cost,
+            'avg_cost_per_unit': avg_cost_per_unit
+        }
+
+        # Chart 1: Production Volume
+        volume_by_day = base_receipts.annotate(day=TruncDay('release_date')).values('day').annotate(
+            daily_total=Sum('total_quantity_produced')
+        ).order_by('day')
+        if volume_by_day:
+            prod_volume_data = {
+                'labels': [d['day'].strftime('%Y-%m-%d') for d in volume_by_day],
+                'datasets': [{'label': 'الإنتاج اليومي', 'data': [d['daily_total'] for d in volume_by_day], 'borderColor': '#198754', 'backgroundColor': 'rgba(25, 135, 84, 0.2)', 'fill': True, 'tension': 0.1}]
+            }
+
+        # Chart 2: Cost Per Unit Trend (only if a specific product is selected)
+        if final_product_id:
+            cost_trend_rows = base_receipts.annotate(
+                unit_cost=ExpressionWrapper(F('total_cost') / F('total_quantity_produced'), output_field=DecimalField())
+            ).order_by('release_date', 'id')
+            if cost_trend_rows:
+                cost_trend_data = {
+                    'labels': [f"#{r.individual_batch_number} ({r.release_date.strftime('%d-%m')})" for r in cost_trend_rows],
+                    'datasets': [{'label': 'تكلفة الوحدة', 'data': [r.unit_cost for r in cost_trend_rows], 'borderColor': '#dc3545', 'fill': False}]
+                }
+
+        # Chart 3: Market Share (Local vs Export)
+        market_share = base_receipts.values('market_type').annotate(total=Sum('total_quantity_produced'))
+        if market_share:
+            market_share_data = {
+                'labels': [dict(FinishedProductReceipt.MarketType.choices).get(m['market_type']) for m in market_share],
+                'datasets': [{'data': [m['total'] for m in market_share]}]
+            }
+        
+        # Chart 4: Product Mix (only if no specific product is selected)
+        if not final_product_id:
+            product_mix = base_receipts.values('batch__template__final_product__name').annotate(
+                total=Sum('total_quantity_produced')).order_by('-total')
+            if product_mix:
+                 product_mix_data = {
+                    'labels': [p['batch__template__final_product__name'] for p in product_mix],
+                    'datasets': [{'data': [p['total'] for p in product_mix]}]
+                }
+        
+        context.update({
+            'fp_kpi_data': fp_kpi_data,
+            'production_volume_data_json': json.dumps(prod_volume_data, default=str),
+            'cost_trend_data_json': json.dumps(cost_trend_data, default=str),
+            'market_share_data_json': json.dumps(market_share_data, default=str),
+            'product_mix_data_json': json.dumps(product_mix_data, default=str),
+            'selected_final_product_id': final_product_id,
+        })
+
+
     template_name = 'inventory/visuals.html'
     if 'X-Partial-Request' in request.headers:
         template_name = 'inventory/partials/visuals_content.html'

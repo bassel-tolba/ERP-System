@@ -77,7 +77,7 @@
                                 <a href="{% url 'inventory:view_finished_product' receipt.pk %}" class="btn btn-sm btn-outline-secondary" title="عرض التفاصيل">
                                     <i class="bi bi-eye"></i>
                                 </a>
-                                <form action="{% url 'inventory:release_from_quarantine' receipt.pk %}" method="post" class="d-inline">
+                                <form action="{% url 'inventory:release_fg_from_quarantine' receipt.pk %}" method="post" class="d-inline">
                                     {% csrf_token %}
                                     <button type="submit" class="btn btn-sm btn-outline-success" title="إفراج عن التشغيلة">
                                         <i class="bi bi-check2-circle"></i> إفراج

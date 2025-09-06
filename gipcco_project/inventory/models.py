@@ -492,7 +492,10 @@ class FinishedProductReceipt(models.Model):
         verbose_name = _("Finished Product Receipt")
         verbose_name_plural = _("Finished Product Receipts")
         ordering = ['-receipt_date', '-id']
-        unique_together = ['batch', 'individual_batch_number']
+        # --- MODIFICATION ---
+        # Removed the unique_together constraint to allow multiple receipts for the same batch number.
+        # This is crucial for scenarios like partial receipts or receiving for different market types.
+        # unique_together = ['batch', 'individual_batch_number']
 
     def __str__(self):
         return f"Receipt for Batch #{self.individual_batch_number} from Plan {self.batch.shop_order_number}"
@@ -521,3 +524,5 @@ class ReceiptSubBatch(models.Model):
 
     def __str__(self):
         return f"{self.quantity} units in {self.sub_batch_identifier} for {self.receipt}"
+    
+    

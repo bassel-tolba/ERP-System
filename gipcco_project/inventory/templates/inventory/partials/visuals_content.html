@@ -1,32 +1,56 @@
 {% load static inventory_extras %}
 
-{# Data Islands to pass backend data to frontend JavaScript #}
+{# Data Islands for Raw Material Analysis #}
 <script id="data-for-chart-1" type="application/json">{{ in_out_data_json|safe }}</script>
 <script id="data-for-chart-2" type="application/json">{{ consumption_data_json|safe }}</script>
 <script id="data-for-chart-3" type="application/json">{{ variance_data_json|safe }}</script>
 <script id="data-for-chart-4" type="application/json">{{ supplier_data_json|safe }}</script>
 
+{# Data Islands for Finished Product Analysis #}
+<script id="fp-data-for-chart-1" type="application/json">{{ production_volume_data_json|safe }}</script>
+<script id="fp-data-for-chart-2" type="application/json">{{ cost_trend_data_json|safe }}</script>
+<script id="fp-data-for-chart-3" type="application/json">{{ market_share_data_json|safe }}</script>
+<script id="fp-data-for-chart-4" type="application/json">{{ product_mix_data_json|safe }}</script>
+
+
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="mb-0 h2">لوحة مؤشرات التحليل الذكي</h1>
 </div>
+
+<!-- Tab Navigation -->
+<ul class="nav nav-tabs nav-fill mb-3" id="analysisTypeTabs" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link {% if analysis_type == 'raw_material' %}active{% endif %}" id="raw-material-tab" data-bs-toggle="tab" data-bs-target="#raw-material-panel" type="button" role="tab">
+        <i class="bi bi-funnel-fill me-2"></i>تحليل المواد الخام
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link {% if analysis_type == 'finished_product' %}active{% endif %}" id="finished-product-tab" data-bs-toggle="tab" data-bs-target="#finished-product-panel" type="button" role="tab">
+        <i class="bi bi-box2-heart-fill me-2"></i>تحليل المنتج النهائي
+    </button>
+  </li>
+</ul>
+
 
 <div class="card shadow-sm mb-4">
     <div class="card-header">
         <h5 class="mb-0"><i class="bi bi-filter-circle-fill me-2"></i>خيارات التحليل المتقدم</h5>
     </div>
     <div class="card-body">
-        <form method="GET" action="{% url 'inventory:visuals' %}">
+        <form id="analysisForm" method="GET" action="{% url 'inventory:visuals' %}">
+            <input type="hidden" name="type" id="analysisTypeInput" value="{{ analysis_type }}">
             <div class="row g-3">
-                <div class="col-lg-3 col-md-6">
-                    <label for="product_id" class="form-label">المنتج <span class="text-danger">*</span></label>
-                    <select name="product_id" id="product_id" class="form-select searchable-select" required>
-                        <option value="">-- اختر منتج --</option>
+                <!-- Raw Material Filters -->
+                <div class="col-lg-3 col-md-6 analysis-filter" data-type="raw_material">
+                    <label for="product_id" class="form-label">المادة الخام <span class="text-danger">*</span></label>
+                    <select name="product_id" id="product_id" class="form-select searchable-select">
+                        <option value="">-- اختر مادة --</option>
                         {% for product in all_primitive_products %}
                         <option value="{{ product.id }}" {% if product.id == selected_product_id %}selected{% endif %}>{{ product.name }} ({{ product.code }})</option>
                         {% endfor %}
                     </select>
                 </div>
-                <div class="col-lg-3 col-md-6">
+                <div class="col-lg-3 col-md-6 analysis-filter" data-type="raw_material">
                     <label for="company_id" class="form-label">الشركة الموردة</label>
                     <select name="company_id" id="company_id" class="form-select searchable-select">
                         <option value="">-- كل الشركات --</option>
@@ -35,7 +59,7 @@
                         {% endfor %}
                     </select>
                 </div>
-                <div class="col-lg-3 col-md-6">
+                <div class="col-lg-3 col-md-6 analysis-filter" data-type="raw_material">
                     <label for="tags" class="form-label">وسوم السجلات</label>
                     <select name="tags" id="tags" class="form-select searchable-select" multiple>
                         {% for tag in all_tags %}
@@ -43,10 +67,23 @@
                         {% endfor %}
                     </select>
                 </div>
-                <div class="col-lg-3 col-md-6">
+                <div class="col-lg-3 col-md-6 analysis-filter" data-type="raw_material">
                     <label for="qc_no" class="form-label">رقم QC</label>
                     <input type="text" name="qc_no" id="qc_no" class="form-control" value="{{ request.GET.qc_no|default:'' }}">
                 </div>
+
+                <!-- Finished Product Filters -->
+                <div class="col-lg-4 col-md-6 analysis-filter" data-type="finished_product">
+                    <label for="final_product_id" class="form-label">المنتج النهائي</label>
+                    <select name="final_product_id" id="final_product_id" class="form-select searchable-select">
+                        <option value="">-- كل المنتجات النهائية --</option>
+                        {% for product in all_final_products %}
+                        <option value="{{ product.id }}" {% if product.id == selected_final_product_id %}selected{% endif %}>{{ product.name }} ({{ product.code }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Common Filters -->
                 <div class="col-lg-4 col-md-6">
                     <label for="start_date" class="form-label">من تاريخ</label>
                     <input type="text" name="start_date" id="start_date" class="form-control datepicker" value="{{ start_date }}">
@@ -63,118 +100,57 @@
     </div>
 </div>
 
-{% if selected_product_id %}
-    <!-- ======================= Key Performance Indicators (KPIs) ======================= -->
-    <div class="row g-4 mb-4">
-        <div class="col">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body text-center">
-                    <h6 class="card-subtitle text-muted">متوسط سعر الشراء</h6>
-                    <p class="card-text fs-4 fw-bold text-primary mb-0">{{ kpi_data.avg_purchase_price|floatformat:3 }}</p>
-                </div>
-            </div>
+<div class="tab-content" id="analysisTabContent">
+  <!-- Raw Material Panel -->
+  <div class="tab-pane fade {% if analysis_type == 'raw_material' %}show active{% endif %}" id="raw-material-panel" role="tabpanel">
+    {% if selected_product_id %}
+        <!-- KPIs -->
+        <div class="row g-4 mb-4">
+            <div class="col"><div class="card h-100 shadow-sm"><div class="card-body text-center"><h6 class="card-subtitle text-muted">متوسط سعر الشراء</h6><p class="card-text fs-4 fw-bold text-primary mb-0">{{ kpi_data.avg_purchase_price|floatformat:3 }}</p></div></div></div>
+            <div class="col"><div class="card h-100 shadow-sm"><div class="card-body text-center"><h6 class="card-subtitle text-muted">متوسط تكلفة الصرف</h6><p class="card-text fs-4 fw-bold text-info mb-0">{{ kpi_data.avg_consumption_cost|floatformat:3 }}</p></div></div></div>
+            <div class="col"><div class="card h-100 shadow-sm"><div class="card-body text-center"><h6 class="card-subtitle text-muted">إجمالي الفرق بالإنتاج</h6><p class="card-text fs-4 fw-bold {% if kpi_data.total_variance_qty > 0 %}text-danger{% else %}text-success{% endif %} mb-0" title="{{ kpi_data.total_variance_qty|floatformat:3 }} {{ kpi_data.product_unit }}">{{ kpi_data.total_variance_percent|floatformat:2 }}%</p></div></div></div>
+            <div class="col"><div class="card h-100 shadow-sm"><div class="card-body text-center"><h6 class="card-subtitle text-muted">مخزون يكفي لمدة</h6><p class="card-text fs-4 fw-bold text-secondary mb-0">{% if kpi_data.days_of_supply > 365 %}∞{% else %}{{ kpi_data.days_of_supply|floatformat:0 }}{% endif %}<small class="fs-6 text-muted"> يوم</small></p></div></div></div>
         </div>
-        <div class="col">
-             <div class="card h-100 shadow-sm">
-                <div class="card-body text-center">
-                    <h6 class="card-subtitle text-muted">متوسط تكلفة الصرف</h6>
-                    <p class="card-text fs-4 fw-bold text-info mb-0">{{ kpi_data.avg_consumption_cost|floatformat:3 }}</p>
-                </div>
-            </div>
+        <!-- Supplier Table -->
+        {% if supplier_analysis_data %}
+        <div class="card shadow-sm mb-4"><div class="card-header"><h5 class="mb-0"><i class="bi bi-truck me-2"></i>تحليل أداء الموردين لهذه المادة</h5></div><div class="table-responsive"><table class="table table-striped table-hover mb-0"><thead class="table-light"><tr><th>المورد</th><th class="text-center">عدد الاستلامات</th><th class="text-center">إجمالي الكمية</th><th class="text-center">إجمالي القيمة</th><th class="text-center">متوسط السعر</th></tr></thead><tbody>
+        {% for s in supplier_analysis_data %}<tr><td>{{ s.company__name }}</td><td class="text-center">{{ s.receipt_count }}</td><td class="text-center text-success fw-bold">{{ s.total_qty|floatformat:3 }} <small class="text-muted">{{ kpi_data.product_unit }}</small></td><td class="text-center">{{ s.total_val|floatformat:3 }}</td><td class="text-center table-info fw-bold">{{ s.avg_price|floatformat:3 }}</td></tr>{% endfor %}
+        </tbody></table></div></div>
+        {% endif %}
+        <!-- Charts -->
+        <div class="row g-4">
+            <div class="col-lg-12"><div class="card shadow-sm"><div class="card-header"><h5 class="mb-0">تطور رصيد المخزون</h5></div><div class="card-body"><div style="height: 350px;"><canvas id="inventoryFlowChart"></canvas></div></div></div></div>
+            <div class="col-md-6"><div class="card shadow-sm"><div class="card-header"><h5 class="mb-0">استهلاك حسب المنتج النهائي</h5></div><div class="card-body"><div style="height: 300px;"><canvas id="consumptionChart"></canvas></div></div></div></div>
+            <div class="col-md-6"><div class="card shadow-sm"><div class="card-header"><h5 class="mb-0">مساهمة الموردين (بالقيمة)</h5></div><div class="card-body"><div style="height: 300px;"><canvas id="supplierChart"></canvas></div></div></div></div>
+            <div class="col-lg-12"><div class="card shadow-sm"><div class="card-header"><h5 class="mb-0">الفرق بالإنتاج (الفعلي - النظري)</h5></div><div class="card-body"><div style="height: 350px;"><canvas id="varianceChart"></canvas></div></div></div></div>
         </div>
-        <div class="col">
-             <div class="card h-100 shadow-sm">
-                <div class="card-body text-center">
-                    <h6 class="card-subtitle text-muted">إجمالي الفرق بالإنتاج</h6>
-                    <p class="card-text fs-4 fw-bold {% if kpi_data.total_variance_qty > 0 %}text-danger{% else %}text-success{% endif %} mb-0" title="{{ kpi_data.total_variance_qty|floatformat:3 }} {{ kpi_data.product_unit }}">
-                        {{ kpi_data.total_variance_percent|floatformat:2 }}%
-                    </p>
-                </div>
-            </div>
-        </div>
-        <div class="col">
-             <div class="card h-100 shadow-sm">
-                <div class="card-body text-center">
-                    <h6 class="card-subtitle text-muted">مخزون يكفي لمدة</h6>
-                    <p class="card-text fs-4 fw-bold text-secondary mb-0">
-                        {% if kpi_data.days_of_supply > 365 %}
-                        ∞
-                        {% else %}
-                        {{ kpi_data.days_of_supply|floatformat:0 }}
-                        {% endif %}
-                        <small class="fs-6 text-muted">يوم</small>
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ======================= Supplier Performance Table ======================= -->
-    {% if supplier_analysis_data %}
-    <div class="card shadow-sm mb-4">
-        <div class="card-header"><h5 class="mb-0"><i class="bi bi-truck me-2"></i>تحليل أداء الموردين لهذه المادة</h5></div>
-        <div class="table-responsive">
-            <table class="table table-striped table-hover mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>المورد</th>
-                        <th class="text-center">عدد الاستلامات</th>
-                        <th class="text-center">إجمالي الكمية المستلمة</th>
-                        <th class="text-center">إجمالي القيمة</th>
-                        <th class="text-center">متوسط سعر الشراء</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for supplier in supplier_analysis_data %}
-                    <tr>
-                        <td>{{ supplier.company__name }}</td>
-                        <td class="text-center">{{ supplier.receipt_count }}</td>
-                        <td class="text-center text-success fw-bold">{{ supplier.total_qty|floatformat:3 }} <small class="text-muted">{{ kpi_data.product_unit }}</small></td>
-                        <td class="text-center">{{ supplier.total_val|floatformat:3 }}</td>
-                        <td class="text-center table-info fw-bold">{{ supplier.avg_price|floatformat:3 }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
+    {% else %}
+        <div class="alert alert-info"><i class="bi bi-info-circle-fill me-2"></i>الرجاء اختيار مادة خام وتحديد فترة زمنية لبدء التحليل.</div>
     {% endif %}
+  </div>
 
-    <!-- ======================= Charts ======================= -->
-    <div class="row g-4">
-        <div class="col-lg-12">
-            <div class="card shadow-sm">
-                <div class="card-header"><h5 class="mb-0">تطور رصيد المخزون خلال الفترة</h5></div>
-                <div class="card-body">
-                    <div style="height: 350px;"><canvas id="inventoryFlowChart"></canvas></div>
-                </div>
-            </div>
+  <!-- Finished Product Panel -->
+  <div class="tab-pane fade {% if analysis_type == 'finished_product' %}show active{% endif %}" id="finished-product-panel" role="tabpanel">
+     {% if request.GET.type == 'finished_product' %}
+        <!-- KPIs -->
+        <div class="row g-4 mb-4">
+            <div class="col"><div class="card h-100 shadow-sm"><div class="card-body text-center"><h6 class="card-subtitle text-muted">إجمالي الإنتاج</h6><p class="card-text fs-4 fw-bold text-primary mb-0">{{ fp_kpi_data.total_produced|floatformat:0 }}</p></div></div></div>
+            <div class="col"><div class="card h-100 shadow-sm"><div class="card-body text-center"><h6 class="card-subtitle text-muted">قيمة الإنتاج الإجمالية</h6><p class="card-text fs-4 fw-bold text-info mb-0">{{ fp_kpi_data.total_value|floatformat:3 }}</p></div></div></div>
+            <div class="col"><div class="card h-100 shadow-sm"><div class="card-body text-center"><h6 class="card-subtitle text-muted">متوسط تكلفة الوحدة</h6><p class="card-text fs-4 fw-bold text-success mb-0">{{ fp_kpi_data.avg_cost_per_unit|floatformat:3 }}</p></div></div></div>
         </div>
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-header"><h5 class="mb-0">استهلاك المادة حسب المنتج النهائي</h5></div>
-                <div class="card-body">
-                    <div style="height: 300px;"><canvas id="consumptionChart"></canvas></div>
-                </div>
-            </div>
+        <!-- Charts -->
+        <div class="row g-4">
+            <div class="col-lg-12"><div class="card shadow-sm"><div class="card-header"><h5 class="mb-0">حجم الإنتاج اليومي</h5></div><div class="card-body"><div style="height: 350px;"><canvas id="productionVolumeChart"></canvas></div></div></div></div>
+            {% if selected_final_product_id %}
+            <div class="col-lg-12"><div class="card shadow-sm"><div class="card-header"><h5 class="mb-0">تطور تكلفة الوحدة لكل تشغيلة</h5></div><div class="card-body"><div style="height: 350px;"><canvas id="costTrendChart"></canvas></div></div></div></div>
+            {% endif %}
+            <div class="col-md-6"><div class="card shadow-sm"><div class="card-header"><h5 class="mb-0">توزيع الإنتاج حسب السوق</h5></div><div class="card-body"><div style="height: 300px;"><canvas id="marketShareChart"></canvas></div></div></div></div>
+            {% if not selected_final_product_id %}
+            <div class="col-md-6"><div class="card shadow-sm"><div class="card-header"><h5 class="mb-0">توزيع الإنتاج حسب المنتج</h5></div><div class="card-body"><div style="height: 300px;"><canvas id="productMixChart"></canvas></div></div></div></div>
+            {% endif %}
         </div>
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-header"><h5 class="mb-0">مساهمة الموردين (حسب القيمة)</h5></div>
-                <div class="card-body">
-                    <div style="height: 300px;"><canvas id="supplierChart"></canvas></div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-12">
-            <div class="card shadow-sm">
-                <div class="card-header"><h5 class="mb-0">تحليل الفرق بالإنتاج (الفعلي - النظري)</h5></div>
-                <div class="card-body">
-                    <div style="height: 350px;"><canvas id="varianceChart"></canvas></div>
-                </div>
-            </div>
-        </div>
-    </div>
-{% else %}
-    <div class="alert alert-info"><i class="bi bi-info-circle-fill me-2"></i>الرجاء اختيار منتج وتحديد فترة زمنية لبدء التحليل.</div>
-{% endif %}
+    {% else %}
+        <div class="alert alert-info"><i class="bi bi-info-circle-fill me-2"></i>الرجاء تحديد فترة زمنية (واختيار منتج) لبدء تحليل الإنتاج.</div>
+    {% endif %}
+  </div>
+</div>

@@ -1,4 +1,4 @@
-<!-- Transaction Details Modal -->
+<!-- Transaction Details Modal (Existing) -->
 <div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
@@ -49,9 +49,10 @@
         </table>
       </div>
       <div class="modal-footer justify-content-between">
+        <!-- MODIFIED: Changed button to trigger the new deep-dive modal -->
         <div id="batch-details-btn-container" class="d-none">
-            <button class="btn btn-primary" id="viewFullBatchBtn" data-bs-target="#batchDetailsModal" data-bs-toggle="modal">
-                <i class="bi bi-zoom-in me-2"></i>عرض تفاصيل التشغيلة كاملة
+            <button class="btn btn-primary" id="viewFullBatchAnalysisBtn" data-bs-target="#batchAnalysisModal" data-bs-toggle="modal">
+                <i class="bi bi-zoom-in me-2"></i>تحليل التشغيلة بالكامل
             </button>
         </div>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
@@ -60,47 +61,73 @@
   </div>
 </div>
 
-<!-- Batch Deep Dive Modal -->
-<div class="modal fade" id="batchDetailsModal" aria-hidden="true" aria-labelledby="batchDetailsModalLabel" tabindex="-1">
-  <div class="modal-dialog modal-xl">
+<!-- NEW: Batch Deep Dive Analysis Modal -->
+<div class="modal fade" id="batchAnalysisModal" aria-hidden="true" aria-labelledby="batchAnalysisModalLabel" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="batchDetailsModalLabel">تفاصيل تشغيلة كاملة</h5>
+        <h5 class="modal-title" id="batchAnalysisModalLabel">تحليل شامل للتشغيلة</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <div id="batch-details-content-loading" class="text-center p-5">
+        <div id="batch-analysis-content-loading" class="text-center p-5">
             <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Loading...</span>
             </div>
-            <p class="mt-2">جاري تحميل البيانات...</p>
+            <p class="mt-2">جاري تحميل بيانات التحليل...</p>
         </div>
-        <div id="batch-details-content-main" class="d-none">
+        <div id="batch-analysis-content-main" class="d-none">
+            <!-- Header Info -->
             <div class="row bg-light p-3 rounded mb-3">
-                <div class="col-md-3"><strong>أمر تشغيل:</strong> <span id="batch-modal-so-num"></span></div>
-                <div class="col-md-3"><strong>رقم التشغيلة:</strong> <span id="batch-modal-batch-num"></span></div>
-                <div class="col-md-3"><strong>تاريخ الإنشاء:</strong> <span id="batch-modal-date"></span></div>
-                <div class="col-md-3"><strong>المنتج النهائي:</strong> <span id="batch-modal-final-prod"></span></div>
+                <div class="col-md-3"><strong>أمر تشغيل:</strong> <span id="ba-so-num"></span></div>
+                <div class="col-md-3"><strong>رقم التشغيلة:</strong> <span id="ba-batch-num"></span></div>
+                <div class="col-md-3"><strong>تاريخ الإنشاء:</strong> <span id="ba-date"></span></div>
+                <div class="col-md-3"><strong>المنتج النهائي:</strong> <span id="ba-final-prod"></span></div>
             </div>
-            <div class="table-responsive">
-                <table class="table table-striped table-bordered">
-                    <thead class="table-dark">
+            <!-- Summary KPIs -->
+             <div class="row g-3 mb-4 text-center">
+                <div class="col"><div class="card bg-primary-subtle border-primary"><div class="card-body p-2"><h6 class="card-subtitle text-muted small">تكلفة المواد الخام</h6><p class="card-text fs-5 fw-bold mb-0" id="ba-total-cost"></p></div></div></div>
+                <div class="col"><div class="card bg-success-subtle border-success"><div class="card-body p-2"><h6 class="card-subtitle text-muted small">إجمالي المنتج</h6><p class="card-text fs-5 fw-bold mb-0" id="ba-total-produced"></p></div></div></div>
+                <div class="col"><div class="card bg-info-subtle border-info"><div class="card-body p-2"><h6 class="card-subtitle text-muted small">متوسط التكلفة للوحدة</h6><p class="card-text fs-5 fw-bold mb-0" id="ba-avg-cost"></p></div></div></div>
+            </div>
+
+            <!-- Raw Materials Table -->
+            <h6><i class="bi bi-funnel-fill"></i> المواد الخام المستخدمة</h6>
+            <div class="table-responsive mb-4">
+                <table class="table table-sm table-striped table-bordered">
+                    <thead class="table-light">
                         <tr>
-                            <th>المادة الخام</th>
-                            <th>مصدر QC</th>
+                            <th>المادة</th>
                             <th class="text-center">الكمية النظرية</th>
                             <th class="text-center">الكمية الفعلية</th>
+                            <th class="text-center">تكلفة الوحدة عند الصرف</th>
+                            <th class="text-center">التكلفة الإجمالية</th>
                         </tr>
                     </thead>
-                    <tbody id="batch-modal-items-tbody">
-                        <!-- Items will be injected here by JavaScript -->
-                    </tbody>
+                    <tbody id="ba-raw-materials-tbody"></tbody>
+                </table>
+            </div>
+
+            <!-- Finished Product Receipts Table -->
+            <h6><i class="bi bi-box2-heart-fill"></i> استلامات المنتج النهائي من هذه التشغيلة</h6>
+            <div class="table-responsive">
+                <table class="table table-sm table-striped table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th>تاريخ الاستلام</th>
+                            <th class="text-center">الكمية المنتجة</th>
+                            <th class="text-center">نوع السوق</th>
+                            <th class="text-center">تكلفة الوحدة</th>
+                            <th class="text-center">الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ba-receipts-tbody"></tbody>
                 </table>
             </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" data-bs-target="#detailsModal" data-bs-toggle="modal">العودة</button>
+        <button class="btn btn-secondary" data-bs-target="#detailsModal" data-bs-toggle="modal">العودة للتفاصيل</button>
         <button type="button" class="btn btn-primary" data-bs-dismiss="modal">إغلاق</button>
       </div>
     </div>

@@ -1622,79 +1622,165 @@
                       }
 
 
-                      // ----- Logic for visuals.html -----
-                      const inventoryFlowChartCanvas = document.getElementById("inventoryFlowChart");
-                      if (inventoryFlowChartCanvas) {
-                        console.log("Initializing visuals.html chart logic...");
-                        if (document.body.hasAttribute("data-visuals-initialized")) return;
-                        document.body.setAttribute("data-visuals-initialized", "true");
-                        if (typeof Chart === "undefined") {
-                          console.error("Chart.js not loaded!");
-                          return;
-                        }
-                        const chartColors = [ "#0d6efd", "#6f42c1", "#d63384", "#dc3545", "#fd7e14", "#ffc107", "#198754", "#20c997", "#0dcaf0", "#6c757d" ];
-                        
-                        function showNoDataMessage(canvasId) {
-                            const canvas = document.getElementById(canvasId);
-                            if (canvas && canvas.parentElement) {
-                                const parent = canvas.parentElement;
-                                const messageDiv = document.createElement('div');
-                                messageDiv.className = 'alert alert-info text-center p-4 d-flex align-items-center justify-content-center h-100';
-                                messageDiv.innerHTML = '<i class="bi bi-bar-chart-line-fill me-2"></i> لا توجد بيانات كافية لعرض هذا الرسم البياني.';
-                                parent.replaceChild(messageDiv, canvas);
-                            }
-                        }
+                        // =========================================================================
+                        //  NEW & ENHANCED LOGIC FOR VISUALS PAGE
+                        // =========================================================================
+                        const analysisForm = container.querySelector("#analysisForm");
+                        if (analysisForm) {
+                            console.log("Initializing visuals.html logic...");
+                            const analysisTypeInput = container.querySelector("#analysisTypeInput");
+                            const analysisTabs = container.querySelectorAll('#analysisTypeTabs button[data-bs-toggle="tab"]');
+                            const allFilters = container.querySelectorAll(".analysis-filter");
 
-                        // Chart 1: Inventory Flow
-                        const inOutData = getDataFromIsland("data-for-chart-1");
-                        if ( inventoryFlowChartCanvas && inOutData && inOutData.labels && inOutData.labels.length > 0 ) {
-                          new Chart(inventoryFlowChartCanvas.getContext("2d"), {
-                            type: "line", data: inOutData, options: { responsive: true, maintainAspectRatio: false, interaction: { mode: "index", intersect: false }, scales: { y: { beginAtZero: true, title: { display: true, text: "الكمية" }, }, }, },
-                          });
-                        } else { showNoDataMessage("inventoryFlowChart"); }
-                        
-                        // Chart 2: Consumption by Final Product
-                        const consumptionData = getDataFromIsland("data-for-chart-2");
-                        const consumptionCanvas = document.getElementById("consumptionChart");
-                        if ( consumptionCanvas && consumptionData && consumptionData.labels && consumptionData.labels.length > 0 ) {
-                          consumptionData.datasets[0].backgroundColor = chartColors;
-                          new Chart(consumptionCanvas.getContext("2d"), {
-                            type: "doughnut", data: consumptionData, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "top" } }, },
-                          });
-                        } else { showNoDataMessage("consumptionChart"); }
-                        
-                        // Chart 3: Production Variance (ENHANCED)
-                        const varianceData = getDataFromIsland("data-for-chart-3");
-                        const varianceCanvas = document.getElementById("varianceChart");
-                        if ( varianceCanvas && varianceData && varianceData.labels && varianceData.labels.length > 0 ) {
-                          // Color bars based on positive (waste) or negative (saving)
-                          varianceData.datasets[0].backgroundColor = varianceData.datasets[0].data.map((v) => v > 0 ? "rgba(220, 53, 69, 0.7)" : "rgba(25, 135, 84, 0.7)");
-                          varianceData.datasets[0].borderColor = varianceData.datasets[0].data.map((v) => v > 0 ? "#dc3545" : "#198754");
-                          varianceData.datasets[0].borderWidth = 1;
-                          new Chart(varianceCanvas.getContext("2d"), {
-                            // The type is 'bar' by default, but individual datasets can override it.
-                            type: "bar", 
-                            data: varianceData, 
-                            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, title: { display: true, text: "كمية الفرق" }, }, }, },
-                          });
-                        } else { showNoDataMessage("varianceChart"); }
+                            // Function to show/hide filters based on selected type
+                            const updateFiltersVisibility = (type) => {
+                                allFilters.forEach(filter => {
+                                    if (filter.dataset.type === type) {
+                                        filter.style.display = 'block';
+                                        filter.querySelectorAll('select, input').forEach(el => el.disabled = false);
+                                    } else {
+                                        filter.style.display = 'none';
+                                        filter.querySelectorAll('select, input').forEach(el => el.disabled = true);
+                                    }
+                                });
+                            };
 
-                        // Chart 4: Supplier Contribution
-                        const supplierData = getDataFromIsland("data-for-chart-4");
-                        const supplierCanvas = document.getElementById("supplierChart");
-                        if ( supplierCanvas && supplierData && supplierData.labels && supplierData.labels.length > 0) {
-                            supplierData.datasets[0].backgroundColor = chartColors.slice().reverse(); 
-                            new Chart(supplierCanvas.getContext("2d"), {
-                                type: "pie", data: supplierData, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "top" } }, },
+                            // Add event listeners to tabs
+                            analysisTabs.forEach(tab => {
+                                tab.addEventListener('shown.bs.tab', (event) => {
+                                    const type = event.target.id === 'raw-material-tab' ? 'raw_material' : 'finished_product';
+                                    analysisTypeInput.value = type;
+                                    updateFiltersVisibility(type);
+                                });
                             });
-                        } else { showNoDataMessage("supplierChart"); }
 
-                      } else {
-                        document.body.removeAttribute("data-visuals-initialized");
-                      }
+                            // Initial setup
+                            updateFiltersVisibility(analysisTypeInput.value);
 
-                      
-                    }
+                            // --- Charting Logic ---
+                            if (typeof Chart === "undefined") {
+                                console.error("Chart.js not loaded!");
+                                return;
+                            }
+                            const chartColors = ["#0d6efd", "#6f42c1", "#d63384", "#dc3545", "#fd7e14", "#ffc107", "#198754", "#20c997", "#0dcaf0", "#6c757d"];
+                            
+                            function showNoDataMessage(canvasId) {
+                                const canvas = document.getElementById(canvasId);
+                                if (canvas && canvas.parentElement) {
+                                    const parent = canvas.parentElement;
+                                    // Avoid adding multiple messages
+                                    if (parent.querySelector('.alert')) return;
+                                    const messageDiv = document.createElement('div');
+                                    messageDiv.className = 'alert alert-info text-center p-4 d-flex align-items-center justify-content-center h-100';
+                                    messageDiv.innerHTML = '<i class="bi bi-bar-chart-line-fill me-2"></i> لا توجد بيانات كافية لعرض هذا الرسم البياني.';
+                                    parent.replaceChild(messageDiv, canvas);
+                                }
+                            }
+
+                            // A. Raw Material Charts
+                            const inOutData = getDataFromIsland("data-for-chart-1");
+                            if (inOutData && inOutData.labels.length > 0) new Chart(document.getElementById("inventoryFlowChart"), { type: "line", data: inOutData, options: { responsive: true, maintainAspectRatio: false, interaction: { mode: "index", intersect: false } }}); else showNoDataMessage("inventoryFlowChart");
+                            const consumptionData = getDataFromIsland("data-for-chart-2");
+                            if (consumptionData && consumptionData.labels.length > 0) { consumptionData.datasets[0].backgroundColor = chartColors; new Chart(document.getElementById("consumptionChart"), { type: "doughnut", data: consumptionData, options: { responsive: true, maintainAspectRatio: false }}); } else showNoDataMessage("consumptionChart");
+                            const varianceData = getDataFromIsland("data-for-chart-3");
+                            if (varianceData && varianceData.labels.length > 0) { varianceData.datasets[0].backgroundColor = varianceData.datasets[0].data.map(v => v > 0 ? "rgba(220, 53, 69, 0.7)" : "rgba(25, 135, 84, 0.7)"); new Chart(document.getElementById("varianceChart"), { type: "bar", data: varianceData, options: { responsive: true, maintainAspectRatio: false }}); } else showNoDataMessage("varianceChart");
+                            const supplierData = getDataFromIsland("data-for-chart-4");
+                            if (supplierData && supplierData.labels.length > 0) { supplierData.datasets[0].backgroundColor = chartColors.slice().reverse(); new Chart(document.getElementById("supplierChart"), { type: "pie", data: supplierData, options: { responsive: true, maintainAspectRatio: false }}); } else showNoDataMessage("supplierChart");
+
+                            // B. Finished Product Charts
+                            const prodVolData = getDataFromIsland("fp-data-for-chart-1");
+                            if (prodVolData && prodVolData.labels.length > 0) new Chart(document.getElementById("productionVolumeChart"), { type: "line", data: prodVolData, options: { responsive: true, maintainAspectRatio: false }}); else showNoDataMessage("productionVolumeChart");
+                            const costTrendData = getDataFromIsland("fp-data-for-chart-2");
+                            if (costTrendData && costTrendData.labels.length > 0) new Chart(document.getElementById("costTrendChart"), { type: "line", data: costTrendData, options: { responsive: true, maintainAspectRatio: false }}); else showNoDataMessage("costTrendChart");
+                            const marketData = getDataFromIsland("fp-data-for-chart-3");
+                            if (marketData && marketData.labels.length > 0) { marketData.datasets[0].backgroundColor = ['#0d6efd', '#fd7e14']; new Chart(document.getElementById("marketShareChart"), { type: "pie", data: marketData, options: { responsive: true, maintainAspectRatio: false }}); } else showNoDataMessage("marketShareChart");
+                            const mixData = getDataFromIsland("fp-data-for-chart-4");
+                            if (mixData && mixData.labels.length > 0) { mixData.datasets[0].backgroundColor = chartColors; new Chart(document.getElementById("productMixChart"), { type: "bar", data: mixData, options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y' }}); } else showNoDataMessage("productMixChart");
+                        }
+
+                        // =========================================================================
+                        //  NEW LOGIC FOR BATCH ANALYSIS MODAL (on ledger page)
+                        // =========================================================================
+                        const detailsModal = container.querySelector('#detailsModal');
+                        if (detailsModal) {
+                            const batchAnalysisModalEl = container.querySelector('#batchAnalysisModal');
+                            const analysisBtn = container.querySelector('#viewFullBatchAnalysisBtn');
+
+                            analysisBtn.addEventListener('click', async function() {
+                                const batchId = this.dataset.batchId;
+                                if (!batchId) return;
+
+                                const loadingEl = batchAnalysisModalEl.querySelector('#batch-analysis-content-loading');
+                                const mainEl = batchAnalysisModalEl.querySelector('#batch-analysis-content-main');
+                                const rawTbody = batchAnalysisModalEl.querySelector('#ba-raw-materials-tbody');
+                                const receiptsTbody = batchAnalysisModalEl.querySelector('#ba-receipts-tbody');
+                                
+                                loadingEl.classList.remove('d-none');
+                                mainEl.classList.add('d-none');
+                                rawTbody.innerHTML = '';
+                                receiptsTbody.innerHTML = '';
+
+                                try {
+                                    const response = await fetch(`/api/batch_analysis/${batchId}/`);
+                                    const data = await response.json();
+                                    
+                                    // Populate header & summary
+                                    mainEl.querySelector('#ba-so-num').textContent = data.shop_order_number;
+                                    mainEl.querySelector('#ba-batch-num').textContent = data.batch_number;
+                                    mainEl.querySelector('#ba-date').textContent = new Date(data.creation_date).toLocaleDateString('en-CA');
+                                    mainEl.querySelector('#ba-final-prod').textContent = data.final_product_name;
+                                    mainEl.querySelector('#ba-total-cost').textContent = parseFloat(data.summary.total_raw_material_cost).toFixed(3);
+                                    mainEl.querySelector('#ba-total-produced').textContent = `${parseFloat(data.summary.total_quantity_produced).toFixed(0)} ${data.final_product_unit}`;
+                                    mainEl.querySelector('#ba-avg-cost').textContent = parseFloat(data.summary.average_cost_per_unit).toFixed(3);
+
+                                    // Populate raw materials
+                                    data.raw_materials_used.forEach(item => {
+                                        rawTbody.innerHTML += `
+                                            <tr>
+                                                <td>${item.product_name}</td>
+                                                <td class="text-center">${parseFloat(item.theoretical_quantity).toFixed(3)} ${item.unit}</td>
+                                                <td class="text-center">${parseFloat(item.actual_quantity).toFixed(3)} ${item.unit}</td>
+                                                <td class="text-center">${parseFloat(item.cost_at_consumption).toFixed(3)}</td>
+                                                <td class="text-center fw-bold">${parseFloat(item.line_total).toFixed(3)}</td>
+                                            </tr>
+                                        `;
+                                    });
+
+                                    // Populate finished goods receipts
+                                    if (data.finished_product_receipts.length > 0) {
+                                        data.finished_product_receipts.forEach(r => {
+                                            receiptsTbody.innerHTML += `
+                                                <tr>
+                                                    <td>${r.receipt_date}</td>
+                                                    <td class="text-center">${parseFloat(r.quantity_produced).toFixed(0)}</td>
+                                                    <td class="text-center">${r.market_type}</td>
+                                                    <td class="text-center fw-bold">${parseFloat(r.cost_per_unit).toFixed(3)}</td>
+                                                    <td class="text-center">${r.status}</td>
+                                                </tr>
+                                            `;
+                                        });
+                                    } else {
+                                        receiptsTbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">لم يتم استلام أي منتج نهائي من هذه التشغيلة بعد.</td></tr>`;
+                                    }
+
+                                    loadingEl.classList.add('d-none');
+                                    mainEl.classList.remove('d-none');
+
+                                } catch (error) {
+                                    console.error("Failed to load batch analysis:", error);
+                                    mainEl.innerHTML = `<div class="alert alert-danger">فشل تحميل بيانات التحليل.</div>`;
+                                }
+                            });
+
+                             // Link batchId to the button when the first modal opens
+                            detailsModal.addEventListener('show.bs.modal', function(event) {
+                                const button = event.relatedTarget;
+                                const batchId = button.getAttribute('data-batch-id');
+                                analysisBtn.dataset.batchId = batchId || '';
+                            });
+                        }
+
+                    } // End of initializePluginsInContent
 
                     // --- Core Dynamic Loading Functions ---
                     async function loadContent(url, pushState = true) {
