@@ -1,10 +1,16 @@
+# gipcco_project/inventory/models.py
 
-
-
-
-from django.db import models
-from django.utils.translation import gettext_lazy as _
 from decimal import Decimal
+from django.db import models, transaction
+from django.utils.translation import gettext_lazy as _
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ValidationError
+
+
+# ==============================================================================
+#  OPERATIONAL MODELS
+# ==============================================================================
 
 class Company(models.Model):
     """
@@ -14,7 +20,7 @@ class Company(models.Model):
     name = models.CharField(max_length=255, unique=True, verbose_name=_("Company Name"))
 
     class Meta:
-        db_table = 'companies'  # Explicitly map to the existing table
+        db_table = 'companies'
         verbose_name = _("Company")
         verbose_name_plural = _("Companies")
         ordering = ['name']
@@ -29,13 +35,11 @@ class Product(models.Model):
     Maps to the 'products' table.
     """
     class ProductType(models.TextChoices):
-        # CORRECTED: Set the display name to Arabic to match the UI.
         RAW_MATERIAL = 'مواد خام', _('مواد خام')
         PACKAGING = 'تعبئه و تغليف', _('تعبئه و تغليف')
         FINAL_PRODUCT = 'منتج نهائي', _('منتج نهائي')
-        # --- NEW PRODUCT TYPES ---
-        MRO = 'قطع غيار و صيانة', _('قطع غيار و صيانة') # Maintenance, Repair, Operations
-        CONSUMABLE = 'مستهلكات', _('مستهلكات') # Office supplies, etc.
+        MRO = 'قطع غيار و صيانة', _('قطع غيار و صيانة')
+        CONSUMABLE = 'مستهلكات', _('مستهلكات')
 
     name = models.CharField(max_length=255, verbose_name=_("Product Name"))
     code = models.CharField(max_length=100, unique=True, verbose_name=_("Product Code"))
@@ -46,13 +50,27 @@ class Product(models.Model):
     )
     unit = models.CharField(max_length=50, verbose_name=_("Unit of Measurement"))
     tags = models.ManyToManyField('ProductTag', blank=True, verbose_name=_("Tags"))
-    # --- NEW FIELD ---
     moving_average_cost = models.DecimalField(
         max_digits=12, decimal_places=3, default=Decimal('0.000'), verbose_name=_("Moving Average Cost")
     )
 
+    # --- NEW ACCOUNTING OVERRIDE FIELDS ---
+    override_inventory_account = models.ForeignKey(
+        'Account', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='+', verbose_name=_("Override Inventory Account")
+    )
+    override_cogs_expense_account = models.ForeignKey(
+        'Account', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='+', verbose_name=_("Override COGS/Expense Account")
+    )
+    # --- NEW FIELD ---
+    override_sales_revenue_account = models.ForeignKey(
+        'Account', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='+', verbose_name=_("Override Sales Revenue Account")
+    )
+
     class Meta:
-        db_table = 'products'  # Explicitly map to the existing table
+        db_table = 'products'
         verbose_name = _("Product")
         verbose_name_plural = _("Products")
         ordering = ['name']
@@ -62,9 +80,6 @@ class Product(models.Model):
 
 
 class ProductTag(models.Model):
-    """
-    Represents a tag that can be assigned to products.
-    """
     name = models.CharField(max_length=100, unique=True, verbose_name=_("Tag Name"))
 
     class Meta:
@@ -78,15 +93,15 @@ class ProductTag(models.Model):
 
 
 class InventoryLog(models.Model):
-    """
-    Represents a single transaction in the inventory log, such as receiving materials.
-    Maps to the 'inventory_log' table.
-    """
-    # --- NEW: Status Choices ---
     class Status(models.TextChoices):
         QUARANTINED = 'quarantined', _('تحت الفحص')
         RELEASED = 'released', _('مفرج عنه')
         REJECTED = 'rejected', _('مرفوض')
+        SCRAPPED = 'scrapped', _('خردة') # --- NEW STATUS ---
+    
+    class VatTreatment(models.TextChoices):
+        RECOVERABLE = 'recoverable', _('ضريبة قابلة للخصم')
+        CAPITALIZED = 'capitalized', _('تضاف للتكلفة')
         
     product = models.ForeignKey(
         Product,
@@ -110,27 +125,20 @@ class InventoryLog(models.Model):
         blank=True,
         verbose_name=_("QC Number")
     )
-    # --- NEW FIELD ---
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
         default=Status.QUARANTINED,
         verbose_name=_("Status")
     )
-    # --- NEW FIELD ---
     release_timestamp = models.DateTimeField(
         null=True,
         blank=True,
         verbose_name=_("Release Timestamp")
     )
-    # --- NEW FIELD ---
-    unit_price = models.DecimalField(
-        max_digits=12, decimal_places=3, null=True, blank=True, verbose_name=_("Unit Price")
-    )
-    # --- NEW FIELD ---
     po_item = models.ForeignKey(
         'PurchaseOrderItem',
-        on_delete=models.SET_NULL, # Set to PROTECT after data migration
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name='receipts',
@@ -142,22 +150,46 @@ class InventoryLog(models.Model):
         verbose_name=_("Tags"),
         related_name='inventory_logs'
     )
+    
+    base_unit_price = models.DecimalField(
+        max_digits=12, decimal_places=3, default=Decimal('0.000'), verbose_name=_("Base Unit Price (before VAT)")
+    )
+    vat_amount = models.DecimalField(
+        max_digits=12, decimal_places=3, default=Decimal('0.000'), verbose_name=_("VAT Amount")
+    )
+    vat_treatment = models.CharField(
+        max_length=20,
+        choices=VatTreatment.choices,
+        default=VatTreatment.RECOVERABLE,
+        verbose_name=_("VAT Treatment")
+    )
 
     class Meta:
-        db_table = 'inventory_log'  # Explicitly map to the existing table
+        db_table = 'inventory_log'
         verbose_name = _("Inventory Log")
         verbose_name_plural = _("Inventory Logs")
         ordering = ['-timestamp']
 
     def __str__(self):
         return f"Log #{self.id}: {self.quantity} {self.product.unit} of {self.product.name}"
+    
+    @property
+    def costing_unit_price(self):
+        """Calculates the unit price used for inventory valuation (MAC)."""
+        if self.quantity == 0:
+            return Decimal('0.000')
+        
+        total_base_price = self.base_unit_price * Decimal(str(self.quantity))
+        
+        if self.vat_treatment == self.VatTreatment.CAPITALIZED:
+            total_cost = total_base_price + self.vat_amount
+        else: # Recoverable
+            total_cost = total_base_price
+            
+        return (total_cost / Decimal(str(self.quantity))).quantize(Decimal('0.001'))
 
 
 class ShopOrderTemplate(models.Model):
-    """
-    Represents a template or "recipe" for a final product.
-    Maps to the 'shop_order_templates' table.
-    """
     name = models.CharField(max_length=255, verbose_name=_("Template Name"))
     final_product = models.ForeignKey(
         Product,
@@ -167,7 +199,7 @@ class ShopOrderTemplate(models.Model):
     )
 
     class Meta:
-        db_table = 'shop_order_templates'  # Explicitly map to the existing table
+        db_table = 'shop_order_templates'
         verbose_name = _("Shop Order Template")
         verbose_name_plural = _("Shop Order Templates")
         ordering = ['name']
@@ -177,10 +209,6 @@ class ShopOrderTemplate(models.Model):
 
 
 class TemplateItem(models.Model):
-    """
-    Represents a single "ingredient" line item within a ShopOrderTemplate.
-    Maps to the 'template_items' table.
-    """
     template = models.ForeignKey(
         ShopOrderTemplate,
         on_delete=models.CASCADE,
@@ -196,7 +224,7 @@ class TemplateItem(models.Model):
     theoretical_quantity = models.FloatField(verbose_name=_("Theoretical Quantity"))
 
     class Meta:
-        db_table = 'template_items'  # Explicitly map to the existing table
+        db_table = 'template_items'
         verbose_name = _("Template Item")
         verbose_name_plural = _("Template Items")
 
@@ -205,10 +233,6 @@ class TemplateItem(models.Model):
 
 
 class Batch(models.Model):
-    """
-    Represents an actual production batch created from a ShopOrderTemplate.
-    Maps to the 'batches' table.
-    """
     template = models.ForeignKey(
         ShopOrderTemplate,
         on_delete=models.PROTECT,
@@ -221,9 +245,13 @@ class Batch(models.Model):
     is_customized = models.BooleanField(default=False, verbose_name=_("Is Customized"))
     is_continuation = models.BooleanField(default=False, verbose_name=_("Is Continuation"))
     notes = models.TextField(null=True, blank=True, verbose_name=_("Notes"))
+    parent_batch = models.ForeignKey(
+        'self', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='continuation_batches', verbose_name=_("Parent Batch (for continuations)")
+    )
 
     class Meta:
-        db_table = 'batches'  # Explicitly map to the existing table
+        db_table = 'batches'
         verbose_name = _("Batch")
         verbose_name_plural = _("Batches")
         ordering = ['-creation_date', '-id']
@@ -231,13 +259,10 @@ class Batch(models.Model):
     def __str__(self):
         return f"Batch {self.batch_number} (SO: {self.shop_order_number})"
 
-    # --- NEW PROPERTY ---
     @property
     def number_of_batches_in_plan(self):
-        """Calculates how many individual batches are represented by this record."""
         parts = str(self.batch_number).split('-')
         try:
-            # Handle non-numeric parts gracefully if they exist but are not part of the range
             start_str = parts[0]
             end_str = parts[-1]
             start = int(''.join(filter(str.isdigit, start_str)))
@@ -245,16 +270,12 @@ class Batch(models.Model):
             
             if end >= start:
                 return (end - start) + 1
-            return 1 # Fallback for malformed ranges like 105-101
+            return 1
         except (ValueError, IndexError):
-            return 1 # If parsing fails, assume it's a single batch
+            return 1
 
 
 class BatchItem(models.Model):
-    """
-    Represents an actual material used in a specific production Batch.
-    Maps to the 'batch_items' table.
-    """
     class SourceType(models.TextChoices):
         OPENING_BALANCE = 'opening_balance', _('Opening Balance')
         INVENTORY_LOG = 'inventory_log', _('Inventory Log')
@@ -286,14 +307,12 @@ class BatchItem(models.Model):
         related_name='batch_items',
         verbose_name=_("Source Inventory Log")
     )
-
-    # --- NEW FIELD ---
     cost_at_consumption = models.DecimalField(
         max_digits=12, decimal_places=3, null=True, blank=True, verbose_name=_("Cost at Consumption")
     )
 
     class Meta:
-        db_table = 'batch_items'  # Explicitly map to the existing table
+        db_table = 'batch_items'
         verbose_name = _("Batch Item")
         verbose_name_plural = _("Batch Items")
 
@@ -302,10 +321,6 @@ class BatchItem(models.Model):
 
 
 class OpeningBalance(models.Model):
-    """
-    Represents the starting inventory balance for a product on a specific date.
-    Maps to the 'opening_balances' table.
-    """
     product = models.ForeignKey(
         Product,
         on_delete=models.CASCADE,
@@ -314,34 +329,27 @@ class OpeningBalance(models.Model):
     )
     quantity = models.FloatField(verbose_name=_("Quantity"))
     balance_date = models.DateTimeField(verbose_name=_("Balance Date"))
-
-    # --- MODIFIED FIELD ---
     total_value = models.DecimalField(
         max_digits=14, decimal_places=3, default=Decimal('0.000'), verbose_name=_("Total Value")
     )
 
     class Meta:
-        db_table = 'opening_balances'  # Explicitly map to the existing table
+        db_table = 'opening_balances'
         verbose_name = _("Opening Balance")
         verbose_name_plural = _("Opening Balances")
         ordering = ['product__name', '-balance_date']
 
     def __str__(self):
         return f"Opening Balance for {self.product.name} on {self.balance_date.date()}: {self.quantity}"
-    # --- NEW PROPERTY ---
+
     @property
     def unit_cost(self):
-        """Calculates the effective unit cost from the total value and quantity."""
         if self.quantity > 0:
             return (self.total_value / Decimal(str(self.quantity))).quantize(Decimal('0.001'))
         return Decimal('0.000')
 
 
 class ProductionReturn(models.Model):
-    """
-    Represents a quantity of material returned from production back to inventory.
-    Maps to the 'production_returns' table.
-    """
     product = models.ForeignKey(
         Product,
         on_delete=models.CASCADE,
@@ -359,7 +367,7 @@ class ProductionReturn(models.Model):
     notes = models.TextField(null=True, blank=True, verbose_name=_("Notes"))
 
     class Meta:
-        db_table = 'production_returns'  # Explicitly map to the existing table
+        db_table = 'production_returns'
         verbose_name = _("Production Return")
         verbose_name_plural = _("Production Returns")
         ordering = ['-return_date']
@@ -415,8 +423,14 @@ class PurchaseOrderItem(models.Model):
     )
     quantity_ordered = models.FloatField(verbose_name=_("Quantity Ordered"))
     
-    total_price = models.DecimalField(
-        max_digits=14, decimal_places=3, verbose_name=_("Total Price")
+    base_price_per_unit = models.DecimalField(
+        max_digits=14, decimal_places=3, verbose_name=_("Base Price Per Unit")
+    )
+    vat_rate = models.DecimalField(
+        max_digits=5, decimal_places=2, default=Decimal('0.00'), verbose_name=_("VAT Rate (e.g., 0.14 for 14%)")
+    )
+    withholding_tax_rate = models.DecimalField(
+        max_digits=5, decimal_places=2, default=Decimal('0.00'), verbose_name=_("Withholding Tax Rate (e.g., 0.01 for 1%)")
     )
 
     class Meta:
@@ -427,28 +441,8 @@ class PurchaseOrderItem(models.Model):
     def __str__(self):
         return f"{self.quantity_ordered} of {self.product.name} for PO #{self.purchase_order.po_number}"
 
-    @property
-    def effective_unit_price(self):
-        """
-        Calculates the unit price based on the total price and total quantity received.
-        This is the value that should be used for inventory costing.
-        """
-        total_quantity_received = InventoryLog.objects.filter(po_item=self).aggregate(total=models.Sum('quantity'))['total'] or 0.0
-        
-        if total_quantity_received > 0:
-            return (self.total_price / Decimal(str(total_quantity_received))).quantize(Decimal('0.001'))
-        
-        if self.quantity_ordered > 0:
-             return (self.total_price / Decimal(str(self.quantity_ordered))).quantize(Decimal('0.001'))
-        
-        return Decimal('0.000')
-
-# --- NEW FINISHED PRODUCT MODELS ---
 
 class FinishedProductReceipt(models.Model):
-    """
-    Represents the receipt of a finished product from a production run.
-    """
     class MarketType(models.TextChoices):
         LOCAL = 'local', _('محلي')
         EXPORT = 'export', _('تصدير')
@@ -496,20 +490,12 @@ class FinishedProductReceipt(models.Model):
         verbose_name = _("Finished Product Receipt")
         verbose_name_plural = _("Finished Product Receipts")
         ordering = ['-receipt_date', '-id']
-        # --- MODIFICATION ---
-        # Removed the unique_together constraint to allow multiple receipts for the same batch number.
-        # This is crucial for scenarios like partial receipts or receiving for different market types.
-        # unique_together = ['batch', 'individual_batch_number']
 
     def __str__(self):
         return f"Receipt for Batch #{self.individual_batch_number} from Plan {self.batch.shop_order_number}"
 
 
 class ReceiptSubBatch(models.Model):
-    """
-
-    Represents a physical sub-batch (e.g., a pallet or container) of a finished product receipt.
-    """
     receipt = models.ForeignKey(
         FinishedProductReceipt,
         on_delete=models.CASCADE,
@@ -529,12 +515,8 @@ class ReceiptSubBatch(models.Model):
     def __str__(self):
         return f"{self.quantity} units in {self.sub_batch_identifier} for {self.receipt}"
     
-    
-
-# --- NEW SALES & CUSTOMER MODELS ---
 
 class Customer(models.Model):
-    """Represents a customer who buys finished products."""
     name = models.CharField(max_length=255, unique=True, verbose_name=_("Customer Name"))
     address = models.TextField(blank=True, null=True, verbose_name=_("Address"))
     contact_info = models.TextField(blank=True, null=True, verbose_name=_("Contact Info"))
@@ -550,7 +532,6 @@ class Customer(models.Model):
 
 
 class SalesOrder(models.Model):
-    """Represents a sales order from a customer."""
     class Status(models.TextChoices):
         DRAFT = 'draft', _('Draft')
         PENDING = 'pending', _('Pending Shipment')
@@ -585,14 +566,12 @@ class SalesOrder(models.Model):
 
 
 class SalesOrderItem(models.Model):
-    """Represents a line item in a Sales Order, linked to a specific batch."""
     sales_order = models.ForeignKey(
         SalesOrder,
         on_delete=models.CASCADE,
         related_name='items',
         verbose_name=_("Sales Order")
     )
-    # This is the key: we sell from a specific FinishedProductReceipt (batch)
     finished_product = models.ForeignKey(
         FinishedProductReceipt,
         on_delete=models.PROTECT,
@@ -600,11 +579,15 @@ class SalesOrderItem(models.Model):
         verbose_name=_("Finished Product Batch")
     )
     quantity_ordered = models.FloatField(verbose_name=_("Quantity Ordered"))
-    unit_price = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Unit Price"))
+    
+    base_price_per_unit = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Base Price Per Unit"))
+    vat_rate = models.DecimalField(
+        max_digits=5, decimal_places=2, default=Decimal('0.00'), verbose_name=_("VAT Rate (e.g., 0.14 for 14%)")
+    )
 
     @property
     def total_price(self):
-        return (Decimal(str(self.quantity_ordered)) * self.unit_price).quantize(Decimal('0.001'))
+        return (Decimal(str(self.quantity_ordered)) * self.base_price_per_unit).quantize(Decimal('0.001'))
 
     class Meta:
         db_table = 'sales_order_items'
@@ -616,10 +599,6 @@ class SalesOrderItem(models.Model):
 
 
 class FinishedProductDispatch(models.Model):
-    """
-    Represents the actual transaction of a finished product leaving inventory.
-    This is the model that generates the ledger entry.
-    """
     sales_order_item = models.ForeignKey(
         SalesOrderItem,
         on_delete=models.PROTECT,
@@ -628,7 +607,6 @@ class FinishedProductDispatch(models.Model):
     )
     quantity = models.FloatField(verbose_name=_("Quantity Dispatched"))
     dispatch_date = models.DateTimeField(verbose_name=_("Dispatch Date"))
-    # The cost is copied at the time of dispatch for accurate COGS reporting
     cost_at_dispatch = models.DecimalField(
         max_digits=14, decimal_places=3, verbose_name=_("Cost at Dispatch")
     )
@@ -642,16 +620,19 @@ class FinishedProductDispatch(models.Model):
     def __str__(self):
         return f"Dispatched {self.quantity} for {self.sales_order_item}"
 
-# --- NEW EXPENSE & PROFITABILITY MODELS ---
 
 class InventoryConsumption(models.Model):
-    """Records the internal consumption of MRO and Consumable inventory items."""
     class Department(models.TextChoices):
         PRODUCTION = 'production', _('الإنتاج')
         ENGINEERING = 'engineering', _('الهندسة والصيانة')
         ADMIN = 'admin', _('الإدارة')
         QC = 'qc', _('الجودة')
         OTHER = 'other', _('أخرى')
+        
+    # --- NEW: Consumption Type for Capitalization vs. Expense ---
+    class ConsumptionType(models.TextChoices):
+        EXPENSE = 'expense', _('Expense (Repair)')
+        CAPITALIZE = 'capitalize', _('Capitalize (Enhancement)')
 
     product = models.ForeignKey(
         Product,
@@ -677,6 +658,16 @@ class InventoryConsumption(models.Model):
     )
     notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
     
+    # --- NEW FIELDS TO SUPPORT ADVANCED LOGIC ---
+    consumption_type = models.CharField(
+        max_length=20, choices=ConsumptionType.choices, default=ConsumptionType.EXPENSE,
+        verbose_name=_("Consumption Type")
+    )
+    fixed_asset = models.ForeignKey(
+        'FixedAsset', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='consumptions', verbose_name=_("Target Fixed Asset (if capitalized)")
+    )
+    
     class Meta:
         db_table = 'inventory_consumptions'
         verbose_name = _("Inventory Consumption")
@@ -685,10 +676,21 @@ class InventoryConsumption(models.Model):
 
     def __str__(self):
         return f"Consumed {self.quantity_consumed} of {self.product.name} by {self.get_department_display()}"
+    
+    def clean(self):
+        # Enforce that a fixed asset must be selected if type is 'Capitalize'
+        if self.consumption_type == self.ConsumptionType.CAPITALIZE and not self.fixed_asset:
+            raise ValidationError({
+                'fixed_asset': _("A fixed asset must be selected when the consumption type is 'Capitalize'.")
+            })
+        # Enforce that MRO/Consumable products are used
+        if self.product and self.product.product_type not in [Product.ProductType.MRO, Product.ProductType.CONSUMABLE]:
+             raise ValidationError({
+                'product': _("Only MRO and Consumable products can be used in internal consumption.")
+            })
 
 
 class ExpenseLog(models.Model):
-    """Records non-inventory expenses like services, bills, and salaries."""
     class Classification(models.TextChoices):
         MANUFACTURING_OVERHEAD = 'manufacturing_overhead', _('تكاليف صناعية غير مباشرة')
         SG_A = 'sg_a', _('مصاريف بيعية وعمومية وإدارية')
@@ -726,3 +728,315 @@ class ExpenseLog(models.Model):
 
     def __str__(self):
         return f"Expense: {self.description} for {self.amount} on {self.expense_date}"
+    
+    
+# ==============================================================================
+#  NEW SUB-LEDGER & BANKING MODELS
+# ==============================================================================
+
+class FixedAsset(models.Model):
+    """
+    Represents an individual fixed asset. This is the Fixed Asset Sub-Ledger.
+    """
+    class AssetStatus(models.TextChoices):
+        IN_SERVICE = 'in_service', _('In Service')
+        UNDER_CONSTRUCTION = 'under_construction', _('Under Construction')
+        IDLE = 'idle', _('Idle')
+        SOLD = 'sold', _('Sold')
+        RETIRED = 'retired', _('Retired/Scrapped')
+
+    asset_tag = models.CharField(max_length=100, unique=True, verbose_name=_("Asset Tag / Barcode"))
+    name = models.CharField(max_length=255, verbose_name=_("Asset Name"))
+    description = models.TextField(blank=True, null=True, verbose_name=_("Description"))
+    
+    gl_account = models.ForeignKey(
+        'Account',
+        on_delete=models.PROTECT,
+        limit_choices_to={'code__startswith': '101'}, # All Fixed Asset accounts start with 101
+        related_name='fixed_assets',
+        verbose_name=_("GL Control Account")
+    )
+    
+    purchase_date = models.DateField(verbose_name=_("Purchase Date"))
+    purchase_cost = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Original Purchase Cost"))
+    depreciation_start_date = models.DateField(verbose_name=_("Depreciation Start Date"))
+    useful_life_years = models.PositiveIntegerField(verbose_name=_("Useful Life (Years)"))
+    salvage_value = models.DecimalField(
+        max_digits=14, decimal_places=3, default=Decimal('0.000'), verbose_name=_("Salvage Value")
+    )
+
+    serial_number = models.CharField(max_length=255, blank=True, null=True, verbose_name=_("Serial Number"))
+    location = models.CharField(max_length=255, blank=True, null=True, verbose_name=_("Location"))
+    status = models.CharField(
+        max_length=20,
+        choices=AssetStatus.choices,
+        default=AssetStatus.IN_SERVICE,
+        verbose_name=_("Status")
+    )
+
+    class Meta:
+        db_table = 'fixed_assets'
+        verbose_name = _("Fixed Asset")
+        verbose_name_plural = _("Fixed Assets")
+        ordering = ['asset_tag']
+
+    def __str__(self):
+        return f"{self.asset_tag} - {self.name}"
+
+class BankAccount(models.Model):
+    """
+    Represents a company bank account or a physical cash box (safe).
+    """
+    name = models.CharField(max_length=255, verbose_name=_("Bank/Cash Box Name"))
+    currency = models.CharField(max_length=10, default='EGP', verbose_name=_("Currency"))
+    
+    gl_account = models.OneToOneField(
+        'Account',
+        on_delete=models.PROTECT,
+        limit_choices_to={'code__startswith': '10201'}, # Cash and Banks accounts start with 10201
+        verbose_name=_("GL Control Account")
+    )
+
+    class Meta:
+        db_table = 'bank_accounts'
+        verbose_name = _("Bank Account / Cash Box")
+        verbose_name_plural = _("Bank Accounts / Cash Boxes")
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+class Payment(models.Model):
+    """
+    Represents a payment transaction, either money in or money out.
+    """
+    class PaymentType(models.TextChoices):
+        PAYMENT_OUT = 'out', _('Payment Made (to Supplier)')
+        PAYMENT_IN = 'in', _('Payment Received (from Customer)')
+        TRANSFER = 'transfer', _('Bank Transfer')
+        OTHER = 'other', _('Other Transaction')
+
+    payment_date = models.DateField(verbose_name=_("Payment Date"))
+    amount = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Amount"))
+    bank_account = models.ForeignKey(BankAccount, on_delete=models.PROTECT, related_name='payments', verbose_name=_("Bank/Cash Account"))
+    payment_type = models.CharField(max_length=10, choices=PaymentType.choices, verbose_name=_("Payment Type"))
+    description = models.CharField(max_length=255, verbose_name=_("Description"))
+    
+    supplier = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True, blank=True, related_name='payments', verbose_name=_("Supplier"))
+    customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True, related_name='payments', verbose_name=_("Customer"))
+    
+    notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
+
+    class Meta:
+        db_table = 'payments'
+        verbose_name = _("Payment")
+        verbose_name_plural = _("Payments")
+        ordering = ['-payment_date']
+
+    def __str__(self):
+        return f"Payment of {self.amount} on {self.payment_date}"
+
+class Employee(models.Model):
+    """
+    Represents an employee, acts as a sub-ledger for employee-related accounts.
+    """
+    employee_id = models.CharField(max_length=50, unique=True, verbose_name=_("Employee ID"))
+    first_name = models.CharField(max_length=100, verbose_name=_("First Name"))
+    last_name = models.CharField(max_length=100, verbose_name=_("Last Name"))
+    job_title = models.CharField(max_length=255, blank=True, null=True, verbose_name=_("Job Title"))
+    is_active = models.BooleanField(default=True, verbose_name=_("Is Active"))
+
+    class Meta:
+        db_table = 'employees'
+        verbose_name = _("Employee")
+        verbose_name_plural = _("Employees")
+        ordering = ['last_name', 'first_name']
+
+    @property
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}"
+
+    def __str__(self):
+        return self.full_name
+
+
+# ==============================================================================
+#  ACCOUNTING CORE MODELS
+# ==============================================================================
+
+class FinancialPeriod(models.Model):
+    name = models.CharField(max_length=100, verbose_name=_("Period Name"))
+    start_date = models.DateField(unique=True, verbose_name=_("Start Date"))
+    end_date = models.DateField(unique=True, verbose_name=_("End Date"))
+    is_closed = models.BooleanField(default=False, verbose_name=_("Is Closed"))
+
+    class Meta:
+        db_table = 'financial_periods'
+        verbose_name = _("Financial Period")
+        verbose_name_plural = _("Financial Periods")
+        ordering = ['-start_date']
+
+    def __str__(self):
+        return f"{self.name} ({self.start_date} to {self.end_date})"
+
+    def clean(self):
+        if self.start_date and self.end_date and self.start_date > self.end_date:
+            raise ValidationError(_("Start date cannot be after end date."))
+
+class Account(models.Model):
+    class AccountType(models.TextChoices):
+        ASSET = 'asset', _('الأصول')
+        LIABILITY = 'liability', _('الالتزامات')
+        EQUITY = 'equity', _('حقوق الملكية')
+        REVENUE = 'revenue', _('الإيرادات')
+        EXPENSE = 'expense', _('المصروفات')
+
+    name = models.CharField(max_length=255, verbose_name=_("Account Name"))
+    code = models.CharField(max_length=20, unique=True, verbose_name=_("Account Code"))
+    account_type = models.CharField(max_length=20, choices=AccountType.choices, verbose_name=_("Account Type"))
+    parent = models.ForeignKey(
+        'self', on_delete=models.PROTECT, null=True, blank=True,
+        related_name='children', verbose_name=_("Parent Account")
+    )
+
+    class Meta:
+        db_table = 'chart_of_accounts'
+        verbose_name = _("Account")
+        verbose_name_plural = _("Chart of Accounts")
+        ordering = ['code']
+
+    def __str__(self):
+        return f"{self.code} - {self.name}"
+
+class JournalEntry(models.Model):
+    date = models.DateTimeField(verbose_name=_("Date"))
+    description = models.CharField(max_length=255, verbose_name=_("Description"))
+    notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
+
+    content_type = models.ForeignKey(ContentType, on_delete=models.SET_NULL, null=True)
+    object_id = models.PositiveIntegerField(null=True)
+    source_object = GenericForeignKey('content_type', 'object_id')
+
+    class Meta:
+        db_table = 'journal_entries'
+        verbose_name = _("Journal Entry")
+        verbose_name_plural = _("Journal Entries")
+        ordering = ['-date']
+
+    def __str__(self):
+        return f"JE-{self.id} on {self.date.strftime('%Y-%m-%d')}: {self.description}"
+
+class JournalEntryLine(models.Model):
+    class EntryType(models.TextChoices):
+        DEBIT = 'debit', _('مدين')
+        CREDIT = 'credit', _('دائن')
+
+    journal_entry = models.ForeignKey(JournalEntry, on_delete=models.CASCADE, related_name='lines', verbose_name=_("Journal Entry"))
+    account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='journal_lines', verbose_name=_("Account"))
+    amount = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Amount"))
+    entry_type = models.CharField(max_length=6, choices=EntryType.choices, verbose_name=_("Entry Type"))
+
+    class Meta:
+        db_table = 'journal_entry_lines'
+        verbose_name = _("Journal Entry Line")
+        verbose_name_plural = _("Journal Entry Lines")
+        ordering = ['journal_entry', 'entry_type']
+
+    def __str__(self):
+        return f"JE-{self.journal_entry.id}: {self.get_entry_type_display()} {self.account} for {self.amount}"
+
+class ProductTypeAccountingSettings(models.Model):
+    product_type = models.CharField(
+        max_length=50, choices=Product.ProductType.choices,
+        unique=True, verbose_name=_("Product Type")
+    )
+    inventory_account = models.ForeignKey(
+        Account, on_delete=models.PROTECT,
+        related_name='+', verbose_name=_("Default Inventory Account")
+    )
+    cogs_or_expense_account = models.ForeignKey(
+        Account, on_delete=models.PROTECT,
+        related_name='+', verbose_name=_("Default COGS/Expense Account")
+    )
+    # --- NEW FIELD ---
+    sales_revenue_account = models.ForeignKey(
+        Account, on_delete=models.PROTECT, null=True, blank=True,
+        related_name='+', verbose_name=_("Default Sales Revenue Account"),
+        help_text=_("Required for 'Final Product' types.")
+    )
+
+    class Meta:
+        db_table = 'product_type_acct_settings'
+        verbose_name = _("Product Type Accounting Setting")
+        verbose_name_plural = _("Product Type Accounting Settings")
+
+    def __str__(self):
+        return f"Settings for {self.get_product_type_display()}"
+
+    def clean(self):
+        # Enforce that final products must have a revenue account set.
+        if self.product_type == Product.ProductType.FINAL_PRODUCT and not self.sales_revenue_account:
+            raise ValidationError({
+                'sales_revenue_account': _("A default sales revenue account is required for the 'Final Product' type.")
+            })
+
+
+# --- NEW ---
+class GeneralAccountingSettings(models.Model):
+    """
+    A singleton model to hold system-wide accounting configuration.
+    This prevents hardcoding account codes in the business logic.
+    """
+    accounts_payable = models.ForeignKey(
+        Account, on_delete=models.PROTECT, related_name='+', 
+        verbose_name=_("Default Accounts Payable (A/P) Account"),
+        help_text=_("e.g., '20201 - حسابات الموردين (ذمم دائنة)'")
+    )
+    accounts_receivable = models.ForeignKey(
+        Account, on_delete=models.PROTECT, related_name='+', 
+        verbose_name=_("Default Accounts Receivable (A/R) Account"),
+        help_text=_("e.g., '10203 - حسابات العملاء (ذمم مدينة)'")
+    )
+    vat_receivable = models.ForeignKey(
+        Account, on_delete=models.PROTECT, related_name='+', 
+        verbose_name=_("VAT on Inputs (Receivable) Account"),
+        help_text=_("e.g., '1020404 - ضريبة القيمة المضافة (المدخلات)'")
+    )
+    vat_payable = models.ForeignKey(
+        Account, on_delete=models.PROTECT, related_name='+', 
+        verbose_name=_("VAT on Outputs (Payable) Account"),
+        help_text=_("The liability account for VAT collected from sales.")
+    )
+    wip_inventory = models.ForeignKey(
+        Account, on_delete=models.PROTECT, related_name='+', 
+        verbose_name=_("Work-in-Progress (WIP) Inventory Account"),
+        help_text=_("e.g., '1020205 - مخزون انتاج تحت التشغيل'")
+    )
+    # --- NEW FIELD ---
+    finished_goods_inventory = models.ForeignKey(
+        Account, on_delete=models.PROTECT, related_name='+',
+        verbose_name=_("Finished Goods (FG) Inventory Account"),
+        help_text=_("e.g., '1020206 - مخزون منتج نهائي'")
+    )
+
+    class Meta:
+        db_table = 'general_accounting_settings'
+        verbose_name = _("General Accounting Setting")
+        verbose_name_plural = _("General Accounting Settings")
+
+    def __str__(self):
+        return str(_("General Accounting Settings"))
+
+    def save(self, *args, **kwargs):
+        # Enforce that only one instance of this model can exist
+        if not self.pk and GeneralAccountingSettings.objects.exists():
+            raise ValidationError(_('There can only be one instance of General Accounting Settings.'))
+        return super().save(*args, **kwargs)
+
+    @classmethod
+    def load(cls):
+        # Convenience method to get the single instance
+        with transaction.atomic():
+            # Use a fixed pk to ensure singleton behavior
+            obj, created = cls.objects.get_or_create(pk=1)
+        return obj

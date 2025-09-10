@@ -127,10 +127,10 @@
 <!-- Edit Product Modals -->
 {% for p in products %}
 <div class="modal fade" id="editProductModal-{{ p.id }}" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">تعديل منتج</h5><button type="button" class="btn-close"
+                <h5 class="modal-title">تعديل منتج: {{ p.name }}</h5><button type="button" class="btn-close"
                     data-bs-dismiss="modal"></button>
             </div>
             <form method="post" action="{% url 'inventory:edit_product' pk=p.id %}" id="editProductForm-{{ p.id }}">
@@ -162,6 +162,39 @@
                             {% endfor %}
                         </select>
                     </div>
+                    
+                    <hr>
+                    <h6 class="mb-3 text-primary"><i class="bi bi-gear-fill"></i> إعدادات الحسابات المخصصة (اختياري)</h6>
+                    <p class="text-muted small">اترك هذه الحقول فارغة لاستخدام الإعدادات الافتراضية لنوع المنتج.</p>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="override_inventory_account_{{ p.id }}" class="form-label">حساب المخزون</label>
+                            <select class="form-select searchable-select" id="override_inventory_account_{{ p.id }}" name="override_inventory_account">
+                                <option value="">-- افتراضي --</option>
+                                {% for acc in all_accounts %}
+                                <option value="{{ acc.id }}" {% if p.override_inventory_account.id == acc.id %}selected{% endif %}>{{ acc }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="override_cogs_expense_account_{{ p.id }}" class="form-label">حساب تكلفة البضاعة/المصروف</label>
+                            <select class="form-select searchable-select" id="override_cogs_expense_account_{{ p.id }}" name="override_cogs_expense_account">
+                                <option value="">-- افتراضي --</option>
+                                {% for acc in all_accounts %}
+                                <option value="{{ acc.id }}" {% if p.override_cogs_expense_account.id == acc.id %}selected{% endif %}>{{ acc }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="override_sales_revenue_account_{{ p.id }}" class="form-label">حساب إيراد المبيعات</label>
+                            <select class="form-select searchable-select" id="override_sales_revenue_account_{{ p.id }}" name="override_sales_revenue_account">
+                                <option value="">-- افتراضي --</option>
+                                {% for acc in all_accounts %}
+                                <option value="{{ acc.id }}" {% if p.override_sales_revenue_account.id == acc.id %}selected{% endif %}>{{ acc }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
@@ -179,7 +212,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize all select elements
     document.querySelectorAll('select.searchable-select, select[multiple]').forEach(function(select) {
-        if (window.TomSelect) {
+        if (window.TomSelect && !select.tomselect) {
             new TomSelect(select, {
                 plugins: ['remove_button'],
                 placeholder: select.multiple ? 'اختر الوسوم المناسبة' : 'اختر...'
@@ -189,7 +222,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize TomSelect for all products and tags selects
     document.querySelectorAll('select.searchable-select, select[name="products"], select[name="tags"]').forEach(function(select) {
-        if (window.TomSelect) {
+        if (window.TomSelect && !select.tomselect) {
             new TomSelect(select, {
                 plugins: ['remove_button'],
                 placeholder: select.multiple ? 'اختر من القائمة' : 'اختر...'
@@ -204,8 +237,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.preventDefault();
                 return;
             }
-        });
-    });
         });
     });
 });

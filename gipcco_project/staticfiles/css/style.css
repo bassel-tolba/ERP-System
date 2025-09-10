@@ -1,0 +1,1336 @@
+/* ==========================================================================
+   MODERN CSS THEME - LIGHT & DARK MODE SUPPORT
+   ========================================================================== */
+
+/* ==========================================================================
+   1. CSS CUSTOM PROPERTIES (DESIGN TOKENS)
+   ========================================================================== */
+:root {
+  /* Brand Colors */
+  --color-primary: #73a324;
+  --color-primary-rgb: 115, 163, 36;
+  --color-primary-light: #e7f1ff;
+  --color-primary-hover: #5f8a1e;
+  --color-primary-subtle: rgba(115, 163, 36, 0.1);
+  
+  /* Semantic Colors */
+  --color-secondary: #6c757d;
+  --color-success: #198754;
+  --color-danger: #dc3545;
+  --color-warning: #ffc107;
+  --color-info: #0dcaf0;
+  
+  /* Typography */
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+  --text-muted: #8e959c;
+  --text-inverse: #ffffff;
+  
+  /* Surfaces */
+  --surface-primary: #ffffff;
+  --surface-secondary: #f8f9fa;
+  --surface-tertiary: #e9ecef;
+  --surface-overlay: rgba(0, 0, 0, 0.5);
+  
+  /* Borders */
+  --border-color: #dee2e6;
+  --border-color-subtle: #f1f3f4;
+  --border-width: 1px;
+  --border-radius-sm: 0.375rem;
+  --border-radius: 0.5rem;
+  --border-radius-lg: 0.75rem;
+  --border-radius-xl: 1rem;
+  
+  /* Shadows */
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  
+  /* Typography Scale */
+  --font-family-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-family-mono: "JetBrains Mono", "Fira Code", Consolas, "Liberation Mono", Menlo, monospace;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  /* Spacing Scale */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  
+  /* Transitions */
+  --transition-fast: 0.15s ease-in-out;
+  --transition-base: 0.2s ease-in-out;
+  --transition-slow: 0.3s ease-in-out;
+  
+  /* Z-Index Scale */
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+  --z-toast: 1080;
+  --z-select-dropdown: 9999;
+}
+
+/* Dark Theme Overrides */
+[data-bs-theme="dark"] {
+  --color-primary-light: rgba(115, 163, 36, 0.15);
+  --color-secondary: #8c96a2;
+  
+  --text-primary: #e4e6ea;
+  --text-secondary: #a8b0b9;
+  --text-muted: #8e959c;
+  --text-inverse: #000000;
+  
+  --surface-primary: #1e2128;
+  --surface-secondary: #16181d;
+  --surface-tertiary: #0d0e11;
+  --surface-overlay: rgba(255, 255, 255, 0.1);
+  
+  --border-color: #3b4048;
+  --border-color-subtle: #2a2d35;
+  
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px -1px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+}
+
+/* ==========================================================================
+   2. GLOBAL STYLES & BASE ELEMENTS
+   ========================================================================== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--surface-secondary);
+  font-family: var(--font-family-sans);
+  color: var(--text-primary);
+  line-height: 1.6;
+  font-weight: var(--font-weight-normal);
+  transition: background-color var(--transition-slow), color var(--transition-slow);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  line-height: 1.3;
+  margin-bottom: var(--space-md);
+}
+
+.mono {
+  font-family: var(--font-family-mono);
+  font-variant-ligatures: common-ligatures;
+}
+
+/* ==========================================================================
+   3. LAYOUT COMPONENTS
+   ========================================================================== */
+
+/* Navigation Bar */
+.navbar {
+  background-color: var(--surface-primary);
+  border-bottom: var(--border-width) solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  padding-top: var(--space-sm);
+  padding-bottom: var(--space-sm);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+  transition: opacity var(--transition-fast);
+}
+
+.navbar-brand:hover {
+  opacity: 0.8;
+}
+
+.navbar-brand .brand-icon {
+  color: var(--color-primary);
+  margin-inline-end: var(--space-sm);
+  font-size: 1.25rem;
+}
+
+.navbar-brand .brand-text {
+  color: var(--text-primary);
+  font-size: 1.1rem;
+}
+
+.navbar-expand-lg .navbar-nav .nav-link {
+  color: var(--text-primary) !important;
+  font-weight: var(--font-weight-medium);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--border-radius-sm);
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.navbar-expand-lg .navbar-nav .nav-link:hover {
+  color: var(--color-primary) !important;
+  background-color: var(--color-primary-subtle);
+}
+
+
+/* ==========================================================================
+   4. FORM COMPONENTS
+   ========================================================================== */
+
+/* Theme Switch */
+.theme-switch {
+  position: relative;
+  display: inline-block;
+  width: 52px;
+  height: 30px;
+}
+
+.theme-switch .form-check-input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.theme-switch .form-check-label {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--border-color);
+  border-radius: 30px;
+  transition: background-color var(--transition-base), transform var(--transition-base);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-xs);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.theme-switch .form-check-label::before {
+  content: "";
+  position: absolute;
+  height: 22px;
+  width: 22px;
+  left: 4px;
+  bottom: 4px;
+  background-color: var(--surface-primary);
+  border-radius: 50%;
+  transition: transform var(--transition-base);
+  box-shadow: var(--shadow-sm);
+  z-index: 2;
+}
+
+.theme-switch .form-check-input:checked + .form-check-label::before {
+  transform: translateX(22px);
+}
+
+.theme-switch .form-check-label i {
+  color: var(--text-secondary);
+  font-size: 12px;
+  z-index: 1;
+  transition: color var(--transition-fast);
+}
+
+/* Tom Select & Dropdown Enhancements */
+.ts-control input,
+.ts-control > .item {
+  padding-right: 30px !important;
+}
+
+.ts-control {
+  padding-right: 30px !important;
+  border-radius: var(--border-radius) !important;
+  border-color: var(--border-color) !important;
+  background-color: var(--surface-primary) !important;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.ts-control:focus-within {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 3px var(--color-primary-subtle) !important;
+}
+
+.ts-dropdown {
+  z-index: var(--z-select-dropdown) !important;
+  background-color: var(--surface-primary) !important;
+  border: var(--border-width) solid var(--border-color) !important;
+  border-radius: var(--border-radius) !important;
+  box-shadow: var(--shadow-lg) !important;
+  margin-top: var(--space-xs) !important;
+}
+
+.option,
+.item {
+  color: var(--text-primary) !important;
+  padding: var(--space-sm) var(--space-md) !important;
+  transition: background-color var(--transition-fast);
+}
+
+.option:hover,
+.option.active {
+  background-color: var(--color-primary-subtle) !important;
+  color: var(--color-primary) !important;
+}
+
+.dropdown-item:active {
+  background-color: var(--color-primary) !important;
+  color: var(--text-inverse) !important;
+}
+
+/* ==========================================================================
+   5. CONTENT COMPONENTS
+   ========================================================================== */
+
+/* Modal Enhancements */
+.modal-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  background-color: var(--surface-primary);
+  border-bottom: var(--border-width) solid var(--border-color);
+  padding: var(--space-lg);
+}
+
+.modal-content {
+  background-color: var(--surface-primary);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-xl);
+}
+
+/* Card Components */
+.card {
+  background-color: var(--surface-primary);
+  border: var(--border-width) solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  border-radius: var(--border-radius);
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.card-header {
+  background-color: var(--surface-secondary);
+  border-bottom: var(--border-width) solid var(--border-color);
+  padding: var(--space-lg);
+  font-weight: var(--font-weight-medium);
+}
+
+.card-body {
+  padding: var(--space-lg);
+}
+
+/* Table Enhancements */
+.table {
+  --bs-table-bg: var(--surface-primary);
+  --bs-table-striped-bg: var(--surface-secondary);
+  --bs-table-hover-bg: var(--color-primary-light);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-xs);
+}
+
+.table thead th {
+  color: var(--color-primary);
+  border-bottom: 2px solid var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  font-size: 0.875rem;
+  letter-spacing: 0.05em;
+  padding: var(--space-md) var(--space-lg);
+}
+
+[data-bs-theme="dark"] .table {
+  --bs-table-hover-bg: rgba(var(--color-primary-rgb), 0.1);
+}
+
+/* Button Enhancements */
+.btn {
+  margin-left: var(--space-xs) !important;
+  border-radius: var(--border-radius) !important;
+  font-weight: var(--font-weight-medium) !important;
+  transition: all var(--transition-fast) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width var(--transition-base), height var(--transition-base);
+}
+
+.btn:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* ==========================================================================
+   6. UTILITY COMPONENTS
+   ========================================================================== */
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--surface-secondary);
+  border-radius: var(--border-radius-sm);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: var(--border-radius-sm);
+  transition: background-color var(--transition-fast);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-secondary);
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--surface-secondary);
+}
+
+/* Firefox Scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) var(--surface-secondary);
+}
+
+/* ==========================================================================
+   7. THIRD-PARTY COMPONENT STYLES
+   ========================================================================== */
+
+/* Flatpickr Date Picker */
+.flatpickr-calendar {
+  background: var(--surface-primary);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-xl);
+  width: 320px;
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+.flatpickr-months {
+  background: var(--surface-secondary);
+  border-bottom: var(--border-width) solid var(--border-color);
+  border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+  padding: var(--space-md) var(--space-lg);
+}
+
+.flatpickr-months .flatpickr-prev-month,
+.flatpickr-months .flatpickr-next-month {
+  top: var(--space-md);
+  padding: var(--space-sm);
+  color: var(--text-secondary);
+  border-radius: var(--border-radius-sm);
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flatpickr-months .flatpickr-prev-month:hover,
+.flatpickr-months .flatpickr-next-month:hover {
+  background: var(--color-primary-subtle);
+  color: var(--color-primary);
+}
+
+.flatpickr-months .flatpickr-prev-month svg,
+.flatpickr-months .flatpickr-next-month svg {
+  display: none;
+}
+
+.flatpickr-months .flatpickr-prev-month::after,
+.flatpickr-months .flatpickr-next-month::after {
+  font-family: 'bootstrap-icons';
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.flatpickr-months .flatpickr-prev-month::after {
+  content: "\F285"; 
+}
+
+.flatpickr-months .flatpickr-next-month::after {
+  content: "\F284";
+}
+
+.flatpickr-current-month {
+  color: var(--text-primary);
+  font-weight: var(--font-weight-semibold);
+  font-size: 1.1rem;
+  height: auto;
+  padding: var(--space-xs) 0;
+}
+
+.flatpickr-current-month .numInput {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  font-weight: inherit;
+  padding: 0;
+  margin: 0 var(--space-xs);
+  border-radius: var(--border-radius-sm);
+}
+
+.flatpickr-weekday {
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-semibold);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.flatpickr-day {
+  color: var(--text-primary);
+  border: var(--border-width) solid transparent;
+  border-radius: var(--border-radius-sm);
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+  font-weight: var(--font-weight-medium);
+}
+
+.flatpickr-day:hover,
+.flatpickr-day:focus {
+  background: var(--color-primary-subtle);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.flatpickr-day.today {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.flatpickr-day.today:hover {
+  background: var(--color-primary-subtle);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange {
+  background: var(--color-primary);
+  color: var(--text-inverse);
+  border-color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.flatpickr-day.disabled, 
+.flatpickr-day.prevMonthDay, 
+.flatpickr-day.nextMonthDay {
+  color: var(--text-muted);
+  opacity: 0.5;
+}
+
+/* ==========================================================================
+   8. RESPONSIVE DESIGN & MEDIA QUERIES
+   ========================================================================== */
+@media (max-width: 768px) {
+  :root {
+    --space-sm: 0.375rem;
+    --space-md: 0.75rem;
+    --space-lg: 1rem;
+    --space-xl: 1.5rem;
+  }
+  
+  .card {
+    margin-bottom: var(--space-md);
+  }
+  
+  .navbar {
+    padding-top: var(--space-xs);
+    padding-bottom: var(--space-xs);
+  }
+  
+  .flatpickr-calendar {
+    width: 280px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* ==========================================================================
+   9. ACCESSIBILITY ENHANCEMENTS
+   ========================================================================== */
+@media (prefers-contrast: high) {
+  :root {
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.3);
+  }
+  
+  .card:hover {
+    transform: none;
+    box-shadow: var(--shadow-sm);
+    outline: 2px solid var(--color-primary);
+  }
+}
+
+/* Focus indicators */
+.btn:focus-visible,
+.form-control:focus,
+.form-select:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Skip link for screen readers */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.skip-link:focus {
+  position: static;
+  width: auto;
+  height: auto;
+}
+
+/* ==========================================================================
+   SEASONAL THEME VARIABLES
+   ========================================================================== */
+
+/* Hide seasonal elements by default */
+.precipitation,
+.celestial,
+.cloud {
+  display: none;
+}
+
+/* Define seasonal theme variables only when activated */
+body.seasonal-mode {
+  /* Seasonal Background Images */
+  --winter-bg-image: url('../img/winter.png');
+  --spring-bg-image: url('../img/spring.png');
+  --summer-bg-image: url('../img/summer.png');
+  --fall-bg-image: url('../img/fall.png');
+  --current-bg-image: var(--winter-bg-image);
+  
+  /* Seasonal Colors */
+  --seasonal-text-color: #e0e6ed;
+  --seasonal-nav-bg: rgba(20, 20, 40, 0.9);
+  --seasonal-post-bg: rgba(30, 30, 50, 0.7);
+  --seasonal-link-color: #e0e6ed;
+  --seasonal-link-hover-color: #add8e6;
+  
+  /* Seasonal Elements */
+  --seasonal-cloud-color: rgba(70, 70, 70, 0.8);
+  --seasonal-celestial-bg: radial-gradient(circle at 30% 30%, #f5f5dc 0%, #e6e6e6 40%, #d3d3d3 100%);
+  --seasonal-celestial-shadow: 0 0 50px rgba(245, 245, 220, 0.3), inset -10px -10px 0 rgba(0, 0, 0, 0.1);
+  --seasonal-precipitation-bg: linear-gradient(to bottom, transparent, rgba(173, 216, 230, 0.6));
+  
+  /* Seasonal Mode */
+  --mode-icon: "🌸";
+  --mode-text: "Spring";
+  
+  /* Winter Brand Colors */
+  --color-primary: #5c9ead;
+  --color-primary-rgb: 92, 158, 173;
+  --color-primary-light: #e7f1ff;
+  --color-primary-hover: #4a7d8f;
+  --color-primary-subtle: rgba(92, 158, 173, 0.1);
+}
+
+/* Spring Theme */
+body.seasonal-mode.spring-mode {
+  --current-bg-image: var(--spring-bg-image);
+  --seasonal-text-color: #2c3e50;
+  --seasonal-nav-bg: rgba(255, 255, 255, 0.9);
+  --seasonal-post-bg: rgba(255, 255, 255, 0.85);
+  --seasonal-link-color: #2c3e50;
+  --seasonal-link-hover-color: #27ae60;
+  --seasonal-cloud-color: rgba(255, 255, 255, 0.9);
+  --seasonal-celestial-bg: radial-gradient(circle at 30% 30%, #FFEB3B 0%, #FFC107 40%, #FF9800 100%);
+  --seasonal-celestial-shadow: 0 0 50px rgba(255, 235, 59, 0.6), inset -10px -10px 0 rgba(255, 152, 0, 0.2);
+  --seasonal-precipitation-bg: linear-gradient(to bottom, rgba(255, 182, 193, 0.6), transparent);
+  --mode-icon: "☀️";
+  --mode-text: "Summer";
+  
+  /* Spring Brand Colors */
+  --color-primary: #27ae60;
+  --color-primary-rgb: 39, 174, 96;
+  --color-primary-light: #e7f7f0;
+  --color-primary-hover: #219653;
+  --color-primary-subtle: rgba(39, 174, 96, 0.1);
+}
+
+/* Summer Theme */
+body.seasonal-mode.summer-mode {
+  --current-bg-image: var(--summer-bg-image);
+  --seasonal-text-color: #2c3e50;
+  --seasonal-nav-bg: rgba(255, 255, 255, 0.9);
+  --seasonal-post-bg: rgba(255, 255, 255, 0.85);
+  --seasonal-link-color: #2c3e50;
+  --seasonal-link-hover-color: #3498db;
+  --seasonal-cloud-color: rgba(255, 255, 255, 0.9);
+  --seasonal-celestial-bg: radial-gradient(circle at 30% 30%, #FFEB3B 0%, #FFC107 40%, #FF9800 100%);
+  --seasonal-celestial-shadow: 0 0 50px rgba(255, 235, 59, 0.6), inset -10px -10px 0 rgba(255, 152, 0, 0.2);
+  --seasonal-precipitation-bg: linear-gradient(to bottom, rgba(255, 255, 200, 0.4), transparent);
+  --mode-icon: "🍂";
+  --mode-text: "Autumn";
+  
+  /* Summer Brand Colors */
+  --color-primary: #3498db;
+  --color-primary-rgb: 52, 152, 219;
+  --color-primary-light: #e7f5ff;
+  --color-primary-hover: #2980b9;
+  --color-primary-subtle: rgba(52, 152, 219, 0.1);
+}
+
+/* Autumn Theme */
+body.seasonal-mode.autumn-mode {
+  --current-bg-image: var(--fall-bg-image);
+  --seasonal-text-color: #2c3e50;
+  --seasonal-nav-bg: rgba(255, 255, 255, 0.9);
+  --seasonal-post-bg: rgba(255, 255, 255, 0.85);
+  --seasonal-link-color: #2c3e50;
+  --seasonal-link-hover-color: #e67e22;
+  --seasonal-cloud-color: rgba(255, 255, 255, 0.9);
+  --seasonal-celestial-bg: radial-gradient(circle at 30% 30%, #FF8C00 0%, #FF7F50 40%, #FF6347 100%);
+  --seasonal-celestial-shadow: 0 0 50px rgba(255, 140, 0, 0.6), inset -10px -10px 0 rgba(255, 99, 71, 0.2);
+  --seasonal-precipitation-bg: linear-gradient(to bottom, rgba(255, 140, 0, 0.6), transparent);
+  --mode-icon: "❄️";
+  --mode-text: "Winter";
+  
+  /* Autumn Brand Colors */
+  --color-primary: #e67e22;
+  --color-primary-rgb: 230, 126, 34;
+  --color-primary-light: #fef5e7;
+  --color-primary-hover: #d35400;
+  --color-primary-subtle: rgba(230, 126, 34, 0.1);
+}
+
+/* Dark Theme with Seasonal Override */
+[data-bs-theme="dark"].seasonal-mode {
+  --current-bg-image: var(--winter-bg-image);
+}
+
+[data-bs-theme="dark"].seasonal-mode.spring-mode {
+  --current-bg-image: var(--spring-bg-image);
+}
+
+[data-bs-theme="dark"].seasonal-mode.summer-mode {
+  --current-bg-image: var(--summer-bg-image);
+}
+
+[data-bs-theme="dark"].seasonal-mode.autumn-mode {
+  --current-bg-image: var(--fall-bg-image);
+}
+
+/* ==========================================================================
+   SEASONAL THEME COMPONENTS
+   ========================================================================== */
+
+/* Seasonal Background */
+body {
+  background-image: none;
+  background-color: var(--surface-secondary);
+}
+
+body.seasonal-mode {
+  background-image: var(--current-bg-image);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  position: relative;
+  transition: background-image 0.5s ease;
+}
+
+/* Show seasonal elements only when seasonal mode is active */
+body.seasonal-mode .precipitation,
+body.seasonal-mode .celestial,
+body.seasonal-mode .cloud {
+  display: block;
+}
+
+/* Animated Precipitation Effect */
+.precipitation {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.7;
+}
+
+.precipitation-element {
+  position: absolute;
+  background: var(--seasonal-precipitation-bg);
+  width: 2px;
+  height: 15px;
+  animation: fall linear infinite;
+}
+
+body.seasonal-mode.spring-mode .precipitation-element {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 182, 193, 0.8);
+}
+
+body.seasonal-mode.summer-mode .precipitation-element {
+  width: 3px;
+  height: 200px;
+  transform-origin: top center;
+  animation: shine linear infinite;
+}
+
+body.seasonal-mode.autumn-mode .precipitation-element {
+  width: 10px;
+  height: 10px;
+  border-radius: 0 50% 50% 50%;
+  background: rgba(255, 140, 0, 0.8);
+  transform: rotate(45deg);
+}
+
+@keyframes fall {
+  0% { transform: translateY(-100vh) rotate(0deg); }
+  100% { transform: translateY(100vh) rotate(360deg); }
+}
+
+@keyframes shine {
+  0% { transform: translateY(-100vh) rotate(0deg); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(100vh) rotate(10deg); opacity: 0; }
+}
+
+/* Celestial Body (moon/sun) - Background Element */
+.celestial {
+  position: fixed;
+  top: 10%;
+  right: 15%;
+  width: 120px;
+  height: 120px;
+  background: var(--seasonal-celestial-bg);
+  border-radius: 50%;
+  box-shadow: var(--seasonal-celestial-shadow);
+  z-index: 0; /* Behind all content */
+  animation: celestialGlow 4s ease-in-out infinite alternate;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.celestial:hover {
+  opacity: 1;
+}
+
+@keyframes celestialGlow {
+  0% { box-shadow: var(--seasonal-celestial-shadow); }
+  100% { box-shadow: 0 0 80px rgba(255, 235, 59, 0.8), inset -10px -10px 0 rgba(255, 152, 0, 0.2); }
+}
+
+/* Clouds */
+.cloud {
+  position: fixed;
+  background: var(--seasonal-cloud-color);
+  border-radius: 50px;
+  opacity: 0.6;
+  animation: drift 30s linear infinite;
+  z-index: 0; /* Behind all content */
+}
+
+.cloud:before,
+.cloud:after {
+  content: '';
+  position: absolute;
+  background: var(--seasonal-cloud-color);
+  border-radius: 50px;
+}
+
+.cloud1 {
+  width: 100px;
+  height: 40px;
+  top: 20%;
+  left: -150px;
+}
+
+.cloud1:before {
+  width: 60px;
+  height: 60px;
+  top: -30px;
+  left: 10px;
+}
+
+.cloud1:after {
+  width: 80px;
+  height: 50px;
+  top: -20px;
+  right: 15px;
+}
+
+.cloud2 {
+  width: 80px;
+  height: 35px;
+  top: 35%;
+  left: -120px;
+  animation-duration: 40s;
+  animation-delay: 10s;
+}
+
+.cloud2:before {
+  width: 50px;
+  height: 50px;
+  top: -25px;
+  left: 15px;
+}
+
+.cloud2:after {
+  width: 70px;
+  height: 40px;
+  top: -15px;
+  right: 10px;
+}
+
+@keyframes drift {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(calc(100vw + 200px)); }
+}
+
+/* Hidden Season Toggle - Easter Egg */
+.season-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 10;
+  opacity: 0.2;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.season-toggle:hover {
+  opacity: 0.8;
+  transform: scale(1.1);
+}
+
+.season-toggle:before {
+  content: var(--mode-icon);
+}
+
+/* Season Indicator - Appears briefly after season change */
+.season-indicator {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 15px 30px;
+  border-radius: 30px;
+  font-size: 1.2rem;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+.season-indicator.show {
+  opacity: 1;
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN FOR SEASONAL ELEMENTS
+   ========================================================================== */
+@media (max-width: 768px) {
+  .celestial {
+    width: 80px;
+    height: 80px;
+    top: 5%;
+    right: 10%;
+  }
+  
+  .season-toggle {
+    width: 35px;
+    height: 35px;
+    bottom: 15px;
+    right: 15px;
+    font-size: 1rem;
+  }
+}
+
+/* ==========================================================================
+   3. LAYOUT COMPONENTS
+   ========================================================================== */
+/* Navigation Bar */
+.navbar {
+  background-color: var(--surface-primary) !important;
+  border-bottom: var(--border-width) solid var(--border-color) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+body.seasonal-mode .navbar {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Dark mode navbar adjustments */
+[data-bs-theme="dark"] .navbar {
+  background-color: var(--surface-primary) !important;
+  border-bottom: var(--border-width) solid var(--border-color) !important;
+}
+
+[data-bs-theme="dark"].seasonal-mode .navbar {
+  background-color: rgba(0, 0, 0, 0.2) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Seasonal navbar adjustments */
+body.seasonal-mode.spring-mode .navbar,
+body.seasonal-mode.summer-mode .navbar,
+body.seasonal-mode.autumn-mode .navbar {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+[data-bs-theme="dark"].seasonal-mode.spring-mode .navbar,
+[data-bs-theme="dark"].seasonal-mode.summer-mode .navbar,
+[data-bs-theme="dark"].seasonal-mode.autumn-mode .navbar {
+  background-color: rgba(0, 0, 0, 0.3) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+  transition: opacity var(--transition-fast);
+  padding: 8px 16px;
+  border-radius: var(--border-radius);
+}
+
+.navbar-brand:hover {
+  opacity: 0.8;
+}
+
+.navbar-brand .brand-icon {
+  color: var(--color-primary);
+  margin-inline-end: var(--space-sm);
+  font-size: 1.25rem;
+}
+
+.navbar-brand .brand-text {
+  color: var(--text-primary);
+  font-size: 1.1rem;
+}
+
+.navbar-expand-lg .navbar-nav .nav-link {
+  color: var(--text-primary) !important;
+  font-weight: var(--font-weight-medium);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--border-radius-sm);
+  transition: all var(--transition-fast);
+  margin: 0 2px;
+}
+
+.navbar-expand-lg .navbar-nav .nav-link:hover {
+  color: var(--color-primary) !important;
+  transform: translateY(-1px);
+}
+
+.navbar-expand-lg .navbar-nav .nav-link.active {
+  background: rgba(115, 163, 36, 0.2);
+  color: var(--color-primary) !important;
+}
+
+/* Navbar dropdown menu adjustments */
+.dropdown-menu {
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: var(--shadow-lg) !important;
+  border-radius: var(--border-radius-lg) !important;
+  padding: var(--space-sm) !important;
+}
+
+[data-bs-theme="dark"] .dropdown-menu {
+  background: rgba(30, 30, 30, 0.95) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.dropdown-item {
+  color: var(--text-primary) !important;
+  padding: var(--space-sm) var(--space-md) !important;
+  border-radius: var(--border-radius-sm) !important;
+  transition: all var(--transition-fast) !important;
+  margin: 2px 0;
+}
+
+.dropdown-item:hover {
+  background: var(--color-primary) !important;
+  color: white !important;
+  transform: translateX(3px);
+}
+
+/* Theme switch adjustments */
+.theme-switch {
+  position: relative;
+  display: inline-block;
+  width: 52px;
+  height: 30px;
+  margin-left: var(--space-md);
+}
+
+.theme-switch .form-check-input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.theme-switch .form-check-label {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 30px;
+  transition: background-color var(--transition-base), transform var(--transition-base);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-xs);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.theme-switch .form-check-label::before {
+  content: "";
+  position: absolute;
+  height: 22px;
+  width: 22px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  border-radius: 50%;
+  transition: transform var(--transition-base);
+  box-shadow: var(--shadow-sm);
+  z-index: 2;
+}
+
+.theme-switch .form-check-input:checked + .form-check-label::before {
+  transform: translateX(22px);
+}
+
+.theme-switch .form-check-label i {
+  color: var(--text-secondary);
+  font-size: 12px;
+  z-index: 1;
+  transition: color var(--transition-fast);
+}
+
+[data-bs-theme="dark"] .theme-switch .form-check-label {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Navbar toggler adjustments */
+.navbar-toggler {
+  border: none !important;
+  padding: var(--space-xs) var(--space-sm) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-radius: var(--border-radius-sm) !important;
+  transition: all var(--transition-fast) !important;
+}
+
+.navbar-toggler:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+}
+
+.navbar-toggler:focus {
+  box-shadow: none !important;
+}
+
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.8%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+}
+
+[data-bs-theme="dark"] .navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.6%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+}
+
+/* Navbar collapse adjustments */
+.navbar-collapse {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: var(--border-radius);
+  padding: var(--space-md);
+  margin-top: var(--space-sm);
+}
+
+[data-bs-theme="dark"] .navbar-collapse {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+@media (min-width: 992px) {
+  .navbar-collapse {
+    background: transparent;
+    padding: 0;
+    margin-top: 0;
+  }
+}
+
+
+
+/* Primary Button - Uses our seasonal primary color */
+.btn-primary {
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--text-inverse) !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: var(--color-primary-hover) !important;
+  border-color: var(--color-primary-hover) !important;
+  color: var(--text-inverse) !important;
+}
+
+.btn-primary:active {
+  background-color: var(--color-primary-hover) !important;
+  border-color: var(--color-primary-hover) !important;
+}
+
+/* Outline Primary Button */
+.btn-outline-primary {
+  color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  background-color: transparent !important;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--text-inverse) !important;
+}
+
+/* Link Button */
+.btn-link {
+  color: var(--color-primary) !important;
+}
+
+.btn-link:hover,
+.btn-link:focus {
+  color: var(--color-primary-hover) !important;
+}
+
+/* All buttons with primary color */
+.btn-primary,
+.btn-outline-primary,
+.btn-link {
+  margin-left: var(--space-xs) !important;
+  border-radius: var(--border-radius) !important;
+  font-weight: var(--font-weight-medium) !important;
+  transition: all var(--transition-fast) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before,
+.btn-outline-primary::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width var(--transition-base), height var(--transition-base);
+}
+
+.btn-primary:hover::before,
+.btn-outline-primary:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+#heading-3 > button > div {
+  background-color: var(--surface-primary)!important;
+  border-bottom: var(--border-width) solid var(--border-color);
+}

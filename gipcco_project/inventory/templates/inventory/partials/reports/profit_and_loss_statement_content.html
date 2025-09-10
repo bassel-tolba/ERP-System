@@ -1,0 +1,58 @@
+<!-- gipcco_project/inventory/templates/inventory/partials/reports/profit_and_loss_statement_content.html -->
+{% load humanize %}
+
+<div class="card shadow-sm print-container">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+            التقرير للفترة من <span class="text-primary">{{ start_date }}</span> إلى <span class="text-primary">{{ end_date }}</span>
+        </h5>
+        <button class="btn btn-sm btn-outline-secondary d-print-none" onclick="window.print();">
+            <i class="bi bi-printer-fill me-1"></i> طباعة
+        </button>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered mb-0">
+                <tbody>
+                    <!-- ==================== REVENUE SECTION ==================== -->
+                    <tr class="table-light">
+                        <th colspan="2" class="fs-5">الإيرادات (Revenue)</th>
+                    </tr>
+                    {% for node in revenue_tree %}
+                        {% include 'inventory/partials/reports/_account_node_row_pnl.html' with node=node level=1 %}
+                    {% empty %}
+                    <tr>
+                        <td colspan="2" class="text-center text-muted">لا توجد إيرادات مسجلة في هذه الفترة.</td>
+                    </tr>
+                    {% endfor %}
+                    <tr class="fw-bold">
+                        <td class="text-end">إجمالي الإيرادات (Total Revenue)</td>
+                        <td class="text-end font-monospace fs-6 table-group-divider">{{ total_revenue|floatformat:3|intcomma }}</td>
+                    </tr>
+
+                    <!-- ==================== EXPENSES SECTION ==================== -->
+                    <tr class="table-light">
+                        <th colspan="2" class="fs-5">المصروفات (Expenses)</th>
+                    </tr>
+                    {% for node in expense_tree %}
+                        {% include 'inventory/partials/reports/_account_node_row_pnl.html' with node=node level=1 %}
+                    {% empty %}
+                     <tr>
+                        <td colspan="2" class="text-center text-muted">لا توجد مصروفات مسجلة في هذه الفترة.</td>
+                    </tr>
+                    {% endfor %}
+                    <tr class="fw-bold">
+                        <td class="text-end">إجمالي المصروفات (Total Expenses)</td>
+                        <td class="text-end font-monospace table-group-divider">({{ total_expense|floatformat:3|intcomma }})</td>
+                    </tr>
+
+                    <!-- ==================== NET PROFIT ==================== -->
+                    <tr class="fw-bolder fs-5 {% if net_profit >= 0 %}table-success{% else %}table-danger{% endif %}">
+                        <td class="text-end">صافي الربح / (الخسارة) (Net Profit / (Loss))</td>
+                        <td class="text-end font-monospace">{{ net_profit|floatformat:3|intcomma }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

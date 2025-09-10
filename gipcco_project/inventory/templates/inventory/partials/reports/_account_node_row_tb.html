@@ -1,0 +1,28 @@
+<!-- gipcco_project/inventory/templates/inventory/partials/reports/_account_node_row_tb.html -->
+{% load humanize %}
+{% comment %}
+    Recursive template to render a node in the Trial Balance tree.
+    Expects:
+    - node: The dictionary for the current account node.
+    - level: The current indentation level (integer).
+{% endcomment %}
+
+{# Only render a row if the account has a balance or is a parent group with children #}
+{% if node.closing_balance != 0 or node.children %}
+    <tr class="{% if not node.children %}fw-normal{% else %}fw-bold table-light{% endif %}">
+        <td style="padding-inline-start: {% widthratio level 1 20 %}px !important;">
+            {{ node.account.code }} - {{ node.account.name }}
+        </td>
+
+        <td class="text-end font-monospace">
+            {% if node.debit_balance > 0 %}{{ node.debit_balance|floatformat:3|intcomma }}{% endif %}
+        </td>
+        <td class="text-end font-monospace">
+            {% if node.credit_balance > 0 %}{{ node.credit_balance|floatformat:3|intcomma }}{% endif %}
+        </td>
+    </tr>
+{% endif %}
+
+{% for child_node in node.children %}
+    {% include 'inventory/partials/reports/_account_node_row_tb.html' with node=child_node level=level|add:1 %}
+{% endfor %}

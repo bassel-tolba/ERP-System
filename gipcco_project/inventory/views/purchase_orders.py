@@ -47,11 +47,14 @@ def create_purchase_order(request: HttpRequest) -> HttpResponse:
         supplier_id = request.POST.get('supplier_id')
         order_date_str = request.POST.get('order_date')
         
+        # --- MODIFIED: Use new field names ---
         product_ids = request.POST.getlist('product_id')
         quantities = request.POST.getlist('quantity')
-        total_prices = request.POST.getlist('total_price')
+        base_prices = request.POST.getlist('base_price_per_unit')
+        vat_rates = request.POST.getlist('vat_rate')
+        wht_rates = request.POST.getlist('withholding_tax_rate')
 
-        if not all([po_number, supplier_id, order_date_str, product_ids, quantities, total_prices]):
+        if not all([po_number, supplier_id, order_date_str, product_ids, quantities, base_prices, vat_rates]):
             messages.warning(request, "الرجاء تعبئة جميع الحقول لإنشاء أمر الشراء.")
             return redirect('inventory:create_purchase_order')
         
@@ -69,14 +72,17 @@ def create_purchase_order(request: HttpRequest) -> HttpResponse:
                 )
                 
                 items_to_create = []
-                for pid, qty, price in zip(product_ids, quantities, total_prices):
-                    if pid and qty and price:
+                # --- MODIFIED: Loop through new form fields ---
+                for pid, qty, price, vat, wht in zip(product_ids, quantities, base_prices, vat_rates, wht_rates):
+                    if pid and qty and price and vat is not None:
                         items_to_create.append(
                             PurchaseOrderItem(
                                 purchase_order=po,
                                 product_id=pid,
                                 quantity_ordered=float(qty),
-                                total_price=Decimal(price)
+                                base_price_per_unit=Decimal(price),
+                                vat_rate=Decimal(vat) / 100, # Convert from percentage
+                                withholding_tax_rate=Decimal(wht or 0) / 100 # Convert from percentage
                             )
                         )
                 PurchaseOrderItem.objects.bulk_create(items_to_create)
@@ -108,7 +114,6 @@ def view_purchase_order(request: HttpRequest, pk: int) -> HttpResponse:
         pk=pk
     )
     
-    # Calculate totals and check for receipts in the view to keep the template clean
     has_any_receipts = False
     for item in po.items.all():
         item.total_received = sum(r.quantity for r in item.receipts.all())
@@ -127,7 +132,6 @@ def view_purchase_order(request: HttpRequest, pk: int) -> HttpResponse:
     return render(request, 'inventory/purchase_order_view.html', context)
 
 
-# --- NEW VIEW ---
 def edit_purchase_order(request: HttpRequest, pk: int) -> HttpResponse:
     """
     Handles editing an existing Purchase Order.
@@ -135,7 +139,6 @@ def edit_purchase_order(request: HttpRequest, pk: int) -> HttpResponse:
     """
     po = get_object_or_404(PurchaseOrder.objects.prefetch_related('items__product'), pk=pk)
 
-    # Check if any item has a receipt. If so, block editing.
     if PurchaseOrderItem.objects.filter(purchase_order=po, receipts__isnull=False).exists():
         messages.error(request, "لا يمكن تعديل أمر الشراء هذا لأنه تم استلام بعض البنود بالفعل.")
         return redirect('inventory:view_purchase_order', pk=pk)
@@ -145,15 +148,17 @@ def edit_purchase_order(request: HttpRequest, pk: int) -> HttpResponse:
         supplier_id = request.POST.get('supplier_id')
         order_date_str = request.POST.get('order_date')
         
+        # --- MODIFIED: Use new field names ---
         product_ids = request.POST.getlist('product_id')
         quantities = request.POST.getlist('quantity')
-        total_prices = request.POST.getlist('total_price')
+        base_prices = request.POST.getlist('base_price_per_unit')
+        vat_rates = request.POST.getlist('vat_rate')
+        wht_rates = request.POST.getlist('withholding_tax_rate')
 
-        if not all([po_number, supplier_id, order_date_str, product_ids, quantities, total_prices]):
+        if not all([po_number, supplier_id, order_date_str, product_ids, quantities, base_prices, vat_rates]):
             messages.warning(request, "الرجاء تعبئة جميع الحقول لتعديل أمر الشراء.")
             return redirect('inventory:edit_purchase_order', pk=pk)
         
-        # Check for unique PO number, excluding the current PO
         if PurchaseOrder.objects.filter(po_number=po_number).exclude(pk=pk).exists():
             messages.error(request, f"رقم أمر الشراء '{po_number}' موجود بالفعل.")
             return redirect('inventory:edit_purchase_order', pk=pk)
@@ -165,18 +170,20 @@ def edit_purchase_order(request: HttpRequest, pk: int) -> HttpResponse:
                 po.order_date = datetime.strptime(order_date_str, '%Y-%m-%d').date()
                 po.save()
                 
-                # Simple strategy: Delete old items and create new ones
                 po.items.all().delete()
                 
                 items_to_create = []
-                for pid, qty, price in zip(product_ids, quantities, total_prices):
-                    if pid and qty and price:
+                # --- MODIFIED: Loop through new form fields ---
+                for pid, qty, price, vat, wht in zip(product_ids, quantities, base_prices, vat_rates, wht_rates):
+                    if pid and qty and price and vat is not None:
                         items_to_create.append(
                             PurchaseOrderItem(
                                 purchase_order=po,
                                 product_id=pid,
                                 quantity_ordered=float(qty),
-                                total_price=Decimal(price)
+                                base_price_per_unit=Decimal(price),
+                                vat_rate=Decimal(vat) / 100,
+                                withholding_tax_rate=Decimal(wht or 0) / 100
                             )
                         )
                 PurchaseOrderItem.objects.bulk_create(items_to_create)
@@ -188,12 +195,14 @@ def edit_purchase_order(request: HttpRequest, pk: int) -> HttpResponse:
 
     primitive_products_qs = Product.objects.filter(~Q(product_type=Product.ProductType.FINAL_PRODUCT))
     
-    # Prepare items data for JavaScript on the template
+    # --- MODIFIED: Prepare items data with new fields for JavaScript ---
     po_items_data = [
         {
             'product_id': item.product_id,
             'quantity': item.quantity_ordered,
-            'total_price': str(item.total_price)
+            'base_price_per_unit': str(item.base_price_per_unit),
+            'vat_rate': str(item.vat_rate * 100),
+            'withholding_tax_rate': str(item.withholding_tax_rate * 100)
         } for item in po.items.all()
     ]
 
@@ -210,7 +219,6 @@ def edit_purchase_order(request: HttpRequest, pk: int) -> HttpResponse:
     return render(request, 'inventory/purchase_order_edit.html', context)
 
 
-# --- NEW VIEW ---
 @require_POST
 def delete_purchase_order(request: HttpRequest, pk: int) -> HttpResponse:
     """

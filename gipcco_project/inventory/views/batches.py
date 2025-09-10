@@ -1,4 +1,4 @@
-
+# gipcco_project/inventory/views/batches.py
 
 import json
 import math
@@ -18,9 +18,10 @@ from django.views.decorators.http import require_POST
 import logging
 
 from ..models import (Batch, BatchItem, Company, InventoryLog, OpeningBalance,
-                     Product, ProductionReturn, ShopOrderTemplate, TemplateItem, FinishedProductReceipt) # --- MODIFIED: Import FinishedProductReceipt
-# --- NEW: Import costing helper ---
-from .helpers import check_and_update_batch_customization, get_opening_balance_for_period, validate_stock_availability, _get_ledger_transactions, recalculate_cost_history_for_product
+                     Product, ProductionReturn, ShopOrderTemplate, TemplateItem, FinishedProductReceipt)
+from .helpers import check_and_update_batch_customization, validate_stock_availability
+# --- MODIFIED: Import from the new costing service ---
+from ..services.costing_service import recalculate_cost_history_for_product
 
 ITEMS_PER_PAGE = 20
 
@@ -106,7 +107,8 @@ def create_batch(request: HttpRequest) -> HttpResponse:
             'templates': templates, 
             'templates_with_items': templates_with_items, 
             'all_available_stock': all_available_stock,
-            'primitive_products': primitive_products
+            'primitive_products': primitive_products,
+            'batches': Batch.objects.all() # Add all batches for parent selection
         }
 
     if request.method == 'POST':
@@ -116,6 +118,7 @@ def create_batch(request: HttpRequest) -> HttpResponse:
         batch_to_str = request.POST.get('batch_number_to')
         creation_date_str = request.POST.get('creation_date')
         is_continuation = 'is_continuation' in request.POST
+        parent_batch_id = request.POST.get('parent_batch') # Get parent batch ID
         notes = request.POST.get('notes', '')
         product_ids = request.POST.getlist('primitive_product_id')
         theoretical_quantities = request.POST.getlist('theoretical_quantity')
@@ -154,6 +157,7 @@ def create_batch(request: HttpRequest) -> HttpResponse:
                     creation_date=creation_datetime, # Use datetime object
                     is_customized=True,
                     is_continuation=is_continuation,
+                    parent_batch_id=parent_batch_id if is_continuation and parent_batch_id else None, # Set parent batch
                     notes=notes
                 )
                 items_to_create = []
@@ -195,6 +199,7 @@ def create_batch(request: HttpRequest) -> HttpResponse:
         'all_available_stock': json_stock,
         'primitive_products': page_data['primitive_products'],
         'primitive_products_json': primitive_products_for_json,
+        'batches': page_data['batches'], # Pass all batches to the template
         'is_partial_request': 'X-Partial-Request' in request.headers
     }
     if 'X-Partial-Request' in request.headers:

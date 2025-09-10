@@ -1,3 +1,4 @@
+# gipcco_project/inventory/views/helpers.py
 
 import json
 import math
@@ -18,18 +19,21 @@ import logging
 
 from ..models import (Batch, BatchItem, Company, InventoryLog, OpeningBalance,
                      Product, ProductionReturn, ShopOrderTemplate, TemplateItem,
-                     InventoryConsumption) # --- MODIFIED: Import InventoryConsumption
+                     InventoryConsumption)
 
 # Get an instance of the logger for this module
 logger = logging.getLogger(__name__)
 
 
 # ==============================================================================
-#  Helper Functions (Unchanged section)
+#  Operational Helper Functions
 # ==============================================================================
 
 def check_and_update_batch_customization(batch_id: int):
-    # This function remains unchanged
+    """
+    Checks if a batch's items deviate from its template's theoretical quantities
+    or item count, and updates the `is_customized` flag accordingly.
+    """
     try:
         batch = Batch.objects.select_related('template').get(pk=batch_id)
         template_item_count = batch.template.items.count()
@@ -39,6 +43,7 @@ def check_and_update_batch_customization(batch_id: int):
         if template_item_count != batch_item_count:
             is_customized = True
         else:
+            # Check if any item's actual quantity differs from its theoretical quantity
             if batch.items.filter(~Q(actual_quantity=F('theoretical_quantity'))).exists():
                 is_customized = True
         
@@ -46,13 +51,14 @@ def check_and_update_batch_customization(batch_id: int):
             batch.is_customized = is_customized
             batch.save(update_fields=['is_customized'])
     except Batch.DoesNotExist:
+        logger.warning(f"Attempted to check customization for non-existent batch_id: {batch_id}")
         pass
 
 
 def validate_stock_availability(product_ids, actual_quantities, source_log_ids, batch_creation_date, batch_id_to_exclude=None):
     """
     Validates stock availability by first aggregating all requests from the same source.
-    MODIFIED to only consider RELEASED stock and validate against release_timestamp.
+    Ensures that stock is 'RELEASED' and that its release date is not after the consumption date.
     - `batch_creation_date` is expected to be a `datetime.date` object.
     """
     requests = {}
@@ -75,7 +81,10 @@ def validate_stock_availability(product_ids, actual_quantities, source_log_ids, 
     # Step 2: Validate each aggregated request against the available stock.
     for request_key, total_requested in requests.items():
         source_id, product_id = request_key
-        product = Product.objects.get(pk=product_id)
+        try:
+            product = Product.objects.get(pk=product_id)
+        except Product.DoesNotExist:
+            return (False, f"المنتج برقم {product_id} غير موجود.")
         
         # Base queryset to find items already using stock, excluding the current batch if editing.
         used_items_qs = BatchItem.objects.filter(primitive_product_id=product_id)
@@ -122,309 +131,3 @@ def validate_stock_availability(product_ids, actual_quantities, source_log_ids, 
                 return (False, f"كمية غير كافية للمنتج '{product.name}' من المصدر QC '{log_entry.qc_no}'. مطلوب: {total_requested:.3f}, متاح: {available_stock:.3f}")
 
     return (True, None)
-
-
-def get_opening_balance_for_period(product_id: int, start_date: datetime) -> float:
-    # This function is now OBSOLETE as get_inventory_state_at_datetime provides a more accurate value.
-    # It remains here for potential compatibility but should be phased out.
-    # The new ledger and analysis reports use get_inventory_state_at_datetime.
-    state = get_inventory_state_at_datetime(product_id, start_date)
-    return float(state['quantity'])
-
-
-def _get_ledger_transactions(product_id, company_id, qc_no, start_date, end_date_inclusive, tag_ids=None):
-    """
-    A private helper to fetch and consolidate all transaction types for the ledger.
-    MODIFIED to only use RELEASED logs and their release_timestamp.
-    """
-    transactions = []
-    
-    # --- MODIFIED: Filter by RELEASED status ---
-    in_logs_qs = InventoryLog.objects.select_related('product', 'company').prefetch_related('tags').filter(
-        status=InventoryLog.Status.RELEASED,
-        release_timestamp__gte=start_date, 
-        release_timestamp__lt=end_date_inclusive
-    )
-    returns_qs = ProductionReturn.objects.select_related('product', 'source_log').prefetch_related('source_log__tags').filter(return_date__gte=start_date, return_date__lt=end_date_inclusive)
-    out_items_qs = BatchItem.objects.select_related(
-        'primitive_product', 'batch', 'source_log', 'batch__template__final_product'
-    ).prefetch_related('source_log__tags').filter(batch__creation_date__gte=start_date, batch__creation_date__lt=end_date_inclusive)
-
-    if product_id: 
-        in_logs_qs = in_logs_qs.filter(product_id=product_id)
-        returns_qs = returns_qs.filter(product_id=product_id)
-        out_items_qs = out_items_qs.filter(primitive_product_id=product_id)
-    if company_id: 
-        in_logs_qs = in_logs_qs.filter(company_id=company_id)
-        returns_qs = returns_qs.none()
-        out_items_qs = out_items_qs.none()
-    if qc_no: 
-        in_logs_qs = in_logs_qs.filter(qc_no__icontains=qc_no)
-        returns_qs = returns_qs.filter(source_log__qc_no__icontains=qc_no)
-        out_items_qs = out_items_qs.filter(source_log__qc_no__icontains=qc_no)
-    
-    if tag_ids:
-        in_logs_qs = in_logs_qs.filter(tags__id__in=tag_ids).distinct()
-        returns_qs = returns_qs.filter(source_log__tags__id__in=tag_ids).distinct()
-        out_items_qs = out_items_qs.filter(source_log__tags__id__in=tag_ids).distinct()
-
-    for log in in_logs_qs:
-        transactions.append({
-            # --- MODIFIED: Use release_timestamp as the transaction date ---
-            'date': log.release_timestamp, 'type': 'IN', 'quantity_change': log.quantity,
-            'product_id': log.product.id, 'product_name': log.product.name, 'product_code': log.product.code, 'unit': log.product.unit,
-            'company_name': log.company.name if log.company else '---', 'qc_no': log.qc_no, 'batch_id': None,
-            'description': f"استلام من {log.company.name if log.company else '---'} (QC: {log.qc_no or 'N/A'})",
-            'shop_order_number': None, 'batch_number': None, 'final_product_name': None, 'theoretical_quantity': None,
-            'tags': log.tags.all(),
-            'unit_price': log.unit_price, 'cost_at_consumption': None,
-        })
-
-    for ret in returns_qs:
-        transactions.append({
-            'date': ret.return_date, 'type': 'RETURN_IN', 'quantity_change': ret.quantity,
-            'product_id': ret.product.id, 'product_name': ret.product.name, 'product_code': ret.product.code, 'unit': ret.product.unit,
-            'company_name': 'إرجاع من الإنتاج', 'qc_no': ret.source_log.qc_no, 'batch_id': None,
-            'description': f"إرجاع من الإنتاج (مصدر QC الأصلي: {ret.source_log.qc_no or 'N/A'})",
-            'shop_order_number': None, 'batch_number': None, 'final_product_name': None, 'theoretical_quantity': None,
-            'tags': ret.source_log.tags.all(),
-            'unit_price': ret.source_log.unit_price, 
-            'cost_at_consumption': None,
-        })
-
-    for item in out_items_qs:
-        source_desc = item.source_log.qc_no or 'N/A' if item.source_log else 'رصيد افتتاحي'
-        continuation_str = ' (تكملة)' if item.batch.is_continuation else ''
-        transactions.append({
-            'date': item.batch.creation_date, 'type': 'OUT', 'quantity_change': -(item.actual_quantity or 0.0),
-            'product_id': item.primitive_product.id, 'product_name': item.primitive_product.name, 'product_code': item.primitive_product.code, 'unit': item.primitive_product.unit,
-            'company_name': None, 'qc_no': source_desc, 'batch_id': item.batch.id,
-            'description': f"صرف لأمر تشغيل {item.batch.shop_order_number}{continuation_str} (مصدر: {source_desc})",
-            'shop_order_number': item.batch.shop_order_number, 'batch_number': item.batch.batch_number,
-            'final_product_name': item.batch.template.final_product.name, 'theoretical_quantity': item.theoretical_quantity,
-            'tags': item.source_log.tags.all() if item.source_log else [],
-            'unit_price': None, 'cost_at_consumption': item.cost_at_consumption,
-        })
-
-    # Ensure deterministic sorting for same-timestamp transactions
-    def get_sort_key(trx):
-        # Sort by date, then by type (IN -> RETURN_IN -> OUT) to process logically
-        type_order = {'IN': 1, 'RETURN_IN': 2, 'OUT': 3}
-        return (trx['date'], type_order.get(trx['type'], 99))
-
-    transactions.sort(key=get_sort_key)
-    return transactions
-
-
-# ==============================================================================
-#  Costing Engine Helper Functions
-# ==============================================================================
-
-def update_moving_average_cost(product_id: int, log_entry: InventoryLog):
-    """
-    Updates the moving average cost for a product based on a new incoming shipment.
-    This is for simple, forward-moving transactions ONLY (date is today or future).
-    """
-    with transaction.atomic():
-        product = Product.objects.select_for_update().get(pk=product_id)
-        
-        # --- MODIFICATION: Only released items affect MAC ---
-        if log_entry.status != InventoryLog.Status.RELEASED:
-            logger.info(f"Skipping MAC update for '{product.name}'; log entry #{log_entry.id} is not released.")
-            return
-
-        incoming_qty = Decimal(log_entry.quantity)
-        incoming_price = log_entry.unit_price or Decimal('0.000')
-
-        # --- MODIFICATION: Only count released logs ---
-        total_in = Decimal(product.inventory_logs.filter(status=InventoryLog.Status.RELEASED).aggregate(q=Coalesce(Sum('quantity'), 0.0))['q'])
-        total_out = Decimal(product.batch_items.aggregate(q=Coalesce(Sum('actual_quantity'), 0.0))['q'])
-        total_ret = Decimal(product.production_returns.aggregate(q=Coalesce(Sum('quantity'), 0.0))['q'])
-        
-        qty_after_receipt = total_in - total_out + total_ret
-        qty_before_receipt = qty_after_receipt - incoming_qty
-        
-        value_before_receipt = qty_before_receipt * product.moving_average_cost
-        value_of_receipt = incoming_qty * incoming_price
-        
-        total_value_after = value_before_receipt + value_of_receipt
-        total_qty_after = qty_before_receipt + incoming_qty
-        
-        if total_qty_after > 0:
-            new_mac = total_value_after / total_qty_after
-        else:
-            new_mac = incoming_price
-        
-        product.moving_average_cost = new_mac.quantize(Decimal('0.001'), rounding=ROUND_HALF_UP)
-        product.save(update_fields=['moving_average_cost'])
-        logger.info(f"Updated MAC for '{product.name}' to {product.moving_average_cost} via simple update.")
-
-
-def get_inventory_state_at_datetime(product_id: int, target_datetime: timezone.datetime) -> dict:
-    """
-    Calculates the total stock quantity and its total value for a product up to a specific datetime.
-    MODIFIED to include internal inventory consumption.
-    """
-    most_recent_ob = OpeningBalance.objects.filter(
-        product_id=product_id, balance_date__lt=target_datetime
-    ).order_by('-balance_date').first()
-
-    if most_recent_ob:
-        running_qty = Decimal(str(most_recent_ob.quantity))
-        running_value = most_recent_ob.total_value
-        effective_date = most_recent_ob.balance_date
-    else:
-        running_qty = Decimal('0.0')
-        running_value = Decimal('0.0')
-        effective_date = timezone.make_aware(datetime.min)
-    
-    # --- MODIFIED: Filter by status and use release_timestamp ---
-    logs = InventoryLog.objects.filter(
-        product_id=product_id, 
-        status=InventoryLog.Status.RELEASED,
-        release_timestamp__gte=effective_date, 
-        release_timestamp__lt=target_datetime
-    )
-    consumptions = BatchItem.objects.filter(
-        primitive_product_id=product_id, 
-        batch__creation_date__gte=effective_date, 
-        batch__creation_date__lt=target_datetime
-    )
-    
-    returns = ProductionReturn.objects.select_related('source_log').filter(
-        product_id=product_id, 
-        return_date__gte=effective_date, 
-        return_date__lt=target_datetime
-    )
-
-    # --- NEW: Query for internal consumptions ---
-    internal_consumptions = InventoryConsumption.objects.filter(
-        product_id=product_id,
-        consumption_date__gte=effective_date,
-        consumption_date__lt=target_datetime
-    )
-    
-    transactions = sorted(
-        list(logs) + list(consumptions) + list(returns) + list(internal_consumptions), # --- MODIFIED: Add internal consumptions
-        key=lambda x: (
-            # --- MODIFIED: Use release_timestamp for sorting logs and add consumption_date ---
-            x.release_timestamp if isinstance(x, InventoryLog) else
-            x.batch.creation_date if isinstance(x, BatchItem) else
-            x.consumption_date if isinstance(x, InventoryConsumption) else
-            x.return_date,
-            1 if isinstance(x, InventoryLog) else 2 if isinstance(x, ProductionReturn) else 3
-        )
-    )
-
-    for trx in transactions:
-        current_avg_cost = (running_value / running_qty) if running_qty > 0 else Decimal('0.0')
-
-        if isinstance(trx, InventoryLog):
-            incoming_qty = Decimal(str(trx.quantity))
-            incoming_price = trx.unit_price or Decimal('0.0')
-            running_value += incoming_qty * incoming_price
-            running_qty += incoming_qty
-        
-        elif isinstance(trx, ProductionReturn):
-            return_qty = Decimal(str(trx.quantity))
-            cost_of_return = Decimal('0.0')
-            if trx.source_log and trx.source_log.unit_price is not None:
-                cost_of_return = trx.source_log.unit_price
-            else:
-                cost_of_return = current_avg_cost
-            
-            running_value += return_qty * cost_of_return
-            running_qty += return_qty
-        
-        elif isinstance(trx, BatchItem):
-            consumed_qty = Decimal(str(trx.actual_quantity or 0.0))
-            running_value -= consumed_qty * current_avg_cost
-            running_qty -= consumed_qty
-        
-        # --- NEW: Handle internal consumptions ---
-        elif isinstance(trx, InventoryConsumption):
-            consumed_qty = Decimal(str(trx.quantity_consumed))
-            # Use the pre-calculated cost stored at the time of consumption
-            running_value -= trx.cost_at_consumption
-            running_qty -= consumed_qty
-            
-    return {'quantity': running_qty, 'value': running_value}
-
-
-def recalculate_cost_history_for_product(product_id: int, start_datetime: timezone.datetime):
-    """
-    Recalculates the entire cost and consumption history for a product from a specific point in time.
-    MODIFIED to only use RELEASED logs and their release_timestamp.
-    """
-    with transaction.atomic():
-        product = Product.objects.select_for_update().get(pk=product_id)
-        logger.info(f"Starting cost recalculation for '{product.name}' from {start_datetime.date()}...")
-        
-        state = get_inventory_state_at_datetime(product_id, start_datetime)
-        running_qty = state['quantity']
-        running_value = state['value']
-
-        # --- MODIFIED: Filter by status and use release_timestamp ---
-        logs = InventoryLog.objects.filter(
-            product_id=product_id, 
-            status=InventoryLog.Status.RELEASED,
-            release_timestamp__gte=start_datetime
-        )
-        consumptions = BatchItem.objects.filter(primitive_product_id=product_id, batch__creation_date__gte=start_datetime)
-        
-        returns = ProductionReturn.objects.select_related('source_log').filter(
-            product_id=product_id, 
-            return_date__gte=start_datetime
-        )
-        
-        transactions = sorted(
-            list(logs) + list(consumptions) + list(returns),
-            key=lambda x: (
-                # --- MODIFIED: Use release_timestamp for sorting ---
-                x.release_timestamp if isinstance(x, InventoryLog) else
-                x.batch.creation_date if isinstance(x, BatchItem) else
-                x.return_date,
-                1 if isinstance(x, InventoryLog) else 2 if isinstance(x, ProductionReturn) else 3
-            )
-        )
-        
-        items_to_update = []
-        
-        for trx in transactions:
-            current_avg_cost = (running_value / running_qty) if running_qty > 0 else Decimal('0.0')
-
-            if isinstance(trx, InventoryLog):
-                incoming_qty = Decimal(str(trx.quantity))
-                incoming_price = trx.unit_price or Decimal('0.0')
-                running_value += incoming_qty * incoming_price
-                running_qty += incoming_qty
-            
-            elif isinstance(trx, ProductionReturn):
-                return_qty = Decimal(str(trx.quantity))
-                cost_of_return = Decimal('0.0')
-                if trx.source_log and trx.source_log.unit_price is not None:
-                    cost_of_return = trx.source_log.unit_price
-                else:
-                    cost_of_return = current_avg_cost
-                
-                running_value += return_qty * cost_of_return
-                running_qty += return_qty
-            
-            elif isinstance(trx, BatchItem):
-                new_cost = current_avg_cost.quantize(Decimal('0.001'), rounding=ROUND_HALF_UP)
-                if trx.cost_at_consumption != new_cost:
-                    trx.cost_at_consumption = new_cost
-                    items_to_update.append(trx)
-                
-                consumed_qty = Decimal(str(trx.actual_quantity or 0.0))
-                running_value -= consumed_qty * new_cost
-                running_qty -= consumed_qty
-
-        if items_to_update:
-            BatchItem.objects.bulk_update(items_to_update, ['cost_at_consumption'])
-            logger.info(f"Updated cost_at_consumption for {len(items_to_update)} batch items of '{product.name}'.")
-
-        final_avg_cost = (running_value / running_qty) if running_qty > 0 else Decimal('0.0')
-        product.moving_average_cost = final_avg_cost.quantize(Decimal('0.001'), rounding=ROUND_HALF_UP)
-        product.save(update_fields=['moving_average_cost'])
-        logger.info(f"Finished recalculating cost history for '{product.name}'. New MAC: {product.moving_average_cost}")

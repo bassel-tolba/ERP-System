@@ -4,4 +4,6 @@
 
 {% block content %}
   {% include "inventory/partials/purchase_order_create_content.html" %}
+
+  {{ products|json_script:"products-data" }}
 {% endblock content %}

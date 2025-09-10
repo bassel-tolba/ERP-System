@@ -1,5 +1,3 @@
-
-
 <!-- gipcco_project/inventory/templates/inventory/partials/dashboard_content.html -->
 
 {% load static %}
@@ -79,20 +77,38 @@
               {% endfor %}
             </select>
           </div>
+          
           <div class="row g-3">
-            <div class="col-md-6 mb-3">
+            <div class="col-12 mb-3">
               <label for="quantity" class="form-label fw-bold">الكمية المستلمة</label>
               <input
                 type="number" step="any" class="form-control form-control-lg"
                 id="quantity" name="quantity" required />
             </div>
-            <div class="col-md-6 mb-3">
-                <label for="unit_price" class="form-label fw-bold">سعر الوحدة</label>
-                <input type="number" step="0.001" class="form-control form-control-lg"
-                    id="unit_price" name="unit_price" required placeholder="0.000"/>
-            </div>
           </div>
           
+          <!-- Manual Price fields, hidden when receiving against PO -->
+          <div id="manual-price-container" class="mb-3">
+              <div class="row g-3">
+                  <div class="col-md-4">
+                      <label for="base_unit_price" class="form-label fw-bold">سعر الوحدة (قبل الضريبة)</label>
+                      <input type="number" step="0.001" class="form-control" id="base_unit_price" name="base_unit_price" placeholder="0.000" required/>
+                  </div>
+                  <div class="col-md-4">
+                      <label for="vat_amount" class="form-label fw-bold">إجمالي مبلغ ضريبة ق.م.</label>
+                      <input type="number" step="0.001" class="form-control" id="vat_amount" name="vat_amount" placeholder="0.000" required/>
+                  </div>
+                  <div class="col-md-4">
+                      <label for="vat_treatment" class="form-label fw-bold">معالجة الضريبة</label>
+                      <select class="form-select" id="vat_treatment" name="vat_treatment">
+                          {% for value, display in vat_treatment_choices %}
+                          <option value="{{ value }}">{{ display }}</option>
+                          {% endfor %}
+                      </select>
+                  </div>
+              </div>
+          </div>
+
           <div class="mb-3">
             <label for="tags" class="form-label fw-bold">الوسوم</label>
             <select class="form-select form-select-lg" id="tags" name="tags" multiple>

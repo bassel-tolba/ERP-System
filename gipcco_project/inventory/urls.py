@@ -10,7 +10,7 @@ from .views.batches import batches, create_batch, view_batch, delete_batch, add_
 from .views.production_returns import production_returns, delete_production_return
 from .views.opening_balances import opening_balances, edit_opening_balance, delete_opening_balance
 # --- MODIFIED: Import new report views ---
-from .views.analysis_ledger_visuals import analysis, ledger, visuals, print_ledger, stock_valuation, sales_margin_analysis, profit_and_loss_statement
+from .views.analysis_ledger_visuals import analysis, ledger, visuals, print_ledger, stock_valuation
 from .views.purchase_orders import purchase_orders, create_purchase_order, view_purchase_order, edit_purchase_order, delete_purchase_order
 # --- MODIFIED: Use aliases for release_from_quarantine to avoid name collision ---
 from .views.finished_products import finished_goods_status, receive_finished_product, view_finished_product, release_from_quarantine as release_fg_from_quarantine
@@ -18,8 +18,10 @@ from .views.finished_products import finished_goods_status, receive_finished_pro
 from .views.api import get_used_qc_sources, api_batch_details, get_product_tags, api_get_open_pos_for_supplier, api_get_po_items, api_get_full_batch_analysis, api_get_sellable_stock, api_get_available_stock
 # --- MODIFIED: Import new API views and sales views ---
 from .views.sales import customers, edit_customer, delete_customer, sales_orders, create_sales_order, view_sales_order, dispatch_from_sales_order
-# --- NEW: Import new expense views ---
+# --- MODIFIED: Import new expense views ---
 from .views.expenses import expenses_dashboard, manage_expenses, edit_inventory_consumption, delete_inventory_consumption, edit_general_expense, delete_general_expense
+# --- MODIFIED: Import new financial report views ---
+from .views.financial_reports import trial_balance, profit_and_loss_statement, batch_production_variance_report
 
 
 app_name = 'inventory'
@@ -98,17 +100,18 @@ urlpatterns = [
     path('stock_valuation/', stock_valuation, name='stock_valuation'),
     path('visuals/', visuals, name='visuals'),
 
-    # --- NEW: Expense & Reporting Routes ---
+    # --- MODIFIED: Expense & Reporting Routes ---
     path('expenses/', expenses_dashboard, name='expenses_dashboard'),
-    # --- NEW EXPENSE MANAGEMENT URLS ---
     path('expenses/manage/', manage_expenses, name='manage_expenses'),
     path('expenses/consumption/edit/<int:pk>/', edit_inventory_consumption, name='edit_inventory_consumption'),
     path('expenses/consumption/delete/<int:pk>/', delete_inventory_consumption, name='delete_inventory_consumption'),
     path('expenses/general/edit/<int:pk>/', edit_general_expense, name='edit_general_expense'),
     path('expenses/general/delete/<int:pk>/', delete_general_expense, name='delete_general_expense'),
-    # --- END NEW ---
-    path('reports/sales-margin/', sales_margin_analysis, name='sales_margin_analysis'),
+    
+    # --- NEW & CORRECTED: Financial Reporting Routes from the General Ledger ---
+    path('reports/trial-balance/', trial_balance, name='trial_balance'),
     path('reports/p-and-l/', profit_and_loss_statement, name='profit_and_loss_statement'),
+    path('reports/batch-variance/', batch_production_variance_report, name='batch_production_variance_report'),
     
     # API Routes
     path('api/get_used_qc_sources/<int:product_pk>/', get_used_qc_sources, name='api_get_used_qc_sources'),

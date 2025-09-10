@@ -1,0 +1,10 @@
+{% extends 'inventory/layout.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% translate "Batch Production Variance Report" %}{% endblock %}
+
+{% block content %}
+    {# This template now just loads the dynamic content partial, ensuring consistency with the site's architecture #}
+    {% include 'inventory/partials/reports/batch_production_variance_report_content.html' %}
+{% endblock %}

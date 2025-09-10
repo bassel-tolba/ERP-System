@@ -21,6 +21,7 @@
     />
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/print.css' %}" media="print">
     <!-- Favicon -->
     <link
       rel="icon"
@@ -234,7 +235,7 @@
               </ul>
             </li>
 
-            <!-- ===== NEW: EXPENSES & REPORTS DROPDOWN ===== -->
+            <!-- ===== NEW: EXPENSES & REPORTS DROPDOWN (MODIFIED) ===== -->
             <li class="nav-item dropdown">
               <a
                 class="nav-link dropdown-toggle {% if active_page == 'expenses_reports' %}active{% endif %}"
@@ -245,30 +246,36 @@
               >
                 <i class="bi bi-calculator-fill me-2"></i>المصروفات والتقارير
               </a>
-              <ul class="dropdown-menu">
+              <ul class="dropdown-menu" aria-labelledby="expensesDropdown">
                  <li>
                   <a class="dropdown-item" href="{% url 'inventory:expenses_dashboard' %}">
                     <i class="bi bi-pencil-square me-2"></i>تسجيل المصروفات
                   </a>
                 </li>
-                <!-- ===== NEW LINK ===== -->
                 <li>
                   <a class="dropdown-item" href="{% url 'inventory:manage_expenses' %}">
                     <i class="bi bi-pencil-fill me-2"></i>إدارة المصروفات
                   </a>
                 </li>
-                <!-- ===== END NEW ===== -->
                 <li><hr class="dropdown-divider" /></li>
-                <li>
-                  <a class="dropdown-item" href="{% url 'inventory:sales_margin_analysis' %}">
-                    تحليل المبيعات والهامش
-                  </a>
-                </li>
+                
+                <!-- ===== MODIFICATION START ===== -->
                 <li>
                   <a class="dropdown-item" href="{% url 'inventory:profit_and_loss_statement' %}">
-                    قائمة الدخل (الأرباح والخسائر)
+                    <i class="bi bi-graph-up me-2"></i>قائمة الدخل (P&L)
                   </a>
                 </li>
+                <li>
+                  <a class="dropdown-item" href="{% url 'inventory:trial_balance' %}">
+                    <i class="bi bi-balance-scale me-2"></i>ميزان المراجعة
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="{% url 'inventory:batch_production_variance_report' %}">
+                    <i class="bi bi-bar-chart-line me-2"></i>تقرير تباين دفعات الإنتاج
+                  </a>
+                </li>
+                <!-- ===== MODIFICATION END ===== -->
               </ul>
             </li>
             <!-- ===== END NEW ===== -->
@@ -368,8 +375,8 @@
     <script src="{% static 'js/flatpickr.min.js' %}"></script>
     <script src="{% static 'js/flatpickr.l10n.ar.js' %}"></script>
     <script src="{% static 'js/tom-select.complete.min.js' %}"></script>
-    
-    <!-- MASTER JAVASCRIPT (Unchanged) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- MASTER JAVASCRIPT (UPDATED) -->
     <script>
                   document.addEventListener("DOMContentLoaded", function () {
                     // --- Theme Switcher & Seasonal Logic (Unchanged from your original file) ---
@@ -501,8 +508,8 @@
 
                     const contentContainer = document.getElementById("page-content");
 
-                    function getDataFromIsland(islandId) {
-                      const island = document.getElementById(islandId);
+                    function getDataFromIsland(islandId, container = document) {
+                      const island = container.querySelector(`#${islandId}`);
                       if (!island || !island.textContent) return null;
                       try {
                         return JSON.parse(island.textContent);
@@ -512,10 +519,39 @@
                       }
                     }
 
+                    // --- Core Dynamic Loading Functions ---
+                    async function loadContent(url, pushState = true) {
+                      try {
+                        contentContainer.style.transition = "opacity 0.2s ease-in-out";
+                        contentContainer.style.opacity = "0.5";
+                        const response = await fetch(url, {
+                          headers: { "X-Partial-Request": "true" },
+                        });
+
+                        if (!response.ok) {
+                          window.location.href = url;
+                          return;
+                        }
+                        const html = await response.text();
+                        contentContainer.innerHTML = html;
+                        contentContainer.style.opacity = "1";
+                        if (pushState) {
+                          history.pushState({ path: url }, "", url);
+                        }
+                        const newTitle = contentContainer.querySelector("h1")?.innerText;
+                        document.title = newTitle ? `${newTitle} - GIPCCO` : "GIPCCO Warehouse System";
+                        initializePluginsInContent(contentContainer); // Pass container for targeted initialization
+                        updateActiveNav(url);
+                      } catch (error) {
+                        console.error("Failed to load dynamic content:", error);
+                        window.location.href = url;
+                      }
+                    }
                     // =========================================================
                     //  MASTER PLUGIN INITIALIZER FUNCTION
                     // =========================================================
                     function initializePluginsInContent(container = document) {
+                        console.log("%c[DEBUG] initializePluginsInContent: Running on container:", "color: green;", container);
 
                         // 1. Generic Initializers
                         flatpickr(container.querySelectorAll(".datepicker"), { dateFormat: "Y-m-d", locale: "ar" });
@@ -584,8 +620,9 @@
                                 });
                             }
                         }
+                        
                         // =========================================================
-                        //  **FIXED AND FINAL**: Logic for records.html (Edit Record Modal)
+                        //  **MODIFIED**: Logic for records.html (Edit Record Modal)
                         // =========================================================
                         const editModal = document.getElementById("editRecordModal");
                         if (editModal && !editModal.dataset.poLogicInitialized) {
@@ -596,7 +633,9 @@
                             const mainProductSelect = new TomSelect('#editProductId');
                             const mainCompanySelect = new TomSelect('#editCompanyId');
                             const manualPriceContainer = document.getElementById('edit-manual-price-container');
-                            const unitPriceInput = document.getElementById('editUnitPrice');
+                            const basePriceInput = document.getElementById('editBaseUnitPrice');
+                            const vatAmountInput = document.getElementById('editVatAmount');
+                            const vatTreatmentSelect = document.getElementById('editVatTreatment');
 
                             const linkPoCheck = document.getElementById('editLinkToPoCheck');
                             const poFieldsContainer = document.getElementById('edit-po-fields-container');
@@ -620,17 +659,22 @@
                                 } catch (error) { console.error('Error fetching modal tags:', error); }
                             };
 
+                            // --- Helper function to toggle fields and required status ---
                             const togglePoFields = (isLinked) => {
                                 if (isLinked) {
                                     poFieldsContainer.style.display = 'block';
                                     manualPriceContainer.style.display = 'none';
-                                    unitPriceInput.required = false;
+                                    // --- FIX: Make manual fields NOT required ---
+                                    basePriceInput.required = false;
+                                    vatAmountInput.required = false;
                                     mainProductSelect.lock();
                                     mainCompanySelect.lock();
                                 } else {
                                     poFieldsContainer.style.display = 'none';
                                     manualPriceContainer.style.display = 'block';
-                                    unitPriceInput.required = true;
+                                    // --- FIX: Make manual fields REQUIRED ---
+                                    basePriceInput.required = true;
+                                    vatAmountInput.required = true;
                                     mainProductSelect.unlock();
                                     mainCompanySelect.unlock();
                                     poSupplierSelect.clear();
@@ -698,9 +742,10 @@
                                 
                                 document.getElementById("editRecordForm").action = `/records/edit/${logId}/`;
                                 document.getElementById("editQuantity").value = button.getAttribute("data-quantity");
-                                document.getElementById("editQcNo").value = button.getAttribute("data-qc-no");
                                 document.getElementById("editEntryDate").value = button.getAttribute("data-entry-date");
-                                unitPriceInput.value = button.getAttribute("data-unit-price");
+                                basePriceInput.value = button.getAttribute("data-base-unit-price");
+                                vatAmountInput.value = button.getAttribute("data-vat-amount");
+                                vatTreatmentSelect.value = button.getAttribute("data-vat-treatment");
 
                                 mainProductSelect.setValue(productId, true);
                                 mainCompanySelect.setValue(companyId, true);
@@ -738,7 +783,7 @@
                         }
 
                       // =========================================================================
-                      //  FINAL FIX & DEBUGGED: Logic for dashboard.html (PO Workflow)
+                      //  **MODIFIED** Logic for dashboard.html (PO Workflow)
                       // =========================================================================
                       const poCheck = container.querySelector('#receiveAgainstPoCheck');
                       if (poCheck && !poCheck.dataset.poLogicInitialized) {
@@ -747,13 +792,15 @@
 
                           try {
                               const poContainer = container.querySelector('#po-fields-container');
+                              const manualPriceContainer = container.querySelector('#manual-price-container');
                               const poSupplierSelectEl = container.querySelector('#po_supplier_id');
                               const poSelectEl = container.querySelector('#purchase_order_id');
                               const poItemSelectEl = container.querySelector('#po_item_id');
                               const mainProductSelect = container.querySelector('#product_id').tomselect;
                               const mainCompanySelect = container.querySelector('#company_id').tomselect;
                               const quantityInput = container.querySelector('#quantity');
-                              const priceInput = container.querySelector('#unit_price');
+                              const basePriceInput = container.querySelector('#base_unit_price');
+                              const vatAmountInput = container.querySelector('#vat_amount'); // <-- ADD THIS LINE
                               
                               console.log('[DEBUG] 2. All required elements found.');
 
@@ -762,23 +809,23 @@
                               const poItemSelect = poItemSelectEl.tomselect;
 
                               poCheck.addEventListener('change', function() {
-                                  console.log(`[DEBUG] EVENT: PO Checkbox changed. Is checked: ${this.checked}`);
                                   if (this.checked) {
                                       poContainer.style.display = 'block';
+                                      manualPriceContainer.style.display = 'none';
+                                      // --- FIX: Make manual fields NOT required ---
+                                      basePriceInput.required = false;
+                                      vatAmountInput.required = false;
                                       mainProductSelect.lock();
                                       mainCompanySelect.lock();
-                                      priceInput.setAttribute('readonly', true);
-                                      priceInput.value = '0.000'; 
                                   } else {
                                       poContainer.style.display = 'none';
+                                      manualPriceContainer.style.display = 'block';
+                                      // --- FIX: Make manual fields REQUIRED ---
+                                      basePriceInput.required = true;
+                                      vatAmountInput.required = true;
                                       mainProductSelect.unlock();
                                       mainCompanySelect.unlock();
-                                      priceInput.removeAttribute('readonly');
-                                      mainProductSelect.clear();
-                                      mainCompanySelect.clear();
-                                      quantityInput.value = '';
-                                      priceInput.value = '';
-                                      poSupplierSelect.clear();
+                                      poSupplierSelectEl.tomselect.clear();
                                   }
                               });
                               
@@ -792,32 +839,15 @@
 
                                   if (supplierId) {
                                       const apiUrl = `/api/supplier/${supplierId}/open_pos/`;
-                                      console.log(`[DEBUG] Manually fetching POs from: ${apiUrl}`);
-                                      
-                                      poSelect.addOption({value: '', text: 'جاري تحميل أوامر الشراء...'});
-                                      poSelect.setValue('', true); // silent select
-
                                       fetch(apiUrl)
                                         .then(res => res.json())
                                         .then(data => {
-                                            console.log('[DEBUG] POs received:', data);
-                                            poSelect.clear(); // Clear loading message
-                                            poSelect.enable();
+                                            poSelect.clear(); poSelect.enable();
                                             if (data.length > 0) {
-                                                data.forEach(po => {
-                                                    poSelect.addOption({value: po.id, text: `${po.po_number} (${po.order_date})`});
-                                                });
+                                                data.forEach(po => poSelect.addOption({value: po.id, text: `${po.po_number} (${po.order_date})`}));
                                             } else {
                                                 poSelect.addOption({value: '', text: 'لا توجد أوامر شراء مفتوحة'});
-                                                poSelect.setValue('', true);
                                             }
-                                        })
-                                        .catch(err => {
-                                            console.error('[DEBUG] FAILED to fetch POs:', err);
-                                            poSelect.clear();
-                                            poSelect.enable();
-                                            poSelect.addOption({value: '', text: 'خطأ في تحميل البيانات'});
-                                            poSelect.setValue('', true);
                                         });
                                   }
                               });
@@ -829,17 +859,10 @@
                                   
                                   if (poId) {
                                       const apiUrl = `/api/po/${poId}/items/`;
-                                      console.log(`[DEBUG] Manually fetching PO Items from: ${apiUrl}`);
-                                      
-                                      poItemSelect.addOption({value: '', text: 'جاري تحميل المواد...'});
-                                      poItemSelect.setValue('', true);
-
                                       fetch(apiUrl)
                                         .then(res => res.json())
                                         .then(data => {
-                                            console.log('[DEBUG] PO Items received:', data);
-                                            poItemSelect.clear();
-                                            poItemSelect.enable();
+                                            poItemSelect.clear(); poItemSelect.enable();
                                             if (data.length > 0) {
                                                 data.forEach(item => {
                                                     poItemSelect.addOption({
@@ -847,20 +870,13 @@
                                                         text: `${item.product_name} | متبقي: ${item.quantity_remaining}`,
                                                         'data-product-id': item.product_id,
                                                         'data-quantity': item.quantity_remaining,
-                                                        'data-price': item.unit_price,
+                                                        // ASSUMING API IS FIXED TO RETURN base_price_per_unit
+                                                        'data-base-price': item.base_price_per_unit, 
                                                     });
                                                 });
                                             } else {
                                                 poItemSelect.addOption({value: '', text: 'لا توجد مواد متبقية'});
-                                                poItemSelect.setValue('', true);
                                             }
-                                        })
-                                        .catch(err => {
-                                            console.error('[DEBUG] FAILED to fetch PO Items:', err);
-                                            poItemSelect.clear();
-                                            poItemSelect.enable();
-                                            poItemSelect.addOption({value: '', text: 'خطأ في تحميل البيانات'});
-                                            poItemSelect.setValue('', true);
                                         });
                                   }
                               });
@@ -871,23 +887,17 @@
                                   const selectedOption = this.options[itemId];
                                   if (itemId && selectedOption) {
                                       const productId = selectedOption['data-product-id'];
-                                      console.log('[DEBUG] Populating form with data:', selectedOption);
-                                      
                                       mainProductSelect.setValue(productId, true); 
                                       mainCompanySelect.setValue(poSupplierSelect.getValue(), true);
                                       quantityInput.value = selectedOption['data-quantity'];
-                                      priceInput.value = selectedOption['data-price'];
-
+                                      // The backend calculates price from the PO item, so we don't need to set it here.
                                       if (window.updateTagsForProduct) {
-                                          console.log(`[DEBUG] Triggering tag update for product ID: ${productId}`);
                                           window.updateTagsForProduct(productId);
                                       }
                                   } else {
-                                      console.log('[DEBUG] PO Item cleared or not found.');
                                       mainProductSelect.clear();
                                       mainCompanySelect.clear();
                                       quantityInput.value = '';
-                                      priceInput.value = '0.000';
                                   }
                               });
                               
@@ -904,11 +914,11 @@
                         console.log("Initializing create_batch.html dynamic logic...");
 
                         // Use the reliable data island helper function
-                        const templateData = getDataFromIsland("template-data") || {};
+                        const templateData = getDataFromIsland("template-data", container) || {};
                         const availableStockData =
-                          getDataFromIsland("available-stock-data") || {};
+                          getDataFromIsland("available-stock-data", container) || {};
                         const allPrimitiveProducts =
-                          getDataFromIsland("primitive-products-data") || [];
+                          getDataFromIsland("primitive-products-data", container) || [];
 
                         const templateSelect = document.getElementById("template_id");
                         const fromInput = document.getElementById("batch_number_from");
@@ -1399,11 +1409,11 @@
                         const addItemBtn =
                           addTemplateModalEl.querySelector("#add-item-btn");
                         const primitiveProducts =
-                          getDataFromIsland("primitive-products-data") || [];
+                          getDataFromIsland("primitive-products-data", container) || [];
                         const addTemplateModal = new bootstrap.Modal(addTemplateModalEl);
                         const sourceTemplate =
-                          getDataFromIsland("source-template-data") || null;
-                        const sourceItems = getDataFromIsland("source-items-data") || [];
+                          getDataFromIsland("source-template-data", container) || null;
+                        const sourceItems = getDataFromIsland("source-items-data", container) || [];
                         function createItemRow(productId = "", quantity = "") {
                           const row = document.createElement("div");
                           row.className =
@@ -1453,10 +1463,10 @@
                         addItemBtn.addEventListener("click", () => createItemRow());
                         addTemplateModalEl.addEventListener("show.bs.modal", () => {
                           container.innerHTML = "";
-                          let isCopying = getDataFromIsland("source-template-data") != null; // Check if we should be in copy mode
+                          let isCopying = getDataFromIsland("source-template-data", container) != null; // Check if we should be in copy mode
                           if (isCopying) {
-                            const sourceTpl = getDataFromIsland("source-template-data");
-                            const sourceItms = getDataFromIsland("source-items-data");
+                            const sourceTpl = getDataFromIsland("source-template-data", container);
+                            const sourceItms = getDataFromIsland("source-items-data", container) || [];
                             addTemplateModalEl.querySelector(
                               "#addTemplateModalLabel"
                             ).innerText = "إنشاء قالب جديد من نسخة";
@@ -1579,7 +1589,6 @@
                                     const data = await response.json();
                                     if (response.ok) {
                                         mainEl.querySelector('#ba-so-num').textContent = data.shop_order_number;
-                                        // ... (rest of the population logic is correct)
                                         mainEl.querySelector('#ba-batch-num').textContent = data.batch_number;
                                         mainEl.querySelector('#ba-date').textContent = new Date(data.creation_date).toLocaleDateString('en-CA');
                                         mainEl.querySelector('#ba-final-prod').textContent = data.final_product_name;
@@ -1748,34 +1757,96 @@
                             }
 
                             // A. Raw Material Charts
-                            const inOutData = getDataFromIsland("data-for-chart-1");
+                            const inOutData = getDataFromIsland("data-for-chart-1", container);
                             if (inOutData && inOutData.labels.length > 0) new Chart(document.getElementById("inventoryFlowChart"), { type: "line", data: inOutData, options: { responsive: true, maintainAspectRatio: false, interaction: { mode: "index", intersect: false } }}); else showNoDataMessage("inventoryFlowChart");
-                            const consumptionData = getDataFromIsland("data-for-chart-2");
+                            const consumptionData = getDataFromIsland("data-for-chart-2", container);
                             if (consumptionData && consumptionData.labels.length > 0) { consumptionData.datasets[0].backgroundColor = chartColors; new Chart(document.getElementById("consumptionChart"), { type: "doughnut", data: consumptionData, options: { responsive: true, maintainAspectRatio: false }}); } else showNoDataMessage("consumptionChart");
-                            const varianceData = getDataFromIsland("data-for-chart-3");
+                            const varianceData = getDataFromIsland("data-for-chart-3", container);
                             if (varianceData && varianceData.labels.length > 0) { varianceData.datasets[0].backgroundColor = varianceData.datasets[0].data.map(v => v > 0 ? "rgba(220, 53, 69, 0.7)" : "rgba(25, 135, 84, 0.7)"); new Chart(document.getElementById("varianceChart"), { type: "bar", data: varianceData, options: { responsive: true, maintainAspectRatio: false }}); } else showNoDataMessage("varianceChart");
-                            const supplierData = getDataFromIsland("data-for-chart-4");
+                            const supplierData = getDataFromIsland("data-for-chart-4", container);
                             if (supplierData && supplierData.labels.length > 0) { supplierData.datasets[0].backgroundColor = chartColors.slice().reverse(); new Chart(document.getElementById("supplierChart"), { type: "pie", data: supplierData, options: { responsive: true, maintainAspectRatio: false }}); } else showNoDataMessage("supplierChart");
 
                             // B. Finished Product Charts
-                            const prodVolData = getDataFromIsland("fp-data-for-chart-1");
+                            const prodVolData = getDataFromIsland("fp-data-for-chart-1", container);
                             if (prodVolData && prodVolData.labels.length > 0) new Chart(document.getElementById("productionVolumeChart"), { type: "line", data: prodVolData, options: { responsive: true, maintainAspectRatio: false }}); else showNoDataMessage("productionVolumeChart");
-                            const costTrendData = getDataFromIsland("fp-data-for-chart-2");
+                            const costTrendData = getDataFromIsland("fp-data-for-chart-2", container);
                             if (costTrendData && costTrendData.labels.length > 0) new Chart(document.getElementById("costTrendChart"), { type: "line", data: costTrendData, options: { responsive: true, maintainAspectRatio: false }}); else showNoDataMessage("costTrendChart");
-                            const marketData = getDataFromIsland("fp-data-for-chart-3");
+                            const marketData = getDataFromIsland("fp-data-for-chart-3", container);
                             if (marketData && marketData.labels.length > 0) { marketData.datasets[0].backgroundColor = ['#0d6efd', '#fd7e14']; new Chart(document.getElementById("marketShareChart"), { type: "pie", data: marketData, options: { responsive: true, maintainAspectRatio: false }}); } else showNoDataMessage("marketShareChart");
-                            const mixData = getDataFromIsland("fp-data-for-chart-4");
+                            const mixData = getDataFromIsland("fp-data-for-chart-4", container);
                             if (mixData && mixData.labels.length > 0) { mixData.datasets[0].backgroundColor = chartColors; new Chart(document.getElementById("productMixChart"), { type: "bar", data: mixData, options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y' }}); } else showNoDataMessage("productMixChart");
 
                             // C. NEW: Expense Analysis Charts
-                            const deptData = getDataFromIsland("exp-data-for-chart-1");
+                            const deptData = getDataFromIsland("exp-data-for-chart-1", container);
                             if (deptData && deptData.labels.length > 0) { deptData.datasets[0].backgroundColor = chartColors; new Chart(document.getElementById("departmentExpenseChart"), { type: "pie", data: deptData, options: { responsive: true, maintainAspectRatio: false }}); } else showNoDataMessage("departmentExpenseChart");
-                            const catTrendData = getDataFromIsland("exp-data-for-chart-2");
+                            const catTrendData = getDataFromIsland("exp-data-for-chart-2", container);
                             if (catTrendData && catTrendData.labels.length > 0) new Chart(document.getElementById("categoryTrendChart"), { type: "line", data: catTrendData, options: { responsive: true, maintainAspectRatio: false }}); else showNoDataMessage("categoryTrendChart");
-                            const topItemsData = getDataFromIsland("exp-data-for-chart-3");
+                            const topItemsData = getDataFromIsland("exp-data-for-chart-3", container);
                             if (topItemsData && topItemsData.labels.length > 0) { topItemsData.datasets[0].backgroundColor = chartColors.slice(0,5); new Chart(document.getElementById("topItemsChart"), { type: "bar", data: topItemsData, options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y' }}); } else showNoDataMessage("topItemsChart");
                         }
                         
+                        // =========================================================================
+                        //  NEW: LOGIC FOR BATCH PRODUCTION VARIANCE REPORT (ROBUST CHECK)
+                        // =========================================================================
+                        const batchVarianceForm = container.querySelector('#batchVarianceForm');
+                        if (batchVarianceForm) {
+                            console.log("%c[DEBUG] Batch Variance Report: Found form. Initializing charts.", "color: blue; font-weight: bold;");
+                            const chartData = getDataFromIsland('chart-data', container);
+                            console.log("[DEBUG] Batch Variance Report: Raw data from island:", chartData);
+
+                            if (chartData && chartData.labels && chartData.labels.length > 0) {
+                                console.log("%c[DEBUG] Batch Variance Report: Chart data is valid. Proceeding to create charts.", "color: green;");
+                                
+                                // --- Quantity Variance Chart ---
+                                try {
+                                    const qtyCtx = container.querySelector('#quantityVarianceChart').getContext('2d');
+                                    new Chart(qtyCtx, {
+                                        type: 'bar',
+                                        data: {
+                                            labels: chartData.labels,
+                                            datasets: [{
+                                                label: 'Quantity Variance',
+                                                data: chartData.variance_qty_data,
+                                                backgroundColor: chartData.variance_qty_data.map(v => v > 0 ? 'rgba(255, 99, 132, 0.5)' : 'rgba(75, 192, 192, 0.5)'),
+                                                borderColor: chartData.variance_qty_data.map(v => v > 0 ? 'rgba(255, 99, 132, 1)' : 'rgba(75, 192, 192, 1)'),
+                                                borderWidth: 1
+                                            }]
+                                        },
+                                        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, title: { display: true, text: 'Quantity' } } } }
+                                    });
+                                    console.log("[DEBUG] Batch Variance Report: Quantity Variance Chart created successfully.");
+                                } catch (e) {
+                                    console.error("[DEBUG] Batch Variance Report: Error creating Quantity Variance Chart:", e);
+                                }
+
+                                // --- Cost Variance Chart ---
+                                try {
+                                    const costCtx = container.querySelector('#costVarianceChart').getContext('2d');
+                                    new Chart(costCtx, {
+                                        type: 'bar',
+                                        data: {
+                                            labels: chartData.labels,
+                                            datasets: [{
+                                                label: 'Cost Variance',
+                                                data: chartData.variance_cost_data,
+                                                backgroundColor: chartData.variance_cost_data.map(v => v > 0 ? 'rgba(255, 99, 132, 0.5)' : 'rgba(75, 192, 192, 0.5)'),
+                                                borderColor: chartData.variance_cost_data.map(v => v > 0 ? 'rgba(255, 99, 132, 1)' : 'rgba(75, 192, 192, 1)'),
+                                                borderWidth: 1
+                                            }]
+                                        },
+                                        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, title: { display: true, text: 'Cost' } } } }
+                                    });
+                                     console.log("[DEBUG] Batch Variance Report: Cost Variance Chart created successfully.");
+                                } catch(e) {
+                                    console.error("[DEBUG] Batch Variance Report: Error creating Cost Variance Chart:", e);
+                                }
+
+                            } else {
+                                console.warn("%c[DEBUG] Batch Variance Report: Chart data is missing, empty, or invalid.", "color: orange;");
+                            }
+                        }
+
+
                 // =========================================================================
                 //  NEW LOGIC FOR MANAGE EXPENSES PAGE
                 // =========================================================================
@@ -1882,6 +1953,7 @@
                         const response = await fetch(url, {
                           headers: { "X-Partial-Request": "true" },
                         });
+
                         if (!response.ok) {
                           window.location.href = url;
                           return;

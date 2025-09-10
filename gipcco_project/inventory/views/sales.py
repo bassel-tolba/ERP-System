@@ -13,7 +13,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-from ..models import Customer, SalesOrder, SalesOrderItem, FinishedProductReceipt, FinishedProductDispatch
+from ..models import Customer, SalesOrder, SalesOrderItem, FinishedProductReceipt, FinishedProductDispatch, Product
 
 
 # --- Customer CRUD Views ---
@@ -95,11 +95,13 @@ def create_sales_order(request: HttpRequest) -> HttpResponse:
         order_date_str = request.POST.get('order_date')
         so_number = request.POST.get('so_number')
         
+        # --- Use new field names from the corrected form ---
         receipt_ids = request.POST.getlist('receipt_id')
         quantities = request.POST.getlist('quantity')
-        unit_prices = request.POST.getlist('unit_price')
+        base_prices = request.POST.getlist('base_price_per_unit')
+        vat_rates = request.POST.getlist('vat_rate')
 
-        if not all([customer_id, order_date_str, so_number, receipt_ids, quantities, unit_prices]):
+        if not all([customer_id, order_date_str, so_number, receipt_ids, quantities, base_prices, vat_rates]):
             messages.error(request, "الرجاء تعبئة جميع الحقول لإنشاء أمر البيع.")
             return redirect('inventory:create_sales_order')
 
@@ -116,14 +118,16 @@ def create_sales_order(request: HttpRequest) -> HttpResponse:
                 )
                 
                 items_to_create = []
-                for receipt_id, qty, price in zip(receipt_ids, quantities, unit_prices):
-                    if receipt_id and qty and price:
+                # --- Loop through new form fields ---
+                for receipt_id, qty, price, vat in zip(receipt_ids, quantities, base_prices, vat_rates):
+                    if receipt_id and qty and price and vat is not None:
                         items_to_create.append(
                             SalesOrderItem(
                                 sales_order=so,
                                 finished_product_id=receipt_id,
                                 quantity_ordered=float(qty),
-                                unit_price=Decimal(price)
+                                base_price_per_unit=Decimal(price),
+                                vat_rate=Decimal(vat) / 100 # Convert from percentage
                             )
                         )
                 SalesOrderItem.objects.bulk_create(items_to_create)
@@ -154,7 +158,6 @@ def view_sales_order(request: HttpRequest, pk: int) -> HttpResponse:
         total_dispatched=Coalesce(Sum('dispatches__quantity'), 0.0, output_field=FloatField())
     )
 
-    # Calculate remaining quantities and overall status
     total_remaining = 0
     for item in so_items:
         item.quantity_remaining = item.quantity_ordered - item.total_dispatched
@@ -225,16 +228,18 @@ def dispatch_from_sales_order(request: HttpRequest, pk: int) -> HttpResponse:
                 messages.warning(request, "لم يتم تحديد كميات للصرف.")
                 return redirect('inventory:view_sales_order', pk=pk)
 
-            FinishedProductDispatch.objects.bulk_create(dispatches_to_create)
+            for dispatch in dispatches_to_create:
+                dispatch.save()
 
-            # Update SO status
             total_ordered = sum(i.quantity_ordered for i in so.items.all())
             total_dispatched_after = sum(d.quantity for d in FinishedProductDispatch.objects.filter(sales_order_item__sales_order=so))
             
             if abs(total_dispatched_after - total_ordered) < 0.001:
                 so.status = SalesOrder.Status.COMPLETED
-            else:
+            elif total_dispatched_after > 0:
                 so.status = SalesOrder.Status.PARTIALLY_SHIPPED
+            else:
+                so.status = SalesOrder.Status.PENDING
             so.save()
 
         messages.success(request, "تم تسجيل عملية الصرف بنجاح.")
@@ -243,29 +248,6 @@ def dispatch_from_sales_order(request: HttpRequest, pk: int) -> HttpResponse:
     
     return redirect('inventory:view_sales_order', pk=pk)
 
-# --- Sales API Views ---
+# --- Sales API Views (REMOVED REDUNDANT FUNCTION) ---
 
-def api_get_sellable_stock(request: HttpRequest) -> JsonResponse:
-    """API endpoint to get released, in-stock finished product batches."""
-    sellable_receipts = FinishedProductReceipt.objects.filter(
-        status=FinishedProductReceipt.Status.RELEASED
-    ).select_related(
-        'batch__template__final_product'
-    ).annotate(
-        total_dispatched=Coalesce(Sum('sales_items__dispatches__quantity'), 0.0, output_field=FloatField())
-    ).annotate(
-        quantity_available=F('total_quantity_produced') - F('total_dispatched')
-    ).filter(
-        quantity_available__gt=0.001
-    )
-
-    data = [
-        {
-            'id': receipt.id,
-            'product_name': receipt.batch.template.final_product.name,
-            'batch_number': receipt.individual_batch_number,
-            'available_qty': receipt.quantity_available,
-            'unit': receipt.batch.template.final_product.unit
-        } for receipt in sellable_receipts
-    ]
-    return JsonResponse(data, safe=False)
+# This function is now defined only in api.py to avoid duplication.

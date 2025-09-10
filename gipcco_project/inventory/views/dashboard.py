@@ -1,5 +1,5 @@
-
 # gipcco_project/inventory/views/dashboard.py
+
 import json
 from datetime import datetime
 from decimal import Decimal
@@ -12,7 +12,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from ..models import Company, InventoryLog, Product, ProductTag, PurchaseOrder, PurchaseOrderItem
-from .helpers import update_moving_average_cost, recalculate_cost_history_for_product
+from ..services.costing_service import recalculate_cost_history_for_product
 
 
 def update_po_status(po_id: int):
@@ -48,9 +48,12 @@ def index(request: HttpRequest) -> HttpResponse:
         company_id = request.POST.get('company_id')
         quantity_str = request.POST.get('quantity')
         date_str = request.POST.get('entry_date')
-        # qc_no removed from initial entry form
-        unit_price_str = request.POST.get('unit_price')
-        po_item_id = request.POST.get('po_item_id') 
+        po_item_id = request.POST.get('po_item_id')
+
+        # --- MODIFIED: Get new accounting fields ---
+        base_unit_price_str = request.POST.get('base_unit_price')
+        vat_amount_str = request.POST.get('vat_amount')
+        vat_treatment = request.POST.get('vat_treatment', InventoryLog.VatTreatment.RECOVERABLE)
 
         if not all([product_id, company_id, quantity_str, date_str]):
             messages.warning(request, 'الرجاء تعبئة جميع الحقول المطلوبة.')
@@ -61,40 +64,35 @@ def index(request: HttpRequest) -> HttpResponse:
             entry_datetime = timezone.make_aware(datetime.combine(entry_date, timezone.now().time()))
             quantity = float(quantity_str)
             
-            final_unit_price = Decimal('0.000')
-
+            # --- MODIFIED: Logic to determine price and VAT ---
             if po_item_id:
                 po_item = get_object_or_404(PurchaseOrderItem, pk=po_item_id)
-                existing_received_qty = po_item.receipts.aggregate(total=Sum('quantity'))['total'] or 0.0
-                new_total_received_qty = Decimal(str(existing_received_qty)) + Decimal(str(quantity))
-                
-                if new_total_received_qty > 0:
-                    final_unit_price = (po_item.total_price / new_total_received_qty).quantize(Decimal('0.001'))
-                
+                base_unit_price = po_item.base_price_per_unit
+                vat_amount = (po_item.base_price_per_unit * Decimal(str(quantity)) * po_item.vat_rate).quantize(Decimal('0.001'))
             else:
-                if not unit_price_str:
-                     messages.warning(request, 'الرجاء تعبئة سعر الوحدة عند الإدخال اليدوي.')
+                if not base_unit_price_str or not vat_amount_str:
+                     messages.warning(request, 'الرجاء تعبئة سعر الوحدة ومبلغ الضريبة عند الإدخال اليدوي.')
                      return redirect('inventory:index')
-                final_unit_price = Decimal(unit_price_str)
+                base_unit_price = Decimal(base_unit_price_str)
+                vat_amount = Decimal(vat_amount_str)
 
             log_entry = InventoryLog.objects.create(
                 product_id=product_id,
                 company_id=company_id,
                 quantity=quantity,
                 timestamp=entry_datetime,
-                # status defaults to QUARANTINED in the model
-                unit_price=final_unit_price,
-                po_item_id=po_item_id if po_item_id else None
+                po_item_id=po_item_id if po_item_id else None,
+                # --- MODIFIED: Save new accounting fields ---
+                base_unit_price=base_unit_price,
+                vat_amount=vat_amount,
+                vat_treatment=vat_treatment
             )
             
             tag_ids = request.POST.getlist('tags')
             if tag_ids:
                 log_entry.tags.set(tag_ids)
             
-            # NOTE: Cost calculation is NOT triggered on receipt. It's triggered upon RELEASE.
-            
             if po_item_id:
-                po_item = PurchaseOrderItem.objects.get(pk=po_item_id)
                 update_po_status(po_item.purchase_order_id)
             
             messages.success(request, 'تم تسجيل الاستلام المبدئي بنجاح. السجل الآن تحت الفحص.')
@@ -123,9 +121,10 @@ def index(request: HttpRequest) -> HttpResponse:
         'logs': InventoryLog.objects.select_related('product', 'company').all()[:15],
         'all_products': Product.objects.filter(~Q(product_type=Product.ProductType.FINAL_PRODUCT)),
         'all_companies': Company.objects.all(),
-        'today_date': timezone.now().strftime('%Y-m-%d'),
+        'today_date': timezone.now().strftime('%Y-%m-%d'),
         'all_tags': ProductTag.objects.all(),
-        'prefill_data_json': prefill_data_json, 
+        'prefill_data_json': prefill_data_json,
+        'vat_treatment_choices': InventoryLog.VatTreatment.choices,
     }
     
     if 'X-Partial-Request' in request.headers:
@@ -133,7 +132,6 @@ def index(request: HttpRequest) -> HttpResponse:
     return render(request, 'inventory/dashboard.html', context)
 
 
-# --- MODIFIED: The records view now supports filtering by status ---
 def records(request: HttpRequest) -> HttpResponse:
     """
     Displays a full list of all inventory log records, with status filtering.
@@ -142,7 +140,7 @@ def records(request: HttpRequest) -> HttpResponse:
     
     logs_qs = InventoryLog.objects.select_related('product', 'company', 'po_item__purchase_order__supplier').all()
     
-    if status_filter in [InventoryLog.Status.QUARANTINED, InventoryLog.Status.RELEASED, InventoryLog.Status.REJECTED]:
+    if status_filter in [s.value for s in InventoryLog.Status]:
         logs_qs = logs_qs.filter(status=status_filter)
 
     context = {
@@ -151,12 +149,13 @@ def records(request: HttpRequest) -> HttpResponse:
         'all_products': Product.objects.all(),
         'all_companies': Company.objects.all(),
         'status_filter': status_filter,
+        'vat_treatment_choices': InventoryLog.VatTreatment.choices,
     }
     if 'X-Partial-Request' in request.headers:
         return render(request, 'inventory/partials/records_content.html', context)
     return render(request, 'inventory/records.html', context)
 
-# --- NEW VIEW: Handles the quarantine management page ---
+
 def quarantine_list(request: HttpRequest) -> HttpResponse:
     """
     Displays a list of all inventory items currently in quarantine, awaiting release.
@@ -168,15 +167,13 @@ def quarantine_list(request: HttpRequest) -> HttpResponse:
     context = {
         'active_page': 'quarantine',
         'logs': quarantined_items,
-        'today_date': timezone.now().strftime('%Y-m-%d'),
+        'today_date': timezone.now().strftime('%Y-%m-%d'),
     }
-    # This view will use the 'records.html' template structure for consistency
     if 'X-Partial-Request' in request.headers:
         return render(request, 'inventory/partials/quarantine_content.html', context)
     return render(request, 'inventory/quarantine.html', context)
 
 
-# --- NEW VIEW: Handles the release action from quarantine ---
 @require_POST
 def release_from_quarantine(request: HttpRequest, pk: int) -> HttpResponse:
     """
@@ -194,7 +191,6 @@ def release_from_quarantine(request: HttpRequest, pk: int) -> HttpResponse:
 
     try:
         release_date = datetime.strptime(release_date_str, '%Y-%m-%d').date()
-        # Use current time for the release timestamp for accuracy
         release_datetime = timezone.make_aware(datetime.combine(release_date, timezone.now().time()))
 
         if release_datetime < log_entry.timestamp:
@@ -206,7 +202,6 @@ def release_from_quarantine(request: HttpRequest, pk: int) -> HttpResponse:
         log_entry.release_timestamp = release_datetime
         log_entry.save(update_fields=['status', 'qc_no', 'release_timestamp'])
 
-        # Trigger the costing engine now that the item is officially in stock
         recalculate_cost_history_for_product(log_entry.product_id, release_datetime)
 
         messages.success(request, f"تم الإفراج عن البند (QC: {qc_no}) بنجاح وتحديث التكاليف.")
@@ -222,7 +217,6 @@ def edit_record(request: HttpRequest, pk: int) -> HttpResponse:
     """
     Handles editing an existing inventory log record, including linking to a PO,
     and triggers cost recalculation.
-    NOTE: This primarily edits the *original* receipt details. Releasing is a separate action.
     """
     log_entry = get_object_or_404(InventoryLog, pk=pk)
     original_timestamp = log_entry.timestamp
@@ -232,9 +226,13 @@ def edit_record(request: HttpRequest, pk: int) -> HttpResponse:
     product_id = request.POST.get('product_id')
     company_id = request.POST.get('company_id')
     quantity_str = request.POST.get('quantity')
-    date_str = request.POST.get('entry_date') # This is the original receipt date
+    date_str = request.POST.get('entry_date')
     po_item_id = request.POST.get('po_item_id')
-    unit_price_str = request.POST.get('unit_price')
+    
+    # --- MODIFIED: Get new accounting fields ---
+    base_unit_price_str = request.POST.get('base_unit_price')
+    vat_amount_str = request.POST.get('vat_amount')
+    vat_treatment = request.POST.get('vat_treatment')
 
     if not all([product_id, company_id, quantity_str, date_str]):
         messages.warning(request, 'الرجاء تعبئة جميع الحقول.')
@@ -242,45 +240,43 @@ def edit_record(request: HttpRequest, pk: int) -> HttpResponse:
 
     try:
         new_date = datetime.strptime(date_str, '%Y-%m-%d').date()
-        # Preserve original time of day unless it needs to be changed
         original_time = log_entry.timestamp.time() if log_entry.timestamp else timezone.now().time()
         new_datetime = timezone.make_aware(datetime.combine(new_date, original_time))
         
         quantity = float(quantity_str)
-        final_unit_price = log_entry.unit_price
         new_po_item = None
-
+        
+        # --- MODIFIED: Logic to update price and VAT ---
         if po_item_id:
             new_po_item = get_object_or_404(PurchaseOrderItem, pk=po_item_id)
-            # Recalculate effective price based on PO
-            # This logic might need adjustment depending on business rules
+            base_unit_price = new_po_item.base_price_per_unit
+            vat_amount = (new_po_item.base_price_per_unit * Decimal(str(quantity)) * new_po_item.vat_rate).quantize(Decimal('0.001'))
         else:
-            if not unit_price_str:
-                messages.warning(request, 'الرجاء تعبئة سعر الوحدة عند عدم الربط بأمر شراء.')
+            if not base_unit_price_str or not vat_amount_str:
+                messages.warning(request, 'الرجاء تعبئة سعر الوحدة ومبلغ الضريبة عند عدم الربط بأمر شراء.')
                 return redirect('inventory:records')
-            final_unit_price = Decimal(unit_price_str)
+            base_unit_price = Decimal(base_unit_price_str)
+            vat_amount = Decimal(vat_amount_str)
 
         log_entry.product_id = product_id
         log_entry.company_id = company_id
         log_entry.quantity = quantity
-        log_entry.timestamp = new_datetime # Updates original receipt date
-        log_entry.unit_price = final_unit_price
+        log_entry.timestamp = new_datetime
         log_entry.po_item = new_po_item
+        log_entry.base_unit_price = base_unit_price
+        log_entry.vat_amount = vat_amount
+        log_entry.vat_treatment = vat_treatment
         log_entry.save()
         
         tag_ids = request.POST.getlist('tags')
         log_entry.tags.set(tag_ids)
 
-        # Update PO statuses if changed
         if original_po_item != new_po_item:
-            if original_po_item:
-                update_po_status(original_po_item.purchase_order_id)
-            if new_po_item:
-                update_po_status(new_po_item.purchase_order_id)
+            if original_po_item: update_po_status(original_po_item.purchase_order_id)
+            if new_po_item: update_po_status(new_po_item.purchase_order_id)
         elif new_po_item:
             update_po_status(new_po_item.purchase_order_id)
 
-        # If the item has already been released, we must trigger a cost recalculation
         if log_entry.status == InventoryLog.Status.RELEASED:
             start_recalc_time = min(original_timestamp, new_datetime, log_entry.release_timestamp)
             recalculate_cost_history_for_product(int(product_id), start_recalc_time)
@@ -310,7 +306,6 @@ def delete_record(request: HttpRequest, pk: int) -> HttpResponse:
     try:
         log_entry.delete()
         
-        # Only recalculate costs if the deleted item was part of the active inventory
         if was_released:
             recalculate_cost_history_for_product(product_id_for_recalc, timestamp_for_recalc)
             messages.info(request, 'تم حذف السجل بنجاح. تم تحديث تكاليف المخزون.')

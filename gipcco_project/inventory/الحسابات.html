@@ -1,0 +1,3747 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شجرة الحسابات</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            text-align: right;
+        }
+
+        thead {
+            background-color: #4CAF50;
+            color: #ffffff;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* Styling for hierarchy based on account number length */
+        .level-1 { font-weight: bold; background-color: #e8f5e9; }
+        .level-2 { font-weight: bold; background-color: #f1f8e9; }
+        .level-3 { font-weight: 500; }
+
+        .name-level-1 { padding-right: 10px; }
+        .name-level-2 { padding-right: 30px; }
+        .name-level-3 { padding-right: 50px; }
+        .name-level-4 { padding-right: 70px; }
+        .name-level-5 { padding-right: 90px; }
+        
+        /* Fixed-width font for account numbers for better alignment */
+        .account-number {
+            font-family: 'Courier New', Courier, monospace;
+            text-align: left;
+            direction: ltr;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>شجرة الحسابات</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>اسم الحساب</th>
+                <th>رقم الحساب</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="level-1">
+                <td class="name-level-1">الاصول</td>
+                <td class="account-number">1</td>
+            </tr>
+            <tr class="level-2">
+                <td class="name-level-2">الأصول طويلة الأجل</td>
+                <td class="account-number">101</td>
+            </tr>
+            <tr class="level-3">
+                <td class="name-level-3">الاصول الثابته</td>
+                <td class="account-number">10101</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">الأراضى</td>
+                <td class="account-number">1010101</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">الأراضى - مصنع غنيم فارما / السكندرية</td>
+                <td class="account-number">10101010001</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">مباني وانشاءات</td>
+                <td class="account-number">1010102</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">خط الغاز الرئيسى للمصنع</td>
+                <td class="account-number">10101020001</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مواد بناء * بويات ودهانات * مواد كهرباء</td>
+                <td class="account-number">10101020002</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">المبانى والإنشاءات - مكتب 321&322 التجمع الخامس</td>
+                <td class="account-number">10101020003</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">خط الكهرباءالرئيسي للمصنع</td>
+                <td class="account-number">10101020004</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">المبانى والإنشاءات - مصنع غنيم فارما</td>
+                <td class="account-number">10101020005</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">المرافق والشبكات - مصنع غنيم فارما</td>
+                <td class="account-number">10101020006</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مبنى المصنع - مصنع غنيم فارما / الأسكندرية</td>
+                <td class="account-number">10101020007</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">الات ومعدات</td>
+                <td class="account-number">1010103</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مقياس لدرجة الدوران البصري للجلوكوز - RUDOLPH</td>
+                <td class="account-number">10101030001</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">معقم بخار NBE901BB - فيدجاري</td>
+                <td class="account-number">10101030002</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مكينة اختبار تسريب العبوات وكفاءة اللحام - هاي رول</td>
+                <td class="account-number">10101030003</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">معقم بخار NBH302BB - فيدجاري</td>
+                <td class="account-number">10101030004</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مكينة الليبول - Label Machine from Arca+Printer</td>
+                <td class="account-number">10101030005</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">كبينة الثبات الخاصة بمستحضرات المحاليل - THERMOLAB</td>
+                <td class="account-number">10101030006</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">جهاز يقيس عدد الجسيمات -(liquid+Air) Beckman</td>
+                <td class="account-number">10101030007</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">جهاز لقياس الكربون العضوي الكلي - HTDS</td>
+                <td class="account-number">10101030008</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">جهاز الإمتصاص الذري - HTDS</td>
+                <td class="account-number">10101030009</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ماكينة الطباعة - FLOW PACK MACHINE</td>
+                <td class="account-number">10101030010</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مولد الكهرباء الرئيسي للمصنع</td>
+                <td class="account-number">10101030011</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">كمبروسر هواء مركزي BOGE-Screw Compressor</td>
+                <td class="account-number">10101030012</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مولد البخار النقي - Pure Steam Generator - FINN AQUA</td>
+                <td class="account-number">10101030013</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">تشيلرات التكييف - جونسون كنترولز</td>
+                <td class="account-number">10101030014</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">محطة المياه المقطرة Finn Aqua فين أكو</td>
+                <td class="account-number">10101030015</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">الغلايات Forbes Marshall</td>
+                <td class="account-number">10101030016</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">محطة تنقية مياه Watertawon وتر تاون</td>
+                <td class="account-number">10101030017</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">تنكات الإذابة Watertawon وتر تاون</td>
+                <td class="account-number">10101030018</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">أوتوكلاف Steelco</td>
+                <td class="account-number">10101030019</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">قواطع المناطق الإنتاجية Fabtec Tec</td>
+                <td class="account-number">10101030020</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ماكينة تعبئة محاليل Romelag روميلاج</td>
+                <td class="account-number">10101030021</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">خدمات معايرة وقياس الاجهزة</td>
+                <td class="account-number">10101030022</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">كمبروسر هواء مركزى 2</td>
+                <td class="account-number">10101030023</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">وسائل نقل وانتقال</td>
+                <td class="account-number">1010104</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">سيارات متنوعة</td>
+                <td class="account-number">10101040001</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">سيارة رينو دوكر فان - شاسيه /015204</td>
+                <td class="account-number">10101040002</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">سيارة تويوتا كورولا -حمراء اللون شاسيه112441</td>
+                <td class="account-number">10101040003</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">سيارة ميكروباص 17 راكب - شاسيه / 37254</td>
+                <td class="account-number">10101040004</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">سيارة ميني باص 29 راكب - شاسيه /97222</td>
+                <td class="account-number">10101040005</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">سيارة ميكروباص 17 راكب - شاسيه 37234</td>
+                <td class="account-number">10101040006</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">اجهزة كمبيوتر واتصالات</td>
+                <td class="account-number">1010105</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">حاسبات وبرامج جاهزة - مصنع غنيم فارما</td>
+                <td class="account-number">10101050001</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">الحاسبات والبرامج الجاهزة - المقر الرئيسى / القاهرة</td>
+                <td class="account-number">10101050002</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">أجهزة كمبيوتر</td>
+                <td class="account-number">10101050003</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">اجهزة سنترال وتليفونات وشبكة الانترنت والسيرفر - مصنع غنيم فارما</td>
+                <td class="account-number">10101050004</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">نظام كاميرات المراقبة</td>
+                <td class="account-number">10101050005</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شويتش مركزي خاص بالشبكات IT</td>
+                <td class="account-number">10101050006</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">اثاث وتجهيزات</td>
+                <td class="account-number">1010106</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">أثاث ومفروشات وتجهيزات مكتبية المكاتب الإدارية - مكتب 321&322 التجمع الخامس</td>
+                <td class="account-number">10101060001</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">أثاث ومفروشات وتجهيزات مكتبية - مصنع غنيم فارما</td>
+                <td class="account-number">10101060002</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شبكات ومرافق التكييف والتهوية وأعمال مكافحة الحريق</td>
+                <td class="account-number">10101060003</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شبكات ومرافق المياه النقية والبخار النقى ومياه الحقن وطلمبات المياه</td>
+                <td class="account-number">10101060004</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">عدد وادوات</td>
+                <td class="account-number">1010107</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">روافع شوكية وكلاركات وأوناش</td>
+                <td class="account-number">10101070001</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">جهاز هاند باليت</td>
+                <td class="account-number">10101070002</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">باليتات وطبالى خشب</td>
+                <td class="account-number">10101070003</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">وحدات مناولة</td>
+                <td class="account-number">10101070004</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">المعدات المساعدة - مصنع غنيم فارما</td>
+                <td class="account-number">10101070005</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">عدد وادوات ومستلزمات مصنع غنيم</td>
+                <td class="account-number">10101070006</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">اسطوانات للغاز</td>
+                <td class="account-number">10101070007</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">طفايات فاير سيرش</td>
+                <td class="account-number">10101070008</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">أجهزة معامل</td>
+                <td class="account-number">1010108</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">أجهزة معامل</td>
+                <td class="account-number">10101080001</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">جهاز لبيان تفاصيل الأحماض الموجودة بالمحلول</td>
+                <td class="account-number">10101080002</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">جهاز قياس وتسجيل الحرارة مع برنامج التشغيل</td>
+                <td class="account-number">10101080003</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">نظام تشغيل لمحطة المياه - Solution Preparation System</td>
+                <td class="account-number">10101080004</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">جهاز قياس الاملاح فى محطة المياة HI383 1F</td>
+                <td class="account-number">10101080005</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">أجهزة قياس درجة الحرارة والرطوبة</td>
+                <td class="account-number">10101080006</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">جهاز حضان لعينات مياه التحضير</td>
+                <td class="account-number">10101080007</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">جهاز لقياس التوصيلة الكهربية الخاصة بالعينات</td>
+                <td class="account-number">10101080008</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">جهاز يقيس معدل الإمتصاص وتحليل المواد الخام</td>
+                <td class="account-number">10101080009</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">جهاز التحليل الكروماتوجرافي - HPLC</td>
+                <td class="account-number">10101080010</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">جهاز لقياس كفاءة ترشيح الفلاتر - Millipore SAS</td>
+                <td class="account-number">10101080011</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">جهاز لقياس الأس الهيدروجيني للمستحضرات</td>
+                <td class="account-number">10101080012</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">أجهزة كهربائبة</td>
+                <td class="account-number">1010109</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">الأجهزة الكهربائية - مصنع غنيم فارما / الأسكندرية</td>
+                <td class="account-number">10101090001</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">اجهزة الحضور والانصراف - مصنع غنيم فارما</td>
+                <td class="account-number">10101090002</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">أجهزة الطابعات ومكائن التصوير</td>
+                <td class="account-number">10101090003</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شبكات ومرافق الأعمال الكهربائية</td>
+                <td class="account-number">10101090004</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">أجهزة كهربائية المكاتب الإدارية - مكتب 321&322 التجمع الخامس</td>
+                <td class="account-number">10101090005</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">اجهزه تكيفات</td>
+                <td class="account-number">10101090006</td>
+            </tr>
+            <tr class="level-3">
+                <td class="name-level-3">مشروعات تحت التنفيذ</td>
+                <td class="account-number">10102</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">للتعديل</td>
+                <td class="account-number">1010201</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">مشروعات تحت التنفيذ - ااصول غير ملموسة</td>
+                <td class="account-number">1010202</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مشروعات تحت التنفيذ - ااصول غير ملموسة</td>
+                <td class="account-number">10102020001</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">مشروعات تحت التنفيذ</td>
+                <td class="account-number">1010203</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مشروعات تحت التنفيذ-متنوع</td>
+                <td class="account-number">10102030001</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مشروعات تحت التنفيذ - المبانى والإنشاءات - مصنع غنيم فارما</td>
+                <td class="account-number">10102030002</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مشروعات تحت التنفيذ - خط الانتاج الثاني - روميلاج</td>
+                <td class="account-number">10102030003</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مشروعات تحت تنفيذ - ضاغط الهواء 2</td>
+                <td class="account-number">10102030004</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مشروعات تحت التنفيذ - ابحاث و تطوير-مستحضر جلوكوز 10%</td>
+                <td class="account-number">10102030005</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مشروعات تحت التنفيذ - ابحاث و تطوير-مستحضر رينجر اسيتات</td>
+                <td class="account-number">10102030006</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مشروعات تحت التنفيذ - ابحاث و تطوير-مستحضر lmepenem</td>
+                <td class="account-number">10102030007</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مشروعات تحت التنفيذ - ابحاث و تطوير-مستحضر merogipinem500mg</td>
+                <td class="account-number">10102030008</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مشروعات تحت التنفيذ - ابحاث و تطوير-مستحضر merogipinem1000mg</td>
+                <td class="account-number">10102030009</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مشروعات تحت التنفيذ - ابحاث و تطوير-مستحضر رينجر لاكتيت</td>
+                <td class="account-number">10102030010</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مشروعات تحت التنفيذ - ابحاث و تطوير-مستحضر ملح0.45%+جلوكوز5%</td>
+                <td class="account-number">10102030011</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مشروعات تحت التنفيذ - ابحاث و تطوير-مستحضر ملح0.45%</td>
+                <td class="account-number">10102030012</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مشروعات تحت التنفيذ - ابحاث و تطوير- مياه للحقن</td>
+                <td class="account-number">10102030013</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مشروعات تحت التنفيذ - ابحاث و تطوير- مستحضر B.S.S</td>
+                <td class="account-number">10102030014</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مشروعات تحت التنفيذ - ابحاث و تطوير-مستحضر CEFAzolin</td>
+                <td class="account-number">10102030015</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مشروعات تحت التنفيذ - ابحاث و تطوير-مستحضر باراستمول</td>
+                <td class="account-number">10102030016</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مشروعات تحت التنفيذ - ابحاث و تطوير-مستحضر مانيتول 20%</td>
+                <td class="account-number">10102030017</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مشروعات تحت التنفيذ - ابحاث و تطوير-مستحضر مانيتول10%</td>
+                <td class="account-number">10102030018</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مشروعات تحت التنفيذ - ابحاث و تطوير-مستحضر ملح0.9%+جلوكوز5%</td>
+                <td class="account-number">10102030019</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مشروعات تحت التنفيذ - ابحاث و تطوير-مستحضر بروفيل واتر</td>
+                <td class="account-number">10102030020</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مشروعات تحت التنفيذ - ابحاث و تطوير-مستحضر بانثول</td>
+                <td class="account-number">10102030021</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مشروعات تحت التنفيذ - ابحاث و تطوير-مستحضر Furigipinem</td>
+                <td class="account-number">10102030022</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مشروعات تحت التنفيذ - ابحاث و تطوير-مستحضر هيدروسولمنت</td>
+                <td class="account-number">10102030023</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مشروعات تحت التنفيذ - ابحاث و تطوير-مستحضر امينوليبان</td>
+                <td class="account-number">10102030024</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مشروعات تحت التنفيذ - ابحاث و تطوير-مستحضر كيدمين 250 مل</td>
+                <td class="account-number">10102030025</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مشروعات تحت التنفيذ - المطعم الرئيسي - مصنع غنيم فارما</td>
+                <td class="account-number">10102030026</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مشروعات تحت التنفيذ - ابحاث و تطوير-مستحضر احماض امينية</td>
+                <td class="account-number">10102030027</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مشروعات تحت التنفيذ - ابحاث و تطوير-مستحضر ملح0.9% 250 مللي</td>
+                <td class="account-number">10102030028</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مشروعات تحت تنفيذ - تنكات التحضير - خط الثانى</td>
+                <td class="account-number">10102030029</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مشروعات تحت التنفيذ - ابحاث و تطوير - مستحضر امينو اسيد</td>
+                <td class="account-number">10102030030</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مشروعات تحت التنفيذ - ابحاث و تطوير-مستحضر المياه المقطرة</td>
+                <td class="account-number">10102030031</td>
+            </tr>
+            <tr class="level-3">
+                <td class="name-level-3">اصول غير ملموسة</td>
+                <td class="account-number">10103</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">مواقع وإيميلات</td>
+                <td class="account-number">1010301</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مواقع وإيميلات</td>
+                <td class="account-number">10103010001</td>
+            </tr>
+            <tr class="level-2">
+                <td class="name-level-2">الاصول المتداوله</td>
+                <td class="account-number">102</td>
+            </tr>
+            <tr class="level-3">
+                <td class="name-level-3">النقدية وما في حكمها</td>
+                <td class="account-number">10201</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">صندوق المصنع</td>
+                <td class="account-number">1020101</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">صندوق المصنع</td>
+                <td class="account-number">10201010001</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">أوراق القبض بالصندوق</td>
+                <td class="account-number">1020102</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">أوراق القبض بالصندوق - المصرف المتحد</td>
+                <td class="account-number">10201020001</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شيكات تحت تحصيل - الاهلى الشروق</td>
+                <td class="account-number">10201020002</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">البنوك</td>
+                <td class="account-number">1020103</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">بنك القاهره / فرع العروبة - جنيه مصري</td>
+                <td class="account-number">10201030003</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">بنك القاهرة / فرع العروبة - دولار امريكي</td>
+                <td class="account-number">10201030004</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">البنك الاهلي / فرع مدينتي - جنيه مصري 0793070895259901011</td>
+                <td class="account-number">10201030005</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">البنك الاهلي / فرع مدينتي - دولار امركي 0793070895259902025</td>
+                <td class="account-number">10201030006</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">البنك الاهلي / فرع الشروق</td>
+                <td class="account-number">10201030007</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">المصرف المتحد - فرع التجمع الخامس</td>
+                <td class="account-number">10201030008</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">بنك مصر / فرع التسعين - جنية مصري 7518</td>
+                <td class="account-number">10201030009</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">بنك مصر / فرع التسعين - دولار امريكى 1183</td>
+                <td class="account-number">10201030010</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">بنك مصر / فرع التسعين - جنية 7879</td>
+                <td class="account-number">10201030011</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">بنك مصر / فرع برج العرب - جنية 6752</td>
+                <td class="account-number">10201030012</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">بنك مصر / فرع التسعين - دولار امريكي 2743</td>
+                <td class="account-number">10201030013</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">المصرف المتحد - فرع التجمع الخامس - دولار</td>
+                <td class="account-number">10201030014</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">مخزن الخدمات</td>
+                <td class="account-number">1020104</td>
+            </tr>
+            <tr class="level-3">
+                <td class="name-level-3">المخزون</td>
+                <td class="account-number">10202</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">مواد خام</td>
+                <td class="account-number">1020201</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">Sodium Chloride - كلوريد الصوديوم</td>
+                <td class="account-number">10202010001</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">mannitol pyrogen- مانيتول</td>
+                <td class="account-number">10202010002</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">sucrose 100mg-سكروز</td>
+                <td class="account-number">10202010003</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">Meropenem with Sodium Carbonate - ميروبينيم - لدى فاركوبى</td>
+                <td class="account-number">10202010004</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ِCalcium Chloride - كلوريد الكالسيوم</td>
+                <td class="account-number">10202010005</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">P+J204:L206otassium Chloride - كلوريد البوتاسيوم</td>
+                <td class="account-number">10202010006</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">Dextrose Monohydrate - سكر ديكستروز</td>
+                <td class="account-number">10202010007</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">Meropenem with Sodium Carbonate - ميروبينيم</td>
+                <td class="account-number">10202010008</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">Sodium Citrate-سترات صوديوم</td>
+                <td class="account-number">10202010009</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">Magnesuim Chloride - كلوريد ماغنسيوم</td>
+                <td class="account-number">10202010010</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">Sodium Acetate - خلات صوديوم</td>
+                <td class="account-number">10202010011</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">Sodium Lactate - لاكتات صوديوم</td>
+                <td class="account-number">10202010012</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">قطع الغيار</td>
+                <td class="account-number">1020202</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">FILTER CARTRIDGE (PREPRATION TANK)</td>
+                <td class="account-number">10202020005</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">FILTER CARTRIDGE (PREPRATION TAN00K)</td>
+                <td class="account-number">10202020006</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">FILTER CARTRIDGE (PREPRATION TAN000K)</td>
+                <td class="account-number">10202020007</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">FILTER CART000RIDGE (PREPRATION TANK)</td>
+                <td class="account-number">10202020008</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">WATER STATION FILTER</td>
+                <td class="account-number">10202020010</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">عاكس ماكينة الروميلاج</td>
+                <td class="account-number">10202020011</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">زيت ضاغط الهواء (الكومبريسور)</td>
+                <td class="account-number">10202020012</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">bag filter 600*300</td>
+                <td class="account-number">10202020013</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">bag fliter 600*600</td>
+                <td class="account-number">10202020014</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">pre filter 600*600</td>
+                <td class="account-number">10202020015</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">pre filter 600*300</td>
+                <td class="account-number">10202020016</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">فلتر 0.2 ميكرون 30 بوصة</td>
+                <td class="account-number">10202020017</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">بلف ايزو 24VDC</td>
+                <td class="account-number">10202020018</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">VS26SA11DF213A - VS26 2X3/2 SOL/SPRING VALVE NC Mini Iso 24Vdc</td>
+                <td class="account-number">10202020019</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">محطة تحلية 20 انش -بدون خزان</td>
+                <td class="account-number">10202020020</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شمعة جامبو بولى 20 انش</td>
+                <td class="account-number">10202020021</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ممبرين 100 جالون اكواجيت</td>
+                <td class="account-number">10202020022</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">خزان ضغط 11 جالون</td>
+                <td class="account-number">10202020023</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">فلتر 0.2 ميكرون 20بوصة</td>
+                <td class="account-number">10202020024</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">CT-2000</td>
+                <td class="account-number">10202020025</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">CT-2014</td>
+                <td class="account-number">10202020026</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">CT-2045</td>
+                <td class="account-number">10202020027</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">CT-2058</td>
+                <td class="account-number">10202020028</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">CT-2065</td>
+                <td class="account-number">10202020029</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">CT-2070</td>
+                <td class="account-number">10202020030</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">حساس اوتوكلاف</td>
+                <td class="account-number">10202020031</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ديفرام</td>
+                <td class="account-number">10202020032</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">SOLENOID valve VQ 120-5F</td>
+                <td class="account-number">10202020033</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">فلتر جامبو 5 ميكرون 20 بوصة</td>
+                <td class="account-number">10202020034</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">فلتر 0.22 ميكرون 10 بوصة</td>
+                <td class="account-number">10202020035</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">جهاز اكونمى - لمستحضر فيروجيبنيم</td>
+                <td class="account-number">10202020036</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">زيت ماكينة روميلاج</td>
+                <td class="account-number">10202020037</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">عوامه اوتوكلاف</td>
+                <td class="account-number">10202020038</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ثيرمو كابل</td>
+                <td class="account-number">10202020039</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">فلتر 30" - 5 ميكرون</td>
+                <td class="account-number">10202020040</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">فلتر 30" - 10 ميكرون</td>
+                <td class="account-number">10202020041</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">اقراص ملح معالجة المياه</td>
+                <td class="account-number">10202020042</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">كلور خام لمعالجة المياه</td>
+                <td class="account-number">10202020043</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">صودا كاوية لمعالجة المياه</td>
+                <td class="account-number">10202020044</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">Air Filter - كبسول</td>
+                <td class="account-number">10202020045</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">standard reference-sodium citrate</td>
+                <td class="account-number">10202020046</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">standard reference-sodium acetate</td>
+                <td class="account-number">10202020047</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">standard reference-magnesium chloride</td>
+                <td class="account-number">10202020048</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">standard reference-calcium chloride dihydrate</td>
+                <td class="account-number">10202020049</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">standard reference-potassium chloride</td>
+                <td class="account-number">10202020050</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">standard reference-sodium chloride</td>
+                <td class="account-number">10202020051</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">standard reference-cilastatin sodium</td>
+                <td class="account-number">10202020052</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">standard reference-cilastatin ammonium salt</td>
+                <td class="account-number">10202020053</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">standard reference-lmipenem monohydrate</td>
+                <td class="account-number">10202020054</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">نترات الفضة</td>
+                <td class="account-number">10202020055</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">standard reference-MANNITO</td>
+                <td class="account-number">10202020056</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مخزون الكيماويات</td>
+                <td class="account-number">10202020057</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">سخان</td>
+                <td class="account-number">10202020058</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">حساس ثيرموستات</td>
+                <td class="account-number">10202020059</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">مواد تعبئة وتغليف</td>
+                <td class="account-number">1020203</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">Polyethylene - بولي ايثيلين</td>
+                <td class="account-number">10202030001</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">Carton - كرتون 500 ملى</td>
+                <td class="account-number">10202030002</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">Scotch 7 cm - اسكوتش 7 سم</td>
+                <td class="account-number">10202030003</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">Stretch 50 cm - استريتش 50 سم</td>
+                <td class="account-number">10202030004</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">Poly Propylene For Wrapping - بولي بروبيلين</td>
+                <td class="account-number">10202030005</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">Plastic Bags Size 40*60</td>
+                <td class="account-number">10202030006</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">Plastic Bags Size 60*90</td>
+                <td class="account-number">10202030007</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">Plastic Bags Wast Blue Size 70*110</td>
+                <td class="account-number">10202030008</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">Plastic Bags Wast Red Size 70*110</td>
+                <td class="account-number">10202030009</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">Plastic Bags Wast white Size 60*110</td>
+                <td class="account-number">10202030010</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">Purified Water Roll</td>
+                <td class="account-number">10202030011</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">Label Ringer Injection</td>
+                <td class="account-number">10202030012</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">Label Glucose 5%</td>
+                <td class="account-number">10202030013</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">Label Sodium Chloride 0.9%</td>
+                <td class="account-number">10202030014</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">Label Merogipinem 500 mg</td>
+                <td class="account-number">10202030015</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">Label Merogipinem 1 gm</td>
+                <td class="account-number">10202030016</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">LABEL Furigipinem</td>
+                <td class="account-number">10202030017</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">يورو كاب</td>
+                <td class="account-number">10202030018</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">Carton - كرتون 250 ملى</td>
+                <td class="account-number">10202030019</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">label sodium chloride.045%</td>
+                <td class="account-number">10202030020</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">label sodium chloride.045% +Glucose 5%</td>
+                <td class="account-number">10202030021</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">label sodium chloride 0.9% +Glucose 5%</td>
+                <td class="account-number">10202030022</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">label Hydrosolmaint</td>
+                <td class="account-number">10202030023</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">Label Glucose 10%</td>
+                <td class="account-number">10202030024</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">رابر - سداده للعبوه - للميروجيبينيم</td>
+                <td class="account-number">10202030025</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">فايل- للميروجيبينيم 500م و 1000م - لدى فاركوبى</td>
+                <td class="account-number">10202030026</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">كرتون - ميروجبينيم</td>
+                <td class="account-number">10202030027</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">علبة - ميروجبينيم 1000جم</td>
+                <td class="account-number">10202030028</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">نشرة - ميروجبينيم 1000جم</td>
+                <td class="account-number">10202030029</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">قواعد مخرمة- ميروجبينيم</td>
+                <td class="account-number">10202030030</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">كبسولة فليب اوف- برتقالى - للميروجيبينيم 500م</td>
+                <td class="account-number">10202030031</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">كبسولة فليب اوف- كبسولة فليب اوف- ازرق- للميروجيبينيم 1000م</td>
+                <td class="account-number">10202030032</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ليبل- للميروجيبينيم 1000م لدى فاركو بى</td>
+                <td class="account-number">10202030035</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">كبسولة فليب اوف- كبسولة فليب اوف- ازرق- للميروجيبينيم 1000م لدى فاركو بى</td>
+                <td class="account-number">10202030036</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">رابر - سداده للعبوه - للميروجيبينيم لدى فاركو بى</td>
+                <td class="account-number">10202030037</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">علبة - ميروجبينيم 1000جم لدى فاركو بى</td>
+                <td class="account-number">10202030038</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">كرتون - ميروجبينيم لدى فاركو بي</td>
+                <td class="account-number">10202030039</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">نشرة - ميروجبينيم - لدى فاركو بي</td>
+                <td class="account-number">10202030040</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">مخزن منتج تام</td>
+                <td class="account-number">1020204</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">محلول كلوريد الصوديوم 0.9%-500مل بدون كاب</td>
+                <td class="account-number">10202040001</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">محلول رينجر 500 مل بدون كاب</td>
+                <td class="account-number">10202040002</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">محلول جلوكوز5%-500مل بدون كاب</td>
+                <td class="account-number">10202040003</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">محلول هيدرو سولمنت 250 مل بدون كاب</td>
+                <td class="account-number">10202040004</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">محلول هيدرو سولمنت 250 مل بكاب</td>
+                <td class="account-number">10202040005</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">محول جلوكوز 5%+ملح .9% بدون كاب</td>
+                <td class="account-number">10202040006</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">محول جلوكوز 5%+ملح .45% بدون كاب</td>
+                <td class="account-number">10202040007</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">محلول ملح 0.45% بدون كاب</td>
+                <td class="account-number">10202040008</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">Meropenem 1000 mg</td>
+                <td class="account-number">10202040009</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">محلول رينجر - 500 مل بالكاب</td>
+                <td class="account-number">10202040010</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">محلول كلوريد صوديوم 0.9% - 500 مل بالكاب</td>
+                <td class="account-number">10202040011</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">محلول جلوكوز 5% - 500 مل بالكاب</td>
+                <td class="account-number">10202040012</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">مخزون اننتاج تحت التشغيل</td>
+                <td class="account-number">1020205</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت. تشغيل - محلول كلوريد صوديوم 0.9% - 500 مل بدون كاب / مواد خام</td>
+                <td class="account-number">10202050001</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت. تشغيل - محلول كلوريد صوديوم 0.9% - 500 مل بدون كاب / قطع غيار</td>
+                <td class="account-number">10202050002</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت. تشغيل - محلول كلوريد صوديوم 0.9% - 500 مل بدون كاب / مواد تعبئة وتغليف</td>
+                <td class="account-number">10202050003</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت. تشغيل - محلول كلوريد صوديوم 0.9% - 500 مل بدون كاب / تكاليف غير مباشرة</td>
+                <td class="account-number">10202050004</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت. تشغيل - محلول جلوكوز 5% - 500 مل بدون كاب / مواد خام</td>
+                <td class="account-number">10202050005</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت. تشغيل - محلول جلوكوز 5% - 500 مل بدون كاب / قطع غيار</td>
+                <td class="account-number">10202050006</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت. تشغيل - محلول جلوكوز 5% - 500 مل بدون كاب / مواد تعبئة وتغليف</td>
+                <td class="account-number">10202050007</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت. تشغيل - محلول جلوكوز 5% - 500 مل بدون كاب / تكاليف غير مباشرة</td>
+                <td class="account-number">10202050008</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت. تشغيل - محلول رينجر - 500 مل بدون كاب / مواد خام</td>
+                <td class="account-number">10202050009</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت. تشغيل - محلول رينجر - 500 مل بدون كاب / قطع غيار</td>
+                <td class="account-number">10202050010</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت. تشغيل - محلول رينجر - 500 مل بدون كاب / مواد تعبئة وتغليف</td>
+                <td class="account-number">10202050011</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت. تشغيل - محلول رينجر - 500 مل بدون كاب / تكاليف غير مباشرة</td>
+                <td class="account-number">10202050012</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت.تشغيل - محلول خليط ملح 0.45% + جلوكوز 5% بدون كاب مواد خام</td>
+                <td class="account-number">10202050013</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت.تشغيل - محلول خليط ملح 0.45% + جلوكوز 5% بدون كاب قطع غيار</td>
+                <td class="account-number">10202050014</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت.تشغيل - محلول خليط ملح 0.45% + جلوكوز 5% بدون كاب مواد تعبئة و تغليف</td>
+                <td class="account-number">10202050015</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت.تشغيل - محلول خليط ملح 0.45% + جلوكوز 5% بدون كاب تكاليف غير مباشرة</td>
+                <td class="account-number">10202050016</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت.تشغيل - محلول ملح 0.45% بدون كاب / مواد خام</td>
+                <td class="account-number">10202050017</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت.تشغيل - محلول ملح 0.45% بدون كاب / قطع غيار</td>
+                <td class="account-number">10202050018</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت.تشغيل - محلول ملح 0.45% بدون كاب / مواد تعبئة و تغليف</td>
+                <td class="account-number">10202050019</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت.تشغيل - محلول ملح 0.45% بدون كاب / تكاليف غير مباشرة</td>
+                <td class="account-number">10202050020</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت.تشغيل - محلول خليط ملح 0.9% + جلوكوز 5% بدون كاب / مواد خام</td>
+                <td class="account-number">10202050021</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت.تشغيل - محلول خليط ملح 0.9% + جلوكوز 5% بدون كاب / قطع غيار</td>
+                <td class="account-number">10202050022</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت.تشغيل - محلول خليط ملح 0.9% + جلوكوز 5% بدون كاب / مواد تعبئة و تغليف</td>
+                <td class="account-number">10202050023</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت.تشغيل - محلول خليط ملح 0.9% + جلوكوز 5% بدون كاب / تكاليف غير مباشرة</td>
+                <td class="account-number">10202050024</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت.تشغيل - محلول هيدروسولمنت بدون كاب / مواد خام</td>
+                <td class="account-number">10202050025</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت.تشغيل - محلول هيدروسولمنت بدون كاب / قطع غيار</td>
+                <td class="account-number">10202050026</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت.تشغيل - محلول هيدروسولمنت بدون كاب / مواد تعبئة و تغليف</td>
+                <td class="account-number">10202050027</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت.تشغيل - محلول هيدروسولمنت بدون كاب / تكاليف غير مباشرة</td>
+                <td class="account-number">10202050028</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت.تشغيل - محلول هيدروسولمنت بالكاب / مواد خام</td>
+                <td class="account-number">10202050029</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت.تشغيل - محلول هيدروسولمنت بالكاب / قطع غيار</td>
+                <td class="account-number">10202050030</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت.تشغيل - محلول هيدروسولمنت بالكاب / مواد تعبئة و تغليف</td>
+                <td class="account-number">10202050031</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت.تشغيل - محلول هيدروسولمنت بالكاب / تكاليف غير مباشرة</td>
+                <td class="account-number">10202050032</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت.تشغيل - merogipinem 1000mg / مواد خام</td>
+                <td class="account-number">10202050033</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت.تشغيل - merogipinem 1000mg / مواد تعبئة و تغليف</td>
+                <td class="account-number">10202050034</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت.تشغيل - merogipinem 1000mg / قطع غيار</td>
+                <td class="account-number">10202050035</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت.تشغيل - merogipinem 1000mg / تكاليف غير مباشرة</td>
+                <td class="account-number">10202050036</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت. تشغيل - محلول رينجر - 500 مل بالكاب / مواد خام</td>
+                <td class="account-number">10202050037</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت. تشغيل - محلول رينجر - 500 مل بالكاب / مواد تعبئة و تغليف</td>
+                <td class="account-number">10202050038</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت. تشغيل - محلول رينجر - 500 مل بالكاب / قطع غيار</td>
+                <td class="account-number">10202050039</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت. تشغيل - محلول رينجر - 500 مل بالكاب / تكاليف غير مباشرة</td>
+                <td class="account-number">10202050040</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت. تشغيل - محلول كلوريد صوديوم 0.9% - 500 مل بالكاب / مواد خام</td>
+                <td class="account-number">10202050041</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت. تشغيل - محلول كلوريد صوديوم 0.9% - 500 مل بالكاب / قطع غيار</td>
+                <td class="account-number">10202050042</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت. تشغيل - محلول كلوريد صوديوم 0.9% - 500 مل بالكاب / مواد تعبئة وتغليف</td>
+                <td class="account-number">10202050043</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت. تشغيل - محلول كلوريد صوديوم 0.9% - 500 مل بالكاب / تكاليف غير مباشرة</td>
+                <td class="account-number">10202050044</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت. تشغيل - محلول جلوكوز 5% - 500 مل بالكاب / مواد خام</td>
+                <td class="account-number">10202050045</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت. تشغيل - محلول جلوكوز 5% - 500 مل بالكاب / قطع غيار</td>
+                <td class="account-number">10202050046</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت. تشغيل - محلول جلوكوز 5% - 500 مل بالكاب / مواد تعبئة وتغليف</td>
+                <td class="account-number">10202050047</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انتاج ت. تشغيل - محلول جلوكوز 5% - 500 مل بالكاب / تكاليف غير مباشرة</td>
+                <td class="account-number">10202050048</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">مخازن الفحص</td>
+                <td class="account-number">1020206</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مخزن الفحص</td>
+                <td class="account-number">10202060001</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">مخزن الخدمات</td>
+                <td class="account-number">1020207</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مخزن الخدمات</td>
+                <td class="account-number">10202070001</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">مخازن اخرى</td>
+                <td class="account-number">1020208</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مخزن مخلفات بولي ايثيلين</td>
+                <td class="account-number">10202080001</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">-- للتعديل</td>
+                <td class="account-number">10202080002</td>
+            </tr>
+            <tr class="level-3">
+                <td class="name-level-3">جارى عملاء</td>
+                <td class="account-number">10203</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">جارى عملاء المحاليل وادوية</td>
+                <td class="account-number">1020301</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شعبان صابر متموح محمد - شراء خردة</td>
+                <td class="account-number">10203010001</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">احمد جمعة ابو اليزيد -شراء خردة</td>
+                <td class="account-number">10203010002</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">جمعية الرحمة للاعمال الخيرية/عادل احمد القلا</td>
+                <td class="account-number">10203010003</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مستشفى دمنهور العسكري</td>
+                <td class="account-number">10203010004</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">محمد السيد عبد الستار السيد - مصنع تخريز بلاستيك</td>
+                <td class="account-number">10203010005</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">منشأة الروماني لتصنيع البلاستيك لصاحبها روماني حنين اسعد حنا</td>
+                <td class="account-number">10203010006</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">بسيونى عبدالغفار عبدالسلام اسماعيل - رايش</td>
+                <td class="account-number">10203010007</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة حورس للتجارة والتوزيع</td>
+                <td class="account-number">10203010008</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة الانتصار الطبى الليبية</td>
+                <td class="account-number">10203010009</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مركز رؤيا لامراض الكلى والغسيل الكلوي</td>
+                <td class="account-number">10203010010</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">المتحدة للاستيراد والتصدير</td>
+                <td class="account-number">10203010011</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مستشفى اندلسية الشلالات</td>
+                <td class="account-number">10203010012</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مستشفى اندلسية سموحة</td>
+                <td class="account-number">10203010013</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة لاما للانشطة المتعددة - السودان</td>
+                <td class="account-number">10203010014</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">أريس الدوائية لاستيراد الادوية والمعدات الطبية - ليبيا</td>
+                <td class="account-number">10203010015</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ص/ ايناس صلاح الدين عبدالهادي - ابوحمص</td>
+                <td class="account-number">10203010016</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصر الفيوم للخدمات الطبية</td>
+                <td class="account-number">10203010017</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">جارى عملاء مستحضرات التجميل</td>
+                <td class="account-number">1020302</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">جمعية الهداية الإسلامية بمغاغا -عصام أبو الفتوح</td>
+                <td class="account-number">10203020001</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">التسنيم فارما لتجارة و توريد و توزيع الادوية</td>
+                <td class="account-number">10203020002</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">نيفين فارما</td>
+                <td class="account-number">10203020003</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مخزن الشمس فارم - سعيد الهادي حامد مسلم</td>
+                <td class="account-number">10203020004</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">الرؤى والنور فارم لتجارة وتوزيع الادوية</td>
+                <td class="account-number">10203020005</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">هيلثي للصناعات الدوائية</td>
+                <td class="account-number">10203020006</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">صيدليات مصر</td>
+                <td class="account-number">10203020007</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">بيع مباشر مستحضرات</td>
+                <td class="account-number">10203020008</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">الاصدقاء لتجارة وتوزيع الادوية</td>
+                <td class="account-number">10203020009</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">وليد عبداللطيف عباس الطرشوبي</td>
+                <td class="account-number">10203020010</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ص/ سالي - طلخا - دقهلية</td>
+                <td class="account-number">10203020011</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ص/ الطرشوبي الجامعة - هشام الطرشوبي</td>
+                <td class="account-number">10203020012</td>
+            </tr>
+            <tr class="level-3">
+                <td class="name-level-3">مصروفات مدفوعة مقدما وارصدة مدينة أخرى</td>
+                <td class="account-number">10204</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">عهد وسلف عاملين</td>
+                <td class="account-number">1020401</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">سلف أ. مصطفى سيف النصر</td>
+                <td class="account-number">10204010001</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">سلف د/ مي انور جميل</td>
+                <td class="account-number">10204010002</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">سلف أ. محب سعد أحمد إبراهيم</td>
+                <td class="account-number">10204010004</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">سلف محمد محمد حسن ابوالسعود</td>
+                <td class="account-number">10204010010</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">عهدة أ/ ايهاب عبدالرازق عبد الحميد إبراهيم</td>
+                <td class="account-number">10204010011</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">عهدة أ/ محب سعد أحمد إبراهيم</td>
+                <td class="account-number">10204010012</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">عهدة ا / عادل الشحات عبدالمولى</td>
+                <td class="account-number">10204010014</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">عهدة د / محمود عثمان</td>
+                <td class="account-number">10204010015</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">عهدة م. سامر احمد عباس</td>
+                <td class="account-number">10204010016</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">عهدة ا/ محمد احمد الدسوقى - المالية</td>
+                <td class="account-number">10204010017</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">عهده أ/ اسلام احمد يوسف</td>
+                <td class="account-number">10204010018</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">عهده أ/هاجر ناصر احمد</td>
+                <td class="account-number">10204010019</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">عهدة ا / محمد سعد اللبيشى</td>
+                <td class="account-number">10204010020</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">عهدة د/ محمد عبدالمنعم محمد صالح - مستحضرات التجميل</td>
+                <td class="account-number">10204010022</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">عهدة ا / مصطفى سيف النصر امين يحيي</td>
+                <td class="account-number">10204010023</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">عهدة أ/ احمد طلعت</td>
+                <td class="account-number">10204010024</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">عهدة م.على محمد احمد حسن عمر</td>
+                <td class="account-number">10204010025</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">عهده أ /عبد الحليم عطية</td>
+                <td class="account-number">10204010026</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">عهده طارق السيد علي بدوي - ش . ق</td>
+                <td class="account-number">10204010027</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">عهدة د/ ايه احمد حسن</td>
+                <td class="account-number">10204010028</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">عهدة أ/ احمد سرحان - مستحضرات</td>
+                <td class="account-number">10204010029</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">عهدة أ/ على ماهر</td>
+                <td class="account-number">10204010030</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">سلف أ . احمد محمد احمد ابراهيم - سائق</td>
+                <td class="account-number">10204010031</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">سلف د.محمد عبد المنعم محمد صالح</td>
+                <td class="account-number">10204010032</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">سلف محمد سعد اللبيشى</td>
+                <td class="account-number">10204010033</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">سلف م على عمر</td>
+                <td class="account-number">10204010034</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">سلف احمد شوقى</td>
+                <td class="account-number">10204010035</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">عهدة أ/ مصطفى سيف النصر (خاصة بالمدير المناوب)</td>
+                <td class="account-number">10204010036</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">عهدة أ/ محمد عصام الدين حسين</td>
+                <td class="account-number">10204010037</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">عهدة أ/ محمود مهدى-سائق</td>
+                <td class="account-number">10204010038</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">عهدة م / محمود على بدوى - مكتب فنى</td>
+                <td class="account-number">10204010039</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">سلف م. محمد عسران عبدالسميع</td>
+                <td class="account-number">10204010040</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">عهدة م / محمد عسران - مكتب فني</td>
+                <td class="account-number">10204010041</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">سلف ا. محمود على بدوى - مكتب فنى</td>
+                <td class="account-number">10204010042</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">موردين دفعات مقدمة</td>
+                <td class="account-number">1020402</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">INEOS SALES LIMITED - اينوس</td>
+                <td class="account-number">10204020001</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة الجمهورية للادوية - DEXTROSE</td>
+                <td class="account-number">10204020002</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة النصر للكيماويات الدولية</td>
+                <td class="account-number">10204020003</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">POLYMED DISTRIBUTION FZE</td>
+                <td class="account-number">10204020004</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">دفعات مقدمة - شركة سيفتي جروب لانظمة الحريق و الانذار</td>
+                <td class="account-number">10204020005</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركه عين شمس للتنميه الصناعيه</td>
+                <td class="account-number">10204020006</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">سوبر باك - ماكينه تعبئه مياه نقيه</td>
+                <td class="account-number">10204020007</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة روميلاج - ماكينة تعبئة المحاليل - المانيا</td>
+                <td class="account-number">10204020008</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">دفعات مقدمة - جونسون ال سالم</td>
+                <td class="account-number">10204020009</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">دفعات مقدمة - شركة النظم المتكاملة لتكنولوجيا</td>
+                <td class="account-number">10204020010</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">دفعات مقدمة - الفهد استيل للاستراد</td>
+                <td class="account-number">10204020011</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">الصفوة للتجارة والمقاولات</td>
+                <td class="account-number">10204020012</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ميديكاب - medicap healthcare limited</td>
+                <td class="account-number">10204020013</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">دفعات مقدمة - رويال اليكتريك</td>
+                <td class="account-number">10204020014</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">دفعات مقدمة - منترونك</td>
+                <td class="account-number">10204020015</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">دفعات مقدمة - ماستر بيلدر</td>
+                <td class="account-number">10204020016</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">دفعات مقدمة - اوميجا لمستحضرات التجميل</td>
+                <td class="account-number">10204020017</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">دفعات مقدمة - اليكمس بايو سنتر</td>
+                <td class="account-number">10204020018</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">دفعات مقدمة - اسلام فؤاد لدعايا مستحضرات التجميل</td>
+                <td class="account-number">10204020019</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">دفعات مقدمة- شركة الاهرام لمستحضرات التجميل</td>
+                <td class="account-number">10204020020</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">دفعات مقدمة - ZUHAI</td>
+                <td class="account-number">10204020021</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">دفعات مقدمة - SHAN DONG</td>
+                <td class="account-number">10204020022</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">دفعات مقدمة - TOFFLON</td>
+                <td class="account-number">10204020023</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">دفعات مقدمة 15% شركة الفتح للمقاولات والأعمال الهندسية/اعمال الكتروميكانيك</td>
+                <td class="account-number">10204020024</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">HTDS INTERNATIONAL</td>
+                <td class="account-number">10204020025</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">تامينات لدى الغير</td>
+                <td class="account-number">1020403</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">تامين ايجار سكن للموظفين</td>
+                <td class="account-number">10204030001</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">الهيئة المصرية العامة للبترول ( تامين الاستهلاك )</td>
+                <td class="account-number">10204030002</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصلحة الجمارك المصرية / دائرة ميناء الإسكندرية - قسائم امانات</td>
+                <td class="account-number">10204030003</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">تامين السولار بخزينة المحكمة</td>
+                <td class="account-number">10204030004</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">تأمينات لدى الغير متنوع</td>
+                <td class="account-number">10204030005</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">مصلحة الضرائب المصرية - ضريبه القيمة المضافة VAT</td>
+                <td class="account-number">1020404</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصلحة الضرائب المصرية - ضريبه القيمة المضافة VAT</td>
+                <td class="account-number">10204040001</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">ارصدة مدينة اخرى</td>
+                <td class="account-number">1020405</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ارصدة مدينة اخرى متنوعة</td>
+                <td class="account-number">10204050001</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">الشركة اللبنانية السويسرية تكافل مصر</td>
+                <td class="account-number">10204050002</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة مصر للتامين التكافلي ممتلكات و مسؤليات</td>
+                <td class="account-number">10204050003</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">GIG EGYPT LIFE TAKAFUL - شركة تامين</td>
+                <td class="account-number">10204050004</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصاريف مدفوعة مقدماً</td>
+                <td class="account-number">10204050005</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شحنات استيرادية</td>
+                <td class="account-number">10204050006</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">المواد القياسية</td>
+                <td class="account-number">10204050007</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">بضاعة بالطريق</td>
+                <td class="account-number">10204050008</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">مصلحة الضرائب المصرية - ضريبة الخصم من المنبع</td>
+                <td class="account-number">1020406</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصلحة الضرائب المصرية - ضريبة الخصم من المنبع</td>
+                <td class="account-number">10204060004</td>
+            </tr>
+            <tr class="level-1">
+                <td class="name-level-1">الألتزامات</td>
+                <td class="account-number">2</td>
+            </tr>
+            <tr class="level-2">
+                <td class="name-level-2">الألتزامات طويلة الأجل</td>
+                <td class="account-number">201</td>
+            </tr>
+            <tr class="level-3">
+                <td class="name-level-3">دائنو شراء اصول ثابتة</td>
+                <td class="account-number">20101</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">دائنو شراء اصول ثابتة</td>
+                <td class="account-number">2010101</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">الاصول المستوردة</td>
+                <td class="account-number">20101010001</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">الأصول المحلية</td>
+                <td class="account-number">20101010002</td>
+            </tr>
+            <tr class="level-3">
+                <td class="name-level-3">قروض طويلة الاجل</td>
+                <td class="account-number">20102</td>
+            </tr>
+            <tr class="level-2">
+                <td class="name-level-2">الألتزامات المتداولة</td>
+                <td class="account-number">202</td>
+            </tr>
+            <tr class="level-3">
+                <td class="name-level-3">موردين</td>
+                <td class="account-number">20201</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">موردين</td>
+                <td class="account-number">2020101</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">السعدني للتجارة والخدمات الصناعية</td>
+                <td class="account-number">20201010001</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">منترونك</td>
+                <td class="account-number">20201010002</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركه عين شمس للتنميه الصناعيه</td>
+                <td class="account-number">20201010003</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">رويال اليكتريك للمقاولات والتوريدات الكهربائية</td>
+                <td class="account-number">20201010004</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة هينريش للتوكيلات التجارية</td>
+                <td class="account-number">20201010005</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">بيوسينس جروب BSG</td>
+                <td class="account-number">20201010006</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة الذهبية للكرتون -اى باك</td>
+                <td class="account-number">20201010007</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة جاما للتجارة والمقاولات</td>
+                <td class="account-number">20201010008</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">اليكتريك تكنولوجى</td>
+                <td class="account-number">20201010009</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">موردين متنوعون</td>
+                <td class="account-number">20201010010</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة الميهى الهندسية - عقد مقاولة اعمال الشبكات WFI - P.S - P.W</td>
+                <td class="account-number">20201010011</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مطعم الركن الدمشقي</td>
+                <td class="account-number">20201010012</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مجموعة التكنولوجيا المتقدمة</td>
+                <td class="account-number">20201010013</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة فاستر للمقاولات والتوريدات العمومية</td>
+                <td class="account-number">20201010014</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ابكس سلكشن Apex Selection</td>
+                <td class="account-number">20201010015</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة كونتكت للتاجير التمويلى</td>
+                <td class="account-number">20201010016</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة ال سالم جونسون - قطع غيار اللتشيلر</td>
+                <td class="account-number">20201010017</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">الشركة المصرية العالمية للسيارات</td>
+                <td class="account-number">20201010018</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مركز تحديث الصناعة</td>
+                <td class="account-number">20201010019</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">اشتكس للسيور</td>
+                <td class="account-number">20201010020</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة ايه بى سي اليكس - ارفف للعينات المرجعية</td>
+                <td class="account-number">20201010021</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركه سي باك لمواد التعبئه والتغليف ( كرتون )</td>
+                <td class="account-number">20201010022</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ماستر ميديكال للخدمات الطبية والمعملية</td>
+                <td class="account-number">20201010023</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">الترا فيجن فور انترناشيونال تريد يوفي - اللال</td>
+                <td class="account-number">20201010024</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة جابتيك للهندسة و التوريدات</td>
+                <td class="account-number">20201010025</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">الدولية للاستشارات الهندسية - الشحات صبري جود الشحات - مكتب الاستشاري</td>
+                <td class="account-number">20201010026</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة دلتا ايجبت باك -توريد كرتون</td>
+                <td class="account-number">20201010027</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة اطلسكوا ايجيبت للتجارة</td>
+                <td class="account-number">20201010028</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">دوكير للخدمات الطبية و المعملية - سلمى محمد فاروق الدهشان - ميديا</td>
+                <td class="account-number">20201010029</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة القاهرة لصناعة مواد التعبئة و التغلييف ( كوباك ) - رولى بروبلين</td>
+                <td class="account-number">20201010030</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصطفى احمد ابراهيم العنانى و شريكتة ( العنانى بلاستك ) - اكياس تعبئة مقاسات مختلفة</td>
+                <td class="account-number">20201010031</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">الشركة المصرة لأنظمة التغليف والبلاستيك مكة المكرمة</td>
+                <td class="account-number">20201010032</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة سي مان سولت-seaman salt</td>
+                <td class="account-number">20201010033</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">قلعة الكرتون لانتاج وتصنيع الكرنوم والورق</td>
+                <td class="account-number">20201010034</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">الحلول الميكاترونية للتحكم الالى ( ميكاسول )</td>
+                <td class="account-number">20201010035</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">جرين تك - Green tk engineering - معايرات</td>
+                <td class="account-number">20201010036</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة فيرست للتنمية الصناعية -توريد كرتون</td>
+                <td class="account-number">20201010037</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة نور العلمية التجارية-خدمات معايرة</td>
+                <td class="account-number">20201010038</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">جاينت جروب لصناعة الكرتون</td>
+                <td class="account-number">20201010039</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">صن باك لصناعة الكرتون</td>
+                <td class="account-number">20201010040</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركه ايبوبلانيت - للمقاولات العامه والتوريدات</td>
+                <td class="account-number">20201010041</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">بريمو لوب للتجارة و التوريدات</td>
+                <td class="account-number">20201010042</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">سينا مصر للامن و الحراسة</td>
+                <td class="account-number">20201010043</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انظمة المعالجة الكيميائية c.t.s</td>
+                <td class="account-number">20201010044</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة الفنار للمقاولات العامة والانشاء ورصف الطرق</td>
+                <td class="account-number">20201010045</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة البروج</td>
+                <td class="account-number">20201010046</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة فيوليا ووتر تكنولوجيز ايجيبت</td>
+                <td class="account-number">20201010047</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">تراست سمارت سيستمز</td>
+                <td class="account-number">20201010048</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">اوميجا للهندسة و التجارة</td>
+                <td class="account-number">20201010049</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">بافاريا مصر</td>
+                <td class="account-number">20201010050</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">اركاديا للتوريدات العمومية - عبدالرحمن مجدى سيد</td>
+                <td class="account-number">20201010051</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انفينيتي للتجهيزات العامة</td>
+                <td class="account-number">20201010052</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة ايجل لتشكيل المعادن</td>
+                <td class="account-number">20201010053</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">المصرية للادوات و الكابلات الكهربائية</td>
+                <td class="account-number">20201010054</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة فاركوبى العالمية</td>
+                <td class="account-number">20201010055</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">الشرق تكنولوجى للتوريدات</td>
+                <td class="account-number">20201010056</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة تكنو اير تاج</td>
+                <td class="account-number">20201010057</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة ابيس للحلول المتكاملة</td>
+                <td class="account-number">20201010058</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">منشأة محمد مسعد شلبى صلاح - ادفانسد للتكنولوجيا المياه و المقاولات</td>
+                <td class="account-number">20201010059</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ام ام كي باك للصناعة والتجارة - كرتون</td>
+                <td class="account-number">20201010060</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة ماسا للخمات الميكانيكية المتكاملة</td>
+                <td class="account-number">20201010061</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">جرين ايس للتكييف و الانظمة صديقة البيئة</td>
+                <td class="account-number">20201010062</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة تكنولوجيا هندسة المياة ويتكو</td>
+                <td class="account-number">20201010063</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة اخناتون تريدنج اند ربريسنتاشن</td>
+                <td class="account-number">20201010064</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة اجيتك للاجهزة العلمية المتكاملة</td>
+                <td class="account-number">20201010065</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة ابناء على الصياد - توريد سولار</td>
+                <td class="account-number">20201010066</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مجموعة السلام الدولية</td>
+                <td class="account-number">20201010067</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">Pharma concept</td>
+                <td class="account-number">20201010068</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">بيور - فلاتر</td>
+                <td class="account-number">20201010069</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة لونا للاستثمارات الصناعية</td>
+                <td class="account-number">20201010070</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">حسن يحيى بدر و شركاه مصنع لورد للملابس - ملابس للعمال</td>
+                <td class="account-number">20201010071</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">بي ارش انجيلوس للتكنولوجيا معالجة المياه</td>
+                <td class="account-number">20201010072</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة الميهي الهندسية - مشتريات</td>
+                <td class="account-number">20201010073</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">Cellopack - سيلو باك</td>
+                <td class="account-number">20201010074</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">المصرية اللوجستية لنظم المعلومات والتجارة الرقمية</td>
+                <td class="account-number">20201010075</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">الحورس لتوريد مواد التعبئة والتغليف</td>
+                <td class="account-number">20201010076</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">تكنوبلاست للطباعة والتغليف</td>
+                <td class="account-number">20201010077</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة سفن باك لصناعة الورق و الكرتون</td>
+                <td class="account-number">20201010078</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مكة للتجارة</td>
+                <td class="account-number">20201010079</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة المجموعة الطبية</td>
+                <td class="account-number">20201010080</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة ال سالم جونسون كنترولز ايجبت - عقد الصيانة</td>
+                <td class="account-number">20201010081</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">انفنتي للتجارة والتوريدات</td>
+                <td class="account-number">20201010082</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مؤسسة لابوراتورى ساينتفك سابليز</td>
+                <td class="account-number">20201010083</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة الاسكندرية لتوزيع الكهرباء</td>
+                <td class="account-number">20201010084</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة المياه والصرف الصحي</td>
+                <td class="account-number">20201010085</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة اى سيرفيس - مستلزمات شبكات واتصالات</td>
+                <td class="account-number">20201010086</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">الشركة المصرية الالمانية - راين برودكت</td>
+                <td class="account-number">20201010087</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">دلتا للصناعات الورقية - كرتون</td>
+                <td class="account-number">20201010088</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة العلا للمقاولات - علاء الدين محمد ابراهيم</td>
+                <td class="account-number">20201010089</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة اي دي سي ( للتطوير المعدات )</td>
+                <td class="account-number">20201010090</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة واتر تون - تنكات التحضير - الصين</td>
+                <td class="account-number">20201010091</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة واتر تاون-محطة معالجة المياه+تنكات التخزين-الصين</td>
+                <td class="account-number">20201010092</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة Finn Aqua - محطة انتاج المياه المقطرة - فنلندا</td>
+                <td class="account-number">20201010093</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة steelco - اوتوكلاف</td>
+                <td class="account-number">20201010094</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">اوبتيما سينتيفك ايجيبت - HTDS</td>
+                <td class="account-number">20201010095</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">SHANGHAI TOFFLON</td>
+                <td class="account-number">20201010096</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">OFFICINA COSTRUZIONI</td>
+                <td class="account-number">20201010097</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">HTDS INTERNATIONAL</td>
+                <td class="account-number">20201010098</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصنع دريمز الحبوبة لمستحضرات التجميل</td>
+                <td class="account-number">20201010099</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">دريم كيم للإستيراد والتصدير</td>
+                <td class="account-number">20201010100</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة رؤية لصناعة مواد التعبئة والتغليف</td>
+                <td class="account-number">20201010101</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة كرييتف للدعاية والإعلان</td>
+                <td class="account-number">20201010102</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة الفتح - عقد الالكتروميكانيك - مصنع غنيم للادوية</td>
+                <td class="account-number">20201010103</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">كريم محمد عبدالقادر - مكتب المحاسب القانوني</td>
+                <td class="account-number">20201010104</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة الفتح - عقد الكهرباء - مصنع غنيم للادوية</td>
+                <td class="account-number">20201010105</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة جى أم بى تك للإستشارات الهندسية-عقد شبكات-مصنع غنيم فارما GMP TECH</td>
+                <td class="account-number">20201010106</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة جرين باك - احمد محمد علي دياب توريد استيكرات</td>
+                <td class="account-number">20201010107</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">محمد كردي</td>
+                <td class="account-number">20201010108</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركه الفتح - شبكات خط ماكينه الساشيت</td>
+                <td class="account-number">20201010109</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">محمد موسى عمر عيسى - توريد انترلوك</td>
+                <td class="account-number">20201010110</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">محمد عطية ابراهيم</td>
+                <td class="account-number">20201010111</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة ميكروتك السعودية لتقنية المعلومات - برامج حسابات</td>
+                <td class="account-number">20201010112</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مكتب ميدك للاستشارات الهندسية - الاستشاري د / محمود بسيوني</td>
+                <td class="account-number">20201010113</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">محمد اسماعيل الصاوي - المراجع والمحاسب القانوني</td>
+                <td class="account-number">20201010114</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة الروبي للخدمات التجارية - مكتب المخلص الجمركي</td>
+                <td class="account-number">20201010115</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">سامي طلعت - مكتب تخليص جمركي واعفاءات</td>
+                <td class="account-number">20201010116</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">م/ محمد عبد المنعم - استشارات هندسيه</td>
+                <td class="account-number">20201010117</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">الشركه المتحده - دراي ميكس</td>
+                <td class="account-number">20201010118</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">تركيب البارتيشن - مدحت عبداللطيف فارما لاين</td>
+                <td class="account-number">20201010119</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">رمضان السيد محروس - استشارى الجمارك</td>
+                <td class="account-number">20201010120</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">محي الدين اسماعيل محمد ابراهيم - اعمال ملف اليقظة</td>
+                <td class="account-number">20201010121</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">محمود جمال ميهوب - ترخيص المكتب</td>
+                <td class="account-number">20201010122</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">الاستشارى - مجدى شفيق</td>
+                <td class="account-number">20201010123</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">للتعديل</td>
+                <td class="account-number">20201010124</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">اتحاد شاغيلى مول سيلفر ستار</td>
+                <td class="account-number">20201010125</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة المصرية الاماراتية للتامينات الحياة التكافلى</td>
+                <td class="account-number">20201010126</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">احمد جمال ميهوب</td>
+                <td class="account-number">20201010127</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة تراست كار ايجيبت</td>
+                <td class="account-number">20201010128</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">احمد عيد احمد سليمان - استشارات لاعتماد ال layout</td>
+                <td class="account-number">20201010129</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">الامانة بست كنترول - مكافحة القوارض و الحشرات</td>
+                <td class="account-number">20201010130</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة مصر للادارة و التنمية الهندسية ايمند - استشاري</td>
+                <td class="account-number">20201010131</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">بلوسكاى للسياحة</td>
+                <td class="account-number">20201010132</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">حيان ساينتفيك</td>
+                <td class="account-number">20201010133</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة اتش جى ايه للبلاستيك</td>
+                <td class="account-number">20201010134</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة ماستر بيلدر</td>
+                <td class="account-number">20201010135</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة هدير رفاعى - للرحلات</td>
+                <td class="account-number">20201010136</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">فيوتشر للتوريدات الهندسية</td>
+                <td class="account-number">20201010137</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة الاهرام - لمستحضرات التجميل</td>
+                <td class="account-number">20201010138</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">الفهد استيل للاستراد</td>
+                <td class="account-number">20201010139</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مركز الناصرية لمعالجة مخلفات الخطرة</td>
+                <td class="account-number">20201010140</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">الهندسية للطاقه الكهربائية</td>
+                <td class="account-number">20201010141</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة النظم المتكاملة لتكنولوجيا المعلومات</td>
+                <td class="account-number">20201010142</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة ايكا للمقاولات</td>
+                <td class="account-number">20201010143</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة اوميجا لمستحضرات التجميل</td>
+                <td class="account-number">20201010144</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">اليكس بايو سنتر - Alex Bio Cinter</td>
+                <td class="account-number">20201010145</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">اسلام فؤاد حسن علام - الدعايه و الاعلان مستحضرات تجميل</td>
+                <td class="account-number">20201010146</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مؤسسة الصفوة للتجارة و المقاولات</td>
+                <td class="account-number">20201010147</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصر هاى تك لمعالجة المياه</td>
+                <td class="account-number">20201010148</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">POLYMED DISTRIBUTION FZE</td>
+                <td class="account-number">20201010149</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة ZHUHAI UNITED LABORATORIES</td>
+                <td class="account-number">20201010150</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">كلير سينث- clear synth</td>
+                <td class="account-number">20201010151</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ميديكاب - medicap healthcare limited</td>
+                <td class="account-number">20201010152</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة شان دونج فارما - shan dong pharmaceuttcal glass</td>
+                <td class="account-number">20201010153</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">الشركة الوطنية للغاز ناتجاس - توصيل الغاز</td>
+                <td class="account-number">20201010154</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">احمد عبد الفتاح الفقى</td>
+                <td class="account-number">20201010155</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">اي اند اس للهندسة والتجارة</td>
+                <td class="account-number">20201010156</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">SHANGHAI TOFFLON دولار</td>
+                <td class="account-number">20201010157</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">OFFICINA COSTRUZIONI يورو</td>
+                <td class="account-number">20201010158</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">HTDS INTERNATIONAL دولار</td>
+                <td class="account-number">20201010159</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">POLYMED DISTRIBUTION FZE دولار</td>
+                <td class="account-number">20201010160</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة ZHUHAI UNITED LABORATORIES دولار</td>
+                <td class="account-number">20201010161</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">كلير سينث- clear synth دولار</td>
+                <td class="account-number">20201010162</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ميديكاب - medicap healthcare limited دولار</td>
+                <td class="account-number">20201010163</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة شان دونج فارما - shan dong pharmaceuttcal glass دولار</td>
+                <td class="account-number">20201010164</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">اسبكترا ايجيبت للتجارة و التوريدات</td>
+                <td class="account-number">20201010165</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">اي باك لصناعة وطباعة مواد التعبئة والتغليف</td>
+                <td class="account-number">20201010166</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">كرافت باك لتصنيع الكرتون المضلع والمنتجات الورقية</td>
+                <td class="account-number">20201010167</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة بيتا</td>
+                <td class="account-number">20201010168</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة الفا للالكترونيات - توريد الاحبار</td>
+                <td class="account-number">20201010169</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة CERT IND</td>
+                <td class="account-number">20201010170</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">بترو سيرف - للسلامة البيئية و الصحة المهنية</td>
+                <td class="account-number">20201010171</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة الاسكندرية للاجهزة</td>
+                <td class="account-number">20201010172</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">الذهبية للابواب الاكترونية</td>
+                <td class="account-number">20201010173</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة فريساج تريد</td>
+                <td class="account-number">20201010174</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">محمد رضا - اعمال عزل</td>
+                <td class="account-number">20201010175</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة المصرية للاملاح و المعادن بالفيوم - اميسال</td>
+                <td class="account-number">20201010176</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">أجيتك للأجهزة العلمية المتكاملة - Agitech</td>
+                <td class="account-number">20201010177</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">بيراميدز كيم للتوريدات العمومية - فرج كمال الدين عدلي</td>
+                <td class="account-number">20201010178</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة وي - المصرية للاتصالات</td>
+                <td class="account-number">20201010179</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">خالد حسن محمد الخزرجي (طارق للبلاستيك)</td>
+                <td class="account-number">20201010180</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">روبكس العالمية لتصنيع البلاستيك</td>
+                <td class="account-number">20201010181</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">المصرية للاثاث</td>
+                <td class="account-number">20201010182</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مورد عام (مشتريات)</td>
+                <td class="account-number">20201010183</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">المتحدة للحلول الصناعية</td>
+                <td class="account-number">20201010184</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">I-gess engineering solutions</td>
+                <td class="account-number">20201010185</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">AUSEN CHEMICAL GROUP</td>
+                <td class="account-number">20201010186</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">فاجا للصناعات</td>
+                <td class="account-number">20201010187</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ويجسار مصر</td>
+                <td class="account-number">20201010188</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">الشركة المصرية للخدمات الصناعية</td>
+                <td class="account-number">20201010189</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ريدوينج</td>
+                <td class="account-number">20201010190</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ماس براند</td>
+                <td class="account-number">20201010191</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">تكنيكال انجنيرنج سيرفيس</td>
+                <td class="account-number">20201010192</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ألفا لافال</td>
+                <td class="account-number">20201010193</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">التيسير للتوريدات الكهربائية</td>
+                <td class="account-number">20201010194</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ألفا باور</td>
+                <td class="account-number">20201010195</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ازيليس انترنتشيونال</td>
+                <td class="account-number">20201010196</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">BEIJING NEURONBC Laboratories</td>
+                <td class="account-number">20201010197</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">بنترونك</td>
+                <td class="account-number">20201010198</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">للتعديل 1</td>
+                <td class="account-number">20201010199</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">فارما ستار</td>
+                <td class="account-number">20201010200</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">الحمد باور HB</td>
+                <td class="account-number">20201010201</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">الشركة الألمانية باور للسخانات والتوريدات الكهربائية والبلاستيكية</td>
+                <td class="account-number">20201010202</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">جيميكا</td>
+                <td class="account-number">20201010203</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ميديكس</td>
+                <td class="account-number">20201010204</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">داود للرحلات</td>
+                <td class="account-number">20201010205</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">اسواق فتح الله</td>
+                <td class="account-number">20201010206</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">فارما ستيم</td>
+                <td class="account-number">20201010207</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ميديكا ساينتفك</td>
+                <td class="account-number">20201010208</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة كون اير - لتكييفات</td>
+                <td class="account-number">20201010209</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">محمد شعبان - شركة وسط الاسكندرية ايجار ماكينة تصوير</td>
+                <td class="account-number">20201010210</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">تو بي تكنولوجيا المعلومات و نظم المعلومات</td>
+                <td class="account-number">20201010211</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ايه يو اف ايجيبت لصناعة وتوزيع المكسرات</td>
+                <td class="account-number">20201010212</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">بدر برنتج - عبير عباس</td>
+                <td class="account-number">20201010213</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">متلايف لتأمينات الحياه</td>
+                <td class="account-number">20201010214</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ديسكى للاستثمار الصناعى</td>
+                <td class="account-number">20201010215</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركه بلايند اند شاتر للتجارة والتوريدات</td>
+                <td class="account-number">20201010216</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ال مأمون جروب للتجارة العامة برنتد</td>
+                <td class="account-number">20201010217</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">المصرية للتوريدات الدولية - تامر السعيد</td>
+                <td class="account-number">20201010218</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة جرجور</td>
+                <td class="account-number">20201010219</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">سوبر باك</td>
+                <td class="account-number">20201010220</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">بترواب لتقنية المعلومات</td>
+                <td class="account-number">20201010221</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">عاطف رشوان عبد الموجود</td>
+                <td class="account-number">20201010222</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">محمد سمير الحداد - اعمال دهانات</td>
+                <td class="account-number">20201010223</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة تكنكال للأعمال الهندسي</td>
+                <td class="account-number">20201010224</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">عبدالله عبدالفتاح احمد يوسف شومان - جبسمبورد</td>
+                <td class="account-number">20201010225</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">القطب للتجارة و المقاولات</td>
+                <td class="account-number">20201010226</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة ميدكس للمشروعات المتكاملة و المقاولات</td>
+                <td class="account-number">20201010227</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة النيل للمشروعات و التجارة</td>
+                <td class="account-number">20201010228</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شوقي سيد حسن سمارت للتوريدات الادوات المكتبية</td>
+                <td class="account-number">20201010229</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">المصرية للتامين التكافلى</td>
+                <td class="account-number">20201010230</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">united group integrated</td>
+                <td class="account-number">20201010231</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة انترناشيونال للصناعات الهندسية</td>
+                <td class="account-number">20201010232</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة التوكيلات المصريه الهندسيه</td>
+                <td class="account-number">20201010233</td>
+            </tr>
+            <tr class="level-3">
+                <td class="name-level-3">اوراق دفع</td>
+                <td class="account-number">20202</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">اوراق دفع</td>
+                <td class="account-number">2020201</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شيكات تحت السداد - البنك الاهلي / مدينتي - جنيه مصري</td>
+                <td class="account-number">20202010001</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شيكات تحت السداد - بنك قطر الوطني / كفر الشيخ - جنيه مصري</td>
+                <td class="account-number">20202010002</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شيكات تحت السداد - المصرف المتحد / فرع التجمع الخامس</td>
+                <td class="account-number">20202010003</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شيكات تحت السداد - بنك مصر / فرع التسعين - جنية مصري</td>
+                <td class="account-number">20202010004</td>
+            </tr>
+            <tr class="level-3">
+                <td class="name-level-3">المستحق الى اطراف ذات علاقة</td>
+                <td class="account-number">20203</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">المستحق الى اطراف ذات علاقة</td>
+                <td class="account-number">2020301</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">الأستاذ/ أيمن أحمد عبد المقصود غنيم</td>
+                <td class="account-number">20203010001</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة غنيم الدولية للمقاولات - السعودية</td>
+                <td class="account-number">20203010002</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة غنيم الدولية للتجارة و المقاولات - مصر</td>
+                <td class="account-number">20203010003</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">test</td>
+                <td class="account-number">20203010004</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مهندس محمد عبد المقصود - مدرسة دمياط الجديدة</td>
+                <td class="account-number">20203010005</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">الاستاذ/ رضا احمد عبد المقصود</td>
+                <td class="account-number">20203010006</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">جاري الشركاء</td>
+                <td class="account-number">2020302</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">جاري الشريك د/ السعيد غنيم</td>
+                <td class="account-number">20203020001</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">جاري الشريك د/ السعيد احمد غنيم</td>
+                <td class="account-number">202030200010001</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">جاري الشريك د/ السعيد احمد غنيم (الحزب)</td>
+                <td class="account-number">202030200010002</td>
+            </tr>
+            <tr class="level-3">
+                <td class="name-level-3">مصروفات مستحقة وارصدة دائنة اخرى</td>
+                <td class="account-number">20204</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">مصروفات مستحقة</td>
+                <td class="account-number">2020401</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">اجور ورواتب مستحقة شهر نوفمبر</td>
+                <td class="account-number">20204010001</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">اجور ورواتب مستحقة شهر ديسمبر</td>
+                <td class="account-number">20204010002</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصاريف مستحقة متنوعة</td>
+                <td class="account-number">20204010003</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">الهيئة العامة للتأمينات الأجتماعية</td>
+                <td class="account-number">20204010004</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصلحة الضرائب-كسب العمل</td>
+                <td class="account-number">20204010005</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصلحة الضرائب المصرية - ضريبة الخصم والاضافة</td>
+                <td class="account-number">20204010006</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">تأمينات للغير تامين مستر - هيئة التنمية الصناعية</td>
+                <td class="account-number">20204010007</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">اجور وراتب مستحقة شهر يناير</td>
+                <td class="account-number">20204010008</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">اجور ورواتب مستحقة شهر اكتوبر</td>
+                <td class="account-number">20204010009</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">اجور ورواتب مستحقة شهر سبتمبر</td>
+                <td class="account-number">20204010010</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">اجور ورواتب مستحقة شهر يونيو</td>
+                <td class="account-number">20204010011</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">اجور ورواتب مستحقة شهر مارس</td>
+                <td class="account-number">20204010012</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">اجور ورواتب مستحقة شهر فبراير</td>
+                <td class="account-number">20204010013</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">اجور ورواتب مستحقة شهر ابريل</td>
+                <td class="account-number">20204010014</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">اجور ورواتب مستحقة شهر مايو</td>
+                <td class="account-number">20204010015</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">اجور ورواتب مستحقة شهر يوليو</td>
+                <td class="account-number">20204010016</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">اجور ورواتب مستحقة شهر اغسطس</td>
+                <td class="account-number">20204010017</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">ضمانات الاعمال</td>
+                <td class="account-number">2020402</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">الشركة الهندسية المتحدة للمشروعات ضمان 5% اعمال مقايسة 15 بند.مصنع غنيم فارما</td>
+                <td class="account-number">20204020001</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة الفتح للمقاولات.مصنع غنيم فارما.ضمان10%الأعمال الكهروميكانيكية</td>
+                <td class="account-number">20204020002</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">الشركة الهندسية المتحدة للمشروعات.ضمان10%أعمال تصميم وتنفيذ مصنع غنيم فارما بالأسكندرية</td>
+                <td class="account-number">20204020003</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ضمانات اخرى</td>
+                <td class="account-number">20204020005</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">ارصدة دائنة اخرى</td>
+                <td class="account-number">2020403</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">محمد رضا-اعمال عزل</td>
+                <td class="account-number">20204030001</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">جمعة اسماعيل جمعة</td>
+                <td class="account-number">20204030002</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">الصافي غزال طاهر السعدي</td>
+                <td class="account-number">20204030003</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة برايفيت ميديكال Private Medical</td>
+                <td class="account-number">20204030004</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">زمكس - محمود عبدالرحمن طه محمد</td>
+                <td class="account-number">20204030005</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">حامد صبحي علي محمد الهباب -شراء خردة</td>
+                <td class="account-number">20204030006</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ارصدة دائنة اخرى</td>
+                <td class="account-number">20204030007</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصلحة الضرائب المصرية- اقساط قيمة مضافة</td>
+                <td class="account-number">20204030008</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">اتحاد نقابات المهن الطبية</td>
+                <td class="account-number">20204030009</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">رامي عبد العال سعد عبد العال المنسي - استشارات تسجيل منتجات</td>
+                <td class="account-number">20204030010</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">دفعات مقدمة عميل / شركة لونج ريتش العالمية المحدودة</td>
+                <td class="account-number">20204030011</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">دفعات مقدمة عميل / شركة لاما للانشطة المتعددة - السودان</td>
+                <td class="account-number">20204030012</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">دفعات مقدمة عميل / مكتب الجدارة العلمي بالعراق</td>
+                <td class="account-number">20204030013</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ايمن سيد احمد - اعمال سباكة</td>
+                <td class="account-number">20204030014</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شركة دى اتش ال - DHL</td>
+                <td class="account-number">20204030015</td>
+            </tr>
+            <tr class="level-3">
+                <td class="name-level-3">مجمع الاهلاك</td>
+                <td class="account-number">20205</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">مجمع الاهلاك</td>
+                <td class="account-number">2020501</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مجمع الاهلاك مبانى وانشاءات وبنية تحتية</td>
+                <td class="account-number">20205010001</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مجمع الاهلاك الات ومعدات</td>
+                <td class="account-number">20205010002</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مجمع الاهلاك وسائل نقل وانتقال</td>
+                <td class="account-number">20205010003</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مجمع الاهلاك اجهزة كمبيوتر واتصالات</td>
+                <td class="account-number">20205010004</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مجمع الاهلاك اثاث وتجهيزات</td>
+                <td class="account-number">20205010005</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مجمع الاهلاك عدد وادوات</td>
+                <td class="account-number">20205010006</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مجمع الاهلاك اجهزة معمل</td>
+                <td class="account-number">20205010007</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مجمع الاهلاك اجهزة كهربائية</td>
+                <td class="account-number">20205010008</td>
+            </tr>
+            <tr class="level-1">
+                <td class="name-level-1">المصروفات</td>
+                <td class="account-number">3</td>
+            </tr>
+            <tr class="level-2">
+                <td class="name-level-2">المصروفات التشغيلية</td>
+                <td class="account-number">301</td>
+            </tr>
+            <tr class="level-3">
+                <td class="name-level-3">المصروفات التشغيلية</td>
+                <td class="account-number">30101</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">المصروفات التشغيلية</td>
+                <td class="account-number">3010101</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">راتب اساسى</td>
+                <td class="account-number">30101010001</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">تامينات اجتماعية</td>
+                <td class="account-number">30101010002</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">عمالة يومية</td>
+                <td class="account-number">30101010003</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">صيانة سيارات</td>
+                <td class="account-number">30101010004</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">تشغيلي - صيانة معدات</td>
+                <td class="account-number">30101010005</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">صيانة مبانى</td>
+                <td class="account-number">30101010006</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">تشغيلي - سولار</td>
+                <td class="account-number">30101010007</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصاريف التخلص من المخلفات البيئية</td>
+                <td class="account-number">30101010008</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصاريف تصنيع مستحضرات التجميل</td>
+                <td class="account-number">30101010009</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصاريف شراء ملفات المستحضرات</td>
+                <td class="account-number">30101010010</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">تشغيلي - كهرباء</td>
+                <td class="account-number">30101010011</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">تشغيلي - مياه</td>
+                <td class="account-number">30101010012</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">وجبات عاملين</td>
+                <td class="account-number">30101010013</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصاريف عينات</td>
+                <td class="account-number">30101010014</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ايجار معدات</td>
+                <td class="account-number">30101010015</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">للتعديل1</td>
+                <td class="account-number">30101010016</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">نظافة</td>
+                <td class="account-number">30101010017</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ماموريات</td>
+                <td class="account-number">30101010018</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شحن ونقل</td>
+                <td class="account-number">30101010019</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">كيماويات معالجة ابراج التبريد</td>
+                <td class="account-number">30101010020</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">كيماويات معالجة المياه</td>
+                <td class="account-number">30101010021</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">نقل محاليل</td>
+                <td class="account-number">30101010022</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مستلزمات انتاج</td>
+                <td class="account-number">30101010023</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">اعمال معايرة</td>
+                <td class="account-number">30101010024</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مستلزمات معامل</td>
+                <td class="account-number">30101010025</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">غاز طبيعى للغلاية</td>
+                <td class="account-number">30101010026</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">احبار</td>
+                <td class="account-number">30101010027</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مستلزمات و مواد كيماوية معامل رقابة الجودة</td>
+                <td class="account-number">30101010028</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">اعمدة فصل</td>
+                <td class="account-number">30101010029</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مستلزمات و مواد كماوية معامل الميكروبيولوجي</td>
+                <td class="account-number">30101010030</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصاريف تحليل عينات بوزارة الصحة/ رسوم افراج طبي</td>
+                <td class="account-number">30101010031</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">للتعديل2</td>
+                <td class="account-number">30101010032</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">1</td>
+                <td class="account-number">30101010033</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">2</td>
+                <td class="account-number">30101010034</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">3</td>
+                <td class="account-number">30101010035</td>
+            </tr>
+            <tr class="level-2">
+                <td class="name-level-2">مصروفات ادراية وبيعية وتسويقية</td>
+                <td class="account-number">302</td>
+            </tr>
+            <tr class="level-3">
+                <td class="name-level-3">مصروفات ادراية وبيعية وتسويقية</td>
+                <td class="account-number">30201</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">مصروفات ادراية وبيعية وتسويقية</td>
+                <td class="account-number">3020101</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">الاجور والرواتب وما فى حكمها</td>
+                <td class="account-number">30201010001</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">صيانة سيارات</td>
+                <td class="account-number">30201010002</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">صيانة معدات</td>
+                <td class="account-number">30201010003</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">صيانة مباني</td>
+                <td class="account-number">30201010004</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصاريف التخلص من المخلفات البيئية</td>
+                <td class="account-number">30201010005</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ضيافة وبوفية</td>
+                <td class="account-number">30201010006</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصروف الضريبة المؤجلة</td>
+                <td class="account-number">30201010007</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">عمولات ومصاريف بنكية</td>
+                <td class="account-number">30201010008</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">نظافة</td>
+                <td class="account-number">30201010009</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">شحن ونقل</td>
+                <td class="account-number">30201010010</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصاريف تسويقية - عمولات بيع محاليل</td>
+                <td class="account-number">30201010011</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصاريف تسويق - مستحضرات التجميل ( كوزمتك )</td>
+                <td class="account-number">30201010012</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مكافآت</td>
+                <td class="account-number">30201010013</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">أمن وحراسة</td>
+                <td class="account-number">30201010014</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">كراسات شروط</td>
+                <td class="account-number">30201010015</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">صندوق طوارئ</td>
+                <td class="account-number">30201010016</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">استشارات مالية</td>
+                <td class="account-number">30201010017</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصروفات اخرى</td>
+                <td class="account-number">30201010018</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">المساهمة التكافلية</td>
+                <td class="account-number">30201010019</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصاريف اقامة وسفر</td>
+                <td class="account-number">30201010020</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">رسوم واشتراكات</td>
+                <td class="account-number">30201010021</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ايجارات</td>
+                <td class="account-number">30201010022</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">تامين علي الحياة والممتلكات</td>
+                <td class="account-number">30201010023</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">اتعاب مهنية واستشارات فنية</td>
+                <td class="account-number">30201010024</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">كهرباء</td>
+                <td class="account-number">30201010025</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصروف اهلاك مبانى وانشاءات وبنية تحتية</td>
+                <td class="account-number">30201010026</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصروف اهلاك الات ومعدات</td>
+                <td class="account-number">30201010027</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصروف اهلاك وسائل نقل وانتقال</td>
+                <td class="account-number">30201010028</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصروف اهلاك اجهزة كمبيوتر واتصالات</td>
+                <td class="account-number">30201010029</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصروف اهلاك اثاث وتجهيزات</td>
+                <td class="account-number">30201010030</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصروف اهلاك عدد وادوات</td>
+                <td class="account-number">30201010031</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصروف اهلاك اجهزة معمل</td>
+                <td class="account-number">30201010032</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصروف اهلاك اجهزة كهربائية</td>
+                <td class="account-number">30201010033</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ضيافة</td>
+                <td class="account-number">30201010034</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">غرامات</td>
+                <td class="account-number">30201010035</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ايجار سيارات</td>
+                <td class="account-number">30201010036</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">صيانة عامة</td>
+                <td class="account-number">30201010037</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصروف اليقظة الدوائية</td>
+                <td class="account-number">30201010038</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصروف ادوات مكتبية ومطبوعات</td>
+                <td class="account-number">30201010039</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصروف انترنت + تليفونات</td>
+                <td class="account-number">30201010040</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">اكراميات</td>
+                <td class="account-number">30201010041</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">بنزين و سولار</td>
+                <td class="account-number">30201010042</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">دعاية واعلان</td>
+                <td class="account-number">30201010043</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ايجار ماكينات تصوير</td>
+                <td class="account-number">30201010044</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصاريف متفرقة</td>
+                <td class="account-number">30201010045</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">علاج</td>
+                <td class="account-number">30201010046</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">فروق عملة اجنبية</td>
+                <td class="account-number">30201010047</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصروف ض. الدمغة الطبية</td>
+                <td class="account-number">30201010048</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">وجبات العاملين</td>
+                <td class="account-number">30201010049</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">التامينات الاجتماعية</td>
+                <td class="account-number">30201010050</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">سلامة وصحة مهنية</td>
+                <td class="account-number">30201010051</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ملابس و احذية امان</td>
+                <td class="account-number">30201010052</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">رسوم تسجيل مستحضرات</td>
+                <td class="account-number">30201010053</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مستلزمات IT + صيانة</td>
+                <td class="account-number">30201010054</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ترخيص سيارات</td>
+                <td class="account-number">30201010055</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">صيانة أثاث سكني ومكتبي</td>
+                <td class="account-number">30201010056</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصروف حماية المدنية</td>
+                <td class="account-number">30201010057</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">تبرعات</td>
+                <td class="account-number">30201010058</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مخالفات مرورية</td>
+                <td class="account-number">30201010059</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">صيانه طفايات حريق</td>
+                <td class="account-number">30201010060</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مياه</td>
+                <td class="account-number">30201010061</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">غاز</td>
+                <td class="account-number">30201010062</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصروف تأمين ضد السطو والحريق</td>
+                <td class="account-number">30201010063</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصروف انتقالات</td>
+                <td class="account-number">30201010064</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">م. تأمين صحي خاص</td>
+                <td class="account-number">30201010065</td>
+            </tr>
+            <tr class="level-2">
+                <td class="name-level-2">مصروفات تمويلية</td>
+                <td class="account-number">303</td>
+            </tr>
+            <tr class="level-3">
+                <td class="name-level-3">مصروفات تمويلية</td>
+                <td class="account-number">30301</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">مصروفات تمويلية</td>
+                <td class="account-number">3030101</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مصروفات تمويلية</td>
+                <td class="account-number">30301010001</td>
+            </tr>
+            <tr class="level-2">
+                <td class="name-level-2">تكلفة البضاعة المباعة</td>
+                <td class="account-number">304</td>
+            </tr>
+            <tr class="level-3">
+                <td class="name-level-3">COGS - كلوريد صوديوم 0.9% 500 مل بدون كاب</td>
+                <td class="account-number">30401</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">COGS - كلوريد صوديوم 0.9% 500 مل بدون كاب</td>
+                <td class="account-number">3040101</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">COGS - كلوريد صوديوم 0.9% 500 مل بدون كاب</td>
+                <td class="account-number">30401010001</td>
+            </tr>
+            <tr class="level-3">
+                <td class="name-level-3">COGS - رينجر 500 مل بدون كاب</td>
+                <td class="account-number">30402</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">COGS - رينجر 500 مل بدون كاب</td>
+                <td class="account-number">3040201</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">COGS - رينجر 500 مل بدون كاب</td>
+                <td class="account-number">30402010001</td>
+            </tr>
+            <tr class="level-3">
+                <td class="name-level-3">COGS - جلوكوز 5% 500 مل بدون كاب</td>
+                <td class="account-number">30403</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">COGS - جلوكوز 5% 500 مل بدون كاب</td>
+                <td class="account-number">3040301</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">COGS - جلوكوز 5% 500 مل بدون كاب</td>
+                <td class="account-number">30403010001</td>
+            </tr>
+            <tr class="level-3">
+                <td class="name-level-3">COGS - كلوريد صوديوم 0.45% 500 مل بدون كاب</td>
+                <td class="account-number">30404</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">COGS - كلوريد صوديوم 0.45% 500 مل بدون كاب</td>
+                <td class="account-number">3040401</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">COGS - كلوريد صوديوم 0.45% 500 مل بدون كاب</td>
+                <td class="account-number">30404010001</td>
+            </tr>
+            <tr class="level-3">
+                <td class="name-level-3">COGS - خليط ملح 0.9% + 5% جلوكوز 500 مل بدون كاب</td>
+                <td class="account-number">30405</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">COGS - خليط ملح 0.9% + 5% جلوكوز 500 مل بدون كاب</td>
+                <td class="account-number">3040501</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">COGS - خليط ملح 0.9% + 5% جلوكوز 500 مل بدون كاب</td>
+                <td class="account-number">30405010001</td>
+            </tr>
+            <tr class="level-3">
+                <td class="name-level-3">COGS - خليط ملح 0.45% + 5% جلوكوز 500 مل بدون كاب</td>
+                <td class="account-number">30406</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">COGS - خليط ملح 0.45% + 5% جلوكوز 500 مل بدون كاب</td>
+                <td class="account-number">3040601</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">COGS - خليط ملح 0.45% + 5% جلوكوز 500 مل بدون كاب</td>
+                <td class="account-number">30406010001</td>
+            </tr>
+            <tr class="level-3">
+                <td class="name-level-3">COGS - هيدروسولمنت 250 مل بدون كاب</td>
+                <td class="account-number">30407</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">COGS - هيدروسولمنت 250 مل بدون كاب</td>
+                <td class="account-number">3040701</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">COGS - هيدروسولمنت 250 مل بدون كاب</td>
+                <td class="account-number">30407010001</td>
+            </tr>
+            <tr class="level-3">
+                <td class="name-level-3">COGS - هيدروسولمنت 250 مل بالكاب</td>
+                <td class="account-number">30408</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">COGS - هيدروسولمنت 250 مل بالكاب</td>
+                <td class="account-number">3040801</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">COGS - هيدروسولمنت 250 مل بالكاب</td>
+                <td class="account-number">30408010001</td>
+            </tr>
+            <tr class="level-1">
+                <td class="name-level-1">الايرادات</td>
+                <td class="account-number">4</td>
+            </tr>
+            <tr class="level-2">
+                <td class="name-level-2">ايرادات النشاط</td>
+                <td class="account-number">401</td>
+            </tr>
+            <tr class="level-3">
+                <td class="name-level-3">ايرادات النشاط</td>
+                <td class="account-number">40101</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">مبيعات محاليل وادوية</td>
+                <td class="account-number">4010101</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مبيعات محاليل وادوية</td>
+                <td class="account-number">40101010001</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">مبيعات مستحضرات تجميل</td>
+                <td class="account-number">4010102</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">مبيعات مستحضرات تجميل</td>
+                <td class="account-number">40101020001</td>
+            </tr>
+            <tr class="level-2">
+                <td class="name-level-2">ايرادات متنوعة</td>
+                <td class="account-number">402</td>
+            </tr>
+            <tr class="level-3">
+                <td class="name-level-3">ايرادات متنوعة</td>
+                <td class="account-number">40201</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">ايراد بيع سكراب</td>
+                <td class="account-number">4020101</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ايراد بيع سكراب</td>
+                <td class="account-number">40201010001</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">ايراد بيع رايش بولى ايسلين</td>
+                <td class="account-number">4020102</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ايراد بيع رايش بولى ايسلين</td>
+                <td class="account-number">40201020001</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">ايرادات - عائد مدين بنك</td>
+                <td class="account-number">4020104</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ايرادات - عائد مدين بنك</td>
+                <td class="account-number">40201040001</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">إيرادات أخرى</td>
+                <td class="account-number">4020105</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">إيرادات أخرى</td>
+                <td class="account-number">40201050001</td>
+            </tr>
+            <tr class="level-1">
+                <td class="name-level-1">حقوق الملكية</td>
+                <td class="account-number">5</td>
+            </tr>
+            <tr class="level-2">
+                <td class="name-level-2">ارباح / خسارة العام</td>
+                <td class="account-number">501</td>
+            </tr>
+            <tr class="level-3">
+                <td class="name-level-3">ارباح / خسارة العام</td>
+                <td class="account-number">50101</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">ارباح / خسارة العام</td>
+                <td class="account-number">5010101</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">ارباح / خسارة العام</td>
+                <td class="account-number">50101010001</td>
+            </tr>
+            <tr class="level-2">
+                <td class="name-level-2">راس المال</td>
+                <td class="account-number">502</td>
+            </tr>
+            <tr class="level-3">
+                <td class="name-level-3">راس المال</td>
+                <td class="account-number">50201</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">راس المال</td>
+                <td class="account-number">5020101</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">رأس مال الشريك م السعيد احمد عبد المقصود غنيم</td>
+                <td class="account-number">50201010001</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">رأس مال الشريك أ يسرا احمد عبد الحميد ابراهيم</td>
+                <td class="account-number">50201010002</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">رأس مال الشريك أ إنجى السعيد احمد عبد المقصود غنيم</td>
+                <td class="account-number">50201010003</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">رأس مال الشريك أ محمد السعيد احمد عبد المقصود غنيم</td>
+                <td class="account-number">50201010004</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">رأس مال الشريك أ مهيب السعيد احمد عبد المقصود غنيم</td>
+                <td class="account-number">50201010005</td>
+            </tr>
+            <tr class="level-2">
+                <td class="name-level-2">أرباح وخسائر مرحلة</td>
+                <td class="account-number">503</td>
+            </tr>
+            <tr class="level-3">
+                <td class="name-level-3">أرباح وخسائر مرحلة</td>
+                <td class="account-number">50301</td>
+            </tr>
+            <tr class="level-4">
+                <td class="name-level-4">أرباح وخسائر مرحلة</td>
+                <td class="account-number">5030101</td>
+            </tr>
+            <tr class="level-5">
+                <td class="name-level-5">أرباح وخسائر مرحلة</td>
+                <td class="account-number">50301010001</td>
+            </tr>
+        </tbody>
+    </table>
+
+</body>
+</html>

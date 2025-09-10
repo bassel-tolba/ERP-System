@@ -1,0 +1,66 @@
+<!-- gipcco_project/inventory/templates/inventory/partials/reports/trial_balance_content.html -->
+{% load humanize %}
+<div class="card shadow-sm print-container">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+            التقرير للفترة من <span class="text-primary">{{ start_date }}</span> إلى <span class="text-primary">{{ end_date }}</span>
+        </h5>
+        <button class="btn btn-sm btn-outline-secondary d-print-none" onclick="window.print();">
+            <i class="bi bi-printer-fill me-1"></i> طباعة
+        </button>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th scope="col">اسم الحساب (Account Name)</th>
+                        <th scope="col" class="text-end" style="width: 20%;">مدين (Debit)</th>
+                        <th scope="col" class="text-end" style="width: 20%;">دائن (Credit)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Assets -->
+                    <tr class="table-secondary fw-bolder"><td colspan="3">الأصول (Assets)</td></tr>
+                    {% for node in asset_tree %}{% include 'inventory/partials/reports/_account_node_row_tb.html' with node=node level=1 %}{% endfor %}
+
+                    <!-- Liabilities -->
+                    <tr class="table-secondary fw-bolder"><td colspan="3">الالتزامات (Liabilities)</td></tr>
+                    {% for node in liability_tree %}{% include 'inventory/partials/reports/_account_node_row_tb.html' with node=node level=1 %}{% endfor %}
+
+                    <!-- Equity -->
+                    <tr class="table-secondary fw-bolder"><td colspan="3">حقوق الملكية (Equity)</td></tr>
+                    {% for node in equity_tree %}{% include 'inventory/partials/reports/_account_node_row_tb.html' with node=node level=1 %}{% endfor %}
+
+                    <!-- Revenue -->
+                    <tr class="table-secondary fw-bolder"><td colspan="3">الإيرادات (Revenue)</td></tr>
+                    {% for node in revenue_tree %}{% include 'inventory/partials/reports/_account_node_row_tb.html' with node=node level=1 %}{% endfor %}
+
+                    <!-- Expenses -->
+                    <tr class="table-secondary fw-bolder"><td colspan="3">المصروفات (Expenses)</td></tr>
+                    {% for node in expense_tree %}{% include 'inventory/partials/reports/_account_node_row_tb.html' with node=node level=1 %}{% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr class="table-primary fw-bold">
+                        <td class="text-end fs-5">الإجمالي (Totals)</td>
+                        <td class="text-end fs-5 font-monospace">{{ grand_total_debits|floatformat:3|intcomma }}</td>
+                        <td class="text-end fs-5 font-monospace">{{ grand_total_credits|floatformat:3|intcomma }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer text-center">
+        {% if is_balanced %}
+            <h5 class="text-success mb-0">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                ميزان المراجعة متوازن (Trial Balance is Balanced)
+            </h5>
+        {% else %}
+            <h5 class="text-danger mb-0">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                تحذير: ميزان المراجعة غير متوازن! (Warning: Trial Balance is NOT Balanced!)
+            </h5>
+        {% endif %}
+    </div>
+</div>

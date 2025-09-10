@@ -1,0 +1,114 @@
+{% load i18n humanize %}
+
+{# The chart data is passed as a JSON script island #}
+<script id="chart-data" type="application/json">{{ chart_data|safe }}</script>
+
+<div class="container-fluid mt-3">
+    <h2 class="mb-4">{% translate "Batch Production Variance Report" %}</h2>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">{% translate "Report Filters" %}</h5>
+        </div>
+        <div class="card-body">
+            <form id="batchVarianceForm" method="GET" action="{% url 'inventory:batch_production_variance_report' %}" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label for="start_date" class="form-label">{% translate "Start Date" %}</label>
+                    <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date }}">
+                </div>
+                <div class="col-md-4">
+                    <label for="end_date" class="form-label">{% translate "End Date" %}</label>
+                    <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date }}">
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary w-100">{% translate "Apply Filters" %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {# The canvas elements for the charts to render into #}
+    <div class="row g-4 mt-3">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header"><h5 class="mb-0">{% translate "Total Quantity Variance by Primitive Product" %}</h5></div>
+                <div class="card-body"><div style="height: 300px;"><canvas id="quantityVarianceChart"></canvas></div></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header"><h5 class="mb-0">{% translate "Total Cost Variance by Primitive Product" %}</h5></div>
+                <div class="card-body"><div style="height: 300px;"><canvas id="costVarianceChart"></canvas></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="mb-0">{% translate "Report Details" %}</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover table-striped mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th colspan="4">{% translate "Batch Information" %}</th>
+                        <th colspan="3">{% translate "Consumption" %}</th>
+                        <th colspan="2">{% translate "Variance" %}</th>
+                    </tr>
+                    <tr>
+                        <th>{% translate "Shop Order" %}</th>
+                        <th>{% translate "Batch No." %}</th>
+                        <th>{% translate "Final Product" %}</th>
+                        <th>{% translate "Material" %}</th>
+                        <th class="text-center">{% translate "Theoretical" %}</th>
+                        <th class="text-center">{% translate "Actual" %}</th>
+                        <th class="text-center">{% translate "Unit Cost" %}</th>
+                        <th class="text-center">{% translate "Quantity" %}</th>
+                        <th class="text-center">{% translate "Cost" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for data in report_data %}
+                        {% for item in data.detailed_items %}
+                            <tr>
+                                {% if forloop.first %}
+                                    <td rowspan="{{ data.detailed_items|length }}">{{ data.main_batch.shop_order_number }}</td>
+                                    <td rowspan="{{ data.detailed_items|length }}">{{ data.main_batch.batch_number }}</td>
+                                    <td rowspan="{{ data.detailed_items|length }}">{{ data.main_batch.template.final_product.name }}</td>
+                                {% endif %}
+                                <td>{{ item.product_name }}</td>
+                                <td class="text-center">{{ item.theoretical_quantity|floatformat:3 }}</td>
+                                <td class="text-center">{{ item.actual_quantity|floatformat:3 }}</td>
+                                <td class="text-center">{{ item.cost_at_consumption|floatformat:3 }}</td>
+                                <td class="text-center {% if item.variance_quantity > 0 %}table-danger{% elif item.variance_quantity < 0 %}table-success{% endif %}">{{ item.variance_quantity|floatformat:3 }}</td>
+                                <td class="text-center {% if item.variance_cost > 0 %}table-danger{% elif item.variance_cost < 0 %}table-success{% endif %}">{{ item.variance_cost|floatformat:3 }}</td>
+                            </tr>
+                        {% endfor %}
+                         <tr class="table-secondary fw-bold">
+                            <td colspan="4" class="text-end">{% translate "Batch Total" %}</td>
+                            <td class="text-center">{{ data.batch_total_theoretical_qty|floatformat:3 }}</td>
+                            <td class="text-center">{{ data.batch_total_actual_qty|floatformat:3 }}</td>
+                            <td></td>
+                            <td class="text-center">{{ data.batch_total_variance_qty|floatformat:3 }}</td>
+                            <td class="text-center">{{ data.batch_total_variance_cost|floatformat:3 }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="9" class="text-center">{% translate "No batch data available for the selected period." %}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot class="table-dark fw-bold">
+                    <tr>
+                        <td colspan="4" class="text-end">{% translate "Grand Total" %}</td>
+                        <td class="text-center">{{ grand_total_theoretical_qty|floatformat:3 }}</td>
+                        <td class="text-center">{{ grand_total_actual_qty|floatformat:3 }}</td>
+                        <td></td>
+                        <td class="text-center">{{ grand_total_variance_qty|floatformat:3 }}</td>
+                        <td class="text-center">{{ grand_total_variance_cost|floatformat:3 }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>

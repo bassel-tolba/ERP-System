@@ -181,7 +181,7 @@ def api_get_po_items(request: HttpRequest, po_id: int) -> JsonResponse:
             'product_id': item.product.id,
             'product_name': f"{item.product.name} ({item.product.code})",
             'quantity_remaining': item.quantity_remaining,
-            'unit_price': item.effective_unit_price
+            'base_price_per_unit': item.base_price_per_unit
         } for item in po_items
     ]
     return JsonResponse(data, safe=False)
@@ -213,40 +213,8 @@ def api_get_sellable_stock(request: HttpRequest) -> JsonResponse:
     return JsonResponse(data, safe=False)
 
 
-
 # --- CORRECTED API ENDPOINT ---
 def api_get_available_stock(request, product_pk):
-    """
-    API endpoint to get all available, released stock logs for a given product.
-    Used for the internal consumption form.
-    THIS VERSION IS CORRECTED for MRO/Consumable items.
-    """
-    product = get_object_or_404(Product, pk=product_pk)
-    
-    # Find all released logs for this product
-    released_logs = InventoryLog.objects.filter(
-        product=product,
-        status=InventoryLog.Status.RELEASED
-    ).annotate(
-        # For MRO/Consumables, we ONLY care about internal consumptions.
-        total_consumed=Coalesce(Sum('consumptions__quantity_consumed'), 0.0, output_field=FloatField())
-    ).annotate(
-        # The calculation is simpler: initial quantity minus what's been internally consumed.
-        remaining_quantity=F('quantity') - F('total_consumed')
-    ).filter(
-        remaining_quantity__gt=0.001  # Only show logs with stock left
-    ).order_by('release_timestamp')
-
-    data = [
-        {
-            'id': log.id,
-            'display_text': f"QC: {log.qc_no or 'N/A'} | متاح: {log.remaining_quantity:.3f} | السعر: {log.unit_price or 'N/A'}",
-            'remaining_quantity': log.remaining_quantity,
-            'unit_price': log.unit_price
-        }
-        for log in released_logs
-    ]
-    return JsonResponse(data, safe=False)
     """
     API endpoint to get all available, released stock logs for a given product.
     Used for the internal consumption form.
@@ -274,9 +242,9 @@ def api_get_available_stock(request, product_pk):
     data = [
         {
             'id': log.id,
-            'display_text': f"QC: {log.qc_no or 'N/A'} | متاح: {log.remaining_quantity:.3f} | السعر: {log.unit_price or 'N/A'}",
+            'display_text': f"QC: {log.qc_no or 'N/A'} | متاح: {log.remaining_quantity:.3f} | السعر: {log.costing_unit_price or 'N/A'}",
             'remaining_quantity': log.remaining_quantity,
-            'unit_price': log.unit_price
+            'costing_unit_price': log.costing_unit_price
         }
         for log in released_logs
     ]

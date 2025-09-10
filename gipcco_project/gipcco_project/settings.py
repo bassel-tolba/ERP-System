@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # --- OUR APP ---
     'inventory.apps.InventoryConfig',
+     # Add this line
+    'django.contrib.humanize', # For using filters like intcomma
 ]
 
 MIDDLEWARE = [
@@ -128,12 +130,14 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-# --- NEW SETTING FOR STATIC FILES ---
-# This tells Django where to look for static files that are not in an app's 'static' directory.
-# It points to the 'static' folder we created at the project root.
+# --- ADD THIS ---
 STATICFILES_DIRS = [
-    BASE_DIR / "static",
+    os.path.join(BASE_DIR, "static"),
 ]
+# ---------------
+
+# This is the path where collectstatic will gather all files.
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 
 # Default primary key field type

@@ -1,69 +1,72 @@
 <!-- gipcco_project/inventory/templates/inventory/partials/sales_order_create_content.html -->
-
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h2 mb-0">إنشاء أمر بيع جديد</h1>
-    <a href="{% url 'inventory:sales_orders' %}" class="btn btn-outline-secondary">
-        <i class="bi bi-x-lg me-2"></i>إلغاء
-    </a>
+  <h1 class="h2 text-primary">إنشاء أمر بيع جديد</h1>
+  <a href="{% url 'inventory:sales_orders' %}" class="btn btn-outline-secondary">
+    <i class="bi bi-list-ul me-2"></i>عرض كل الأوامر
+  </a>
 </div>
 
 <form method="POST" action="{% url 'inventory:create_sales_order' %}">
-    {% csrf_token %}
-    <div class="card shadow-sm mb-4">
-        <div class="card-header">
-            <h5 class="mb-0">بيانات أمر البيع الأساسية</h5>
-        </div>
-        <div class="card-body">
-            <div class="row g-3">
-                <div class="col-md-4">
-                    <label for="customer_id" class="form-label">العميل</label>
-                    <select name="customer_id" id="customer_id" class="form-select searchable-select" required>
-                        <option value="">-- اختر عميل --</option>
-                        {% for customer in customers %}
-                        <option value="{{ customer.id }}">{{ customer.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label for="so_number" class="form-label">رقم أمر البيع</label>
-                    <input type="text" name="so_number" id="so_number" class="form-control" required>
-                </div>
-                <div class="col-md-4">
-                    <label for="order_date" class="form-label">تاريخ الأمر</label>
-                    <input type="text" name="order_date" id="order_date" class="form-control datepicker" value="{{ today_date }}" required>
-                </div>
-            </div>
-        </div>
+  {% csrf_token %}
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-light">
+      <h5 class="mb-0">بيانات الأمر الأساسية</h5>
     </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label for="customer_id" class="form-label">العميل</label>
+          <select id="customer_id" name="customer_id" class="form-select searchable-select" required>
+            <option value="">اختر عميل...</option>
+            {% for customer in customers %}
+              <option value="{{ customer.id }}">{{ customer.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label for="so_number" class="form-label">رقم أمر البيع (SO)</label>
+          <input type="text" id="so_number" name="so_number" class="form-control" required />
+        </div>
+        <div class="col-md-4">
+          <label for="order_date" class="form-label">تاريخ الأمر</label>
+          <input type="text" id="order_date" name="order_date" class="form-control datepicker" value="{{ today_date }}" required />
+        </div>
+      </div>
+    </div>
+  </div>
 
-    <div class="card shadow-sm">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">بنود أمر البيع</h5>
-            <button type="button" class="btn btn-sm btn-outline-success" id="add-so-item-btn">
-                <i class="bi bi-plus-circle-fill me-2"></i>إضافة بند
-            </button>
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-bordered mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="ps-3" style="width: 50%;">المنتج / التشغيلة</th>
-                            <th style="width: 20%;">الكمية المطلوبة</th>
-                            <th style="width: 20%;">سعر الوحدة</th>
-                            <th class="pe-2"></th>
-                        </tr>
-                    </thead>
-                    <tbody id="so-items-tbody">
-                        <!-- Rows will be added by JavaScript -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <div class="card-footer text-end">
-            <button type="submit" class="btn btn-primary btn-lg">
-                <i class="bi bi-check2-circle me-2"></i>حفظ أمر البيع
-            </button>
-        </div>
+  <div class="card shadow-sm">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">بنود أمر البيع</h5>
+      <button type="button" class="btn btn-sm btn-success" id="add-so-item-btn">
+        <i class="bi bi-plus-circle-fill me-2"></i>إضافة بند جديد
+      </button>
     </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover table-striped mb-0">
+          <thead class="table-light">
+            <tr>
+              <!-- ====== START OF CORRECTION ====== -->
+              <th class="ps-3" style="width: 40%;">المنتج/التشغيلة</th>
+              <th style="width: 20%;">الكمية المطلوبة</th>
+              <th style="width: 20%;">السعر الأساسي / وحدة</th>
+              <th style="width: 15%;">ض.ق.م (%)</th>
+              <th class="text-center pe-2" style="width: 5%;"></th>
+              <!-- ====== END OF CORRECTION ====== -->
+            </tr>
+          </thead>
+          <tbody id="so-items-tbody">
+            <!-- Rows will be dynamically added here by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-4 d-flex justify-content-end">
+    <button type="submit" class="btn btn-primary btn-lg">
+      <i class="bi bi-save-fill me-2"></i>حفظ أمر البيع
+    </button>
+  </div>
 </form>

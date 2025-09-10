@@ -1,0 +1,45 @@
+<!-- gipcco_project\inventory\templates\inventory\reports\trial_balance.html -->
+{% extends "inventory/layout.html" %}
+{% load static %}
+
+{% block title %}ميزان المراجعة | Trial Balance{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="h4">
+            <i class="bi bi-balance-scale text-primary me-2"></i>
+            ميزان المراجعة (Trial Balance)
+        </h2>
+    </div>
+
+    <!-- Filter Form -->
+    <div class="card shadow-sm mb-4 d-print-none">
+        <div class="card-body">
+            <form id="filter-form" class="row g-3 align-items-center" method="GET" action="{% url 'inventory:trial_balance' %}">
+                <div class="col-md-5">
+                    <label for="start_date" class="form-label">من تاريخ (From Date)</label>
+                    <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date }}">
+                </div>
+                <div class="col-md-5">
+                    <label for="end_date" class="form-label">إلى تاريخ (To Date)</label>
+                    <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date }}">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-funnel-fill me-1"></i> تحديث
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Report Content Area -->
+    <div id="report-content">
+        {% include 'inventory/partials/reports/trial_balance_content.html' %}
+    </div>
+
+</div>
+{% endblock %}

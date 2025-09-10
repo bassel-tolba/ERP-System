@@ -1,0 +1,103 @@
+/* Print-specific styles */
+@media print {
+    /* Hide elements not needed for printing */
+    .d-print-none {
+        display: none !important;
+    }
+
+    /* Ensure tables and their content are fully visible */
+    .table {
+        width: 100%;
+        margin-bottom: 1rem;
+        color: #212529;
+        border-collapse: collapse;
+    }
+
+    .table th,
+    .table td {
+        padding: 0.75rem;
+        vertical-align: top;
+        border-top: 1px solid #dee2e6;
+    }
+
+    .table thead th {
+        vertical-align: bottom;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    .table tbody + tbody {
+        border-top: 2px solid #dee2e6;
+    }
+
+    .table .table-bordered {
+        border: 1px solid #dee2e6;
+    }
+
+    .table-bordered th,
+    .table-bordered td {
+        border: 1px solid #dee2e6;
+    }
+
+    .table-bordered thead th,
+    .table-bordered thead td {
+        border-bottom-width: 2px;
+    }
+
+    /* Remove shadows and borders from cards for cleaner print */
+    .card {
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    .card-header {
+        background-color: #f8f9fa !important;
+        border-bottom: 1px solid #e9ecef !important;
+    }
+
+    /* Adjust text and background colors for print */
+    body {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color: #000;
+        background-color: #fff;
+    }
+
+    .table-light {
+        background-color: #f8f9fa !important;
+    }
+
+    .table-secondary {
+        background-color: #e2e3e5 !important;
+    }
+
+    .table-primary {
+        background-color: #cfe2ff !important;
+    }
+
+    .table-success {
+        background-color: #d1e7dd !important;
+    }
+
+    .table-danger {
+        background-color: #f8d7da !important;
+    }
+
+    /* Ensure text colors are readable */
+    .text-primary {
+        color: #007bff !important;
+    }
+    .text-success {
+        color: #28a745 !important;
+    }
+    .text-danger {
+        color: #dc3545 !important;
+    }
+
+    /* Page breaks for better report separation */
+    .print-container {
+        page-break-after: always;
+    }
+    .print-container:last-child {
+        page-break-after: auto;
+    }
+}

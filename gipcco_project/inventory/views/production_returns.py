@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.db.models import Q
 
 from ..models import BatchItem, Product, ProductionReturn
+from ..services.costing_service import recalculate_cost_history_for_product
 
 
 # --- Production Returns Views ---
@@ -33,7 +34,7 @@ def production_returns(request: HttpRequest) -> HttpResponse:
         try:
             with transaction.atomic():
                 quantity = float(quantity_str)
-                return_date = datetime.strptime(return_date_str, '%Y-%m-%d')
+                return_datetime = timezone.make_aware(datetime.strptime(return_date_str, '%Y-%m-%d'))
                 
                 # Validation
                 total_consumed = BatchItem.objects.filter(source_log_id=source_log_id).aggregate(total=Coalesce(Sum('actual_quantity'), 0.0))['total']
@@ -43,14 +44,16 @@ def production_returns(request: HttpRequest) -> HttpResponse:
                 if quantity > max_returnable + 0.001:
                     messages.error(request, f"لا يمكن إرجاع هذه الكمية. الكمية القصوى المسموحة من هذا المصدر هي {max_returnable:.3f}")
                 else:
-                    ProductionReturn.objects.create(
+                    pr_return = ProductionReturn.objects.create(
                         product_id=product_id,
                         source_log_id=source_log_id,
                         quantity=quantity,
-                        return_date=return_date,
+                        return_date=return_datetime,
                         notes=notes
                     )
-                    messages.success(request, "تم تسجيل المرتجع بنجاح.")
+                    # --- COSTING TRIGGER ---
+                    recalculate_cost_history_for_product(pr_return.product_id, pr_return.return_date)
+                    messages.success(request, "تم تسجيل المرتجع وتحديث التكاليف بنجاح.")
         except Exception as e:
             messages.error(request, f"حدث خطأ أثناء الحفظ: {e}")
         
@@ -74,6 +77,14 @@ def delete_production_return(request: HttpRequest, pk: int) -> HttpResponse:
     Deletes a production return record.
     """
     pr_return = get_object_or_404(ProductionReturn, pk=pk)
+    
+    # --- COSTING TRIGGER ---
+    product_id_to_recalc = pr_return.product_id
+    recalc_start_date = pr_return.return_date
+    
     pr_return.delete()
-    messages.info(request, 'تم حذف سجل الإرجاع بنجاح.')
+    
+    recalculate_cost_history_for_product(product_id_to_recalc, recalc_start_date)
+
+    messages.info(request, 'تم حذف سجل الإرجاع وتحديث التكاليف بنجاح.')
     return redirect('inventory:production_returns')

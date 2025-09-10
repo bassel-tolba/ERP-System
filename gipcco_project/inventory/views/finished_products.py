@@ -10,6 +10,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from ..models import Batch, FinishedProductReceipt, ReceiptSubBatch
+from ..services.costing_service import get_inventory_state_at_datetime
 
 def finished_goods_status(request):
     """
@@ -77,21 +78,25 @@ def receive_finished_product(request, batch_pk, individual_batch_number):
     Handles the form for receiving a single batch from a production plan.
     """
     production_plan = get_object_or_404(
-        Batch.objects.select_related('template__final_product').prefetch_related('items'), 
+        Batch.objects.select_related('template__final_product').prefetch_related('items__primitive_product'), 
         pk=batch_pk
     )
 
-    # --- MODIFICATION ---
-    # The check for existing receipts has been removed to allow multiple receipts
-    # for the same batch number, as requested.
-    # if FinishedProductReceipt.objects.filter(batch=production_plan, individual_batch_number=individual_batch_number).exists():
-    #     messages.error(request, f"تشغيلة رقم '{individual_batch_number}' تم استلامها بالفعل.")
-    #     return redirect('inventory:view_batch', pk=batch_pk)
+    # ====== START OF CORRECTION ======
+    # This logic now correctly calculates the cost even if the `cost_at_consumption`
+    # field hasn't been populated by the costing service yet.
+    total_plan_cost = Decimal('0.0')
+    for item in production_plan.items.all():
+        cost = item.cost_at_consumption
+        # If cost is not yet calculated (due to signal timing), calculate it on the fly
+        if cost is None:
+            state = get_inventory_state_at_datetime(item.primitive_product_id, production_plan.creation_date)
+            mac = (state['value'] / state['quantity']) if state['quantity'] > 0 else Decimal('0.0')
+            cost = mac.quantize(Decimal('0.001'))
+        
+        total_plan_cost += cost * Decimal(str(item.actual_quantity or 0.0))
+    # ====== END OF CORRECTION ======
 
-    total_plan_cost = sum(
-        (item.cost_at_consumption or Decimal('0')) * Decimal(str(item.actual_quantity or 0.0))
-        for item in production_plan.items.all()
-    )
     num_batches_in_plan = production_plan.number_of_batches_in_plan
     proportional_cost = (total_plan_cost / num_batches_in_plan) if num_batches_in_plan > 0 else Decimal('0.0')
 

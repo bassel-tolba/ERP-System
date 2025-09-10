@@ -6,7 +6,7 @@ from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
-from ..models import Company, Product, ProductTag
+from ..models import Company, Product, ProductTag, Account
 
 
 def companies(request: HttpRequest) -> HttpResponse:
@@ -75,7 +75,6 @@ def products(request: HttpRequest) -> HttpResponse:
             messages.error(request, f'كود المنتج "{code}" موجود بالفعل.')
         else:
             product = Product.objects.create(name=name, code=code, product_type=product_type, unit=unit)
-            # --- FIX: Associate the selected tags with the newly created product ---
             if tag_ids:
                 product.tags.set(tag_ids)
             messages.success(request, f'تمت إضافة المنتج "{name}" بنجاح.')
@@ -83,10 +82,11 @@ def products(request: HttpRequest) -> HttpResponse:
 
     context = {
         'active_page': 'products',
-        # --- OPTIMIZATION: Prefetch related tags to avoid extra database queries in the template ---
         'products': Product.objects.prefetch_related('tags').order_by('name'),
         'product_type_choices': Product.ProductType.choices,
-        'all_tags': ProductTag.objects.all(), # Pass all tags to the template
+        'all_tags': ProductTag.objects.all(),
+        # --- NEW: Pass accounts for override dropdowns ---
+        'all_accounts': Account.objects.all(),
     }
     if 'X-Partial-Request' in request.headers:
         return render(request, 'inventory/partials/products_content.html', context)
@@ -103,7 +103,12 @@ def edit_product(request: HttpRequest, pk: int) -> HttpResponse:
     code = request.POST.get('code')
     p_type = request.POST.get('product_type')
     unit = request.POST.get('unit')
-    tag_ids = request.POST.getlist('tags') # Get selected tag IDs
+    tag_ids = request.POST.getlist('tags')
+    
+    # --- NEW: Get account override IDs from the form ---
+    override_inventory_account_id = request.POST.get('override_inventory_account')
+    override_cogs_expense_account_id = request.POST.get('override_cogs_expense_account')
+    override_sales_revenue_account_id = request.POST.get('override_sales_revenue_account')
 
     if all([name, code, p_type, unit]):
         if Product.objects.filter(code=code).exclude(pk=pk).exists():
@@ -113,8 +118,13 @@ def edit_product(request: HttpRequest, pk: int) -> HttpResponse:
             product.code = code
             product.product_type = p_type
             product.unit = unit
+            
+            # --- NEW: Set account override fields ---
+            product.override_inventory_account_id = override_inventory_account_id if override_inventory_account_id else None
+            product.override_cogs_expense_account_id = override_cogs_expense_account_id if override_cogs_expense_account_id else None
+            product.override_sales_revenue_account_id = override_sales_revenue_account_id if override_sales_revenue_account_id else None
+
             product.save()
-            # --- FIX: Update the product's associated tags after saving ---
             product.tags.set(tag_ids)
             messages.success(request, "تم تعديل المنتج بنجاح.")
     return redirect('inventory:products')
@@ -137,7 +147,7 @@ def create_tag(request: HttpRequest) -> HttpResponse:
     Handles creating a new product tag and associating it with products.
     """
     name = request.POST.get('name')
-    product_ids = request.POST.getlist('products')  # Get selected product IDs
+    product_ids = request.POST.getlist('products')
     
     if not name:
         messages.error(request, 'يرجى إدخال اسم الوسم.')
@@ -145,7 +155,6 @@ def create_tag(request: HttpRequest) -> HttpResponse:
         
     tag, created = ProductTag.objects.get_or_create(name=name)
     if created:
-        # Associate tag with selected products
         if product_ids:
             products = Product.objects.filter(id__in=product_ids)
             for product in products:

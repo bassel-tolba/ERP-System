@@ -1,0 +1,33 @@
+<!-- gipcco_project/inventory/templates/inventory/partials/reports/_account_node_row_pnl.html -->
+{% load humanize inventory_filters %}
+{% comment %}
+    Recursive template to render a node in the P&L tree.
+    Expects:
+    - node: The dictionary for the current account node.
+    - level: The current indentation level (integer).
+{% endcomment %}
+
+{# Only render a row if the account has activity during the period or is a parent group #}
+{% if node.period_change != 0 or node.children %}
+<tr class="{% if not node.children %}fw-normal{% else %}fw-bold{% endif %}">
+    <td style="padding-inline-start: {% widthratio level 1 20 %}px !important;">
+        {{ node.account.code }} - {{ node.account.name }}
+    </td>
+    <td class="text-end font-monospace" style="width: 25%;">
+        {# Only leaf nodes (non-parents) with a value should show an amount #}
+        {# Parent node totals will be displayed in the summary rows #}
+        {# We show all values as positive numbers, as the section (Revenue/Expense) dictates their effect #}
+        {% if not node.children and node.period_change != 0 %}
+            {% if node.period_change < 0 %}
+                {{ node.period_change|abs_filter|floatformat:3|intcomma }}
+            {% else %}
+                {{ node.period_change|abs_filter|floatformat:3|intcomma }}
+            {% endif %}
+        {% endif %}
+    </td>
+</tr>
+{% endif %}
+
+{% for child_node in node.children %}
+    {% include 'inventory/partials/reports/_account_node_row_pnl.html' with node=child_node level=level|add:1 %}
+{% endfor %}

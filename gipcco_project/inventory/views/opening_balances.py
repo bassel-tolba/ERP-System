@@ -11,7 +11,8 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from ..models import OpeningBalance, Product
-from .helpers import recalculate_cost_history_for_product
+# --- MODIFIED: Import from the new costing service ---
+from ..services.costing_service import recalculate_cost_history_for_product
 
 
 def opening_balances(request: HttpRequest) -> HttpResponse:

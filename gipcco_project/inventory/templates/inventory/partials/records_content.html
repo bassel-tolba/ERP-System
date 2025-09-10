@@ -1,4 +1,3 @@
-
 <!-- gipcco_project/inventory/templates/inventory/partials/records_content.html -->
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -85,7 +84,9 @@
                                 data-company-id="{{ log.company.id }}"
                                 data-quantity="{{ log.quantity|floatformat:3 }}"
                                 data-entry-date="{{ log.timestamp|date:'Y-m-d' }}"
-                                data-unit-price="{{ log.unit_price|floatformat:3|default:'' }}"
+                                data-base-unit-price="{{ log.base_unit_price|floatformat:3 }}"
+                                data-vat-amount="{{ log.vat_amount|floatformat:3 }}"
+                                data-vat-treatment="{{ log.vat_treatment }}"
                                 data-tag-ids="{% for tag in log.tags.all %}{{ tag.id }},{% endfor %}"
                                 data-po-item-id="{{ log.po_item.id|default:'' }}"
                                 data-po-id="{{ log.po_item.purchase_order.id|default:'' }}"
@@ -160,13 +161,29 @@
                         </select>
                     </div>
                     <div class="row">
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-12 mb-3">
                             <label class="form-label fw-bold">الكمية</label>
                             <input type="number" step="any" class="form-control" name="quantity" id="editQuantity" required>
                         </div>
-                        <div class="col-md-6 mb-3" id="edit-manual-price-container">
-                            <label for="editUnitPrice" class="form-label fw-bold">سعر الوحدة</label>
-                            <input type="number" step="0.001" class="form-control" name="unit_price" id="editUnitPrice" required placeholder="0.000"/>
+                    </div>
+                    <div class="mb-3" id="edit-manual-price-container">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="editBaseUnitPrice" class="form-label fw-bold">سعر الوحدة (قبل الضريبة)</label>
+                                <input type="number" step="0.001" class="form-control" name="base_unit_price" id="editBaseUnitPrice" required placeholder="0.000"/>
+                            </div>
+                             <div class="col-md-4">
+                                <label for="editVatAmount" class="form-label fw-bold">إجمالي مبلغ ضريبة ق.م.</label>
+                                <input type="number" step="0.001" class="form-control" name="vat_amount" id="editVatAmount" required placeholder="0.000"/>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="editVatTreatment" class="form-label fw-bold">معالجة الضريبة</label>
+                                <select class="form-select" id="editVatTreatment" name="vat_treatment">
+                                    {% for value, display in vat_treatment_choices %}
+                                    <option value="{{ value }}">{{ display }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
                         </div>
                     </div>
                     <div class="mb-3">
