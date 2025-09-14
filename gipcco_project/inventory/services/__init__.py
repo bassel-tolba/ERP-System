@@ -7,6 +7,9 @@ from .accounting_service import (
     create_je_for_finished_goods_receipt,
     create_je_for_production_return,
     create_je_for_sales_dispatch,
+    create_je_for_supplier_payment, 
+    create_je_for_customer_payment, 
+    create_je_for_bank_transfer,
 )
 from .costing_service import (
     get_inventory_state_at_datetime,
@@ -21,6 +24,9 @@ __all__ = [
     'create_je_for_finished_goods_receipt',
     'create_je_for_production_return',
     'create_je_for_sales_dispatch',
+    'create_je_for_supplier_payment',
+    'create_je_for_customer_payment',
+    'create_je_for_bank_transfer',
     # Costing Service
     'get_inventory_state_at_datetime',
     'recalculate_cost_history_for_product',

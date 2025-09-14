@@ -31,7 +31,8 @@ SECRET_KEY = 'django-insecure-@e^a57h=v73b*0@7$m0=r%_0o6(tq99i_g5p+!5a_#)h+n^h0*
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# Add your laptop's hotspot IP address here
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '192.168.137.1']
 
 
 # Application definition
@@ -44,6 +45,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'admincharts',
+    'import_export',
     # --- OUR APP ---
     'inventory.apps.InventoryConfig',
      # Add this line
@@ -227,7 +230,7 @@ JAZZMIN_SETTINGS = {
     "footer_small_text": False,
     "body_small_text": False,
     "brand_small_text": False,
-    "brand_colour": "navbar-dark", # Options: "navbar-primary", "navbar-dark", etc.
+    "brand_colour": "navbar-primary", # Options: "navbar-primary", "navbar-dark", etc.
     "accent": "accent-primary", # Accent color for links, buttons
     "login_logo": "img/ims_logo.png", # Logo for the login page
     "login_logo_max_height": "120px",
@@ -273,37 +276,36 @@ JAZZMIN_SETTINGS = {
     # Optional: Order your apps/models in the sidebar
     "order_with_respect_to": ["inventory", "products", "companies", "auth"],
 
-    # UI Tweaks (buttons, dark mode, etc.)
-    "actions_sticky_top": True,
-    "search_model_names": ["products.Product", "inventory.Batch", "inventory.PurchaseOrder"], # Models to include in global search
+    # # UI Tweaks (buttons, dark mode, etc.)
+    # "actions_sticky_top": True,
+    # "search_model_names": ["products.Product", "inventory.Batch", "inventory.PurchaseOrder"], # Models to include in global search
 }
 
 # Add UI Tweaks for a more granular look and feel
 JAZZMIN_UI_TWEAKS = {
+    "navbar": "navbar-dark",
     "navbar_variants": ["navbar-dark", "navbar-primary", "navbar-white", "navbar-light"],
     "sidebar_variants": ["sidebar-dark-primary", "sidebar-light-primary", "sidebar-dark-info"],
-    "theme": "united", # Example: "united", "materia", "flatly", "darkly", "cosmo", "yeti", "lumen", "litera", "simplex", "solar", "superhero", "spacelab"
-    "no_navbar_border": False,
-    "navbar_fixed": True,
-    "layout_boxed": False,
-    "footer_fixed": False,
-    "sidebar_nav_accordion": True,
-    "body_classes": "text-sm", # Adjust font size globally
-    "button_classes": {
-        "primary": "btn-outline-primary",
-        "secondary": "btn-outline-secondary",
-        "info": "btn-info",
-        "warning": "btn-warning",
-        "danger": "btn-danger",
-        "success": "btn-success"
-    },
-    "alert_classes": {
-        "success": "alert-success",
-        "info": "alert-info",
-        "warning": "alert-warning",
-        "danger": "alert-danger"
-    },
-    "dark_mode_theme": "darkly", # Or any other dark theme
-    "dark_mode_active": True, # Set to True for default dark mode
-    "dark_mode_toggle_builtin": True, # Shows a toggle for dark mode in the navbar
+    "theme": "darkly", # Example: "united", "materia", "flatly", "darkly", "cosmo", "yeti", "lumen", "litera", "simplex", "solar", "superhero", "spacelab"
+    # "no_navbar_border": False,
+    # "navbar_fixed": True,
+    # "layout_boxed": False,
+    # "footer_fixed": False,
+    # "sidebar_nav_accordion": True,
+    # "body_classes": "text-sm", # Adjust font size globally
+    # "button_classes": {
+    #     "primary": "btn-outline-primary",
+    #     "secondary": "btn-outline-secondary",
+    #     "info": "btn-info",
+    #     "warning": "btn-warning",
+    #     "danger": "btn-danger",
+    #     "success": "btn-success"
+    # },
+    # "alert_classes": {
+    #     "success": "alert-success",
+    #     "info": "alert-info",
+    #     "warning": "alert-warning",
+    #     "danger": "alert-danger"
+    # },
+
 }

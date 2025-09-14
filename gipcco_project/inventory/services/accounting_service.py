@@ -11,7 +11,7 @@ from django.contrib.contenttypes.models import ContentType
 from ..models import (
     InventoryLog, JournalEntry, JournalEntryLine, FinancialPeriod,
     GeneralAccountingSettings, ProductTypeAccountingSettings, Product,
-    Batch, InventoryConsumption, FinishedProductDispatch, FinishedProductReceipt, ProductionReturn
+    Batch, InventoryConsumption, FinishedProductDispatch, FinishedProductReceipt, ProductionReturn, Payment, BankTransfer, DepreciationLog, FixedAsset
 )
 from ..services.costing_service import get_inventory_state_at_datetime
 
@@ -500,4 +500,254 @@ def create_je_for_sales_dispatch(dispatch: FinishedProductDispatch) -> Optional[
                 journal_entry=je, account=vat_payable_account, amount=vat_amount, entry_type=JournalEntryLine.EntryType.CREDIT
             )
         logger.info(f"Successfully created JE-{je.id} for FinishedProductDispatch ID {dispatch.id}.")
+    return je
+
+
+
+def create_je_for_supplier_payment(payment: Payment) -> Optional[JournalEntry]:
+    """
+    Creates a journal entry when a payment is made to a supplier.
+
+    Accounting Logic:
+    - DEBIT: Accounts Payable (reducing the liability)
+    - CREDIT: Bank/Cash Account (reducing the asset)
+    """
+    # 1. --- Pre-checks and Guards ---
+    if payment.payment_type != Payment.PaymentType.PAYMENT_OUT or not payment.supplier:
+        logger.debug(f"JE creation skipped for Payment ID {payment.id}: Not an outgoing supplier payment.")
+        return None
+
+    if JournalEntry.objects.filter(
+        content_type=ContentType.objects.get_for_model(payment), object_id=payment.id
+    ).exists():
+        logger.debug(f"Journal entry for Payment ID {payment.id} already exists. Aborting.")
+        return None
+
+    _check_period_is_open(payment.payment_date)
+    
+    # 2. --- Get Accounts ---
+    settings = GeneralAccountingSettings.load()
+    ap_account = settings.accounts_payable
+    bank_gl_account = payment.bank_account.gl_account
+
+    if not all([ap_account, bank_gl_account]):
+        raise ValueError(_("A/P account or the Bank's GL account is not configured."))
+        
+    # 3. --- Create Journal Entry and Lines ---
+    with transaction.atomic():
+        description = _(
+            "Payment to supplier '%(supplier)s'. Ref: %(desc)s"
+        ) % {
+            'supplier': payment.supplier.name,
+            'desc': payment.description
+        }
+        je = JournalEntry.objects.create(
+            date=payment.payment_date, description=description, source_object=payment
+        )
+
+        # Debit Accounts Payable
+        JournalEntryLine.objects.create(
+            journal_entry=je, account=ap_account, amount=payment.amount,
+            entry_type=JournalEntryLine.EntryType.DEBIT
+        )
+        # Credit Bank/Cash Account
+        JournalEntryLine.objects.create(
+            journal_entry=je, account=bank_gl_account, amount=payment.amount,
+            entry_type=JournalEntryLine.EntryType.CREDIT
+        )
+        logger.info(f"Successfully created JE-{je.id} for supplier Payment ID {payment.id}.")
+    return je
+
+def create_je_for_customer_payment(payment: Payment) -> Optional[JournalEntry]:
+    """
+    Creates a journal entry when a payment is received from a customer.
+
+    Accounting Logic:
+    - DEBIT: Bank/Cash Account (increasing the asset)
+    - CREDIT: Accounts Receivable (reducing the asset)
+    """
+    # 1. --- Pre-checks and Guards ---
+    if payment.payment_type != Payment.PaymentType.PAYMENT_IN or not payment.customer:
+        logger.debug(f"JE creation skipped for Payment ID {payment.id}: Not an incoming customer payment.")
+        return None
+
+    if JournalEntry.objects.filter(
+        content_type=ContentType.objects.get_for_model(payment), object_id=payment.id
+    ).exists():
+        logger.debug(f"Journal entry for Payment ID {payment.id} already exists. Aborting.")
+        return None
+
+    _check_period_is_open(payment.payment_date)
+    
+    # 2. --- Get Accounts ---
+    settings = GeneralAccountingSettings.load()
+    ar_account = settings.accounts_receivable
+    bank_gl_account = payment.bank_account.gl_account
+
+    if not all([ar_account, bank_gl_account]):
+        raise ValueError(_("A/R account or the Bank's GL account is not configured."))
+        
+    # 3. --- Create Journal Entry and Lines ---
+    with transaction.atomic():
+        description = _(
+            "Payment received from customer '%(customer)s'. Ref: %(desc)s"
+        ) % {
+            'customer': payment.customer.name,
+            'desc': payment.description
+        }
+        je = JournalEntry.objects.create(
+            date=payment.payment_date, description=description, source_object=payment
+        )
+
+        # Debit Bank/Cash Account
+        JournalEntryLine.objects.create(
+            journal_entry=je, account=bank_gl_account, amount=payment.amount,
+            entry_type=JournalEntryLine.EntryType.DEBIT
+        )
+        # Credit Accounts Receivable
+        JournalEntryLine.objects.create(
+            journal_entry=je, account=ar_account, amount=payment.amount,
+            entry_type=JournalEntryLine.EntryType.CREDIT
+        )
+        logger.info(f"Successfully created JE-{je.id} for customer Payment ID {payment.id}.")
+    return je
+
+
+def create_je_for_bank_transfer(transfer: BankTransfer) -> Optional[JournalEntry]:
+    """
+    Creates a journal entry for an internal bank transfer.
+
+    Accounting Logic:
+    - DEBIT: Destination Bank/Cash GL Account (asset increases)
+    - CREDIT: Source Bank/Cash GL Account (asset decreases)
+    """
+    if JournalEntry.objects.filter(
+        content_type=ContentType.objects.get_for_model(transfer), object_id=transfer.id
+    ).exists():
+        logger.debug(f"Journal entry for BankTransfer ID {transfer.id} already exists. Aborting.")
+        return None
+
+    _check_period_is_open(transfer.transfer_date)
+    
+    source_gl = transfer.source_account.gl_account
+    dest_gl = transfer.destination_account.gl_account
+
+    if not all([source_gl, dest_gl]):
+        raise ValueError(_("One of the bank accounts in the transfer is missing its GL account link."))
+
+    with transaction.atomic():
+        je = JournalEntry.objects.create(
+            date=transfer.transfer_date,
+            description=transfer.description,
+            source_object=transfer
+        )
+
+        # Debit Destination
+        JournalEntryLine.objects.create(
+            journal_entry=je, account=dest_gl, amount=transfer.amount,
+            entry_type=JournalEntryLine.EntryType.DEBIT
+        )
+        # Credit Source
+        JournalEntryLine.objects.create(
+            journal_entry=je, account=source_gl, amount=transfer.amount,
+            entry_type=JournalEntryLine.EntryType.CREDIT
+        )
+        logger.info(f"Successfully created JE-{je.id} for BankTransfer ID {transfer.id}.")
+    return je
+
+def create_je_for_monthly_depreciation(year: int, month: int) -> Optional[JournalEntry]:
+    """
+    Calculates and posts a single, consolidated journal entry for all eligible
+    fixed assets for a given month.
+    """
+    from django.utils.timezone import datetime
+    import calendar
+
+    # 1. --- Pre-checks and Guards ---
+    period_end_date = datetime(year, month, calendar.monthrange(year, month)[1]).date()
+    _check_period_is_open(period_end_date)
+    
+    # Find assets that have already been depreciated for this period
+    already_processed_assets = DepreciationLog.objects.filter(
+        period_date=period_end_date
+    ).values_list('asset_id', flat=True)
+    
+    # Find assets eligible for depreciation this month
+    eligible_assets = FixedAsset.objects.filter(
+        status=FixedAsset.AssetStatus.IN_SERVICE,
+        depreciation_start_date__lte=period_end_date,
+        useful_life_years__gt=0
+    ).exclude(id__in=already_processed_assets)
+
+    if not eligible_assets.exists():
+        logger.info(f"No new assets to depreciate for {year}-{month:02d}.")
+        return None
+    
+    # 2. --- Calculate Depreciation and Group by Account ---
+    depreciation_details = []
+    expense_totals = {}  # {account: total_amount}
+    accumulated_totals = {} # {account: total_amount}
+
+    for asset in eligible_assets:
+        if asset.depreciable_base <= 0:
+            continue
+            
+        monthly_depreciation = (asset.depreciable_base / (asset.useful_life_years * 12)).quantize(Decimal('0.001'))
+        
+        # Check if this month's depreciation exceeds the remaining value
+        remaining_value = asset.depreciable_base - asset.accumulated_depreciation
+        if remaining_value <= 0:
+            continue # Already fully depreciated
+        
+        # Adjust the last depreciation amount to not overshoot
+        final_amount = min(monthly_depreciation, remaining_value)
+        if final_amount <= 0:
+            continue
+
+        depreciation_details.append({
+            'asset': asset,
+            'amount': final_amount
+        })
+        
+        # Aggregate amounts for the journal entry
+        expense_acc = asset.depreciation_expense_account
+        accum_acc = asset.accumulated_depreciation_account
+        expense_totals[expense_acc] = expense_totals.get(expense_acc, Decimal('0.000')) + final_amount
+        accumulated_totals[accum_acc] = accumulated_totals.get(accum_acc, Decimal('0.000')) + final_amount
+
+    if not depreciation_details:
+        logger.info(f"No depreciation value to post for {year}-{month:02d}.")
+        return None
+
+    # 3. --- Create Journal Entry and Logs ---
+    with transaction.atomic():
+        description = _("Monthly depreciation for %(period)s") % {'period': period_end_date.strftime('%Y-%m')}
+        je = JournalEntry.objects.create(
+            date=period_end_date, description=description, source_object=None
+        )
+
+        # Debit Expense Accounts
+        for account, total in expense_totals.items():
+            JournalEntryLine.objects.create(
+                journal_entry=je, account=account, amount=total, entry_type=JournalEntryLine.EntryType.DEBIT
+            )
+        
+        # Credit Accumulated Depreciation Accounts
+        for account, total in accumulated_totals.items():
+            JournalEntryLine.objects.create(
+                journal_entry=je, account=account, amount=total, entry_type=JournalEntryLine.EntryType.CREDIT
+            )
+
+        # Create the log records to prevent re-running
+        logs_to_create = [
+            DepreciationLog(
+                asset=detail['asset'],
+                period_date=period_end_date,
+                amount=detail['amount'],
+                journal_entry=je
+            ) for detail in depreciation_details
+        ]
+        DepreciationLog.objects.bulk_create(logs_to_create)
+
+        logger.info(f"Successfully created JE-{je.id} for monthly depreciation.")
     return je

@@ -8,13 +8,13 @@
         </div>
         <div>
             <a href="{% url 'inventory:view_batch' receipt.batch.pk %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> العودة لأمر التشغيل</a>
-            <a href="{% url 'inventory:finished_products_list' %}" class="btn btn-secondary"><i class="bi bi-list-ul"></i> قائمة المستلم</a>
+            <a href="{% url 'inventory:finished_goods_status' %}" class="btn btn-secondary"><i class="bi bi-list-ul"></i> حالة المنتج النهائي</a>
         </div>
     </div>
 
     <div class="row">
         <div class="col-lg-8">
-            <div class="card">
+            <div class="card mb-4">
                 <div class="card-header d-flex justify-content-between">
                      <h5 class="mb-0">التشغيلات الفرعية (البالتات)</h5>
                      <span class="badge bg-primary fs-6">{{ receipt.sub_batches.count }} تشغيلة فرعية</span>
@@ -46,7 +46,7 @@
             </div>
         </div>
         <div class="col-lg-4">
-            <div class="card">
+            <div class="card mb-4">
                 <div class="card-header">
                     <h5 class="mb-0">بيانات الاستلام</h5>
                 </div>
@@ -67,7 +67,7 @@
                         </dd>
                         
                         <dt class="col-sm-5">تكلفة التشغيلة</dt>
-                        <dd class="col-sm-7 fw-bold">{{ receipt.total_cost }}</dd>
+                        <dd class="col-sm-7 fw-bold">{{ receipt.total_cost|floatformat:3 }}</dd>
                         
                         {% if receipt.notes %}
                         <dt class="col-sm-12 mt-2">ملاحظات</dt>
@@ -76,6 +76,57 @@
                     </dl>
                 </div>
             </div>
+
+            <!-- NEW: Cost Breakdown Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-calculator me-2"></i> تفاصيل حساب التكلفة</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>تكلفة الأمر الأصلي</span>
+                            <span class="fw-bold">{{ main_plan_cost|floatformat:3 }}</span>
+                        </li>
+                        
+                        {% if continuation_batches_with_costs %}
+                            <li class="list-group-item">
+                                <span class="fw-bold">الأوامر التكميلية:</span>
+                                <ul class="list-unstyled mt-2 mb-0 ps-3">
+                                    {% for cont_batch in continuation_batches_with_costs %}
+                                        <li class="d-flex justify-content-between align-items-center mb-1">
+                                            <small class="text-muted"><a href="{% url 'inventory:view_batch' cont_batch.pk %}">SO: {{ cont_batch.shop_order_number }}</a></small>
+                                            <small>{{ cont_batch.continuation_cost|floatformat:3 }}</small>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>إجمالي تكلفة الأوامر التكميلية</span>
+                                <span class="fw-bold">{{ total_continuation_cost|floatformat:3 }}</span>
+                            </li>
+                        {% endif %}
+
+                        <li class="list-group-item d-flex justify-content-between align-items-center bg-light fw-bolder fs-6">
+                            <span>إجمالي تكلفة الخطة</span>
+                            <span>{{ total_plan_cost|floatformat:3 }}</span>
+                        </li>
+
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                           <span>عدد التشغيلات في الخطة</span>
+                           <span>{{ production_plan.number_of_batches_in_plan }}</span>
+                        </li>
+                         <li class="list-group-item d-flex justify-content-between align-items-center bg-primary-subtle text-primary-emphasis fw-bolder fs-5">
+                            <span>التكلفة لهذه التشغيلة</span>
+                            <span>{{ receipt.total_cost|floatformat:3 }}</span>
+                        </li>
+                    </ul>
+                     <p class="text-muted small mt-3 mb-0">
+                         التكلفة لهذه التشغيلة = (إجمالي تكلفة الخطة / عدد التشغيلات في الخطة)
+                     </p>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>

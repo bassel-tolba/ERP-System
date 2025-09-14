@@ -6,14 +6,17 @@ from django.db.models.signals import post_save, post_delete, pre_save
 from django.dispatch import receiver
 from django.contrib.contenttypes.models import ContentType
 
-from .models import FinishedProductDispatch, FinishedProductReceipt, InventoryLog, JournalEntry, Batch, InventoryConsumption, ProductionReturn
+from .models import FinishedProductDispatch, FinishedProductReceipt, InventoryLog, JournalEntry, Batch, InventoryConsumption, ProductionReturn, Payment, BankTransfer
 from .services.accounting_service import (
     create_je_for_inventory_receipt, 
     create_je_for_production_consumption,
     create_je_for_internal_consumption,
     create_je_for_finished_goods_receipt,
     create_je_for_production_return,
-    create_je_for_sales_dispatch
+    create_je_for_sales_dispatch,
+    create_je_for_supplier_payment,
+    create_je_for_customer_payment,
+    create_je_for_bank_transfer
 )
 
 logger = logging.getLogger(__name__)
@@ -181,3 +184,68 @@ def handle_dispatch_delete(sender, instance: FinishedProductDispatch, **kwargs):
         JournalEntry.objects.filter(content_type=content_type, object_id=instance.id).delete()
     except Exception as e:
         logger.error(f"Error cleaning up JE for deleted FinishedProductDispatch ID {instance.id}: {e}", exc_info=True)
+        
+        
+
+
+
+@receiver(post_delete, sender=Payment)
+def handle_payment_delete(sender, instance: Payment, **kwargs):
+    """Deletes the associated JE when a Payment is deleted."""
+    try:
+        content_type = ContentType.objects.get_for_model(instance)
+        JournalEntry.objects.filter(content_type=content_type, object_id=instance.id).delete()
+        logger.info(f"Deleted JE for deleted Payment ID {instance.id}.")
+    except Exception as e:
+        logger.error(f"Error cleaning up JE for deleted Payment ID {instance.id}: {e}", exc_info=True)
+        
+        
+        
+        
+        
+@receiver(post_save, sender=Payment)
+def handle_payment_save(sender, instance: Payment, created, **kwargs):
+    """
+    Creates/updates the JE for a payment, routing to the correct service
+    based on the payment type (A/P or A/R).
+    """
+    if not created: # Delete old JE on update to allow regeneration
+        try:
+            content_type = ContentType.objects.get_for_model(instance)
+            JournalEntry.objects.filter(content_type=content_type, object_id=instance.id).delete()
+            logger.info(f"Deleted existing JE for updated Payment ID {instance.id}.")
+        except Exception as e:
+            logger.error(f"Error deleting old JE for updated Payment ID {instance.id}: {e}", exc_info=True)
+    
+    try:
+        if instance.payment_type == Payment.PaymentType.PAYMENT_OUT:
+            create_je_for_supplier_payment(payment=instance)
+        elif instance.payment_type == Payment.PaymentType.PAYMENT_IN:
+            create_je_for_customer_payment(payment=instance)
+    except Exception as e:
+        logger.error(f"Error creating JE for Payment ID {instance.id}: {e}", exc_info=True)
+        
+# --- NEW: BANK TRANSFER SIGNAL HANDLERS ---
+@receiver(post_save, sender=BankTransfer)
+def handle_bank_transfer_save(sender, instance: BankTransfer, created, **kwargs):
+    """Creates/updates the JE for a bank transfer."""
+    if not created:
+        try:
+            content_type = ContentType.objects.get_for_model(instance)
+            JournalEntry.objects.filter(content_type=content_type, object_id=instance.id).delete()
+        except Exception as e:
+            logger.error(f"Error deleting old JE for updated BankTransfer ID {instance.id}: {e}", exc_info=True)
+    try:
+        create_je_for_bank_transfer(transfer=instance)
+    except Exception as e:
+        logger.error(f"Error creating JE for BankTransfer ID {instance.id}: {e}", exc_info=True)
+
+
+@receiver(post_delete, sender=BankTransfer)
+def handle_bank_transfer_delete(sender, instance: BankTransfer, **kwargs):
+    """Deletes the associated JE when a BankTransfer is deleted."""
+    try:
+        content_type = ContentType.objects.get_for_model(instance)
+        JournalEntry.objects.filter(content_type=content_type, object_id=instance.id).delete()
+    except Exception as e:
+        logger.error(f"Error cleaning up JE for deleted BankTransfer ID {instance.id}: {e}", exc_info=True)

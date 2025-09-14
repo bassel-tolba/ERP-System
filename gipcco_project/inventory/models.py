@@ -7,7 +7,6 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 
-
 # ==============================================================================
 #  OPERATIONAL MODELS
 # ==============================================================================
@@ -233,6 +232,27 @@ class TemplateItem(models.Model):
 
 
 class Batch(models.Model):
+    """
+    IMPORTANT LOGIC NOTES FOR DEVELOPERS:
+    This model represents a production plan or "Shop Order". It can be a standard plan
+    or a "continuation" of a previous plan.
+
+    - `is_continuation` & `parent_batch`:
+      - If `is_continuation` is True, this batch represents an additional consumption
+        of raw materials for a production plan that was already started.
+      - The `parent_batch` field MUST be set to the original Batch this one continues.
+      - Continuation batches share the same Shop Order Number as their parent.
+
+    - Business Logic Constraints:
+      1. RECEIVING FINISHED GOODS: Finished products should ONLY be received against the
+         original (parent) batch, i.e., where `is_continuation` is False. Continuation
+         batches are only for tracking extra material costs. The backend logic for
+         receiving finished goods MUST enforce this by checking `batch.is_continuation`.
+      2. COSTING: The total cost of producing a finished good from a plan is the sum of
+         the costs of the parent batch PLUS all of its `continuation_batches`.
+         Reports and costing logic must aggregate these costs when calculating the
+         final unit cost of the produced goods.
+    """
     template = models.ForeignKey(
         ShopOrderTemplate,
         on_delete=models.PROTECT,
@@ -749,13 +769,30 @@ class FixedAsset(models.Model):
     name = models.CharField(max_length=255, verbose_name=_("Asset Name"))
     description = models.TextField(blank=True, null=True, verbose_name=_("Description"))
     
+    # --- CORRECTED LINES ---
     gl_account = models.ForeignKey(
-        'Account',
+        'Account', # Use a string here
         on_delete=models.PROTECT,
-        limit_choices_to={'code__startswith': '101'}, # All Fixed Asset accounts start with 101
+        limit_choices_to={'code__startswith': '101'},
         related_name='fixed_assets',
         verbose_name=_("GL Control Account")
     )
+    
+    depreciation_expense_account = models.ForeignKey(
+        'Account', # Use a string here
+        on_delete=models.PROTECT,
+        limit_choices_to={'account_type': 'expense'}, # The value should also be a string
+        related_name='+', 
+        verbose_name=_("Depreciation Expense Account")
+    )
+    accumulated_depreciation_account = models.ForeignKey(
+        'Account', # Use a string here
+        on_delete=models.PROTECT,
+        limit_choices_to={'code__startswith': '20205'},
+        related_name='+', 
+        verbose_name=_("Accumulated Depreciation Account")
+    )
+    # --- END CORRECTIONS ---
     
     purchase_date = models.DateField(verbose_name=_("Purchase Date"))
     purchase_cost = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Original Purchase Cost"))
@@ -783,6 +820,19 @@ class FixedAsset(models.Model):
     def __str__(self):
         return f"{self.asset_tag} - {self.name}"
 
+    @property
+    def depreciable_base(self):
+        return self.purchase_cost - self.salvage_value
+
+    @property
+    def accumulated_depreciation(self):
+        """Calculates total depreciation posted against this asset."""
+        return self.depreciation_logs.aggregate(total=models.Sum('amount'))['total'] or Decimal('0.000')
+
+    @property
+    def net_book_value(self):
+        return self.purchase_cost - self.accumulated_depreciation
+
 class BankAccount(models.Model):
     """
     Represents a company bank account or a physical cash box (safe).
@@ -806,6 +856,12 @@ class BankAccount(models.Model):
     def __str__(self):
         return self.name
 
+
+# --- MODIFICATION TO EXISTING 'Payment' MODEL ---
+# Find your 'Payment' model and add the 'source_object' generic foreign key.
+# This is not strictly required by the plan but is excellent practice for traceability.
+# We also add a property to check if it's applied.
+
 class Payment(models.Model):
     """
     Represents a payment transaction, either money in or money out.
@@ -827,6 +883,11 @@ class Payment(models.Model):
     
     notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
 
+    # --- NEW: Generic FK for source, e.g., link to a specific bank transfer record ---
+    content_type = models.ForeignKey(ContentType, on_delete=models.SET_NULL, null=True, blank=True)
+    object_id = models.PositiveIntegerField(null=True, blank=True)
+    source_object = GenericForeignKey('content_type', 'object_id')
+
     class Meta:
         db_table = 'payments'
         verbose_name = _("Payment")
@@ -835,7 +896,27 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"Payment of {self.amount} on {self.payment_date}"
+    
+    @property
+    def total_applied(self):
+        """Total amount applied to SUPPLIER invoices."""
+        return self.applications.aggregate(total=models.Sum('amount_applied'))['total'] or Decimal('0.000')
 
+    # --- NEW PROPERTY FOR A/R ---
+    @property
+    def total_received_applied(self):
+        """Total amount applied to CUSTOMER invoices."""
+        return self.customer_applications.aggregate(total=models.Sum('amount_applied'))['total'] or Decimal('0.000')
+
+    @property
+    def unapplied_amount(self):
+        if self.payment_type == self.PaymentType.PAYMENT_OUT:
+            return self.amount - self.total_applied
+        elif self.payment_type == self.PaymentType.PAYMENT_IN:
+            return self.amount - self.total_received_applied
+        return self.amount # For transfers etc.
+    
+    
 class Employee(models.Model):
     """
     Represents an employee, acts as a sub-ledger for employee-related accounts.
@@ -1040,3 +1121,274 @@ class GeneralAccountingSettings(models.Model):
             # Use a fixed pk to ensure singleton behavior
             obj, created = cls.objects.get_or_create(pk=1)
         return obj
+    
+    
+    
+# ==============================================================================
+#  ACCOUNTING SUB-LEDGER DETAIL MODELS
+# ==============================================================================
+
+class SupplierInvoice(models.Model):
+    """
+    Represents an invoice received from a supplier, linking one or more
+    inventory receipts to a single billable document.
+    """
+    class InvoiceStatus(models.TextChoices):
+        DRAFT = 'draft', _('Draft')
+        AWAITING_PAYMENT = 'awaiting_payment', _('Awaiting Payment')
+        PARTIALLY_PAID = 'partially_paid', _('Partially Paid')
+        PAID = 'paid', _('Paid')
+        CANCELLED = 'cancelled', _('Cancelled')
+
+    supplier = models.ForeignKey(
+        Company, on_delete=models.PROTECT, related_name='invoices', verbose_name=_("Supplier")
+    )
+    invoice_number = models.CharField(max_length=255, verbose_name=_("Invoice Number"))
+    invoice_date = models.DateField(verbose_name=_("Invoice Date"))
+    due_date = models.DateField(verbose_name=_("Due Date"))
+    
+    total_amount = models.DecimalField(
+        max_digits=14, decimal_places=3, default=Decimal('0.000'), verbose_name=_("Total Invoice Amount")
+    )
+    amount_paid = models.DecimalField(
+        max_digits=14, decimal_places=3, default=Decimal('0.000'), verbose_name=_("Amount Paid")
+    )
+    status = models.CharField(
+        max_length=20, choices=InvoiceStatus.choices, default=InvoiceStatus.AWAITING_PAYMENT,
+        verbose_name=_("Status")
+    )
+    notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
+
+    class Meta:
+        db_table = 'supplier_invoices'
+        verbose_name = _("Supplier Invoice")
+        verbose_name_plural = _("Supplier Invoices")
+        ordering = ['-invoice_date']
+        unique_together = ('supplier', 'invoice_number')
+
+    def __str__(self):
+        return f"Invoice {self.invoice_number} from {self.supplier.name}"
+
+    @property
+    def balance_due(self):
+        return self.total_amount - self.amount_paid
+
+    def update_status(self, save=True):
+        """Updates the invoice status based on the amount paid."""
+        if self.status == self.InvoiceStatus.CANCELLED:
+            return
+            
+        if self.amount_paid >= self.total_amount:
+            self.status = self.InvoiceStatus.PAID
+        elif self.amount_paid > 0:
+            self.status = self.InvoiceStatus.PARTIALLY_PAID
+        else:
+            self.status = self.InvoiceStatus.AWAITING_PAYMENT
+        
+        if save:
+            self.save(update_fields=['status'])
+
+
+class SupplierInvoiceItem(models.Model):
+    """Links a specific inventory receipt to a supplier invoice."""
+    invoice = models.ForeignKey(
+        SupplierInvoice, on_delete=models.CASCADE, related_name='items', verbose_name=_("Invoice")
+    )
+    # Using OneToOneField ensures a receipt can only be on ONE invoice.
+    receipt = models.OneToOneField(
+        InventoryLog, on_delete=models.PROTECT, related_name='invoice_item',
+        verbose_name=_("Inventory Receipt (Log)")
+    )
+    amount = models.DecimalField(
+        max_digits=14, decimal_places=3, verbose_name=_("Amount for this item")
+    )
+
+    class Meta:
+        db_table = 'supplier_invoice_items'
+        verbose_name = _("Supplier Invoice Item")
+        verbose_name_plural = _("Supplier Invoice Items")
+
+    def __str__(self):
+        return f"Item for receipt {self.receipt_id} on Invoice {self.invoice.invoice_number}"
+
+
+class PaymentApplication(models.Model):
+    """
+    A linking table that details how much of a single payment was applied
+    to a specific invoice. This is crucial for handling partial payments.
+    """
+    payment = models.ForeignKey(
+        'Payment', on_delete=models.CASCADE, related_name='applications', verbose_name=_("Payment")
+    )
+    invoice = models.ForeignKey(
+        SupplierInvoice, on_delete=models.PROTECT, related_name='applications', verbose_name=_("Invoice")
+    )
+    amount_applied = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Amount Applied"))
+    application_date = models.DateField(auto_now_add=True, verbose_name=_("Application Date"))
+    
+    class Meta:
+        db_table = 'payment_applications'
+        verbose_name = _("Payment Application")
+        verbose_name_plural = _("Payment Applications")
+
+
+class CustomerInvoice(models.Model):
+    """
+    Represents an invoice sent to a customer, linking one or more
+    dispatches to a single billable document.
+    """
+    class InvoiceStatus(models.TextChoices):
+        DRAFT = 'draft', _('Draft')
+        AWAITING_PAYMENT = 'awaiting_payment', _('Awaiting Payment')
+        PARTIALLY_PAID = 'partially_paid', _('Partially Paid')
+        PAID = 'paid', _('Paid')
+        CANCELLED = 'cancelled', _('Cancelled')
+
+    customer = models.ForeignKey(
+        Customer, on_delete=models.PROTECT, related_name='invoices', verbose_name=_("Customer")
+    )
+    invoice_number = models.CharField(max_length=255, verbose_name=_("Invoice Number"))
+    invoice_date = models.DateField(verbose_name=_("Invoice Date"))
+    due_date = models.DateField(verbose_name=_("Due Date"))
+    
+    total_amount = models.DecimalField(
+        max_digits=14, decimal_places=3, default=Decimal('0.000'), verbose_name=_("Total Invoice Amount")
+    )
+    amount_paid = models.DecimalField(
+        max_digits=14, decimal_places=3, default=Decimal('0.000'), verbose_name=_("Amount Paid")
+    )
+    status = models.CharField(
+        max_length=20, choices=InvoiceStatus.choices, default=InvoiceStatus.AWAITING_PAYMENT,
+        verbose_name=_("Status")
+    )
+    notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
+    sales_order = models.ForeignKey(
+        SalesOrder, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='invoices', verbose_name=_("Related Sales Order")
+    )
+
+    class Meta:
+        db_table = 'customer_invoices'
+        verbose_name = _("Customer Invoice")
+        verbose_name_plural = _("Customer Invoices")
+        ordering = ['-invoice_date']
+        unique_together = ('customer', 'invoice_number')
+
+    def __str__(self):
+        return f"Invoice {self.invoice_number} to {self.customer.name}"
+
+    @property
+    def balance_due(self):
+        return self.total_amount - self.amount_paid
+
+    def update_status(self, save=True):
+        """Updates the invoice status based on the amount paid."""
+        if self.status == self.InvoiceStatus.CANCELLED:
+            return
+            
+        if self.amount_paid >= self.total_amount:
+            self.status = self.InvoiceStatus.PAID
+        elif self.amount_paid > 0:
+            self.status = self.InvoiceStatus.PARTIALLY_PAID
+        else:
+            self.status = self.InvoiceStatus.AWAITING_PAYMENT
+        
+        if save:
+            self.save(update_fields=['status'])
+
+
+class CustomerInvoiceItem(models.Model):
+    """Links a specific dispatch to a customer invoice."""
+    invoice = models.ForeignKey(
+        CustomerInvoice, on_delete=models.CASCADE, related_name='items', verbose_name=_("Invoice")
+    )
+    dispatch = models.OneToOneField(
+        FinishedProductDispatch, on_delete=models.PROTECT, related_name='invoice_item',
+        verbose_name=_("Finished Product Dispatch")
+    )
+    amount = models.DecimalField(
+        max_digits=14, decimal_places=3, verbose_name=_("Amount for this item")
+    )
+
+    class Meta:
+        db_table = 'customer_invoice_items'
+        verbose_name = _("Customer Invoice Item")
+        verbose_name_plural = _("Customer Invoice Items")
+
+    def __str__(self):
+        return f"Item for dispatch {self.dispatch_id} on Invoice {self.invoice.invoice_number}"
+
+
+class CustomerPaymentApplication(models.Model):
+    """
+    Links a received payment to a specific customer invoice.
+    """
+    payment = models.ForeignKey(
+        'Payment', on_delete=models.CASCADE, related_name='customer_applications', verbose_name=_("Payment")
+    )
+    invoice = models.ForeignKey(
+        CustomerInvoice, on_delete=models.PROTECT, related_name='applications', verbose_name=_("Invoice")
+    )
+    amount_applied = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Amount Applied"))
+    application_date = models.DateField(auto_now_add=True, verbose_name=_("Application Date"))
+    
+    class Meta:
+        db_table = 'customer_payment_applications'
+        verbose_name = _("Customer Payment Application")
+        verbose_name_plural = _("Customer Payment Applications")
+
+class BankTransfer(models.Model):
+    """
+    Represents the movement of funds between two internal bank accounts/cash boxes.
+    """
+    transfer_date = models.DateField(verbose_name=_("Transfer Date"))
+    amount = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Amount"))
+    source_account = models.ForeignKey(
+        BankAccount, on_delete=models.PROTECT, related_name='transfers_out',
+        verbose_name=_("Source Account (From)")
+    )
+    destination_account = models.ForeignKey(
+        BankAccount, on_delete=models.PROTECT, related_name='transfers_in',
+        verbose_name=_("Destination Account (To)")
+    )
+    description = models.CharField(max_length=255, verbose_name=_("Description"))
+    notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
+
+    class Meta:
+        db_table = 'bank_transfers'
+        verbose_name = _("Bank Transfer")
+        verbose_name_plural = _("Bank Transfers")
+        ordering = ['-transfer_date']
+
+    def __str__(self):
+        return f"Transfer of {self.amount} from {self.source_account} to {self.destination_account}"
+
+    def clean(self):
+        if self.source_account == self.destination_account:
+            raise ValidationError(_("Source and destination accounts cannot be the same."))
+        
+        
+class DepreciationLog(models.Model):
+    """
+    Logs a single depreciation event for a fixed asset for a specific period.
+    This prevents double-posting depreciation for the same month.
+    """
+    asset = models.ForeignKey(
+        FixedAsset, on_delete=models.CASCADE, related_name='depreciation_logs', verbose_name=_("Asset")
+    )
+    period_date = models.DateField(verbose_name=_("Period End Date"))
+    amount = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Depreciation Amount"))
+    journal_entry = models.ForeignKey(
+        JournalEntry, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='depreciation_logs', verbose_name=_("Journal Entry")
+    )
+
+    class Meta:
+        db_table = 'depreciation_logs'
+        verbose_name = _("Depreciation Log")
+        verbose_name_plural = _("Depreciation Logs")
+        ordering = ['-period_date', 'asset']
+        unique_together = ('asset', 'period_date') # Critical constraint
+
+    def __str__(self):
+        return f"Depreciation for {self.asset.name} on {self.period_date}"

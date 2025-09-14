@@ -1,0 +1,97 @@
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+  <h1 class="h2"><i class="bi bi-bank me-2"></i>لوحة متابعة البنوك والخزينة</h1>
+</div>
+
+<h3 class="h4 mb-3">الأرصدة الحالية</h3>
+<div class="row g-4">
+  {% for account in bank_accounts %}
+  <div class="col-md-6 col-lg-4">
+    <div class="card shadow-sm text-center">
+      <div class="card-body">
+        <h5 class="card-title"><i class="bi bi-safe-fill me-2"></i>{{ account.name }}</h5>
+        <p class="card-text fs-2 fw-bold text-success">{{ account.balance|floatformat:3 }}</p>
+        <small class="text-muted">{{ account.currency }}</small>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <p class="text-muted">لم يتم إعداد أي حسابات بنكية بعد.</p>
+  {% endfor %}
+</div>
+
+<hr class="my-4">
+
+<div class="row g-4">
+  <div class="col-lg-5">
+    <div class="card shadow-sm">
+      <div class="card-header"><h5 class="mb-0">إجراء تحويل بنكي جديد</h5></div>
+      <div class="card-body">
+        <form method="post" action="{% url 'inventory:bank_accounts_dashboard' %}">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="source_account" class="form-label">من حساب</label>
+            <select name="source_account" id="source_account" class="form-select" required>
+              {% for account in bank_accounts %}
+              <option value="{{ account.id }}">{{ account.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="destination_account" class="form-label">إلى حساب</label>
+            <select name="destination_account" id="destination_account" class="form-select" required>
+              {% for account in bank_accounts %}
+              <option value="{{ account.id }}">{{ account.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="amount" class="form-label">المبلغ</label>
+            <input type="number" name="amount" id="amount" class="form-control" step="0.001" min="0.001" required>
+          </div>
+          <div class="mb-3">
+            <label for="transfer_date" class="form-label">تاريخ التحويل</label>
+            <input type="date" name="transfer_date" id="transfer_date" class="form-control" value="{{ today_date }}" required>
+          </div>
+          <div class="mb-3">
+            <label for="description" class="form-label">الوصف</label>
+            <input type="text" name="description" id="description" class="form-control" required>
+          </div>
+          <div class="d-grid">
+            <button class="btn btn-primary" type="submit"><i class="bi bi-arrow-left-right me-2"></i>تنفيذ التحويل</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-7">
+    <div class="card shadow-sm">
+      <div class="card-header"><h5 class="mb-0">آخر التحويلات المسجلة</h5></div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th>التاريخ</th>
+                <th>من حساب</th>
+                <th>إلى حساب</th>
+                <th class="text-end">المبلغ</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for transfer in transfers %}
+              <tr>
+                <td>{{ transfer.transfer_date|date:"Y-m-d" }}</td>
+                <td>{{ transfer.source_account.name }}</td>
+                <td>{{ transfer.destination_account.name }}</td>
+                <td class="text-end">{{ transfer.amount|floatformat:3 }}</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="4" class="text-center text-muted">لا توجد تحويلات مسجلة.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

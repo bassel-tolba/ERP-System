@@ -4,7 +4,8 @@ from decimal import Decimal
 
 from django.contrib import messages
 from django.db import transaction
-from django.db.models import Count
+from django.db.models import Count, Sum, F, ExpressionWrapper, DecimalField
+from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
@@ -21,7 +22,13 @@ def finished_goods_status(request):
     """
     # 1. Get batches that are still "In Production"
     # A batch is in production if the number of received batches is less than the total planned.
-    all_plans = Batch.objects.annotate(received_count=Count('receipts')).select_related(
+    # ==========================================================================
+    #  FIX: Filter out continuation batches from this list.
+    #  Only parent batches can have finished goods received against them.
+    # ==========================================================================
+    all_plans = Batch.objects.filter(is_continuation=False).annotate(
+        received_count=Count('receipts')
+    ).select_related(
         'template__final_product'
     ).order_by('-creation_date')
 
@@ -78,24 +85,48 @@ def receive_finished_product(request, batch_pk, individual_batch_number):
     Handles the form for receiving a single batch from a production plan.
     """
     production_plan = get_object_or_404(
-        Batch.objects.select_related('template__final_product').prefetch_related('items__primitive_product'), 
+        Batch.objects.select_related('template__final_product').prefetch_related(
+            'items__primitive_product', 'continuation_batches__items'
+        ), 
         pk=batch_pk
     )
 
-    # ====== START OF CORRECTION ======
-    # This logic now correctly calculates the cost even if the `cost_at_consumption`
-    # field hasn't been populated by the costing service yet.
-    total_plan_cost = Decimal('0.0')
+    # ==========================================================================
+    #  CRITICAL BACKEND VALIDATION: PREVENT RECEIPT ON CONTINUATION BATCHES
+    # ==========================================================================
+    if production_plan.is_continuation:
+        messages.error(request, "خطأ: لا يمكن استلام منتج نهائي على أمر تشغيل تكميلي. الرجاء الاستلام على الأمر الأصلي فقط.")
+        # Redirect to the correct parent batch for a better user experience
+        redirect_pk = production_plan.parent_batch.pk if production_plan.parent_batch else production_plan.pk
+        return redirect('inventory:view_batch', pk=redirect_pk)
+    # ==========================================================================
+
+
+    # ==========================================================================
+    #  CORRECTED COST CALCULATION
+    #  This now includes the cost of the main plan AND all its continuations.
+    # ==========================================================================
+    main_plan_cost = Decimal('0.0')
     for item in production_plan.items.all():
         cost = item.cost_at_consumption
-        # If cost is not yet calculated (due to signal timing), calculate it on the fly
-        if cost is None:
+        if cost is None: # Fallback calculation if costing service hasn't run yet
             state = get_inventory_state_at_datetime(item.primitive_product_id, production_plan.creation_date)
             mac = (state['value'] / state['quantity']) if state['quantity'] > 0 else Decimal('0.0')
             cost = mac.quantize(Decimal('0.001'))
-        
-        total_plan_cost += cost * Decimal(str(item.actual_quantity or 0.0))
-    # ====== END OF CORRECTION ======
+        main_plan_cost += cost * Decimal(str(item.actual_quantity or 0.0))
+
+    # Aggregate costs from all continuation batches using a more efficient DB query
+    continuation_costs = production_plan.continuation_batches.aggregate(
+        total=Sum(
+            ExpressionWrapper(
+                F('items__actual_quantity') * F('items__cost_at_consumption'),
+                output_field=DecimalField()
+            )
+        )
+    )['total'] or Decimal('0.0')
+
+    total_plan_cost = main_plan_cost + continuation_costs
+    # ==========================================================================
 
     num_batches_in_plan = production_plan.number_of_batches_in_plan
     proportional_cost = (total_plan_cost / num_batches_in_plan) if num_batches_in_plan > 0 else Decimal('0.0')
@@ -127,7 +158,7 @@ def receive_finished_product(request, batch_pk, individual_batch_number):
                     notes=notes,
                     total_cost=proportional_cost.quantize(Decimal('0.001')),
                     total_quantity_produced=total_quantity_produced,
-                    status=FinishedProductReceipt.Status.QUARANTINED # Explicitly set
+                    status=FinishedProductReceipt.Status.QUARANTINED
                 )
 
                 # Create all the sub-batch records
@@ -171,7 +202,8 @@ def receive_finished_product(request, batch_pk, individual_batch_number):
 
 def view_finished_product(request, pk):
     """
-    Displays the details of a single finished product receipt.
+    Displays the details of a single finished product receipt,
+    including a detailed cost breakdown from the parent and continuation batches.
     """
     receipt = get_object_or_404(
         FinishedProductReceipt.objects.select_related(
@@ -179,9 +211,55 @@ def view_finished_product(request, pk):
         ).prefetch_related('sub_batches'),
         pk=pk
     )
+
+    production_plan = receipt.batch
+
+    # This case should not happen based on business rules, but it's a good safeguard.
+    if production_plan.is_continuation:
+        messages.error(request, "لا يمكن عرض تفاصيل استلام من أمر تشغيل تكميلي مباشرة.")
+        redirect_pk = production_plan.parent_batch.pk if production_plan.parent_batch else production_plan.pk
+        return redirect('inventory:view_batch', pk=redirect_pk)
+
+    # ==========================================================================
+    #  COST BREAKDOWN CALCULATION
+    # ==========================================================================
+    # 1. Calculate cost of the main production plan using DB aggregation for efficiency
+    main_plan_cost = production_plan.items.aggregate(
+        total=Coalesce(Sum(
+            ExpressionWrapper(
+                F('actual_quantity') * F('cost_at_consumption'),
+                output_field=DecimalField()
+            )
+        ), Decimal('0.0'))
+    )['total']
+
+    # 2. Get continuation batches with their individual costs annotated
+    continuation_batches_with_costs = production_plan.continuation_batches.annotate(
+        continuation_cost=Coalesce(Sum(
+            ExpressionWrapper(
+                F('items__actual_quantity') * F('items__cost_at_consumption'),
+                output_field=DecimalField()
+            )
+        ), Decimal('0.0'))
+    ).order_by('creation_date')
+
+    # 3. Calculate total continuation cost from the annotated batches
+    total_continuation_cost = continuation_batches_with_costs.aggregate(
+        total=Sum('continuation_cost')
+    )['total'] or Decimal('0.0')
+
+    # 4. Calculate the grand total cost for the entire plan
+    total_plan_cost = main_plan_cost + total_continuation_cost
+    # ==========================================================================
+
     context = {
         'active_page': 'shop_orders',
         'receipt': receipt,
+        'production_plan': production_plan,
+        'main_plan_cost': main_plan_cost,
+        'continuation_batches_with_costs': continuation_batches_with_costs,
+        'total_continuation_cost': total_continuation_cost,
+        'total_plan_cost': total_plan_cost,
     }
 
     if 'X-Partial-Request' in request.headers:

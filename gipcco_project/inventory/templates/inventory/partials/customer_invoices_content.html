@@ -1,0 +1,90 @@
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+  <h1 class="h2"><i class="bi bi-file-earmark-bar-graph-fill me-2"></i>فواتير العملاء</h1>
+  <div class="btn-toolbar mb-2 mb-md-0">
+    <a href="{% url 'inventory:create_customer_invoice' %}" class="btn btn-primary">
+      <i class="bi bi-plus-circle-fill me-2"></i>إنشاء فاتورة عميل جديدة
+    </a>
+  </div>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-header">
+    <h5 class="card-title mb-0"><i class="bi bi-funnel-fill me-2"></i>فلترة النتائج</h5>
+  </div>
+  <div class="card-body">
+    <form method="get" action="{% url 'inventory:customer_invoices' %}" id="customerInvoiceFilters">
+      <div class="row g-3">
+        <div class="col-md-5">
+          <label for="customer" class="form-label">العميل</label>
+          <select name="customer" id="customer" class="form-select searchable-select">
+            <option value="">كل العملاء</option>
+            {% for customer in customers %}
+              <option value="{{ customer.id }}" {% if customer.id == selected_customer %}selected{% endif %}>{{ customer.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-5">
+          <label for="status" class="form-label">الحالة</label>
+          <select name="status" id="status" class="form-select">
+            <option value="">كل الحالات</option>
+            {% for value, name in statuses %}
+              <option value="{{ value }}" {% if value == selected_status %}selected{% endif %}>{{ name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+          <button type="submit" class="btn btn-secondary w-100"><i class="bi bi-search me-2"></i>بحث</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card shadow-sm mt-4">
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th scope="col">رقم الفاتورة</th>
+            <th scope="col">العميل</th>
+            <th scope="col">تاريخ الفاتورة</th>
+            <th scope="col">تاريخ الاستحقاق</th>
+            <th scope="col" class="text-end">الإجمالي</th>
+            <th scope="col" class="text-end">المحصّل</th>
+            <th scope="col" class="text-end">الرصيد</th>
+            <th scope="col" class="text-center">الحالة</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for invoice in invoices %}
+          <tr>
+            <td><a href="{% url 'inventory:view_customer_invoice' invoice.pk %}" class="fw-bold">#{{ invoice.invoice_number }}</a></td>
+            <td>{{ invoice.customer.name }}</td>
+            <td>{{ invoice.invoice_date|date:"Y-m-d" }}</td>
+            <td>{{ invoice.due_date|date:"Y-m-d" }}</td>
+            <td class="text-end">{{ invoice.total_amount|floatformat:3 }}</td>
+            <td class="text-end">{{ invoice.amount_paid|floatformat:3 }}</td>
+            <td class="text-end fw-bold">{{ invoice.balance_due|floatformat:3 }}</td>
+            <td class="text-center">
+              {% if invoice.status == 'paid' %}
+                <span class="badge bg-success-subtle border border-success-subtle text-success-emphasis rounded-pill">{{ invoice.get_status_display }}</span>
+              {% elif invoice.status == 'partially_paid' %}
+                <span class="badge bg-warning-subtle border border-warning-subtle text-warning-emphasis rounded-pill">{{ invoice.get_status_display }}</span>
+              {% elif invoice.status == 'awaiting_payment' %}
+                <span class="badge bg-danger-subtle border border-danger-subtle text-danger-emphasis rounded-pill">{{ invoice.get_status_display }}</span>
+              {% else %}
+                <span class="badge bg-secondary-subtle border border-secondary-subtle text-secondary-emphasis rounded-pill">{{ invoice.get_status_display }}</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="8" class="text-center py-4">لا توجد فواتير تطابق معايير البحث.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

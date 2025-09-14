@@ -1,0 +1,139 @@
+{% load humanize %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+  <h1 class="h2"><i class="bi bi-receipt-cutoff me-2"></i>فاتورة المورد #{{ invoice.invoice_number }}</h1>
+  <div class="btn-toolbar mb-2 mb-md-0">
+     {% if invoice.status == 'paid' %}
+        <span class="badge fs-6 bg-success-subtle border border-success-subtle text-success-emphasis rounded-pill"><i class="bi bi-check-circle-fill me-2"></i>{{ invoice.get_status_display }}</span>
+      {% elif invoice.status == 'partially_paid' %}
+        <span class="badge fs-6 bg-warning-subtle border border-warning-subtle text-warning-emphasis rounded-pill"><i class="bi bi-hourglass-split me-2"></i>{{ invoice.get_status_display }}</span>
+      {% elif invoice.status == 'awaiting_payment' %}
+        <span class="badge fs-6 bg-danger-subtle border border-danger-subtle text-danger-emphasis rounded-pill"><i class="bi bi-clock-history me-2"></i>{{ invoice.get_status_display }}</span>
+      {% else %}
+        <span class="badge fs-6 bg-secondary-subtle border border-secondary-subtle text-secondary-emphasis rounded-pill">{{ invoice.get_status_display }}</span>
+      {% endif %}
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-header">
+        <h5 class="mb-0">بنود الفاتورة</h5>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>تاريخ الاستلام</th>
+                <th>رقم الفحص</th>
+                <th>المنتج</th>
+                <th>الكمية</th>
+                <th class="text-end">القيمة</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in items %}
+              <tr>
+                <td>{{ item.receipt.release_timestamp|date:"Y-m-d" }}</td>
+                <td>{{ item.receipt.qc_no|default:"N/A" }}</td>
+                <td>{{ item.receipt.product.name }}</td>
+                <td>{{ item.receipt.quantity }} {{ item.receipt.product.unit }}</td>
+                <td class="text-end">{{ item.amount|floatformat:3 }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card shadow-sm mt-4">
+      <div class="card-header"><h5 class="mb-0">سجل المدفوعات</h5></div>
+      <div class="card-body">
+        {% if applications %}
+        <table class="table">
+          <thead>
+            <tr>
+              <th>تاريخ الدفع</th>
+              <th>الحساب البنكي/الخزينة</th>
+              <th>مرجع الدفع</th>
+              <th class="text-end">المبلغ المدفوع</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for app in applications %}
+            <tr>
+              <td>{{ app.payment.payment_date|date:"Y-m-d" }}</td>
+              <td>{{ app.payment.bank_account.name }}</td>
+              <td>{{ app.payment.description }}</td>
+              <td class="text-end">{{ app.amount_applied|floatformat:3 }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <p class="text-center text-muted">لا توجد مدفوعات مسجلة لهذه الفاتورة بعد.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card shadow-sm">
+      <div class="card-header"><h5 class="mb-0">ملخص الفاتورة</h5></div>
+      <div class="card-body">
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item d-flex justify-content-between"><strong>المورد:</strong><span>{{ invoice.supplier.name }}</span></li>
+          <li class="list-group-item d-flex justify-content-between"><strong>تاريخ الفاتورة:</strong><span>{{ invoice.invoice_date|date:"Y-m-d" }}</span></li>
+          <li class="list-group-item d-flex justify-content-between"><strong>تاريخ الاستحقاق:</strong><span>{{ invoice.due_date|date:"Y-m-d" }}</span></li>
+        </ul>
+        <hr>
+        <dl class="row mb-0">
+          <dt class="col-6">إجمالي الفاتورة</dt>
+          <dd class="col-6 text-end">{{ invoice.total_amount|floatformat:3 }}</dd>
+          
+          <dt class="col-6">إجمالي المدفوع</dt>
+          <dd class="col-6 text-end text-success">{{ invoice.amount_paid|floatformat:3 }}</dd>
+          
+          <dt class="col-6 border-top pt-2 mt-2">الرصيد المستحق</dt>
+          <dd class="col-6 text-end fw-bold border-top pt-2 mt-2 fs-5">{{ invoice.balance_due|floatformat:3 }}</dd>
+        </dl>
+      </div>
+    </div>
+    
+    {% if invoice.balance_due > 0 %}
+    <div class="card shadow-sm mt-4">
+      <div class="card-header"><h5 class="mb-0">تسجيل دفعة جديدة</h5></div>
+      <div class="card-body">
+        <form action="{% url 'inventory:apply_payment_to_invoice' invoice.pk %}" method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="bank_account" class="form-label">الحساب المدفوع منه</label>
+            <select name="bank_account" id="bank_account" class="form-select" required>
+              {% for account in bank_accounts %}
+              <option value="{{ account.id }}">{{ account.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="payment_date" class="form-label">تاريخ الدفع</label>
+            <input type="date" name="payment_date" id="payment_date" value="{{ today_date }}" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label for="amount" class="form-label">المبلغ المدفوع</label>
+            <input type="number" name="amount" id="amount" class="form-control" step="0.001" min="0.001" max="{{ invoice.balance_due }}" value="{{ invoice.balance_due }}" required>
+          </div>
+           <div class="mb-3">
+            <label for="description" class="form-label">الوصف/المرجع</label>
+            <input type="text" name="description" id="description" class="form-control" value="دفعة للفاتورة رقم {{ invoice.invoice_number }}">
+          </div>
+          <div class="d-grid">
+            <button type="submit" class="btn btn-success"><i class="bi bi-cash-stack me-2"></i>تسجيل الدفعة</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>

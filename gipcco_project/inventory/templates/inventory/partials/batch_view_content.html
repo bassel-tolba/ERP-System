@@ -1,7 +1,6 @@
-
+<!-- gipcco_project/inventory/templates/inventory/partials/batch_view_content.html -->
 
 {% load static %}
-{% comment %} {% load mathfilters %} {# You might need to install django-mathfilters: pip install django-mathfilters #} {% endcomment %}
 
 <form method="post" action="{% url 'inventory:update_batch_items_bulk' batch_pk=batch.id %}" id="batchEditForm">
     {% csrf_token %}
@@ -35,11 +34,22 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-2 mb-3 d-flex align-items-end">
-                    <div class="form-check form-switch">
+                 <div class="col-md-6 mb-3">
+                    <div class="form-check form-switch pt-2">
                       <input class="form-check-input" type="checkbox" role="switch" id="isContinuationSwitch" name="is_continuation" {% if batch.is_continuation %}checked{% endif %}>
-                      <label class="form-check-label" for="isContinuationSwitch">تكملة</label>
+                      <label class="form-check-label" for="isContinuationSwitch">تكملة لأمر تشغيل سابق</label>
                     </div>
+                </div>
+                <div class="col-md-6 mb-3" id="parent_batch_container_edit" style="display: {% if batch.is_continuation %}block{% else %}none{% endif %};">
+                    <label for="parent_batch_edit" class="form-label">الأمر الأصلي</label>
+                    <select class="form-select searchable-select" id="parent_batch_edit" name="parent_batch">
+                        <option value="">اختر الأمر الأصلي...</option>
+                        {% for p_batch in available_parent_batches %}
+                        <option value="{{ p_batch.id }}" {% if batch.parent_batch and p_batch.id == batch.parent_batch.id %}selected{% endif %}>
+                            SO: {{ p_batch.shop_order_number }} | Batch: {{ p_batch.batch_number }} | {{ p_batch.template.final_product.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
                 </div>
             </div>
             <div class="row">
@@ -132,7 +142,7 @@
     </div>
 </form>
 
-<!-- ===== START OF NEW SECTION ===== -->
+{% if not batch.is_continuation %}
 <div class="card mt-4">
     <div class="card-header">
         <h3 class="mb-0"><i class="bi bi-box-seam me-2"></i> استلام المنتج النهائي</h3>
@@ -188,8 +198,7 @@
         {% endif %}
     </div>
 </div>
-<!-- ===== END OF NEW SECTION ===== -->
-
+{% endif %}
 
 <!-- Hidden form for deleting batch items -->
 <form method="post" id="deleteItemForm" class="d-none">

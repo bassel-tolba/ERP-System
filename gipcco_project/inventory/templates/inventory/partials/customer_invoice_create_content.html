@@ -1,0 +1,85 @@
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+  <h1 class="h2"><i class="bi bi-file-earmark-plus-fill me-2"></i>إنشاء فاتورة عميل جديدة</h1>
+</div>
+
+<form method="post" id="createCustomerInvoiceForm">
+  {% csrf_token %}
+  <div class="row">
+    <div class="col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-header">
+          <h5 class="card-title mb-0">بنود الفاتورة (عمليات الصرف غير المفوترة)</h5>
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+              <label for="sales_order" class="form-label">اختر أمر البيع لعرض عمليات الصرف</label>
+              <select name="sales_order" id="sales_order" class="form-select searchable-select" required>
+                <option value="">--- اختر أمر بيع ---</option>
+                {% for so in sales_orders %}
+                  <option value="{{ so.id }}">#{{ so.so_number }} - {{ so.customer.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-sm">
+                <thead>
+                  <tr>
+                    <th style="width: 5%;"><input class="form-check-input" type="checkbox" id="select-all-dispatches" title="تحديد الكل"></th>
+                    <th>تاريخ الصرف</th>
+                    <th>المنتج المصروف</th>
+                    <th>الكمية</th>
+                    <th class="text-end">القيمة</th>
+                  </tr>
+                </thead>
+                <tbody id="dispatches-table-body">
+                  <!-- JS will populate this -->
+                </tbody>
+                <tfoot>
+                  <tr id="no-dispatches-row">
+                    <td colspan="5" class="text-center py-3 text-muted">يرجى اختيار أمر بيع لعرض عمليات الصرف المتاحة.</td>
+                  </tr>
+                  <tr id="dispatches-loading" class="d-none">
+                    <td colspan="5" class="text-center py-3">
+                      <div class="spinner-border spinner-border-sm" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                      </div>
+                      <span class="ms-2">جاري تحميل البيانات...</span>
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card shadow-sm">
+        <div class="card-header">
+          <h5 class="card-title mb-0">بيانات الفاتورة</h5>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label for="invoice_number" class="form-label">رقم فاتورة العميل</label>
+            <input type="text" class="form-control" id="invoice_number" name="invoice_number" required>
+          </div>
+          <div class="mb-3">
+            <label for="invoice_date" class="form-label">تاريخ الفاتورة</label>
+            <input type="date" class="form-control" id="invoice_date" name="invoice_date" value="{{ today_date }}" required>
+          </div>
+          <div class="mb-3">
+            <label for="due_date" class="form-label">تاريخ الاستحقاق</label>
+            <input type="date" class="form-control" id="due_date" name="due_date" value="{{ today_date }}" required>
+          </div>
+          <hr>
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">إجمالي الفاتورة:</h5>
+            <h5 class="mb-0 fw-bold"><span id="total-amount">0.000</span> EGP</h5>
+          </div>
+          <div class="d-grid mt-4">
+            <button type="submit" class="btn btn-primary btn-lg"><i class="bi bi-save-fill me-2"></i>حفظ الفاتورة</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>

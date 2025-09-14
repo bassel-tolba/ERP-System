@@ -15,7 +15,7 @@ from .views.purchase_orders import purchase_orders, create_purchase_order, view_
 # --- MODIFIED: Use aliases for release_from_quarantine to avoid name collision ---
 from .views.finished_products import finished_goods_status, receive_finished_product, view_finished_product, release_from_quarantine as release_fg_from_quarantine
 # --- MODIFIED: Import new API view ---
-from .views.api import get_used_qc_sources, api_batch_details, get_product_tags, api_get_open_pos_for_supplier, api_get_po_items, api_get_full_batch_analysis, api_get_sellable_stock, api_get_available_stock
+from .views.api import get_used_qc_sources, api_batch_details, get_product_tags, api_get_open_pos_for_supplier, api_get_po_items, api_get_full_batch_analysis, api_get_sellable_stock, api_get_available_stock, api_batch_details
 # --- MODIFIED: Import new API views and sales views ---
 from .views.sales import customers, edit_customer, delete_customer, sales_orders, create_sales_order, view_sales_order, dispatch_from_sales_order
 # --- MODIFIED: Import new expense views ---
@@ -23,6 +23,7 @@ from .views.expenses import expenses_dashboard, manage_expenses, edit_inventory_
 # --- MODIFIED: Import new financial report views ---
 from .views.financial_reports import trial_balance, profit_and_loss_statement, batch_production_variance_report
 
+from .views import financials
 
 app_name = 'inventory'
 
@@ -113,6 +114,26 @@ urlpatterns = [
     path('reports/p-and-l/', profit_and_loss_statement, name='profit_and_loss_statement'),
     path('reports/batch-variance/', batch_production_variance_report, name='batch_production_variance_report'),
     
+    # --- Financials (A/P, A/R, Banking) Routes ---
+    path('financials/supplier_invoices/', financials.supplier_invoices, name='supplier_invoices'),
+    path('financials/supplier_invoices/create/', financials.create_supplier_invoice, name='create_supplier_invoice'),
+    path('financials/supplier_invoice/<int:pk>/', financials.view_supplier_invoice, name='view_supplier_invoice'),
+    path('financials/supplier_invoice/<int:pk>/pay/', financials.apply_payment_to_invoice, name='apply_payment_to_invoice'),
+
+    # --- NEW: Customer Invoice (A/R) Routes ---
+    path('financials/customer_invoices/', financials.customer_invoices, name='customer_invoices'),
+    path('financials/customer_invoices/create/', financials.create_customer_invoice, name='create_customer_invoice'),
+    path('financials/customer_invoice/<int:pk>/', financials.view_customer_invoice, name='view_customer_invoice'),
+    path('financials/customer_invoice/<int:pk>/receive_payment/', financials.receive_payment_for_invoice, name='receive_payment_for_invoice'),
+    
+    # --- NEW: Banking & General Ledger Routes ---
+    path('financials/banking/', financials.bank_accounts_dashboard, name='bank_accounts_dashboard'),
+    path('financials/journal/', financials.journal_entries, name='journal_entries'),
+    path('financials/journal/create/', financials.create_journal_entry, name='create_journal_entry'),
+    
+    # --- NEW: Fixed Assets Route ---
+    path('financials/fixed_assets/', financials.fixed_assets_dashboard, name='fixed_assets_dashboard'),
+    
     # API Routes
     path('api/get_used_qc_sources/<int:product_pk>/', get_used_qc_sources, name='api_get_used_qc_sources'),
     path('api/batch_details/<int:batch_pk>/', api_batch_details, name='api_batch_details'),
@@ -124,6 +145,8 @@ urlpatterns = [
     path('api/get_used_qc_sources/<int:product_pk>/', get_used_qc_sources, name='api_get_used_qc_sources'),
     # --- NEW API ROUTE ---
     path('api/available_stock/<int:product_pk>/', api_get_available_stock, name='api_get_available_stock'),
+    path('api/supplier/<int:supplier_id>/uninvoiced_receipts/', financials.api_get_uninvoiced_receipts, name='api_get_uninvoiced_receipts'),
+    path('api/sales_order/<int:so_id>/uninvoiced_dispatches/', financials.api_get_uninvoiced_dispatches, name='api_get_uninvoiced_dispatches'),
     
      # --- NEW: Customer Routes ---
     path('customers/', customers, name='customers'),
@@ -135,5 +158,6 @@ urlpatterns = [
     path('sales_orders/create/', create_sales_order, name='create_sales_order'),
     path('sales_order/<int:pk>/', view_sales_order, name='view_sales_order'),
     path('sales_order/<int:pk>/dispatch/', dispatch_from_sales_order, name='dispatch_from_sales_order'),
+    path('api/batch_details/<int:batch_pk>/', api_batch_details, name='api_batch_details'), 
 
 ]

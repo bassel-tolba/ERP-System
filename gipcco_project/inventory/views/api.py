@@ -249,3 +249,29 @@ def api_get_available_stock(request, product_pk):
         for log in released_logs
     ]
     return JsonResponse(data, safe=False)
+
+
+
+# ===== START OF NEW VIEW =====
+def api_batch_details(request: HttpRequest, batch_pk: int) -> JsonResponse:
+    """
+    Returns key details for a specific batch, used for the 'continuation' feature.
+    """
+    try:
+        batch = get_object_or_404(
+            Batch.objects.select_related('template__final_product'), 
+            pk=batch_pk
+        )
+        
+        # Parse the batch number to get the 'from' part
+        batch_from_str = str(batch.batch_number).split('-')[0]
+
+        data = {
+            'shop_order_number': batch.shop_order_number,
+            'batch_number_from': batch_from_str, # Use the parsed 'from' part
+            'template_id': batch.template.id,
+            'template_name': f"{batch.template.name} ({batch.template.final_product.name})"
+        }
+        return JsonResponse(data)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=404)

@@ -108,7 +108,7 @@ def create_batch(request: HttpRequest) -> HttpResponse:
             'templates_with_items': templates_with_items, 
             'all_available_stock': all_available_stock,
             'primitive_products': primitive_products,
-            'batches': Batch.objects.all() # Add all batches for parent selection
+            'batches': Batch.objects.select_related('template__final_product').all() # Add all batches for parent selection
         }
 
     if request.method == 'POST':
@@ -211,7 +211,7 @@ def view_batch(request: HttpRequest, pk: int) -> HttpResponse:
     """
     Displays the details of a single batch, allowing for edits.
     """
-    batch_info = get_object_or_404(Batch.objects.select_related('template__final_product'), pk=pk)
+    batch_info = get_object_or_404(Batch.objects.select_related('template__final_product', 'parent_batch'), pk=pk)
     
     # --- MODIFIED: Logic to handle batch ranges for receiving finished products ---
     batch_from, batch_to = None, None
@@ -291,7 +291,14 @@ def view_batch(request: HttpRequest, pk: int) -> HttpResponse:
         
         item.available_stock = sorted(available_stock_rows, key=lambda x: x['timestamp'])
         batch_items_with_stock.append(item)
-        
+    
+    # --- START OF MODIFICATION: Provide batches for parent selection ---
+    # A batch cannot be its own parent.
+    available_parent_batches = Batch.objects.select_related(
+        'template__final_product'
+    ).exclude(pk=pk).order_by('-creation_date')
+    # --- END OF MODIFICATION ---
+
     context = {
         'active_page': 'shop_orders',
         'batch': batch_info,
@@ -301,6 +308,7 @@ def view_batch(request: HttpRequest, pk: int) -> HttpResponse:
         'batch_from': batch_from,
         'batch_to': batch_to,
         'plan_status_list': plan_status_list, # --- NEW CONTEXT VARIABLE ---
+        'available_parent_batches': available_parent_batches, # --- NEW CONTEXT VARIABLE ---
         'is_partial_request': 'X-Partial-Request' in request.headers
     }
     if 'X-Partial-Request' in request.headers:
@@ -364,6 +372,9 @@ def update_batch_items_bulk(request: HttpRequest, batch_pk: int) -> HttpResponse
     batch_from_str = request.POST.get('batch_number_from')
     batch_to_str = request.POST.get('batch_number_to')
     is_continuation = 'is_continuation' in request.POST
+    # --- START OF MODIFICATION: Get parent batch ID from form ---
+    parent_batch_id = request.POST.get('parent_batch')
+    # --- END OF MODIFICATION ---
     notes = request.POST.get('notes', '')
 
     if not all([shop_order_number, creation_date_str, batch_from_str]):
@@ -415,6 +426,14 @@ def update_batch_items_bulk(request: HttpRequest, batch_pk: int) -> HttpResponse
             batch.batch_number = final_batch_number_str
             batch.is_continuation = is_continuation
             batch.notes = notes
+            
+            # --- START OF MODIFICATION: Update parent batch ---
+            if is_continuation and parent_batch_id:
+                batch.parent_batch_id = parent_batch_id
+            else:
+                batch.parent_batch = None # Clear parent if it's not a continuation
+            # --- END OF MODIFICATION ---
+
             batch.save()
 
             for item_id in item_ids:

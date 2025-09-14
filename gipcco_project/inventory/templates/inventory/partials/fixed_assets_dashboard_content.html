@@ -1,0 +1,75 @@
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+  <h1 class="h2"><i class="bi bi-building-gear me-2"></i>لوحة متابعة الأصول الثابتة</h1>
+</div>
+
+<div class="alert alert-info d-flex align-items-center" role="alert">
+  <i class="bi bi-info-circle-fill me-3 fs-4"></i>
+  <div>
+    <strong>ملاحظة:</strong> يتم احتساب وتسجيل قيد الإهلاك الشهري بشكل مجمع عبر أمر إداري. لتنفيذ هذا الإجراء، استخدم الأمر: <br>
+    <code class="user-select-all">python manage.py post_depreciation --year YYYY --month MM</code>
+  </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header"><h5 class="mb-0">قائمة الأصول الثابتة</h5></div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>كود الأصل</th>
+                        <th>اسم الأصل</th>
+                        <th>تاريخ الشراء</th>
+                        <th class="text-end">تكلفة الشراء</th>
+                        <th class="text-end">مجمع الإهلاك</th>
+                        <th class="text-end">صافي القيمة الدفترية</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for asset in assets %}
+                    <tr>
+                        <td class="fw-bold">{{ asset.asset_tag }}</td>
+                        <td>{{ asset.name }}</td>
+                        <td>{{ asset.purchase_date|date:"Y-m-d" }}</td>
+                        <td class="text-end">{{ asset.purchase_cost|floatformat:3 }}</td>
+                        <td class="text-end text-danger">{{ asset.accumulated_depreciation|floatformat:3 }}</td>
+                        <td class="text-end fw-bold">{{ asset.net_book_value|floatformat:3 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="6" class="text-center py-4">لا توجد أصول ثابتة مسجلة.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header"><h5 class="mb-0">آخر عمليات الإهلاك المسجلة</h5></div>
+    <div class="card-body">
+         <div class="table-responsive">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>تاريخ الفترة</th>
+                        <th>الأصل</th>
+                        <th class="text-end">مبلغ الإهلاك</th>
+                        <th>مرجع القيد</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in depreciation_logs %}
+                    <tr>
+                        <td>{{ log.period_date|date:"Y-m-d" }}</td>
+                        <td>{{ log.asset.name }}</td>
+                        <td class="text-end">{{ log.amount|floatformat:3 }}</td>
+                        <td>JE-{{ log.journal_entry.id|default:"N/A" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4" class="text-center text-muted">لم يتم تسجيل أي عمليات إهلاك.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

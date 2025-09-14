@@ -14,29 +14,36 @@
                     <h3><i class="bi bi-input-cursor-text"></i> 1. بيانات أمر التشغيل</h3>
                 </div>
                 <div class="card-body p-4">
-                    <div class="mb-3">
-                        <label for="template_id" class="form-label fw-bold">اختر القالب لتحميل المواد</label>
-                        <select class="form-select searchable-select" id="template_id" name="template_id" required>
-                            <option value="">اختر قالب...</option>
-                            {% for t in templates %}
-                            <option value="{{ t.id }}">{{ t.name }} ({{ t.final_product.name }})</option>
-                            {% endfor %}
-                        </select>
+                    <!-- ===== START OF MODIFICATION: Added 'data-container' attributes for easier JS targeting ===== -->
+                    <div id="standard-fields-container">
+                        <div class="mb-3">
+                            <label for="template_id" class="form-label fw-bold">اختر القالب لتحميل المواد</label>
+                            <select class="form-select searchable-select" id="template_id" name="template_id" required>
+                                <option value="">اختر قالب...</option>
+                                {% for t in templates %}
+                                <option value="{{ t.id }}">{{ t.name }} ({{ t.final_product.name }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="shop_order_number" class="form-label fw-bold">رقم أمر التشغيل</label>
+                                <input type="text" class="form-control" id="shop_order_number" name="shop_order_number" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="batch_number_from" class="form-label fw-bold">رقم التشغيلة (من)</label>
+                                <input type="number" class="form-control" id="batch_number_from" name="batch_number_from" required placeholder="مثال: 101">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="batch_number_to" class="form-label fw-bold">إلى (اختياري)</label>
+                                <input type="number" class="form-control" id="batch_number_to" name="batch_number_to" placeholder="مثال: 105">
+                            </div>
+                        </div>
                     </div>
+                     <!-- ===== END OF MODIFICATION ===== -->
+
                     <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <label for="shop_order_number" class="form-label fw-bold">رقم أمر التشغيل</label>
-                            <input type="text" class="form-control" id="shop_order_number" name="shop_order_number" required>
-                        </div>
-                         <div class="col-md-2 mb-3">
-                            <label for="batch_number_from" class="form-label fw-bold">رقم التشغيلة (من)</label>
-                            <input type="number" class="form-control" id="batch_number_from" name="batch_number_from" required placeholder="مثال: 101">
-                        </div>
-                        <div class="col-md-2 mb-3">
-                            <label for="batch_number_to" class="form-label fw-bold">إلى (اختياري)</label>
-                            <input type="number" class="form-control" id="batch_number_to" name="batch_number_to" placeholder="مثال: 105">
-                        </div>
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-12 mb-3">
                             <label for="creation_date" class="form-label fw-bold">تاريخ الإنشاء</label>
                             <input type="text" class="form-control datepicker" id="creation_date" name="creation_date" value="{{ today_date }}" required>
                         </div>
@@ -45,12 +52,25 @@
                         <label for="notes" class="form-label fw-bold">ملاحظات (اختياري)</label>
                         <textarea class="form-control" id="notes" name="notes" rows="2" placeholder="أضف أي ملاحظات خاصة بأمر التشغيل هنا..."></textarea>
                     </div>
-                     <div class="mb-3">
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" role="switch" id="is_continuation" name="is_continuation">
-                            <label class="form-check-label" for="is_continuation">
-                                تكملة لأمر تشغيل سابق (يسمح بتكرار رقم أمر التشغيل)
-                            </label>
+                     <div class="row align-items-center">
+                        <div class="col-md-4 mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" id="is_continuation" name="is_continuation">
+                                <label class="form-check-label" for="is_continuation">
+                                    تكملة لأمر تشغيل سابق
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-8 mb-3" id="parent_batch_container" style="display: none;">
+                            <label for="parent_batch" class="form-label fw-bold">الأمر الأصلي</label>
+                            <select class="form-select searchable-select" id="parent_batch" name="parent_batch">
+                                <option value="">اختر الأمر الأصلي...</option>
+                                {% for batch in batches %}
+                                <option value="{{ batch.id }}">
+                                    SO: {{ batch.shop_order_number }} | Batch: {{ batch.batch_number }} | {{ batch.template.final_product.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
                         </div>
                     </div>
                 </div>
