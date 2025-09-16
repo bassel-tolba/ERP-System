@@ -134,6 +134,8 @@ function initDashboardLogic(container) {
                     'data-product-id': item.product_id,
                     'data-quantity': item.quantity_remaining,
                     'data-base-price': item.base_price_per_unit,
+                    'data-vat-rate': item.vat_rate,
+                    'data-wht-rate': item.withholding_tax_rate,
                   });
                 });
               } else {
@@ -152,6 +154,17 @@ function initDashboardLogic(container) {
           mainProductSelect.setValue(productId, true);
           mainCompanySelect.setValue(poSupplierSelect.getValue(), true);
           quantityInput.value = selectedOption['data-quantity'];
+          // Set VAT and WHT display fields (rates are fractions, display as %)
+          const vatRateEl = container.querySelector('#po_vat_rate');
+          const whtRateEl = container.querySelector('#po_wht_rate');
+          if (vatRateEl) {
+            const vr = parseFloat(selectedOption['data-vat-rate']);
+            vatRateEl.value = isFinite(vr) ? (vr * 100).toFixed(2) : '';
+          }
+          if (whtRateEl) {
+            const wr = parseFloat(selectedOption['data-wht-rate']);
+            whtRateEl.value = isFinite(wr) ? (wr * 100).toFixed(2) : '';
+          }
           if (window.updateTagsForProduct) {
             window.updateTagsForProduct(productId);
           }
@@ -159,6 +172,10 @@ function initDashboardLogic(container) {
           mainProductSelect.clear();
           mainCompanySelect.clear();
           quantityInput.value = '';
+          const vatRateEl = container.querySelector('#po_vat_rate');
+          const whtRateEl = container.querySelector('#po_wht_rate');
+          if (vatRateEl) vatRateEl.value = '';
+          if (whtRateEl) whtRateEl.value = '';
         }
       });
 

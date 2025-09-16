@@ -54,6 +54,8 @@ def index(request: HttpRequest) -> HttpResponse:
         base_unit_price_str = request.POST.get('base_unit_price')
         vat_amount_str = request.POST.get('vat_amount')
         vat_treatment = request.POST.get('vat_treatment', InventoryLog.VatTreatment.RECOVERABLE)
+        withholding_tax_amount_str = request.POST.get('withholding_tax_amount')
+
 
         if not all([product_id, company_id, quantity_str, date_str]):
             messages.warning(request, 'الرجاء تعبئة جميع الحقول المطلوبة.')
@@ -69,12 +71,14 @@ def index(request: HttpRequest) -> HttpResponse:
                 po_item = get_object_or_404(PurchaseOrderItem, pk=po_item_id)
                 base_unit_price = po_item.base_price_per_unit
                 vat_amount = (po_item.base_price_per_unit * Decimal(str(quantity)) * po_item.vat_rate).quantize(Decimal('0.001'))
+                withholding_tax_amount = (po_item.base_price_per_unit * Decimal(str(quantity)) * po_item.withholding_tax_rate).quantize(Decimal('0.001'))
             else:
                 if not base_unit_price_str or not vat_amount_str:
                      messages.warning(request, 'الرجاء تعبئة سعر الوحدة ومبلغ الضريبة عند الإدخال اليدوي.')
                      return redirect('inventory:index')
                 base_unit_price = Decimal(base_unit_price_str)
                 vat_amount = Decimal(vat_amount_str)
+                withholding_tax_amount = Decimal(withholding_tax_amount_str) if withholding_tax_amount_str else Decimal('0.000')
 
             log_entry = InventoryLog.objects.create(
                 product_id=product_id,
@@ -85,7 +89,8 @@ def index(request: HttpRequest) -> HttpResponse:
                 # --- MODIFIED: Save new accounting fields ---
                 base_unit_price=base_unit_price,
                 vat_amount=vat_amount,
-                vat_treatment=vat_treatment
+                vat_treatment=vat_treatment,
+                withholding_tax_amount=withholding_tax_amount
             )
             
             tag_ids = request.POST.getlist('tags')
@@ -233,6 +238,7 @@ def edit_record(request: HttpRequest, pk: int) -> HttpResponse:
     base_unit_price_str = request.POST.get('base_unit_price')
     vat_amount_str = request.POST.get('vat_amount')
     vat_treatment = request.POST.get('vat_treatment')
+    withholding_tax_amount_str = request.POST.get('withholding_tax_amount')
 
     if not all([product_id, company_id, quantity_str, date_str]):
         messages.warning(request, 'الرجاء تعبئة جميع الحقول.')
@@ -251,12 +257,14 @@ def edit_record(request: HttpRequest, pk: int) -> HttpResponse:
             new_po_item = get_object_or_404(PurchaseOrderItem, pk=po_item_id)
             base_unit_price = new_po_item.base_price_per_unit
             vat_amount = (new_po_item.base_price_per_unit * Decimal(str(quantity)) * new_po_item.vat_rate).quantize(Decimal('0.001'))
+            withholding_tax_amount = (new_po_item.base_price_per_unit * Decimal(str(quantity)) * new_po_item.withholding_tax_rate).quantize(Decimal('0.001'))
         else:
             if not base_unit_price_str or not vat_amount_str:
                 messages.warning(request, 'الرجاء تعبئة سعر الوحدة ومبلغ الضريبة عند عدم الربط بأمر شراء.')
                 return redirect('inventory:records')
             base_unit_price = Decimal(base_unit_price_str)
             vat_amount = Decimal(vat_amount_str)
+            withholding_tax_amount = Decimal(withholding_tax_amount_str) if withholding_tax_amount_str else Decimal('0.000')
 
         log_entry.product_id = product_id
         log_entry.company_id = company_id
@@ -266,6 +274,7 @@ def edit_record(request: HttpRequest, pk: int) -> HttpResponse:
         log_entry.base_unit_price = base_unit_price
         log_entry.vat_amount = vat_amount
         log_entry.vat_treatment = vat_treatment
+        log_entry.withholding_tax_amount = withholding_tax_amount
         log_entry.save()
         
         tag_ids = request.POST.getlist('tags')

@@ -6,7 +6,7 @@
   </a>
 </div>
 
-<form method="POST" action="{% url 'inventory:create_sales_order' %}">
+<form method="POST" action="{% url 'inventory:create_sales_order' %}" id="createSalesOrderForm">
   {% csrf_token %}
   <div class="card shadow-sm mb-4">
     <div class="card-header bg-light">
@@ -47,17 +47,15 @@
         <table class="table table-hover table-striped mb-0">
           <thead class="table-light">
             <tr>
-              <!-- ====== START OF CORRECTION ====== -->
               <th class="ps-3" style="width: 40%;">المنتج/التشغيلة</th>
               <th style="width: 20%;">الكمية المطلوبة</th>
               <th style="width: 20%;">السعر الأساسي / وحدة</th>
               <th style="width: 15%;">ض.ق.م (%)</th>
               <th class="text-center pe-2" style="width: 5%;"></th>
-              <!-- ====== END OF CORRECTION ====== -->
             </tr>
           </thead>
           <tbody id="so-items-tbody">
-            <!-- Rows will be dynamically added here by JavaScript -->
+            <!-- Rows will be dynamically added here by sales_order_create_logic.js -->
           </tbody>
         </table>
       </div>

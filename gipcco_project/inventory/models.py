@@ -162,6 +162,9 @@ class InventoryLog(models.Model):
         default=VatTreatment.RECOVERABLE,
         verbose_name=_("VAT Treatment")
     )
+    withholding_tax_amount = models.DecimalField(
+        max_digits=12, decimal_places=3, default=Decimal('0.000'), verbose_name=_("Withholding Tax Amount")
+    )
 
     class Meta:
         db_table = 'inventory_log'
@@ -1091,7 +1094,13 @@ class GeneralAccountingSettings(models.Model):
     wip_inventory = models.ForeignKey(
         Account, on_delete=models.PROTECT, related_name='+', 
         verbose_name=_("Work-in-Progress (WIP) Inventory Account"),
-        help_text=_("e.g., '1020205 - مخزون انتاج تحت التشغيل'")
+        help_text=_("e.g., '102020205 - مخزون انتاج تحت التشغيل'")
+    )
+    withholding_tax_payable = models.ForeignKey(
+        Account, on_delete=models.PROTECT, related_name='+',
+        verbose_name=_("Withholding Tax Payable Account"),
+        help_text=_("The liability account for withholding tax deducted from supplier payments."),
+        null=True, blank=True
     )
     # --- NEW FIELD ---
     finished_goods_inventory = models.ForeignKey(

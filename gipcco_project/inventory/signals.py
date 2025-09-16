@@ -119,12 +119,19 @@ def handle_internal_consumption_deletion(sender, instance: InventoryConsumption,
     except Exception as e:
         logger.error(f"Error cleaning up JE for deleted InventoryConsumption ID {instance.id}: {e}", exc_info=True)
         
-        
-        
 @receiver(post_save, sender=FinishedProductReceipt)        
-def handle_fg_receipt_save(sender, instance: FinishedProductReceipt, **kwargs):
-    """Creates a JE when a FinishedProductReceipt is released."""
-    # The service function checks the status, so we can call it directly.
+def handle_fg_receipt_save(sender, instance: FinishedProductReceipt, created, **kwargs):
+    """Creates/updates a JE when a FinishedProductReceipt is saved."""
+    # If the record was updated, delete the old JE to allow regeneration.
+    if not created:
+        try:
+            content_type = ContentType.objects.get_for_model(instance)
+            JournalEntry.objects.filter(content_type=content_type, object_id=instance.id).delete()
+            logger.info(f"Deleted existing JE for updated FinishedProductReceipt ID {instance.id} to allow regeneration.")
+        except Exception as e:
+            logger.error(f"Error deleting old JE for updated FinishedProductReceipt ID {instance.id}: {e}", exc_info=True)
+
+    # The service function will create the JE.
     try:
         create_je_for_finished_goods_receipt(receipt=instance)
     except Exception as e:

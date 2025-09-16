@@ -70,7 +70,7 @@
   --transition-slow: 0.3s ease-in-out;
 
   /* Z-Index Scale */
-  --z-sidebar: 1035;
+  --z-sidebar: 1045; /* Offcanvas z-index is 1045 by default */
   --z-header: 1030;
   --z-dropdown: 1000;
   --z-sticky: 1020;
@@ -81,8 +81,7 @@
   --z-select-dropdown: 9999;
   
   /* Layout Variables */
-  --sidebar-width: 260px;
-  --sidebar-width-collapsed: 80px;
+  --sidebar-width: 300px; /* Width for the offcanvas sidebar */
   --header-height: 65px;
 }
 
@@ -153,40 +152,39 @@ h1, h2, h3, h4, h5, h6 {
    ========================================================================== */
 .layout-wrapper {
   display: flex;
+  flex-direction: column;
   min-height: 100vh;
 }
 
-/* --- Sidebar --- */
-.sidebar {
-  width: var(--sidebar-width);
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  z-index: var(--z-sidebar);
-  background-color: var(--surface-primary);
-  border-left: var(--border-width) solid var(--border-color);
-  display: flex;
-  flex-direction: column;
-  transition: width var(--transition-base);
-  box-shadow: var(--shadow-md);
-  padding: var(--space-md) 0;
+/* --- Offcanvas Sidebar --- */
+.offcanvas-end {
+    width: var(--sidebar-width);
+    background-color: var(--surface-primary);
+    border-left: var(--border-width) solid var(--border-color);
+}
+
+.offcanvas-header {
+    padding: 0; /* Remove padding to allow the sidebar-header to fill it */
+    border-bottom: var(--border-width) solid var(--border-color);
+}
+
+.offcanvas-header .btn-close {
+    margin: var(--space-md);
 }
 
 .sidebar-header {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start; /* Align to the start */
   padding: var(--space-sm) var(--space-lg);
-  margin-bottom: var(--space-md);
   height: var(--header-height);
   text-decoration: none;
+  flex-grow: 1;
 }
 
 .sidebar-header .brand-icon {
   color: var(--color-primary);
   font-size: 2rem;
-  transition: transform var(--transition-base);
 }
 
 .sidebar-header .brand-text {
@@ -194,15 +192,11 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 1.1rem;
   font-weight: var(--font-weight-semibold);
   margin-right: var(--space-sm);
-  opacity: 1;
-  transition: opacity var(--transition-base);
   white-space: nowrap;
 }
 
 .sidebar-nav {
-  flex-grow: 1;
-  overflow-y: auto;
-  padding: 0 var(--space-md);
+  padding: var(--space-md);
 }
 
 .nav-item .nav-link,
@@ -270,106 +264,17 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: var(--font-weight-semibold);
 }
 
-/* Collapsed Sidebar Styles */
-body.sidebar-collapsed .sidebar {
-  width: var(--sidebar-width-collapsed);
-}
-
-body.sidebar-collapsed .sidebar-header .brand-text {
-  opacity: 0;
-  width: 0;
-}
-
-body.sidebar-collapsed .sidebar-header .brand-icon {
-  transform: scale(1.1);
-}
-
-body.sidebar-collapsed .nav-link span,
-body.sidebar-collapsed .dropdown-toggle span {
-  display: none;
-}
-
-body.sidebar-collapsed .nav-link,
-body.sidebar-collapsed .dropdown-toggle {
-  justify-content: center;
-}
-body.sidebar-collapsed .nav-link .nav-icon,
-body.sidebar-collapsed .dropdown-toggle .nav-icon {
-  margin-left: 0;
-}
-/* --- Collapsed Sidebar Popover Menu --- */
-body.sidebar-collapsed .nav-item {
-  position: relative;
-}
 .navbar-nav{
   padding: 0%;
 }
 
-/* Position the dropdown container outside the sidebar */
-body.sidebar-collapsed .collapse {
-  position: absolute;
-  top: -6px; /* Align vertically with the icon, with a small offset */
-  right: var(--sidebar-width-collapsed); /* Position it just to the left of the sidebar */
-  width: 220px; /* Give the popover a proper width */
-  z-index: calc(var(--z-sidebar) + 5); /* Ensure it's above other elements */
-  display: none; /* Hide by default */
-}
-
-/* When the collapse is triggered (gets .show class), style it like a popover */
-body.sidebar-collapsed .collapse.show {
-  display: block; /* Make it visible */
-}
-
-/* Style the inner menu to look like a floating card */
-body.sidebar-collapsed .collapse .dropdown-menu {
-  background-color: var(--surface-primary) !important;
-  border: var(--border-width) solid var(--border-color) !important;
-  box-shadow: var(--shadow-lg) !important;
-  border-radius: var(--border-radius-lg) !important;
-  padding: var(--space-sm) !important;
-  margin: 0 0 0 var(--space-sm) !important; /* Add a small gap from the sidebar */
-  min-width: 100%;
-}
-
-/* Remove the excessive indentation on dropdown items in the popover */
-body.sidebar-collapsed .dropdown-menu .dropdown-item {
-  padding: 0.75rem 1rem !important; /* Reset padding for popover view */
-  font-size: 0.9rem;
-}
-
-/* Add a small triangle pointing to the parent icon for better UX */
-body.sidebar-collapsed .collapse .dropdown-menu::before {
-  content: '';
-  position: absolute;
-  top: 15px;
-  right: -8px; /* Position it to overlap the gap */
-  width: 16px;
-  height: 16px;
-  background-color: var(--surface-primary);
-  border-top: var(--border-width) solid var(--border-color);
-  border-right: var(--border-width) solid var(--border-color);
-  transform: rotate(-45deg);
-  z-index: -1;
-}
-
-[data-bs-theme="dark"] body.sidebar-collapsed .collapse .dropdown-menu::before {
-    background-color: var(--surface-primary);
-    border-color: var(--border-color);
-}
-
-
 /* --- Main Content Area --- */
 .main-content {
   flex-grow: 1;
-  padding-right: var(--sidebar-width); /* Match sidebar width */
-  transition: padding-right var(--transition-base);
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-}
-
-body.sidebar-collapsed .main-content {
-  padding-right: var(--sidebar-width-collapsed);
+  width: 100%;
 }
 
 /* --- Top Header --- */
@@ -499,6 +404,11 @@ body.sidebar-collapsed .main-content {
   background-color: var(--color-primary-subtle) !important;
   color: var(--color-primary) !important;
 }
+.ts-control input {
+  text-align: center !important;
+
+}
+
 
 /* Theme Switch */
 .theme-switch .form-check-label {
@@ -525,7 +435,7 @@ body.sidebar-collapsed .main-content {
 }
 .theme-switch .form-check-input { display: none; }
 .theme-switch .form-check-input:checked + .form-check-label::before {
-  transform: translateX(-22px);
+  transform: translateX(22px);
 }
 .theme-switch .form-check-label i {
   position: absolute;
@@ -538,23 +448,12 @@ body.sidebar-collapsed .main-content {
 .theme-switch .bi-moon-stars-fill { left: 7px; }
 
 
-/* --- Tables --- */
-.table {
-  --bs-table-bg: var(--surface-primary);
-  --bs-table-striped-bg: var(--surface-secondary);
-  --bs-table-hover-bg: var(--color-primary-light);
-  border-radius: var(--border-radius);
-  overflow: hidden;
-  box-shadow: var(--shadow-xs);
-}
-.table thead th {
-  background-color: var(--surface-secondary);
-  color: var(--text-secondary);
-  border-bottom: 2px solid var(--border-color);
-  font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
-  font-size: 0.8rem;
-  letter-spacing: 0.05em;
+.sidebar-nav .dropdown-menu {
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background-color: var(--surface-secondary) !important;
 }
 
 /* --- Sticky Form Footer --- */
@@ -603,22 +502,10 @@ body.sidebar-collapsed .main-content {
    6. RESPONSIVE DESIGN
    ========================================================================== */
 @media (max-width: 991.98px) {
-  body:not(.sidebar-collapsed) {
-      /* Force collapse on smaller screens */
-      --sidebar-width: var(--sidebar-width-collapsed);
-  }
-  .sidebar {
-      /* On mobile, you might want it to overlay content instead of pushing it */
-      transform: translateX(var(--sidebar-width));
-  }
-  body.sidebar-open .sidebar {
-      transform: translateX(0);
-  }
-  .main-content {
-      padding-right: 0 !important;
-  }
-  .sidebar-toggle.mobile-toggle {
-    display: block !important;
+  /* On smaller screens, the offcanvas is the default behavior, so no major changes are needed here. 
+     You might adjust the offcanvas width if desired. */
+  :root {
+    --sidebar-width: 280px; /* Slightly smaller for mobile */
   }
 }
 

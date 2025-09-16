@@ -44,6 +44,16 @@
                     <option value="">-- اختر أمر شراء أولاً --</option>
                   </select>
               </div>
+              <div class="row g-3">
+                  <div class="col-md-6">
+                      <label for="po_vat_rate" class="form-label fw-bold">ضريبة القيمة المضافة (%)</label>
+                      <input type="number" step="0.01" class="form-control" id="po_vat_rate" value="" placeholder="--" disabled>
+                  </div>
+                  <div class="col-md-6">
+                      <label for="po_wht_rate" class="form-label fw-bold">ضريبة المنبع (%)</label>
+                      <input type="number" step="0.01" class="form-control" id="po_wht_rate" value="" placeholder="--" disabled>
+                  </div>
+              </div>
           </div>
           
           <!-- Standard Fields -->
@@ -99,6 +109,12 @@
                       <input type="number" step="0.001" class="form-control" id="vat_amount" name="vat_amount" placeholder="0.000" required/>
                   </div>
                   <div class="col-md-4">
+                      <label for="withholding_tax_amount" class="form-label fw-bold">مبلغ ضريبة المنبع</label>
+                      <input type="number" step="0.001" class="form-control" id="withholding_tax_amount" name="withholding_tax_amount" placeholder="0.000"/>
+                  </div>
+              </div>
+              <div class="row g-3 mt-2">
+                  <div class="col-md-12">
                       <label for="vat_treatment" class="form-label fw-bold">معالجة الضريبة</label>
                       <select class="form-select" id="vat_treatment" name="vat_treatment">
                           {% for value, display in vat_treatment_choices %}

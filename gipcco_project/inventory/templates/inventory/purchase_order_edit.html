@@ -6,5 +6,5 @@
   {% include "inventory/partials/purchase_order_edit_content.html" %}
 
   {{ products|json_script:"products-data" }}
-  {{ po_items_json|json_script:"po-items-data" }}
+  {{ po_items_data|json_script:"po-items-data" }}
 {% endblock content %}

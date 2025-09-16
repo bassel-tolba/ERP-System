@@ -1,9 +1,10 @@
-<!-- gipcco_project/inventory/templates/inventory/purchase_order_create.html -->
-
 {% extends "inventory/layout.html" %}
 
 {% block content %}
+  {# This now ONLY includes the self-contained partial. #}
   {% include "inventory/partials/purchase_order_create_content.html" %}
-
-  {{ products|json_script:"products-data" }}
 {% endblock content %}
+
+{% block scripts %}
+  {# This block remains empty. #}
+{% endblock scripts %}

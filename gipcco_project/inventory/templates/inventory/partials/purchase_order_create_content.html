@@ -7,7 +7,7 @@
     </a>
 </div>
 
-<form method="post" action="{% url 'inventory:create_purchase_order' %}">
+<form method="post" action="{% url 'inventory:create_purchase_order' %}" id="createPurchaseOrderForm">
     {% csrf_token %}
     <div class="card shadow-sm mb-4">
         <div class="card-header">
@@ -52,6 +52,7 @@
                             <th class="text-center">ضريبة ق.م (%)</th>
                             <th class="text-center">خصم منبع (%)</th>
                             <th class="text-center">الإجمالي (شامل ضريبة ق.م)</th>
+                            <th class="text-center">الصافي المستحق للدفع</th>
                             <th class="text-center pe-3">إجراء</th>
                         </tr>
                     </thead>
@@ -67,59 +68,6 @@
     </div>
 </form>
 
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    if (document.body.dataset.poCreateInitialized) return;
-    document.body.dataset.poCreateInitialized = 'true';
-
-    const productsData = JSON.parse(document.getElementById('products-data').textContent);
-    const tbody = document.getElementById('po-items-tbody');
-    const addItemBtn = document.getElementById('add-item-btn');
-    let rowCounter = 0;
-
-    const calculateTotal = (row) => {
-        const qty = parseFloat(row.querySelector('input[name="quantity"]').value) || 0;
-        const basePrice = parseFloat(row.querySelector('input[name="base_price_per_unit"]').value) || 0;
-        const vatRate = parseFloat(row.querySelector('input[name="vat_rate"]').value) || 0;
-        const total = qty * (basePrice * (1 + vatRate / 100));
-        row.querySelector('.line-total').textContent = total.toFixed(3);
-    };
-
-    const addItemRow = () => {
-        rowCounter++;
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td class="ps-3">
-                <select name="product_id" class="form-select" data-row-id="${rowCounter}" required></select>
-            </td>
-            <td><input type="number" step="any" name="quantity" class="form-control text-center" required></td>
-            <td><input type="number" step="0.001" name="base_price_per_unit" class="form-control text-center" required></td>
-            <td><input type="number" step="any" name="vat_rate" class="form-control text-center" value="14.00" required></td>
-            <td><input type="number" step="any" name="withholding_tax_rate" class="form-control text-center" value="1.00"></td>
-            <td class="text-center fw-bold line-total">0.000</td>
-            <td class="text-center pe-3">
-                <button type="button" class="btn btn-sm btn-outline-danger remove-item-btn"><i class="bi bi-trash"></i></button>
-            </td>
-        `;
-        tbody.appendChild(row);
-        
-        const newSelect = row.querySelector(`select[data-row-id="${rowCounter}"]`);
-        const tomselect = new TomSelect(newSelect, {
-            options: productsData.map(p => ({ value: p.id, text: `${p.name} (${p.code})` })),
-            placeholder: 'ابحث عن منتج...',
-            create: false
-        });
-        
-        row.addEventListener('input', () => calculateTotal(row));
-    };
-
-    tbody.addEventListener('click', function(e) {
-        if (e.target.closest('.remove-item-btn')) {
-            e.target.closest('tr').remove();
-        }
-    });
-
-    addItemBtn.addEventListener('click', addItemRow);
-    addItemRow(); // Add the first row automatically
-});
-</script>
+{# === MOVE THE DATA ISLAND HERE === #}
+{# This ensures the data is always loaded as part of the partial content #}
+{{ products|json_script:"products-data" }}

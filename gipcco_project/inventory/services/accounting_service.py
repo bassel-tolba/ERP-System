@@ -71,7 +71,8 @@ def create_je_for_inventory_receipt(inventory_log: InventoryLog) -> Optional[Jou
     Accounting Logic:
     - DEBIT: Inventory Account (at costing value)
     - DEBIT: VAT Receivable (if VAT is recoverable)
-    - CREDIT: Accounts Payable (for the total invoice amount)
+    - CREDIT: Accounts Payable (for the total invoice amount MINUS withholding tax)
+    - CREDIT: Withholding Tax Payable
     """
     # 1. --- Pre-checks and Guards ---
     if inventory_log.status != InventoryLog.Status.RELEASED:
@@ -96,14 +97,16 @@ def create_je_for_inventory_receipt(inventory_log: InventoryLog) -> Optional[Jou
     inventory_account = _get_product_inventory_account(inventory_log.product)
     ap_account = settings.accounts_payable
     vat_account = settings.vat_receivable
+    wht_account = settings.withholding_tax_payable
     
-    if not all([inventory_account, ap_account, vat_account]):
+    if not all([inventory_account, ap_account, vat_account, wht_account]):
         raise ValueError(_("One or more required general accounting settings are not configured."))
 
     # 3. --- Calculate Amounts ---
     quantity = Decimal(str(inventory_log.quantity))
     total_base_amount = inventory_log.base_unit_price * quantity
     vat_amount = inventory_log.vat_amount
+    wht_amount = inventory_log.withholding_tax_amount
     total_invoice_amount = total_base_amount + vat_amount
     costing_value = inventory_log.costing_unit_price * quantity
     
@@ -146,9 +149,18 @@ def create_je_for_inventory_receipt(inventory_log: InventoryLog) -> Optional[Jou
         JournalEntryLine.objects.create(
             journal_entry=je,
             account=ap_account,
-            amount=total_invoice_amount.quantize(Decimal('0.001')),
+            amount=(total_invoice_amount - wht_amount).quantize(Decimal('0.001')),
             entry_type=JournalEntryLine.EntryType.CREDIT
         )
+
+        # Line 4: Credit Withholding Tax Payable (if applicable)
+        if wht_amount > 0:
+            JournalEntryLine.objects.create(
+                journal_entry=je,
+                account=wht_account,
+                amount=wht_amount.quantize(Decimal('0.001')),
+                entry_type=JournalEntryLine.EntryType.CREDIT
+            )
 
         logger.info(f"Successfully created Journal Entry JE-{je.id} for InventoryLog ID {inventory_log.id}.")
 
@@ -315,17 +327,15 @@ def create_je_for_internal_consumption(consumption: InventoryConsumption) -> Opt
 
 def create_je_for_finished_goods_receipt(receipt: FinishedProductReceipt) -> Optional[JournalEntry]:
     """
-    Creates a journal entry for a released finished product receipt.
-    This moves value from WIP Inventory to Finished Goods Inventory.
+    Creates a journal entry for a finished product receipt.
+    This moves value from WIP Inventory to Finished Goods Inventory upon receipt.
 
     Accounting Logic:
     - DEBIT: Finished Goods Inventory
     - CREDIT: Work-in-Progress (WIP) Inventory
     """
     # 1. --- Pre-checks and Guards ---
-    if receipt.status != FinishedProductReceipt.Status.RELEASED:
-        return None # Only create JEs for released goods
-
+    # JE is now created upon receipt, regardless of quarantine status.
     if JournalEntry.objects.filter(
         content_type=ContentType.objects.get_for_model(receipt),
         object_id=receipt.id
@@ -333,7 +343,7 @@ def create_je_for_finished_goods_receipt(receipt: FinishedProductReceipt) -> Opt
         logger.warning(f"Journal entry for FinishedProductReceipt ID {receipt.id} already exists. Aborting.")
         return None
 
-    _check_period_is_open(receipt.release_date or receipt.receipt_date)
+    _check_period_is_open(receipt.receipt_date)
 
     # 2. --- Get Accounts and Amount ---
     total_cost = receipt.total_cost
@@ -360,7 +370,7 @@ def create_je_for_finished_goods_receipt(receipt: FinishedProductReceipt) -> Opt
         }
 
         je = JournalEntry.objects.create(
-            date=receipt.release_date or receipt.receipt_date,
+            date=receipt.receipt_date,
             description=description,
             source_object=receipt
         )

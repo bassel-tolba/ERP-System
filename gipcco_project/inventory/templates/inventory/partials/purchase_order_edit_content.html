@@ -108,7 +108,8 @@ document.addEventListener("DOMContentLoaded", function() {
         const tomselect = new TomSelect(newSelect, {
             options: productsData.map(p => ({ value: p.id, text: `${p.name} (${p.code})` })),
             placeholder: 'ابحث عن منتج...',
-            create: false
+            create: false,
+            dropdownParent: 'body'
         });
 
         if (item.product_id) {

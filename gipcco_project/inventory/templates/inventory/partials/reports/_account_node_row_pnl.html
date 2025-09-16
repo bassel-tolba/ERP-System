@@ -11,7 +11,9 @@
 {% if node.period_change != 0 or node.children %}
 <tr class="{% if not node.children %}fw-normal{% else %}fw-bold{% endif %}">
     <td style="padding-inline-start: {% widthratio level 1 20 %}px !important;">
-        {{ node.account.code }} - {{ node.account.name }}
+        <a href="{% url 'inventory:general_ledger' %}?account_id={{ node.account.id }}&start_date={{ start_date }}&end_date={{ end_date }}" class="text-decoration-none">
+            {{ node.account.code }} - {{ node.account.name }}
+        </a>
     </td>
     <td class="text-end font-monospace" style="width: 25%;">
         {# Only leaf nodes (non-parents) with a value should show an amount #}

@@ -1,5 +1,6 @@
 <!-- gipcco_project/inventory/templates/inventory/partials/purchase_order_view_content.html -->
 {% load humanize %}
+{% load inventory_filters %}
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
@@ -60,15 +61,16 @@
                         <th class="text-center">الكمية المطلوبة</th>
                         <th class="text-center">السعر الأساسي</th>
                         <th class="text-center">ضريبة ق.م.</th>
-                        <th class="text-center">الإجمالي/وحدة</th>
-                        <th class="text-center">الإجمالي الكلي</th>
+                        <th class="text-center">ضريبة المنبع</th>
+                        <th class="text-center">الإجمالي/وحدة (شامل ق.م.)</th>
+                        <th class="text-center">الإجمالي الكلي (شامل ق.م.)</th>
+                        <th class="text-center">الصافي المستحق للدفع</th>
                         <th class="text-center">الكمية المستلمة</th>
                         <th class="text-center pe-3">الحالة</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for item in po.items.all %}
-                    {% with total_price_per_unit=item.base_price_per_unit|add:(item.base_price_per_unit|mul:item.vat_rate) %}
                     <tr>
                         <td class="ps-3">
                             <strong>{{ item.product.name }}</strong>
@@ -76,9 +78,11 @@
                         </td>
                         <td class="text-center fw-bold">{{ item.quantity_ordered|floatformat:3 }}</td>
                         <td class="text-center">{{ item.base_price_per_unit|floatformat:3 }}</td>
-                        <td class="text-center">{{ item.vat_rate|floatformat:2|mul:100 }}%</td>
-                        <td class="text-center">{{ total_price_per_unit|floatformat:3 }}</td>
-                        <td class="text-center fw-bold">{{ total_price_per_unit|mul:item.quantity_ordered|floatformat:3|intcomma }}</td>
+                        <td class="text-center">{{ item.vat_rate|mul:100|floatformat:2 }}%</td>
+                        <td class="text-center">{{ item.withholding_tax_rate|mul:100|floatformat:2 }}%</td>
+                        <td class="text-center">{{ item.total_price_per_unit_incl_vat|floatformat:3 }}</td>
+                        <td class="text-center fw-bold">{{ item.total_price_incl_vat|floatformat:3|intcomma }}</td>
+                        <td class="text-center fw-bold text-primary">{{ item.net_payable|floatformat:3|intcomma }}</td>
                         <td class="text-center">{{ item.total_received|floatformat:3 }}</td>
                         <td class="text-center pe-3">
                             {% if item.is_completed %}
@@ -88,7 +92,6 @@
                             {% endif %}
                         </td>
                     </tr>
-                    {% endwith %}
                     {% endfor %}
                 </tbody>
             </table>

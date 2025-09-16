@@ -42,6 +42,8 @@ window.initializePluginsInContent = function (container = document) {
         '#customerInvoiceFilters': initCustomerInvoiceListLogic,
         '#createCustomerInvoiceForm': initCreateCustomerInvoiceLogic,
         '#journalEntryForm': initJournalEntryCreateLogic,
+        '#createSalesOrderForm': initSalesOrderCreateLogic,
+        '#createPurchaseOrderForm': initPurchaseOrderCreateLogic,
     };
 
     for (const selector in pageInitializers) {

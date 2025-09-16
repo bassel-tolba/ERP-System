@@ -11,7 +11,8 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 
-from ..models import Account, JournalEntryLine, JournalEntry, FinancialPeriod, Batch
+from ..models import Account, JournalEntryLine, JournalEntry, FinancialPeriod, Batch, Product, FinishedProductDispatch, InventoryConsumption, ProductionReturn, BatchItem, InventoryLog
+from ..services.costing_service import get_inventory_state_at_datetime
 
 # ==============================================================================
 #  HELPER FUNCTIONS
@@ -521,5 +522,170 @@ def batch_production_variance_report(request: HttpRequest) -> HttpResponse:
     template_name = 'inventory/reports/batch_production_variance_report.html'
     if 'X-Partial-Request' in request.headers:
         template_name = 'inventory/partials/reports/batch_production_variance_report_content.html'
+        
+    return render(request, template_name, context)
+
+
+# ==============================================================================
+#  NEW PRODUCT LEDGER REPORT
+# ==============================================================================
+
+def product_ledger(request: HttpRequest) -> HttpResponse:
+    """
+    Generates a detailed report showing the complete lifecycle of a single product
+    within a specified date range, including a running stock balance and value.
+    """
+    start_date, end_date, start_date_str, end_date_str = _get_date_range_from_request(request)
+    product_id = request.GET.get('product_id')
+    
+    product = None
+    transactions = []
+    opening_balance_qty = Decimal('0.0')
+    opening_balance_val = Decimal('0.0')
+    closing_balance_qty = Decimal('0.0')
+    closing_balance_val = Decimal('0.0')
+    total_in_qty = Decimal('0.0')
+    total_out_qty = Decimal('0.0')
+
+    if product_id:
+        product = get_object_or_404(Product, pk=product_id)
+
+        # 1. Calculate Opening Balance (state before start_date)
+        opening_state = get_inventory_state_at_datetime(product.id, start_date)
+        opening_balance_qty = opening_state['quantity']
+        opening_balance_val = opening_state['value']
+        
+        # 2. Get all transactions within the period
+        receipts = InventoryLog.objects.filter(
+            product=product, status=InventoryLog.Status.RELEASED,
+            release_timestamp__range=(start_date, end_date)
+        ).select_related('company', 'po_item__purchase_order')
+
+        prod_consumptions = BatchItem.objects.filter(
+            primitive_product=product, batch__creation_date__range=(start_date, end_date)
+        ).select_related('batch__template__final_product')
+
+        returns = ProductionReturn.objects.filter(
+            product=product, return_date__range=(start_date, end_date)
+        ).select_related('source_log')
+
+        internal_consumptions = InventoryConsumption.objects.filter(
+            product=product, consumption_date__range=(start_date, end_date)
+        ).select_related('source_log')
+
+        dispatches = FinishedProductDispatch.objects.filter(
+            sales_order_item__finished_product__batch__template__final_product=product,
+            dispatch_date__range=(start_date, end_date)
+        ).select_related('sales_order_item__sales_order__customer', 'sales_order_item__finished_product')
+
+        # 3. Combine and sort all transactions chronologically
+        all_transactions = []
+        for r in receipts:
+            all_transactions.append({'date': r.release_timestamp, 'type': 'IN', 'obj': r, 'sort_key': 1})
+        for pc in prod_consumptions:
+            all_transactions.append({'date': pc.batch.creation_date, 'type': 'OUT', 'obj': pc, 'sort_key': 2})
+        for ret in returns:
+            all_transactions.append({'date': ret.return_date, 'type': 'IN', 'obj': ret, 'sort_key': 1})
+        for ic in internal_consumptions:
+            all_transactions.append({'date': ic.consumption_date, 'type': 'OUT', 'obj': ic, 'sort_key': 2})
+        for d in dispatches:
+            all_transactions.append({'date': d.dispatch_date, 'type': 'OUT', 'obj': d, 'sort_key': 2})
+            
+        sorted_transactions = sorted(all_transactions, key=lambda x: (x['date'], x['sort_key']))
+        
+        # 4. Process transactions to build the ledger
+        running_qty = opening_balance_qty
+        running_val = opening_balance_val
+        
+        for trx_data in sorted_transactions:
+            trx = trx_data['obj']
+            current_mac = (running_val / running_qty) if running_qty > 0 else Decimal('0.0')
+            
+            entry = {'date': trx_data['date'], 'in_qty': Decimal('0.0'), 'out_qty': Decimal('0.0')}
+
+            if isinstance(trx, InventoryLog):
+                qty = Decimal(str(trx.quantity))
+                val = qty * trx.costing_unit_price
+                entry.update({
+                    'type': 'Receipt', 'description': f"Purchase from {trx.company.name} (PO: {trx.po_item.purchase_order.po_number if trx.po_item else 'N/A'}, QC: {trx.qc_no})",
+                    'in_qty': qty, 'unit_cost': trx.costing_unit_price, 'total_val': val
+                })
+                running_qty += qty
+                running_val += val
+                total_in_qty += qty
+            
+            elif isinstance(trx, ProductionReturn):
+                qty = Decimal(str(trx.quantity))
+                cost = trx.source_log.costing_unit_price if trx.source_log else current_mac
+                val = qty * cost
+                entry.update({
+                    'type': 'Return', 'description': f"Return from production. Notes: {trx.notes or 'N/A'}",
+                    'in_qty': qty, 'unit_cost': cost, 'total_val': val
+                })
+                running_qty += qty
+                running_val += val
+                total_in_qty += qty
+
+            elif isinstance(trx, BatchItem):
+                qty = Decimal(str(trx.actual_quantity or 0.0))
+                cost = trx.cost_at_consumption or current_mac
+                val = qty * cost
+                entry.update({
+                    'type': 'Production Use', 'description': f"Consumed in SO: {trx.batch.shop_order_number} to produce {trx.batch.template.final_product.name}",
+                    'out_qty': qty, 'unit_cost': cost, 'total_val': -val
+                })
+                running_qty -= qty
+                running_val -= val
+                total_out_qty += qty
+
+            elif isinstance(trx, InventoryConsumption):
+                qty = Decimal(str(trx.quantity_consumed))
+                val = trx.cost_at_consumption
+                cost = (val / qty) if qty > 0 else Decimal('0.0')
+                entry.update({
+                    'type': 'Internal Use', 'description': f"Consumed by {trx.get_department_display()}. Notes: {trx.notes or 'N/A'}",
+                    'out_qty': qty, 'unit_cost': cost, 'total_val': -val
+                })
+                running_qty -= qty
+                running_val -= val
+                total_out_qty += qty
+
+            elif isinstance(trx, FinishedProductDispatch):
+                qty = Decimal(str(trx.quantity))
+                val = trx.cost_at_dispatch
+                cost = (val / qty) if qty > 0 else Decimal('0.0')
+                entry.update({
+                    'type': 'Sale', 'description': f"Sold to {trx.sales_order_item.sales_order.customer.name} (SO: {trx.sales_order_item.sales_order.so_number})",
+                    'out_qty': qty, 'unit_cost': cost, 'total_val': -val
+                })
+                running_qty -= qty
+                running_val -= val
+                total_out_qty += qty
+
+            entry['running_qty'] = running_qty
+            entry['running_val'] = running_val
+            transactions.append(entry)
+
+        closing_balance_qty = running_qty
+        closing_balance_val = running_val
+
+    context = {
+        'active_page': 'analysis', # Match the sidebar section
+        'products': Product.objects.order_by('name'),
+        'selected_product': product,
+        'transactions': transactions,
+        'opening_balance_qty': opening_balance_qty,
+        'opening_balance_val': opening_balance_val,
+        'closing_balance_qty': closing_balance_qty,
+        'closing_balance_val': closing_balance_val,
+        'total_in_qty': total_in_qty,
+        'total_out_qty': total_out_qty,
+        'start_date': start_date_str,
+        'end_date': end_date_str,
+    }
+    
+    template_name = 'inventory/reports/product_ledger.html'
+    if 'X-Partial-Request' in request.headers:
+        template_name = 'inventory/partials/reports/product_ledger_content.html'
         
     return render(request, template_name, context)

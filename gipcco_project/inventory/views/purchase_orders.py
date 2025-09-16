@@ -122,6 +122,18 @@ def view_purchase_order(request: HttpRequest, pk: int) -> HttpResponse:
         item.is_completed = item.total_received >= item.quantity_ordered
         item.quantity_remaining = item.quantity_ordered - item.total_received
 
+        # Perform calculations in the view for clarity in the template
+        quantity = Decimal(str(item.quantity_ordered))
+        base_price = item.base_price_per_unit
+        vat_rate = item.vat_rate
+        wht_rate = item.withholding_tax_rate
+
+        item.total_price_per_unit_incl_vat = base_price * (Decimal('1') + vat_rate)
+        item.total_price_incl_vat = item.total_price_per_unit_incl_vat * quantity
+        
+        withholding_tax_amount = (quantity * base_price) * wht_rate
+        item.net_payable = item.total_price_incl_vat - withholding_tax_amount
+
     context = {
         'active_page': 'purchasing',
         'po': po,
@@ -211,7 +223,7 @@ def edit_purchase_order(request: HttpRequest, pk: int) -> HttpResponse:
         'po': po,
         'suppliers': Company.objects.all(),
         'products': list(primitive_products_qs.values('id', 'name', 'code')),
-        'po_items_json': json.dumps(po_items_data),
+        'po_items_data': po_items_data,
     }
     
     if 'X-Partial-Request' in request.headers:

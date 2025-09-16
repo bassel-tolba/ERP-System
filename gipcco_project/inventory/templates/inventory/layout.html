@@ -20,148 +20,154 @@
     <!-- Favicon -->
     <link rel="icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon" />
 </head>
-<body class="sidebar-collapsed">
+<body>
 
     <div class="layout-wrapper">
         <!-- ==========================================================================
-           SIDEBAR NAVIGATION
+           SIDEBAR NAVIGATION (Offcanvas)
            ========================================================================== -->
-        <aside class="sidebar">
-            <a class="sidebar-header" href="{% url 'inventory:index' %}">
-                <i class="bi bi-buildings-fill brand-icon"></i>
-                <span class="brand-text">GIPCCO Warehouse</span>
-            </a>
+        <div class="offcanvas offcanvas-end" tabindex="-1" id="sidebarOffcanvas" aria-labelledby="sidebarOffcanvasLabel">
+            <div class="offcanvas-header">
+                <a class="sidebar-header" href="{% url 'inventory:index' %}" id="sidebarOffcanvasLabel">
+                    <i class="bi bi-buildings-fill brand-icon"></i>
+                    <span class="brand-text">GIPCCO Warehouse</span>
+                </a>
+                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body">
+                <nav class="sidebar-nav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link {% if active_page == 'index' %}active{% endif %}" href="{% url 'inventory:index' %}">
+                                <i class="bi bi-grid-1x2-fill nav-icon"></i>
+                                <span>لوحة التحكم</span>
+                            </a>
+                        </li>
 
-            <nav class="sidebar-nav">
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link {% if active_page == 'index' %}active{% endif %}" href="{% url 'inventory:index' %}">
-                            <i class="bi bi-grid-1x2-fill nav-icon"></i>
-                            <span>لوحة التحكم</span>
-                        </a>
-                    </li>
+                        <li class="nav-item">
+                            <a class="nav-link dropdown-toggle {% if active_page == 'purchasing' %}active{% endif %}" href="#purchasingSubmenu" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="purchasingSubmenu">
+                                <i class="bi bi-cart-check-fill nav-icon"></i>
+                                <span>المشتريات</span>
+                            </a>
+                            <div class="collapse" id="purchasingSubmenu">
+                                <ul class="dropdown-menu show">
+                                    <li><a class="dropdown-item" href="{% url 'inventory:create_purchase_order' %}">إنشاء أمر شراء</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'inventory:purchase_orders' %}">عرض أوامر الشراء</a></li>
+                                </ul>
+                            </div>
+                        </li>
 
-                    <li class="nav-item">
-                        <a class="nav-link dropdown-toggle {% if active_page == 'purchasing' %}active{% endif %}" href="#purchasingSubmenu" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="purchasingSubmenu">
-                            <i class="bi bi-cart-check-fill nav-icon"></i>
-                            <span>المشتريات</span>
-                        </a>
-                        <div class="collapse" id="purchasingSubmenu">
-                            <ul class="dropdown-menu show">
-                                <li><a class="dropdown-item" href="{% url 'inventory:create_purchase_order' %}">إنشاء أمر شراء</a></li>
-                                <li><a class="dropdown-item" href="{% url 'inventory:purchase_orders' %}">عرض أوامر الشراء</a></li>
-                            </ul>
-                        </div>
-                    </li>
+                        <li class="nav-item">
+                            <a class="nav-link dropdown-toggle {% if active_page == 'sales' %}active{% endif %}" href="#salesSubmenu" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="salesSubmenu">
+                                <i class="bi bi-truck nav-icon"></i>
+                                <span>المبيعات</span>
+                            </a>
+                            <div class="collapse" id="salesSubmenu">
+                                <ul class="dropdown-menu show">
+                                    <li><a class="dropdown-item" href="{% url 'inventory:create_sales_order' %}">إنشاء أمر بيع</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'inventory:sales_orders' %}">عرض أوامر البيع</a></li>
+                                </ul>
+                            </div>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link dropdown-toggle {% if active_page == 'shop_orders' %}active{% endif %}" href="#shopOrdersSubmenu" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="shopOrdersSubmenu">
+                                <i class="bi bi-box-seam-fill nav-icon"></i>
+                                <span>أوامر التشغيل</span>
+                            </a>
+                            <div class="collapse" id="shopOrdersSubmenu">
+                                <ul class="dropdown-menu show">
+                                    <li><a class="dropdown-item" href="{% url 'inventory:batches' %}">عرض أوامر التشغيل</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'inventory:finished_goods_status' %}">حالة المنتج النهائي</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'inventory:shop_order_templates' %}">إدارة القوالب</a></li>
+                                </ul>
+                            </div>
+                        </li>
 
-                    <li class="nav-item">
-                        <a class="nav-link dropdown-toggle {% if active_page == 'sales' %}active{% endif %}" href="#salesSubmenu" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="salesSubmenu">
-                            <i class="bi bi-truck nav-icon"></i>
-                            <span>المبيعات</span>
-                        </a>
-                        <div class="collapse" id="salesSubmenu">
-                            <ul class="dropdown-menu show">
-                                <li><a class="dropdown-item" href="{% url 'inventory:create_sales_order' %}">إنشاء أمر بيع</a></li>
-                                <li><a class="dropdown-item" href="{% url 'inventory:sales_orders' %}">عرض أوامر البيع</a></li>
-                            </ul>
-                        </div>
-                    </li>
-                    
-                    <li class="nav-item">
-                        <a class="nav-link dropdown-toggle {% if active_page == 'shop_orders' %}active{% endif %}" href="#shopOrdersSubmenu" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="shopOrdersSubmenu">
-                            <i class="bi bi-box-seam-fill nav-icon"></i>
-                            <span>أوامر التشغيل</span>
-                        </a>
-                        <div class="collapse" id="shopOrdersSubmenu">
-                            <ul class="dropdown-menu show">
-                                <li><a class="dropdown-item" href="{% url 'inventory:batches' %}">عرض أوامر التشغيل</a></li>
-                                <li><a class="dropdown-item" href="{% url 'inventory:finished_goods_status' %}">حالة المنتج النهائي</a></li>
-                                <li><a class="dropdown-item" href="{% url 'inventory:shop_order_templates' %}">إدارة القوالب</a></li>
-                            </ul>
-                        </div>
-                    </li>
+                        <li class="nav-item">
+                            <a class="nav-link dropdown-toggle {% if active_page == 'analysis' or active_page == 'production_returns' or active_page == 'opening_balances' or active_page == 'ledger' or active_page == 'visuals' or active_page == 'quarantine' %}active{% endif %}" href="#inventorySubmenu" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="inventorySubmenu">
+                                <i class="bi bi-bar-chart-line-fill nav-icon"></i>
+                                <span>التحليل والمخزون</span>
+                            </a>
+                            <div class="collapse" id="inventorySubmenu">
+                                <ul class="dropdown-menu show">
+                                    <li><a class="dropdown-item" href="{% url 'inventory:quarantine_list' %}">إدارة المواد تحت الفحص</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'inventory:analysis' %}">تحليل حركة المخزون</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'inventory:opening_balances' %}">الأرصدة الافتتاحية</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'inventory:production_returns' %}">إرجاع من الإنتاج</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="{% url 'inventory:ledger' %}">كشف حساب منتج/شركة</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'inventory:product_ledger' %}">كشف حساب منتج (تفصيلي)</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'inventory:stock_valuation' %}">تقييم المخزون الحالي</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'inventory:visuals' %}">لوحة المؤشرات الرسومية</a></li>
+                                </ul>
+                            </div>
+                        </li>
 
-                    <li class="nav-item">
-                        <a class="nav-link dropdown-toggle {% if active_page == 'analysis' or active_page == 'production_returns' or active_page == 'opening_balances' or active_page == 'ledger' or active_page == 'visuals' or active_page == 'quarantine' %}active{% endif %}" href="#inventorySubmenu" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="inventorySubmenu">
-                            <i class="bi bi-bar-chart-line-fill nav-icon"></i>
-                            <span>التحليل والمخزون</span>
-                        </a>
-                        <div class="collapse" id="inventorySubmenu">
-                            <ul class="dropdown-menu show">
-                                <li><a class="dropdown-item" href="{% url 'inventory:quarantine_list' %}">إدارة المواد تحت الفحص</a></li>
-                                <li><a class="dropdown-item" href="{% url 'inventory:analysis' %}">تحليل حركة المخزون</a></li>
-                                <li><a class="dropdown-item" href="{% url 'inventory:opening_balances' %}">الأرصدة الافتتاحية</a></li>
-                                <li><a class="dropdown-item" href="{% url 'inventory:production_returns' %}">إرجاع من الإنتاج</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{% url 'inventory:ledger' %}">كشف حساب منتج/شركة</a></li>
-                                <li><a class="dropdown-item" href="{% url 'inventory:stock_valuation' %}">تقييم المخزون الحالي</a></li>
-                                <li><a class="dropdown-item" href="{% url 'inventory:visuals' %}">لوحة المؤشرات الرسومية</a></li>
-                            </ul>
-                        </div>
-                    </li>
+                        <li class="nav-item">
+                            <a class="nav-link dropdown-toggle {% if active_page == 'financials' %}active{% endif %}" href="#financialsSubmenu" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="financialsSubmenu">
+                                 <i class="bi bi-bank2 nav-icon"></i>
+                                 <span>المالية</span>
+                            </a>
+                             <div class="collapse" id="financialsSubmenu">
+                                <ul class="dropdown-menu show">
+                                    <li><h6 class="dropdown-header">الحسابات الدائنة (A/P)</h6></li>
+                                    <li><a class="dropdown-item {% if sub_page == 'supplier_invoices' %}active{% endif %}" href="{% url 'inventory:supplier_invoices' %}">فواتير الموردين</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'inventory:create_supplier_invoice' %}">إنشاء فاتورة مورد</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><h6 class="dropdown-header">الحسابات المدينة (A/R)</h6></li>
+                                    <li><a class="dropdown-item {% if sub_page == 'customer_invoices' %}active{% endif %}" href="{% url 'inventory:customer_invoices' %}">فواتير العملاء</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'inventory:create_customer_invoice' %}">إنشاء فاتورة عميل</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><h6 class="dropdown-header">البنوك و الخزينة</h6></li>
+                                    <li><a class="dropdown-item {% if sub_page == 'banking' %}active{% endif %}" href="{% url 'inventory:bank_accounts_dashboard' %}">أرصدة وتحويلات</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><h6 class="dropdown-header">الأصول الثابتة</h6></li>
+                                    <li><a class="dropdown-item {% if sub_page == 'assets' %}active{% endif %}" href="{% url 'inventory:fixed_assets_dashboard' %}">لوحة متابعة الأصول</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><h6 class="dropdown-header">دفتر الأستاذ العام</h6></li>
+                                    <li><a class="dropdown-item {% if sub_page == 'journal' %}active{% endif %}" href="{% url 'inventory:journal_entries' %}">قيود اليومية اليدوية</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'inventory:trial_balance' %}">ميزان المراجعة</a></li>
+                                </ul>
+                            </div>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link dropdown-toggle {% if active_page == 'expenses_reports' %}active{% endif %}" href="#reportsSubmenu" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="reportsSubmenu">
+                                <i class="bi bi-calculator-fill nav-icon"></i>
+                                <span>المصروفات والتقارير</span>
+                            </a>
+                            <div class="collapse" id="reportsSubmenu">
+                                <ul class="dropdown-menu show">
+                                    <li><a class="dropdown-item" href="{% url 'inventory:expenses_dashboard' %}">تسجيل المصروفات</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'inventory:manage_expenses' %}">إدارة المصروفات</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><h6 class="dropdown-header">التقارير المالية</h6></li>
+                                    <li><a class="dropdown-item" href="{% url 'inventory:profit_and_loss_statement' %}">قائمة الدخل (P&L)</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'inventory:trial_balance' %}">ميزان المراجعة</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'inventory:batch_production_variance_report' %}">تقرير تباين دفعات الإنتاج</a></li>
+                                </ul>
+                            </div>
+                        </li>
 
-                    <li class="nav-item">
-                        <a class="nav-link dropdown-toggle {% if active_page == 'financials' %}active{% endif %}" href="#financialsSubmenu" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="financialsSubmenu">
-                             <i class="bi bi-bank2 nav-icon"></i>
-                             <span>المالية</span>
-                        </a>
-                         <div class="collapse" id="financialsSubmenu">
-                            <ul class="dropdown-menu show">
-                                <li><h6 class="dropdown-header">الحسابات الدائنة (A/P)</h6></li>
-                                <li><a class="dropdown-item {% if sub_page == 'supplier_invoices' %}active{% endif %}" href="{% url 'inventory:supplier_invoices' %}">فواتير الموردين</a></li>
-                                <li><a class="dropdown-item" href="{% url 'inventory:create_supplier_invoice' %}">إنشاء فاتورة مورد</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><h6 class="dropdown-header">الحسابات المدينة (A/R)</h6></li>
-                                <li><a class="dropdown-item {% if sub_page == 'customer_invoices' %}active{% endif %}" href="{% url 'inventory:customer_invoices' %}">فواتير العملاء</a></li>
-                                <li><a class="dropdown-item" href="{% url 'inventory:create_customer_invoice' %}">إنشاء فاتورة عميل</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><h6 class="dropdown-header">البنوك و الخزينة</h6></li>
-                                <li><a class="dropdown-item {% if sub_page == 'banking' %}active{% endif %}" href="{% url 'inventory:bank_accounts_dashboard' %}">أرصدة وتحويلات</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><h6 class="dropdown-header">الأصول الثابتة</h6></li>
-                                <li><a class="dropdown-item {% if sub_page == 'assets' %}active{% endif %}" href="{% url 'inventory:fixed_assets_dashboard' %}">لوحة متابعة الأصول</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><h6 class="dropdown-header">دفتر الأستاذ العام</h6></li>
-                                <li><a class="dropdown-item {% if sub_page == 'journal' %}active{% endif %}" href="{% url 'inventory:journal_entries' %}">قيود اليومية اليدوية</a></li>
-                                <li><a class="dropdown-item" href="{% url 'inventory:trial_balance' %}">ميزان المراجعة</a></li>
-                            </ul>
-                        </div>
-                    </li>
-                    
-                    <li class="nav-item">
-                        <a class="nav-link dropdown-toggle {% if active_page == 'expenses_reports' %}active{% endif %}" href="#reportsSubmenu" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="reportsSubmenu">
-                            <i class="bi bi-calculator-fill nav-icon"></i>
-                            <span>المصروفات والتقارير</span>
-                        </a>
-                        <div class="collapse" id="reportsSubmenu">
-                            <ul class="dropdown-menu show">
-                                <li><a class="dropdown-item" href="{% url 'inventory:expenses_dashboard' %}">تسجيل المصروفات</a></li>
-                                <li><a class="dropdown-item" href="{% url 'inventory:manage_expenses' %}">إدارة المصروفات</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><h6 class="dropdown-header">التقارير التحليلية</h6></li>
-                                <li><a class="dropdown-item" href="{% url 'inventory:profit_and_loss_statement' %}">قائمة الدخل (P&L)</a></li>
-                                <li><a class="dropdown-item" href="{% url 'inventory:batch_production_variance_report' %}">تقرير تباين دفعات الإنتاج</a></li>
-                            </ul>
-                        </div>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link dropdown-toggle {% if active_page == 'settings' %}active{% endif %}" href="#settingsSubmenu" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="settingsSubmenu">
-                            <i class="bi bi-gear-fill nav-icon"></i>
-                            <span>الإعدادات</span>
-                        </a>
-                        <div class="collapse" id="settingsSubmenu">
-                            <ul class="dropdown-menu show">
-                                <li><a class="dropdown-item" href="{% url 'inventory:records' %}">إدارة السجلات</a></li>
-                                <li><a class="dropdown-item" href="{% url 'inventory:products' %}">إدارة المنتجات</a></li>
-                                <li><a class="dropdown-item" href="{% url 'inventory:companies' %}">إدارة الموردين</a></li>
-                                <li><a class="dropdown-item" href="{% url 'inventory:customers' %}">إدارة العملاء</a></li>
-                            </ul>
-                        </div>
-                    </li>
-                </ul>
-            </nav>
-        </aside>
+                        <li class="nav-item">
+                            <a class="nav-link dropdown-toggle {% if active_page == 'settings' %}active{% endif %}" href="#settingsSubmenu" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="settingsSubmenu">
+                                <i class="bi bi-gear-fill nav-icon"></i>
+                                <span>الإعدادات</span>
+                            </a>
+                            <div class="collapse" id="settingsSubmenu">
+                                <ul class="dropdown-menu show">
+                                    <li><a class="dropdown-item" href="{% url 'inventory:records' %}">إدارة السجلات</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'inventory:products' %}">إدارة المنتجات</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'inventory:companies' %}">إدارة الموردين</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'inventory:customers' %}">إدارة العملاء</a></li>
+                                </ul>
+                            </div>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
 
         <!-- ==========================================================================
            MAIN CONTENT WRAPPER
@@ -169,7 +175,7 @@
         <div class="main-content">
             <!-- Header -->
             <header class="header">
-                <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle Sidebar">
+                <button class="sidebar-toggle" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" aria-controls="sidebarOffcanvas" aria-label="Toggle Sidebar">
                     <i class="bi bi-list"></i>
                 </button>
                 <div class="header-actions">
@@ -234,6 +240,7 @@
             expensesGeneralEdit: "/expenses/general/edit/<pk>/",
             recordsEdit: "/records/edit/<logId>/",
             createBatch: "{% url 'inventory:create_batch' %}",
+            apiGetSellableStock: "{% url 'inventory:api_get_sellable_stock' %}",
         };
     </script>
     
@@ -261,12 +268,7 @@
         }
 
         // --- Sidebar Toggle Logic ---
-        const sidebarToggle = document.getElementById('sidebarToggle');
-        if (sidebarToggle) {
-            sidebarToggle.addEventListener('click', function() {
-                document.body.classList.toggle('sidebar-collapsed');
-            });
-        }
+        // This is now handled by Bootstrap's data attributes, so the custom JS is removed.
       });
     </script>
 
@@ -284,9 +286,11 @@
     <script src="{% static 'layout/js/manage_expenses_logic.js' %}"></script>
     <script src="{% static 'layout/js/expenses_page_logic.js' %}"></script>
     <script src="{% static 'layout/js/financials_logic.js' %}"></script>
-
+    <script src="{% static 'layout/js/sales_order_create_logic.js' %}"></script>
+    <script src="{% static 'layout/js/purchase_order_create_logic.js' %}"></script>
     <!-- Dynamic content loader (MUST BE LAST) -->
     <script src="{% static 'layout/js/dynamic_content_loader.js' %}"></script>
+    
 
     {% block scripts %}{% endblock %}
 </body>

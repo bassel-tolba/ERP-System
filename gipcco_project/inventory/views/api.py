@@ -181,7 +181,9 @@ def api_get_po_items(request: HttpRequest, po_id: int) -> JsonResponse:
             'product_id': item.product.id,
             'product_name': f"{item.product.name} ({item.product.code})",
             'quantity_remaining': item.quantity_remaining,
-            'base_price_per_unit': item.base_price_per_unit
+            'base_price_per_unit': item.base_price_per_unit,
+            'vat_rate': item.vat_rate,
+            'withholding_tax_rate': item.withholding_tax_rate
         } for item in po_items
     ]
     return JsonResponse(data, safe=False)

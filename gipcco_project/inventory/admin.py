@@ -465,7 +465,8 @@ class ProductTypeAccountingSettingsAdmin(admin.ModelAdmin):
 class GeneralAccountingSettingsAdmin(admin.ModelAdmin):
     autocomplete_fields = (
         'accounts_payable', 'accounts_receivable', 'vat_receivable',
-        'vat_payable', 'wip_inventory', 'finished_goods_inventory'
+        'vat_payable', 'wip_inventory', 'finished_goods_inventory',
+        'withholding_tax_payable'
     )
     def has_add_permission(self, request):
         return self.model.objects.count() == 0

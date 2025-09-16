@@ -21,7 +21,7 @@ from .views.sales import customers, edit_customer, delete_customer, sales_orders
 # --- MODIFIED: Import new expense views ---
 from .views.expenses import expenses_dashboard, manage_expenses, edit_inventory_consumption, delete_inventory_consumption, edit_general_expense, delete_general_expense
 # --- MODIFIED: Import new financial report views ---
-from .views.financial_reports import trial_balance, profit_and_loss_statement, batch_production_variance_report
+from .views.financial_reports import trial_balance, profit_and_loss_statement, batch_production_variance_report, product_ledger, general_ledger
 
 from .views import financials
 
@@ -98,23 +98,40 @@ urlpatterns = [
     path('ledger/', ledger, name='ledger'),
     path('ledger/print/', print_ledger, name='print_ledger'),
     path('analysis/', analysis, name='analysis'),
-    path('stock_valuation/', stock_valuation, name='stock_valuation'),
     path('visuals/', visuals, name='visuals'),
+    path('stock_valuation/', stock_valuation, name='stock_valuation'),
+    
+    # --- NEW: Sales Management ---
+    path('customers/', customers, name='customers'),
+    path('customers/edit/<int:pk>/', edit_customer, name='edit_customer'),
+    path('customers/delete/<int:pk>/', delete_customer, name='delete_customer'),
 
-    # --- MODIFIED: Expense & Reporting Routes ---
+    # --- NEW: Sales Order Routes ---
+    path('sales_orders/', sales_orders, name='sales_orders'),
+    path('sales_orders/create/', create_sales_order, name='create_sales_order'),
+    path('sales_order/<int:pk>/', view_sales_order, name='view_sales_order'),
+    path('sales_order/<int:pk>/dispatch/', dispatch_from_sales_order, name='dispatch_from_sales_order'),
+    path('api/batch_details/<int:batch_pk>/', api_batch_details, name='api_batch_details'), 
+
+    # --- NEW: Expense Management ---
     path('expenses/', expenses_dashboard, name='expenses_dashboard'),
     path('expenses/manage/', manage_expenses, name='manage_expenses'),
     path('expenses/consumption/edit/<int:pk>/', edit_inventory_consumption, name='edit_inventory_consumption'),
     path('expenses/consumption/delete/<int:pk>/', delete_inventory_consumption, name='delete_inventory_consumption'),
     path('expenses/general/edit/<int:pk>/', edit_general_expense, name='edit_general_expense'),
     path('expenses/general/delete/<int:pk>/', delete_general_expense, name='delete_general_expense'),
-    
+
     # --- NEW & CORRECTED: Financial Reporting Routes from the General Ledger ---
+    path('reports/general_ledger/', general_ledger, name='general_ledger'),
     path('reports/trial-balance/', trial_balance, name='trial_balance'),
     path('reports/p-and-l/', profit_and_loss_statement, name='profit_and_loss_statement'),
     path('reports/batch-variance/', batch_production_variance_report, name='batch_production_variance_report'),
-    
-    # --- Financials (A/P, A/R, Banking) Routes ---
+    path('reports/profit_and_loss/', profit_and_loss_statement, name='profit_and_loss_statement'),
+    path('reports/trial_balance/', trial_balance, name='trial_balance'),
+    path('reports/product_ledger/', product_ledger, name='product_ledger'),
+
+    # --- NEW: Financials (A/P, A/R, Banking) ---
+    # Supplier Invoices (A/P)
     path('financials/supplier_invoices/', financials.supplier_invoices, name='supplier_invoices'),
     path('financials/supplier_invoices/create/', financials.create_supplier_invoice, name='create_supplier_invoice'),
     path('financials/supplier_invoice/<int:pk>/', financials.view_supplier_invoice, name='view_supplier_invoice'),
@@ -148,16 +165,4 @@ urlpatterns = [
     path('api/supplier/<int:supplier_id>/uninvoiced_receipts/', financials.api_get_uninvoiced_receipts, name='api_get_uninvoiced_receipts'),
     path('api/sales_order/<int:so_id>/uninvoiced_dispatches/', financials.api_get_uninvoiced_dispatches, name='api_get_uninvoiced_dispatches'),
     
-     # --- NEW: Customer Routes ---
-    path('customers/', customers, name='customers'),
-    path('customers/edit/<int:pk>/', edit_customer, name='edit_customer'),
-    path('customers/delete/<int:pk>/', delete_customer, name='delete_customer'),
-
-    # --- NEW: Sales Order Routes ---
-    path('sales_orders/', sales_orders, name='sales_orders'),
-    path('sales_orders/create/', create_sales_order, name='create_sales_order'),
-    path('sales_order/<int:pk>/', view_sales_order, name='view_sales_order'),
-    path('sales_order/<int:pk>/dispatch/', dispatch_from_sales_order, name='dispatch_from_sales_order'),
-    path('api/batch_details/<int:batch_pk>/', api_batch_details, name='api_batch_details'), 
-
 ]

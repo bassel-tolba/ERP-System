@@ -1,0 +1,61 @@
+<!-- gipcco_project\inventory\templates\inventory\reports\general_ledger.html -->
+{% extends "inventory/layout.html" %}
+{% load static %}
+
+{% block title %}دفتر الأستاذ العام | General Ledger{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="h4">
+            <i class="bi bi-book-half text-primary me-2"></i>
+            دفتر الأستاذ العام (General Ledger)
+        </h2>
+    </div>
+
+    <!-- Filter Form -->
+    <div class="card shadow-sm mb-4 d-print-none">
+        <div class="card-body">
+            <form id="filter-form" class="row g-3 align-items-center" method="GET" action="{% url 'inventory:general_ledger' %}">
+                <div class="col-md-4">
+                    <label for="account_id" class="form-label">الحساب (Account)</label>
+                    <select class="form-select searchable-select" id="account_id" name="account_id" required>
+                        <option value="">اختر حساب...</option>
+                        {% for acc in accounts %}
+                        <option value="{{ acc.id }}" {% if selected_account.id == acc.id %}selected{% endif %}>{{ acc.code }} - {{ acc.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="start_date" class="form-label">من تاريخ (From)</label>
+                    <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="end_date" class="form-label">إلى تاريخ (To)</label>
+                    <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date }}">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-funnel-fill me-1"></i> تحديث
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Report Content Area -->
+    <div id="report-content">
+        {% if selected_account %}
+            {% include 'inventory/partials/reports/general_ledger_content.html' %}
+        {% else %}
+            <div class="alert alert-info text-center" role="alert">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                يرجى اختيار حساب لعرض دفتر الأستاذ الخاص به.
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

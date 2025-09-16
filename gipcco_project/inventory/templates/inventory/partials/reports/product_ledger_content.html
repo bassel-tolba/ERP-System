@@ -1,0 +1,90 @@
+<!-- gipcco_project/inventory/templates/inventory/partials/reports/product_ledger_content.html -->
+{% load humanize %}
+
+<div class="card shadow-sm print-container">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <div>
+            <h5 class="mb-0">كشف حساب للمنتج: <span class="text-primary">{{ selected_product.name }}</span></h5>
+            <p class="mb-0 text-muted small">
+                الفترة من <span class="fw-bold">{{ start_date }}</span> إلى <span class="fw-bold">{{ end_date }}</span>
+            </p>
+        </div>
+        <button class="btn btn-sm btn-outline-secondary d-print-none" onclick="window.print();">
+            <i class="bi bi-printer-fill me-1"></i> طباعة
+        </button>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th rowspan="2" class="align-middle">التاريخ</th>
+                        <th rowspan="2" class="align-middle">البيان / الحركة</th>
+                        <th colspan="3" class="text-center">الحركة</th>
+                        <th colspan="2" class="text-center">الرصيد</th>
+                    </tr>
+                    <tr>
+                        <th class="text-center">وارد</th>
+                        <th class="text-center">منصرف</th>
+                        <th class="text-center">التكلفة</th>
+                    
+                        <th class="text-center">الكمية</th>
+                        <th class="text-center">القيمة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Opening Balance -->
+                    <tr class="fw-bold">
+                        <td>{{ start_date }}</td>
+                        <td>رصيد أول المدة</td>
+                        <td colspan="3"></td>
+                        <td class="text-center font-monospace">{{ opening_balance_qty|floatformat:3|intcomma }}</td>
+                        <td class="text-end font-monospace">{{ opening_balance_val|floatformat:3|intcomma }}</td>
+                    </tr>
+
+                    <!-- Transactions -->
+                    {% for trx in transactions %}
+                    <tr>
+                        <td>{{ trx.date|date:"Y-m-d H:i" }}</td>
+                        <td>
+                            <span class="fw-bold">[{{ trx.type }}]</span>
+                            {{ trx.description }}
+                        </td>
+                        <td class="text-center font-monospace {% if trx.in_qty > 0 %}text-success fw-bold{% endif %}">
+                            {% if trx.in_qty > 0 %}{{ trx.in_qty|floatformat:3|intcomma }}{% endif %}
+                        </td>
+                        <td class="text-center font-monospace {% if trx.out_qty > 0 %}text-danger fw-bold{% endif %}">
+                            {% if trx.out_qty > 0 %}{{ trx.out_qty|floatformat:3|intcomma }}{% endif %}
+                        </td>
+                        <td class="text-end font-monospace">{{ trx.unit_cost|floatformat:3|intcomma }}</td>
+                        <td class="text-center font-monospace">{{ trx.running_qty|floatformat:3|intcomma }}</td>
+                        <td class="text-end font-monospace">{{ trx.running_val|floatformat:3|intcomma }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">
+                            لا توجد حركات لهذا المنتج في الفترة المحددة.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <!-- Totals -->
+                    <tr class="table-light fw-bold">
+                        <td colspan="2" class="text-end">الإجماليات</td>
+                        <td class="text-center font-monospace text-success">{{ total_in_qty|floatformat:3|intcomma }}</td>
+                        <td class="text-center font-monospace text-danger">{{ total_out_qty|floatformat:3|intcomma }}</td>
+                        <td colspan="1"></td>
+                        <td class="text-center font-monospace">{{ closing_balance_qty|floatformat:3|intcomma }}</td>
+                        <td class="text-end font-monospace">{{ closing_balance_val|floatformat:3|intcomma }}</td>
+                    </tr>
+                    <!-- Closing Balance -->
+                    <tr class="fw-bolder table-primary">
+                        <td colspan="6" class="text-end fs-5">رصيد آخر المدة</td>
+                        <td class="text-end fs-5 font-monospace">{{ closing_balance_val|floatformat:3|intcomma }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
