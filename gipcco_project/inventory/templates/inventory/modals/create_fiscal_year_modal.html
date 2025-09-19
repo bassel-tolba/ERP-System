@@ -1,0 +1,39 @@
+<div class="modal fade" id="createFiscalYearModal" tabindex="-1" aria-labelledby="createFiscalYearModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{% url 'inventory:create_fiscal_year' %}" method="post">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createFiscalYearModalLabel">إنشاء سنة مالية جديدة</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="fiscal_year_name" class="form-label">اسم السنة المالية</label>
+                        <input type="text" class="form-control" id="fiscal_year_name" name="name" required placeholder="مثال: السنة المالية 2024">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="start_date" class="form-label">تاريخ البدء</label>
+                            <input type="text" class="form-control datepicker" id="start_date" name="start_date" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="end_date" class="form-label">تاريخ الانتهاء</label>
+                            <input type="text" class="form-control datepicker" id="end_date" name="end_date" required>
+                        </div>
+                    </div>
+                     <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="generate_periods" name="generate_periods" checked>
+                        <label class="form-check-label" for="generate_periods">
+                            توليد 12 فترة محاسبية شهرية تلقائياً
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-primary">حفظ وإنشاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

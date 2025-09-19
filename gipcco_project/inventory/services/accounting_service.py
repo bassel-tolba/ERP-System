@@ -11,7 +11,7 @@ from django.contrib.contenttypes.models import ContentType
 from ..models import (
     InventoryLog, JournalEntry, JournalEntryLine, FinancialPeriod,
     GeneralAccountingSettings, ProductTypeAccountingSettings, Product,
-    Batch, InventoryConsumption, FinishedProductDispatch, FinishedProductReceipt, ProductionReturn, Payment, BankTransfer, DepreciationLog, FixedAsset
+    Batch, InventoryConsumption, FinishedProductDispatch, FinishedProductReceipt, ProductionReturn, Payment, BankTransfer, DepreciationLog, FixedAsset, FiscalYear
 )
 from ..services.costing_service import get_inventory_state_at_datetime
 
@@ -21,15 +21,29 @@ logger = logging.getLogger(__name__)
 # --- Helper Functions ---
 
 def _check_period_is_open(date_to_check):
-    """Checks if the given date falls within an open financial period."""
+    """
+    Checks if the given date falls within an open financial period.
+    This is the authoritative gatekeeper for all financially relevant transactions.
+    It raises a PermissionError if the period is closed or locked.
+    """
     # Ensure we use the date part if a datetime is passed
     check_date = date_to_check.date() if hasattr(date_to_check, 'date') else date_to_check
-    period = FinancialPeriod.objects.filter(
-        start_date__lte=check_date,
-        end_date__gte=check_date
-    ).first()
-    if period and period.is_closed:
-        raise PermissionError(_(f"Financial period for date {check_date} is closed."))
+    try:
+        period = FinancialPeriod.objects.get(
+            start_date__lte=check_date,
+            end_date__gte=check_date
+        )
+        if period.status in [FinancialPeriod.Status.CLOSED, FinancialPeriod.Status.PERMANENTLY_LOCKED]:
+            raise PermissionError(
+                _(f"Financial period '{period.name}' for date {check_date} is {period.get_status_display()} and cannot be posted to.")
+            )
+    except FinancialPeriod.DoesNotExist:
+        raise PermissionError(_(f"No financial period found for date {check_date}. Please create one."))
+    except FinancialPeriod.MultipleObjectsReturned:
+        # This indicates a serious data integrity issue that must be resolved.
+        logger.error(f"CRITICAL: Overlapping financial periods found for date {check_date}.")
+        raise PermissionError(_(f"Configuration error: Overlapping financial periods exist for date {check_date}. Contact administrator."))
+
 
 def _get_product_inventory_account(product: Product) -> Product:
     """Gets the correct inventory account for a product, checking for overrides."""
@@ -125,7 +139,8 @@ def create_je_for_inventory_receipt(inventory_log: InventoryLog) -> Optional[Jou
         je = JournalEntry.objects.create(
             date=inventory_log.release_timestamp,
             description=description,
-            source_object=inventory_log
+            source_object=inventory_log,
+            status=JournalEntry.Status.POSTED
         )
         
         # Line 1: Debit Inventory
@@ -234,7 +249,8 @@ def create_je_for_production_consumption(batch: Batch) -> Optional[JournalEntry]
         je = JournalEntry.objects.create(
             date=batch.creation_date,
             description=description,
-            source_object=batch
+            source_object=batch,
+            status=JournalEntry.Status.POSTED
         )
 
         # Line 1: Debit WIP Inventory
@@ -301,7 +317,8 @@ def create_je_for_internal_consumption(consumption: InventoryConsumption) -> Opt
         je = JournalEntry.objects.create(
             date=consumption.consumption_date,
             description=description,
-            source_object=consumption
+            source_object=consumption,
+            status=JournalEntry.Status.POSTED
         )
         
         # Debit Expense Account
@@ -372,7 +389,8 @@ def create_je_for_finished_goods_receipt(receipt: FinishedProductReceipt) -> Opt
         je = JournalEntry.objects.create(
             date=receipt.receipt_date,
             description=description,
-            source_object=receipt
+            source_object=receipt,
+            status=JournalEntry.Status.POSTED
         )
 
         # Debit Finished Goods Inventory
@@ -426,7 +444,8 @@ def create_je_for_production_return(prod_return: ProductionReturn) -> Optional[J
             'product': prod_return.product.name,
         }
         je = JournalEntry.objects.create(
-            date=prod_return.return_date, description=description, source_object=prod_return
+            date=prod_return.return_date, description=description, source_object=prod_return,
+            status=JournalEntry.Status.POSTED
         )
         JournalEntryLine.objects.create(
             journal_entry=je, account=rm_account, amount=return_value, entry_type=JournalEntryLine.EntryType.DEBIT
@@ -489,7 +508,8 @@ def create_je_for_sales_dispatch(dispatch: FinishedProductDispatch) -> Optional[
             'customer': so_item.sales_order.customer.name, 'so_num': so_item.sales_order.so_number
         }
         je = JournalEntry.objects.create(
-            date=dispatch.dispatch_date, description=description, source_object=dispatch
+            date=dispatch.dispatch_date, description=description, source_object=dispatch,
+            status=JournalEntry.Status.POSTED
         )
         # COGS Entry
         JournalEntryLine.objects.create(
@@ -552,7 +572,8 @@ def create_je_for_supplier_payment(payment: Payment) -> Optional[JournalEntry]:
             'desc': payment.description
         }
         je = JournalEntry.objects.create(
-            date=payment.payment_date, description=description, source_object=payment
+            date=payment.payment_date, description=description, source_object=payment,
+            status=JournalEntry.Status.POSTED
         )
 
         # Debit Accounts Payable
@@ -606,7 +627,8 @@ def create_je_for_customer_payment(payment: Payment) -> Optional[JournalEntry]:
             'desc': payment.description
         }
         je = JournalEntry.objects.create(
-            date=payment.payment_date, description=description, source_object=payment
+            date=payment.payment_date, description=description, source_object=payment,
+            status=JournalEntry.Status.POSTED
         )
 
         # Debit Bank/Cash Account
@@ -649,7 +671,8 @@ def create_je_for_bank_transfer(transfer: BankTransfer) -> Optional[JournalEntry
         je = JournalEntry.objects.create(
             date=transfer.transfer_date,
             description=transfer.description,
-            source_object=transfer
+            source_object=transfer,
+            status=JournalEntry.Status.POSTED
         )
 
         # Debit Destination
@@ -733,7 +756,8 @@ def create_je_for_monthly_depreciation(year: int, month: int) -> Optional[Journa
     with transaction.atomic():
         description = _("Monthly depreciation for %(period)s") % {'period': period_end_date.strftime('%Y-%m')}
         je = JournalEntry.objects.create(
-            date=period_end_date, description=description, source_object=None
+            date=period_end_date, description=description, source_object=None,
+            status=JournalEntry.Status.POSTED
         )
 
         # Debit Expense Accounts

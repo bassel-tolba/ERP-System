@@ -1,0 +1,21 @@
+<div class="modal fade" id="deleteFiscalYearModal-{{ year.id }}" tabindex="-1" aria-labelledby="deleteFiscalYearModalLabel-{{ year.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{% url 'inventory:delete_fiscal_year' year.id %}" method="post">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteFiscalYearModalLabel-{{ year.id }}">تأكيد حذف السنة المالية</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>هل أنت متأكد من رغبتك في حذف السنة المالية <strong>"{{ year.name }}"</strong>؟</p>
+                    <p class="text-danger"><strong>تحذير:</strong> لا يمكن التراجع عن هذا الإجراء. سيتم حذف جميع الفترات المحاسبية المرتبطة بهذه السنة المالية. لا يمكن حذف السنة المالية إذا كانت تحتوي على أي معاملات مسجلة.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-danger">نعم، قم بالحذف</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

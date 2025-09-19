@@ -292,3 +292,288 @@ function initJournalEntryCreateLogic(container) {
     });
     updateTotals(); // Initial calculation
 }
+
+function initReconciliationManageLogic(container) {
+    const reconciliationWorkspace = container.querySelector('#reconciliationWorkspace');
+    if (!reconciliationWorkspace) return;
+
+    const reconId = reconciliationWorkspace.dataset.reconciliationId;
+    const matchUrl = reconciliationWorkspace.dataset.matchUrl;
+    const csrfToken = reconciliationWorkspace.dataset.csrfToken;
+    const status = reconciliationWorkspace.dataset.status;
+
+    // --- MODAL FOR MATCHING ---
+    const confirmationModalEl = container.querySelector('#confirmationModal');
+    const confirmationModal = confirmationModalEl ? new bootstrap.Modal(confirmationModalEl) : null;
+    const modalBody = container.querySelector('#confirmationModal .modal-body');
+    const confirmButton = container.querySelector('#confirmActionBtn');
+
+    // --- NEW: MODAL FOR ADJUSTMENTS ---
+    const adjustmentModalEl = container.querySelector('#adjustmentModal');
+    const adjustmentModal = adjustmentModalEl ? new bootstrap.Modal(adjustmentModalEl) : null;
+    const adjustmentForm = container.querySelector('#adjustmentForm');
+    const modalLineId = container.querySelector('#modalLineId');
+    const modalLineDescription = container.querySelector('#modalLineDescription');
+    const modalLineAmount = container.querySelector('#modalLineAmount');
+    const modalDescriptionInput = container.querySelector('#modalDescription');
+    const modalAccountSelect = container.querySelector('#modalAccount');
+    const modalAccountLabel = container.querySelector('#modalAccountLabel');
+
+
+    if (!confirmationModal || !modalBody || !confirmButton) {
+        console.error("Reconciliation matching modal elements not found.");
+        return;
+    }
+     if (!adjustmentModal || !adjustmentForm) {
+        console.error("Reconciliation adjustment modal elements not found.");
+        return;
+    }
+
+    if (status === "reconciled") {
+        reconciliationWorkspace.querySelectorAll('input, button, .statement-line, .internal-transaction').forEach(el => {
+            el.disabled = true;
+            el.style.pointerEvents = 'none';
+        });
+        return;
+    }
+
+    let selectedLine = null;
+    let selectedTrx = null;
+    let lastFocusedElement = null; // To store focus for accessibility
+
+    function clearSelections() {
+        if (selectedLine) {
+            selectedLine.classList.remove('selected');
+            selectedLine = null;
+        }
+        if (selectedTrx) {
+            selectedTrx.classList.remove('selected');
+            selectedTrx = null;
+        }
+    }
+
+    reconciliationWorkspace.querySelectorAll('.statement-line').forEach(row => {
+        row.addEventListener('click', () => {
+            const isCurrentlySelected = row.classList.contains('selected');
+            if (selectedLine) selectedLine.classList.remove('selected');
+            
+            if (isCurrentlySelected) {
+                selectedLine = null;
+            } else {
+                selectedLine = row;
+                selectedLine.classList.add('selected');
+            }
+            checkAndMatch();
+        });
+    });
+
+    reconciliationWorkspace.querySelectorAll('.internal-transaction').forEach(row => {
+        row.addEventListener('click', () => {
+            const isCurrentlySelected = row.classList.contains('selected');
+            if (selectedTrx) selectedTrx.classList.remove('selected');
+
+            if (isCurrentlySelected) {
+                selectedTrx = null;
+            } else {
+                selectedTrx = row;
+                selectedTrx.classList.add('selected');
+            }
+            checkAndMatch();
+        });
+    });
+
+    function checkAndMatch() {
+        if (!selectedLine || !selectedTrx) return;
+
+        const lineAmount = parseFloat(selectedLine.dataset.amount);
+        const trxAmount = parseFloat(selectedTrx.dataset.amount);
+
+        if (Math.abs(lineAmount - trxAmount) < 0.001) {
+            modalBody.innerHTML = `
+                <p>هل أنت متأكد من أنك تريد مطابقة هذه المعاملات؟</p>
+                <ul>
+                    <li><strong>كشف الحساب:</strong> ${selectedLine.cells[1].innerText} (${lineAmount.toFixed(2)})</li>
+                    <li><strong>معاملة داخلية:</strong> ${selectedTrx.cells[1].innerText} (${trxAmount.toFixed(2)})</li>
+                </ul>
+            `;
+            confirmationModal.show();
+
+            confirmButton.onclick = () => {
+                // Ensure selectedLine and selectedTrx are still valid before matching
+                if (selectedLine && selectedTrx) {
+                    match(selectedLine.dataset.lineId, selectedTrx.dataset.trxId, selectedTrx.dataset.trxType);
+                }
+                confirmationModal.hide();
+            };
+        } else {
+            showAlert('المبالغ غير متطابقة. يرجى تحديد معاملات بنفس القيمة.', 'warning');
+            clearSelections();
+        }
+    }
+    
+    // --- NEW: ADJUSTMENT MODAL LOGIC ---
+    const expenseAccounts = JSON.parse(document.getElementById('expense-accounts-data').textContent);
+    const incomeAccounts = JSON.parse(document.getElementById('income-accounts-data').textContent);
+
+    container.querySelectorAll('.create-adjustment-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const row = e.target.closest('.statement-line');
+            const lineId = row.dataset.lineId;
+            const lineAmount = parseFloat(row.dataset.amount);
+            const lineDescription = row.dataset.description;
+
+            // Populate modal fields
+            modalLineId.value = lineId;
+            modalLineDescription.textContent = lineDescription;
+            modalLineAmount.textContent = lineAmount.toFixed(3);
+            modalDescriptionInput.value = lineDescription; // Pre-fill description
+
+            // Populate account dropdown based on amount
+            modalAccountSelect.innerHTML = ''; // Clear previous options
+            const accounts = lineAmount < 0 ? expenseAccounts : incomeAccounts;
+            modalAccountLabel.textContent = lineAmount < 0 ? 'اختر حساب المصروف' : 'اختر حساب الإيراد';
+            
+            accounts.forEach(acc => {
+                const option = new Option(`${acc.code} - ${acc.name}`, acc.id);
+                modalAccountSelect.add(option);
+            });
+        });
+    });
+
+    adjustmentForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const adjustmentUrl = reconciliationWorkspace.dataset.adjustmentUrl;
+        const formData = new FormData(adjustmentForm);
+
+        try {
+            const response = await fetch(adjustmentUrl, {
+                method: 'POST',
+                body: formData,
+                headers: { 
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrfToken // Add the CSRF token to the header
+                }
+            });
+
+            // Improved debugging: Check if the response is ok before trying to parse JSON
+            if (!response.ok) {
+                // Get the raw text of the error response for better debugging
+                const errorText = await response.text();
+                console.error('Adjustment API Error Response:', errorText);
+                throw new Error(`Server responded with status ${response.status}`);
+            }
+
+            const data = await response.json();
+            if (data.status === 'success') {
+                adjustmentModal.hide();
+                showAlert('تم إنشاء وتسوية التعديل بنجاح.', 'success');
+                if (window.loadContent) {
+                    window.loadContent(window.location.href, false);
+                } else {
+                    location.reload();
+                }
+            } else {
+                showAlert('خطأ في إنشاء التعديل: ' + data.message, 'danger');
+            }
+        } catch (error) {
+            // --- ADDED DEBUGGING ---
+            console.error('Full Adjustment Error:', error);
+            showAlert('حدث خطأ غير متوقع أثناء إنشاء التعديل.', 'danger');
+        }
+    });
+
+
+    if (confirmationModalEl) {
+        // --- NEW: Accessibility Fix ---
+        // Store the last focused element before the modal opens
+        confirmationModalEl.addEventListener('show.bs.modal', () => {
+            lastFocusedElement = document.activeElement;
+        });
+        // When the modal is hidden, clear selections and return focus
+        confirmationModalEl.addEventListener('hidden.bs.modal', () => {
+            clearSelections();
+            if (lastFocusedElement) {
+                lastFocusedElement.focus();
+            }
+        });
+    }
+
+    async function match(lineId, trxId, trxType) {
+        const formData = new FormData();
+        formData.append('line_id', lineId);
+        formData.append('trx_id', trxId);
+        formData.append('trx_type', trxType);
+        formData.append('csrfmiddlewaretoken', csrfToken);
+
+        try {
+            const response = await fetch(matchUrl, {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            const data = await response.json();
+            if (data.status === 'success') {
+                if (window.loadContent) {
+                    showAlert('تمت مطابقة المعاملة بنجاح.', 'success');
+                    window.loadContent(window.location.href, false);
+                } else {
+                    location.reload();
+                }
+            } else {
+                showAlert('خطأ في مطابقة المعاملة: ' + data.message, 'danger');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showAlert('حدث خطأ غير متوقع.', 'danger');
+        }
+    }
+
+    function showAlert(message, type = 'info') {
+        const alertContainer = document.querySelector('#page-content');
+        if (!alertContainer) return;
+
+        const alertHTML = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        `;
+        alertContainer.insertAdjacentHTML('afterbegin', alertHTML);
+    }
+
+    reconciliationWorkspace.querySelectorAll('.unmatch-form').forEach(form => {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!confirm('Are you sure you want to unmatch this transaction?')) {
+                return;
+            }
+
+            const url = form.action;
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': csrfToken
+                    }
+                });
+                if (response.ok && response.redirected) {
+                    if (window.loadContent) {
+                        window.loadContent(response.url, false);
+                    } else {
+                        window.location.href = response.url;
+                    }
+                } else {
+                    const data = await response.json();
+                    showAlert(data.message || 'An error occurred.', 'danger');
+                }
+            } catch (error) {
+                console.error('Unmatch Error:', error);
+                showAlert('An unexpected error occurred during unmatching.', 'danger');
+            }
+        });
+    });
+}

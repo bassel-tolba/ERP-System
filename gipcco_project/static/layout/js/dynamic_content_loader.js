@@ -42,8 +42,11 @@ window.initializePluginsInContent = function (container = document) {
         '#customerInvoiceFilters': initCustomerInvoiceListLogic,
         '#createCustomerInvoiceForm': initCreateCustomerInvoiceLogic,
         '#journalEntryForm': initJournalEntryCreateLogic,
+        '#reconciliationWorkspace': initReconciliationManageLogic,
         '#createSalesOrderForm': initSalesOrderCreateLogic,
         '#createPurchaseOrderForm': initPurchaseOrderCreateLogic,
+        '#taxReportForm': initTaxReconciliationReportLogic,
+        '#closePeriodContainer': initClosePeriodLogic,
     };
 
     for (const selector in pageInitializers) {

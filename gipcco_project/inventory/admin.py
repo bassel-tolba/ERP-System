@@ -22,7 +22,9 @@ from .models import (
     # --- NEW MODEL IMPORTS ---
     SupplierInvoice, SupplierInvoiceItem, PaymentApplication,
     CustomerInvoice, CustomerInvoiceItem, CustomerPaymentApplication,
-    BankTransfer, DepreciationLog
+    BankTransfer, DepreciationLog,
+    # --- ADDED FOR FIX ---
+    BankReconciliation, BankStatementLine, FiscalYear
 )
 from .views.dashboard import update_po_status
 from .views.helpers import check_and_update_batch_customization
@@ -278,6 +280,13 @@ class FinishedProductDispatchAdmin(admin.ModelAdmin):
     autocomplete_fields = ('sales_order_item',)
     readonly_fields = ('cost_at_dispatch',)
 
+@admin.register(ExpenseLog)
+class ExpenseLogAdmin(admin.ModelAdmin):
+    list_display = ('expense_date', 'description', 'amount', 'category', 'classification')
+    list_filter = ('category', 'classification', 'expense_date')
+    search_fields = ('description', 'notes')
+    date_hierarchy = 'expense_date'
+
 # ==============================================================================
 #  FINANCE & BANKING ADMINS
 # ==============================================================================
@@ -410,13 +419,65 @@ class DepreciationLogAdmin(admin.ModelAdmin):
     def has_change_permission(self, request, obj=None):
         return False # Should not be edited manually
 
+
+# ==============================================================================
+#  BANK RECONCILIATION ADMINS (NEWLY ADDED SECTION)
+# ==============================================================================
+class BankStatementLineInline(admin.TabularInline):
+    model = BankStatementLine
+    extra = 0
+    readonly_fields = ('is_reconciled', 'reconciled_object')
+    fields = ('transaction_date', 'description', 'amount', 'is_reconciled', 'reconciled_object')
+
+@admin.register(BankReconciliation)
+class BankReconciliationAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'bank_account', 'statement_date', 'status', 'statement_closing_balance')
+    list_filter = ('status', 'bank_account')
+    search_fields = ('bank_account__name',)
+    date_hierarchy = 'statement_date'
+    autocomplete_fields = ('bank_account',)
+    inlines = [BankStatementLineInline]
+    readonly_fields = ('created_at', 'updated_at')
+    fieldsets = (
+        (None, {
+            'fields': ('bank_account', 'statement_date', 'status')
+        }),
+        ('Balances', {
+            'fields': ('statement_opening_balance', 'statement_closing_balance')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at')
+        })
+    )
+
 # ==============================================================================
 #  CORE ACCOUNTING & SETTINGS ADMINS
 # ==============================================================================
-@admin.register(FinancialPeriod)
-class FinancialPeriodAdmin(admin.ModelAdmin):
+class FinancialPeriodInline(admin.TabularInline):
+    model = FinancialPeriod
+    extra = 0
+    readonly_fields = ('name', 'start_date', 'end_date', 'status')
+    fields = ('name', 'start_date', 'end_date', 'status')
+    can_delete = False
+    ordering = ('start_date',)
+    show_change_link = True
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+@admin.register(FiscalYear)
+class FiscalYearAdmin(admin.ModelAdmin):
     list_display = ('name', 'start_date', 'end_date', 'is_closed')
     list_filter = ('is_closed',)
+    search_fields = ('name',)
+    inlines = [FinancialPeriodInline]
+
+@admin.register(FinancialPeriod)
+class FinancialPeriodAdmin(admin.ModelAdmin):
+    list_display = ('name', 'fiscal_year', 'start_date', 'end_date', 'status')
+    list_filter = ('status', 'fiscal_year')
+    search_fields = ('name', 'fiscal_year__name')
+    ordering = ('-start_date',)
 
 @admin.register(Account)
 class AccountAdmin(ImportExportModelAdmin):

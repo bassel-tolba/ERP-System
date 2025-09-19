@@ -1,0 +1,109 @@
+{% load i18n %}
+
+<!-- Completed Reconciliations -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">{% trans "فترات التسوية المكتملة" %}</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>{% trans "الحساب البنكي" %}</th>
+                        <th>{% trans "تاريخ كشف الحساب" %}</th>
+                        <th>{% trans "تاريخ التسوية" %}</th>
+                        <th class="text-right">{% trans "الرصيد الختامي" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for recon in reconciliations %}
+                    <tr>
+                        <td>{{ recon.bank_account.name }}</td>
+                        <td>{{ recon.statement_date|date:"Y-m-d" }}</td>
+                        <td>{{ recon.reconciled_at|date:"Y-m-d H:i" }}</td>
+                        <td class="text-right">{{ recon.statement_closing_balance|floatformat:2 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center">{% trans "لم يتم العثور على تسويات مكتملة لهذا الفلتر." %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Outstanding (Uncleared) Transactions -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-danger">{% trans "المعاملات المعلقة غير المسواة" %}</h6>
+    </div>
+    <div class="card-body">
+        <h6 class="mb-3">{% trans "المدفوعات" %}</h6>
+        <div class="table-responsive mb-4">
+            <table class="table table-sm" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>{% trans "التاريخ" %}</th>
+                        <th>{% trans "الحساب البنكي" %}</th>
+                        <th>{% trans "الوصف" %}</th>
+                        <th class="text-right">{% trans "المبلغ" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in outstanding_payments %}
+                    <tr>
+                        <td>{{ payment.payment_date|date:"Y-m-d" }}</td>
+                        <td>{{ payment.bank_account.name }}</td>
+                        <td>{{ payment.description }}</td>
+                        <td class="text-right {% if payment.payment_type == 'in' %}text-success{% else %}text-danger{% endif %}">
+                            {% if payment.payment_type == 'in' %}{{ payment.amount|floatformat:2 }}{% else %}-{{ payment.amount|floatformat:2 }}{% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4" class="text-center">{% trans "لا توجد مدفوعات معلقة." %}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <h6 class="mb-3">{% trans "التحويلات البنكية" %}</h6>
+        <div class="table-responsive">
+            <table class="table table-sm" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>{% trans "التاريخ" %}</th>
+                        <th>{% trans "من حساب" %}</th>
+                        <th>{% trans "إلى حساب" %}</th>
+                        <th>{% trans "الوصف" %}</th>
+                        <th class="text-right">{% trans "المبلغ" %}</th>
+                        <th>{% trans "الحالة" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transfer in outstanding_transfers %}
+                    <tr>
+                        <td>{{ transfer.transfer_date|date:"Y-m-d" }}</td>
+                        <td>{{ transfer.source_account.name }}</td>
+                        <td>{{ transfer.destination_account.name }}</td>
+                        <td>{{ transfer.description }}</td>
+                        <td class="text-right">{{ transfer.amount|floatformat:2 }}</td>
+                        <td>
+                            {% if not transfer.source_cleared_date %}
+                                <span class="badge badge-warning">{% trans "غير مسواة من المصدر" %}</span>
+                            {% endif %}
+                            {% if not transfer.destination_cleared_date %}
+                                <span class="badge badge-warning">{% trans "غير مسواة في الوجهة" %}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="6" class="text-center">{% trans "لا توجد تحويلات معلقة." %}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

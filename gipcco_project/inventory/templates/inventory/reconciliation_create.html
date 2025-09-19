@@ -1,0 +1,59 @@
+{% extends "inventory/layout.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "تسوية بنكية جديدة" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <h1 class="h3 mb-4 text-gray-800">{% trans "بدء تسوية بنكية جديدة" %}</h1>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">{% trans "تفاصيل التسوية" %}</h6>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{% url 'inventory:create_bank_reconciliation' %}">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="bank_account">{% trans "الحساب البنكي" %}</label>
+                            <select name="bank_account" id="bank_account" class="form-control" required>
+                                <option value="">{% trans "اختر حسابًا" %}</option>
+                                {% for account in bank_accounts %}
+                                <option value="{{ account.pk }}">{{ account.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="statement_date">{% trans "تاريخ كشف الحساب" %}</label>
+                            <input type="date" name="statement_date" id="statement_date" class="form-control" value="{{ today_date }}" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="statement_opening_balance">{% trans "الرصيد الافتتاحي لكشف الحساب" %}</label>
+                            <input type="number" step="0.01" name="statement_opening_balance" id="statement_opening_balance" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="statement_closing_balance">{% trans "الرصيد الختامي لكشف الحساب" %}</label>
+                            <input type="number" step="0.01" name="statement_closing_balance" id="statement_closing_balance" class="form-control" required>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-end">
+                    <a href="{% url 'inventory:bank_reconciliations_list' %}" class="btn btn-secondary mr-2 dynamic-link">{% trans "إلغاء" %}</a>
+                    <button type="submit" class="btn btn-primary">{% trans "بدء التسوية" %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,73 +1,66 @@
 <!-- gipcco_project/inventory/templates/inventory/partials/reports/general_ledger_content.html -->
 {% load humanize %}
 
+<style>
+    .account-summary-row .expander .bi-chevron-right {
+        transition: transform 0.2s ease-in-out;
+    }
+    .account-summary-row .expander[aria-expanded="true"] .bi-chevron-right {
+        transform: rotate(90deg);
+    }
+    .expander-placeholder {
+        display: inline-block;
+        width: 1.2em; /* Match icon width */
+    }
+    .transaction-detail-row td, .account-summary-row td {
+        vertical-align: middle;
+    }
+</style>
+
 <div class="card shadow-sm print-container">
     <div class="card-header bg-light d-flex justify-content-between align-items-center">
         <div>
+            {% if selected_account %}
             <h5 class="mb-0">كشف حساب: <span class="text-primary">{{ selected_account.name }} ({{ selected_account.code }})</span></h5>
             <p class="mb-0 text-muted small">
                 الفترة من <span class="fw-bold">{{ start_date }}</span> إلى <span class="fw-bold">{{ end_date }}</span>
             </p>
+            {% else %}
+            <h5 class="mb-0">كشف حساب عام</h5>
+            <p class="mb-0 text-muted small">يرجى اختيار حساب لعرض التقرير</p>
+            {% endif %}
         </div>
         <button class="btn btn-sm btn-outline-secondary d-print-none" onclick="window.print();">
             <i class="bi bi-printer-fill me-1"></i> طباعة
         </button>
     </div>
-    <div class="card-body">
+    <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-bordered table-hover mb-0">
-                <thead class="table-light">
+            <table class="table table-hover mb-0">
+                <thead class="table-dark">
                     <tr>
-                        <th>التاريخ</th>
-                        <th>البيان / المرجع</th>
-                        <th class="text-end">مدين (Debit)</th>
-                        <th class="text-end">دائن (Credit)</th>
-                        <th class="text-end">الرصيد (Balance)</th>
+                        <th style="width: 50%;">الحساب / البيان</th>
+                        <th class="text-end">رصيد أول المدة</th>
+                        <th class="text-end">إجمالي مدين</th>
+                        <th class="text-end">إجمالي دائن</th>
+                        <th class="text-end">رصيد آخر المدة</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Opening Balance -->
-                    <tr class="fw-bold">
-                        <td>{{ start_date }}</td>
-                        <td colspan="3">رصيد أول المدة (Opening Balance)</td>
-                        <td class="text-end font-monospace">{{ opening_balance|floatformat:3|intcomma }}</td>
-                    </tr>
-
-                    <!-- Transactions -->
-                    {% for trx in transactions %}
-                    <tr>
-                        <td>{{ trx.date|date:"Y-m-d H:i" }}</td>
-                        <td>{{ trx.description }}</td>
-                        <td class="text-end font-monospace {% if trx.debit > 0 %}text-success{% endif %}">
-                            {% if trx.debit > 0 %}{{ trx.debit|floatformat:3|intcomma }}{% endif %}
-                        </td>
-                        <td class="text-end font-monospace {% if trx.credit > 0 %}text-danger{% endif %}">
-                            {% if trx.credit > 0 %}{{ trx.credit|floatformat:3|intcomma }}{% endif %}
-                        </td>
-                        <td class="text-end font-monospace">{{ trx.balance|floatformat:3|intcomma }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" class="text-center text-muted py-4">
-                            لا توجد حركات لهذا الحساب في الفترة المحددة.
-                        </td>
-                    </tr>
-                    {% endfor %}
+                    {% if account_tree %}
+                        {% include 'inventory/partials/reports/_general_ledger_node.html' with node=account_tree start_date=start_date end_date=end_date parent_id=None %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-5">
+                                {% if selected_account %}
+                                    لا توجد حركات لهذا الحساب أو لحساباته الفرعية في الفترة المحددة.
+                                {% else %}
+                                    الرجاء تحديد حساب من القائمة أعلاه لعرض كشف الحساب.
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endif %}
                 </tbody>
-                <tfoot>
-                    <!-- Totals -->
-                    <tr class="table-light fw-bold">
-                        <td colspan="2" class="text-end">الإجماليات (Totals)</td>
-                        <td class="text-end font-monospace text-success">{{ total_debits|floatformat:3|intcomma }}</td>
-                        <td class="text-end font-monospace text-danger">{{ total_credits|floatformat:3|intcomma }}</td>
-                        <td></td>
-                    </tr>
-                    <!-- Closing Balance -->
-                    <tr class="fw-bolder table-primary">
-                        <td colspan="4" class="text-end fs-5">رصيد آخر المدة (Closing Balance)</td>
-                        <td class="text-end fs-5 font-monospace">{{ closing_balance|floatformat:3|intcomma }}</td>
-                    </tr>
-                </tfoot>
             </table>
         </div>
     </div>

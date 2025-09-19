@@ -1,0 +1,60 @@
+{% extends "inventory/layout.html" %}
+
+{% block content %}
+<div class="container-fluid" id="closePeriodContainer" data-period-id="{{ period.id }}">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 text-primary">إغلاق الفترة المحاسبية</h1>
+            <p class="text-muted">مراجعة نهائية وإغلاق للفترة: <strong>{{ period.name }}</strong> ({{ period.start_date|date:"Y-m-d" }} إلى {{ period.end_date|date:"Y-m-d" }})</p>
+        </div>
+        <a href="{% url 'inventory:fiscal_year_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left-circle me-2"></i>العودة إلى قائمة الفترات
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="bi bi-exclamation-triangle-fill me-2"></i>قائمة فحص ما قبل الإغلاق</h5>
+                </div>
+                <div class="card-body">
+                    <p>يجب استيفاء جميع الشروط التالية لتتمكن من إغلاق الفترة بشكل نهائي. سيتم تحديث الحالة تلقائيًا.</p>
+                    <ul class="list-group" id="checklist">
+                        <li class="list-group-item d-flex justify-content-between align-items-center" data-check="bank_reconciliations">
+                            <span>1. جميع الحسابات البنكية للفترة تم تسويتها.</span>
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center" data-check="draft_jes">
+                            <span>2. لا توجد قيود يومية يدوية في حالة "مسودة".</span>
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center" data-check="inventory_valuation">
+                            <span>3. تم تشغيل تقييم المخزون بنجاح.</span>
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center" data-check="unposted_invoices">
+                            <span>4. لا توجد فواتير موردين أو عملاء غير مرحّلة.</span>
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-footer text-center">
+                    <form action="{% url 'inventory:close_period_action' period.id %}" method="post" id="closePeriodForm">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-lg" id="finalizeCloseBtn" disabled>
+                            <i class="bi bi-lock-fill me-2"></i>إغلاق الفترة نهائياً
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Add specific JS for this page
+</script>
+{% endblock %}

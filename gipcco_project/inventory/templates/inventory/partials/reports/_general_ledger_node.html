@@ -1,0 +1,64 @@
+<!-- gipcco_project/inventory/templates/inventory/partials/reports/_general_ledger_node.html -->
+{% load humanize %}
+
+{% comment %}
+    Recursive template to render a node in the General Ledger tree.
+    Expects:
+    - node: The dictionary for the current account node.
+    - start_date: For linking.
+    - end_date: For linking.
+    - parent_id: (Optional) The ID of the parent account for collapsing.
+{% endcomment %}
+
+{% if node %}
+    <!-- ================== Account Summary Row ================== -->
+    <tr class="account-summary-row 
+        {% if node.level == 0 %}table-primary fw-bolder{% endif %}
+        {% if node.level > 0 %}table-light fw-bold{% endif %}
+        {% if parent_id %}collapse gl-details-for-{{ parent_id }}{% endif %}"
+        style="--level: {{ node.level }};">
+        
+        <!-- Account Name and Expander -->
+        <td class="account-name" style="padding-inline-start: calc(var(--level) * 1.5rem + 0.75rem);">
+            {% if node.direct_transactions or node.children %}
+            <a class="expander text-decoration-none me-2" 
+               data-bs-toggle="collapse" 
+               data-bs-target=".gl-details-for-{{ node.account.id }}" 
+               role="button" 
+               aria-expanded="false" 
+               aria-controls="gl-details-for-{{ node.account.id }}">
+                <i class="bi bi-chevron-right"></i>
+            </a>
+            {% else %}
+            <span class="expander-placeholder me-2"></span>
+            {% endif %}
+            <a href="{% url 'inventory:general_ledger' %}?account_id={{ node.account.id }}&start_date={{ start_date }}&end_date={{ end_date }}" class="text-dark">
+                {{ node.account.code }} - {{ node.account.name }}
+            </a>
+        </td>
+        
+        <!-- Financial Totals -->
+        <td class="text-end font-monospace">{{ node.opening_balance|floatformat:3|intcomma }}</td>
+        <td class="text-end font-monospace text-success">{{ node.total_debits|floatformat:3|intcomma }}</td>
+        <td class="text-end font-monospace text-danger">{{ node.total_credits|floatformat:3|intcomma }}</td>
+        <td class="text-end font-monospace">{{ node.closing_balance|floatformat:3|intcomma }}</td>
+    </tr>
+
+    <!-- ================== Direct Transactions for this node ================== -->
+    {% for trx in node.direct_transactions %}
+    <tr class="transaction-detail-row collapse gl-details-for-{{ node.account.id }}" style="--level: {{ node.level|add:1 }};">
+        <td style="padding-inline-start: calc(var(--level) * 1.5rem + 2.5rem);">
+            <span class="text-muted">{{ trx.date|date:"Y-m-d" }}</span> - {{ trx.description }}
+        </td>
+        <td></td> {# Placeholder for Opening Balance #}
+        <td class="text-end font-monospace text-success-emphasis">{% if trx.debit > 0 %}{{ trx.debit|floatformat:3|intcomma }}{% endif %}</td>
+        <td class="text-end font-monospace text-danger-emphasis">{% if trx.credit > 0 %}{{ trx.credit|floatformat:3|intcomma }}{% endif %}</td>
+        <td></td> {# Placeholder for Closing Balance #}
+    </tr>
+    {% endfor %}
+
+    <!-- ================== Child Accounts (Recursive) ================== -->
+    {% for child_node in node.children %}
+        {% include 'inventory/partials/reports/_general_ledger_node.html' with node=child_node parent_id=node.account.id %}
+    {% endfor %}
+{% endif %}

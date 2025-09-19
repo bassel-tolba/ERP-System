@@ -1,0 +1,48 @@
+<h6 class="mb-3">الفترات المحاسبية للسنة المالية: {{ fiscal_year.name }}</h6>
+<table class="table table-striped table-hover table-sm">
+    <thead>
+        <tr>
+            <th>الفترة</th>
+            <th>تاريخ البدء</th>
+            <th>تاريخ الانتهاء</th>
+            <th>الحالة</th>
+            <th>الإجراءات</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for period in periods %}
+        <tr class="align-middle">
+            <td>{{ period.name }}</td>
+            <td>{{ period.start_date|date:"Y-m-d" }}</td>
+            <td>{{ period.end_date|date:"Y-m-d" }}</td>
+            <td>
+                <span class="badge bg-{% if period.status == 'open' %}success{% elif period.status == 'pending_close' %}warning text-dark{% elif period.status == 'closed' %}danger{% else %}secondary{% endif %}">{{ period.get_status_display }}</span>
+            </td>
+            <td>
+                <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#auditLogModal-{{ period.id }}">
+                    <i class="bi bi-card-list"></i> سجل التدقيق
+                </button>
+                {% if period.status != 'locked' %}
+                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#managePeriodModal-{{ period.id }}">
+                    <i class="bi bi-gear-fill"></i> إدارة
+                </button>
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5" class="text-center">
+                <p class="my-2">لا توجد فترات محاسبية لهذه السنة المالية.</p>
+                {% if not fiscal_year.is_closed %}
+                <form action="{% url 'inventory:generate_monthly_periods' fiscal_year.id %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-success">
+                        <i class="bi bi-calendar-plus-fill me-2"></i>توليد 12 فترة شهرية
+                    </button>
+                </form>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

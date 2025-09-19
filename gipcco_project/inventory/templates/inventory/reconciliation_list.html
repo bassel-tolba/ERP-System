@@ -1,0 +1,70 @@
+{% extends "inventory/layout.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "التسويات البنكية" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">{% trans "التسويات البنكية" %}</h1>
+        <a href="{% url 'inventory:create_bank_reconciliation' %}" class="btn btn-primary btn-icon-split" id="create-reconciliation-btn">
+            <span class="icon text-white-50"><i class="fas fa-plus"></i></span>
+            <span class="text">{% trans "تسوية جديدة" %}</span>
+        </a>
+    </div>
+
+    <!-- Filter Form -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">{% trans "تصفية التسويات" %}</h6>
+        </div>
+        <div class="card-body">
+            <form method="get" action="{% url 'inventory:bank_reconciliations_list' %}" id="filter-form">
+                <div class="row">
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label for="bank_account">{% trans "الحساب البنكي" %}</label>
+                            <select name="bank_account" id="bank_account" class="form-control">
+                                <option value="">{% trans "كل الحسابات" %}</option>
+                                {% for account in bank_accounts %}
+                                <option value="{{ account.pk }}" {% if selected_bank_account == account.pk %}selected{% endif %}>{{ account.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label for="status">{% trans "الحالة" %}</label>
+                            <select name="status" id="status" class="form-control">
+                                <option value="">{% trans "كل الحالات" %}</option>
+                                {% for value, name in statuses %}
+                                <option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-info btn-block">{% trans "تصفية" %}</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Reconciliation List Table -->
+    <div id="reconciliation-list-container">
+        {% include 'inventory/partials/reconciliation_list_content.html' %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const loader = new DynamicContentLoader();
+    loader.initForm('filter-form', 'reconciliation-list-container');
+    loader.initLink('create-reconciliation-btn', '#content-wrapper .container-fluid');
+});
+</script>
+{% endblock %}

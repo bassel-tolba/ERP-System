@@ -6,6 +6,8 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
+from django.db.models import Q
+from django.conf import settings
 
 # ==============================================================================
 #  OPERATIONAL MODELS
@@ -891,6 +893,14 @@ class Payment(models.Model):
     object_id = models.PositiveIntegerField(null=True, blank=True)
     source_object = GenericForeignKey('content_type', 'object_id')
 
+    # --- NEW RECONCILIATION FIELDS ---
+    reconciliation = models.ForeignKey(
+        'BankReconciliation', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='payments', verbose_name=_("Bank Reconciliation")
+    )
+    cleared_date = models.DateField(null=True, blank=True, verbose_name=_("Cleared Date"))
+
+
     class Meta:
         db_table = 'payments'
         verbose_name = _("Payment")
@@ -948,20 +958,59 @@ class Employee(models.Model):
 #  ACCOUNTING CORE MODELS
 # ==============================================================================
 
-class FinancialPeriod(models.Model):
-    name = models.CharField(max_length=100, verbose_name=_("Period Name"))
+class FiscalYear(models.Model):
+    """
+    Represents a fiscal year, which contains multiple financial periods.
+    """
+    name = models.CharField(max_length=100, unique=True, verbose_name=_("Fiscal Year Name"))
     start_date = models.DateField(unique=True, verbose_name=_("Start Date"))
     end_date = models.DateField(unique=True, verbose_name=_("End Date"))
     is_closed = models.BooleanField(default=False, verbose_name=_("Is Closed"))
+
+    class Meta:
+        db_table = 'fiscal_years'
+        verbose_name = _("Fiscal Year")
+        verbose_name_plural = _("Fiscal Years")
+        ordering = ['-start_date']
+
+    def __str__(self):
+        return self.name
+
+    def clean(self):
+        if self.start_date and self.end_date and self.start_date > self.end_date:
+            raise ValidationError(_("Start date cannot be after end date."))
+
+
+class FinancialPeriod(models.Model):
+    class Status(models.TextChoices):
+        OPEN = 'open', _('Open')
+        PENDING_CLOSE = 'pending_close', _('Pending Close')
+        CLOSED = 'closed', _('Closed')
+        PERMANENTLY_LOCKED = 'locked', _('Permanently Locked')
+
+    fiscal_year = models.ForeignKey(
+        FiscalYear, on_delete=models.PROTECT,
+        related_name='periods', verbose_name=_("Fiscal Year")
+    )
+    name = models.CharField(max_length=100, verbose_name=_("Period Name"))
+    start_date = models.DateField(unique=True, verbose_name=_("Start Date"))
+    end_date = models.DateField(unique=True, verbose_name=_("End Date"))
+    status = models.CharField(
+        max_length=20, choices=Status.choices, default=Status.OPEN, verbose_name=_("Status")
+    )
 
     class Meta:
         db_table = 'financial_periods'
         verbose_name = _("Financial Period")
         verbose_name_plural = _("Financial Periods")
         ordering = ['-start_date']
+        permissions = [
+            ("can_reopen_period", "Can re-open a closed financial period"),
+            ("can_permanently_lock_period", "Can permanently lock a financial period"),
+        ]
 
     def __str__(self):
-        return f"{self.name} ({self.start_date} to {self.end_date})"
+        return f"{self.name} ({self.start_date} to {self.end_date}) - {self.get_status_display()}"
 
     def clean(self):
         if self.start_date and self.end_date and self.start_date > self.end_date:
@@ -993,9 +1042,16 @@ class Account(models.Model):
         return f"{self.code} - {self.name}"
 
 class JournalEntry(models.Model):
+    class Status(models.TextChoices):
+        DRAFT = 'draft', _('Draft')
+        POSTED = 'posted', _('Posted')
+
     date = models.DateTimeField(verbose_name=_("Date"))
     description = models.CharField(max_length=255, verbose_name=_("Description"))
     notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
+    status = models.CharField(
+        max_length=10, choices=Status.choices, default=Status.POSTED, verbose_name=_("Status")
+    )
 
     content_type = models.ForeignKey(ContentType, on_delete=models.SET_NULL, null=True)
     object_id = models.PositiveIntegerField(null=True)
@@ -1009,6 +1065,45 @@ class JournalEntry(models.Model):
 
     def __str__(self):
         return f"JE-{self.id} on {self.date.strftime('%Y-%m-%d')}: {self.description}"
+
+    def get_description(self):
+        """
+        Provides a translated, user-friendly description of the journal entry's purpose
+        based on its source object.
+        """
+        if not self.source_object:
+            return self.description
+
+        model_name = self.source_object._meta.model_name
+        
+        if model_name == 'inventorylog':
+            return f"إثبات استلام مواد خام: {self.source_object.product.name} من {self.source_object.company.name} (فحص جودة: {self.source_object.qc_no})"
+        
+        if model_name == 'batch':
+            return f"صرف مواد خام لدفعة إنتاج: {self.source_object.template.final_product.name} (أمر تشغيل: {self.source_object.shop_order_number})"
+
+        if model_name == 'inventoryconsumption':
+            return f"صرف داخلي: {self.source_object.quantity_consumed} {self.source_object.product.unit} من {self.source_object.product.name} إلى قسم {self.source_object.get_department_display()}"
+
+        if model_name == 'finishedproductreceipt':
+            return f"استلام منتج نهائي: {self.source_object.total_quantity_produced} {self.source_object.batch.template.final_product.unit} من {self.source_object.batch.template.final_product.name} (دفعة: {self.source_object.individual_batch_number})"
+
+        if model_name == 'productionreturn':
+            return f"مرتجع من الإنتاج: {self.source_object.quantity} {self.source_object.product.unit} من {self.source_object.product.name}"
+
+        if model_name == 'finishedproductdispatch':
+            return f"إثبات بيع وتسليم منتج نهائي: {self.source_object.quantity} {self.source_object.sales_order_item.finished_product.batch.template.final_product.unit} إلى {self.source_object.sales_order_item.sales_order.customer.name}"
+
+        if model_name == 'payment':
+            if self.source_object.payment_type == 'out':
+                return f"سداد مورد: {self.source_object.supplier.name} بمبلغ {self.source_object.amount}"
+            elif self.source_object.payment_type == 'in':
+                return f"تحصيل من عميل: {self.source_object.customer.name} بمبلغ {self.source_object.amount}"
+
+        if model_name == 'banktransfer':
+            return f"تحويل بنكي من {self.source_object.from_account.name} إلى {self.source_object.to_account.name}"
+            
+        return self.description # Fallback to the original description
 
 class JournalEntryLine(models.Model):
     class EntryType(models.TextChoices):
@@ -1363,6 +1458,21 @@ class BankTransfer(models.Model):
     description = models.CharField(max_length=255, verbose_name=_("Description"))
     notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
 
+    # --- NEW RECONCILIATION FIELDS ---
+    # We need two sets of fields because a transfer affects two reconciliations (one for each bank account)
+    source_reconciliation = models.ForeignKey(
+        'BankReconciliation', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='source_transfers', verbose_name=_("Source Bank Reconciliation")
+    )
+    source_cleared_date = models.DateField(null=True, blank=True, verbose_name=_("Source Cleared Date"))
+    
+    destination_reconciliation = models.ForeignKey(
+        'BankReconciliation', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='destination_transfers', verbose_name=_("Destination Bank Reconciliation")
+    )
+    destination_cleared_date = models.DateField(null=True, blank=True, verbose_name=_("Destination Cleared Date"))
+
+
     class Meta:
         db_table = 'bank_transfers'
         verbose_name = _("Bank Transfer")
@@ -1401,3 +1511,132 @@ class DepreciationLog(models.Model):
 
     def __str__(self):
         return f"Depreciation for {self.asset.name} on {self.period_date}"
+
+
+# ==============================================================================
+#  ACCOUNTING AUDIT MODELS
+# ==============================================================================
+
+class PeriodClosingAuditLog(models.Model):
+    """Logs all status changes for a financial period for audit purposes."""
+    class ActionType(models.TextChoices):
+        CLOSE = 'close', _('Close Period')
+        REOPEN = 'reopen', _('Re-open Period')
+        LOCK = 'lock', _('Permanently Lock')
+
+    financial_period = models.ForeignKey(
+        FinancialPeriod, on_delete=models.CASCADE,
+        related_name='audit_logs', verbose_name=_("Financial Period")
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT,
+        verbose_name=_("User"),
+        help_text=_("The user who performed the action.")
+    )
+    action_timestamp = models.DateTimeField(auto_now_add=True, verbose_name=_("Action Timestamp"))
+    action_type = models.CharField(
+        max_length=20, choices=ActionType.choices, verbose_name=_("Action Type")
+    )
+    justification = models.TextField(
+        blank=True, null=True, verbose_name=_("Justification"),
+        help_text=_("Required when re-opening a closed period.")
+    )
+
+    class Meta:
+        verbose_name = _("Period Closing Audit Log")
+        verbose_name_plural = _("Period Closing Audit Logs")
+        ordering = ['-action_timestamp']
+
+    def __str__(self):
+        return f"{self.get_action_type_display()} on {self.financial_period} by {self.user} at {self.action_timestamp}"
+
+
+# ==============================================================================
+#  NEW BANK RECONCILIATION MODELS
+# ==============================================================================
+
+class BankReconciliation(models.Model):
+    """
+    Represents a single bank reconciliation period for a specific bank account.
+    """
+    class Status(models.TextChoices):
+        OPEN = 'open', _('Open')
+        RECONCILED = 'reconciled', _('Reconciled')
+        
+    bank_account = models.ForeignKey(
+        BankAccount, on_delete=models.PROTECT, related_name='reconciliations',
+        verbose_name=_("Bank Account")
+    )
+    statement_date = models.DateField(verbose_name=_("Statement Date"))
+    statement_opening_balance = models.DecimalField(
+        max_digits=14, decimal_places=3, verbose_name=_("Statement Opening Balance")
+    )
+    statement_closing_balance = models.DecimalField(
+        max_digits=14, decimal_places=3, verbose_name=_("Statement Closing Balance")
+    )
+    status = models.CharField(
+        max_length=20, choices=Status.choices, default=Status.OPEN, verbose_name=_("Status")
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-statement_date']
+        unique_together = ('bank_account', 'statement_date')
+        db_table = 'bank_reconciliations'
+        verbose_name = _("Bank Reconciliation")
+        verbose_name_plural = _("Bank Reconciliations")
+
+    def __str__(self):
+        return f"{self.bank_account.name} - {self.statement_date.strftime('%Y-%m-%d')}"
+
+    def unmatch_all_transactions(self):
+        """Resets all linked payments and transfers to an unreconciled state."""
+        # Unlink Payments
+        self.payments.update(reconciliation=None, cleared_date=None)
+        
+        # Unlink BankTransfers (both source and destination)
+        BankTransfer.objects.filter(source_reconciliation=self).update(
+            source_reconciliation=None, source_cleared_date=None
+        )
+        BankTransfer.objects.filter(destination_reconciliation=self).update(
+            destination_reconciliation=None, destination_cleared_date=None
+        )
+        
+        # Reset statement lines
+        self.statement_lines.update(is_reconciled=False, reconciled_object_content_type=None, reconciled_object_id=None)
+
+
+class BankStatementLine(models.Model):
+    """
+    Represents a single transaction line from an imported bank statement.
+    """
+    reconciliation = models.ForeignKey(
+        BankReconciliation, on_delete=models.CASCADE, related_name='statement_lines',
+        verbose_name=_("Reconciliation Period")
+    )
+    transaction_date = models.DateField(verbose_name=_("Transaction Date"))
+    description = models.CharField(max_length=255, verbose_name=_("Description"))
+    amount = models.DecimalField(
+        max_digits=14, decimal_places=3, verbose_name=_("Amount"),
+        help_text=_("Positive for deposits, negative for withdrawals.")
+    )
+    is_reconciled = models.BooleanField(default=False, verbose_name=_("Is Reconciled"))
+
+    # --- Generic FK to link to the matched internal transaction (Payment, BankTransfer, etc.) ---
+    reconciled_object_content_type = models.ForeignKey(
+        ContentType, on_delete=models.SET_NULL, null=True, blank=True
+    )
+    reconciled_object_id = models.PositiveIntegerField(null=True, blank=True)
+    reconciled_object = GenericForeignKey(
+        'reconciled_object_content_type', 'reconciled_object_id'
+    )
+
+    class Meta:
+        db_table = 'bank_statement_lines' # Explicitly set the table name
+        ordering = ['transaction_date', 'pk']
+        verbose_name = _("Bank Statement Line")
+        verbose_name_plural = _("Bank Statement Lines")
+
+    def __str__(self):
+        return f"{self.transaction_date}: {self.description} ({self.amount})"

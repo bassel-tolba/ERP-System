@@ -1,0 +1,56 @@
+{% load i18n %}
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">{% trans "فترات التسوية" %}</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="reconciliationTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>{% trans "الحساب البنكي" %}</th>
+                        <th>{% trans "تاريخ كشف الحساب" %}</th>
+                        <th>{% trans "الرصيد الافتتاحي" %}</th>
+                        <th>{% trans "الرصيد الختامي" %}</th>
+                        <th>{% trans "الحالة" %}</th>
+                        <th>{% trans "الإجراءات" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for recon in reconciliations %}
+                    <tr>
+                        <td>{{ recon.bank_account.name }}</td>
+                        <td>{{ recon.statement_date|date:"Y-m-d" }}</td>
+                        <td>{{ recon.statement_opening_balance|floatformat:2 }}</td>
+                        <td>{{ recon.statement_closing_balance|floatformat:2 }}</td>
+                        <td>
+                            {% if recon.status == 'open' %}
+                                <span class="badge badge-warning">{{ recon.get_status_display }}</span>
+                            {% else %}
+                                <span class="badge badge-success">{{ recon.get_status_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'inventory:manage_bank_reconciliation' pk=recon.pk %}" class="btn btn-sm btn-info dynamic-link">
+                                {% if recon.status == 'open' %}{% trans "إدارة" %}{% else %}{% trans "عرض" %}{% endif %}
+                            </a>
+                            {% if recon.status == 'open' %}
+                            <form method="post" action="{% url 'inventory:delete_bank_reconciliation' pk=recon.pk %}" class="d-inline" onsubmit="return confirm('{% trans "هل أنت متأكد أنك تريد حذف هذه التسوية؟ سيؤدي هذا إلى إلغاء مطابقة جميع المعاملات المرتبطة." %}')">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-danger">
+                                    <i class="fas fa-trash"></i> {% trans "حذف" %}
+                                </button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">{% trans "لم يتم العثور على فترات تسوية." %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

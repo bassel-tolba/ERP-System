@@ -355,19 +355,29 @@ h1, h2, h3, h4, h5, h6 {
 
 .btn-primary {
   background-color: var(--color-primary) !important;
-  border-color: var(--color-primary) !important;
+
   color: var(--text-inverse) !important;
-  box-shadow: var(--shadow-sm) !important;
 }
 .btn-primary:hover {
   background-color: var(--color-primary-hover) !important;
   border-color: var(--color-primary-hover) !important;
-  box-shadow: var(--shadow-md) !important;
-  transform: translateY(-2px);
 }
 .btn:focus-visible {
   outline: 3px solid var(--color-primary-subtle) !important;
   outline-offset: 1px;
+}
+.btn-outline-primary {
+    background-color: var(--color-primary) !important;
+
+  color: var(--text-inverse) !important;
+}
+.btn-outline-primary:hover {
+  background-color: var(--color-primary-hover) !important;
+  border-color: var(--color-primary-hover) !important;
+}
+.badge {
+  color: var(--text-primary) !important;
+  border-color: var(--text-primary) !important;
 }
 
 /* --- Forms --- */
@@ -497,6 +507,19 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--text-inverse);
   border-color: var(--color-primary);
 }
+
+/* --- NEW: Bank Reconciliation Styles --- */
+.table-hover .statement-line,
+.table-hover .internal-transaction {
+  cursor: pointer;
+}
+
+.table-hover .statement-line.selected,
+.table-hover .internal-transaction.selected {
+  background-color: var(--color-primary-subtle) !important;
+  box-shadow: inset 4px 0 0 0 var(--color-primary);
+}
+
 
 /* ==========================================================================
    6. RESPONSIVE DESIGN

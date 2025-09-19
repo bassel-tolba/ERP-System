@@ -1,0 +1,42 @@
+<div class="modal fade" id="viewAuditLogModal-{{ period.id }}" tabindex="-1" aria-labelledby="viewAuditLogModalLabel-{{ period.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewAuditLogModalLabel-{{ period.id }}">سجل التدقيق للفترة: {{ period.name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="auditLogBody-{{ period.id }}">
+                <div class="text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const modalElement = document.getElementById('viewAuditLogModal-{{ period.id }}');
+    if (modalElement) {
+        modalElement.addEventListener('show.bs.modal', function () {
+            const auditLogBody = document.getElementById('auditLogBody-{{ period.id }}');
+            const url = "{% url 'inventory:view_period_audit_log' period.id %}";
+            
+            fetch(url)
+                .then(response => response.text())
+                .then(html => {
+                    auditLogBody.innerHTML = html;
+                })
+                .catch(error => {
+                    console.error('Failed to load audit log:', error);
+                    auditLogBody.innerHTML = '<p class="text-danger">حدث خطأ أثناء تحميل سجل التدقيق.</p>';
+                });
+        });
+    }
+});
+</script>

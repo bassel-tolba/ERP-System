@@ -1,0 +1,119 @@
+{% load humanize %}
+<div class="container-fluid" id="taxReconciliationReportContainer">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-primary">تقرير التسوية الضريبية</h1>
+        <button class="btn btn-outline-secondary d-print-none" onclick="window.print();">
+            <i class="bi bi-printer-fill me-2"></i>طباعة التقرير
+        </button>
+    </div>
+
+    {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+    {% else %}
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <form method="get" action="{% url 'inventory:tax_reconciliation_report' %}" id="taxReportForm" class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label for="start_date" class="form-label">من تاريخ</label>
+                        <input type="text" class="form-control datepicker" id="start_date" name="start_date" value="{{ start_date }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="end_date" class="form-label">إلى تاريخ</label>
+                        <input type="text" class="form-control datepicker" id="end_date" name="end_date" value="{{ end_date }}">
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-funnel-fill me-2"></i>تحديث التقرير
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- VAT Summary -->
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">ملخص ضريبة القيمة المضافة (VAT)</h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-bordered mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>الحساب</th>
+                                    <th class="text-center">رصيد افتتاحي</th>
+                                    <th class="text-center">مدين (الفترة)</th>
+                                    <th class="text-center">دائن (الفترة)</th>
+                                    <th class="text-center">رصيد ختامي</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- VAT Receivable -->
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'inventory:general_ledger' %}?account_id={{ vat_receivable.account.id }}&start_date={{ start_date }}&end_date={{ end_date }}" class="fw-bold">
+                                            {{ vat_receivable.account.name }} (ضريبة المدخلات)
+                                        </a>
+                                    </td>
+                                    <td class="text-center">{{ vat_receivable.opening|floatformat:3|intcomma }}</td>
+                                    <td class="text-center text-success">{{ vat_receivable.debits|floatformat:3|intcomma }}</td>
+                                    <td class="text-center text-danger">{{ vat_receivable.credits|floatformat:3|intcomma }}</td>
+                                    <td class="text-center fw-bold">{{ vat_receivable.closing|floatformat:3|intcomma }}</td>
+                                </tr>
+                                <!-- VAT Payable -->
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'inventory:general_ledger' %}?account_id={{ vat_payable.account.id }}&start_date={{ start_date }}&end_date={{ end_date }}" class="fw-bold">
+                                            {{ vat_payable.account.name }} (ضريبة المخرجات)
+                                        </a>
+                                    </td>
+                                    <td class="text-center">{{ vat_payable.opening|floatformat:3|intcomma }}</td>
+                                    <td class="text-center text-success">{{ vat_payable.debits|floatformat:3|intcomma }}</td>
+                                    <td class="text-center text-danger">{{ vat_payable.credits|floatformat:3|intcomma }}</td>
+                                    <td class="text-center fw-bold">{{ vat_payable.closing|floatformat:3|intcomma }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Net VAT & WHT -->
+            <div class="col-lg-4">
+                <div class="card bg-primary text-white mb-3">
+                    <div class="card-body text-center">
+                        <h6 class="card-title text-uppercase">صافي ضريبة القيمة المضافة المستحقة</h6>
+                        <p class="display-6 fw-bold mb-0">{{ net_vat_due|floatformat:3|intcomma }}</p>
+                        <small>{% if net_vat_due > 0 %}مبلغ مستحق للدفع{% else %}رصيد دائن (للخصم){% endif %}</small>
+                    </div>
+                </div>
+                <div class="card">
+                     <div class="card-header bg-light">
+                        <h5 class="mb-0">ملخص ضريبة الخصم والتحصيل</h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-bordered mb-0">
+                             <thead class="table-light">
+                                <tr>
+                                    <th>الحساب</th>
+                                    <th class="text-center">رصيد ختامي</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'inventory:general_ledger' %}?account_id={{ wht_payable.account.id }}&start_date={{ start_date }}&end_date={{ end_date }}" class="fw-bold">
+                                            {{ wht_payable.account.name }}
+                                        </a>
+                                    </td>
+                                    <td class="text-center fw-bold">{{ wht_payable.closing|floatformat:3|intcomma }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>

@@ -1,0 +1,61 @@
+<div class="container-fluid" id="fiscalYearContainer">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2 text-primary">إدارة السنوات المالية والفترات المحاسبية</h1>
+        <div>
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createFiscalYearModal">
+                <i class="bi bi-plus-circle-fill me-2"></i>إنشاء سنة مالية جديدة
+            </button>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">السنوات المالية</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="accordion" id="fiscalYearsAccordion">
+                {% for year in fiscal_years %}
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="heading-{{ year.id }}">
+                        <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ year.id }}" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}" aria-controls="collapse-{{ year.id }}">
+                            <span class="fw-bold fs-5">{{ year.name }}</span>
+                            <span class="badge bg-{% if year.is_closed %}danger{% else %}success{% endif %} ms-3">{{ year.is_closed|yesno:"مغلقة,مفتوحة" }}</span>
+                            <div class="ms-auto d-flex align-items-center">
+                                <small class="text-muted me-3">({{ year.start_date|date:"Y-m-d" }} إلى {{ year.end_date|date:"Y-m-d" }})</small>
+                                {% if not year.is_closed %}
+                                <button class="btn btn-sm btn-outline-secondary me-2" data-bs-toggle="modal" data-bs-target="#editFiscalYearModal-{{ year.id }}" onclick="event.stopPropagation()">
+                                    <i class="bi bi-pencil-fill"></i> تعديل
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteFiscalYearModal-{{ year.id }}" onclick="event.stopPropagation()">
+                                    <i class="bi bi-trash-fill"></i> حذف
+                                </button>
+                                {% endif %}
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="collapse-{{ year.id }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" aria-labelledby="heading-{{ year.id }}" data-bs-parent="#fiscalYearsAccordion">
+                        <div class="accordion-body">
+                            {% include 'inventory/partials/financial_periods_table.html' with periods=year.periods.all fiscal_year=year %}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="p-4 text-center">
+                    <p>لم يتم العثور على سنوات مالية. ابدأ بإنشاء واحدة جديدة.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'inventory/modals/create_fiscal_year_modal.html' %}
+
+{% for year in fiscal_years %}
+    {% include 'inventory/modals/edit_fiscal_year_modal.html' with year=year %}
+    {% include 'inventory/modals/delete_fiscal_year_modal.html' with year=year %}
+    {% for period in year.periods.all %}
+        {% include 'inventory/modals/manage_period_modal.html' with period=period %}
+        {% include 'inventory/modals/view_audit_log_modal.html' with period=period %}
+    {% endfor %}
+{% endfor %}

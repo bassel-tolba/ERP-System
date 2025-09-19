@@ -1,0 +1,50 @@
+{% extends "inventory/layout.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Bank Reconciliation Report" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <h1 class="h3 mb-4 text-gray-800">{% trans "Bank Reconciliation Report" %}</h1>
+
+    <!-- Filter Form -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">{% trans "Filter Report" %}</h6>
+        </div>
+        <div class="card-body">
+            <form method="get" action="{% url 'inventory:reconciliation_report' %}" id="filter-form">
+                <div class="row">
+                    <div class="col-md-10">
+                        <div class="form-group">
+                            <label for="bank_account">{% trans "Bank Account" %}</label>
+                            <select name="bank_account" id="bank_account" class="form-control">
+                                <option value="">{% trans "All Accounts" %}</option>
+                                {% for account in bank_accounts %}
+                                <option value="{{ account.pk }}" {% if selected_bank_account == account.pk %}selected{% endif %}>{{ account.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-info btn-block">{% trans "Filter" %}</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="report-content-container">
+        {% include 'inventory/partials/reports/reconciliation_report_content.html' %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const loader = new DynamicContentLoader();
+    loader.initForm('filter-form', 'report-content-container');
+});
+</script>
+{% endblock %}

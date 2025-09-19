@@ -61,6 +61,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'inventory.middleware.FinancialPeriodExceptionHandlerMiddleware', # --- NEW ---
 ]
 
 ROOT_URLCONF = 'gipcco_project.urls'

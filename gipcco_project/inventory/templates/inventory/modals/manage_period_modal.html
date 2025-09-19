@@ -1,0 +1,72 @@
+<div class="modal fade" id="managePeriodModal-{{ period.id }}" tabindex="-1" aria-labelledby="managePeriodModalLabel-{{ period.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="managePeriodModalLabel-{{ period.id }}">إدارة الفترة: {{ period.name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>الحالة الحالية: <strong class="text-primary">{{ period.get_status_display }}</strong></p>
+                
+                <hr>
+
+                <h6><i class="bi bi-arrow-repeat me-2"></i>تغيير الحالة</h6>
+                <form action="{% url 'inventory:change_period_status' period.id %}" method="post" class="row g-3 align-items-end">
+                    {% csrf_token %}
+                    <div class="col-md-4">
+                        <label for="new_status-{{ period.id }}" class="form-label">الحالة الجديدة</label>
+                        <select class="form-select" id="new_status-{{ period.id }}" name="new_status">
+                            {% if period.status == 'open' %}
+                                <option value="pending_close">قيد الإغلاق</option>
+                            {% elif period.status == 'pending_close' %}
+                                <option value="open">فتح</option>
+                                <option value="closed">إغلاق</option>
+                            {% elif period.status == 'closed' %}
+                                {% if perms.inventory.can_reopen_period %}
+                                <option value="open">إعادة فتح</option>
+                                {% endif %}
+                            {% endif %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="justification-{{ period.id }}" class="form-label">المبرر (مطلوب عند إعادة الفتح)</label>
+                        <input type="text" class="form-control" id="justification-{{ period.id }}" name="justification" placeholder="أدخل سبب إعادة فتح الفترة...">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">تطبيق</button>
+                    </div>
+                </form>
+
+                {% if period.status == 'pending_close' %}
+                <div class="alert alert-info mt-3">
+                    <p class="mb-1"><strong>الخطوة التالية:</strong></p>
+                    <p class="mb-0">بعد التأكد من أن الفترة جاهزة للإغلاق، يمكنك الانتقال إلى شاشة الإغلاق النهائي.</p>
+                    <a href="{% url 'inventory:close_period_view' period.id %}" class="btn btn-warning mt-2">الانتقال إلى شاشة الإغلاق</a>
+                </div>
+                {% endif %}
+
+                {% if perms.inventory.can_permanently_lock_period and period.status == 'closed' %}
+                <hr class="my-4">
+                <div class="p-3 border border-danger rounded">
+                    <h6 class="text-danger"><i class="bi bi-lock-fill me-2"></i>الإغلاق الدائم للفترة</h6>
+                    <p>هذا الإجراء سيقوم بإغلاق الفترة بشكل دائم وغير قابل للتراجع. لا يمكن إعادة فتح الفترة بعد إغلاقها بشكل دائم. استخدم هذا الخيار فقط بعد المراجعة النهائية والتأكد من صحة جميع البيانات.</p>
+                    <form action="{% url 'inventory:change_period_status' period.id %}" method="post" onsubmit="return confirm('هل أنت متأكد من رغبتك في إغلاق هذه الفترة بشكل دائم؟ لا يمكن التراجع عن هذا الإجراء.');">
+                        {% csrf_token %}
+                        <input type="hidden" name="new_status" value="locked">
+                        <div class="mb-3">
+                            <label for="lock_justification-{{ period.id }}" class="form-label">ملاحظات الإغلاق الدائم</label>
+                            <input type="text" class="form-control" id="lock_justification-{{ period.id }}" name="justification" value="Period locked after final audit." required>
+                        </div>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-lock-fill me-2"></i>إغلاق دائم
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+            </div>
+        </div>
+    </div>
+</div>

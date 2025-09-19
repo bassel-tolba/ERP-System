@@ -11,7 +11,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="h4">
             <i class="bi bi-file-spreadsheet-fill text-primary me-2"></i>
-            كشف حساب منتج (Product Ledger)
+            كشف حساب منتج
         </h2>
     </div>
 
@@ -20,7 +20,7 @@
         <div class="card-body">
             <form id="filter-form" class="row g-3 align-items-center" method="GET" action="{% url 'inventory:product_ledger' %}">
                 <div class="col-md-4">
-                    <label for="product_id" class="form-label">المنتج (Product)</label>
+                    <label for="product_id" class="form-label">المنتج</label>
                     <select class="form-select searchable-select" id="product_id" name="product_id" required>
                         <option value="">اختر منتج...</option>
                         {% for p in products %}
@@ -29,11 +29,11 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <label for="start_date" class="form-label">من تاريخ (From)</label>
+                    <label for="start_date" class="form-label">من تاريخ</label>
                     <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date }}">
                 </div>
                 <div class="col-md-3">
-                    <label for="end_date" class="form-label">إلى تاريخ (To)</label>
+                    <label for="end_date" class="form-label">إلى تاريخ</label>
                     <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date }}">
                 </div>
                 <div class="col-md-2 d-flex align-items-end">

@@ -2,12 +2,17 @@
 
 import logging
 
-from django.db.models.signals import post_save, post_delete, pre_save
+from django.db.models.signals import post_save, post_delete, pre_save, pre_delete
 from django.dispatch import receiver
 from django.contrib.contenttypes.models import ContentType
 
-from .models import FinishedProductDispatch, FinishedProductReceipt, InventoryLog, JournalEntry, Batch, InventoryConsumption, ProductionReturn, Payment, BankTransfer
+from .models import (
+    FinishedProductDispatch, FinishedProductReceipt, InventoryLog, JournalEntry,
+    Batch, InventoryConsumption, ProductionReturn, Payment, BankTransfer,
+    DepreciationLog
+)
 from .services.accounting_service import (
+    _check_period_is_open, # Import the gatekeeper function
     create_je_for_inventory_receipt, 
     create_je_for_production_consumption,
     create_je_for_internal_consumption,
@@ -21,6 +26,51 @@ from .services.accounting_service import (
 
 logger = logging.getLogger(__name__)
 
+# ==============================================================================
+# PRE-SAVE AND PRE-DELETE HOOKS FOR DATA INTEGRITY
+# ==============================================================================
+
+# A dictionary mapping transactional models to their date fields.
+# This allows us to create generic signal handlers.
+TRANSACTIONAL_MODELS = {
+    InventoryLog: 'release_timestamp',
+    Batch: 'creation_date',
+    InventoryConsumption: 'consumption_date',
+    FinishedProductReceipt: 'receipt_date',
+    ProductionReturn: 'return_date',
+    FinishedProductDispatch: 'dispatch_date',
+    Payment: 'payment_date',
+    BankTransfer: 'transfer_date',
+    DepreciationLog: 'period_date',
+}
+
+def pre_save_period_check(sender, instance, **kwargs):
+    """Generic pre-save signal to check the financial period status."""
+    date_field_name = TRANSACTIONAL_MODELS.get(sender)
+    if date_field_name:
+        date_to_check = getattr(instance, date_field_name)
+        if date_to_check:
+            # For new records or if the date has changed.
+            if instance.pk is None or getattr(sender.objects.get(pk=instance.pk), date_field_name) != date_to_check:
+                 _check_period_is_open(date_to_check)
+
+def pre_delete_period_check(sender, instance, **kwargs):
+    """Generic pre-delete signal to check the financial period status."""
+    date_field_name = TRANSACTIONAL_MODELS.get(sender)
+    if date_field_name:
+        date_to_check = getattr(instance, date_field_name)
+        if date_to_check:
+            _check_period_is_open(date_to_check)
+
+# Connect the signals dynamically
+for model, date_field in TRANSACTIONAL_MODELS.items():
+    pre_save.connect(pre_save_period_check, sender=model, weak=False)
+    pre_delete.connect(pre_delete_period_check, sender=model, weak=False)
+
+
+# ==============================================================================
+# POST-SAVE HOOKS FOR JOURNAL ENTRY CREATION
+# ==============================================================================
 
 @receiver(post_save, sender=InventoryLog)
 def handle_inventory_log_release(sender, instance: InventoryLog, **kwargs):

@@ -1,0 +1,305 @@
+{% extends "inventory/layout.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "إدارة التسوية البنكية" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4" 
+     id="reconciliationWorkspace"
+     data-reconciliation-id="{{ reconciliation.pk }}"
+     data-match-url="{% url 'inventory:api_match_transactions' pk=reconciliation.pk %}"
+     data-adjustment-url="{% url 'inventory:api_create_adjustment_and_match' pk=reconciliation.pk %}"
+     data-csrf-token="{{ csrf_token }}"
+     data-status="{{ reconciliation.status }}">
+    <!-- Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">{% trans "مساحة عمل التسوية" %}</h1>
+            <p class="mb-0 text-muted">{{ reconciliation.bank_account.name }} - {% trans "تاريخ كشف الحساب" %}: {{ reconciliation.statement_date|date:"Y-m-d" }}</p>
+        </div>
+        <div class="d-flex align-items-center">
+            {% if reconciliation.status == 'open' %}
+            <form method="post" action="{% url 'inventory:finalize_reconciliation' pk=reconciliation.pk %}" onsubmit="return confirm('{% trans "هل أنت متأكد أنك تريد إنهاء هذه التسوية؟ لا يمكن التراجع عن هذا الإجراء." %}')">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success btn-icon-split mr-2" {% if difference != 0 %}disabled title="{% trans 'لا يمكنك الإنهاء حتى يصبح الفرق صفرًا.' %}"{% endif %}>
+                    <span class="icon text-white-50"><i class="fas fa-lock"></i></span>
+                    <span class="text">{% trans "إنهاء التسوية" %}</span>
+                </button>
+            </form>
+            {% endif %}
+            <a href="{% url 'inventory:bank_reconciliations_list' %}" class="btn btn-sm btn-secondary dynamic-link">
+                <i class="fas fa-arrow-left fa-sm text-white-50"></i> {% trans "العودة إلى القائمة" %}
+            </a>
+        </div>
+    </div>
+
+    <!-- Reconciliation Summary -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">{% trans "الرصيد الختامي لكشف الحساب" %}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ reconciliation.statement_closing_balance|floatformat:2 }}</div>
+                        </div>
+                        <div class="col-auto"><i class="fas fa-file-invoice-dollar fa-2x text-gray-300"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">{% trans "الرصيد المسوى" %}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ cleared_balance|floatformat:2 }}</div>
+                        </div>
+                        <div class="col-auto"><i class="fas fa-check-circle fa-2x text-gray-300"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card {% if difference == 0 %}border-left-info{% else %}border-left-danger{% endif %} shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold {% if difference == 0 %}text-info{% else %}text-danger{% endif %} text-uppercase mb-1">{% trans "الفرق" %}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ difference|floatformat:2 }}</div>
+                        </div>
+                        <div class="col-auto"><i class="fas fa-balance-scale fa-2x text-gray-300"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">{% trans "رصيد الدفتر (الأستاذ العام)" %}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ book_balance|floatformat:2 }}</div>
+                        </div>
+                        <div class="col-auto"><i class="fas fa-book fa-2x text-gray-300"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Reconciliation Workspace -->
+    <div class="row">
+        <!-- Left Side: Bank Statement Lines -->
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">{% trans "بنود كشف الحساب البنكي غير المسواة" %}</h6>
+                    <!-- Future: Add import button here -->
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "التاريخ" %}</th>
+                                    <th>{% trans "الوصف" %}</th>
+                                    <th class="text-right">{% trans "المبلغ" %}</th>
+                                    <th class="text-center">{% trans "الإجراءات" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for line in unreconciled_statement_lines %}
+                                <tr class="statement-line" data-line-id="{{ line.id }}" data-amount="{{ line.amount }}" data-description="{{ line.description }}">
+                                    <td>{{ line.transaction_date|date:"Y-m-d" }}</td>
+                                    <td>{{ line.description }}</td>
+                                    <td class="text-right {% if line.amount > 0 %}text-success{% else %}text-danger{% endif %}">{{ line.amount|floatformat:2 }}</td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-outline-primary create-adjustment-btn" data-bs-toggle="modal" data-bs-target="#adjustmentModal">
+                                            <i class="bi bi-plus-circle-dotted"></i> {% trans "تعديل" %}
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="4" class="text-center">{% trans "لا توجد بنود كشف حساب غير مسواة." %}</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <hr>
+                    <!-- Manual Entry Form -->
+                    {% if reconciliation.status == 'open' %}
+                    <h6 class="mt-4">{% trans "إضافة بند كشف حساب يدويًا" %}</h6>
+                    <form method="post" action="{% url 'inventory:manage_bank_reconciliation' pk=reconciliation.pk %}">
+                        {% csrf_token %}
+                        <div class="form-row">
+                            <div class="col-md-3">
+                                <input type="date" name="transaction_date" class="form-control form-control-sm" value="{{ today_date }}" required>
+                            </div>
+                            <div class="col-md-5">
+                                <input type="text" name="description" class="form-control form-control-sm" placeholder="{% trans "الوصف" %}" required>
+                            </div>
+                            <div class="col-md-3">
+                                <input type="number" step="0.01" name="amount" class="form-control form-control-sm" placeholder="{% trans "المبلغ" %}" required>
+                            </div>
+                            <div class="col-md-1">
+                                <button type="submit" class="btn btn-primary btn-sm btn-block"><i class="fas fa-plus"></i></button>
+                            </div>
+                        </div>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side: Internal Transactions -->
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">{% trans "المعاملات الداخلية غير المسواة" %}</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "التاريخ" %}</th>
+                                    <th>{% trans "الوصف" %}</th>
+                                    <th class="text-right">{% trans "المبلغ" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for trx in internal_transactions %}
+                                <tr class="internal-transaction" data-trx-id="{{ trx.obj.pk }}" data-trx-type="{{ trx.type }}" data-amount="{{ trx.amount }}">
+                                    <td>{{ trx.date|date:"Y-m-d" }}</td>
+                                    <td>{{ trx.obj.description }}</td>
+                                    <td class="text-right {% if trx.amount > 0 %}text-success{% else %}text-danger{% endif %}">{{ trx.amount|floatformat:2 }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="3" class="text-center">{% trans "لم يتم العثور على معاملات غير مسواة لهذه الفترة." %}</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW: Reconciled Items Section -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">{% trans "البنود المسواة" %}</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>{% trans "بند كشف الحساب" %}</th>
+                            <th class="text-right">{% trans "المبلغ" %}</th>
+                            <th>{% trans "المعاملة الداخلية المطابقة" %}</th>
+                            <th>{% trans "الإجراءات" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for line in reconciled_statement_lines %}
+                        <tr>
+                            <td>{{ line.transaction_date|date:"Y-m-d" }} - {{ line.description }}</td>
+                            <td class="text-right">{{ line.amount|floatformat:2 }}</td>
+                            <td>
+                                {% if line.reconciled_object %}
+                                    {{ line.reconciled_object.description }}
+                                {% else %}
+                                    <span class="text-muted">{% trans "غير متاح" %}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if reconciliation.status == 'open' %}
+                                <form method="post" action="{% url 'inventory:api_unmatch_transaction' pk=reconciliation.pk %}" class="d-inline unmatch-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="line_id" value="{{ line.pk }}">
+                                    <button type="submit" class="btn btn-sm btn-warning">
+                                        <i class="fas fa-undo"></i> {% trans "إلغاء المطابقة" %}
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center">{% trans "لم تتم تسوية أي بنود بعد." %}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- NEW: Adjustment Modal -->
+<div class="modal fade" id="adjustmentModal" tabindex="-1" aria-labelledby="adjustmentModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="adjustmentForm">
+        <div class="modal-header">
+          <h5 class="modal-title" id="adjustmentModalLabel">{% trans "إنشاء تسوية بنكية" %}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <p>{% trans "إنشاء معاملة جديدة لـ:" %}</p>
+            <div class="alert alert-info">
+                <strong>{% trans "البند" %}:</strong> <span id="modalLineDescription"></span><br>
+                <strong>{% trans "المبلغ" %}:</strong> <span id="modalLineAmount"></span>
+            </div>
+            <input type="hidden" name="line_id" id="modalLineId">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label for="modalDescription" class="form-label">{% trans "وصف المعاملة" %}</label>
+              <input type="text" class="form-control" id="modalDescription" name="description" required>
+            </div>
+            <div class="mb-3">
+              <label for="modalAccount" class="form-label" id="modalAccountLabel"></label>
+              <select class="form-select" id="modalAccount" name="account_id" required>
+                  {# Options will be populated by JavaScript #}
+              </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "إلغاء" %}</button>
+          <button type="submit" class="btn btn-primary">{% trans "إنشاء ومطابقة" %}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Confirmation Modal for Matching -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmationModalLabel">{% trans "تأكيد الإجراء" %}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "إلغاء" %}</button>
+        <button type="button" class="btn btn-primary" id="confirmActionBtn">{% trans "تأكيد" %}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{ expense_accounts|json_script:"expense-accounts-data" }}
+{{ income_accounts|json_script:"income-accounts-data" }}
+{% endblock %}
+
+{% block extra_js %}
+{# The JavaScript logic has been moved to financials_logic.js and is loaded by dynamic_content_loader.js #}
+{% endblock %}

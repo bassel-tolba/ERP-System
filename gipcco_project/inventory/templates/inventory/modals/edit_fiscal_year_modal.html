@@ -1,0 +1,34 @@
+<div class="modal fade" id="editFiscalYearModal-{{ year.id }}" tabindex="-1" aria-labelledby="editFiscalYearModalLabel-{{ year.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{% url 'inventory:edit_fiscal_year' year.id %}" method="post">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editFiscalYearModalLabel-{{ year.id }}">تعديل السنة المالية: {{ year.name }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="fiscal_year_name-{{ year.id }}" class="form-label">اسم السنة المالية</label>
+                        <input type="text" class="form-control" id="fiscal_year_name-{{ year.id }}" name="name" value="{{ year.name }}" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="start_date-{{ year.id }}" class="form-label">تاريخ البدء</label>
+                            <input type="text" class="form-control datepicker" id="start_date-{{ year.id }}" name="start_date" value="{{ year.start_date|date:'Y-m-d' }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="end_date-{{ year.id }}" class="form-label">تاريخ الانتهاء</label>
+                            <input type="text" class="form-control datepicker" id="end_date-{{ year.id }}" name="end_date" value="{{ year.end_date|date:'Y-m-d' }}" required>
+                        </div>
+                    </div>
+                    <p class="text-muted small">ملاحظة: لا يمكن تعديل تواريخ سنة مالية تحتوي على فترات محاسبية.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-primary">حفظ التعديلات</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

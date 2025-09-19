@@ -21,7 +21,7 @@ from .views.sales import customers, edit_customer, delete_customer, sales_orders
 # --- MODIFIED: Import new expense views ---
 from .views.expenses import expenses_dashboard, manage_expenses, edit_inventory_consumption, delete_inventory_consumption, edit_general_expense, delete_general_expense
 # --- MODIFIED: Import new financial report views ---
-from .views.financial_reports import trial_balance, profit_and_loss_statement, batch_production_variance_report, product_ledger, general_ledger
+from .views.financial_reports import trial_balance, profit_and_loss_statement, batch_production_variance_report, product_ledger, general_ledger, tax_reconciliation_report, reconciliation_report, balance_sheet
 
 from .views import financials
 
@@ -111,48 +111,66 @@ urlpatterns = [
     path('sales_orders/create/', create_sales_order, name='create_sales_order'),
     path('sales_order/<int:pk>/', view_sales_order, name='view_sales_order'),
     path('sales_order/<int:pk>/dispatch/', dispatch_from_sales_order, name='dispatch_from_sales_order'),
-    path('api/batch_details/<int:batch_pk>/', api_batch_details, name='api_batch_details'), 
 
     # --- NEW: Expense Management ---
     path('expenses/', expenses_dashboard, name='expenses_dashboard'),
     path('expenses/manage/', manage_expenses, name='manage_expenses'),
-    path('expenses/consumption/edit/<int:pk>/', edit_inventory_consumption, name='edit_inventory_consumption'),
-    path('expenses/consumption/delete/<int:pk>/', delete_inventory_consumption, name='delete_inventory_consumption'),
-    path('expenses/general/edit/<int:pk>/', edit_general_expense, name='edit_general_expense'),
-    path('expenses/general/delete/<int:pk>/', delete_general_expense, name='delete_general_expense'),
-
-    # --- NEW & CORRECTED: Financial Reporting Routes from the General Ledger ---
-    path('reports/general_ledger/', general_ledger, name='general_ledger'),
-    path('reports/trial-balance/', trial_balance, name='trial_balance'),
-    path('reports/p-and-l/', profit_and_loss_statement, name='profit_and_loss_statement'),
-    path('reports/batch-variance/', batch_production_variance_report, name='batch_production_variance_report'),
-    path('reports/profit_and_loss/', profit_and_loss_statement, name='profit_and_loss_statement'),
-    path('reports/trial_balance/', trial_balance, name='trial_balance'),
-    path('reports/product_ledger/', product_ledger, name='product_ledger'),
+    path('expenses/consumption/<int:pk>/edit/', edit_inventory_consumption, name='edit_inventory_consumption'),
+    path('expenses/consumption/<int:pk>/delete/', delete_inventory_consumption, name='delete_inventory_consumption'),
+    path('expenses/general/<int:pk>/edit/', edit_general_expense, name='edit_general_expense'),
+    path('expenses/general/<int:pk>/delete/', delete_general_expense, name='delete_general_expense'),
 
     # --- NEW: Financials (A/P, A/R, Banking) ---
-    # Supplier Invoices (A/P)
     path('financials/supplier_invoices/', financials.supplier_invoices, name='supplier_invoices'),
     path('financials/supplier_invoices/create/', financials.create_supplier_invoice, name='create_supplier_invoice'),
     path('financials/supplier_invoice/<int:pk>/', financials.view_supplier_invoice, name='view_supplier_invoice'),
-    path('financials/supplier_invoice/<int:pk>/pay/', financials.apply_payment_to_invoice, name='apply_payment_to_invoice'),
-
-    # --- NEW: Customer Invoice (A/R) Routes ---
+    path('financials/supplier_invoice/<int:pk>/apply_payment/', financials.apply_payment_to_invoice, name='apply_payment_to_invoice'),
     path('financials/customer_invoices/', financials.customer_invoices, name='customer_invoices'),
     path('financials/customer_invoices/create/', financials.create_customer_invoice, name='create_customer_invoice'),
     path('financials/customer_invoice/<int:pk>/', financials.view_customer_invoice, name='view_customer_invoice'),
     path('financials/customer_invoice/<int:pk>/receive_payment/', financials.receive_payment_for_invoice, name='receive_payment_for_invoice'),
-    
-    # --- NEW: Banking & General Ledger Routes ---
     path('financials/banking/', financials.bank_accounts_dashboard, name='bank_accounts_dashboard'),
     path('financials/journal/', financials.journal_entries, name='journal_entries'),
     path('financials/journal/create/', financials.create_journal_entry, name='create_journal_entry'),
-    
-    # --- NEW: Fixed Assets Route ---
+    path('financials/journal/<int:pk>/post/', financials.post_journal_entry, name='post_journal_entry'),
     path('financials/fixed_assets/', financials.fixed_assets_dashboard, name='fixed_assets_dashboard'),
-    
+
+    # --- NEW: Bank Reconciliation ---
+    path('financials/reconciliation/', financials.bank_reconciliations_list, name='bank_reconciliations_list'),
+    path('financials/reconciliation/create/', financials.create_bank_reconciliation, name='create_bank_reconciliation'),
+    path('financials/reconciliation/<int:pk>/manage/', financials.manage_bank_reconciliation, name='manage_bank_reconciliation'),
+    path('financials/reconciliation/<int:pk>/delete/', financials.delete_bank_reconciliation, name='delete_bank_reconciliation'),
+    path('financials/reconciliation/<int:pk>/match/', financials.api_match_transactions, name='api_match_transactions'),
+    path('financials/reconciliation/<int:pk>/unmatch/', financials.api_unmatch_transaction, name='api_unmatch_transaction'),
+    path('financials/reconciliation/<int:pk>/create_adjustment/', financials.api_create_adjustment_and_match, name='api_create_adjustment_and_match'),
+    path('financials/reconciliation/<int:pk>/finalize/', financials.finalize_reconciliation, name='finalize_reconciliation'),
+
+    # --- NEW: Financial Reports ---
+    path('reports/general_ledger/', general_ledger, name='general_ledger'),
+    path('reports/trial_balance/', trial_balance, name='trial_balance'),
+    path('reports/profit_and_loss_statement/', profit_and_loss_statement, name='profit_and_loss_statement'),
+    path('reports/balance_sheet/', balance_sheet, name='balance_sheet'),
+    path('reports/tax_reconciliation/', tax_reconciliation_report, name='tax_reconciliation_report'),
+    path('reports/production_variance/', batch_production_variance_report, name='batch_production_variance_report'),
+    path('reports/reconciliation/', reconciliation_report, name='reconciliation_report'),
+
+    # --- NEW PRODUCT LEDGER ---
+    path('reports/product_ledger/', product_ledger, name='product_ledger'),
+
+    # --- NEW: Financial Period Management ---
+    path('financials/periods/', financials.fiscal_year_list, name='fiscal_year_list'),
+    path('financials/periods/create_year/', financials.create_fiscal_year, name='create_fiscal_year'),
+    path('financials/periods/<int:pk>/edit/', financials.edit_fiscal_year, name='edit_fiscal_year'),
+    path('financials/periods/<int:pk>/delete/', financials.delete_fiscal_year, name='delete_fiscal_year'),
+    path('financials/periods/<int:year_id>/generate_periods/', financials.generate_monthly_periods, name='generate_monthly_periods'),
+    path('financials/periods/<int:period_id>/change_status/', financials.change_period_status, name='change_period_status'),
+    path('financials/periods/<int:period_id>/close/', financials.close_period_view, name='close_period_view'),
+    path('financials/periods/<int:period_id>/close_action/', financials.close_period_action, name='close_period_action'),
+    path('financials/periods/<int:period_id>/audit_log/', financials.view_period_audit_log, name='view_period_audit_log'),
+    path('api/periods/<int:period_id>/checklist_status/', financials.api_period_checklist_status, name='api_period_checklist_status'),
+
+
     # API Routes
-    path('api/get_used_qc_sources/<int:product_pk>/', get_used_qc_sources, name='api_get_used_qc_sources'),
     path('api/batch_details/<int:batch_pk>/', api_batch_details, name='api_batch_details'),
     path('api/batch_analysis/<int:batch_pk>/', api_get_full_batch_analysis, name='api_get_full_batch_analysis'),
     path('api/product_tags/<int:product_id>/', get_product_tags, name='api_product_tags'),

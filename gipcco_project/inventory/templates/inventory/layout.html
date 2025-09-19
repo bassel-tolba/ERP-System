@@ -121,13 +121,16 @@
                                     <li><hr class="dropdown-divider"></li>
                                     <li><h6 class="dropdown-header">البنوك و الخزينة</h6></li>
                                     <li><a class="dropdown-item {% if sub_page == 'banking' %}active{% endif %}" href="{% url 'inventory:bank_accounts_dashboard' %}">أرصدة وتحويلات</a></li>
+                                    <li><a class="dropdown-item {% if sub_page == 'reconciliation' %}active{% endif %}" href="{% url 'inventory:bank_reconciliations_list' %}">التسوية البنكية</a></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li><h6 class="dropdown-header">الأصول الثابتة</h6></li>
                                     <li><a class="dropdown-item {% if sub_page == 'assets' %}active{% endif %}" href="{% url 'inventory:fixed_assets_dashboard' %}">لوحة متابعة الأصول</a></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li><h6 class="dropdown-header">دفتر الأستاذ العام</h6></li>
                                     <li><a class="dropdown-item {% if sub_page == 'journal' %}active{% endif %}" href="{% url 'inventory:journal_entries' %}">قيود اليومية اليدوية</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'inventory:create_journal_entry' %}">إنشاء قيد يومية</a></li>
                                     <li><a class="dropdown-item" href="{% url 'inventory:trial_balance' %}">ميزان المراجعة</a></li>
+                                    <li><a class="dropdown-item {% if sub_page == 'periods' %}active{% endif %}" href="{% url 'inventory:fiscal_year_list' %}">الفترات المحاسبية</a></li>
                                 </ul>
                             </div>
                         </li>
@@ -145,6 +148,8 @@
                                     <li><h6 class="dropdown-header">التقارير المالية</h6></li>
                                     <li><a class="dropdown-item" href="{% url 'inventory:profit_and_loss_statement' %}">قائمة الدخل (P&L)</a></li>
                                     <li><a class="dropdown-item" href="{% url 'inventory:trial_balance' %}">ميزان المراجعة</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'inventory:tax_reconciliation_report' %}">تقرير التسوية الضريبية</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'inventory:reconciliation_report' %}">تقرير التسوية البنكية</a></li>
                                     <li><a class="dropdown-item" href="{% url 'inventory:batch_production_variance_report' %}">تقرير تباين دفعات الإنتاج</a></li>
                                 </ul>
                             </div>
@@ -288,6 +293,8 @@
     <script src="{% static 'layout/js/financials_logic.js' %}"></script>
     <script src="{% static 'layout/js/sales_order_create_logic.js' %}"></script>
     <script src="{% static 'layout/js/purchase_order_create_logic.js' %}"></script>
+    <script src="{% static 'layout/js/tax_reconciliation_report_logic.js' %}"></script>
+    <script src="{% static 'layout/js/close_period_logic.js' %}"></script>
     <!-- Dynamic content loader (MUST BE LAST) -->
     <script src="{% static 'layout/js/dynamic_content_loader.js' %}"></script>
     

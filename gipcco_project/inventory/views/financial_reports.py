@@ -11,7 +11,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 
-from ..models import Account, JournalEntryLine, JournalEntry, FinancialPeriod, Batch, Product, FinishedProductDispatch, InventoryConsumption, ProductionReturn, BatchItem, InventoryLog
+from ..models import Account, JournalEntryLine, JournalEntry, FinancialPeriod, Batch, Product, FinishedProductDispatch, InventoryConsumption, ProductionReturn, BatchItem, InventoryLog, GeneralAccountingSettings, BankAccount, Payment, BankTransfer, BankReconciliation
 from ..services.costing_service import get_inventory_state_at_datetime
 
 # ==============================================================================
@@ -169,57 +169,89 @@ def general_ledger(request: HttpRequest) -> HttpResponse:
     account_id = request.GET.get('account_id')
     
     account = None
-    transactions = []
-    opening_balance = Decimal('0.0')
-    closing_balance = Decimal('0.0')
-    total_debits = Decimal('0.0')
-    total_credits = Decimal('0.0')
+    account_tree = None
 
     if account_id:
         account = get_object_or_404(Account, pk=account_id)
 
-        # 1. Calculate Opening Balance (before start_date)
-        ob_debits = JournalEntryLine.objects.filter(
-            account=account, entry_type='debit', journal_entry__date__lt=start_date
-        ).aggregate(total=Coalesce(Sum('amount'), Decimal('0.0')))['total']
-        ob_credits = JournalEntryLine.objects.filter(
-            account=account, entry_type='credit', journal_entry__date__lt=start_date
-        ).aggregate(total=Coalesce(Sum('amount'), Decimal('0.0')))['total']
-        opening_balance = ob_debits - ob_credits
-        
-        # 2. Get Transactions within the period
-        lines = JournalEntryLine.objects.filter(
-            account=account, journal_entry__date__range=(start_date, end_date)
-        ).select_related('journal_entry').order_by('journal_entry__date', 'id')
-        
-        running_balance = opening_balance
-        for line in lines:
-            debit_amount = line.amount if line.entry_type == 'debit' else Decimal('0.0')
-            credit_amount = line.amount if line.entry_type == 'credit' else Decimal('0.0')
-            running_balance += (debit_amount - credit_amount)
-            
-            transactions.append({
-                'date': line.journal_entry.date,
-                'je_id': line.journal_entry.id,
-                'description': line.journal_entry.description,
-                'debit': debit_amount,
-                'credit': credit_amount,
-                'balance': running_balance
-            })
-            total_debits += debit_amount
-            total_credits += credit_amount
+        def _get_account_ledger_tree(current_account, level=0):
+            """
+            Recursively builds a hierarchical ledger for an account and its children.
+            """
+            # 1. Get direct transactions for the current account
+            direct_lines = JournalEntryLine.objects.filter(
+                account=current_account, journal_entry__date__range=(start_date, end_date)
+            ).select_related('journal_entry').order_by('journal_entry__date', 'id')
 
-        closing_balance = running_balance
+            direct_transactions = []
+            direct_debits = Decimal('0.0')
+            direct_credits = Decimal('0.0')
+            for line in direct_lines:
+                debit = line.amount if line.entry_type == 'debit' else Decimal('0.0')
+                credit = line.amount if line.entry_type == 'credit' else Decimal('0.0')
+                direct_transactions.append({
+                    'date': line.journal_entry.date,
+                    'je_id': line.journal_entry.id,
+                    'description': line.journal_entry.get_description(),
+                    'debit': debit,
+                    'credit': credit,
+                })
+                direct_debits += debit
+                direct_credits += credit
+
+            # 2. Recursively process children
+            children_nodes = []
+            children_total_opening = Decimal('0.0')
+            children_total_debits = Decimal('0.0')
+            children_total_credits = Decimal('0.0')
+            
+            for child in current_account.children.order_by('code'):
+                child_node = _get_account_ledger_tree(child, level + 1)
+                if child_node: # Only add children with activity
+                    children_nodes.append(child_node)
+                    children_total_opening += child_node['opening_balance']
+                    children_total_debits += child_node['total_debits']
+                    children_total_credits += child_node['total_credits']
+
+            # 3. Calculate opening balance for the current account ONLY
+            ob_debits = JournalEntryLine.objects.filter(
+                account=current_account, entry_type='debit', journal_entry__date__lt=start_date
+            ).aggregate(total=Coalesce(Sum('amount'), Decimal('0.0')))['total']
+            ob_credits = JournalEntryLine.objects.filter(
+                account=current_account, entry_type='credit', journal_entry__date__lt=start_date
+            ).aggregate(total=Coalesce(Sum('amount'), Decimal('0.0')))['total']
+            direct_opening_balance = ob_debits - ob_credits
+
+            # 4. Aggregate totals for the current node
+            total_opening_balance = direct_opening_balance + children_total_opening
+            total_debits = direct_debits + children_total_debits
+            total_credits = direct_credits + children_total_credits
+            total_closing_balance = total_opening_balance + total_debits - total_credits
+
+            # Only return a node if it or its children have any activity
+            if not direct_transactions and not children_nodes and total_opening_balance == 0:
+                return None
+
+            return {
+                'account': current_account,
+                'level': level,
+                'opening_balance': total_opening_balance,
+                'total_debits': total_debits,
+                'total_credits': total_credits,
+                'closing_balance': total_closing_balance,
+                'direct_transactions': direct_transactions,
+                'children': children_nodes,
+                'has_children_with_activity': any(c is not None for c in children_nodes)
+            }
+
+        account_tree = _get_account_ledger_tree(account)
+
 
     context = {
         'active_page': 'expenses_reports',
         'accounts': Account.objects.order_by('code'),
         'selected_account': account,
-        'transactions': transactions,
-        'opening_balance': opening_balance,
-        'closing_balance': closing_balance,
-        'total_debits': total_debits,
-        'total_credits': total_credits,
+        'account_tree': account_tree,
         'start_date': start_date_str,
         'end_date': end_date_str,
     }
@@ -388,6 +420,69 @@ def balance_sheet(request: HttpRequest) -> HttpResponse:
         
     return render(request, template_name, context)
 
+
+def tax_reconciliation_report(request: HttpRequest) -> HttpResponse:
+    """
+    Generates a dedicated report for tax reconciliation, summarizing VAT and Withholding Tax.
+    """
+    start_date, end_date, start_date_str, end_date_str = _get_date_range_from_request(request)
+
+    try:
+        settings = GeneralAccountingSettings.load()
+        vat_receivable_acc = settings.vat_receivable
+        vat_payable_acc = settings.vat_payable
+        wht_payable_acc = settings.withholding_tax_payable
+    except GeneralAccountingSettings.DoesNotExist:
+        context = {'error': "General Accounting Settings are not configured."}
+        return render(request, 'inventory/reports/tax_reconciliation_report.html', context)
+
+    # Helper to get balance components for an account
+    def get_account_balance_details(account):
+        if not account:
+            return {'opening': Decimal('0.0'), 'debits': Decimal('0.0'), 'credits': Decimal('0.0'), 'closing': Decimal('0.0')}
+        
+        opening_debits = JournalEntryLine.objects.filter(account=account, entry_type='debit', journal_entry__date__lt=start_date).aggregate(s=Coalesce(Sum('amount'), Decimal('0.0')))['s']
+        opening_credits = JournalEntryLine.objects.filter(account=account, entry_type='credit', journal_entry__date__lt=start_date).aggregate(s=Coalesce(Sum('amount'), Decimal('0.0')))['s']
+        opening_balance = opening_debits - opening_credits
+
+        period_debits = JournalEntryLine.objects.filter(account=account, entry_type='debit', journal_entry__date__range=(start_date, end_date)).aggregate(s=Coalesce(Sum('amount'), Decimal('0.0')))['s']
+        period_credits = JournalEntryLine.objects.filter(account=account, entry_type='credit', journal_entry__date__range=(start_date, end_date)).aggregate(s=Coalesce(Sum('amount'), Decimal('0.0')))['s']
+        
+        closing_balance = opening_balance + period_debits - period_credits
+        
+        return {
+            'account': account,
+            'opening': opening_balance,
+            'debits': period_debits,
+            'credits': period_credits,
+            'closing': closing_balance
+        }
+
+    vat_receivable_data = get_account_balance_details(vat_receivable_acc)
+    vat_payable_data = get_account_balance_details(vat_payable_acc)
+    wht_payable_data = get_account_balance_details(wht_payable_acc)
+
+    # VAT is a liability, so a positive balance is owed. We expect payable > receivable.
+    # The balance for payable accounts is naturally negative (credits > debits), so we invert it.
+    net_vat_due = -vat_payable_data['closing'] - vat_receivable_data['closing']
+
+    context = {
+        'active_page': 'expenses_reports',
+        'start_date': start_date_str,
+        'end_date': end_date_str,
+        'vat_receivable': vat_receivable_data,
+        'vat_payable': vat_payable_data,
+        'wht_payable': wht_payable_data,
+        'net_vat_due': net_vat_due,
+    }
+
+    template_name = 'inventory/reports/tax_reconciliation_report.html'
+    if 'X-Partial-Request' in request.headers:
+        template_name = 'inventory/partials/reports/tax_reconciliation_report_content.html'
+        
+    return render(request, template_name, context)
+
+
 def batch_production_variance_report(request: HttpRequest) -> HttpResponse:
     """
     Generates a report comparing theoretical vs. actual material consumption for production batches.
@@ -527,6 +622,51 @@ def batch_production_variance_report(request: HttpRequest) -> HttpResponse:
 
 
 # ==============================================================================
+#  NEW RECONCILIATION REPORT
+# ==============================================================================
+
+def reconciliation_report(request: HttpRequest) -> HttpResponse:
+    """
+    Generates a report showing the status of bank reconciliations and lists
+    outstanding (uncleared) transactions.
+    """
+    bank_account_id = request.GET.get('bank_account')
+    
+    reconciliations = BankReconciliation.objects.filter(status=BankReconciliation.Status.RECONCILED)
+    
+    outstanding_payments = Payment.objects.filter(
+        cleared_date__isnull=True
+    ).select_related('bank_account', 'supplier', 'customer').order_by('payment_date')
+    
+    outstanding_transfers = BankTransfer.objects.filter(
+        Q(source_cleared_date__isnull=True) | Q(destination_cleared_date__isnull=True)
+    ).select_related('source_account', 'destination_account').order_by('transfer_date')
+
+    if bank_account_id:
+        reconciliations = reconciliations.filter(bank_account_id=bank_account_id)
+        outstanding_payments = outstanding_payments.filter(bank_account_id=bank_account_id)
+        outstanding_transfers = outstanding_transfers.filter(
+            Q(source_account_id=bank_account_id, source_cleared_date__isnull=True) |
+            Q(destination_account_id=bank_account_id, destination_cleared_date__isnull=True)
+        )
+
+    context = {
+        'active_page': 'expenses_reports',
+        'bank_accounts': BankAccount.objects.all(),
+        'selected_bank_account': int(bank_account_id) if bank_account_id else None,
+        'reconciliations': reconciliations,
+        'outstanding_payments': outstanding_payments,
+        'outstanding_transfers': outstanding_transfers,
+    }
+    
+    template_name = 'inventory/reports/reconciliation_report.html'
+    if 'X-Partial-Request' in request.headers:
+        template_name = 'inventory/partials/reports/reconciliation_report_content.html'
+        
+    return render(request, template_name, context)
+
+
+# ==============================================================================
 #  NEW PRODUCT LEDGER REPORT
 # ==============================================================================
 
@@ -607,7 +747,7 @@ def product_ledger(request: HttpRequest) -> HttpResponse:
                 qty = Decimal(str(trx.quantity))
                 val = qty * trx.costing_unit_price
                 entry.update({
-                    'type': 'Receipt', 'description': f"Purchase from {trx.company.name} (PO: {trx.po_item.purchase_order.po_number if trx.po_item else 'N/A'}, QC: {trx.qc_no})",
+                    'type': 'استلام', 'description': f"شراء من {trx.company.name} (أمر شراء: {trx.po_item.purchase_order.po_number if trx.po_item else 'غير متاح'}, فحص جودة: {trx.qc_no})",
                     'in_qty': qty, 'unit_cost': trx.costing_unit_price, 'total_val': val
                 })
                 running_qty += qty
@@ -619,7 +759,7 @@ def product_ledger(request: HttpRequest) -> HttpResponse:
                 cost = trx.source_log.costing_unit_price if trx.source_log else current_mac
                 val = qty * cost
                 entry.update({
-                    'type': 'Return', 'description': f"Return from production. Notes: {trx.notes or 'N/A'}",
+                    'type': 'مرتجع إنتاج', 'description': f"مرتجع من الإنتاج. ملاحظات: {trx.notes or 'لا يوجد'}",
                     'in_qty': qty, 'unit_cost': cost, 'total_val': val
                 })
                 running_qty += qty
@@ -631,7 +771,7 @@ def product_ledger(request: HttpRequest) -> HttpResponse:
                 cost = trx.cost_at_consumption or current_mac
                 val = qty * cost
                 entry.update({
-                    'type': 'Production Use', 'description': f"Consumed in SO: {trx.batch.shop_order_number} to produce {trx.batch.template.final_product.name}",
+                    'type': 'استخدام في الإنتاج', 'description': f"استخدام في أمر تشغيل: {trx.batch.shop_order_number} لإنتاج {trx.batch.template.final_product.name}",
                     'out_qty': qty, 'unit_cost': cost, 'total_val': -val
                 })
                 running_qty -= qty
@@ -643,7 +783,7 @@ def product_ledger(request: HttpRequest) -> HttpResponse:
                 val = trx.cost_at_consumption
                 cost = (val / qty) if qty > 0 else Decimal('0.0')
                 entry.update({
-                    'type': 'Internal Use', 'description': f"Consumed by {trx.get_department_display()}. Notes: {trx.notes or 'N/A'}",
+                    'type': 'استخدام داخلي', 'description': f"صرف إلى قسم {trx.get_department_display()}. ملاحظات: {trx.notes or 'لا يوجد'}",
                     'out_qty': qty, 'unit_cost': cost, 'total_val': -val
                 })
                 running_qty -= qty
@@ -655,7 +795,7 @@ def product_ledger(request: HttpRequest) -> HttpResponse:
                 val = trx.cost_at_dispatch
                 cost = (val / qty) if qty > 0 else Decimal('0.0')
                 entry.update({
-                    'type': 'Sale', 'description': f"Sold to {trx.sales_order_item.sales_order.customer.name} (SO: {trx.sales_order_item.sales_order.so_number})",
+                    'type': 'مبيعات', 'description': f"بيع إلى {trx.sales_order_item.sales_order.customer.name} (أمر بيع: {trx.sales_order_item.sales_order.so_number})",
                     'out_qty': qty, 'unit_cost': cost, 'total_val': -val
                 })
                 running_qty -= qty

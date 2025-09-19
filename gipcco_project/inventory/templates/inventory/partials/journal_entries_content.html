@@ -15,6 +15,7 @@
         <div class="d-flex justify-content-between w-100 me-3">
           <span class="fw-bold">JE-{{ je.id }}</span>
           <span class="text-muted flex-grow-1 px-3">{{ je.description }}</span>
+          <span class="badge bg-{% if je.status == 'posted' %}success{% else %}warning text-dark{% endif %} me-3">{{ je.get_status_display }}</span>
           <span class="text-muted">{{ je.date|date:"Y-m-d" }}</span>
           <span class="fw-bold ms-4">{{ je.total_amount|floatformat:3 }} EGP</span>
         </div>
@@ -40,6 +41,16 @@
             {% endfor %}
           </tbody>
         </table>
+        {% if je.status == 'draft' %}
+        <div class="text-end mt-2">
+            <form action="{% url 'inventory:post_journal_entry' je.id %}" method="post" class="d-inline" onsubmit="return confirm('هل أنت متأكد من ترحيل هذا القيد؟');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-success">
+                    <i class="bi bi-check-circle-fill me-1"></i> ترحيل القيد
+                </button>
+            </form>
+        </div>
+        {% endif %}
       </div>
     </div>
   </div>
