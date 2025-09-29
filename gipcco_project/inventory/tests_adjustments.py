@@ -72,6 +72,9 @@ class TestAdjustmentAccounting(AccountingServiceBaseTestCase):
         self.assertEqual(credit_line.account, self.accounts['1020201']) # RM Inventory
         self.assertEqual(credit_line.amount, expected_value)
 
+        # --- NEW: Verify Sub-Ledger Links ---
+        self.assertEqual(credit_line.sub_ledger_object, self.raw_material)
+
     def test_create_je_for_inventory_overage_gain(self):
         """
         Verify a positive adjustment (overage) correctly debits the inventory
@@ -108,6 +111,9 @@ class TestAdjustmentAccounting(AccountingServiceBaseTestCase):
         credit_line = je.lines.get(entry_type='credit')
         self.assertEqual(credit_line.account, self.accounts['40202']) # Gain Account
         self.assertEqual(credit_line.amount, expected_value)
+
+        # --- NEW: Verify Sub-Ledger Links ---
+        self.assertEqual(debit_line.sub_ledger_object, self.raw_material)
 
 
 class TestAdjustmentService(AccountingServiceBaseTestCase):

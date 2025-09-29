@@ -7,9 +7,6 @@ from django.utils import timezone
 from django.db.models import Sum, Q, Count
 from django.db.models.functions import TruncMonth
 
-from import_export.admin import ImportExportModelAdmin
-from admincharts.admin import AdminChartMixin
-
 from .models import (
     Company, Product, ProductTag, InventoryLog, ShopOrderTemplate,
     TemplateItem, Batch, BatchItem, OpeningBalance, ProductionReturn,
@@ -34,12 +31,12 @@ from .services.costing_service import recalculate_cost_history_for_product
 #  SETUP & OPERATIONAL ADMINS
 # ==============================================================================
 @admin.register(Company)
-class CompanyAdmin(ImportExportModelAdmin):
+class CompanyAdmin(admin.ModelAdmin): # Changed from ImportExportModelAdmin
     list_display = ('name',)
     search_fields = ('name',)
 
 @admin.register(Customer)
-class CustomerAdmin(ImportExportModelAdmin):
+class CustomerAdmin(admin.ModelAdmin): # Changed from ImportExportModelAdmin
     list_display = ('name', 'address', 'contact_info')
     search_fields = ('name',)
 
@@ -49,7 +46,7 @@ class ProductTagAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 @admin.register(Product)
-class ProductAdmin(ImportExportModelAdmin):
+class ProductAdmin(admin.ModelAdmin): # Changed from ImportExportModelAdmin
     list_display = ('name', 'code', 'product_type', 'unit', 'moving_average_cost')
     list_filter = ('product_type', 'tags')
     search_fields = ('name', 'code')
@@ -62,7 +59,7 @@ class ProductAdmin(ImportExportModelAdmin):
     readonly_fields = ('moving_average_cost',)
 
 @admin.register(Employee)
-class EmployeeAdmin(ImportExportModelAdmin):
+class EmployeeAdmin(admin.ModelAdmin): # Changed from ImportExportModelAdmin
     list_display = ('employee_id', 'full_name', 'job_title', 'is_active')
     list_filter = ('is_active',)
     search_fields = ('employee_id', 'first_name', 'last_name')
@@ -75,52 +72,14 @@ class EmployeeAdmin(ImportExportModelAdmin):
 #  INVENTORY & PRODUCTION ADMINS
 # ==============================================================================
 @admin.register(InventoryLog)
-class InventoryLogAdmin(AdminChartMixin, admin.ModelAdmin):
+class InventoryLogAdmin(admin.ModelAdmin): # Removed AdminChartMixin
     list_display = ('id', 'product', 'quantity', 'status', 'qc_no', 'release_timestamp', 'company')
     list_filter = ('status', 'company', 'product__product_type')
     search_fields = ('product__name', 'product__code', 'qc_no', 'po_item__purchase_order__po_number')
     date_hierarchy = 'timestamp'
     autocomplete_fields = ('product', 'company', 'po_item')
     actions = ['release_items', 'reject_items', 'scrap_items'] # Added scrap
-    list_chart_type = "bar"
 
-    def get_list_chart_queryset(self, changelist):
-        return changelist.queryset
-
-    def get_list_chart_data(self, queryset):
-        if not queryset:
-            return {}
-        monthly_data = (
-            queryset.annotate(month=TruncMonth("timestamp"))
-            .values("month", "status")
-            .annotate(count=Count("id"))
-            .order_by("month")
-        )
-        chart_data = {}
-        for item in monthly_data:
-            month_label = item["month"].strftime("%b %Y")
-            if month_label not in chart_data:
-                chart_data[month_label] = {
-                    "month_obj": item["month"],
-                    InventoryLog.Status.QUARANTINED: 0,
-                    InventoryLog.Status.RELEASED: 0,
-                    InventoryLog.Status.REJECTED: 0,
-                    InventoryLog.Status.SCRAPPED: 0,
-                }
-            chart_data[month_label][item["status"]] = item["count"]
-        sorted_months = sorted(chart_data.items(), key=lambda x: x[1]["month_obj"])
-        labels = [month[0] for month in sorted_months]
-        return {
-            "labels": labels,
-            "datasets": [
-                {"label": "Released", "data": [m[1][InventoryLog.Status.RELEASED] for m in sorted_months], "backgroundColor": "#28a745"},
-                {"label": "Quarantined", "data": [m[1][InventoryLog.Status.QUARANTINED] for m in sorted_months], "backgroundColor": "#ffc107"},
-                {"label": "Rejected", "data": [m[1][InventoryLog.Status.REJECTED] for m in sorted_months], "backgroundColor": "#dc3545"},
-                {"label": "Scrapped", "data": [m[1][InventoryLog.Status.SCRAPPED] for m in sorted_months], "backgroundColor": "#6c757d"},
-            ],
-            "options": { "scales": { "y": {"stacked": True}, "x": {"stacked": True} } }
-        }
-    
     @admin.action(description="Release selected items")
     def release_items(self, request, queryset):
         # ... (add logic here if needed, or rely on UI)
@@ -480,16 +439,28 @@ class FinancialPeriodAdmin(admin.ModelAdmin):
     ordering = ('-start_date',)
 
 @admin.register(Account)
-class AccountAdmin(ImportExportModelAdmin):
-    list_display = ('code', 'name', 'account_type', 'parent')
-    list_filter = ('account_type',)
+class AccountAdmin(admin.ModelAdmin): # Changed from ImportExportModelAdmin
+    list_display = ('code', 'name', 'account_type', 'parent', 'is_control_account')
+    list_filter = ('account_type', 'is_control_account')
     search_fields = ('code', 'name')
     autocomplete_fields = ('parent',)
+    list_editable = ('is_control_account',)
+    fieldsets = (
+        (None, {
+            'fields': ('code', 'name', 'account_type', 'parent')
+        }),
+        ('Sub-Ledger Settings', {
+            'classes': ('collapse',),
+            'fields': ('is_control_account', 'sub_ledger_model'),
+        }),
+    )
 
 class JournalEntryLineInline(admin.TabularInline):
     model = JournalEntryLine
     extra = 2
     autocomplete_fields = ('account',)
+    readonly_fields = ('sub_ledger_object',)
+    fields = ('entry_type', 'account', 'amount', 'sub_ledger_content_type', 'sub_ledger_object_id', 'sub_ledger_object')
 
 @admin.register(JournalEntry)
 class JournalEntryAdmin(admin.ModelAdmin):

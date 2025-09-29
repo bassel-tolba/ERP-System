@@ -1242,6 +1242,19 @@ class Account(models.Model):
         'self', on_delete=models.PROTECT, null=True, blank=True,
         related_name='children', verbose_name=_("Parent Account")
     )
+    # --- NEW FIELDS ---
+    is_control_account = models.BooleanField(
+        default=False,
+        verbose_name=_("Is Control Account"),
+        help_text=_("Designates if this account requires a sub-ledger entry (e.g., A/R, A/P).")
+    )
+    sub_ledger_model = models.ForeignKey(
+        ContentType,
+        on_delete=models.PROTECT,
+        null=True, blank=True,
+        verbose_name=_("Sub-Ledger Model"),
+        help_text=_("The model that acts as the sub-ledger for this account (e.g., Customer, Company).")
+    )
 
     class Meta:
         db_table = 'chart_of_accounts'
@@ -1251,6 +1264,16 @@ class Account(models.Model):
 
     def __str__(self):
         return f"{self.code} - {self.name}"
+
+    def clean(self):
+        if self.is_control_account and not self.sub_ledger_model:
+            raise ValidationError({
+                'sub_ledger_model': _("A Sub-Ledger Model must be specified for control accounts.")
+            })
+        if not self.is_control_account and self.sub_ledger_model:
+            raise ValidationError({
+                'sub_ledger_model': _("Sub-Ledger Model should only be set for control accounts.")
+            })
 
 class JournalEntry(models.Model):
     class Status(models.TextChoices):
@@ -1326,6 +1349,14 @@ class JournalEntryLine(models.Model):
     amount = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Amount"))
     entry_type = models.CharField(max_length=6, choices=EntryType.choices, verbose_name=_("Entry Type"))
 
+    # --- NEW: Generic FK for Sub-Ledger ---
+    sub_ledger_content_type = models.ForeignKey(
+        ContentType, on_delete=models.PROTECT, null=True, blank=True,
+        verbose_name=_("Sub-Ledger Type")
+    )
+    sub_ledger_object_id = models.PositiveIntegerField(null=True, blank=True, verbose_name=_("Sub-Ledger ID"))
+    sub_ledger_object = GenericForeignKey('sub_ledger_content_type', 'sub_ledger_object_id')
+
     class Meta:
         db_table = 'journal_entry_lines'
         verbose_name = _("Journal Entry Line")
@@ -1334,6 +1365,27 @@ class JournalEntryLine(models.Model):
 
     def __str__(self):
         return f"JE-{self.journal_entry.id}: {self.get_entry_type_display()} {self.account} for {self.amount}"
+
+    def clean(self):
+        super().clean()
+        if self.account and self.account.is_control_account:
+            # 1. A sub-ledger object must be provided.
+            if not self.sub_ledger_object_id:
+                raise ValidationError({
+                    'sub_ledger_object_id': _("A sub-ledger entry is required for the control account '{account}'.")
+                    .format(account=self.account.name)
+                })
+            
+            # 2. The provided sub-ledger object's type must match the account's specified sub_ledger_model.
+            if self.sub_ledger_content_type != self.account.sub_ledger_model:
+                raise ValidationError({
+                    'sub_ledger_content_type': _("The selected sub-ledger type '{provided_type}' does not match the required type '{required_type}' for the account '{account}'.")
+                    .format(
+                        provided_type=self.sub_ledger_content_type,
+                        required_type=self.account.sub_ledger_model,
+                        account=self.account.name
+                    )
+                })
 
 class ProductTypeAccountingSettings(models.Model):
     product_type = models.CharField(

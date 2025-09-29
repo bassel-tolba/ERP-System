@@ -154,12 +154,14 @@ def create_je_for_inventory_adjustment(adjustment: InventoryAdjustment) -> Optio
                 journal_entry=je, account=loss_account, amount=adjustment_value, entry_type=JournalEntryLine.EntryType.DEBIT
             )
             JournalEntryLine.objects.create(
-                journal_entry=je, account=inventory_account, amount=adjustment_value, entry_type=JournalEntryLine.EntryType.CREDIT
+                journal_entry=je, account=inventory_account, amount=adjustment_value, entry_type=JournalEntryLine.EntryType.CREDIT,
+                sub_ledger_object=adjustment.product
             )
         else: # Overage
             logger.info(f"    Processing overage: DEBIT '{inventory_account.name}', CREDIT '{gain_account.name}' with {adjustment_value}.")
             JournalEntryLine.objects.create(
-                journal_entry=je, account=inventory_account, amount=adjustment_value, entry_type=JournalEntryLine.EntryType.DEBIT
+                journal_entry=je, account=inventory_account, amount=adjustment_value, entry_type=JournalEntryLine.EntryType.DEBIT,
+                sub_ledger_object=adjustment.product
             )
             JournalEntryLine.objects.create(
                 journal_entry=je, account=gain_account, amount=adjustment_value, entry_type=JournalEntryLine.EntryType.CREDIT
@@ -240,7 +242,8 @@ def create_je_for_inventory_receipt(inventory_log: InventoryLog) -> Optional[Jou
             journal_entry=je,
             account=inventory_account,
             amount=costing_value.quantize(Decimal('0.001')),
-            entry_type=JournalEntryLine.EntryType.DEBIT
+            entry_type=JournalEntryLine.EntryType.DEBIT,
+            sub_ledger_object=inventory_log.product
         )
         
         # Line 2: Debit VAT Receivable (if applicable)
@@ -257,7 +260,8 @@ def create_je_for_inventory_receipt(inventory_log: InventoryLog) -> Optional[Jou
             journal_entry=je,
             account=ap_account,
             amount=(total_invoice_amount - wht_amount).quantize(Decimal('0.001')),
-            entry_type=JournalEntryLine.EntryType.CREDIT
+            entry_type=JournalEntryLine.EntryType.CREDIT,
+            sub_ledger_object=inventory_log.company
         )
 
         # Line 4: Credit Withholding Tax Payable (if applicable)
@@ -304,7 +308,7 @@ def create_je_for_production_consumption(batch: Batch) -> Optional[JournalEntry]
         raise ValueError(_("Work-in-Progress (WIP) account is not configured in General Accounting Settings."))
 
     total_consumption_cost = Decimal('0.0')
-    credits_by_account = {}  # {account_id: total_amount}
+    credits_by_account = {}  # {account_id: (total_amount, product_object)}
 
     for item in batch.items.all():
         if item.actual_quantity and item.actual_quantity > 0:
@@ -322,7 +326,10 @@ def create_je_for_production_consumption(batch: Batch) -> Optional[JournalEntry]
             total_consumption_cost += line_cost
             
             inventory_account = _get_product_inventory_account(item.primitive_product)
-            credits_by_account[inventory_account] = credits_by_account.get(inventory_account, Decimal('0.0')) + line_cost
+            
+            # Store amount and the product for sub-ledger linking
+            current_amount, _product = credits_by_account.get(inventory_account, (Decimal('0.0'), None))
+            credits_by_account[inventory_account] = (current_amount + line_cost, item.primitive_product)
 
     if total_consumption_cost <= 0:
         logger.info(f"Total consumption cost for Batch ID {batch.id} is zero. No JE will be created.")
@@ -350,17 +357,19 @@ def create_je_for_production_consumption(batch: Batch) -> Optional[JournalEntry]
             journal_entry=je,
             account=wip_account,
             amount=total_consumption_cost.quantize(Decimal('0.001')),
-            entry_type=JournalEntryLine.EntryType.DEBIT
+            entry_type=JournalEntryLine.EntryType.DEBIT,
+            sub_ledger_object=batch.template.final_product
         )
 
         # Line 2..N: Credit individual Raw Material Inventory accounts
-        for account, credit_amount in credits_by_account.items():
+        for account, (credit_amount, product_sub_ledger) in credits_by_account.items():
             if credit_amount > 0:
                 JournalEntryLine.objects.create(
                     journal_entry=je,
                     account=account,
                     amount=credit_amount.quantize(Decimal('0.001')),
-                    entry_type=JournalEntryLine.EntryType.CREDIT
+                    entry_type=JournalEntryLine.EntryType.CREDIT,
+                    sub_ledger_object=product_sub_ledger
                 )
         
         logger.info(f"Successfully created Journal Entry JE-{je.id} for Batch ID {batch.id}.")
@@ -403,8 +412,10 @@ def create_je_for_internal_consumption(consumption: InventoryConsumption) -> Opt
         if not consumption.fixed_asset:
             raise ValueError(_("Cannot create capitalization JE for consumption without a linked Fixed Asset."))
         debit_account = consumption.fixed_asset.gl_account
+        debit_sub_ledger = consumption.fixed_asset
     else: # Default to EXPENSE
         debit_account = _get_product_expense_account(consumption.product)
+        debit_sub_ledger = None # Expenses don't typically have a sub-ledger here
 
     # 3. --- Create Journal Entry and Lines ---
     with transaction.atomic():
@@ -429,7 +440,8 @@ def create_je_for_internal_consumption(consumption: InventoryConsumption) -> Opt
             journal_entry=je,
             account=debit_account,
             amount=total_cost.quantize(Decimal('0.001')),
-            entry_type=JournalEntryLine.EntryType.DEBIT
+            entry_type=JournalEntryLine.EntryType.DEBIT,
+            sub_ledger_object=debit_sub_ledger
         )
         
         # Credit Inventory Account
@@ -437,7 +449,8 @@ def create_je_for_internal_consumption(consumption: InventoryConsumption) -> Opt
             journal_entry=je,
             account=inventory_account,
             amount=total_cost.quantize(Decimal('0.001')),
-            entry_type=JournalEntryLine.EntryType.CREDIT
+            entry_type=JournalEntryLine.EntryType.CREDIT,
+            sub_ledger_object=consumption.product
         )
         
         logger.info(f"Successfully created Journal Entry JE-{je.id} for InventoryConsumption ID {consumption.id}.")
@@ -467,6 +480,7 @@ def create_je_for_finished_goods_receipt(receipt: FinishedProductReceipt) -> Opt
 
     # 2. --- Get Accounts and Amount ---
     total_cost = receipt.total_cost
+    final_product = receipt.batch.template.final_product
     if total_cost <= 0:
         logger.info(f"Total cost for receipt {receipt.id} is zero. No JE created.")
         return None
@@ -498,11 +512,13 @@ def create_je_for_finished_goods_receipt(receipt: FinishedProductReceipt) -> Opt
 
         # Debit Finished Goods Inventory
         JournalEntryLine.objects.create(
-            journal_entry=je, account=fg_account, amount=total_cost, entry_type=JournalEntryLine.EntryType.DEBIT
+            journal_entry=je, account=fg_account, amount=total_cost, entry_type=JournalEntryLine.EntryType.DEBIT,
+            sub_ledger_object=final_product
         )
         # Credit Work-in-Progress Inventory
         JournalEntryLine.objects.create(
-            journal_entry=je, account=wip_account, amount=total_cost, entry_type=JournalEntryLine.EntryType.CREDIT
+            journal_entry=je, account=wip_account, amount=total_cost, entry_type=JournalEntryLine.EntryType.CREDIT,
+            sub_ledger_object=final_product
         )
 
         logger.info(f"Successfully created Journal Entry JE-{je.id} for FinishedProductReceipt ID {receipt.id}.")
@@ -551,10 +567,12 @@ def create_je_for_production_return(prod_return: ProductionReturn) -> Optional[J
             status=JournalEntry.Status.POSTED
         )
         JournalEntryLine.objects.create(
-            journal_entry=je, account=rm_account, amount=return_value, entry_type=JournalEntryLine.EntryType.DEBIT
+            journal_entry=je, account=rm_account, amount=return_value, entry_type=JournalEntryLine.EntryType.DEBIT,
+            sub_ledger_object=prod_return.product
         )
         JournalEntryLine.objects.create(
-            journal_entry=je, account=wip_account, amount=return_value, entry_type=JournalEntryLine.EntryType.CREDIT
+            journal_entry=je, account=wip_account, amount=return_value, entry_type=JournalEntryLine.EntryType.CREDIT,
+            sub_ledger_object=prod_return.product
         )
         logger.info(f"Successfully created JE-{je.id} for ProductionReturn ID {prod_return.id}.")
     return je
@@ -616,17 +634,21 @@ def create_je_for_sales_dispatch(dispatch: FinishedProductDispatch) -> Optional[
         )
         # COGS Entry
         JournalEntryLine.objects.create(
-            journal_entry=je, account=cogs_account, amount=cogs_amount, entry_type=JournalEntryLine.EntryType.DEBIT
+            journal_entry=je, account=cogs_account, amount=cogs_amount, entry_type=JournalEntryLine.EntryType.DEBIT,
+            sub_ledger_object=final_product
         )
         JournalEntryLine.objects.create(
-            journal_entry=je, account=fg_account, amount=cogs_amount, entry_type=JournalEntryLine.EntryType.CREDIT
+            journal_entry=je, account=fg_account, amount=cogs_amount, entry_type=JournalEntryLine.EntryType.CREDIT,
+            sub_ledger_object=final_product
         )
         # Revenue Entry
         JournalEntryLine.objects.create(
-            journal_entry=je, account=ar_account, amount=total_receivable, entry_type=JournalEntryLine.EntryType.DEBIT
+            journal_entry=je, account=ar_account, amount=total_receivable, entry_type=JournalEntryLine.EntryType.DEBIT,
+            sub_ledger_object=so_item.sales_order.customer
         )
         JournalEntryLine.objects.create(
-            journal_entry=je, account=revenue_account, amount=base_revenue, entry_type=JournalEntryLine.EntryType.CREDIT
+            journal_entry=je, account=revenue_account, amount=base_revenue, entry_type=JournalEntryLine.EntryType.CREDIT,
+            sub_ledger_object=final_product
         )
         if vat_amount > 0:
             JournalEntryLine.objects.create(
@@ -682,12 +704,14 @@ def create_je_for_supplier_payment(payment: Payment) -> Optional[JournalEntry]:
         # Debit Accounts Payable
         JournalEntryLine.objects.create(
             journal_entry=je, account=ap_account, amount=payment.amount,
-            entry_type=JournalEntryLine.EntryType.DEBIT
+            entry_type=JournalEntryLine.EntryType.DEBIT,
+            sub_ledger_object=payment.supplier
         )
         # Credit Bank/Cash Account
         JournalEntryLine.objects.create(
             journal_entry=je, account=bank_gl_account, amount=payment.amount,
-            entry_type=JournalEntryLine.EntryType.CREDIT
+            entry_type=JournalEntryLine.EntryType.CREDIT,
+            sub_ledger_object=payment.bank_account
         )
         logger.info(f"Successfully created JE-{je.id} for supplier Payment ID {payment.id}.")
     return je
@@ -737,12 +761,14 @@ def create_je_for_customer_payment(payment: Payment) -> Optional[JournalEntry]:
         # Debit Bank/Cash Account
         JournalEntryLine.objects.create(
             journal_entry=je, account=bank_gl_account, amount=payment.amount,
-            entry_type=JournalEntryLine.EntryType.DEBIT
+            entry_type=JournalEntryLine.EntryType.DEBIT,
+            sub_ledger_object=payment.bank_account
         )
         # Credit Accounts Receivable
         JournalEntryLine.objects.create(
             journal_entry=je, account=ar_account, amount=payment.amount,
-            entry_type=JournalEntryLine.EntryType.CREDIT
+            entry_type=JournalEntryLine.EntryType.CREDIT,
+            sub_ledger_object=payment.customer
         )
         logger.info(f"Successfully created JE-{je.id} for customer Payment ID {payment.id}.")
     return je
@@ -789,12 +815,14 @@ def create_je_for_employee_advance(advance: EmployeeAdvance) -> Optional[Journal
         # Debit Employee Advances Receivable
         JournalEntryLine.objects.create(
             journal_entry=je, account=employee_advances_account, amount=advance.amount,
-            entry_type=JournalEntryLine.EntryType.DEBIT
+            entry_type=JournalEntryLine.EntryType.DEBIT,
+            sub_ledger_object=advance.employee
         )
         # Credit Bank/Cash Account
         JournalEntryLine.objects.create(
             journal_entry=je, account=bank_gl_account, amount=advance.amount,
-            entry_type=JournalEntryLine.EntryType.CREDIT
+            entry_type=JournalEntryLine.EntryType.CREDIT,
+            sub_ledger_object=advance.source_payment.bank_account
         )
         logger.info(f"Successfully created JE-{je.id} for EmployeeAdvance ID {advance.id}.")
     return je
@@ -1057,12 +1085,14 @@ def create_je_for_depreciation(depreciation_log: DepreciationLog) -> Optional[Jo
         # Debit Depreciation Expense
         JournalEntryLine.objects.create(
             journal_entry=je, account=expense_account, amount=depreciation_amount,
-            entry_type=JournalEntryLine.EntryType.DEBIT
+            entry_type=JournalEntryLine.EntryType.DEBIT,
+            sub_ledger_object=asset
         )
         # Credit Accumulated Depreciation
         JournalEntryLine.objects.create(
             journal_entry=je, account=accumulated_dep_account, amount=depreciation_amount,
-            entry_type=JournalEntryLine.EntryType.CREDIT
+            entry_type=JournalEntryLine.EntryType.CREDIT,
+            sub_ledger_object=asset
         )
         
         # Link the JE back to the log for traceability

@@ -83,6 +83,12 @@ class TestAccountingService(AccountingServiceBaseTestCase):
         self.assertEqual(total_debits, total_credits)
         self.assertEqual(total_debits, Decimal("1140.000"))
 
+        # --- NEW: Verify Sub-Ledger Links ---
+        inv_line = je.lines.get(account=self.accounts['1020201'])
+        ap_line = je.lines.get(account=self.accounts['20201'])
+        self.assertEqual(inv_line.sub_ledger_object, self.raw_material)
+        self.assertEqual(ap_line.sub_ledger_object, self.supplier)
+
     def test_create_je_for_inventory_receipt_not_released(self):
         """
         Verify that a JE is NOT created if the inventory log is not 'RELEASED'.
@@ -210,6 +216,10 @@ class TestAccountingService(AccountingServiceBaseTestCase):
         self.assertEqual(credit_line.account, self.accounts['1020201']) # RM Inventory Account
         self.assertEqual(credit_line.amount, expected_total_cost)
 
+        # --- NEW: Verify Sub-Ledger Links ---
+        self.assertEqual(debit_line.sub_ledger_object, self.final_product)
+        self.assertEqual(credit_line.sub_ledger_object, self.raw_material)
+
     def test_create_je_for_finished_goods_receipt_success(self):
         """
         Verify that creating a FinishedProductReceipt correctly moves value
@@ -248,6 +258,10 @@ class TestAccountingService(AccountingServiceBaseTestCase):
         credit_line = je.lines.get(entry_type='credit')
         self.assertEqual(credit_line.account, self.accounts['1020205']) # WIP Account
         self.assertEqual(credit_line.amount, Decimal("500.000"))
+
+        # --- NEW: Verify Sub-Ledger Links ---
+        self.assertEqual(debit_line.sub_ledger_object, self.final_product)
+        self.assertEqual(credit_line.sub_ledger_object, self.final_product)
 
     def test_create_je_for_sales_dispatch_success(self):
         """
@@ -328,6 +342,17 @@ class TestAccountingService(AccountingServiceBaseTestCase):
         # Verify the entry is balanced
         self.assertEqual(sum(debits.values()), sum(credits.values()))
 
+        # --- NEW: Verify Sub-Ledger Links ---
+        cogs_debit_line = je.lines.get(account=self.accounts['50101'], entry_type='debit')
+        fg_credit_line = je.lines.get(account=self.accounts['1020206'], entry_type='credit')
+        ar_debit_line = je.lines.get(account=self.accounts['10203'], entry_type='debit')
+        rev_credit_line = je.lines.get(account=self.accounts['40101'], entry_type='credit')
+
+        self.assertEqual(cogs_debit_line.sub_ledger_object, self.final_product)
+        self.assertEqual(fg_credit_line.sub_ledger_object, self.final_product)
+        self.assertEqual(ar_debit_line.sub_ledger_object, self.customer)
+        self.assertEqual(rev_credit_line.sub_ledger_object, self.final_product)
+
 
 class TestPaymentAccounting(AccountingServiceBaseTestCase):
     """
@@ -366,6 +391,10 @@ class TestPaymentAccounting(AccountingServiceBaseTestCase):
         self.assertEqual(credit_line.account, self.bank_account.gl_account)
         self.assertEqual(credit_line.amount, Decimal("1130.000"))
 
+        # --- NEW: Verify Sub-Ledger Links ---
+        self.assertEqual(debit_line.sub_ledger_object, self.supplier)
+        self.assertEqual(credit_line.sub_ledger_object, self.bank_account)
+
     def test_create_je_for_customer_payment_success(self):
         """
         Verify that a payment from a customer correctly debits the bank and credits A/R.
@@ -398,6 +427,10 @@ class TestPaymentAccounting(AccountingServiceBaseTestCase):
         credit_line = je.lines.get(entry_type='credit')
         self.assertEqual(credit_line.account, self.accounts['10203']) # A/R Account
         self.assertEqual(credit_line.amount, Decimal("912.000"))
+
+        # --- NEW: Verify Sub-Ledger Links ---
+        self.assertEqual(debit_line.sub_ledger_object, self.bank_account)
+        self.assertEqual(credit_line.sub_ledger_object, self.customer)
 
 
 class TestMiscAccountingTransactions(AccountingServiceBaseTestCase):
@@ -451,6 +484,11 @@ class TestMiscAccountingTransactions(AccountingServiceBaseTestCase):
         self.assertEqual(credit_line.account, self.accounts['1020207']) # MRO Inventory
         self.assertEqual(credit_line.amount, Decimal("200.000"))
 
+        # --- NEW: Verify Sub-Ledger Links ---
+        self.assertEqual(credit_line.sub_ledger_object, self.mro_product)
+        # Expense line has no sub-ledger in this case
+        self.assertIsNone(debit_line.sub_ledger_object)
+
     def test_create_je_for_production_return_success(self):
         """
         Verify that returning unused raw material from production correctly
@@ -498,6 +536,10 @@ class TestMiscAccountingTransactions(AccountingServiceBaseTestCase):
         credit_line = je.lines.get(entry_type='credit')
         self.assertEqual(credit_line.account, self.accounts['1020205']) # WIP Inventory
         self.assertEqual(credit_line.amount, expected_value)
+
+        # --- NEW: Verify Sub-Ledger Links ---
+        self.assertEqual(debit_line.sub_ledger_object, self.raw_material)
+        self.assertEqual(credit_line.sub_ledger_object, self.raw_material)
 
 
 class TestOverheadAllocation(AccountingServiceBaseTestCase):

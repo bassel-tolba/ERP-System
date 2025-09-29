@@ -905,3 +905,205 @@ INFO 2025-09-28 21:20:00,036 django.server basehttp 3024 17588 "GET /static/webf
 INFO 2025-09-28 21:20:00,129 django.server basehttp 3024 17588 "GET /static/webfonts/41.woff2 HTTP/1.1" 200 21168
 INFO 2025-09-28 21:20:00,251 django.server basehttp 3024 17588 "GET /static/img/favicon.ico HTTP/1.1" 200 41001
 INFO 2025-09-28 21:20:06,901 django.server basehttp 3024 17588 "GET /finished_goods_status/ HTTP/1.1" 200 88254
+INFO 2025-09-29 09:42:52,490 django.utils.autoreload autoreload 12144 10980 Watching for file changes with StatReloader
+INFO 2025-09-29 09:42:55,490 django.server basehttp 12144 13820 "GET /admin HTTP/1.1" 301 0
+INFO 2025-09-29 09:42:55,628 django.server basehttp 12144 6416 "GET /admin/ HTTP/1.1" 200 71122
+INFO 2025-09-29 09:42:56,323 django.server basehttp 12144 8296 "GET /static/vendor/fontawesome-free/webfonts/fa-regular-400.woff2 HTTP/1.1" 200 25392
+INFO 2025-09-29 09:42:56,328 django.server basehttp 12144 6416 "GET /static/vendor/fontawesome-free/webfonts/fa-solid-900.woff2 HTTP/1.1" 200 156400
+WARNING 2025-09-29 09:42:56,778 django.server basehttp 12144 6416 "GET /static/fas%20fa-warehouse HTTP/1.1" 404 1864
+INFO 2025-09-29 09:43:11,151 django.server basehttp 12144 8296 "GET /admin/inventory/account/ HTTP/1.1" 200 122392
+INFO 2025-09-29 09:43:11,188 django.server basehttp 12144 8296 "GET /static/vendor/select2/css/select2.min.css HTTP/1.1" 200 16264
+INFO 2025-09-29 09:43:11,221 django.server basehttp 12144 8296 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-09-29 09:43:11,231 django.server basehttp 12144 8296 "GET /static/jazzmin/js/change_list.js HTTP/1.1" 200 2252
+ERROR 2025-09-29 09:43:23,581 django.request log 12144 8296 Internal Server Error: /admin/inventory/journalentry/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\options.py", line 683, in get_field
+    return self.fields_map[field_name]
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^
+KeyError: 'source_object_link'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\contrib\admin\utils.py", line 290, in lookup_field
+    f = _get_non_gfk_field(opts, name)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\contrib\admin\utils.py", line 330, in _get_non_gfk_field
+    field = opts.get_field(name)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\options.py", line 685, in get_field
+    raise FieldDoesNotExist(
+        "%s has no field named '%s'" % (self.object_name, field_name)
+    )
+django.core.exceptions.FieldDoesNotExist: JournalEntry has no field named 'source_object_link'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 220, in _get_response
+    response = response.render()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\contrib\admin\templatetags\base.py", line 45, in render
+    return super().render(context)
+           ~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\library.py", line 359, in render
+    _dict = self.func(*resolved_args, **resolved_kwargs)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\contrib\admin\templatetags\admin_list.py", line 354, in result_list
+    "results": list(results(cl)),
+               ~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\contrib\admin\templatetags\admin_list.py", line 330, in results
+    yield ResultList(None, items_for_result(cl, res, None))
+          ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\contrib\admin\templatetags\admin_list.py", line 321, in __init__
+    super().__init__(*items)
+    ~~~~~~~~~~~~~~~~^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\contrib\admin\templatetags\admin_list.py", line 219, in items_for_result
+    f, attr, value = lookup_field(field_name, result, cl.model_admin)
+                     ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\contrib\admin\utils.py", line 299, in lookup_field
+    value = attr(obj)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\admin.py", line 487, in source_object_link
+    url = reverse(f'admin:{meta.app_label}_{meta.model_name}_change', args=[obj.object_id])
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\urls\base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\urls\resolvers.py", line 831, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'inventory_employeeadvance_change' not found. 'inventory_employeeadvance_change' is not a valid view function or pattern name.
+ERROR 2025-09-29 09:43:23,593 django.server basehttp 12144 8296 "GET /admin/inventory/journalentry/ HTTP/1.1" 500 444331
+WARNING 2025-09-29 09:43:23,862 django.request log 12144 8296 Not Found: /favicon.ico
+WARNING 2025-09-29 09:43:23,863 django.server basehttp 12144 8296 "GET /favicon.ico HTTP/1.1" 404 37036
+INFO 2025-09-29 09:43:25,081 django.server basehttp 12144 8296 "GET /admin/inventory/account/ HTTP/1.1" 200 122392
+INFO 2025-09-29 09:43:29,795 django.server basehttp 12144 8296 "GET /admin/inventory/account/?p=2 HTTP/1.1" 200 43663
+INFO 2025-09-29 09:43:29,844 django.server basehttp 12144 8296 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-09-29 09:49:56,061 django.utils.autoreload autoreload 12144 10980 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\services\accounting_service.py changed, reloading.
+INFO 2025-09-29 09:49:57,406 django.utils.autoreload autoreload 8320 16024 Watching for file changes with StatReloader
+INFO 2025-09-29 09:51:44,608 django.utils.autoreload autoreload 8320 16024 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\services\accounting_service.py changed, reloading.
+INFO 2025-09-29 09:51:45,860 django.utils.autoreload autoreload 15208 1288 Watching for file changes with StatReloader
+INFO 2025-09-29 09:55:03,096 django.utils.autoreload autoreload 15208 1288 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\services\accounting_service.py changed, reloading.
+INFO 2025-09-29 09:55:04,463 django.utils.autoreload autoreload 332 16420 Watching for file changes with StatReloader
+INFO 2025-09-29 09:58:37,930 django.utils.autoreload autoreload 332 16420 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\services\accounting_service.py changed, reloading.
+INFO 2025-09-29 09:58:39,065 django.utils.autoreload autoreload 10144 8480 Watching for file changes with StatReloader
+INFO 2025-09-29 09:59:30,978 django.utils.autoreload autoreload 10144 8480 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\services\accounting_service.py changed, reloading.
+INFO 2025-09-29 09:59:32,143 django.utils.autoreload autoreload 11208 13104 Watching for file changes with StatReloader
+INFO 2025-09-29 09:59:46,789 django.utils.autoreload autoreload 11208 13104 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\services\accounting_service.py changed, reloading.
+INFO 2025-09-29 09:59:47,953 django.utils.autoreload autoreload 12560 13828 Watching for file changes with StatReloader
+INFO 2025-09-29 10:11:43,327 django.utils.autoreload autoreload 12560 13828 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-29 10:11:44,429 django.utils.autoreload autoreload 10356 216 Watching for file changes with StatReloader
+INFO 2025-09-29 10:12:17,854 django.utils.autoreload autoreload 10356 216 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-29 10:12:18,965 django.utils.autoreload autoreload 10924 15640 Watching for file changes with StatReloader
+INFO 2025-09-29 10:12:47,017 django.utils.autoreload autoreload 10924 15640 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-29 10:12:48,122 django.utils.autoreload autoreload 3728 14096 Watching for file changes with StatReloader
+INFO 2025-09-29 10:18:06,066 django.utils.autoreload autoreload 3728 14096 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-29 10:18:07,176 django.utils.autoreload autoreload 1048 12856 Watching for file changes with StatReloader
+INFO 2025-09-29 10:18:25,702 django.utils.autoreload autoreload 1048 12856 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-29 10:18:27,000 django.utils.autoreload autoreload 2004 15024 Watching for file changes with StatReloader
+INFO 2025-09-29 10:19:54,998 django.utils.autoreload autoreload 2004 15024 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-29 10:19:55,958 django.utils.autoreload autoreload 9520 11224 Watching for file changes with StatReloader
+INFO 2025-09-29 10:21:54,434 django.utils.autoreload autoreload 9520 11224 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-29 10:21:55,317 django.utils.autoreload autoreload 7364 17616 Watching for file changes with StatReloader
+INFO 2025-09-29 11:04:38,005 django.utils.autoreload autoreload 7364 17616 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-29 11:04:39,223 django.utils.autoreload autoreload 14884 10832 Watching for file changes with StatReloader
+INFO 2025-09-29 11:06:03,821 django.utils.autoreload autoreload 14884 10832 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-29 11:06:05,651 django.utils.autoreload autoreload 11084 9592 Watching for file changes with StatReloader
+INFO 2025-09-29 11:06:52,456 django.utils.autoreload autoreload 11084 9592 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-29 11:06:53,769 django.utils.autoreload autoreload 16288 4868 Watching for file changes with StatReloader
+INFO 2025-09-29 11:07:12,422 django.utils.autoreload autoreload 16288 4868 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-29 11:07:13,951 django.utils.autoreload autoreload 12692 7732 Watching for file changes with StatReloader
+INFO 2025-09-29 11:21:05,338 django.utils.autoreload autoreload 12692 7732 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-29 11:21:06,482 django.utils.autoreload autoreload 9444 16392 Watching for file changes with StatReloader
+INFO 2025-09-29 11:21:22,882 django.utils.autoreload autoreload 9444 16392 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-29 11:21:23,964 django.utils.autoreload autoreload 11152 6380 Watching for file changes with StatReloader
+INFO 2025-09-29 11:21:35,054 django.utils.autoreload autoreload 11152 6380 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-29 11:21:36,276 django.utils.autoreload autoreload 11484 6452 Watching for file changes with StatReloader
+INFO 2025-09-29 11:34:17,128 django.utils.autoreload autoreload 11484 6452 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-29 11:34:18,369 django.utils.autoreload autoreload 9224 9380 Watching for file changes with StatReloader
+INFO 2025-09-29 11:34:54,952 django.utils.autoreload autoreload 9224 9380 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\services\accounting_service.py changed, reloading.
+INFO 2025-09-29 11:34:56,047 django.utils.autoreload autoreload 12932 3176 Watching for file changes with StatReloader
+INFO 2025-09-29 11:37:22,592 django.utils.autoreload autoreload 12932 3176 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-29 11:37:23,589 django.utils.autoreload autoreload 16660 9708 Watching for file changes with StatReloader
+INFO 2025-09-29 11:38:52,090 django.utils.autoreload autoreload 16660 9708 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-29 11:38:53,129 django.utils.autoreload autoreload 6348 16632 Watching for file changes with StatReloader
+INFO 2025-09-29 11:41:00,292 django.utils.autoreload autoreload 6348 16632 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-29 11:41:01,509 django.utils.autoreload autoreload 2688 13268 Watching for file changes with StatReloader
+INFO 2025-09-29 11:43:45,806 django.utils.autoreload autoreload 2688 13268 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-29 11:43:46,846 django.utils.autoreload autoreload 5836 8568 Watching for file changes with StatReloader
+INFO 2025-09-29 11:46:03,402 django.utils.autoreload autoreload 5836 8568 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-29 11:46:04,491 django.utils.autoreload autoreload 13492 10036 Watching for file changes with StatReloader
+INFO 2025-09-29 11:48:56,144 django.utils.autoreload autoreload 13492 10036 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-29 11:48:57,222 django.utils.autoreload autoreload 4876 6192 Watching for file changes with StatReloader
+INFO 2025-09-29 11:52:59,215 django.utils.autoreload autoreload 4876 6192 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-29 11:53:00,293 django.utils.autoreload autoreload 5716 4072 Watching for file changes with StatReloader
+INFO 2025-09-29 11:53:28,252 django.utils.autoreload autoreload 5716 4072 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-29 11:53:29,770 django.utils.autoreload autoreload 10412 15124 Watching for file changes with StatReloader
+INFO 2025-09-29 12:21:48,090 django.utils.autoreload autoreload 10412 15124 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\services\accounting_service.py changed, reloading.
+INFO 2025-09-29 12:21:50,477 django.utils.autoreload autoreload 9856 11780 Watching for file changes with StatReloader
+INFO 2025-09-29 12:21:53,039 django.utils.autoreload autoreload 9856 11780 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\admin.py changed, reloading.
+INFO 2025-09-29 12:21:54,118 django.utils.autoreload autoreload 9964 716 Watching for file changes with StatReloader
