@@ -1,0 +1,166 @@
+{% load i18n %}
+{% load inventory_extras %}
+
+<div class="container-fluid" id="employee-advances-container" data-employee-id="{{ employee.id }}" data-unsettled-api-url="{% url 'inventory:api_get_unsettled_transactions' employee.id %}">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                <div>
+                    <h4 class="mb-sm-0">{% trans "Financials for" %} {{ employee.full_name }}</h4>
+                    <p class="text-muted mb-0">{% trans "Total Outstanding Balance:" %} <span class="fw-bold {% if employee.outstanding_advance_balance > 0 %}text-danger{% endif %}">{{ employee.outstanding_advance_balance|floatformat:2 }}</span></p>
+                </div>
+                <div class="page-title-right">
+                     <a href="{% url 'inventory:employee_financials_dashboard' %}" class="btn btn-secondary">
+                        <i class="ri-arrow-left-line align-bottom me-1"></i> {% trans "Back to Dashboard" %}
+                    </a>
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createAdvanceModal">
+                        <i class="ri-add-line align-bottom me-1"></i> {% trans "Create New Advance" %}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{% trans "Advances History" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="accordion" id="advancesAccordion">
+                        {% for advance in advances %}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="heading-{{ advance.id }}">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ advance.id }}" aria-expanded="false" aria-controls="collapse-{{ advance.id }}">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <span>{% trans "Advance on" %} {{ advance.advance_date|date:"Y-m-d" }} - {{ advance.amount|floatformat:2 }}</span>
+                                        <span>{% trans "Unsettled:" %} <span class="fw-bold">{{ advance.unsettled_amount|floatformat:2 }}</span></span>
+                                        <span><span class="badge {{ advance.status|status_badge }}">{{ advance.get_status_display }}</span></span>
+                                    </div>
+                                </button>
+                            </h2>
+                            <div id="collapse-{{ advance.id }}" class="accordion-collapse collapse" aria-labelledby="heading-{{ advance.id }}" data-bs-parent="#advancesAccordion">
+                                <div class="accordion-body">
+                                    <p><strong>{% trans "Notes:" %}</strong> {{ advance.notes|default:"N/A" }}</p>
+                                    <p><strong>{% trans "Source Payment:" %}</strong> {{ advance.source_payment }}</p>
+                                    <hr>
+                                    <h5>{% trans "Settlements" %}</h5>
+                                    <ul class="list-group">
+                                        {% for settlement in advance.settlements.all %}
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <span>{% trans "Settled with" %} {{ settlement.source_transaction }} {% trans "on" %} {{ settlement.settlement_date|date:"Y-m-d" }}</span>
+                                            <span class="badge bg-success rounded-pill">{{ settlement.amount_settled|floatformat:2 }}</span>
+                                        </li>
+                                        {% empty %}
+                                        <li class="list-group-item">{% trans "No settlements for this advance yet." %}</li>
+                                        {% endfor %}
+                                    </ul>
+                                    {% if advance.status == 'OPEN' or advance.status == 'PARTIALLY_SETTLED' %}
+                                    <div class="mt-3">
+                                        <button class="btn btn-primary settle-advance-btn" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#settleAdvanceModal"
+                                                data-advance-id="{{ advance.id }}"
+                                                data-unsettled-amount="{{ advance.unsettled_amount }}">
+                                            {% trans "Settle This Advance" %}
+                                        </button>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="alert alert-info">{% trans "No advances recorded for this employee." %}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Advance Modal -->
+<div class="modal fade" id="createAdvanceModal" tabindex="-1" aria-labelledby="createAdvanceModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{% trans "Create New Advance for" %} {{ employee.full_name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'inventory:employee_advance_detail' employee.id %}" method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="advance_date" class="form-label">{% trans "Advance Date" %}</label>
+                        <input type="text" class="form-control datepicker" id="advance_date" name="advance_date" value="{{ today_date }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="amount" class="form-label">{% trans "Amount" %}</label>
+                        <input type="number" step="0.01" class="form-control" id="amount" name="amount" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="bank_account" class="form-label">{% trans "Source Bank/Cash" %}</label>
+                        <select class="form-select searchable-select" id="bank_account" name="bank_account" required>
+                            {% for account in bank_accounts %}
+                            <option value="{{ account.id }}">{{ account.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">{% trans "Notes" %}</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">{% trans "Close" %}</button>
+                    <button type="submit" class="btn btn-primary">{% trans "Save Advance" %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Settle Advance Modal -->
+<div class="modal fade" id="settleAdvanceModal" tabindex="-1" aria-labelledby="settleAdvanceModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="settleAdvanceModalLabel">{% trans "Settle Advance" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="settleAdvanceForm" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="settlement_items" id="settlement_items_input">
+                <div class="modal-body">
+                    <p>{% trans "Unsettled amount for this advance:" %} <strong id="modal_unsettled_amount"></strong></p>
+                    <p>{% trans "Total selected for settlement:" %} <strong id="modal_total_selected">0.00</strong></p>
+                    <div id="settlement-transactions-loading" class="text-center my-3">
+                        <div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>
+                    </div>
+                    <table class="table table-sm" id="settlement-transactions-table">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="select_all_settlements"></th>
+                                <th>{% trans "Date" %}</th>
+                                <th>{% trans "Type" %}</th>
+                                <th>{% trans "Description" %}</th>
+                                <th class="text-end">{% trans "Amount" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody id="settlement-transactions-body">
+                            <!-- Rows will be inserted by JavaScript -->
+                        </tbody>
+                    </table>
+                    <div id="no-settlements-message" class="alert alert-info d-none">
+                        {% trans "No unsettled transactions found for this employee." %}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                    <button type="submit" class="btn btn-primary" id="confirmSettlementBtn" disabled>{% trans "Confirm Settlement" %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

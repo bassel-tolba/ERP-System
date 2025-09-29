@@ -43,6 +43,17 @@ function initManageExpensesLogic(container) {
       document.getElementById("edit_g_category").value = button.dataset.category;
       document.getElementById("edit_g_classification").value = button.dataset.classification;
       document.getElementById("edit_g_notes").value = button.dataset.notes;
+
+      // --- NEW: Set Cost Pool ---
+      const costPoolSelect = document.getElementById("edit_g_cost_pool");
+      if (costPoolSelect) {
+          // Check if TomSelect is attached and use its API
+          if (costPoolSelect.tomselect) {
+              costPoolSelect.tomselect.setValue(button.dataset.costPoolId);
+          } else {
+              costPoolSelect.value = button.dataset.costPoolId;
+          }
+      }
     });
   }
 }

@@ -1,6 +1,29 @@
 from django import template
 from decimal import Decimal, InvalidOperation
+import json
+from django.utils.safestring import mark_safe
+from django.utils.functional import Promise
+from django.utils.encoding import force_str
+
 register = template.Library()
+
+class LazyEncoder(json.JSONEncoder):
+    """
+    A custom JSON encoder that can handle Django's lazy translation proxy objects.
+    """
+    def default(self, obj):
+        if isinstance(obj, Promise):
+            return force_str(obj)
+        return super().default(obj)
+
+@register.filter(name='jsonify')
+def jsonify(data):
+    """
+    Safely converts a Python object (e.g., a list of choices) to a JSON string,
+    handling Django's lazy translation proxies.
+    """
+    return mark_safe(json.dumps(list(data), cls=LazyEncoder))
+
 
 @register.filter
 def get_item(dictionary, key):
@@ -55,3 +78,14 @@ def subtract(value, arg):
         return (Decimal(str(value)) - Decimal(str(arg)))
     except (ValueError, TypeError, InvalidOperation):
         return Decimal('0.000')
+
+@register.filter
+def status_badge(status_string):
+    """Returns a Bootstrap badge class based on an EmployeeAdvance status string."""
+    if status_string == 'OPEN':
+        return 'bg-danger'
+    elif status_string == 'PARTIALLY_SETTLED':
+        return 'bg-warning'
+    elif status_string == 'SETTLED':
+        return 'bg-success'
+    return 'bg-secondary'

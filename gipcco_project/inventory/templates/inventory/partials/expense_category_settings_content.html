@@ -1,0 +1,77 @@
+{% load i18n %}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                <h4 class="mb-sm-0">{% trans "Expense Category to GL Account Mapping" %}</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-7">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{% trans "Existing Mappings" %}</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped align-middle">
+                        <thead>
+                            <tr>
+                                <th>{% trans "Expense Category" %}</th>
+                                <th>{% trans "Mapped GL Account" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for mapping in mappings %}
+                            <tr>
+                                <td>{{ mapping.get_category_display }}</td>
+                                <td>{{ mapping.expense_account.code }} - {{ mapping.expense_account.name }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="2" class="text-center">{% trans "No mappings have been created yet." %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{% trans "Create or Update Mapping" %}</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">{% trans "Select an expense category and the corresponding GL account to map it to. If a mapping already exists, it will be updated." %}</p>
+                    <form action="{% url 'inventory:expense_category_settings' %}" method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="category" class="form-label">{% trans "Expense Category" %}</label>
+                            <select class="form-select searchable-select" id="category" name="category" required>
+                                <option value="">{% trans "Select a category..." %}</option>
+                                {% for value, label in all_categories %}
+                                    <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="account" class="form-label">{% trans "GL Expense Account" %}</label>
+                            <select class="form-select searchable-select" id="account" name="account" required>
+                                <option value="">{% trans "Select an account..." %}</option>
+                                {% for acc in expense_accounts %}
+                                    <option value="{{ acc.id }}">{{ acc.code }} - {{ acc.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">{% trans "Save Mapping" %}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

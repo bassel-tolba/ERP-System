@@ -40,9 +40,25 @@
                         <i class="bi bi-calendar-plus-fill me-2"></i>توليد 12 فترة شهرية
                     </button>
                 </form>
+                <button type="button" class="btn btn-sm btn-primary create-period-btn" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#createFinancialPeriodModal"
+                        data-year-id="{{ fiscal_year.id }}">
+                    <i class="bi bi-plus-square-dotted me-2"></i>إضافة فترة مخصصة
+                </button>
                 {% endif %}
             </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+<div class="mt-3">
+    {% if periods and not fiscal_year.is_closed %}
+        <button type="button" class="btn btn-primary create-period-btn" 
+                data-bs-toggle="modal" 
+                data-bs-target="#createFinancialPeriodModal"
+                data-year-id="{{ fiscal_year.id }}">
+            <i class="bi bi-plus-square-dotted me-2"></i>إضافة فترة مخصصة
+        </button>
+    {% endif %}
+</div>

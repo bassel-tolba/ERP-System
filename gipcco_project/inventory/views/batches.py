@@ -120,6 +120,11 @@ def create_batch(request: HttpRequest) -> HttpResponse:
         is_continuation = 'is_continuation' in request.POST
         parent_batch_id = request.POST.get('parent_batch') # Get parent batch ID
         notes = request.POST.get('notes', '')
+
+        # --- NEW: Get overhead allocation fields ---
+        machine_hours_str = request.POST.get('machine_hours_consumed')
+        labor_hours_str = request.POST.get('labor_hours_consumed')
+
         product_ids = request.POST.getlist('primitive_product_id')
         theoretical_quantities = request.POST.getlist('theoretical_quantity')
         actual_quantities = request.POST.getlist('actual_quantity')
@@ -149,7 +154,11 @@ def create_batch(request: HttpRequest) -> HttpResponse:
                 final_batch_number_str = batch_from_str
                 if batch_to_str and batch_to_str.strip() and int(batch_to_str) >= int(batch_from_str):
                     final_batch_number_str = f"{batch_from_str}-{batch_to_str}"
-                
+
+                # --- NEW: Prepare overhead fields for saving ---
+                machine_hours = float(machine_hours_str) if machine_hours_str else None
+                labor_hours = float(labor_hours_str) if labor_hours_str else None
+
                 batch = Batch.objects.create(
                     template_id=template_id,
                     shop_order_number=shop_order_number,
@@ -158,7 +167,10 @@ def create_batch(request: HttpRequest) -> HttpResponse:
                     is_customized=True,
                     is_continuation=is_continuation,
                     parent_batch_id=parent_batch_id if is_continuation and parent_batch_id else None, # Set parent batch
-                    notes=notes
+                    notes=notes,
+                    # --- NEW: Save overhead fields ---
+                    machine_hours_consumed=machine_hours,
+                    labor_hours_consumed=labor_hours
                 )
                 items_to_create = []
                 for pid, t_qty, a_qty, src_id_str in zip(product_ids, theoretical_quantities, actual_quantities, source_log_ids):
@@ -376,6 +388,8 @@ def update_batch_items_bulk(request: HttpRequest, batch_pk: int) -> HttpResponse
     parent_batch_id = request.POST.get('parent_batch')
     # --- END OF MODIFICATION ---
     notes = request.POST.get('notes', '')
+    machine_hours = request.POST.get('machine_hours_consumed')
+    labor_hours = request.POST.get('labor_hours_consumed') # NEW
 
     if not all([shop_order_number, creation_date_str, batch_from_str]):
         messages.error(request, "الرجاء تعبئة بيانات أمر التشغيل الأساسية (رقم الأمر، التاريخ، رقم التشغيلة).")
@@ -418,21 +432,20 @@ def update_batch_items_bulk(request: HttpRequest, batch_pk: int) -> HttpResponse
 
     try:
         with transaction.atomic():
+            batch.shop_order_number = shop_order_number
+            batch.creation_date = creation_datetime
+            batch.notes = notes
+            batch.is_continuation = is_continuation
+            # --- START OF MODIFICATION: Update parent batch and machine hours ---
+            batch.parent_batch_id = parent_batch_id if is_continuation and parent_batch_id else None
+            batch.machine_hours_consumed = float(machine_hours) if machine_hours else None
+            batch.labor_hours_consumed = float(labor_hours) if labor_hours else None # NEW
+            # --- END OF MODIFICATION ---
+
             final_batch_number_str = batch_from_str
             if batch_to_str and batch_to_str.strip() and int(batch_to_str) >= int(batch_from_str):
                 final_batch_number_str = f"{batch_from_str}-{batch_to_str}"
-            batch.shop_order_number = shop_order_number
-            batch.creation_date = creation_datetime
             batch.batch_number = final_batch_number_str
-            batch.is_continuation = is_continuation
-            batch.notes = notes
-            
-            # --- START OF MODIFICATION: Update parent batch ---
-            if is_continuation and parent_batch_id:
-                batch.parent_batch_id = parent_batch_id
-            else:
-                batch.parent_batch = None # Clear parent if it's not a continuation
-            # --- END OF MODIFICATION ---
 
             batch.save()
 

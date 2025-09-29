@@ -16,13 +16,17 @@ from django.views.decorators.http import require_POST
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.decorators import permission_required
 from django.urls import reverse
+from django.core.exceptions import ValidationError
 
 
 from ..models import (
     Company, SupplierInvoice, SupplierInvoiceItem, InventoryLog,
-    Payment, PaymentApplication, BankAccount, Customer, CustomerInvoice, FinishedProductDispatch, CustomerInvoiceItem, CustomerPaymentApplication, SalesOrder, BankTransfer, JournalEntry, JournalEntryLine, FixedAsset, DepreciationLog, BankReconciliation, BankStatementLine, Account, FiscalYear, FinancialPeriod, PeriodClosingAuditLog
+    Payment, PaymentApplication, BankAccount, Customer, CustomerInvoice, FinishedProductDispatch, CustomerInvoiceItem, CustomerPaymentApplication, SalesOrder, BankTransfer, JournalEntry, JournalEntryLine, FixedAsset, DepreciationLog, BankReconciliation, BankStatementLine, Account, FiscalYear, FinancialPeriod, PeriodClosingAuditLog,
+    CostPool, AllocationDriver, OverheadAllocationRun, ExpenseLog
 )
 from ..forms import JournalEntryForm, JournalEntryLineFormSet
+from ..services.overhead_service import execute_overhead_allocation_run, apply_overhead_to_finished_goods
+from ..services.accounting_service import create_je_for_overhead_allocation, create_je_for_overhead_application
 
 # --- Accounts Payable (A/P) Views ---
 
@@ -916,6 +920,197 @@ def fixed_assets_dashboard(request: HttpRequest) -> HttpResponse:
 
 
 # ==============================================================================
+#  NEW OVERHEAD & CONFIGURATION VIEWS
+# ==============================================================================
+
+def cost_pools_list(request: HttpRequest) -> HttpResponse:
+    """
+    Manages the Cost Pool hierarchy (listing, creation, editing, and deletion).
+    """
+    if request.method == 'POST':
+        try:
+            action = request.POST.get('action', 'save') # Default to 'save' for backward compatibility
+
+            if action == 'delete':
+                pool_id = request.POST.get('pool_id')
+                pool_to_delete = get_object_or_404(CostPool, pk=pool_id)
+
+                # Safety Check 1: Cannot delete if it has children
+                if pool_to_delete.children.exists():
+                    messages.error(request, f"Cannot delete '{pool_to_delete.name}' because it has sub-pools. Please delete or reassign them first.")
+                    return redirect('inventory:cost_pools_list')
+
+                # Safety Check 2: Cannot delete if it has associated expenses
+                if pool_to_delete.expenses.exists():
+                    messages.error(request, f"Cannot delete '{pool_to_delete.name}' because it has expenses logged against it.")
+                    return redirect('inventory:cost_pools_list')
+                
+                # Safety Check 3: Cannot delete if used in an allocation run
+                if pool_to_delete.allocation_runs.exists():
+                    messages.error(request, f"Cannot delete '{pool_to_delete.name}' because it has been used in an overhead allocation run.")
+                    return redirect('inventory:cost_pools_list')
+
+                pool_name = pool_to_delete.name
+                pool_to_delete.delete()
+                messages.success(request, f"Cost Pool '{pool_name}' has been deleted successfully.")
+
+            elif action == 'save':
+                pool_id = request.POST.get('pool_id')
+                name = request.POST.get('name', '').strip()
+                parent_id = request.POST.get('parent') or None
+                gl_account_id = request.POST.get('gl_account') or None
+
+                if not name:
+                    raise ValueError("Cost Pool Name cannot be empty.")
+
+                if pool_id: # This is an Edit operation
+                    pool = get_object_or_404(CostPool, pk=pool_id)
+                    pool.name = name
+                    pool.parent_id = parent_id
+                    pool.gl_account_id = gl_account_id
+                    pool.save()
+                    messages.success(request, f"Cost Pool '{name}' updated successfully.")
+                else: # This is a Create operation
+                    CostPool.objects.create(
+                        name=name,
+                        parent_id=parent_id,
+                        gl_account_id=gl_account_id
+                    )
+                    messages.success(request, f"Cost Pool '{name}' created successfully.")
+        
+        except Exception as e:
+            messages.error(request, f"An error occurred: {e}")
+        
+        return redirect('inventory:cost_pools_list')
+
+    # For GET request
+    all_pools = CostPool.objects.select_related('parent', 'gl_account').all()
+    expense_accounts = Account.objects.filter(account_type=Account.AccountType.EXPENSE).order_by('code')
+    
+    # Build a hierarchical structure for display
+    root_pools = [pool for pool in all_pools if not pool.parent]
+    for pool in root_pools:
+        pool.children_list = [child for child in all_pools if child.parent_id == pool.id]
+
+    context = {
+        'active_page': 'financials',
+        'sub_page': 'cost_pools',
+        'all_pools': all_pools,
+        'root_pools': root_pools,
+        'expense_accounts': expense_accounts,
+    }
+    if 'X-Partial-Request' in request.headers:
+        return render(request, 'inventory/partials/cost_pools_list_content.html', context)
+    return render(request, 'inventory/cost_pools_list.html', context)
+
+
+def allocation_drivers_list(request: HttpRequest) -> HttpResponse:
+    """
+    Manages the Allocation Driver master list (listing, creation, editing).
+    """
+    if request.method == 'POST':
+        try:
+            driver_id = request.POST.get('driver_id')
+            name = request.POST.get('name', '').strip()
+            description = request.POST.get('description', '').strip()
+
+            if not name:
+                raise ValueError("Driver name cannot be empty.")
+
+            if driver_id: # Editing - Only description can be edited
+                driver = get_object_or_404(AllocationDriver, pk=driver_id)
+                driver.description = description
+                driver.save()
+                messages.success(request, f"Allocation Driver '{driver.get_name_display()}' description updated successfully.")
+            else: # Creating
+                AllocationDriver.objects.create(name=name, description=description)
+                messages.success(request, f"Allocation Driver created successfully.")
+        except Exception as e:
+            messages.error(request, f"An error occurred: {e}")
+        
+        return redirect('inventory:allocation_drivers_list')
+
+    # --- NEW: Get existing driver names to exclude them from the choices in the create form ---
+    existing_driver_names = list(AllocationDriver.objects.values_list('name', flat=True))
+    available_choices = [
+        (value, label) for value, label in AllocationDriver.DriverChoices.choices 
+        if value not in existing_driver_names
+    ]
+
+    context = {
+        'active_page': 'financials',
+        'sub_page': 'allocation_drivers',
+        'drivers': AllocationDriver.objects.all(),
+        'available_choices': available_choices, # NEW
+    }
+    if 'X-Partial-Request' in request.headers:
+        return render(request, 'inventory/partials/allocation_drivers_list_content.html', context)
+    return render(request, 'inventory/allocation_drivers_list.html', context)
+
+
+def overhead_allocation_workspace(request: HttpRequest) -> HttpResponse:
+    """
+    Manages the period-end overhead allocation process.
+    """
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        try:
+            if action == 'create_run':
+                period_id = request.POST.get('financial_period')
+                pool_id = request.POST.get('cost_pool')
+                driver_id = request.POST.get('allocation_driver')
+                OverheadAllocationRun.objects.create(
+                    financial_period_id=period_id,
+                    cost_pool_id=pool_id,
+                    allocation_driver_id=driver_id
+                )
+                messages.success(request, "New overhead allocation run created successfully.")
+            
+            elif action == 'calculate_rate':
+                run_id = request.POST.get('run_id')
+                run = get_object_or_404(OverheadAllocationRun, pk=run_id)
+                execute_overhead_allocation_run(run)
+                messages.success(request, f"Successfully calculated overhead rate for run #{run.id}.")
+
+            elif action == 'post_to_gl':
+                run_id = request.POST.get('run_id')
+                run = get_object_or_404(OverheadAllocationRun, pk=run_id)
+                create_je_for_overhead_allocation(run)
+                messages.success(request, f"Successfully posted overhead for run #{run.id} to the General Ledger.")
+
+            elif action == 'apply_to_inventory':
+                run_id = request.POST.get('run_id')
+                run = get_object_or_404(OverheadAllocationRun, pk=run_id)
+                # This service function calculates and applies the cost, returning the total.
+                total_applied_cost = apply_overhead_to_finished_goods(run)
+                # This service function creates the corresponding JE.
+                create_je_for_overhead_application(run, total_applied_cost)
+                messages.success(request, f"Successfully applied overhead of {total_applied_cost:,.2f} from run #{run.id} to Finished Goods inventory.")
+
+        except Exception as e:
+            messages.error(request, f"An error occurred: {e}")
+        
+        return redirect('inventory:overhead_allocation_workspace')
+
+    # For GET request
+    runs = OverheadAllocationRun.objects.select_related(
+        'financial_period', 'cost_pool', 'allocation_driver', 'journal_entry', 'application_journal_entry'
+    ).all()
+
+    context = {
+        'active_page': 'financials',
+        'sub_page': 'overhead_allocation',
+        'runs': runs,
+        'financial_periods': FinancialPeriod.objects.filter(status=FinancialPeriod.Status.OPEN),
+        'cost_pools': CostPool.objects.all(),
+        'allocation_drivers': AllocationDriver.objects.all(),
+    }
+    if 'X-Partial-Request' in request.headers:
+        return render(request, 'inventory/partials/overhead_allocation_workspace_content.html', context)
+    return render(request, 'inventory/overhead_allocation_workspace.html', context)
+
+
+# ==============================================================================
 #  FINANCIAL PERIOD MANAGEMENT VIEWS
 # ==============================================================================
 
@@ -960,25 +1155,64 @@ def create_fiscal_year(request: HttpRequest) -> HttpResponse:
                 # Generate 12 monthly periods
                 current_start = start_date
                 for i in range(12):
-                    current_end = current_start + relativedelta(months=1) - relativedelta(days=1)
-                    # Ensure the last period's end date doesn't exceed the fiscal year's end date
+                    current_end = (current_start + relativedelta(months=1)) - relativedelta(days=1)
                     if current_end > end_date:
                         current_end = end_date
                     
                     FinancialPeriod.objects.create(
                         fiscal_year=fiscal_year,
-                        name=f"{current_start.strftime('%B %Y')}",
+                        name=current_start.strftime('%B %Y'),
                         start_date=current_start,
                         end_date=current_end,
                         status=FinancialPeriod.Status.OPEN
                     )
-                    current_start = current_end + relativedelta(days=1)
+                    current_start = current_start + relativedelta(months=1)
                     if current_start > end_date:
-                        break # Stop if we've passed the fiscal year end date
+                        break
 
         messages.success(request, f"تم إنشاء السنة المالية '{name}' بنجاح.")
     except Exception as e:
         messages.error(request, f"حدث خطأ أثناء إنشاء السنة المالية: {e}")
+    
+    return redirect('inventory:fiscal_year_list')
+
+
+@require_POST
+def create_financial_period(request: HttpRequest, year_id: int) -> HttpResponse:
+    """Handles the creation of a single, custom financial period."""
+    fiscal_year = get_object_or_404(FiscalYear, pk=year_id)
+    if fiscal_year.is_closed:
+        messages.error(request, "لا يمكن إضافة فترة لسنة مالية مغلقة.")
+        return redirect('inventory:fiscal_year_list')
+        
+    try:
+        name = request.POST.get('name')
+        start_date_str = request.POST.get('start_date')
+        end_date_str = request.POST.get('end_date')
+
+        if not all([name, start_date_str, end_date_str]):
+            messages.error(request, "يرجى تعبئة جميع الحقول.")
+            return redirect('inventory:fiscal_year_list')
+
+        start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+        end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+
+        with transaction.atomic():
+            period = FinancialPeriod(
+                fiscal_year=fiscal_year,
+                name=name,
+                start_date=start_date,
+                end_date=end_date,
+                status=FinancialPeriod.Status.OPEN
+            )
+            period.clean() # Validate model constraints
+            period.save()
+
+        messages.success(request, f"تم إنشاء الفترة المحاسبية '{name}' بنجاح.")
+    except ValidationError as e:
+        messages.error(request, f"خطأ في التحقق: {e.message}")
+    except Exception as e:
+        messages.error(request, f"حدث خطأ أثناء إنشاء الفترة: {e}")
     
     return redirect('inventory:fiscal_year_list')
 
@@ -1100,10 +1334,10 @@ def change_period_status(request: HttpRequest, period_id: int) -> HttpResponse:
         if period.status == FinancialPeriod.Status.CLOSED and new_status == FinancialPeriod.Status.OPEN:
             if not request.user.has_perm('inventory.can_reopen_period'):
                 messages.error(request, "ليس لديك الصلاحية لإعادة فتح فترة مغلقة.")
-                return redirect('inventory.fiscal_year_list')
+                return redirect('inventory:fiscal_year_list')
             if not justification:
                 messages.error(request, "يجب تقديم مبرر لإعادة فتح فترة مغلقة.")
-                return redirect('inventory.fiscal_year_list')
+                return redirect('inventory:fiscal_year_list')
             
             # Create an audit log entry for re-opening
             PeriodClosingAuditLog.objects.create(

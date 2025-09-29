@@ -50,6 +50,7 @@
 </div>
 
 {% include 'inventory/modals/create_fiscal_year_modal.html' %}
+{% include 'inventory/modals/create_financial_period_modal.html' %}
 
 {% for year in fiscal_years %}
     {% include 'inventory/modals/edit_fiscal_year_modal.html' with year=year %}
@@ -59,3 +60,25 @@
         {% include 'inventory/modals/view_audit_log_modal.html' with period=period %}
     {% endfor %}
 {% endfor %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const createPeriodModal = document.getElementById('createFinancialPeriodModal');
+        if (createPeriodModal) {
+            const form = createPeriodModal.querySelector('#createFinancialPeriodForm');
+            const yearIdInput = createPeriodModal.querySelector('#modal_fiscal_year_id');
+            const originalAction = form.action;
+
+            createPeriodModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const yearId = button.getAttribute('data-year-id');
+                
+                yearIdInput.value = yearId;
+                
+                // Update the form's action URL dynamically
+                const newAction = originalAction.replace('/0/', `/${yearId}/`);
+                form.setAttribute('action', newAction);
+            });
+        }
+    });
+</script>

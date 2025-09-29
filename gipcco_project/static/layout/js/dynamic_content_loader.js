@@ -47,6 +47,13 @@ window.initializePluginsInContent = function (container = document) {
         '#createPurchaseOrderForm': initPurchaseOrderCreateLogic,
         '#taxReportForm': initTaxReconciliationReportLogic,
         '#closePeriodContainer': initClosePeriodLogic,
+        '#fiscalYearContainer': initFiscalYearListLogic,
+        '#overhead-allocation-workspace-container': initOverheadAllocationWorkspaceLogic,
+        '#variance-allocation-content': initInventoryCountsLogic,
+        '#createCostPoolModal': initCostPoolsListLogic, // <-- ADDED THIS LINE
+        // --- NEW: Employee Financials ---
+        '#employee-advances-container': initEmployeeAdvanceDetailLogic,
+        '#manage-employees-container': initManageEmployeesLogic,
     };
 
     for (const selector in pageInitializers) {

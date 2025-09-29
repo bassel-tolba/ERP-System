@@ -1,0 +1,145 @@
+{% load i18n %}
+{% load inventory_extras %}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                <h4 class="mb-sm-0">{% trans "Cost Pool Management" %}</h4>
+                <div class="page-title-right">
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createCostPoolModal">
+                        <i class="ri-add-line align-bottom me-1"></i> {% trans "Create New Cost Pool" %}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{% trans "Cost Pool Hierarchy" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group col nested-list-group">
+                        {% for pool in root_pools %}
+                            <div class="list-group-item nested-item">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-grow-1">
+                                        <strong>{{ pool.name }}</strong>
+                                        {% if pool.gl_account %}
+                                            <small class="text-muted d-block">GL: {{ pool.gl_account.code }} - {{ pool.gl_account.name }}</small>
+                                        {% endif %}
+                                    </div>
+                                    <div class="flex-shrink-0">
+                                        <button class="btn btn-sm btn-soft-info edit-cost-pool-btn"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#createCostPoolModal"
+                                                data-pool-id="{{ pool.id }}"
+                                                data-pool-name="{{ pool.name }}"
+                                                data-pool-parent-id="{{ pool.parent_id|default:'' }}"
+                                                data-pool-gl-account-id="{{ pool.gl_account_id|default:'' }}">
+                                            <i class="ri-pencil-fill align-bottom"></i> {% trans "Edit" %}
+                                        </button>
+                                        <button class="btn btn-sm btn-soft-danger delete-cost-pool-btn"
+                                                data-pool-id="{{ pool.id }}"
+                                                data-pool-name="{{ pool.name }}">
+                                            <i class="ri-delete-bin-fill align-bottom"></i> {% trans "Delete" %}
+                                        </button>
+                                    </div>
+                                </div>
+                                {% if pool.children_list %}
+                                    <div class="list-group nested-group mt-2">
+                                        {% for child in pool.children_list %}
+                                            <div class="list-group-item nested-item">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="flex-grow-1">
+                                                        -- {{ child.name }}
+                                                        {% if child.gl_account %}
+                                                            <small class="text-muted d-block">GL: {{ child.gl_account.code }} - {{ child.gl_account.name }}</small>
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="flex-shrink-0">
+                                                        <button class="btn btn-sm btn-soft-info edit-cost-pool-btn"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#createCostPoolModal"
+                                                                data-pool-id="{{ child.id }}"
+                                                                data-pool-name="{{ child.name }}"
+                                                                data-pool-parent-id="{{ child.parent_id|default:'' }}"
+                                                                data-pool-gl-account-id="{{ child.gl_account_id|default:'' }}">
+                                                            <i class="ri-pencil-fill align-bottom"></i> {% trans "Edit" %}
+                                                        </button>
+                                                        <button class="btn btn-sm btn-soft-danger delete-cost-pool-btn"
+                                                                data-pool-id="{{ child.id }}"
+                                                                data-pool-name="{{ child.name }}">
+                                                            <i class="ri-delete-bin-fill align-bottom"></i> {% trans "Delete" %}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% empty %}
+                            <div class="alert alert-info">{% trans "No cost pools have been created yet." %}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create/Edit Cost Pool Modal -->
+<div class="modal fade" id="createCostPoolModal" tabindex="-1" aria-labelledby="createCostPoolModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createCostPoolModalLabel">{% trans "Cost Pool" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'inventory:cost_pools_list' %}" method="post" id="costPoolForm">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="save">
+                <input type="hidden" name="pool_id" id="pool_id">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="pool_name" class="form-label">{% trans "Cost Pool Name" %}</label>
+                        <input type="text" class="form-control" id="pool_name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="pool_parent" class="form-label">{% trans "Parent Pool (Optional)" %}</label>
+                        <select class="form-select searchable-select" id="pool_parent" name="parent">
+                            <option value="">{% trans "None (Root Level)" %}</option>
+                            {% for pool in all_pools %}
+                                <option value="{{ pool.id }}">{{ pool.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="pool_gl_account" class="form-label">{% trans "GL Expense Account (Optional)" %}</label>
+                        <select class="form-select searchable-select" id="pool_gl_account" name="gl_account">
+                            <option value="">{% trans "None (Group Level Only)" %}</option>
+                            {% for acc in expense_accounts %}
+                                <option value="{{ acc.id }}">{{ acc.code }} - {{ acc.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">{% trans "Close" %}</button>
+                    <button type="submit" class="btn btn-primary">{% trans "Save" %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden Delete Form -->
+<form action="{% url 'inventory:cost_pools_list' %}" method="post" id="deleteCostPoolForm" style="display: none;">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="delete">
+    <input type="hidden" name="pool_id" id="delete_pool_id">
+</form>

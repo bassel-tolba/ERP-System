@@ -1,17 +1,22 @@
 # gipcco_project/inventory/services/accounting_service.py
 
 import logging
+import calendar
 from decimal import Decimal
 from typing import Optional
 
 from django.db import transaction
+from django.db.models import Sum
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 
 from ..models import (
     InventoryLog, JournalEntry, JournalEntryLine, FinancialPeriod,
     GeneralAccountingSettings, ProductTypeAccountingSettings, Product,
-    Batch, InventoryConsumption, FinishedProductDispatch, FinishedProductReceipt, ProductionReturn, Payment, BankTransfer, DepreciationLog, FixedAsset, FiscalYear
+    Batch, InventoryConsumption, FinishedProductDispatch, FinishedProductReceipt, ProductionReturn, Payment, BankTransfer, DepreciationLog, FixedAsset, FiscalYear,
+    InventoryAdjustment, EmployeeAdvance, OverheadAllocationRun, CostPool, ExpenseLog, Account,
+
 )
 from ..services.costing_service import get_inventory_state_at_datetime
 
@@ -77,6 +82,93 @@ def _get_product_revenue_account(product: Product) -> Product:
     return setting.sales_revenue_account
 
 # --- Journal Entry Creation Services ---
+
+def create_je_for_inventory_adjustment(adjustment: InventoryAdjustment) -> Optional[JournalEntry]:
+    """
+    Creates a journal entry for an inventory adjustment.
+
+    Accounting Logic for Shortage (negative quantity):
+    - DEBIT: Inventory Adjustment Loss Account
+    - CREDIT: Inventory Account
+
+    Accounting Logic for Overage (positive quantity):
+    - DEBIT: Inventory Account
+    - CREDIT: Inventory Adjustment Gain Account
+    """
+    logger.info(f"--> Entered 'create_je_for_inventory_adjustment' for Adjustment ID {adjustment.id}.")
+    
+    # Check for existing JE
+    existing_je_check = JournalEntry.objects.filter(
+        content_type=ContentType.objects.get_for_model(adjustment), object_id=adjustment.id
+    )
+    if existing_je_check.exists():
+        logger.warning(f"    [CHECK FAILED] Journal entry for InventoryAdjustment ID {adjustment.id} already exists (JE ID: {existing_je_check.first().id}). Aborting.")
+        return None
+    logger.info("    [CHECK PASSED] No existing journal entry found.")
+
+    logger.info(f"    Checking financial period for adjustment date: {adjustment.adjustment_date}.")
+    try:
+        _check_period_is_open(adjustment.adjustment_date)
+        logger.info("    [CHECK PASSED] Financial period is open.")
+    except Exception as e:
+        logger.error(f"    [CHECK FAILED] Financial period check failed: {e}", exc_info=True)
+        raise e # Re-raise the exception to see it in the console
+
+    settings = GeneralAccountingSettings.load()
+    inventory_account = _get_product_inventory_account(adjustment.product)
+    loss_account = settings.inventory_adjustment_loss_account
+    gain_account = settings.inventory_adjustment_gain_account
+    logger.info(f"    Accounts determined: Inventory='{inventory_account}', Loss='{loss_account}', Gain='{gain_account}'.")
+
+    if not all([inventory_account, loss_account, gain_account]):
+        logger.error(f"    [CHECK FAILED] Failed to create JE for adjustment {adjustment.id}: Critical accounts are not configured in GeneralAccountingSettings.")
+        raise ValueError(_("Inventory, Loss, or Gain account for adjustments is not configured in General Settings."))
+    logger.info("    [CHECK PASSED] All required accounting settings are configured.")
+
+    adjustment_value = abs(Decimal(str(adjustment.adjustment_quantity)) * adjustment.cost_at_adjustment)
+    logger.info(f"    Calculated adjustment value: {adjustment_value} (Qty: {adjustment.adjustment_quantity}, Cost: {adjustment.cost_at_adjustment})")
+    
+    # --- MODIFICATION BASED ON USER FEEDBACK ---
+    # The check for zero-value adjustments has been removed. The system will now create
+    # journal entries with a value of zero if the cost_at_adjustment results in it.
+    # This is to allow for specific business cases where recording a zero-value transaction is required.
+    
+    with transaction.atomic():
+        description = _(
+            "Inventory adjustment for '%(product)s' due to %(reason)s"
+        ) % {
+            'product': adjustment.product.name,
+            'reason': adjustment.get_reason_code_display()
+        }
+        logger.info(f"    Creating JournalEntry with description: \"{description}\"")
+        je = JournalEntry.objects.create(
+            date=adjustment.adjustment_date,
+            description=description,
+            source_object=adjustment,
+            status=JournalEntry.Status.POSTED
+        )
+
+        if adjustment.adjustment_quantity < 0: # Shortage
+            logger.info(f"    Processing shortage: DEBIT '{loss_account.name}', CREDIT '{inventory_account.name}' with {adjustment_value}.")
+            JournalEntryLine.objects.create(
+                journal_entry=je, account=loss_account, amount=adjustment_value, entry_type=JournalEntryLine.EntryType.DEBIT
+            )
+            JournalEntryLine.objects.create(
+                journal_entry=je, account=inventory_account, amount=adjustment_value, entry_type=JournalEntryLine.EntryType.CREDIT
+            )
+        else: # Overage
+            logger.info(f"    Processing overage: DEBIT '{inventory_account.name}', CREDIT '{gain_account.name}' with {adjustment_value}.")
+            JournalEntryLine.objects.create(
+                journal_entry=je, account=inventory_account, amount=adjustment_value, entry_type=JournalEntryLine.EntryType.DEBIT
+            )
+            JournalEntryLine.objects.create(
+                journal_entry=je, account=gain_account, amount=adjustment_value, entry_type=JournalEntryLine.EntryType.CREDIT
+            )
+        
+        logger.info(f"    Successfully created JE-{je.id} for InventoryAdjustment ID {adjustment.id}.")
+        logger.info(f"<-- Exiting 'create_je_for_inventory_adjustment' for Adjustment ID {adjustment.id}.")
+    return je
+
 
 def create_je_for_inventory_receipt(inventory_log: InventoryLog) -> Optional[JournalEntry]:
     """
@@ -280,8 +372,12 @@ def create_je_for_internal_consumption(consumption: InventoryConsumption) -> Opt
     """
     Creates a journal entry for the internal consumption of an MRO or Consumable item.
     
-    Accounting Logic:
+    Accounting Logic (Expense):
     - DEBIT: Expense Account (determined by product type or product override)
+    - CREDIT: Inventory Account for the consumed item
+
+    Accounting Logic (Capitalize):
+    - DEBIT: Fixed Asset's GL Control Account
     - CREDIT: Inventory Account for the consumed item
     """
     # 1. --- Pre-checks and Guards ---
@@ -301,8 +397,15 @@ def create_je_for_internal_consumption(consumption: InventoryConsumption) -> Opt
         return None
         
     inventory_account = _get_product_inventory_account(consumption.product)
-    expense_account = _get_product_expense_account(consumption.product)
     
+    # --- MODIFIED: Determine the debit account based on consumption type ---
+    if consumption.consumption_type == InventoryConsumption.ConsumptionType.CAPITALIZE:
+        if not consumption.fixed_asset:
+            raise ValueError(_("Cannot create capitalization JE for consumption without a linked Fixed Asset."))
+        debit_account = consumption.fixed_asset.gl_account
+    else: # Default to EXPENSE
+        debit_account = _get_product_expense_account(consumption.product)
+
     # 3. --- Create Journal Entry and Lines ---
     with transaction.atomic():
         description = _(
@@ -321,10 +424,10 @@ def create_je_for_internal_consumption(consumption: InventoryConsumption) -> Opt
             status=JournalEntry.Status.POSTED
         )
         
-        # Debit Expense Account
+        # Debit Expense or Asset Account
         JournalEntryLine.objects.create(
             journal_entry=je,
-            account=expense_account,
+            account=debit_account,
             amount=total_cost.quantize(Decimal('0.001')),
             entry_type=JournalEntryLine.EntryType.DEBIT
         )
@@ -645,6 +748,226 @@ def create_je_for_customer_payment(payment: Payment) -> Optional[JournalEntry]:
     return je
 
 
+def create_je_for_employee_advance(advance: EmployeeAdvance) -> Optional[JournalEntry]:
+    """
+    Creates a journal entry when funds are advanced to an employee.
+
+    Accounting Logic:
+    - DEBIT: Employee Advances Receivable (an asset, representing money owed to the company)
+    - CREDIT: Bank/Cash Account (the source of the funds)
+    """
+    # 1. --- Pre-checks and Guards ---
+    if JournalEntry.objects.filter(
+        content_type=ContentType.objects.get_for_model(advance), object_id=advance.id
+    ).exists():
+        logger.debug(f"Journal entry for EmployeeAdvance ID {advance.id} already exists. Aborting.")
+        return None
+
+    _check_period_is_open(advance.advance_date)
+    
+    # 2. --- Get Accounts ---
+    settings = GeneralAccountingSettings.load()
+    employee_advances_account = settings.employee_advances_receivable
+    bank_gl_account = advance.source_payment.bank_account.gl_account
+
+    if not all([employee_advances_account, bank_gl_account]):
+        raise ValueError(_("The Employee Advances Receivable account or the source Bank's GL account is not configured in General Settings."))
+        
+    # 3. --- Create Journal Entry and Lines ---
+    with transaction.atomic():
+        description = _(
+            "Advance of %(amount)s to employee '%(employee)s'"
+        ) % {
+            'amount': advance.amount,
+            'employee': advance.employee.full_name
+        }
+        je = JournalEntry.objects.create(
+            date=advance.advance_date, description=description, source_object=advance,
+            status=JournalEntry.Status.POSTED
+        )
+
+        # Debit Employee Advances Receivable
+        JournalEntryLine.objects.create(
+            journal_entry=je, account=employee_advances_account, amount=advance.amount,
+            entry_type=JournalEntryLine.EntryType.DEBIT
+        )
+        # Credit Bank/Cash Account
+        JournalEntryLine.objects.create(
+            journal_entry=je, account=bank_gl_account, amount=advance.amount,
+            entry_type=JournalEntryLine.EntryType.CREDIT
+        )
+        logger.info(f"Successfully created JE-{je.id} for EmployeeAdvance ID {advance.id}.")
+    return je
+
+
+def create_je_for_overhead_allocation(run: OverheadAllocationRun) -> Optional[JournalEntry]:
+    """
+    Creates a consolidated journal entry for an overhead allocation run.
+
+    --- CORRECTED ACCOUNTING LOGIC ---
+    - DEBIT: Work-in-Progress (WIP) Inventory Account (for the total allocated amount)
+    - CREDIT: Each individual Expense Account that contributed to the cost pool,
+              effectively clearing them out and transferring their value to WIP.
+    """
+    # 1. --- Pre-checks and Guards ---
+    if run.status != OverheadAllocationRun.Status.CALCULATED:
+        logger.warning(f"Attempted to post JE for allocation run {run.id} which has not been calculated. Status is '{run.status}'.")
+        return None
+    
+    if run.journal_entry:
+        logger.warning(f"Journal entry for allocation run {run.id} already exists (JE ID: {run.journal_entry.id}). Aborting.")
+        return None
+
+    period = run.financial_period
+    _check_period_is_open(period.end_date)
+
+    # 2. --- Get Accounts and Amounts ---
+    settings = GeneralAccountingSettings.load()
+    wip_account = settings.wip_inventory
+    if not wip_account:
+        raise ValueError(_("Work-in-Progress (WIP) account is not configured in General Accounting Settings."))
+
+    # Find all descendant pools to gather all relevant expenses
+    all_pools = [run.cost_pool]
+    descendants = run.cost_pool.children.all()
+    while descendants:
+        all_pools.extend(descendants)
+        descendants = CostPool.objects.filter(parent__in=descendants)
+
+    # --- NEW: Aggregate expenses by their cost pool to map to GL accounts ---
+    expenses_in_pool = ExpenseLog.objects.filter(
+        expense_date__gte=period.start_date,
+        expense_date__lte=period.end_date,
+        cost_pool__in=all_pools
+    ).select_related('cost_pool__gl_account')
+    
+    credits_by_account = {}
+    for expense in expenses_in_pool:
+        # The account to credit is now directly on the cost pool
+        account_to_credit = expense.cost_pool.gl_account
+        if account_to_credit:
+            # Aggregate the amounts per account
+            credits_by_account[account_to_credit] = credits_by_account.get(account_to_credit, Decimal('0.0')) + expense.amount
+        else:
+            # If a mapping is missing on a cost pool that has expenses, we cannot create a balanced entry.
+            raise ValueError(
+                _("Accounting configuration error: The cost pool '%(pool_name)s' has expenses logged against it but is not mapped to a GL account. Please configure it in the Cost Pool Management page.")
+                % {'pool_name': expense.cost_pool.name}
+            )
+
+    total_allocated_amount = run.total_pool_amount
+    if total_allocated_amount <= 0:
+        logger.info(f"Total allocated amount for run {run.id} is zero. No JE will be created.")
+        run.status = OverheadAllocationRun.Status.POSTED # Mark as posted even if zero
+        run.save()
+        return None
+
+    # 3. --- Create Journal Entry and Lines ---
+    with transaction.atomic():
+        description = _(
+            "Allocation of %(pool_name)s overhead for period %(period_name)s"
+        ) % {
+            'pool_name': run.cost_pool.name,
+            'period_name': period.name
+        }
+        je = JournalEntry.objects.create(
+            date=period.end_date,
+            description=description,
+            source_object=run,
+            status=JournalEntry.Status.POSTED
+        )
+
+        # Debit WIP Inventory for the total amount
+        JournalEntryLine.objects.create(
+            journal_entry=je,
+            account=wip_account,
+            amount=total_allocated_amount,
+            entry_type=JournalEntryLine.EntryType.DEBIT
+        )
+
+        # --- NEW: Create individual credit lines for each cleared expense account ---
+        for account, credit_amount in credits_by_account.items():
+            if credit_amount > 0:
+                JournalEntryLine.objects.create(
+                    journal_entry=je,
+                    account=account,
+                    amount=credit_amount,
+                    entry_type=JournalEntryLine.EntryType.CREDIT
+                )
+        
+        # Link the JE back to the run and update status
+        run.journal_entry = je
+        run.status = OverheadAllocationRun.Status.POSTED
+        run.posted_at = timezone.now()
+        run.save()
+
+        logger.info(f"Successfully created JE-{je.id} for Overhead Allocation Run ID {run.id}.")
+    return je
+
+
+def create_je_for_overhead_application(run: OverheadAllocationRun, total_applied_cost: Decimal) -> Optional[JournalEntry]:
+    """
+    Creates the second journal entry in the overhead process, which moves the
+    applied overhead cost from WIP to Finished Goods inventory.
+
+    Accounting Logic:
+    - DEBIT: Finished Goods Inventory
+    - CREDIT: Work-in-Progress (WIP) Inventory
+    """
+    if run.status != OverheadAllocationRun.Status.POSTED:
+        raise ValueError("Cannot create application JE for a run that is not in 'Posted' status.")
+    if run.application_journal_entry:
+        logger.warning(f"Application JE for run {run.id} already exists. Aborting.")
+        return None
+    if total_applied_cost <= 0:
+        logger.info(f"Total applied overhead for run {run.id} is zero. No application JE will be created.")
+        # Even if the JE is zero, we mark the run as APPLIED to complete the workflow.
+        run.status = OverheadAllocationRun.Status.APPLIED
+        run.save()
+        return None
+
+    period = run.financial_period
+    _check_period_is_open(period.end_date)
+
+    settings = GeneralAccountingSettings.load()
+    wip_account = settings.wip_inventory
+    fg_account = settings.finished_goods_inventory
+
+    if not all([wip_account, fg_account]):
+        raise ValueError("WIP or Finished Goods inventory account is not configured in General Settings.")
+
+    with transaction.atomic():
+        description = _(
+            "Application of %(pool_name)s overhead to Finished Goods for period %(period_name)s"
+        ) % {
+            'pool_name': run.cost_pool.name,
+            'period_name': period.name
+        }
+        je = JournalEntry.objects.create(
+            date=period.end_date,
+            description=description,
+            source_object=run,
+            status=JournalEntry.Status.POSTED
+        )
+
+        # Debit Finished Goods Inventory
+        JournalEntryLine.objects.create(
+            journal_entry=je, account=fg_account, amount=total_applied_cost, entry_type=JournalEntryLine.EntryType.DEBIT
+        )
+        # Credit Work-in-Progress Inventory
+        JournalEntryLine.objects.create(
+            journal_entry=je, account=wip_account, amount=total_applied_cost, entry_type=JournalEntryLine.EntryType.CREDIT
+        )
+
+        # Link this new JE to the run and update the final status
+        run.application_journal_entry = je
+        run.status = OverheadAllocationRun.Status.APPLIED
+        run.save()
+
+        logger.info(f"Successfully created Application JE-{je.id} for Overhead Allocation Run ID {run.id}.")
+    return je
+
+
 def create_je_for_bank_transfer(transfer: BankTransfer) -> Optional[JournalEntry]:
     """
     Creates a journal entry for an internal bank transfer.
@@ -686,102 +1009,147 @@ def create_je_for_bank_transfer(transfer: BankTransfer) -> Optional[JournalEntry
             entry_type=JournalEntryLine.EntryType.CREDIT
         )
         logger.info(f"Successfully created JE-{je.id} for BankTransfer ID {transfer.id}.")
-    return je
 
-def create_je_for_monthly_depreciation(year: int, month: int) -> Optional[JournalEntry]:
-    """
-    Calculates and posts a single, consolidated journal entry for all eligible
-    fixed assets for a given month.
-    """
-    from django.utils.timezone import datetime
-    import calendar
 
+# --- NEW SERVICE FUNCTION FOR DEPRECIATION ---
+def create_je_for_depreciation(depreciation_log: DepreciationLog) -> Optional[JournalEntry]:
+    """
+    Creates a journal entry for a monthly depreciation log.
+
+    Accounting Logic:
+    - DEBIT: Depreciation Expense Account (from the asset)
+    - CREDIT: Accumulated Depreciation Account (from the asset)
+    """
     # 1. --- Pre-checks and Guards ---
-    period_end_date = datetime(year, month, calendar.monthrange(year, month)[1]).date()
-    _check_period_is_open(period_end_date)
-    
-    # Find assets that have already been depreciated for this period
-    already_processed_assets = DepreciationLog.objects.filter(
-        period_date=period_end_date
-    ).values_list('asset_id', flat=True)
-    
-    # Find assets eligible for depreciation this month
-    eligible_assets = FixedAsset.objects.filter(
-        status=FixedAsset.AssetStatus.IN_SERVICE,
-        depreciation_start_date__lte=period_end_date,
-        useful_life_years__gt=0
-    ).exclude(id__in=already_processed_assets)
-
-    if not eligible_assets.exists():
-        logger.info(f"No new assets to depreciate for {year}-{month:02d}.")
-        return None
-    
-    # 2. --- Calculate Depreciation and Group by Account ---
-    depreciation_details = []
-    expense_totals = {}  # {account: total_amount}
-    accumulated_totals = {} # {account: total_amount}
-
-    for asset in eligible_assets:
-        if asset.depreciable_base <= 0:
-            continue
-            
-        monthly_depreciation = (asset.depreciable_base / (asset.useful_life_years * 12)).quantize(Decimal('0.001'))
-        
-        # Check if this month's depreciation exceeds the remaining value
-        remaining_value = asset.depreciable_base - asset.accumulated_depreciation
-        if remaining_value <= 0:
-            continue # Already fully depreciated
-        
-        # Adjust the last depreciation amount to not overshoot
-        final_amount = min(monthly_depreciation, remaining_value)
-        if final_amount <= 0:
-            continue
-
-        depreciation_details.append({
-            'asset': asset,
-            'amount': final_amount
-        })
-        
-        # Aggregate amounts for the journal entry
-        expense_acc = asset.depreciation_expense_account
-        accum_acc = asset.accumulated_depreciation_account
-        expense_totals[expense_acc] = expense_totals.get(expense_acc, Decimal('0.000')) + final_amount
-        accumulated_totals[accum_acc] = accumulated_totals.get(accum_acc, Decimal('0.000')) + final_amount
-
-    if not depreciation_details:
-        logger.info(f"No depreciation value to post for {year}-{month:02d}.")
+    if JournalEntry.objects.filter(
+        content_type=ContentType.objects.get_for_model(depreciation_log), object_id=depreciation_log.id
+    ).exists():
+        logger.debug(f"Journal entry for DepreciationLog ID {depreciation_log.id} already exists. Aborting.")
         return None
 
-    # 3. --- Create Journal Entry and Logs ---
+    _check_period_is_open(depreciation_log.period_date)
+    
+    # 2. --- Get Accounts and Amount ---
+    asset = depreciation_log.asset
+    depreciation_amount = depreciation_log.amount
+    
+    expense_account = asset.depreciation_expense_account
+    accumulated_dep_account = asset.accumulated_depreciation_account
+
+    if not all([expense_account, accumulated_dep_account]):
+        raise ValueError(_(f"The fixed asset '{asset.name}' is missing its depreciation or accumulated depreciation account configuration."))
+        
+    # 3. --- Create Journal Entry and Lines ---
     with transaction.atomic():
-        description = _("Monthly depreciation for %(period)s") % {'period': period_end_date.strftime('%Y-%m')}
+        description = _(
+            "Monthly depreciation for asset '%(asset_name)s' (%(asset_tag)s)"
+        ) % {
+            'asset_name': asset.name,
+            'asset_tag': asset.asset_tag
+        }
         je = JournalEntry.objects.create(
-            date=period_end_date, description=description, source_object=None,
+            date=depreciation_log.period_date,
+            description=description,
+            source_object=depreciation_log,
             status=JournalEntry.Status.POSTED
         )
 
-        # Debit Expense Accounts
-        for account, total in expense_totals.items():
-            JournalEntryLine.objects.create(
-                journal_entry=je, account=account, amount=total, entry_type=JournalEntryLine.EntryType.DEBIT
-            )
+        # Debit Depreciation Expense
+        JournalEntryLine.objects.create(
+            journal_entry=je, account=expense_account, amount=depreciation_amount,
+            entry_type=JournalEntryLine.EntryType.DEBIT
+        )
+        # Credit Accumulated Depreciation
+        JournalEntryLine.objects.create(
+            journal_entry=je, account=accumulated_dep_account, amount=depreciation_amount,
+            entry_type=JournalEntryLine.EntryType.CREDIT
+        )
         
-        # Credit Accumulated Depreciation Accounts
-        for account, total in accumulated_totals.items():
-            JournalEntryLine.objects.create(
-                journal_entry=je, account=account, amount=total, entry_type=JournalEntryLine.EntryType.CREDIT
-            )
-
-        # Create the log records to prevent re-running
-        logs_to_create = [
-            DepreciationLog(
-                asset=detail['asset'],
-                period_date=period_end_date,
-                amount=detail['amount'],
-                journal_entry=je
-            ) for detail in depreciation_details
-        ]
-        DepreciationLog.objects.bulk_create(logs_to_create)
-
-        logger.info(f"Successfully created JE-{je.id} for monthly depreciation.")
+        # Link the JE back to the log for traceability
+        depreciation_log.journal_entry = je
+        depreciation_log.save(update_fields=['journal_entry'])
+        
+        logger.info(f"Successfully created JE-{je.id} for DepreciationLog ID {depreciation_log.id}.")
     return je
+
+
+def run_monthly_depreciation(period: FinancialPeriod) -> dict:
+    """
+    Calculates and posts depreciation for all eligible fixed assets for a given period.
+
+    - Identifies all 'In Service' assets whose depreciation should have started.
+    - Checks if depreciation has already been posted for the period to prevent duplicates.
+    - Calculates straight-line monthly depreciation.
+    - Handles the final depreciation amount to ensure the net book value matches the salvage value.
+    - Creates a DepreciationLog for each asset, which triggers JE creation via a signal.
+
+    Returns:
+        A dictionary summarizing the run (e.g., assets processed, total depreciated).
+    """
+    logger.info(f"Starting monthly depreciation run for period '{period.name}'.")
+    _check_period_is_open(period.end_date)
+
+    assets_to_depreciate = FixedAsset.objects.filter(
+        status=FixedAsset.AssetStatus.IN_SERVICE,
+        depreciation_start_date__lte=period.end_date
+    )
+
+    # Exclude assets for which depreciation has already been logged for this period's end date
+    existing_logs = DepreciationLog.objects.filter(
+        asset__in=assets_to_depreciate,
+        period_date=period.end_date
+    ).values_list('asset_id', flat=True)
+
+    assets_to_process = assets_to_depreciate.exclude(id__in=existing_logs)
+
+    if not assets_to_process.exists():
+        summary = {
+            "status": "success",
+            "message": "No new assets to depreciate for this period.",
+            "assets_processed": 0,
+            "total_depreciation": Decimal("0.0")
+        }
+        logger.info("No new assets found to depreciate for this period.")
+        return summary
+
+    processed_count = 0
+    total_depreciation_posted = Decimal("0.0")
+
+    for asset in assets_to_process:
+        with transaction.atomic():
+            # Ensure we don't depreciate past the salvage value
+            accumulated_dep = asset.accumulated_depreciation
+            depreciable_base = asset.depreciable_base
+
+            if accumulated_dep >= depreciable_base:
+                logger.info(f"Skipping asset '{asset.asset_tag}' as it is fully depreciated.")
+                continue
+
+            monthly_depreciation_amount = (depreciable_base / (asset.useful_life_years * 12)).quantize(Decimal('0.001'))
+
+            # Check if this is the last depreciation entry or if it would overshoot
+            if (accumulated_dep + monthly_depreciation_amount) > depreciable_base:
+                final_amount = depreciable_base - accumulated_dep
+                depreciation_amount = final_amount
+            else:
+                depreciation_amount = monthly_depreciation_amount
+
+            if depreciation_amount > 0:
+                # This creation will trigger the post_save signal to create the JE
+                DepreciationLog.objects.create(
+                    asset=asset,
+                    period_date=period.end_date,
+                    amount=depreciation_amount
+                )
+                processed_count += 1
+                total_depreciation_posted += depreciation_amount
+                logger.info(f"Posted depreciation of {depreciation_amount} for asset '{asset.asset_tag}'.")
+
+    summary = {
+        "status": "success",
+        "message": f"Depreciation run completed for period '{period.name}'.",
+        "assets_processed": processed_count,
+        "total_depreciation": total_depreciation_posted
+    }
+    logger.info(f"Finished depreciation run. Processed {processed_count} assets with a total value of {total_depreciation_posted}.")
+    return summary

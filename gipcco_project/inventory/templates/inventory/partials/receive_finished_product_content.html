@@ -43,6 +43,22 @@
                             <label for="notes" class="form-label fw-bold">ملاحظات (اختياري)</label>
                             <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
                         </div>
+
+                        <hr>
+                        <h6 class="mb-3 fw-bold text-primary">بيانات توزيع التكاليف العامة (اختياري)</h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="number_of_bottles" class="form-label fw-bold">عدد العبوات/الوحدات</label>
+                                <input type="number" class="form-control" id="number_of_bottles" name="number_of_bottles" placeholder="مثال: 10000">
+                                <div class="form-text">أدخل العدد الإجمالي للعبوات في هذه الاستلامة.</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">حجم العبوة (مل)</label>
+                                <input type="text" class="form-control" value="{{ bottle_size_from_template|default:'غير محدد في القالب' }}" readonly disabled>
+                                <div class="form-text">يتم تحديد هذا الحجم من قالب أمر التشغيل.</div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 

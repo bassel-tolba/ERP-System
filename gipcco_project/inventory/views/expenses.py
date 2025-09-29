@@ -9,7 +9,7 @@ from django.db.models import Q, Sum, F, FloatField
 from django.db.models.functions import Coalesce
 from decimal import Decimal
 
-from ..models import Product, InventoryLog, InventoryConsumption, ExpenseLog, FixedAsset
+from ..models import Product, InventoryLog, InventoryConsumption, ExpenseLog, FixedAsset, Employee, CostPool
 from ..services.costing_service import recalculate_cost_history_for_product
 
 def expenses_dashboard(request: HttpRequest) -> HttpResponse:
@@ -31,6 +31,7 @@ def expenses_dashboard(request: HttpRequest) -> HttpResponse:
                     notes = request.POST.get('notes', '')
                     consumption_type = request.POST.get('consumption_type')
                     fixed_asset_id = request.POST.get('fixed_asset_id')
+                    employee_id = request.POST.get('employee_id') # NEW
 
                     if not all([product_id, source_log_id, quantity_str, date_str, department]):
                         raise ValueError("يرجى تعبئة جميع الحقول المطلوبة.")
@@ -49,6 +50,7 @@ def expenses_dashboard(request: HttpRequest) -> HttpResponse:
                         notes=notes,
                         consumption_type=consumption_type,
                         fixed_asset_id=fixed_asset_id if fixed_asset_id else None,
+                        employee_id=employee_id if employee_id else None, # NEW
                     )
                     # --- COSTING TRIGGER ---
                     recalculate_cost_history_for_product(consumption.product_id, consumption.consumption_date)
@@ -63,13 +65,20 @@ def expenses_dashboard(request: HttpRequest) -> HttpResponse:
 
         elif form_type == 'general_expense':
             try:
+                # --- MODIFIED: Added cost_pool_id ---
+                cost_pool_id = request.POST.get('cost_pool_id')
+                if not cost_pool_id:
+                    raise ValueError("Cost Pool is a required field.")
+
                 ExpenseLog.objects.create(
                     description=request.POST.get('description'),
                     expense_date=request.POST.get('expense_date'),
                     amount=Decimal(request.POST.get('amount')),
                     category=request.POST.get('category'),
                     classification=request.POST.get('classification'),
-                    notes=request.POST.get('notes', '')
+                    notes=request.POST.get('notes', ''),
+                    employee_id=request.POST.get('employee_id') if request.POST.get('employee_id') else None,
+                    cost_pool_id=cost_pool_id, # --- NEW ---
                 )
                 messages.success(request, "تم تسجيل المصروف العام بنجاح.")
             except (ValueError, TypeError) as e:
@@ -83,6 +92,9 @@ def expenses_dashboard(request: HttpRequest) -> HttpResponse:
         Q(product_type=Product.ProductType.MRO) | Q(product_type=Product.ProductType.CONSUMABLE)
     )
     
+    # --- NEW: Import CostPool ---
+    from ..models import CostPool
+
     context = {
         'active_page': 'expenses_reports',
         'consumable_products': consumable_products,
@@ -94,6 +106,8 @@ def expenses_dashboard(request: HttpRequest) -> HttpResponse:
         'all_general_expenses': ExpenseLog.objects.all()[:20],
         'consumption_types': InventoryConsumption.ConsumptionType.choices,
         'fixed_assets': FixedAsset.objects.filter(status=FixedAsset.AssetStatus.IN_SERVICE),
+        'employees': Employee.objects.filter(is_active=True),
+        'cost_pools': CostPool.objects.all(), # --- NEW ---
     }
     
     template_name = 'inventory/expenses_dashboard.html'
@@ -107,13 +121,14 @@ def manage_expenses(request: HttpRequest) -> HttpResponse:
     Displays a unified page to manage (view, filter, edit, delete)
     both InventoryConsumption and ExpenseLog records.
     """
-    consumptions_qs = InventoryConsumption.objects.select_related('product', 'source_log', 'fixed_asset').order_by('-consumption_date')
+    consumptions_qs = InventoryConsumption.objects.select_related('product', 'source_log', 'fixed_asset', 'employee').order_by('-consumption_date')
     
     c_query = request.GET.get('c_query', '')
     c_start_date = request.GET.get('c_start_date', '')
     c_end_date = request.GET.get('c_end_date', '')
     c_product = request.GET.get('c_product', '')
     c_department = request.GET.get('c_department', '')
+    c_employee = request.GET.get('c_employee', '') # NEW
 
     if c_query:
         consumptions_qs = consumptions_qs.filter(Q(notes__icontains=c_query) | Q(product__name__icontains=c_query))
@@ -125,14 +140,19 @@ def manage_expenses(request: HttpRequest) -> HttpResponse:
         consumptions_qs = consumptions_qs.filter(product_id=c_product)
     if c_department:
         consumptions_qs = consumptions_qs.filter(department=c_department)
+    if c_employee:
+        consumptions_qs = consumptions_qs.filter(employee_id=c_employee) # NEW
 
-    general_expenses_qs = ExpenseLog.objects.order_by('-expense_date')
+    # --- MODIFIED: Added cost_pool to select_related ---
+    general_expenses_qs = ExpenseLog.objects.select_related('employee', 'cost_pool').order_by('-expense_date')
 
     g_query = request.GET.get('g_query', '')
     g_start_date = request.GET.get('g_start_date', '')
     g_end_date = request.GET.get('g_end_date', '')
     g_category = request.GET.get('g_category', '')
     g_classification = request.GET.get('g_classification', '')
+    g_employee = request.GET.get('g_employee', '') # NEW
+    g_cost_pool = request.GET.get('g_cost_pool', '') # --- NEW ---
 
     if g_query:
         general_expenses_qs = general_expenses_qs.filter(Q(description__icontains=g_query) | Q(notes__icontains=g_query))
@@ -144,10 +164,17 @@ def manage_expenses(request: HttpRequest) -> HttpResponse:
         general_expenses_qs = general_expenses_qs.filter(category=g_category)
     if g_classification:
         general_expenses_qs = general_expenses_qs.filter(classification=g_classification)
+    if g_employee:
+        general_expenses_qs = general_expenses_qs.filter(employee_id=g_employee) # NEW
+    if g_cost_pool:
+        general_expenses_qs = general_expenses_qs.filter(cost_pool_id=g_cost_pool) # --- NEW ---
         
     consumable_products = Product.objects.filter(
         Q(product_type=Product.ProductType.MRO) | Q(product_type=Product.ProductType.CONSUMABLE)
     )
+
+    # --- NEW: Import CostPool ---
+    from ..models import CostPool
 
     context = {
         'active_page': 'expenses_reports',
@@ -160,6 +187,8 @@ def manage_expenses(request: HttpRequest) -> HttpResponse:
         'filter_values': request.GET,
         'consumption_types': InventoryConsumption.ConsumptionType.choices,
         'fixed_assets': FixedAsset.objects.filter(status=FixedAsset.AssetStatus.IN_SERVICE),
+        'employees': Employee.objects.filter(is_active=True),
+        'cost_pools': CostPool.objects.all(), # --- NEW ---
     }
     
     template_name = 'inventory/manage_expenses.html'
@@ -204,6 +233,7 @@ def edit_inventory_consumption(request: HttpRequest, pk: int) -> HttpResponse:
             consumption.notes = request.POST.get('notes', '')
             consumption.consumption_type = request.POST.get('consumption_type')
             consumption.fixed_asset_id = request.POST.get('fixed_asset_id') or None
+            consumption.employee_id = request.POST.get('employee_id') or None # NEW
             consumption.cost_at_consumption = source_log.costing_unit_price * Decimal(str(new_quantity))
             
             consumption.save()
@@ -255,12 +285,19 @@ def edit_general_expense(request: HttpRequest, pk: int) -> HttpResponse:
         if not amount_str:
             raise ValueError("المبلغ حقل مطلوب.")
         
+        # --- NEW: Get cost_pool_id ---
+        cost_pool_id = request.POST.get('cost_pool_id')
+        if not cost_pool_id:
+            raise ValueError("Cost Pool is a required field.")
+
         expense.description = request.POST.get('description')
         expense.expense_date = request.POST.get('expense_date')
         expense.amount = Decimal(amount_str)
         expense.category = request.POST.get('category')
         expense.classification = request.POST.get('classification')
         expense.notes = request.POST.get('notes', '')
+        expense.employee_id = request.POST.get('employee_id') or None
+        expense.cost_pool_id = cost_pool_id # --- NEW ---
         
         expense.save()
         messages.success(request, f"تم تحديث المصروف العام '{expense.description}' بنجاح.")

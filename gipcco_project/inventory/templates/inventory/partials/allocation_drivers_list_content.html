@@ -1,0 +1,138 @@
+{% load i18n %}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                <h4 class="mb-sm-0">{% trans "Allocation Driver Management" %}</h4>
+                <div class="page-title-right">
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createDriverModal">
+                        <i class="ri-add-line align-bottom me-1"></i> {% trans "Create New Driver" %}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{% trans "Available Allocation Drivers" %}</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>{% trans "Name" %}</th>
+                                <th>{% trans "Description" %}</th>
+                                <th>{% trans "Actions" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for driver in drivers %}
+                            <tr>
+                                <td>{{ driver.get_name_display }}</td>
+                                <td>{{ driver.description }}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-soft-info edit-driver-btn"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#createDriverModal"
+                                            data-driver-id="{{ driver.id }}"
+                                            data-driver-name="{{ driver.get_name_display }}"
+                                            data-driver-description="{{ driver.description|default:'' }}">
+                                        <i class="ri-pencil-fill align-bottom"></i> {% trans "Edit" %}
+                                    </button>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center">{% trans "No allocation drivers have been created yet." %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create/Edit Driver Modal -->
+<div class="modal fade" id="createDriverModal" tabindex="-1" aria-labelledby="createDriverModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createDriverModalLabel">{% trans "Allocation Driver" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'inventory:allocation_drivers_list' %}" method="post" id="driverForm">
+                {% csrf_token %}
+                <input type="hidden" name="driver_id" id="driver_id">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="driver_name" class="form-label">{% trans "Driver Name" %}</label>
+                        <select class="form-select" id="driver_name" name="name" required>
+                            <option value="" disabled selected>{% trans "Select a driver..." %}</option>
+                            {% for value, label in available_choices %}
+                                <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        <input type="text" class="form-control" id="driver_name_edit" readonly disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label for="driver_description" class="form-label">{% trans "Description" %}</label>
+                        <textarea class="form-control" id="driver_description" name="description" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">{% trans "Close" %}</button>
+                    <button type="submit" class="btn btn-primary">{% trans "Save" %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const createDriverModal = document.getElementById('createDriverModal');
+    if (createDriverModal) {
+        const driverForm = document.getElementById('driverForm');
+        const driverIdInput = document.getElementById('driver_id');
+        const driverNameSelect = document.getElementById('driver_name');
+        const driverNameEditInput = document.getElementById('driver_name_edit');
+        const driverDescriptionInput = document.getElementById('driver_description');
+        const modalLabel = document.getElementById('createDriverModalLabel');
+
+        createDriverModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const driverId = button.getAttribute('data-driver-id');
+
+            if (driverId) { // Editing
+                modalLabel.textContent = '{% trans "Edit Allocation Driver" %}';
+                driverIdInput.value = button.getAttribute('data-driver-id');
+                
+                driverNameSelect.style.display = 'none';
+                driverNameSelect.removeAttribute('name');
+                driverNameSelect.required = false;
+
+                driverNameEditInput.style.display = 'block';
+                driverNameEditInput.value = button.getAttribute('data-driver-name');
+                
+                driverDescriptionInput.value = button.getAttribute('data-driver-description');
+            } else { // Creating
+                modalLabel.textContent = '{% trans "Create New Driver" %}';
+                driverForm.reset();
+                driverIdInput.value = '';
+
+                driverNameSelect.style.display = 'block';
+                driverNameSelect.setAttribute('name', 'name');
+                driverNameSelect.required = true;
+
+                driverNameEditInput.style.display = 'none';
+            }
+        });
+    }
+});
+</script>

@@ -52,6 +52,22 @@
                         <label for="notes" class="form-label fw-bold">ملاحظات (اختياري)</label>
                         <textarea class="form-control" id="notes" name="notes" rows="2" placeholder="أضف أي ملاحظات خاصة بأمر التشغيل هنا..."></textarea>
                     </div>
+
+                    <hr>
+                    <h6 class="mb-3 fw-bold text-primary">بيانات توزيع التكاليف العامة (اختياري)</h6>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="machine_hours_consumed" class="form-label fw-bold">ساعات تشغيل الماكينات</label>
+                            <input type="number" step="any" class="form-control" id="machine_hours_consumed" name="machine_hours_consumed" placeholder="مثال: 8.5">
+                            <div class="form-text">أدخل إجمالي ساعات عمل الماكينات لهذه الخطة.</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="labor_hours_consumed" class="form-label fw-bold">ساعات عمل العمال</label>
+                            <input type="number" step="any" class="form-control" id="labor_hours_consumed" name="labor_hours_consumed" placeholder="مثال: 16">
+                            <div class="form-text">أدخل إجمالي ساعات عمل العمال لهذه الخطة.</div>
+                        </div>
+                    </div>
+
                      <div class="row align-items-center">
                         <div class="col-md-4 mb-3">
                             <div class="form-check form-switch">

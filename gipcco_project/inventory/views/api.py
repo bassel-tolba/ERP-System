@@ -1,11 +1,20 @@
 # gipcco_project/inventory/views/api.py
-from decimal import Decimal
-from django.db.models import Sum, F, FloatField
-from django.db.models.functions import Coalesce
-from django.http import HttpRequest, JsonResponse
-from django.shortcuts import get_object_or_404
 
-from ..models import Batch, BatchItem, Product, ProductTag, PurchaseOrder, PurchaseOrderItem, FinishedProductReceipt, InventoryLog
+from decimal import Decimal
+import logging
+
+from django.shortcuts import get_object_or_404
+from django.http import HttpRequest, JsonResponse
+from django.contrib.contenttypes.models import ContentType
+from django.db.models import F, Q, Sum, Subquery, OuterRef, FloatField, Value, DecimalField
+from django.db.models.functions import Coalesce
+
+from ..models import (
+    Product, ProductTag, PurchaseOrder, PurchaseOrderItem, InventoryLog, Batch,
+    FinishedProductReceipt, SalesOrderItem, FinishedProductDispatch,
+    InventoryAdjustment, Employee, ExpenseLog, BatchItem, InventoryConsumption,
+    ProductionReturn, EmployeeAdvanceSettlement, JournalEntry
+)
 
 
 # --- API Views ---
@@ -191,14 +200,35 @@ def api_get_po_items(request: HttpRequest, po_id: int) -> JsonResponse:
 
 def api_get_sellable_stock(request: HttpRequest) -> JsonResponse:
     """API endpoint to get released, in-stock finished product batches."""
+    
+    # Subquery for total dispatched. This calculates the sum for each receipt in isolation.
+    dispatched_subquery = FinishedProductDispatch.objects.filter(
+        sales_order_item__finished_product_id=OuterRef('pk')
+    ).values(
+        'sales_order_item__finished_product_id'  # Group by receipt
+    ).annotate(
+        total=Sum('quantity')
+    ).values('total')
+
+    # Subquery for total adjusted. This also calculates the sum in isolation.
+    adjusted_subquery = InventoryAdjustment.objects.filter(
+        source_finished_product_id=OuterRef('pk')
+    ).values(
+        'source_finished_product_id'  # Group by receipt
+    ).annotate(
+        total=Sum('adjustment_quantity')
+    ).values('total')
+
+    # The main query now uses the subqueries, preventing the join multiplication bug.
     sellable_receipts = FinishedProductReceipt.objects.filter(
         status=FinishedProductReceipt.Status.RELEASED
     ).select_related(
         'batch__template__final_product'
     ).annotate(
-        total_dispatched=Coalesce(Sum('sales_items__dispatches__quantity'), 0.0, output_field=FloatField())
+        total_dispatched=Coalesce(Subquery(dispatched_subquery, output_field=FloatField()), 0.0),
+        total_adjusted=Coalesce(Subquery(adjusted_subquery, output_field=FloatField()), 0.0)
     ).annotate(
-        quantity_available=F('total_quantity_produced') - F('total_dispatched')
+        quantity_available=F('total_quantity_produced') - F('total_dispatched') + F('total_adjusted')
     ).filter(
         quantity_available__gt=0.001
     )
@@ -216,27 +246,30 @@ def api_get_sellable_stock(request: HttpRequest) -> JsonResponse:
 
 
 # --- CORRECTED API ENDPOINT ---
-def api_get_available_stock(request, product_pk):
+def api_get_available_stock(request: HttpRequest, product_pk: int) -> JsonResponse:
     """
     API endpoint to get all available, released stock logs for a given product.
-    Used for the internal consumption form.
+    Used for the internal consumption form. Now uses subqueries for accuracy.
     """
     product = get_object_or_404(Product, pk=product_pk)
     
-    # Find all released logs for this product
+    # --- ROBUST SUBQUERY APPROACH FOR RAW MATERIALS ---
+    consumed_prod_subquery = BatchItem.objects.filter(source_log_id=OuterRef('pk')).values('source_log_id').annotate(total=Sum('actual_quantity')).values('total')
+    consumed_internal_subquery = InventoryConsumption.objects.filter(source_log_id=OuterRef('pk')).values('source_log_id').annotate(total=Sum('quantity_consumed')).values('total')
+    returned_subquery = ProductionReturn.objects.filter(source_log_id=OuterRef('pk')).values('source_log_id').annotate(total=Sum('quantity')).values('total')
+    adjusted_subquery = InventoryAdjustment.objects.filter(source_log_id=OuterRef('pk')).values('source_log_id').annotate(total=Sum('adjustment_quantity')).values('total')
+
+    # Find all released logs for this product and calculate remaining quantity accurately
     released_logs = InventoryLog.objects.filter(
         product=product,
         status=InventoryLog.Status.RELEASED
     ).annotate(
-        # Calculate total used from production batches
-        total_used_in_prod=Coalesce(Sum('batch_items__actual_quantity'), 0.0, output_field=FloatField()),
-        # Calculate total used from internal consumptions
-        total_used_in_consumption=Coalesce(Sum('consumptions__quantity_consumed'), 0.0, output_field=FloatField()),
-        # Calculate total returned from production
-        total_returned=Coalesce(Sum('production_returns__quantity'), 0.0, output_field=FloatField())
+        total_used_in_prod=Coalesce(Subquery(consumed_prod_subquery, output_field=FloatField()), 0.0),
+        total_used_in_consumption=Coalesce(Subquery(consumed_internal_subquery, output_field=FloatField()), 0.0),
+        total_returned=Coalesce(Subquery(returned_subquery, output_field=FloatField()), 0.0),
+        total_adjusted=Coalesce(Subquery(adjusted_subquery, output_field=FloatField()), 0.0)
     ).annotate(
-        # Calculate final remaining quantity
-        remaining_quantity=F('quantity') - F('total_used_in_prod') - F('total_used_in_consumption') + F('total_returned')
+        remaining_quantity=F('quantity') - F('total_used_in_prod') - F('total_used_in_consumption') + F('total_returned') + F('total_adjusted')
     ).filter(
         remaining_quantity__gt=0.001  # Only show logs with stock left
     ).order_by('release_timestamp')
@@ -253,27 +286,159 @@ def api_get_available_stock(request, product_pk):
     return JsonResponse(data, safe=False)
 
 
-
-# ===== START OF NEW VIEW =====
-def api_batch_details(request: HttpRequest, batch_pk: int) -> JsonResponse:
+def api_get_stock_sources_for_product(request: HttpRequest, product_id: int) -> JsonResponse:
     """
-    Returns key details for a specific batch, used for the 'continuation' feature.
+    Returns a detailed list of all stock sources (InventoryLog and FinishedProductReceipt)
+    for a given product, using robust subqueries to ensure accurate remaining quantity.
+    """
+    product = get_object_or_404(Product, pk=product_id)
+    sources = []
+
+    # 1. Get Raw Material / MRO sources from InventoryLog
+    if product.product_type != Product.ProductType.FINAL_PRODUCT:
+        # --- ROBUST SUBQUERY APPROACH FOR RAW MATERIALS ---
+        consumed_prod_subquery = BatchItem.objects.filter(source_log_id=OuterRef('pk')).values('source_log_id').annotate(total=Sum('actual_quantity')).values('total')
+        consumed_internal_subquery = InventoryConsumption.objects.filter(source_log_id=OuterRef('pk')).values('source_log_id').annotate(total=Sum('quantity_consumed')).values('total')
+        returned_subquery = ProductionReturn.objects.filter(source_log_id=OuterRef('pk')).values('source_log_id').annotate(total=Sum('quantity')).values('total')
+        adjusted_subquery = InventoryAdjustment.objects.filter(source_log_id=OuterRef('pk')).values('source_log_id').annotate(total=Sum('adjustment_quantity')).values('total')
+
+        logs = InventoryLog.objects.filter(
+            product_id=product_id
+        ).exclude(
+            status__in=[InventoryLog.Status.REJECTED, InventoryLog.Status.SCRAPPED]
+        ).annotate(
+            total_consumed_prod=Coalesce(Subquery(consumed_prod_subquery, output_field=FloatField()), 0.0),
+            total_consumed_internal=Coalesce(Subquery(consumed_internal_subquery, output_field=FloatField()), 0.0),
+            total_returned=Coalesce(Subquery(returned_subquery, output_field=FloatField()), 0.0),
+            total_adjusted=Coalesce(Subquery(adjusted_subquery, output_field=FloatField()), 0.0)
+        ).annotate(
+            remaining_quantity=F('quantity') - F('total_consumed_prod') - F('total_consumed_internal') + F('total_returned') + F('total_adjusted')
+        ).order_by('release_timestamp')
+
+        for log in logs:
+            sources.append({
+                'type': 'log',
+                'id': log.id,
+                'identifier': f"QC: {log.qc_no}",
+                'date': log.release_timestamp.strftime('%Y-%m-%d') if log.release_timestamp else log.timestamp.strftime('%Y-%m-%d'),
+                'original_quantity': log.quantity,
+                'remaining_quantity': log.remaining_quantity,
+                'status': log.status,
+                'status_display': log.get_status_display(),
+            })
+
+    # 2. Get Finished Product sources from FinishedProductReceipt
+    else:
+        # --- ROBUST SUBQUERY APPROACH FOR FINISHED GOODS ---
+        dispatched_subquery = FinishedProductDispatch.objects.filter(sales_order_item__finished_product_id=OuterRef('pk')).values('sales_order_item__finished_product_id').annotate(total=Sum('quantity')).values('total')
+        adjusted_subquery = InventoryAdjustment.objects.filter(source_finished_product_id=OuterRef('pk')).values('source_finished_product_id').annotate(total=Sum('adjustment_quantity')).values('total')
+
+        receipts = FinishedProductReceipt.objects.filter(
+            batch__template__final_product_id=product_id
+        ).exclude(
+            status=FinishedProductReceipt.Status.REJECTED
+        ).annotate(
+            total_dispatched=Coalesce(Subquery(dispatched_subquery, output_field=FloatField()), 0.0),
+            total_adjusted=Coalesce(Subquery(adjusted_subquery, output_field=FloatField()), 0.0)
+        ).annotate(
+            remaining_quantity=F('total_quantity_produced') - F('total_dispatched') + F('total_adjusted')
+        ).order_by('release_date')
+
+        for receipt in receipts:
+            sources.append({
+                'type': 'receipt',
+                'id': receipt.id,
+                'identifier': f"Batch: {receipt.individual_batch_number}",
+                'date': receipt.release_date.strftime('%Y-%m-%d') if receipt.release_date else receipt.receipt_date.strftime('%Y-%m-%d'),
+                'original_quantity': receipt.total_quantity_produced,
+                'remaining_quantity': receipt.remaining_quantity,
+                'status': receipt.status,
+                'status_display': receipt.get_status_display(),
+            })
+
+    return JsonResponse({'sources': sources})
+
+
+def api_get_unsettled_transactions(request: HttpRequest, employee_id: int) -> JsonResponse:
+    """
+    Finds all InventoryLog and ExpenseLog transactions assigned to an employee
+    that have not yet been used to settle any advance.
     """
     try:
-        batch = get_object_or_404(
-            Batch.objects.select_related('template__final_product'), 
-            pk=batch_pk
-        )
-        
-        # Parse the batch number to get the 'from' part
-        batch_from_str = str(batch.batch_number).split('-')[0]
+        employee = get_object_or_404(Employee, pk=employee_id)
 
+        # Get IDs of transactions already used in any settlement
+        settled_inventory_ids = EmployeeAdvanceSettlement.objects.filter(
+            content_type=ContentType.objects.get_for_model(InventoryLog)
+        ).values_list('object_id', flat=True)
+        
+        settled_expense_ids = EmployeeAdvanceSettlement.objects.filter(
+            content_type=ContentType.objects.get_for_model(ExpenseLog)
+        ).values_list('object_id', flat=True)
+
+        # Find un-settled inventory receipts
+        unsettled_receipts = InventoryLog.objects.filter(
+            employee=employee,
+            status=InventoryLog.Status.RELEASED
+        ).exclude(id__in=settled_inventory_ids)
+
+        # Find un-settled general expenses
+        unsettled_expenses = ExpenseLog.objects.filter(
+            employee=employee
+        ).exclude(id__in=settled_expense_ids)
+
+        data = []
+        for receipt in unsettled_receipts:
+            data.append({
+                'id': receipt.id,
+                'type': 'inventorylog',
+                'type_display': 'Receipt',
+                'date': receipt.release_timestamp.strftime('%Y-%m-%d'),
+                'description': f"Receipt for {receipt.product.name} (QC: {receipt.qc_no})",
+                'amount': str(receipt.total_cost.quantize(Decimal('0.001')))
+            })
+
+        for expense in unsettled_expenses:
+            data.append({
+                'id': expense.id,
+                'type': 'expenselog',
+                'type_display': 'Expense',
+                'date': expense.expense_date.strftime('%Y-%m-%d'),
+                'description': expense.description,
+                'amount': str(expense.amount.quantize(Decimal('0.001')))
+            })
+        
+        # Sort by date
+        data.sort(key=lambda x: x['date'])
+
+        return JsonResponse({'transactions': data})
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+def api_get_journal_entry_details(request: HttpRequest, je_id: int) -> JsonResponse:
+    """
+    API endpoint to get the details of a single Journal Entry, including its lines.
+    """
+    try:
+        je = get_object_or_404(JournalEntry.objects.prefetch_related('lines__account'), pk=je_id)
+        
+        lines_data = [
+            {
+                'account_name': line.account.name,
+                'account_code': line.account.code,
+                'amount': line.amount,
+                'entry_type': line.entry_type,
+            } for line in je.lines.all()
+        ]
+        
         data = {
-            'shop_order_number': batch.shop_order_number,
-            'batch_number_from': batch_from_str, # Use the parsed 'from' part
-            'template_id': batch.template.id,
-            'template_name': f"{batch.template.name} ({batch.template.final_product.name})"
+            'id': je.id,
+            'date': je.date,
+            'description': je.description,
+            'lines': lines_data,
         }
         return JsonResponse(data)
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=404)
+        return JsonResponse({'error': str(e)}, status=500)

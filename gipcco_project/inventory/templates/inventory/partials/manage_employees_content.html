@@ -1,0 +1,113 @@
+<div class="container-fluid" id="manage-employees-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-primary">إدارة الموظفين</h1>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#employeeModal">
+            <i class="bi bi-plus-circle-fill me-2"></i>إضافة موظف جديد
+        </button>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>معرف الموظف</th>
+                            <th>الاسم الكامل</th>
+                            <th>المسمى الوظيفي</th>
+                            <th>الحالة</th>
+                            <th class="text-center">الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for employee in employees %}
+                        <tr>
+                            <td>{{ employee.employee_id }}</td>
+                            <td>{{ employee.full_name }}</td>
+                            <td>{{ employee.job_title|default:"--" }}</td>
+                            <td>
+                                {% if employee.is_active %}
+                                    <span class="badge bg-success">نشط</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">غير نشط</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-outline-primary me-2 edit-employee-btn"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#employeeModal"
+                                        data-pk="{{ employee.pk }}"
+                                        data-employee-id="{{ employee.employee_id }}"
+                                        data-first-name="{{ employee.first_name }}"
+                                        data-last-name="{{ employee.last_name }}"
+                                        data-job-title="{{ employee.job_title|default:'' }}"
+                                        data-is-active="{{ employee.is_active|yesno:'true,false' }}">
+                                    <i class="bi bi-pencil-fill"></i> تعديل
+                                </button>
+                                <form action="{% url 'inventory:manage_employees' %}" method="post" class="d-inline" onsubmit="return confirm('هل أنت متأكد من رغبتك في حذف هذا الموظف؟ لا يمكن التراجع عن هذا الإجراء.');">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="employee_pk" value="{{ employee.pk }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash-fill"></i> حذف
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">لا يوجد موظفين مسجلين حالياً.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Employee Create/Edit Modal -->
+<div class="modal fade" id="employeeModal" tabindex="-1" aria-labelledby="employeeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{% url 'inventory:manage_employees' %}" method="post" id="employeeForm">
+                {% csrf_token %}
+                <input type="hidden" name="action" id="form_action" value="create">
+                <input type="hidden" name="employee_pk" id="form_employee_pk">
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="employeeModalLabel">إضافة موظف جديد</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="form_employee_id" class="form-label">معرف الموظف <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="form_employee_id" name="employee_id" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="form_first_name" class="form-label">الاسم الأول <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="form_first_name" name="first_name" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="form_last_name" class="form-label">الاسم الأخير <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="form_last_name" name="last_name" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="form_job_title" class="form-label">المسمى الوظيفي</label>
+                        <input type="text" class="form-control" id="form_job_title" name="job_title">
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="form_is_active" name="is_active" checked>
+                        <label class="form-check-label" for="form_is_active">الموظف نشط</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                    <button type="submit" class="btn btn-primary">حفظ التغييرات</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

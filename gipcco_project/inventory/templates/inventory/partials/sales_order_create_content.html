@@ -9,7 +9,7 @@
 <form method="POST" action="{% url 'inventory:create_sales_order' %}" id="createSalesOrderForm">
   {% csrf_token %}
   <div class="card shadow-sm mb-4">
-    <div class="card-header bg-light">
+    <div class="card-header">
       <h5 class="mb-0">بيانات الأمر الأساسية</h5>
     </div>
     <div class="card-body">
@@ -36,7 +36,7 @@
   </div>
 
   <div class="card shadow-sm">
-    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+    <div class="card-header d-flex justify-content-between align-items-center">
       <h5 class="mb-0">بنود أمر البيع</h5>
       <button type="button" class="btn btn-sm btn-success" id="add-so-item-btn">
         <i class="bi bi-plus-circle-fill me-2"></i>إضافة بند جديد
@@ -45,7 +45,7 @@
     <div class="card-body p-0">
       <div class="table-responsive">
         <table class="table table-hover table-striped mb-0">
-          <thead class="table-light">
+          <thead class="table">
             <tr>
               <th class="ps-3" style="width: 40%;">المنتج/التشغيلة</th>
               <th style="width: 20%;">الكمية المطلوبة</th>

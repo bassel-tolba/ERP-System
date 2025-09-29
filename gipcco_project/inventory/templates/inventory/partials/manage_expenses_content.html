@@ -132,6 +132,12 @@
                     <div class="col-md-2">
                         <input type="text" name="g_end_date" class="form-control datepicker" placeholder="إلى تاريخ..." value="{{ filter_values.g_end_date }}">
                     </div>
+                    <div class="col-md-2">
+                        <select name="g_cost_pool" class="form-select searchable-select">
+                            <option value="">كل مراكز التكلفة</option>
+                            {% for pool in cost_pools %}<option value="{{ pool.id }}" {% if filter_values.g_cost_pool == pool.id|stringformat:"s" %}selected{% endif %}>{{ pool.name }}</option>{% endfor %}
+                        </select>
+                    </div>
                     <div class="col-md-1">
                         <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search"></i></button>
                     </div>
@@ -148,7 +154,7 @@
                                 <th>التاريخ</th>
                                 <th>البيان</th>
                                 <th>الفئة</th>
-                                <th>التصنيف</th>
+                                <th>مركز التكلفة</th>
                                 <th>المبلغ</th>
                                 <th>ملاحظات</th>
                                 <th></th>
@@ -160,7 +166,7 @@
                                 <td>{{ item.expense_date|date:"Y-m-d" }}</td>
                                 <td>{{ item.description }}</td>
                                 <td>{{ item.get_category_display }}</td>
-                                <td>{{ item.get_classification_display }}</td>
+                                <td>{{ item.cost_pool.name }}</td>
                                 <td>{{ item.amount|floatformat:3 }}</td>
                                 <td>{{ item.notes|truncatechars:30 }}</td>
                                 <td class="text-end">
@@ -171,7 +177,8 @@
                                         data-date="{{ item.expense_date|date:"Y-m-d" }}"
                                         data-category="{{ item.category }}"
                                         data-classification="{{ item.classification }}"
-                                        data-notes="{{ item.notes|default_if_none:'' }}">
+                                        data-notes="{{ item.notes|default_if_none:'' }}"
+                                        data-cost-pool-id="{{ item.cost_pool.id }}">
                                         <i class="bi bi-pencil-fill"></i>
                                     </button>
                                      <form action="{% url 'inventory:delete_general_expense' item.pk %}" method="post" class="d-inline" onsubmit="return confirm('هل أنت متأكد من حذف هذا المصروف؟');">
@@ -241,53 +248,59 @@
 
 <!-- Edit General Expense Modal -->
 <div class="modal fade" id="editGeneralExpenseModal" tabindex="-1" aria-labelledby="editGeneralExpenseModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="editGeneralExpenseModalLabel">تعديل مصروف عام</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <form id="editGeneralExpenseForm" method="POST">
-          {% csrf_token %}
-          <div class="modal-body">
-              <div class="mb-3">
-                  <label for="edit_g_description" class="form-label">البيان</label>
-                  <input type="text" name="description" id="edit_g_description" class="form-control" required>
-              </div>
-              <div class="row">
-                  <div class="col-md-6 mb-3">
-                      <label for="edit_g_amount" class="form-label">المبلغ</label>
-                      <input type="number" step="any" name="amount" id="edit_g_amount" class="form-control" required>
-                  </div>
-                  <div class="col-md-6 mb-3">
-                      <label for="edit_g_date" class="form-label">التاريخ</label>
-                      <input type="text" name="expense_date" id="edit_g_date" class="form-control datepicker" required>
-                  </div>
-              </div>
-              <div class="row">
-                   <div class="col-md-6 mb-3">
-                       <label for="edit_g_category" class="form-label">الفئة</label>
-                        <select name="category" id="edit_g_category" class="form-select" required>
-                            {% for val, name in expense_categories %}<option value="{{ val }}">{{ name }}</option>{% endfor %}
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="editGeneralExpenseForm" method="post">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="editGeneralExpenseModalLabel">تعديل مصروف عام</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="edit_g_description" class="form-label">البيان</label>
+                        <input type="text" id="edit_g_description" name="description" class="form-control" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_g_amount" class="form-label">المبلغ</label>
+                            <input type="number" step="any" id="edit_g_amount" name="amount" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_g_date" class="form-label">التاريخ</label>
+                            <input type="text" id="edit_g_date" name="expense_date" class="form-control datepicker" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_g_category" class="form-label">الفئة</label>
+                            <select id="edit_g_category" name="category" class="form-select" required>
+                                {% for val, name in expense_categories %}<option value="{{ val }}">{{ name }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_g_classification" class="form-label">التصنيف</label>
+                            <select id="edit_g_classification" name="classification" class="form-select" required>
+                                {% for val, name in expense_classifications %}<option value="{{ val }}">{{ name }}</option>{% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_g_cost_pool" class="form-label">مركز التكلفة <span class="text-danger">*</span></label>
+                        <select id="edit_g_cost_pool" name="cost_pool_id" class="form-select searchable-select" required>
+                            {% for pool in cost_pools %}<option value="{{ pool.id }}">{{ pool.name }}</option>{% endfor %}
                         </select>
-                   </div>
-                   <div class="col-md-6 mb-3">
-                       <label for="edit_g_classification" class="form-label">التصنيف</label>
-                        <select name="classification" id="edit_g_classification" class="form-select" required>
-                            {% for val, name in expense_classifications %}<option value="{{ val }}">{{ name }}</option>{% endfor %}
-                        </select>
-                   </div>
-              </div>
-              <div class="mb-3">
-                  <label for="edit_g_notes" class="form-label">ملاحظات</label>
-                  <textarea name="notes" id="edit_g_notes" class="form-control" rows="3"></textarea>
-              </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
-            <button type="submit" class="btn btn-success">حفظ التعديلات</button>
-          </div>
-      </form>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_g_notes" class="form-label">ملاحظات</label>
+                        <textarea id="edit_g_notes" name="notes" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                    <button type="submit" class="btn btn-primary">حفظ التغييرات</button>
+                </div>
+            </form>
+        </div>
     </div>
-  </div>
 </div>

@@ -14,14 +14,19 @@ from .views.analysis_ledger_visuals import analysis, ledger, visuals, print_ledg
 from .views.purchase_orders import purchase_orders, create_purchase_order, view_purchase_order, edit_purchase_order, delete_purchase_order
 # --- MODIFIED: Use aliases for release_from_quarantine to avoid name collision ---
 from .views.finished_products import finished_goods_status, receive_finished_product, view_finished_product, release_from_quarantine as release_fg_from_quarantine
+# --- NEW: Import adjustments views ---
+from .views.adjustments import inventory_counts_list, create_inventory_count, manage_inventory_count, allocate_inventory_variances
 # --- MODIFIED: Import new API view ---
-from .views.api import get_used_qc_sources, api_batch_details, get_product_tags, api_get_open_pos_for_supplier, api_get_po_items, api_get_full_batch_analysis, api_get_sellable_stock, api_get_available_stock, api_batch_details
+from .views.api import get_used_qc_sources, api_batch_details, get_product_tags, api_get_open_pos_for_supplier, api_get_po_items, api_get_full_batch_analysis, api_get_sellable_stock, api_get_available_stock, api_batch_details, api_get_stock_sources_for_product
+from .views import api # Add this import
 # --- MODIFIED: Import new API views and sales views ---
 from .views.sales import customers, edit_customer, delete_customer, sales_orders, create_sales_order, view_sales_order, dispatch_from_sales_order
 # --- MODIFIED: Import new expense views ---
 from .views.expenses import expenses_dashboard, manage_expenses, edit_inventory_consumption, delete_inventory_consumption, edit_general_expense, delete_general_expense
 # --- MODIFIED: Import new financial report views ---
 from .views.financial_reports import trial_balance, profit_and_loss_statement, batch_production_variance_report, product_ledger, general_ledger, tax_reconciliation_report, reconciliation_report, balance_sheet
+# --- NEW: Import employee views ---
+from .views import employees
 
 from .views import financials
 
@@ -62,6 +67,7 @@ urlpatterns = [
     path('purchase_order/<int:pk>/edit/', edit_purchase_order, name='edit_purchase_order'),
     path('purchase_order/<int:pk>/delete/', delete_purchase_order, name='delete_purchase_order'),
 
+
     # Template Routes
     path('shop_order_templates/', shop_order_templates, name='shop_order_templates'),
     path('shop_order_templates/delete/<int:pk>/', delete_shop_order_template, name='delete_shop_order_template'),
@@ -101,6 +107,12 @@ urlpatterns = [
     path('visuals/', visuals, name='visuals'),
     path('stock_valuation/', stock_valuation, name='stock_valuation'),
     
+    # --- NEW: Inventory Counts & Adjustments ---
+    path('inventory_counts/', inventory_counts_list, name='inventory_counts_list'),
+    path('inventory_counts/create/', create_inventory_count, name='create_inventory_count'),
+    path('inventory_counts/manage/<int:pk>/', manage_inventory_count, name='manage_inventory_count'),
+    path('inventory_counts/allocate/<int:pk>/', allocate_inventory_variances, name='allocate_inventory_variances'),
+
     # --- NEW: Sales Management ---
     path('customers/', customers, name='customers'),
     path('customers/edit/<int:pk>/', edit_customer, name='edit_customer'),
@@ -111,6 +123,12 @@ urlpatterns = [
     path('sales_orders/create/', create_sales_order, name='create_sales_order'),
     path('sales_order/<int:pk>/', view_sales_order, name='view_sales_order'),
     path('sales_order/<int:pk>/dispatch/', dispatch_from_sales_order, name='dispatch_from_sales_order'),
+
+    # --- NEW: Employee Financials ---
+    path('employees/financials/', employees.employee_financials_dashboard, name='employee_financials_dashboard'),
+    path('employees/financials/<int:employee_id>/', employees.employee_advance_detail, name='employee_advance_detail'),
+    path('employees/financials/settle/<int:advance_id>/', employees.settle_employee_advance, name='settle_employee_advance'),
+    path('employees/manage/', employees.manage_employees, name='manage_employees'),
 
     # --- NEW: Expense Management ---
     path('expenses/', expenses_dashboard, name='expenses_dashboard'),
@@ -134,41 +152,43 @@ urlpatterns = [
     path('financials/journal/create/', financials.create_journal_entry, name='create_journal_entry'),
     path('financials/journal/<int:pk>/post/', financials.post_journal_entry, name='post_journal_entry'),
     path('financials/fixed_assets/', financials.fixed_assets_dashboard, name='fixed_assets_dashboard'),
+    
+    # --- NEW: Overhead Allocation & Configuration ---
+    path('financials/cost_pools/', financials.cost_pools_list, name='cost_pools_list'),
+    path('financials/allocation_drivers/', financials.allocation_drivers_list, name='allocation_drivers_list'),
+    path('financials/overhead_allocation/', financials.overhead_allocation_workspace, name='overhead_allocation_workspace'),
 
     # --- NEW: Bank Reconciliation ---
     path('financials/reconciliation/', financials.bank_reconciliations_list, name='bank_reconciliations_list'),
     path('financials/reconciliation/create/', financials.create_bank_reconciliation, name='create_bank_reconciliation'),
     path('financials/reconciliation/<int:pk>/manage/', financials.manage_bank_reconciliation, name='manage_bank_reconciliation'),
     path('financials/reconciliation/<int:pk>/delete/', financials.delete_bank_reconciliation, name='delete_bank_reconciliation'),
-    path('financials/reconciliation/<int:pk>/match/', financials.api_match_transactions, name='api_match_transactions'),
-    path('financials/reconciliation/<int:pk>/unmatch/', financials.api_unmatch_transaction, name='api_unmatch_transaction'),
-    path('financials/reconciliation/<int:pk>/create_adjustment/', financials.api_create_adjustment_and_match, name='api_create_adjustment_and_match'),
     path('financials/reconciliation/<int:pk>/finalize/', financials.finalize_reconciliation, name='finalize_reconciliation'),
 
-    # --- NEW: Financial Reports ---
-    path('reports/general_ledger/', general_ledger, name='general_ledger'),
+    # --- NEW: Financial Period Management ---
+    path('financials/periods/', financials.fiscal_year_list, name='fiscal_year_list'),
+    path('financials/periods/create/', financials.create_fiscal_year, name='create_fiscal_year'),
+    path('financials/periods/edit/<int:pk>/', financials.edit_fiscal_year, name='edit_fiscal_year'),
+    path('financials/periods/delete/<int:pk>/', financials.delete_fiscal_year, name='delete_fiscal_year'),
+    path('financials/periods/generate/<int:year_id>/', financials.generate_monthly_periods, name='generate_monthly_periods'),
+    path('financials/periods/create_period/<int:year_id>/', financials.create_financial_period, name='create_financial_period'),
+    path('financials/periods/change_status/<int:period_id>/', financials.change_period_status, name='change_period_status'),
+    path('financials/periods/close/<int:period_id>/', financials.close_period_view, name='close_period_view'),
+    path('financials/periods/close/<int:period_id>/action/', financials.close_period_action, name='close_period_action'),
+    path('financials/periods/audit_log/<int:period_id>/', financials.view_period_audit_log, name='view_period_audit_log'),
+
+
+    # --- Reports ---
     path('reports/trial_balance/', trial_balance, name='trial_balance'),
-    path('reports/profit_and_loss_statement/', profit_and_loss_statement, name='profit_and_loss_statement'),
+    path('reports/profit_and_loss/', profit_and_loss_statement, name='profit_and_loss_statement'),
     path('reports/balance_sheet/', balance_sheet, name='balance_sheet'),
     path('reports/tax_reconciliation/', tax_reconciliation_report, name='tax_reconciliation_report'),
     path('reports/production_variance/', batch_production_variance_report, name='batch_production_variance_report'),
     path('reports/reconciliation/', reconciliation_report, name='reconciliation_report'),
-
+    path('reports/general_ledger/', general_ledger, name='general_ledger'),
+    
     # --- NEW PRODUCT LEDGER ---
     path('reports/product_ledger/', product_ledger, name='product_ledger'),
-
-    # --- NEW: Financial Period Management ---
-    path('financials/periods/', financials.fiscal_year_list, name='fiscal_year_list'),
-    path('financials/periods/create_year/', financials.create_fiscal_year, name='create_fiscal_year'),
-    path('financials/periods/<int:pk>/edit/', financials.edit_fiscal_year, name='edit_fiscal_year'),
-    path('financials/periods/<int:pk>/delete/', financials.delete_fiscal_year, name='delete_fiscal_year'),
-    path('financials/periods/<int:year_id>/generate_periods/', financials.generate_monthly_periods, name='generate_monthly_periods'),
-    path('financials/periods/<int:period_id>/change_status/', financials.change_period_status, name='change_period_status'),
-    path('financials/periods/<int:period_id>/close/', financials.close_period_view, name='close_period_view'),
-    path('financials/periods/<int:period_id>/close_action/', financials.close_period_action, name='close_period_action'),
-    path('financials/periods/<int:period_id>/audit_log/', financials.view_period_audit_log, name='view_period_audit_log'),
-    path('api/periods/<int:period_id>/checklist_status/', financials.api_period_checklist_status, name='api_period_checklist_status'),
-
 
     # API Routes
     path('api/batch_details/<int:batch_pk>/', api_batch_details, name='api_batch_details'),
@@ -182,5 +202,9 @@ urlpatterns = [
     path('api/available_stock/<int:product_pk>/', api_get_available_stock, name='api_get_available_stock'),
     path('api/supplier/<int:supplier_id>/uninvoiced_receipts/', financials.api_get_uninvoiced_receipts, name='api_get_uninvoiced_receipts'),
     path('api/sales_order/<int:so_id>/uninvoiced_dispatches/', financials.api_get_uninvoiced_dispatches, name='api_get_uninvoiced_dispatches'),
+    path('api/product/<int:product_id>/stock_sources/', api_get_stock_sources_for_product, name='api_get_stock_sources_for_product'),
+    path('api/journal_entry/<int:je_id>/', api.api_get_journal_entry_details, name='api_get_journal_entry_details'),
+    # --- NEW: API for Employee Advance Settlement ---
+    path('api/employees/<int:employee_id>/unsettled_transactions/', api.api_get_unsettled_transactions, name='api_get_unsettled_transactions'),
     
 ]

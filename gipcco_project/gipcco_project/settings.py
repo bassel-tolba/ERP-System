@@ -202,18 +202,30 @@ LOGGING = {
             'level': 'INFO',
             'propagate': True,
         },
-        # This is the logger for our application
+        # --- NEW: Logger for our 'inventory' app ---
         'inventory': {
             'handlers': ['console', 'file'],
-            'level': 'DEBUG', # Capture all levels of logs from our app
-            'propagate': False, # Prevent logs from being passed to the root logger
+            'level': 'DEBUG', # Set to DEBUG to capture all levels of logs from our app
+            'propagate': True,
         },
     },
 }
 
+# --- NEW: Disable file logging during tests ---
+# This checks if 'test' is in the command-line arguments (e.g., 'manage.py test')
+# and reconfigures the logging to prevent file locks and speed up tests.
+import sys
+if 'test' in sys.argv:
+    LOGGING['handlers']['file'] = {
+        'level': 'INFO',
+        'class': 'logging.NullHandler', # Send file logs to nowhere during tests
+    }
+    # Optionally, you can also reduce the console output verbosity during tests
+    # LOGGING['handlers']['console']['level'] = 'WARNING'
 
 
-
+# --- JAZZMIN SETTINGS ---
+# These settings customize the look and feel of the Django admin interface.
 JAZZMIN_SETTINGS = {
     # TITLE AND LOGO
     "site_title": "Inventory Admin",

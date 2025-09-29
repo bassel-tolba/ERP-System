@@ -93,6 +93,13 @@
                             </select>
                         </div>
                         <div class="col-12">
+                            <label for="cost_pool_id" class="form-label">مركز التكلفة <span class="text-danger">*</span></label>
+                            <select name="cost_pool_id" id="cost_pool_id" class="form-select searchable-select" required>
+                                <option value="">-- اختر مركز تكلفة --</option>
+                                {% for pool in cost_pools %}<option value="{{ pool.id }}">{{ pool.name }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-12">
                             <label for="notes_general" class="form-label">ملاحظات</label>
                             <textarea name="notes" id="notes_general" class="form-control" rows="2"></textarea>
                         </div>

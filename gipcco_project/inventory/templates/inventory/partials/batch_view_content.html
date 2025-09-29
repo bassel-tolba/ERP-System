@@ -51,6 +51,14 @@
                         {% endfor %}
                     </select>
                 </div>
+                <div class="col-md-3 mb-3">
+                    <label for="machine_hours_consumed" class="form-label">Machine Hours Consumed</label>
+                    <input type="number" step="any" class="form-control" id="machine_hours_consumed" name="machine_hours_consumed" value="{{ batch.machine_hours_consumed|default:'' }}">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="labor_hours_consumed" class="form-label">Labor Hours Consumed</label>
+                    <input type="number" step="any" class="form-control" id="labor_hours_consumed" name="labor_hours_consumed" value="{{ batch.labor_hours_consumed|default:'' }}">
+                </div>
             </div>
             <div class="row">
                 <div class="col-12">

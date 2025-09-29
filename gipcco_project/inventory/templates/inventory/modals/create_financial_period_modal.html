@@ -1,0 +1,34 @@
+<div class="modal fade" id="createFinancialPeriodModal" tabindex="-1" aria-labelledby="createFinancialPeriodModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createFinancialPeriodModalLabel">إنشاء فترة محاسبية جديدة</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="createFinancialPeriodForm" method="post" action="{% url 'inventory:create_financial_period' 0 %}">
+                {% csrf_token %}
+                <input type="hidden" name="fiscal_year_id" id="modal_fiscal_year_id">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="period_name" class="form-label">اسم الفترة</label>
+                        <input type="text" class="form-control" id="period_name" name="name" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="period_start_date" class="form-label">تاريخ البدء</label>
+                            <input type="text" class="form-control datepicker" id="period_start_date" name="start_date" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="period_end_date" class="form-label">تاريخ الانتهاء</label>
+                            <input type="text" class="form-control datepicker" id="period_end_date" name="end_date" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                    <button type="submit" class="btn btn-primary">حفظ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

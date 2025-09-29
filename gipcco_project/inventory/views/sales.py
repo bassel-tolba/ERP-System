@@ -193,8 +193,9 @@ def dispatch_from_sales_order(request: HttpRequest, pk: int) -> HttpResponse:
         
         with transaction.atomic():
             dispatches_to_create = []
+            # --- ADDED .select_for_update() to lock the rows ---
             so_items = {
-                str(item.id): item for item in SalesOrderItem.objects.filter(sales_order=so)
+                str(item.id): item for item in SalesOrderItem.objects.select_for_update().filter(sales_order=so)
                 .annotate(total_dispatched=Coalesce(Sum('dispatches__quantity'), 0.0))
             }
 

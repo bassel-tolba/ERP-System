@@ -1,0 +1,37 @@
+<div class="container-fluid">
+    <h1 class="h3 mb-4 text-gray-800">بدء جرد مخزني جديد</h1>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form method="post" action="{% url 'inventory:create_inventory_count' %}">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="reason" class="form-label">سبب الجرد</label>
+                    <input type="text" class="form-control" id="reason" name="reason" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="products" class="form-label">اختر المنتجات للجرد</label>
+                    <select id="products" name="products" class="form-control searchable-select" multiple required>
+                        {% for product in products %}
+                        <option value="{{ product.id }}">{{ product }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-3 form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="include_quarantined" name="include_quarantined" value="true" checked>
+                    <label class="form-check-label" for="include_quarantined">
+                        تضمين الكميات "تحت الفحص" في رصيد النظام
+                        <i class="bi bi-info-circle" data-bs-toggle="tooltip" title="عند التحديد، سيتم حساب رصيد النظام الأولي بناءً على مجموع الكميات المفرج عنها وتحت الفحص. عند عدم التحديد، سيتم الحساب بناءً على الكميات المفرج عنها فقط."></i>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-play-circle-fill me-2"></i>بدء الجرد
+                </button>
+                <a href="{% url 'inventory:inventory_counts_list' %}" class="btn btn-secondary">إلغاء</a>
+            </form>
+        </div>
+    </div>
+</div>

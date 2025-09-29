@@ -1,0 +1,42 @@
+<div class="container-fluid">
+    <h1 class="h3 mb-4 text-gray-800">إدخال الكميات المعدودة</h1>
+    <p>سبب الجرد: <strong>{{ count.reason }}</strong> | التاريخ: <strong>{{ count.count_date }}</strong></p>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form method="post" action="{% url 'inventory:manage_inventory_count' count.pk %}">
+                {% csrf_token %}
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>كود المنتج</th>
+                                <th>اسم المنتج</th>
+                                <th>الوحدة</th>
+                                <th style="width: 200px;">الكمية المعدودة</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in count.items.all %}
+                            <tr>
+                                <td>{{ item.product.code }}</td>
+                                <td>{{ item.product.name }}</td>
+                                <td>{{ item.product.unit }}</td>
+                                <td>
+                                    <input type="number" step="any" class="form-control" name="counted_quantity_{{ item.id }}" value="{{ item.counted_quantity|default:'' }}" {% if count.status != 'in_progress' %}readonly{% endif %} required>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% if count.status == 'in_progress' %}
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-check-circle-fill me-2"></i>حفظ الكميات والانتقال للتخصيص
+                </button>
+                {% endif %}
+                <a href="{% url 'inventory:inventory_counts_list' %}" class="btn btn-secondary">العودة للقائمة</a>
+            </form>
+        </div>
+    </div>
+</div>

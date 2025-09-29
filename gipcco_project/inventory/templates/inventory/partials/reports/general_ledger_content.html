@@ -18,7 +18,7 @@
 </style>
 
 <div class="card shadow-sm print-container">
-    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+    <div class="card-header d-flex justify-content-between align-items-center">
         <div>
             {% if selected_account %}
             <h5 class="mb-0">كشف حساب: <span class="text-primary">{{ selected_account.name }} ({{ selected_account.code }})</span></h5>
@@ -37,7 +37,7 @@
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover mb-0">
-                <thead class="table-dark">
+                <thead class="table">
                     <tr>
                         <th style="width: 50%;">الحساب / البيان</th>
                         <th class="text-end">رصيد أول المدة</th>

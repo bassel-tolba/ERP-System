@@ -15,6 +15,7 @@ def shop_order_templates(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
         template_name = request.POST.get('template_name')
         final_product_id = request.POST.get('final_product_id')
+        bottle_size_ml_str = request.POST.get('bottle_size_ml') # NEW
         primitive_ids = request.POST.getlist('primitive_product_id')
         quantities = request.POST.getlist('theoretical_quantity')
 
@@ -26,7 +27,8 @@ def shop_order_templates(request: HttpRequest) -> HttpResponse:
             with transaction.atomic():
                 template = ShopOrderTemplate.objects.create(
                     name=template_name,
-                    final_product_id=final_product_id
+                    final_product_id=final_product_id,
+                    bottle_size_ml=int(bottle_size_ml_str) if bottle_size_ml_str else None # NEW
                 )
                 items_to_create = []
                 for pid, qty in zip(primitive_ids, quantities):
@@ -54,7 +56,8 @@ def shop_order_templates(request: HttpRequest) -> HttpResponse:
         # Serialize the template object into a dictionary for json_script
         source_template_data = {
             'name': source_template_obj.name,
-            'final_product_id': source_template_obj.final_product_id
+            'final_product_id': source_template_obj.final_product_id,
+            'bottle_size_ml': source_template_obj.bottle_size_ml # NEW
         }
 
     primitive_products_qs = Product.objects.filter(~Q(product_type=Product.ProductType.FINAL_PRODUCT))
@@ -111,6 +114,7 @@ def edit_shop_order_template(request: HttpRequest, pk: int) -> HttpResponse:
     if request.method == 'POST':
         template_name = request.POST.get('template_name')
         final_product_id = request.POST.get('final_product_id')
+        bottle_size_ml_str = request.POST.get('bottle_size_ml') # NEW
         primitive_ids = request.POST.getlist('primitive_product_id')
         quantities = request.POST.getlist('theoretical_quantity')
         
@@ -122,6 +126,7 @@ def edit_shop_order_template(request: HttpRequest, pk: int) -> HttpResponse:
             with transaction.atomic():
                 template.name = template_name
                 template.final_product_id = final_product_id
+                template.bottle_size_ml = int(bottle_size_ml_str) if bottle_size_ml_str else None # NEW
                 template.save()
 
                 # Delete old items and create new ones

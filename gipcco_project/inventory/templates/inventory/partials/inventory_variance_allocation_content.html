@@ -1,0 +1,108 @@
+{% load inventory_extras %}
+<div class="container-fluid" id="variance-allocation-content" data-count-id="{{ count.id }}">
+    <h1 class="h3 mb-4 text-gray-800">تخصيص فروقات الجرد</h1>
+    <p>راجع الفروقات أدناه وقم بتخصيصها على مصادر المخزون الصحيحة قبل الترحيل.</p>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form id="allocationForm" method="post" action="{% url 'inventory:allocate_inventory_variances' count.pk %}">
+                {% csrf_token %}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>المنتج</th>
+                            <th>كمية النظام</th>
+                            <th>الكمية المعدودة</th>
+                            <th>الفرق</th>
+                            <th>الحالة</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in variance_items %}
+                        <tr data-item-id="{{ item.id }}">
+                            <td>{{ item.product }}</td>
+                            <td>{{ item.system_quantity|floatformat:2 }}</td>
+                            <td>{{ item.counted_quantity|floatformat:2 }}</td>
+                            <td>
+                                <span class="badge fs-6 bg-{% if item.variance_quantity < 0 %}danger{% else %}success{% endif %}">
+                                    {{ item.variance_quantity|floatformat:2 }}
+                                </span>
+                            </td>
+                            <td class="allocation-status">
+                                <span class="badge bg-secondary">معلق</span>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-primary allocate-btn" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#allocationModal_{{ item.id }}"
+                                        data-product-id="{{ item.product.id }}"
+                                        data-product-type="{{ item.product.product_type }}"
+                                        data-variance="{{ item.variance_quantity }}"
+                                        data-item-id="{{ item.id }}">
+                                    تخصيص
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <hr>
+                <button type="submit" class="btn btn-primary" id="postAdjustmentsBtn" disabled>
+                    <i class="bi bi-check-all me-2"></i>ترحيل جميع التسويات المعتمدة
+                </button>
+                 <a href="{% url 'inventory:inventory_counts_list' %}" class="btn btn-secondary">العودة للقائمة</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modals for each variance item -->
+{% for item in variance_items %}
+<div class="modal fade" id="allocationModal_{{ item.id }}" tabindex="-1" aria-labelledby="allocationModalLabel_{{ item.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="allocationModalLabel_{{ item.id }}">تخصيص فرق للمنتج: {{ item.product.name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="allocation-details">
+                    <!-- Content will be loaded via JavaScript -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary save-allocation-btn">حفظ التخصيص</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- NEW: Modal for Auto-Distribution Batch Selection -->
+<div class="modal fade" id="autoDistributeModal" tabindex="-1" aria-labelledby="autoDistributeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="autoDistributeModalLabel">تحديد دفعات للتوزيع التلقائي</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>الرجاء تحديد الدفعات التي سيتم توزيع العجز عليها. سيبدأ النظام بأحدث دفعة تم تحديدها.</p>
+                <div id="autoDistributeBatchList" class="table-responsive" style="max-height: 400px;">
+                    <!-- Batch list will be populated by JavaScript -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" id="confirmAutoDistributionBtn">تأكيد التوزيع</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Data Island for JavaScript -->
+<script id="reasonCodesData" type="application/json">
+    {{ reason_codes|jsonify }}
+</script>

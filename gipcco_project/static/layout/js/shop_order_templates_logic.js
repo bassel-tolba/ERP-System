@@ -86,6 +86,9 @@ function initShopOrderTemplatesLogic(container) {
         addTemplateModalEl.querySelector(
           "#template_name_input"
         ).value = `نسخة من - ${sourceTpl.name}`;
+        addTemplateModalEl.querySelector(
+          "#bottle_size_ml_input"
+        ).value = sourceTpl.bottle_size_ml || "";
         if (sourceItms && sourceItms.length > 0) {
           sourceItms.forEach((item) => {
             createItemRow(

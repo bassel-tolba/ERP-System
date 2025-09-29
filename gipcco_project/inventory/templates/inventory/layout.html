@@ -8,7 +8,7 @@
     <!-- Google Fonts -->
     <link rel="stylesheet" href="{% static 'css/google-fonts.css' %}" />
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/bootstrap.rtl.css' %}" />
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="{% static 'css/bootstrap-icons.min.css' %}" />
     <!-- Third-party CSS -->
@@ -85,7 +85,7 @@
                         </li>
 
                         <li class="nav-item">
-                            <a class="nav-link dropdown-toggle {% if active_page == 'analysis' or active_page == 'production_returns' or active_page == 'opening_balances' or active_page == 'ledger' or active_page == 'visuals' or active_page == 'quarantine' %}active{% endif %}" href="#inventorySubmenu" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="inventorySubmenu">
+                            <a class="nav-link dropdown-toggle {% if active_page == 'analysis' or active_page == 'production_returns' or active_page == 'opening_balances' or active_page == 'ledger' or active_page == 'visuals' or active_page == 'quarantine' or active_page == 'inventory_counts' %}active{% endif %}" href="#inventorySubmenu" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="inventorySubmenu">
                                 <i class="bi bi-bar-chart-line-fill nav-icon"></i>
                                 <span>التحليل والمخزون</span>
                             </a>
@@ -95,6 +95,7 @@
                                     <li><a class="dropdown-item" href="{% url 'inventory:analysis' %}">تحليل حركة المخزون</a></li>
                                     <li><a class="dropdown-item" href="{% url 'inventory:opening_balances' %}">الأرصدة الافتتاحية</a></li>
                                     <li><a class="dropdown-item" href="{% url 'inventory:production_returns' %}">إرجاع من الإنتاج</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'inventory:inventory_counts_list' %}">الجرد والمطابقة</a></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item" href="{% url 'inventory:ledger' %}">كشف حساب منتج/شركة</a></li>
                                     <li><a class="dropdown-item" href="{% url 'inventory:product_ledger' %}">كشف حساب منتج (تفصيلي)</a></li>
@@ -131,8 +132,21 @@
                                     <li><a class="dropdown-item" href="{% url 'inventory:create_journal_entry' %}">إنشاء قيد يومية</a></li>
                                     <li><a class="dropdown-item" href="{% url 'inventory:trial_balance' %}">ميزان المراجعة</a></li>
                                     <li><a class="dropdown-item {% if sub_page == 'periods' %}active{% endif %}" href="{% url 'inventory:fiscal_year_list' %}">الفترات المحاسبية</a></li>
+                                    
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><h6 class="dropdown-header">إعدادات التكاليف العامة</h6></li>
+                                    <li><a class="dropdown-item {% if sub_page == 'cost_pools' %}active{% endif %}" href="{% url 'inventory:cost_pools_list' %}">مراكز التكلفة</a></li>
+                                    <li><a class="dropdown-item {% if sub_page == 'allocation_drivers' %}active{% endif %}" href="{% url 'inventory:allocation_drivers_list' %}">عوامل التوزيع</a></li>
+                                    <li><a class="dropdown-item {% if sub_page == 'overhead_allocation' %}active{% endif %}" href="{% url 'inventory:overhead_allocation_workspace' %}">توزيع التكاليف العامة</a></li>
                                 </ul>
                             </div>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link {% if active_page == 'employee_financials' %}active{% endif %}" href="{% url 'inventory:employee_financials_dashboard' %}">
+                                <i class="bi bi-people-fill nav-icon"></i>
+                                <span>سلف الموظفين</span>
+                            </a>
                         </li>
                         
                         <li class="nav-item">
@@ -166,6 +180,7 @@
                                     <li><a class="dropdown-item" href="{% url 'inventory:products' %}">إدارة المنتجات</a></li>
                                     <li><a class="dropdown-item" href="{% url 'inventory:companies' %}">إدارة الموردين</a></li>
                                     <li><a class="dropdown-item" href="{% url 'inventory:customers' %}">إدارة العملاء</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'inventory:manage_employees' %}">إدارة الموظفين</a></li>
                                 </ul>
                             </div>
                         </li>
@@ -295,6 +310,8 @@
     <script src="{% static 'layout/js/purchase_order_create_logic.js' %}"></script>
     <script src="{% static 'layout/js/tax_reconciliation_report_logic.js' %}"></script>
     <script src="{% static 'layout/js/close_period_logic.js' %}"></script>
+    <script src="{% static 'layout/js/inventory_counts_logic.js' %}"></script>
+    <script src="{% static 'layout/js/employees_logic.js' %}"></script>
     <!-- Dynamic content loader (MUST BE LAST) -->
     <script src="{% static 'layout/js/dynamic_content_loader.js' %}"></script>
     

@@ -47,6 +47,9 @@ This file defines the database schema and core business logic. The file follows 
 - **`FinishedProductDispatch`**: Records the shipment of finished goods against a `SalesOrderItem`.
 - **`InventoryConsumption`**: Records the internal use of MRO or Consumable items.
 - **`ExpenseLog`**: Records general, non-inventory expenses.
+- **`InventoryCount`**: Header for a physical inventory counting event. Tracks the date, reason, and status of the count.
+- **`InventoryCountItem`**: A line within an `InventoryCount`, snapshotting the system vs. counted quantity for a single product.
+- **`InventoryAdjustment`**: The final, auditable record of a stock variance, linked to a specific source (`InventoryLog` or `FinishedProductReceipt`).
 
 #### 2.1.2. Accounting & Financial Models
 - **`FixedAsset`**: The fixed asset sub-ledger.
@@ -58,7 +61,7 @@ This file defines the database schema and core business logic. The file follows 
 - **`JournalEntry`**: The header for a journal entry. Can be linked to a source object (e.g., `InventoryLog`, `Batch`).
 - **`JournalEntryLine`**: A debit or credit line within a `JournalEntry`.
 - **`ProductTypeAccountingSettings`**: Maps product types to default GL accounts (Inventory, COGS, Sales).
-- **`GeneralAccountingSettings`**: A singleton model holding system-wide default accounts (A/P, A/R, WIP, etc.).
+- **`GeneralAccountingSettings`**: A singleton model holding system-wide default accounts (A/P, A/R, WIP, Inventory Adjustment Gain/Loss, etc.).
 - **`SupplierInvoice`**: An A/P invoice from a supplier, linking one or more `InventoryLog` receipts.
 - **`SupplierInvoiceItem`**: Links a receipt to a `SupplierInvoice`.
 - **`PaymentApplication`**: Links a `Payment` to a `SupplierInvoice`.
@@ -71,17 +74,33 @@ This file defines the database schema and core business logic. The file follows 
 - **`BankReconciliation`**: Represents a bank reconciliation period.
 - **`BankStatementLine`**: A line item from a bank statement, used in reconciliation.
 
+#### 2.1.3. Employee Financial Sub-Ledger Models
+- **`Employee`**: Represents an employee, acting as a sub-ledger for employee-related accounts (e.g., advances).
+- **`EmployeeAdvance`**: Records a single disbursement of funds to an employee, creating a receivable. It's linked to a `Payment` transaction.
+- **`EmployeeAdvanceSettlement`**: A linking table that connects an `InventoryLog` or `ExpenseLog` to an `EmployeeAdvance` to justify the expenditure and settle the advance.
+
+#### 2.1.4. Overhead Allocation Models
+- **`CostPool`**: Represents a pool of indirect manufacturing costs (e.g., "Factory Rent", "Machine Maintenance"). Pools can be hierarchical. Each pool is linked to a specific GL expense account.
+- **`AllocationDriver`**: Represents the basis for allocating cost pools (e.g., "Machine Hours", "Labor Hours", "Total Production Units").
+- **`OverheadAllocationRun`**: An event record for calculating and posting overhead for a specific `CostPool` and `FinancialPeriod`. It stores the calculated rate and links to the resulting journal entries.
+
 ### 2.2. Services (`inventory/services/`)
 
 The application uses a service layer to encapsulate complex business logic. This is a key architectural pattern.
 
 -   **`costing_service.py`**:
     -   **`get_inventory_state_at_datetime(product_id, target_datetime)`**:
-        -   **Purpose**: Calculates the historical stock quantity and total value for a product at a specific moment. Core function for valuation.
+        -   **Purpose**: Calculates the historical stock quantity and total value for a product at a specific moment. Core function for valuation. Now includes `InventoryAdjustment` transactions.
         -   **Returns**: A dictionary `{'quantity': Decimal, 'value': Decimal}`.
     -   **`recalculate_cost_history_for_product(product_id, start_datetime)`**:
-        -   **Purpose**: The "master" costing function. Iterates through all transactions for a product from a start date, recalculates the moving average cost at each step, updates the `cost_at_consumption` on `BatchItem`s, and finally updates the `moving_average_cost` on the `Product` model.
+        -   **Purpose**: The "master" costing function. Iterates through all transactions for a product from a start date, recalculates the moving average cost at each step, updates the `cost_at_consumption` on `BatchItem`s, and finally updates the `moving_average_cost` on the `Product` model. Now includes `InventoryAdjustment` transactions.
         -   **Returns**: `None`.
+
+-   **`overhead_service.py`**:
+    -   **`calculate_cost_pool_total(cost_pool, period)`**: Calculates the total expenses assigned to a cost pool (and its children) for a period.
+    -   **`calculate_driver_units_total(driver, period)`**: Calculates the total number of driver units (e.g., total machine hours) recorded in a period.
+    -   **`execute_overhead_allocation_run(run)`**: The main calculation engine. It uses the above functions to determine the total pool amount, total driver units, and calculates the final overhead rate, saving it to the `OverheadAllocationRun` object.
+    -   **`apply_overhead_to_finished_goods(run)`**: Applies the calculated overhead rate to all `FinishedProductReceipt` records within the period. It proportionally distributes the total pool cost to each receipt based on the driver units consumed by that receipt, updating the `allocated_overhead_cost` field.
 
 -   **`accounting_service.py`**:
     -   **`_check_period_is_open(date)`**: Helper that raises a `PermissionError` if the date falls in a closed `FinancialPeriod`. Used as a gatekeeper for all financial transactions.
@@ -96,10 +115,20 @@ The application uses a service layer to encapsulate complex business logic. This
         -   `...customer_payment`: DEBIT Bank Account; CREDIT A/R.
         -   `...bank_transfer`: DEBIT Destination Bank; CREDIT Source Bank.
         -   `...monthly_depreciation`: DEBIT Depreciation Expense; CREDIT Accumulated Depreciation.
+        -   `...inventory_adjustment`: DEBIT Inventory/Loss Account; CREDIT Inventory/Gain Account.
+        -   `...employee_advance`: DEBIT Employee Advances Receivable; CREDIT Bank Account.
+        -   `...overhead_allocation`: DEBIT WIP Inventory; CREDIT various Expense Accounts from the cost pool.
+        -   `...overhead_application`: DEBIT Finished Goods Inventory; CREDIT WIP Inventory.
+
+-   **`adjustment_service.py`**:
+    -   **`start_inventory_count`**: Creates a count event and snapshots system quantities.
+    -   **`create_adjustments_from_form`**: Creates `InventoryAdjustment` records based on user input from the allocation modal.
+    -   **`auto_distribute_finished_good_shortage`**: Implements the special logic to automatically create shortage adjustments for finished goods from the newest batches first.
+    -   **`finalize_inventory_count`**: Triggers cost recalculation for all affected products and marks the count as complete.
 
 ### 2.3. Signals (`inventory/signals.py`)
 
-The application uses Django signals (`post_save`, `post_delete`) to automatically trigger the creation of journal entries when key models (like `InventoryLog`, `Batch`, `Payment`, `FinishedProductDispatch`) are saved or deleted. This decouples the accounting logic from the core business operations.
+The application uses Django signals (`post_save`, `post_delete`) to automatically trigger the creation of journal entries when key models (like `InventoryLog`, `Batch`, `Payment`, `FinishedProductDispatch`, `InventoryAdjustment`) are saved or deleted. This decouples the accounting logic from the core business operations.
 
 ### 2.4. Views (`inventory/views/`)
 
@@ -152,12 +181,23 @@ The views are organized into separate files based on their functionality.
     - `expenses_dashboard(request)`: (GET/POST) A dashboard for logging `InventoryConsumption` (internal use) and `ExpenseLog` (general expenses). Triggers cost recalculation for inventory consumption.
     - `manage_expenses(request)`: (GET) A unified view to filter, edit, and delete both types of expenses.
     - `edit_*`, `delete_*`: (POST) Handlers for editing/deleting expense records, with cost recalculation triggers for inventory items.
+- **`adjustments.py`**:
+    - `inventory_counts_list(request)`: (GET) Lists all inventory count events.
+    - `create_inventory_count(request)`: (GET/POST) Form to start a new count and select products.
+    - `manage_inventory_count(request, pk)`: (GET/POST) Workspace for entering physical counted quantities.
+    - `allocate_inventory_variances(request, pk)`: (GET/POST) The main workspace for reviewing variances and allocating them to specific stock sources before final posting.
+- **`employees.py`**:
+    - `manage_employees(request)`: (GET/POST) CRUD operations for `Employee` records.
+    - `employee_financials_dashboard(request)`: (GET) A dashboard showing all employees and their outstanding advance balances.
+    - `employee_advance_detail(request, employee_id)`: (GET/POST) A detailed view for a single employee, showing all their advances and settlements. Handles the creation of new `EmployeeAdvance` records.
+    - `settle_employee_advance(request, advance_id)`: (POST) Handles the settlement of an advance by linking it to selected `InventoryLog` or `ExpenseLog` transactions.
 - **`financials.py`**: A large module containing views for:
     -   **A/P**: `supplier_invoices`, `create_supplier_invoice`, `view_supplier_invoice`, `apply_payment_to_invoice`.
     -   **A/R**: `customer_invoices`, `create_customer_invoice`, `view_customer_invoice`, `receive_payment_for_invoice`.
     -   **Banking**: `bank_accounts_dashboard` to view balances and create `BankTransfer`s.
     -   **Journal Entries**: `journal_entries` (list), `create_journal_entry` (form), `post_journal_entry` (action).
     -   **Fixed Assets**: `fixed_assets_dashboard` to view assets and depreciation logs.
+    -   **Overhead & Configuration**: `cost_pools_list` (manage cost pool hierarchy), `allocation_drivers_list` (manage allocation drivers), `overhead_allocation_workspace` (the main screen to run, post, and apply period-end overhead calculations).
     -   **Period Management**: `fiscal_year_list`, `create_fiscal_year`, `edit_fiscal_year`, `delete_fiscal_year`, `change_period_status`, `close_period_view`, `close_period_action`.
     -   **Bank Reconciliation**: `bank_reconciliations_list`, `create_bank_reconciliation`, `manage_bank_reconciliation`, `finalize_reconciliation`.
 - **`financial_reports.py`**:
@@ -178,8 +218,11 @@ This file maps URLs to view functions. Key routes include:
 - `/purchase_orders/`, `/sales_orders/`: PO and SO management.
 - `/batches/`: Production plan management.
 - `/finished_goods_status/`: View for production pipeline.
+- `/inventory_counts/`: Inventory count and adjustment management.
+- `/employee_financials/`: Namespace for employee advance management.
 - `/financials/`: Namespace for all accounting views (invoices, banking, journal, etc.).
 - `/financials/periods/`: Fiscal year and period management.
+- `/financials/cost_pools/`, `/financials/allocation_drivers/`, `/financials/overhead_allocation/`: Overhead configuration and execution URLs.
 - `/reports/`: Namespace for all financial reports (GL, P&L, Balance Sheet, etc.).
 - `/api/`: Namespace for all API endpoints.
 
@@ -192,6 +235,8 @@ The API is primarily used by the frontend to create dynamic and interactive form
 - **`api_get_available_stock(product_pk)`**: Returns available `InventoryLog` sources for a product for internal consumption.
 - **`api_get_uninvoiced_receipts(supplier_id)`**: Returns receipts not yet on a supplier invoice.
 - **`api_get_uninvoiced_dispatches(so_id)`**: Returns dispatches not yet on a customer invoice.
+- **`api_get_stock_sources_for_product(product_id)`**: Returns a detailed list of all stock sources (`InventoryLog`s and `FinishedProductReceipt`s) for a product, used to populate the allocation modal.
+- **`api_get_unsettled_transactions(employee_id)`**: Returns `InventoryLog` and `ExpenseLog` transactions for an employee that have not yet been used to settle an advance.
 - **`api_period_checklist_status(period_id)`**: JSON endpoint that validates pre-closing conditions for a financial period.
 - **Reconciliation APIs**: `api_match_transactions`, `api_unmatch_transaction`, `api_create_adjustment_and_match` handle the interactive matching logic on the reconciliation page.
 
@@ -243,6 +288,7 @@ These files contain specialized logic for individual pages, called by the dynami
     -   **Invoice Creation**: Fetches uninvoiced items via API and builds the selection table, with real-time total calculation.
     -   **Journal Entry Creation**: Manages the dynamic formset, calculates running totals, and disables the save button until the entry is balanced.
     -   **Bank Reconciliation**: Manages the state of selected items, matches transactions, and handles the creation of adjustment entries via modals and API calls.
+-   **`inventory_counts_logic.js`**: Manages the entire interactive workflow for the "Variance Allocation Workspace". It fetches stock sources via API, dynamically builds the allocation modal, validates user input, stores the allocation state, and prepares the final data for submission.
 -   **`visuals_logic.js`**: Manages tabs, reads data from JSON islands, and renders all charts on the analysis page using Chart.js.
 -   **`close_period_logic.js`**: On the period closing page, it polls the `api_period_checklist_status` endpoint, updates the UI of the checklist with success/failure icons, and enables the finalization button only when all checks pass.
 -   **`expenses_page_logic.js`**: Manages the dynamic "Source Log" dropdown on the expense dashboard.
@@ -279,6 +325,7 @@ These files contain the actual UI for each page and are the content swapped by t
 -   **`partials/supplier_invoice_create_content.html`**: Form for invoice details, table for selecting items to be invoiced. **JS Module**: `financials_logic.js`.
 -   **`partials/journal_entry_create_content.html`**: Dynamic table for JE lines with sticky footer showing totals. **JS Module**: `financials_logic.js`.
 -   **`partials/fiscal_year_list_content.html`**: Accordion layout for fiscal years/periods. Modals for all actions.
+-   **`partials/inventory_counts_list_content.html`**, **`partials/inventory_count_create_content.html`**, **`partials/inventory_count_manage_content.html`**, **`partials/inventory_variance_allocation_content.html`**: A suite of templates that manage the entire inventory count workflow, from creation and data entry to the interactive variance allocation workspace. **JS Module**: `inventory_counts_logic.js`.
 -   **`partials/reports/*`**: Data-heavy tables for reports. Filter forms use the dynamic loader.
 -   **`partials/visuals_content.html`**: Tabbed layout with `<canvas>` elements for charts. **JS Module**: `visuals_logic.js`.
 

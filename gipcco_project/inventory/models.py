@@ -177,6 +177,16 @@ class InventoryLog(models.Model):
     def __str__(self):
         return f"Log #{self.id}: {self.quantity} {self.product.unit} of {self.product.name}"
     
+    # --- NEW: Link to Employee ---
+    employee = models.ForeignKey(
+        'Employee',
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name='inventory_receipts',
+        verbose_name=_("Responsible Employee")
+    )
+
     @property
     def costing_unit_price(self):
         """Calculates the unit price used for inventory valuation (MAC)."""
@@ -200,6 +210,11 @@ class ShopOrderTemplate(models.Model):
         on_delete=models.CASCADE,
         related_name='templates',
         verbose_name=_("Final Product")
+    )
+    # --- NEW: Field for bottle size ---
+    bottle_size_ml = models.PositiveIntegerField(
+        null=True, blank=True, verbose_name=_("Bottle Size (mL)"),
+        help_text=_("For overhead allocation based on volume, enter the size of a single bottle/unit in milliliters.")
     )
 
     class Meta:
@@ -274,11 +289,20 @@ class Batch(models.Model):
         'self', on_delete=models.SET_NULL, null=True, blank=True,
         related_name='continuation_batches', verbose_name=_("Parent Batch (for continuations)")
     )
+    # --- NEW: Field for capturing allocation driver data ---
+    machine_hours_consumed = models.FloatField(
+        null=True, blank=True, verbose_name=_("Machine Hours Consumed"),
+        help_text=_("Enter the actual machine hours used for this production run.")
+    )
+    # --- NEW: Field for labor hours ---
+    labor_hours_consumed = models.FloatField(
+        null=True, blank=True, verbose_name=_("Labor Hours Consumed"),
+        help_text=_("Enter the actual labor hours used for this production run.")
+    )
 
     class Meta:
-        db_table = 'batches'
-        verbose_name = _("Batch")
-        verbose_name_plural = _("Batches")
+        verbose_name = _("Production Plan")
+        verbose_name_plural = _("Production Plans")
         ordering = ['-creation_date', '-id']
 
     def __str__(self):
@@ -468,6 +492,51 @@ class PurchaseOrderItem(models.Model):
 
 
 class FinishedProductReceipt(models.Model):
+    """
+    Represents the receipt of finished goods from a production batch.
+
+    DEVELOPER NOTE ON CALCULATING REMAINING STOCK:
+    A common requirement is to calculate the remaining (sellable) quantity
+    of a finished product receipt. The correct formula is:
+    `remaining = total_quantity_produced - total_dispatched + total_adjusted`
+
+    A naive attempt to calculate this using Django's ORM might look like:
+    ```python
+    # !!! BUGGY - DO NOT USE !!!
+    FinishedProductReceipt.objects.annotate(
+        total_dispatched=Sum('sales_items__dispatches__quantity'),
+        total_adjusted=Sum('adjustments__adjustment_quantity')
+    )
+    ```
+    This approach is **WRONG** and will produce incorrect results due to the nature
+    of SQL JOINs. If a receipt has multiple dispatches AND multiple adjustments,
+    the database join will create a Cartesian product, causing each sum to be
+    multiplied and massively inflated.
+
+    THE CORRECT APPROACH is to use Subqueries to calculate each sum in isolation,
+    preventing the join multiplication bug. Example:
+    ```python
+    from django.db.models import Subquery, OuterRef, Sum, FloatField
+    from django.db.models.functions import Coalesce
+
+    dispatched_subquery = FinishedProductDispatch.objects.filter(
+        sales_order_item__finished_product_id=OuterRef('pk')
+    ).values('sales_order_item__finished_product_id').annotate(total=Sum('quantity')).values('total')
+
+    adjusted_subquery = InventoryAdjustment.objects.filter(
+        source_finished_product_id=OuterRef('pk')
+    ).values('source_finished_product_id').annotate(total=Sum('adjustment_quantity')).values('total')
+
+    receipts = FinishedProductReceipt.objects.annotate(
+        total_dispatched=Coalesce(Subquery(dispatched_subquery, output_field=FloatField()), 0.0),
+        total_adjusted=Coalesce(Subquery(adjusted_subquery, output_field=FloatField()), 0.0)
+    ).annotate(
+        quantity_available=F('total_quantity_produced') - F('total_dispatched') + F('total_adjusted')
+    )
+    ```
+    This robust method should be used in any API, view, or service that needs
+    to accurately determine the available stock of a finished product receipt.
+    """
     class MarketType(models.TextChoices):
         LOCAL = 'local', _('محلي')
         EXPORT = 'export', _('تصدير')
@@ -492,6 +561,11 @@ class FinishedProductReceipt(models.Model):
     )
     total_quantity_produced = models.FloatField(
         verbose_name=_("Total Quantity Produced")
+    )
+    allocated_overhead_cost = models.DecimalField(
+        max_digits=14, decimal_places=3, default=Decimal('0.000'),
+        verbose_name=_("Allocated Overhead Cost"),
+        help_text=_("The portion of manufacturing overhead applied to this receipt.")
     )
     market_type = models.CharField(
         max_length=10,
@@ -745,6 +819,26 @@ class ExpenseLog(models.Model):
     )
     notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
 
+    # --- NEW: Link to Employee ---
+    employee = models.ForeignKey(
+        'Employee',
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name='expenses_logged',
+        verbose_name=_("Responsible Employee")
+    )
+
+    # --- NEW: Link to Cost Pool ---
+    cost_pool = models.ForeignKey(
+        'CostPool',
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name='expenses',
+        verbose_name=_("Cost Pool")
+    )
+
     class Meta:
         db_table = 'expense_logs'
         verbose_name = _("General Expense Log")
@@ -953,6 +1047,123 @@ class Employee(models.Model):
     def __str__(self):
         return self.full_name
 
+    # --- NEW: Balance Calculation Properties ---
+    @property
+    def total_advances(self):
+        """Calculates the total amount of all advances given to the employee."""
+        return self.advances.aggregate(total=models.Sum('amount'))['total'] or Decimal('0.000')
+
+    @property
+    def total_settled_from_advances(self):
+        """Calculates the total amount settled across all of the employee's advances."""
+        return EmployeeAdvanceSettlement.objects.filter(advance__employee=self).aggregate(total=models.Sum('amount_settled'))['total'] or Decimal('0.000')
+
+    @property
+    def outstanding_advance_balance(self):
+        """The net amount the employee still owes the company from advances."""
+        return self.total_advances - self.total_settled_from_advances
+
+
+# --- NEW: EMPLOYEE ADVANCE & SETTLEMENT MODELS ---
+
+class EmployeeAdvance(models.Model):
+    """
+    Represents a single disbursement of funds to an employee, creating a receivable.
+    This is the core of the Employee Financial Responsibility Sub-Ledger.
+    """
+    class Status(models.TextChoices):
+        OPEN = 'open', _('Open')
+        PARTIALLY_SETTLED = 'partially_settled', _('Partially Settled')
+        SETTLED = 'settled', _('Settled')
+
+    employee = models.ForeignKey(
+        Employee,
+        on_delete=models.PROTECT,
+        related_name='advances',
+        verbose_name=_("Employee")
+    )
+    advance_date = models.DateField(verbose_name=_("Advance Date"))
+    amount = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Amount"))
+    
+    # Link to the actual payment transaction that disbursed the cash
+    source_payment = models.OneToOneField(
+        Payment,
+        on_delete=models.PROTECT,
+        related_name='employee_advance',
+        verbose_name=_("Source Payment Transaction")
+    )
+    
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.OPEN,
+        verbose_name=_("Status")
+    )
+    notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
+
+    class Meta:
+        db_table = 'employee_advances'
+        verbose_name = _("Employee Advance")
+        verbose_name_plural = _("Employee Advances")
+        ordering = ['-advance_date']
+
+    def __str__(self):
+        return f"Advance of {self.amount} to {self.employee.full_name} on {self.advance_date}"
+
+    @property
+    def total_settled(self):
+        """Calculates the total amount from this advance that has been settled."""
+        return self.settlements.aggregate(total=models.Sum('amount_settled'))['total'] or Decimal('0.000')
+
+    @property
+    def unsettled_amount(self):
+        return self.amount - self.total_settled
+
+    def update_status(self, save=True):
+        """Updates the advance status based on the settled amount."""
+        if self.status == self.Status.SETTLED:
+            return
+            
+        total_settled = self.total_settled
+        if total_settled >= self.amount:
+            self.status = self.Status.SETTLED
+        elif total_settled > 0:
+            self.status = self.Status.PARTIALLY_SETTLED
+        else:
+            self.status = self.Status.OPEN
+        
+        if save:
+            self.save(update_fields=['status'])
+
+
+class EmployeeAdvanceSettlement(models.Model):
+    """
+    A linking table that explicitly connects an expense or inventory receipt
+    to an employee advance, acting as a justification for the funds spent.
+    """
+    advance = models.ForeignKey(
+        EmployeeAdvance,
+        on_delete=models.CASCADE,
+        related_name='settlements',
+        verbose_name=_("Employee Advance")
+    )
+    amount_settled = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Amount Settled"))
+    settlement_date = models.DateField(auto_now_add=True, verbose_name=_("Settlement Date"))
+
+    # Generic Foreign Key to the source transaction (InventoryLog or ExpenseLog)
+    content_type = models.ForeignKey(ContentType, on_delete=models.PROTECT)
+    object_id = models.PositiveIntegerField()
+    source_transaction = GenericForeignKey('content_type', 'object_id')
+
+    class Meta:
+        db_table = 'employee_advance_settlements'
+        verbose_name = _("Employee Advance Settlement")
+        verbose_name_plural = _("Employee Advance Settlements")
+        ordering = ['-settlement_date']
+
+    def __str__(self):
+        return f"Settlement of {self.amount_settled} for {self.advance}"
+
 
 # ==============================================================================
 #  ACCOUNTING CORE MODELS
@@ -1153,11 +1364,15 @@ class ProductTypeAccountingSettings(models.Model):
         return f"Settings for {self.get_product_type_display()}"
 
     def clean(self):
-        # Enforce that final products must have a revenue account set.
+        """
+        Ensures that if the product type is 'Final Product', a sales revenue
+        account is provided.
+        """
         if self.product_type == Product.ProductType.FINAL_PRODUCT and not self.sales_revenue_account:
             raise ValidationError({
-                'sales_revenue_account': _("A default sales revenue account is required for the 'Final Product' type.")
+                'sales_revenue_account': _("A default sales revenue account is required for 'Final Product' types.")
             })
+        
 
 
 # --- NEW ---
@@ -1203,6 +1418,26 @@ class GeneralAccountingSettings(models.Model):
         verbose_name=_("Finished Goods (FG) Inventory Account"),
         help_text=_("e.g., '1020206 - مخزون منتج نهائي'")
     )
+    # --- NEW INVENTORY ADJUSTMENT ACCOUNTS ---
+    inventory_adjustment_loss_account = models.ForeignKey(
+        Account, on_delete=models.PROTECT, related_name='+',
+        verbose_name=_("Inventory Adjustment Loss Account"),
+        help_text=_("The expense account for inventory shortages/shrinkage."),
+        null=True, blank=True
+    )
+    inventory_adjustment_gain_account = models.ForeignKey(
+        Account, on_delete=models.PROTECT, related_name='+',
+        verbose_name=_("Inventory Adjustment Gain Account"),
+        help_text=_("The revenue/other income account for inventory overages."),
+        null=True, blank=True
+    )
+    # --- NEW: EMPLOYEE ADVANCES CONTROL ACCOUNT ---
+    employee_advances_receivable = models.ForeignKey(
+        Account, on_delete=models.PROTECT, related_name='+',
+        verbose_name=_("Employee Advances Receivable Account"),
+        help_text=_("The asset account for tracking money given to employees."),
+        null=True, blank=True
+    )
 
     class Meta:
         db_table = 'general_accounting_settings'
@@ -1228,6 +1463,297 @@ class GeneralAccountingSettings(models.Model):
     
     
     
+# ==============================================================================
+#  NEW INVENTORY COUNT & ADJUSTMENT MODELS
+# ==============================================================================
+
+class InventoryCount(models.Model):
+    """
+    Header for a physical inventory counting event.
+    """
+    class CountStatus(models.TextChoices):
+        IN_PROGRESS = 'in_progress', _('In Progress')
+        PENDING_ALLOCATION = 'pending_allocation', _('Pending Allocation')
+        COMPLETED = 'completed', _('Completed')
+
+    count_date = models.DateField(verbose_name=_("Count Date"))
+    status = models.CharField(
+        max_length=20, choices=CountStatus.choices,
+        default=CountStatus.IN_PROGRESS, verbose_name=_("Status")
+    )
+    reason = models.CharField(max_length=255, verbose_name=_("Reason for Count"))
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT,
+        verbose_name=_("Created By")
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'inventory_counts'
+        verbose_name = _("Inventory Count")
+        verbose_name_plural = _("Inventory Counts")
+        ordering = ['-count_date']
+
+    def __str__(self):
+        return f"Inventory Count on {self.count_date} ({self.get_status_display()})"
+
+
+class InventoryCountItem(models.Model):
+    """
+    A single product line within an inventory count, capturing the state at that time.
+    """
+    inventory_count = models.ForeignKey(
+        InventoryCount, on_delete=models.CASCADE,
+        related_name='items', verbose_name=_("Inventory Count")
+    )
+    product = models.ForeignKey(
+        Product, on_delete=models.PROTECT,
+        related_name='count_items', verbose_name=_("Product")
+    )
+    system_quantity = models.FloatField(verbose_name=_("System Quantity at Time of Count"))
+    counted_quantity = models.FloatField(null=True, blank=True, verbose_name=_("Physically Counted Quantity"))
+
+    @property
+    def variance_quantity(self):
+        if self.counted_quantity is None:
+            return 0
+        return self.counted_quantity - self.system_quantity
+
+    class Meta:
+        db_table = 'inventory_count_items'
+        verbose_name = _("Inventory Count Item")
+        verbose_name_plural = _("Inventory Count Items")
+        unique_together = ('inventory_count', 'product')
+
+    def __str__(self):
+        return f"{self.product.name} in count {self.inventory_count.id}"
+
+
+class InventoryAdjustment(models.Model):
+    """
+    An auditable record of a single, granular inventory adjustment against a specific stock source.
+    """
+    class ReasonCode(models.TextChoices):
+        SHRINKAGE = 'shrinkage', _('Shrinkage/Loss')
+        DAMAGE = 'damage', _('Damaged Goods')
+        DATA_ENTRY_ERROR = 'data_entry_error', _('Data Entry Correction')
+        OVERAGE_FOUND = 'overage_found', _('Overage Found During Count')
+        OTHER = 'other', _('Other')
+
+    product = models.ForeignKey(
+        Product, on_delete=models.PROTECT,
+        related_name='adjustments', verbose_name=_("Product")
+    )
+    adjustment_quantity = models.FloatField(
+        verbose_name=_("Adjustment Quantity"),
+        help_text=_("Use a negative number for shortages and a positive number for overages.")
+    )
+    adjustment_date = models.DateTimeField(verbose_name=_("Adjustment Date"))
+    cost_at_adjustment = models.DecimalField(
+        max_digits=14, decimal_places=3, verbose_name=_("Cost at Time of Adjustment")
+    )
+    reason_code = models.CharField(
+        max_length=30, choices=ReasonCode.choices, verbose_name=_("Reason Code")
+    )
+    notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
+    
+    # --- Source Linking ---
+    source_log = models.ForeignKey(
+        InventoryLog, on_delete=models.PROTECT, null=True, blank=True,
+        related_name='adjustments', verbose_name=_("Source Inventory Log (Raw Material)")
+    )
+    source_finished_product = models.ForeignKey(
+        FinishedProductReceipt, on_delete=models.PROTECT, null=True, blank=True,
+        related_name='adjustments', verbose_name=_("Source Finished Product Receipt")
+    )
+    
+    # --- Context ---
+    inventory_count = models.ForeignKey(
+        InventoryCount,
+        on_delete=models.CASCADE,
+        related_name='adjustments',
+        verbose_name=_("Inventory Count Event")
+    )
+
+    class Meta:
+        ordering = ['-adjustment_date']
+        db_table = 'inventory_adjustments'
+        verbose_name = _("Inventory Adjustment")
+        verbose_name_plural = _("Inventory Adjustments")
+
+    def clean(self):
+        if self.source_log and self.source_finished_product:
+            raise ValidationError(_("An adjustment can only be linked to one source (either an Inventory Log or a Finished Product Receipt)."))
+        if not self.source_log and not self.source_finished_product:
+            raise ValidationError(_("An adjustment must be linked to a source."))
+
+    def __str__(self):
+        direction = _("Shortage") if self.adjustment_quantity < 0 else _("Overage")
+        return f"{direction} of {abs(self.adjustment_quantity)} for {self.product.name}"
+
+
+# ==============================================================================
+#  NEW OVERHEAD ALLOCATION MODELS
+# ==============================================================================
+
+class CostPool(models.Model):
+    """
+    A hierarchical model for defining overhead cost pools, similar to the Chart of Accounts.
+    """
+    name = models.CharField(max_length=255, verbose_name=_("Cost Pool Name"))
+    code = models.CharField(max_length=20, unique=True, verbose_name=_("Cost Pool Code"))
+    parent = models.ForeignKey(
+        'self', on_delete=models.PROTECT, null=True, blank=True,
+        related_name='children', verbose_name=_("Parent Cost Pool")
+    )
+    # --- NEW: Direct link to the GL account ---
+    gl_account = models.ForeignKey(
+        'Account',
+        on_delete=models.PROTECT,
+        related_name='cost_pools',
+        verbose_name=_("GL Expense Account"),
+        limit_choices_to={'account_type': Account.AccountType.EXPENSE},
+        null=True, blank=True, # Allow parent pools to not have a direct account
+        help_text=_("The specific expense account in the GL that this pool's costs are cleared to.")
+    )
+
+    class Meta:
+        db_table = 'cost_pools'
+        verbose_name = _("Cost Pool")
+        verbose_name_plural = _("Cost Pools")
+        ordering = ['code']
+
+    def __str__(self):
+        return f"{self.code} - {self.name}"
+
+    def save(self, *args, **kwargs):
+        # Generate a code only if one isn't provided and the instance is new
+        if not self.code and not self.pk:
+            if self.parent:
+                # Logic for child pools
+                last_child = CostPool.objects.filter(parent=self.parent).order_by('code').last()
+                if last_child:
+                    parts = last_child.code.split('-')
+                    try:
+                        new_suffix = int(parts[-1]) + 1
+                        self.code = f"{self.parent.code}-{new_suffix:03d}"
+                    except (ValueError, IndexError):
+                        # Fallback if the last child has a weird code
+                        self.code = f"{self.parent.code}-001"
+                else:
+                    # First child
+                    self.code = f"{self.parent.code}-001"
+            else:
+                # Logic for top-level pools
+                # Find the highest numeric code among top-level pools
+                last_code = CostPool.objects.filter(parent__isnull=True)\
+                    .exclude(code__exact='')\
+                    .values_list('code', flat=True)
+                
+                max_code = 0
+                for code in last_code:
+                    try:
+                        # Find the highest integer code, ignoring hierarchical ones
+                        if '-' not in code:
+                            max_code = max(max_code, int(code))
+                    except (ValueError, TypeError):
+                        continue # Ignore non-integer codes
+
+                if max_code > 0:
+                    self.code = str(max_code + 1)
+                else:
+                    # First ever valid top-level cost pool
+                    self.code = "1000"
+        
+        super().save(*args, **kwargs)
+
+
+class AllocationDriver(models.Model):
+    """
+    Represents a basis for allocating overhead costs, e.g., machine hours, labor hours.
+    This is a master list of available drivers.
+    """
+    class DriverChoices(models.TextChoices):
+        MACHINE_HOURS = 'Machine Hours', _('Machine Hours')
+        LABOR_HOURS = 'Labor Hours', _('Labor Hours')
+        BOTTLE_UNITS = 'Total Production Units (Bottles)', _('Total Production Units (Bottles)')
+        LITERS_VOLUME = 'Total Production Volume (Liters)', _('Total Production Volume (Liters)')
+
+    name = models.CharField(
+        max_length=255,
+        unique=True,
+        choices=DriverChoices.choices,
+        verbose_name=_("Driver Name")
+    )
+    description = models.TextField(blank=True, null=True, verbose_name=_("Description"))
+
+    class Meta:
+        db_table = 'allocation_drivers'
+        verbose_name = _("Allocation Driver")
+        verbose_name_plural = _("Allocation Drivers")
+
+    def __str__(self):
+        return self.get_name_display()
+
+
+class OverheadAllocationRun(models.Model):
+    """
+    Records the execution and results of an overhead allocation for a specific period.
+    This creates an auditable snapshot of the entire calculation.
+    """
+    class Status(models.TextChoices):
+        PENDING = 'pending', _('Pending')
+        CALCULATED = 'calculated', _('Rate Calculated')
+        POSTED = 'posted', _('Posted to GL')
+        APPLIED = 'applied', _('Applied to Inventory')
+
+    financial_period = models.ForeignKey(
+        FinancialPeriod, on_delete=models.PROTECT, related_name='allocation_runs',
+        verbose_name=_("Financial Period")
+    )
+    cost_pool = models.ForeignKey(
+        CostPool, on_delete=models.PROTECT, related_name='allocation_runs',
+        verbose_name=_("Cost Pool")
+    )
+    allocation_driver = models.ForeignKey(
+        AllocationDriver, on_delete=models.PROTECT, related_name='allocation_runs',
+        verbose_name=_("Allocation Driver")
+    )
+    
+    total_pool_amount = models.DecimalField(
+        max_digits=14, decimal_places=3, default=Decimal('0.0'), verbose_name=_("Total Pool Amount for Period")
+    )
+    total_driver_units = models.FloatField(default=0.0, verbose_name=_("Total Driver Units for Period"))
+    calculated_rate = models.DecimalField(
+        max_digits=14, decimal_places=5, default=Decimal('0.0'), verbose_name=_("Calculated Overhead Rate")
+    )
+    
+    status = models.CharField(
+        max_length=20, choices=Status.choices, default=Status.PENDING, verbose_name=_("Status")
+    )
+    journal_entry = models.ForeignKey(
+        JournalEntry, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='+', verbose_name=_("Resulting Journal Entry")
+    )
+    # --- NEW: Link to the second JE that applies the cost from WIP to FG ---
+    application_journal_entry = models.ForeignKey(
+        JournalEntry, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='+', verbose_name=_("Inventory Application Journal Entry")
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    posted_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'overhead_allocation_runs'
+        verbose_name = _("Overhead Allocation Run")
+        verbose_name_plural = _("Overhead Allocation Runs")
+        ordering = ['-financial_period__start_date', 'cost_pool__code']
+        unique_together = ('financial_period', 'cost_pool')
+
+    def __str__(self):
+        return f"Allocation for {self.cost_pool.name} in {self.financial_period.name}"
+
+
 # ==============================================================================
 #  ACCOUNTING SUB-LEDGER DETAIL MODELS
 # ==============================================================================
@@ -1290,7 +1816,7 @@ class SupplierInvoice(models.Model):
             self.status = self.InvoiceStatus.AWAITING_PAYMENT
         
         if save:
-            self.save(update_fields=['status'])
+            self.save(update_fields=['status', 'amount_paid'])
 
 
 class SupplierInvoiceItem(models.Model):
@@ -1385,6 +1911,8 @@ class CustomerInvoice(models.Model):
     def balance_due(self):
         return self.total_amount - self.amount_paid
 
+
+
     def update_status(self, save=True):
         """Updates the invoice status based on the amount paid."""
         if self.status == self.InvoiceStatus.CANCELLED:
@@ -1398,7 +1926,7 @@ class CustomerInvoice(models.Model):
             self.status = self.InvoiceStatus.AWAITING_PAYMENT
         
         if save:
-            self.save(update_fields=['status'])
+            self.save(update_fields=['status', 'amount_paid'])
 
 
 class CustomerInvoiceItem(models.Model):
@@ -1477,11 +2005,6 @@ class BankTransfer(models.Model):
         db_table = 'bank_transfers'
         verbose_name = _("Bank Transfer")
         verbose_name_plural = _("Bank Transfers")
-        ordering = ['-transfer_date']
-
-    def __str__(self):
-        return f"Transfer of {self.amount} from {self.source_account} to {self.destination_account}"
-
     def clean(self):
         if self.source_account == self.destination_account:
             raise ValidationError(_("Source and destination accounts cannot be the same."))

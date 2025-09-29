@@ -293,6 +293,164 @@ function initJournalEntryCreateLogic(container) {
     updateTotals(); // Initial calculation
 }
 
+// --- NEW: Logic for Cost Pool Management ---
+function initCostPoolsListLogic(container) {
+    const modalEl = container.querySelector('#createCostPoolModal');
+    if (!modalEl) return;
+
+    const modal = new bootstrap.Modal(modalEl);
+    const form = modalEl.querySelector('#costPoolForm');
+    const modalTitle = modalEl.querySelector('.modal-title');
+    const poolIdInput = form.querySelector('#pool_id');
+    const poolNameInput = form.querySelector('#pool_name');
+    const poolParentSelect = form.querySelector('#pool_parent');
+    const poolGlAccountSelect = form.querySelector('#pool_gl_account');
+    
+    // TomSelect instances can be stored to manage them
+    let parentTomSelect = poolParentSelect.tomselect;
+    let glAccountTomSelect = poolGlAccountSelect.tomselect;
+
+    // Handle opening the modal for editing
+    container.querySelectorAll('.edit-cost-pool-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            const poolId = button.dataset.poolId;
+            const poolName = button.dataset.poolName;
+            const parentId = button.dataset.poolParentId;
+            const glAccountId = button.dataset.poolGlAccountId;
+
+            modalTitle.textContent = "Edit Cost Pool";
+            poolIdInput.value = poolId;
+            poolNameInput.value = poolName;
+            
+            if (parentTomSelect) {
+                parentTomSelect.setValue(parentId || '');
+            } else {
+                poolParentSelect.value = parentId || '';
+            }
+            if (glAccountTomSelect) {
+                glAccountTomSelect.setValue(glAccountId || '');
+            } else {
+                poolGlAccountSelect.value = glAccountId || '';
+            }
+        });
+    });
+
+    // Handle delete button clicks
+    container.querySelectorAll('.delete-cost-pool-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.preventDefault();
+            const poolId = button.dataset.poolId;
+            const poolName = button.dataset.poolName;
+            
+            if (confirm(`Are you sure you want to delete the cost pool "${poolName}"? This action cannot be undone.`)) {
+                const deleteForm = document.getElementById('deleteCostPoolForm');
+                if (deleteForm) {
+                    deleteForm.querySelector('#delete_pool_id').value = poolId;
+                    deleteForm.submit();
+                }
+            }
+        });
+    });
+
+    // Reset modal on open for the "Create New" case, if not triggered by an edit button
+    modalEl.addEventListener('show.bs.modal', function (event) {
+        // If the modal was triggered by the main "Create New" button
+        if (!event.relatedTarget || !event.relatedTarget.classList.contains('edit-cost-pool-btn')) {
+            modalTitle.textContent = "Create New Cost Pool";
+            form.reset();
+            poolIdInput.value = '';
+            if (parentTomSelect) {
+                parentTomSelect.clear();
+            }
+            if (glAccountTomSelect) {
+                glAccountTomSelect.clear();
+            }
+        }
+    });
+}
+
+// --- NEW: Logic for Allocation Driver Management ---
+function initAllocationDriversListLogic(container) {
+    const modalEl = container.querySelector('#createDriverModal');
+    if (!modalEl) return;
+
+    const modal = new bootstrap.Modal(modalEl);
+    const form = modalEl.querySelector('#driverForm');
+    const modalTitle = modalEl.querySelector('.modal-title');
+    const driverIdInput = form.querySelector('#driver_id');
+    const driverNameInput = form.querySelector('#driver_name');
+    const driverDescInput = form.querySelector('#driver_description');
+
+    container.querySelectorAll('.edit-driver-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            modalTitle.textContent = "Edit Allocation Driver";
+            driverIdInput.value = button.dataset.driverId;
+            driverNameInput.value = button.dataset.driverName;
+            driverDescInput.value = button.dataset.driverDescription;
+        });
+    });
+
+    modalEl.addEventListener('hidden.bs.modal', () => {
+        modalTitle.textContent = "Create New Allocation Driver";
+        form.reset();
+        driverIdInput.value = '';
+    });
+}
+
+// --- NEW: Logic for Overhead Allocation Workspace ---
+function initOverheadAllocationWorkspaceLogic(container) {
+    // This function can be used to add any specific JS logic for the workspace in the future.
+    // For now, the forms are handled by the dynamic content loader's default behavior.
+    // We can add confirmation modals here if needed.
+    container.querySelectorAll('form[action*="overhead_allocation"]').forEach(form => {
+        form.addEventListener('submit', (e) => {
+            const action = form.querySelector('input[name="action"]').value;
+            let message = "Are you sure you want to proceed?";
+            if (action === 'calculate_rate') {
+                message = "This will calculate the overhead rate based on the current data. Proceed?";
+            } else if (action === 'post_to_gl') {
+                message = "WARNING: This action is irreversible and will post a journal entry to the General Ledger. Are you absolutely sure you want to proceed?";
+            } else if (action === 'apply_to_inventory') {
+                message = "WARNING: This will apply the calculated overhead cost to all finished goods in the period. This action cannot be easily undone. Proceed?";
+            }
+            
+            if (!confirm(message)) {
+                e.preventDefault();
+            }
+        });
+    });
+}
+
+// --- NEW: Logic for Fiscal Year / Period Management ---
+function initFiscalYearListLogic(container) {
+    const createPeriodModalEl = container.querySelector('#createFinancialPeriodModal');
+    if (createPeriodModalEl) {
+        const form = createPeriodModalEl.querySelector('#createFinancialPeriodForm');
+        const yearIdInput = createPeriodModalEl.querySelector('#modal_fiscal_year_id');
+        // The base action URL might be incorrect if loaded dynamically, so we build it fresh.
+        // It should look like: /financials/periods/create_period/0/
+        const actionParts = window.location.pathname.split('/');
+        actionParts.pop(); // remove trailing slash
+        actionParts.push('create_period', '0', '');
+        const originalAction = actionParts.join('/');
+
+
+        // Use an event listener on the container to handle dynamically added buttons
+        container.addEventListener('click', function(event) {
+            const button = event.target.closest('.create-period-btn');
+            if (button) {
+                const yearId = button.getAttribute('data-year-id');
+                if (yearId) {
+                    yearIdInput.value = yearId;
+                    const newAction = originalAction.replace('/0/', `/${yearId}/`);
+                    form.setAttribute('action', newAction);
+                }
+            }
+        });
+    }
+}
+
+
 function initReconciliationManageLogic(container) {
     const reconciliationWorkspace = container.querySelector('#reconciliationWorkspace');
     if (!reconciliationWorkspace) return;

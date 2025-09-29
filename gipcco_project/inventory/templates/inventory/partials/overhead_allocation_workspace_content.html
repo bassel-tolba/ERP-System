@@ -1,0 +1,194 @@
+{% load i18n %}
+{% load inventory_extras %}
+
+<div class="container-fluid" id="overhead-allocation-workspace-container">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                <h4 class="mb-sm-0">{% trans "Overhead Allocation Workspace" %}</h4>
+                <div class="page-title-right">
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createRunModal">
+                        <i class="ri-add-line align-bottom me-1"></i> {% trans "Create New Allocation Run" %}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{% trans "Allocation Runs" %}</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped align-middle">
+                        <thead>
+                            <tr>
+                                <th>{% trans "Period" %}</th>
+                                <th>{% trans "Cost Pool" %}</th>
+                                <th>{% trans "Driver" %}</th>
+                                <th>{% trans "Pool Amount" %}</th>
+                                <th>{% trans "Driver Units" %}</th>
+                                <th>{% trans "Calculated Rate" %}</th>
+                                <th>{% trans "Status" %}</th>
+                                <th>{% trans "Journal Entry" %}</th>
+                                <th>{% trans "Actions" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for run in runs %}
+                            <tr>
+                                <td>{{ run.financial_period.name }}</td>
+                                <td>{{ run.cost_pool.name }}</td>
+                                <td>{{ run.allocation_driver.get_name_display }}</td>
+                                <td>{{ run.total_pool_amount|default:"-"|floatformat:2 }}</td>
+                                <td>{{ run.total_driver_units|default:"-"|floatformat:2 }}</td>
+                                <td>{{ run.calculated_rate|default:"-"|floatformat:5 }}</td>
+                                <td>
+                                    <span class="badge {{ run.get_status_display|status_badge }}">{{ run.get_status_display }}</span>
+                                </td>
+                                <td>
+                                    {% if run.journal_entry %}
+                                        <a href="#" class="view-je-link" data-je-id="{{ run.journal_entry.id }}">JE-{{ run.journal_entry.id }}</a>
+                                    {% endif %}
+                                    {% if run.application_journal_entry %}
+                                        <br><a href="#" class="view-je-link" data-je-id="{{ run.application_journal_entry.id }}">App-JE-{{ run.application_journal_entry.id }}</a>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if run.status == "pending" %}
+                                    <form action="{% url 'inventory:overhead_allocation_workspace' %}" method="post" class="d-inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="calculate_rate">
+                                        <input type="hidden" name="run_id" value="{{ run.id }}">
+                                        <button type="submit" class="btn btn-sm btn-primary">{% trans "Calculate Rate" %}</button>
+                                    </form>
+                                    {% elif run.status == "calculated" %}
+                                    <form action="{% url 'inventory:overhead_allocation_workspace' %}" method="post" class="d-inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="post_to_gl">
+                                        <input type="hidden" name="run_id" value="{{ run.id }}">
+                                        <button type="submit" class="btn btn-sm btn-success">{% trans "Approve & Post to GL" %}</button>
+                                    </form>
+                                    {% elif run.status == "posted" %}
+                                    <form action="{% url 'inventory:overhead_allocation_workspace' %}" method="post" class="d-inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="apply_to_inventory">
+                                        <input type="hidden" name="run_id" value="{{ run.id }}">
+                                        <button type="submit" class="btn btn-sm btn-info">{% trans "Apply to Inventory" %}</button>
+                                    </form>
+                                    {% else %}
+                                    <span class="text-muted">{% trans "No actions" %}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="9" class="text-center">{% trans "No allocation runs have been created yet." %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'inventory/modals/view_journal_entry_modal.html' %}
+
+<!-- Create Run Modal -->
+<div class="modal fade" id="createRunModal" tabindex="-1" aria-labelledby="createRunModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createRunModalLabel">{% trans "Create New Allocation Run" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'inventory:overhead_allocation_workspace' %}" method="post" id="createRunForm">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="create_run">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="financial_period" class="form-label">{% trans "Financial Period" %}</label>
+                        <select class="form-select searchable-select" id="financial_period" name="financial_period" required>
+                            <option value="">{% trans "Select a period..." %}</option>
+                            {% for period in financial_periods %}
+                                <option value="{{ period.id }}">{{ period.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="cost_pool" class="form-label">{% trans "Cost Pool" %}</label>
+                        <select class="form-select searchable-select" id="cost_pool" name="cost_pool" required>
+                            <option value="">{% trans "Select a cost pool..." %}</option>
+                            {% for pool in cost_pools %}
+                                <option value="{{ pool.id }}">{{ pool.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="allocation_driver" class="form-label">{% trans "Allocation Driver" %}</label>
+                        <select class="form-select searchable-select" id="allocation_driver" name="allocation_driver" required>
+                            <option value="">{% trans "Select a driver..." %}</option>
+                            {% for driver in allocation_drivers %}
+                                <option value="{{ driver.id }}">{{ driver.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">{% trans "Close" %}</button>
+                    <button type="submit" class="btn btn-primary">{% trans "Create Run" %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const jeModalEl = document.getElementById('viewJournalEntryModal');
+    if (jeModalEl) {
+        const jeModal = new bootstrap.Modal(jeModalEl);
+        const jeIdSpan = jeModalEl.querySelector('#je-id');
+        const jeDateSpan = jeModalEl.querySelector('#je-date');
+        const jeDescSpan = jeModalEl.querySelector('#je-description');
+        const jeLinesTable = jeModalEl.querySelector('#je-lines-table');
+
+        document.querySelectorAll('.view-je-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const jeId = this.dataset.jeId;
+                
+                // This is a placeholder URL. You need to create this API endpoint.
+                const url = `/api/journal_entry/${jeId}/`;
+
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        jeIdSpan.textContent = data.id;
+                        jeDateSpan.textContent = new Date(data.date).toLocaleDateString();
+                        jeDescSpan.textContent = data.description;
+                        
+                        jeLinesTable.innerHTML = ''; // Clear previous lines
+                        data.lines.forEach(line => {
+                            const row = `
+                                <tr>
+                                    <td>${line.account_code} - ${line.account_name}</td>
+                                    <td class="text-end">${line.entry_type === 'debit' ? parseFloat(line.amount).toFixed(3) : ''}</td>
+                                    <td class="text-end">${line.entry_type === 'credit' ? parseFloat(line.amount).toFixed(3) : ''}</td>
+                                </tr>
+                            `;
+                            jeLinesTable.insertAdjacentHTML('beforeend', row);
+                        });
+
+                        jeModal.show();
+                    })
+                    .catch(error => console.error('Error fetching JE details:', error));
+            });
+        });
+    }
+});
+</script>

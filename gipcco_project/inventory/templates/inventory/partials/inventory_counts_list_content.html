@@ -1,0 +1,53 @@
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">عمليات الجرد المخزني</h1>
+        <a href="{% url 'inventory:create_inventory_count' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle-fill me-2"></i>بدء جرد جديد
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>تاريخ الجرد</th>
+                            <th>سبب الجرد</th>
+                            <th>الحالة</th>
+                            <th>تم إنشاؤه بواسطة</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for count in counts %}
+                        <tr>
+                            <td>{{ count.count_date }}</td>
+                            <td>{{ count.reason }}</td>
+                            <td>
+                                <span class="badge bg-{% if count.status == 'completed' %}success{% elif count.status == 'pending_allocation' %}warning{% else %}primary{% endif %}">
+                                    {{ count.get_status_display }}
+                                </span>
+                            </td>
+                            <td>{{ count.created_by.get_full_name|default:count.created_by.username }}</td>
+                            <td>
+                                {% if count.status == 'in_progress' %}
+                                <a href="{% url 'inventory:manage_inventory_count' count.pk %}" class="btn btn-sm btn-info">إدخال الكميات</a>
+                                {% elif count.status == 'pending_allocation' %}
+                                <a href="{% url 'inventory:allocate_inventory_variances' count.pk %}" class="btn btn-sm btn-warning">تخصيص الفروقات</a>
+                                {% else %}
+                                <a href="{% url 'inventory:manage_inventory_count' count.pk %}" class="btn btn-sm btn-secondary">عرض</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">لم يتم العثور على عمليات جرد.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

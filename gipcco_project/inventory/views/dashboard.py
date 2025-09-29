@@ -11,7 +11,7 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-from ..models import Company, InventoryLog, Product, ProductTag, PurchaseOrder, PurchaseOrderItem
+from ..models import Company, InventoryLog, Product, ProductTag, PurchaseOrder, PurchaseOrderItem, Employee
 from ..services.costing_service import recalculate_cost_history_for_product
 
 
@@ -49,6 +49,7 @@ def index(request: HttpRequest) -> HttpResponse:
         quantity_str = request.POST.get('quantity')
         date_str = request.POST.get('entry_date')
         po_item_id = request.POST.get('po_item_id')
+        employee_id = request.POST.get('employee_id') # NEW
 
         # --- MODIFIED: Get new accounting fields ---
         base_unit_price_str = request.POST.get('base_unit_price')
@@ -86,6 +87,7 @@ def index(request: HttpRequest) -> HttpResponse:
                 quantity=quantity,
                 timestamp=entry_datetime,
                 po_item_id=po_item_id if po_item_id else None,
+                employee_id=employee_id if employee_id else None, # NEW
                 # --- MODIFIED: Save new accounting fields ---
                 base_unit_price=base_unit_price,
                 vat_amount=vat_amount,
@@ -130,6 +132,7 @@ def index(request: HttpRequest) -> HttpResponse:
         'all_tags': ProductTag.objects.all(),
         'prefill_data_json': prefill_data_json,
         'vat_treatment_choices': InventoryLog.VatTreatment.choices,
+        'employees': Employee.objects.filter(is_active=True), # NEW
     }
     
     if 'X-Partial-Request' in request.headers:
@@ -233,6 +236,7 @@ def edit_record(request: HttpRequest, pk: int) -> HttpResponse:
     quantity_str = request.POST.get('quantity')
     date_str = request.POST.get('entry_date')
     po_item_id = request.POST.get('po_item_id')
+    employee_id = request.POST.get('employee_id') # NEW
     
     # --- MODIFIED: Get new accounting fields ---
     base_unit_price_str = request.POST.get('base_unit_price')
@@ -271,6 +275,7 @@ def edit_record(request: HttpRequest, pk: int) -> HttpResponse:
         log_entry.quantity = quantity
         log_entry.timestamp = new_datetime
         log_entry.po_item = new_po_item
+        log_entry.employee_id = employee_id if employee_id else None # NEW
         log_entry.base_unit_price = base_unit_price
         log_entry.vat_amount = vat_amount
         log_entry.vat_treatment = vat_treatment

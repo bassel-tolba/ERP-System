@@ -1,11 +1,49 @@
 /* ==========================================================================
-   MODERN ERP THEME - GIPCCO WAREHOUSE SYSTEM
+   MODERN ERP THEME - GIPCCO WAREHOUSE SYSTEM (REFACTORED)
    ========================================================================== */
 
 /* ==========================================================================
    1. CSS CUSTOM PROPERTIES (DESIGN TOKENS)
    ========================================================================== */
-:root {
+@font-face {
+  font-family: 'dubai-regular';
+  src: url('../webfonts/alfont_com_Dubai-Regular.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'noto-kufi';
+  src: url('../webfonts/NotoKufiArabic-VariableFont_wght.ttf');
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'anthropic-sans';
+  src: url(../webfonts/anthropic-sans.woff2) format('woff2'),
+  
+  font-feature-settings: normal;
+  font-kerning: auto;
+  font-optical-sizing: auto;
+  font-palette: normal;
+  font-size: 16px;
+  font-size-adjust: none;
+  font-stretch: 100%;
+  font-style: normal;
+  font-synthesis-small-caps: auto;
+  font-synthesis-style: auto;
+  font-synthesis-weight: auto;
+  font-variant-alternates: normal;
+  font-variant-caps: normal;
+  font-variant-east-asian: normal;
+  font-variant-emoji: normal;
+  font-variant-ligatures: normal;
+  font-variant-numeric: normal;
+  font-variant-position: normal;
+  font-variation-settings: normal;
+
+}
+
+   :root {
   /* Brand Colors */
   --color-primary: #3b82f6;
   --color-primary-rgb: 59, 130, 246;
@@ -49,7 +87,7 @@
   --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
 
   /* Typography Scale */
-  --font-family-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-family-sans:   noto-kufi, dubai-regular , "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --font-family-mono: "JetBrains Mono", "Fira Code", Consolas, "Liberation Mono", Menlo, monospace;
   --font-weight-normal: 400;
   --font-weight-medium: 500;
@@ -70,7 +108,7 @@
   --transition-slow: 0.3s ease-in-out;
 
   /* Z-Index Scale */
-  --z-sidebar: 1045; /* Offcanvas z-index is 1045 by default */
+  --z-sidebar: 1045;
   --z-header: 1030;
   --z-dropdown: 1000;
   --z-sticky: 1020;
@@ -81,8 +119,63 @@
   --z-select-dropdown: 9999;
   
   /* Layout Variables */
-  --sidebar-width: 300px; /* Width for the offcanvas sidebar */
+  --sidebar-width: 300px;
   --header-height: 65px;
+
+
+  /* ======================================================================== */
+  /* NEW: BOOTSTRAP VARIABLE MAPPING                                          */
+  /* This section maps your design tokens to Bootstrap's core CSS variables.  */
+  /* This automatically themes Bootstrap components without manual overrides. */
+  /* ======================================================================== */
+  
+  /* Core Colors & Body */
+  --bs-primary: var(--color-primary);
+  --bs-primary-rgb: var(--color-primary-rgb);
+  --bs-secondary: var(--color-secondary);
+  --bs-success: var(--color-success);
+  --bs-danger: var(--color-danger);
+  --bs-warning: var(--color-warning);
+  --bs-info: var(--color-info);
+  --bs-body-color: var(--text-primary);
+  --bs-body-bg: var(--surface-secondary);
+  --bs-secondary-color: var(--text-muted);
+  --bs-tertiary-bg: var(--surface-primary);
+  
+  /* Borders */
+  --bs-border-color: var(--border-color);
+  --bs-border-width: var(--border-width);
+  --bs-border-radius: var(--border-radius);
+  --bs-border-radius-sm: var(--border-radius-sm);
+  --bs-border-radius-lg: var(--border-radius-lg);
+  --bs-border-radius-xl: var(--border-radius-xl);
+
+  /* Typography */
+  --bs-font-sans-serif: var(--font-family-sans);
+  --bs-font-monospace: var(--font-family-mono);
+  --bs-body-font-weight: var(--font-weight-normal);
+
+  /* Components */
+  --bs-card-bg: var(--surface-primary);
+  --bs-card-border-color: var(--border-color);
+  --bs-card-border-radius: var(--border-radius-lg);
+  --bs-card-cap-bg: var(--surface-secondary);
+  
+  --bs-btn-font-weight: var(--font-weight-medium);
+  --bs-btn-border-radius: var(--border-radius);
+  --bs-btn-focus-box-shadow: 0 0 0 3px var(--color-primary-subtle);
+
+  --bs-form-control-bg: var(--surface-primary);
+  --bs-form-control-color: var(--text-primary);
+  --bs-form-control-placeholder-color: var(--text-muted);
+  --bs-form-control-border-color: var(--border-color);
+  --bs-form-focus-border-color: var(--color-primary);
+  --bs-form-focus-box-shadow: 0 0 0 3px var(--color-primary-subtle);
+  
+  --bs-dropdown-bg: var(--surface-primary);
+  --bs-dropdown-border-color: var(--border-color);
+  --bs-dropdown-link-hover-bg: var(--color-primary-subtle);
+  --bs-dropdown-link-hover-color: var(--color-primary);
 }
 
 /* Dark Theme Overrides */
@@ -107,12 +200,23 @@
   --border-color: #334155;
   --border-color-subtle: #1e293b;
 
-  /* Shadows are less visible in dark mode, so we often lighten them with a white tint */
   --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
   --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 2px -1px rgba(0, 0, 0, 0.2);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+  
+  /* NEW: Bootstrap Dark Mode Variable Mapping */
+  --bs-body-color: var(--text-primary);
+  --bs-body-bg: var(--surface-secondary);
+  --bs-border-color: var(--border-color);
+  --bs-secondary-color: var(--text-muted);
+  --bs-tertiary-bg: var(--surface-primary);
+  --bs-card-bg: var(--surface-primary);
+  --bs-card-border-color: var(--border-color);
+  --bs-card-cap-bg: var(--surface-tertiary); /* Slightly darker header */
+  --bs-form-control-bg: var(--surface-primary);
+  --bs-form-control-color: var(--text-primary);
 }
 
 /* ==========================================================================
@@ -127,9 +231,8 @@ html {
 }
 
 body {
-  background-color: var(--surface-secondary);
+  /* REFACTORED: background-color and color are now set by Bootstrap vars */
   font-family: var(--font-family-sans);
-  color: var(--text-primary);
   line-height: 1.6;
   font-weight: var(--font-weight-normal);
   transition: background-color var(--transition-base), color var(--transition-base);
@@ -158,35 +261,31 @@ h1, h2, h3, h4, h5, h6 {
 
 /* --- Offcanvas Sidebar --- */
 .offcanvas-end {
-    width: var(--sidebar-width);
-    background-color: var(--surface-primary);
-    border-left: var(--border-width) solid var(--border-color);
+  width: var(--sidebar-width);
+  background-color: var(--surface-primary);
+  border-left: var(--border-width) solid var(--border-color);
 }
-
 .offcanvas-header {
-    padding: 0; /* Remove padding to allow the sidebar-header to fill it */
-    border-bottom: var(--border-width) solid var(--border-color);
+  padding: 0;
+  border-bottom: var(--border-width) solid var(--border-color);
 }
-
 .offcanvas-header .btn-close {
-    margin: var(--space-md);
+  margin: var(--space-md);
 }
 
 .sidebar-header {
   display: flex;
   align-items: center;
-  justify-content: flex-start; /* Align to the start */
+  justify-content: flex-start;
   padding: var(--space-sm) var(--space-lg);
   height: var(--header-height);
   text-decoration: none;
   flex-grow: 1;
 }
-
 .sidebar-header .brand-icon {
   color: var(--color-primary);
   font-size: 2rem;
 }
-
 .sidebar-header .brand-text {
   color: var(--text-primary);
   font-size: 1.1rem;
@@ -197,6 +296,9 @@ h1, h2, h3, h4, h5, h6 {
 
 .sidebar-nav {
   padding: var(--space-md);
+}
+.navbar-nav {
+  padding: 0;
 }
 
 .nav-item .nav-link,
@@ -211,7 +313,6 @@ h1, h2, h3, h4, h5, h6 {
   white-space: nowrap;
   margin-bottom: var(--space-xs);
 }
-
 .nav-item .nav-link .nav-icon,
 .nav-item .dropdown-toggle .nav-icon {
   font-size: 1.25rem;
@@ -219,13 +320,11 @@ h1, h2, h3, h4, h5, h6 {
   margin-left: var(--space-md);
   transition: color var(--transition-fast);
 }
-
 .nav-item .nav-link:hover,
 .nav-item .dropdown-toggle:hover {
   background-color: var(--color-primary-subtle);
   color: var(--color-primary);
 }
-
 .nav-item .nav-link.active,
 .nav-item .dropdown-toggle.active {
   background-color: var(--color-primary);
@@ -237,35 +336,35 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--text-inverse);
 }
 
-
+/* REFACTORED: Style general dropdowns first, then specialize */
 .dropdown-menu {
+  box-shadow: var(--shadow-lg) !important;
+  margin-top: var(--space-xs) !important;
+}
+
+/* Specific dropdown menu style for sidebar navigation */
+.sidebar-nav .dropdown-menu {
   background-color: transparent !important;
   border: none !important;
+  box-shadow: none !important;
   padding: 0 !important;
   margin: 0 !important;
 }
-
-.dropdown-menu .dropdown-item {
+.sidebar-nav .dropdown-menu .dropdown-item {
   color: var(--text-secondary);
   padding: 0.5rem 1rem 0.5rem 3.5rem !important; /* Indent child items */
   border-radius: var(--border-radius);
   font-size: 0.95rem;
   transition: all var(--transition-fast);
 }
-
-.dropdown-menu .dropdown-item:hover {
+.sidebar-nav .dropdown-menu .dropdown-item:hover {
   background-color: var(--color-primary-subtle);
   color: var(--color-primary);
 }
-
-.dropdown-menu .dropdown-item.active {
+.sidebar-nav .dropdown-menu .dropdown-item.active {
   background-color: var(--color-primary-subtle);
   color: var(--color-primary);
   font-weight: var(--font-weight-semibold);
-}
-
-.navbar-nav{
-  padding: 0%;
 }
 
 /* --- Main Content Area --- */
@@ -328,77 +427,56 @@ h1, h2, h3, h4, h5, h6 {
    ========================================================================== */
 
 /* --- Cards --- */
+/* REFACTORED: Most card styles are now handled by Bootstrap variables.
+   We only need to keep custom additions like the hover effect. */
 .card {
-  background-color: var(--surface-primary);
-  border: var(--border-width) solid var(--border-color);
   box-shadow: none;
-  border-radius: var(--border-radius-lg);
   transition: box-shadow var(--transition-base);
 }
 .card:hover {
   box-shadow: var(--shadow-sm);
 }
 .card-header {
-  background-color: var(--surface-secondary);
-  border-bottom: var(--border-width) solid var(--border-color);
   padding: var(--space-md) var(--space-lg);
   font-weight: var(--font-weight-medium);
 }
-.card-body { padding: var(--space-lg); }
+.card-body { 
+  padding: var(--space-lg); 
+}
 
 /* --- Buttons --- */
+/* REFACTORED: Removed .btn-primary overrides. These are now handled by 
+   --bs-primary, --bs-btn-font-weight, etc. The framework does the work! */
 .btn {
-  border-radius: var(--border-radius) !important;
-  font-weight: var(--font-weight-medium) !important;
   transition: all var(--transition-fast) !important;
 }
-
-.btn-primary {
-  background-color: var(--color-primary) !important;
-
-  color: var(--text-inverse) !important;
+.btn {
+  color: var(--text-primary) !important;
 }
-.btn-primary:hover {
-  background-color: var(--color-primary-hover) !important;
-  border-color: var(--color-primary-hover) !important;
+.badge {
+  color: var(--text-secondary) !important;
 }
 .btn:focus-visible {
   outline: 3px solid var(--color-primary-subtle) !important;
   outline-offset: 1px;
 }
-.btn-outline-primary {
-    background-color: var(--color-primary) !important;
+/* REFACTORED: Removed .btn-outline-primary which was styled like a solid button.
+   Bootstrap's default outline button will now correctly use your theme colors. */
 
-  color: var(--text-inverse) !important;
-}
-.btn-outline-primary:hover {
-  background-color: var(--color-primary-hover) !important;
-  border-color: var(--color-primary-hover) !important;
-}
 .badge {
   color: var(--text-primary) !important;
   border-color: var(--text-primary) !important;
 }
 
 /* --- Forms --- */
+/* REFACTORED: Removed most form styles as they are now handled by Bootstrap
+   variables like --bs-form-control-bg and --bs-form-focus-box-shadow. */
 .form-control, .form-select, .ts-control {
-  background-color: var(--surface-primary) !important;
-  border: var(--border-width) solid var(--border-color) !important;
-  border-radius: var(--border-radius) !important;
-  color: var(--text-primary) !important;
   padding: 0.5rem 1rem !important;
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
-.form-control::placeholder {
-  color: var(--text-muted);
-}
-.form-control:focus, .form-select:focus, .ts-control.focus {
-  border-color: var(--color-primary) !important;
-  box-shadow: 0 0 0 3px var(--color-primary-subtle) !important;
-  outline: none !important;
-}
 
-/* Tom Select Dropdown */
+/* Tom Select Dropdown (specific 3rd party library) */
 .ts-dropdown {
   z-index: var(--z-select-dropdown) !important;
   background-color: var(--surface-primary) !important;
@@ -416,11 +494,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 .ts-control input {
   text-align: center !important;
-
 }
 
-
-/* Theme Switch */
+/* --- Theme Switch (Custom Component) --- */
 .theme-switch .form-check-label {
   background-color: var(--surface-tertiary);
   border: 1px solid var(--border-color);
@@ -458,15 +534,7 @@ h1, h2, h3, h4, h5, h6 {
 .theme-switch .bi-moon-stars-fill { left: 7px; }
 
 
-.sidebar-nav .dropdown-menu {
-  border: none !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  background-color: var(--surface-secondary) !important;
-}
-
-/* --- Sticky Form Footer --- */
+/* --- Sticky Form Footer (Custom Component) --- */
 .sticky-form-footer {
   position: sticky;
   bottom: 0;
@@ -508,7 +576,7 @@ h1, h2, h3, h4, h5, h6 {
   border-color: var(--color-primary);
 }
 
-/* --- NEW: Bank Reconciliation Styles --- */
+/* --- Bank Reconciliation Styles (Custom Component) --- */
 .table-hover .statement-line,
 .table-hover .internal-transaction {
   cursor: pointer;
@@ -520,13 +588,10 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: inset 4px 0 0 0 var(--color-primary);
 }
 
-
 /* ==========================================================================
    6. RESPONSIVE DESIGN
    ========================================================================== */
 @media (max-width: 991.98px) {
-  /* On smaller screens, the offcanvas is the default behavior, so no major changes are needed here. 
-     You might adjust the offcanvas width if desired. */
   :root {
     --sidebar-width: 280px; /* Slightly smaller for mobile */
   }
