@@ -17,7 +17,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 import logging
 
-from ..models import (Batch, BatchItem, Company, InventoryLog, OpeningBalance,
+from ..models import (Batch, BatchItem, Company, InventoryLog,
                      Product, ProductionReturn, ShopOrderTemplate, TemplateItem,
                      InventoryConsumption)
 
@@ -91,43 +91,27 @@ def validate_stock_availability(product_ids, actual_quantities, source_log_ids, 
         if batch_id_to_exclude:
             used_items_qs = used_items_qs.exclude(batch_id=batch_id_to_exclude)
 
-        if source_id == -1: # ---- VALIDATING AGAINST OPENING BALANCE ----
-            latest_balance = OpeningBalance.objects.filter(product_id=product_id).order_by('-balance_date').first()
-            if not latest_balance:
-                return (False, f"لا يوجد رصيد افتتاحي للمنتج '{product.name}'.")
+        try:
+            log_entry = InventoryLog.objects.get(pk=source_id)
+        except InventoryLog.DoesNotExist:
+            return (False, f"مصدر المخزون برقم {source_id} غير موجود.")
 
-            if latest_balance.balance_date.date() > batch_creation_date:
-                return False, f"خطأ في مادة '{product.name}': تاريخ الرصيد الافتتاحي ({latest_balance.balance_date.date()}) أحدث من تاريخ أمر التشغيل ({batch_creation_date})."
-            
-            total_available_from_ob = latest_balance.quantity
-            already_used = used_items_qs.filter(source_type=BatchItem.SourceType.OPENING_BALANCE).aggregate(total=Coalesce(Sum('actual_quantity'), 0.0))['total']
-            available_stock = total_available_from_ob - already_used
-
-            if total_requested > available_stock + 0.001: # Add tolerance for float comparison
-                return (False, f"كمية غير كافية للمنتج '{product.name}' من الرصيد الافتتاحي. مطلوب: {total_requested:.3f}, متاح: {available_stock:.3f}")
+        # --- QC VALIDATION ---
+        if log_entry.status != InventoryLog.Status.RELEASED:
+            return (False, f"خطأ في مادة '{log_entry.product.name}': المصدر (QC: {log_entry.qc_no or 'N/A'}) لم يتم الإفراج عنه بعد وهو تحت الفحص.")
         
-        else: # ---- VALIDATING AGAINST INVENTORY LOG (QC) ----
-            try:
-                log_entry = InventoryLog.objects.get(pk=source_id)
-            except InventoryLog.DoesNotExist:
-                return (False, f"مصدر المخزون برقم {source_id} غير موجود.")
+        if not log_entry.release_timestamp or log_entry.release_timestamp.date() > batch_creation_date:
+            return False, f"خطأ في مادة '{log_entry.product.name}': تاريخ الإفراج عن المصدر ({log_entry.release_timestamp.date()}) أحدث من تاريخ أمر التشغيل ({batch_creation_date})."
+        
+        if product_id != log_entry.product_id:
+            return (False, f"عدم تطابق المنتج. تم طلب '{product.name}' من مصدر QC '{log_entry.qc_no}' الذي يخص منتج '{log_entry.product.name}'.")
 
-            # --- QC VALIDATION ---
-            if log_entry.status != InventoryLog.Status.RELEASED:
-                return (False, f"خطأ في مادة '{log_entry.product.name}': المصدر (QC: {log_entry.qc_no or 'N/A'}) لم يتم الإفراج عنه بعد وهو تحت الفحص.")
-            
-            if not log_entry.release_timestamp or log_entry.release_timestamp.date() > batch_creation_date:
-                return False, f"خطأ في مادة '{log_entry.product.name}': تاريخ الإفراج عن المصدر ({log_entry.release_timestamp.date()}) أحدث من تاريخ أمر التشغيل ({batch_creation_date})."
-            
-            if product_id != log_entry.product_id:
-                return (False, f"عدم تطابق المنتج. تم طلب '{product.name}' من مصدر QC '{log_entry.qc_no}' الذي يخص منتج '{log_entry.product.name}'.")
+        total_available_from_log = log_entry.quantity
+        total_returned = log_entry.production_returns.aggregate(total=Coalesce(Sum('quantity'), 0.0))['total']
+        already_used = used_items_qs.filter(source_log_id=source_id).aggregate(total=Coalesce(Sum('actual_quantity'), 0.0))['total']
+        available_stock = total_available_from_log - already_used + total_returned
 
-            total_available_from_log = log_entry.quantity
-            total_returned = log_entry.production_returns.aggregate(total=Coalesce(Sum('quantity'), 0.0))['total']
-            already_used = used_items_qs.filter(source_log_id=source_id).aggregate(total=Coalesce(Sum('actual_quantity'), 0.0))['total']
-            available_stock = total_available_from_log - already_used + total_returned
-
-            if total_requested > available_stock + 0.001: # Add tolerance for float comparison
-                return (False, f"كمية غير كافية للمنتج '{product.name}' من المصدر QC '{log_entry.qc_no}'. مطلوب: {total_requested:.3f}, متاح: {available_stock:.3f}")
+        if total_requested > available_stock + 0.001: # Add tolerance for float comparison
+            return (False, f"كمية غير كافية للمنتج '{product.name}' من المصدر QC '{log_entry.qc_no}'. مطلوب: {total_requested:.3f}, متاح: {available_stock:.3f}")
 
     return (True, None)

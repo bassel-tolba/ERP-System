@@ -107,7 +107,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const logId = button.getAttribute('data-log-id');
             const form = document.getElementById('releaseForm');
             
-            // --- MODIFIED: Use the correct, unique URL name for raw materials ---
             const actionUrl = "{% url 'inventory:release_material_from_quarantine' pk=0 %}".replace('/0/', `/${logId}/`);
             form.action = actionUrl;
         });

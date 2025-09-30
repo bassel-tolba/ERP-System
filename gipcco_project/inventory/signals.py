@@ -9,7 +9,8 @@ from django.contrib.contenttypes.models import ContentType
 from .models import (
     FinishedProductDispatch, FinishedProductReceipt, InventoryLog, JournalEntry,
     Batch, InventoryConsumption, ProductionReturn, Payment, BankTransfer,
-    DepreciationLog, InventoryAdjustment, EmployeeAdvance, EmployeeAdvanceSettlement
+    DepreciationLog, InventoryAdjustment, EmployeeAdvance, EmployeeAdvanceSettlement,
+    FinancialPeriod, PeriodCloseChecklist
 )
 from .services.accounting_service import (
     _check_period_is_open, # Import the gatekeeper function
@@ -346,3 +347,12 @@ def handle_advance_settlement_save(sender, instance: EmployeeAdvanceSettlement, 
         advance = instance.advance
         advance.update_status(save=True)
         logger.info(f"Updated status for EmployeeAdvance ID {advance.id} due to new settlement.")
+
+
+@receiver(post_save, sender=FinancialPeriod)
+def create_period_close_checklist(sender, instance, created, **kwargs):
+    """
+    Automatically create a PeriodCloseChecklist when a new FinancialPeriod is created.
+    """
+    if created:
+        PeriodCloseChecklist.objects.create(financial_period=instance)

@@ -1,0 +1,54 @@
+{% load humanize %}
+
+<div class="container-fluid p-4">
+    <!-- Page Header -->
+    <div class="row align-items-center mb-4">
+        <div class="col-md-8">
+            <h1 class="h3 mb-0 text-gray-800">تقرير تقييم المخزون الحالي</h1>
+            <p class="mb-0 text-muted">التقرير بتاريخ: {{ report_date|date:"Y-m-d H:i" }}</p>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>نوع المنتج</th>
+                            <th>كود المنتج</th>
+                            <th>اسم المنتج</th>
+                            <th class="text-end">الكمية الحالية</th>
+                            <th>الوحدة</th>
+                            <th class="text-end">متوسط التكلفة للوحدة</th>
+                            <th class="text-end">القيمة الإجمالية</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for line in report_lines %}
+                        <tr>
+                            <td>{{ line.product.get_product_type_display }}</td>
+                            <td>{{ line.product.code }}</td>
+                            <td>{{ line.product.name }}</td>
+                            <td class="text-end">{{ line.quantity|floatformat:3|intcomma }}</td>
+                            <td>{{ line.product.unit }}</td>
+                            <td class="text-end">{{ line.unit_cost|floatformat:3|intcomma }}</td>
+                            <td class="text-end">{{ line.total_value|floatformat:3|intcomma }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center">لا يوجد مخزون حالي.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot class="table-primary">
+                        <tr>
+                            <th colspan="6" class="text-end">الإجمالي العام لقيمة المخزون</th>
+                            <th class="text-end">{{ grand_total_value|floatformat:3|intcomma }}</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

@@ -3,11 +3,13 @@
 from decimal import Decimal
 from django.utils import timezone
 
-# Import the base test case and models from existing tests
-from .tests import AccountingServiceBaseTestCase
+# Import the base test case from the new base file
+from .test_base import AccountingServiceBaseTestCase
 from .models import (
     InventoryLog, Batch, BatchItem, InventoryAdjustment, InventoryCount,
-    ProductionReturn, OpeningBalance
+    ProductionReturn, Product, SalesOrder, SalesOrderItem, FinishedProductDispatch,
+    JournalEntry, JournalEntryLine, ShopOrderTemplate, ProductTypeAccountingSettings,
+    FinishedProductReceipt
 )
 from .services import costing_service
 
@@ -15,6 +17,11 @@ class TestCostingService(AccountingServiceBaseTestCase):
     """
     Test suite for functions in `costing_service.py`.
     """
+    def setUp(self):
+        """Clear journal entries before each test to ensure isolation."""
+        super().setUp()
+        JournalEntry.objects.all().delete()
+
     def test_get_inventory_state_at_datetime_complex_scenario(self):
         """
         Verify that get_inventory_state_at_datetime correctly calculates quantity
@@ -39,7 +46,7 @@ class TestCostingService(AccountingServiceBaseTestCase):
             batch=batch1, primitive_product=self.raw_material,
             theoretical_quantity=20.0,
             actual_quantity=20.0,
-            cost_at_consumption=Decimal("10.000"), source_type='inventory_log'
+            cost_at_consumption=Decimal("10.000")
         )
 
         # Sept 15: Receive 50 units @ 12.00 each. State: 130 units, 800 + 600 = 1400.00 value
@@ -137,7 +144,7 @@ class TestCostingService(AccountingServiceBaseTestCase):
             batch=batch1, primitive_product=self.raw_material,
             theoretical_quantity=20.0,
             actual_quantity=20.0,
-            cost_at_consumption=Decimal("10.000"), source_type='inventory_log'
+            cost_at_consumption=Decimal("10.000")
         )
 
         # Sept 15: Receive 50 units @ 12.00.
@@ -186,40 +193,176 @@ class TestCostingService(AccountingServiceBaseTestCase):
         expected_mac = Decimal("1520.000") / Decimal("130.0")
         self.assertAlmostEqual(self.raw_material.moving_average_cost, expected_mac, places=3)
 
-    def test_costing_with_opening_balance(self):
-        """
-        Verify that an OpeningBalance is correctly included in cost calculations.
-        """
-        # 1. Arrange
-        # Sept 1: Opening balance of 50 units with a total value of 525.00 (unit cost 10.50)
-        OpeningBalance.objects.create(
-            product=self.raw_material,
-            quantity=50.0,
-            balance_date=timezone.make_aware(timezone.datetime(2025, 9, 1, 0, 0, 0)),
-            total_value=Decimal("525.000")
-        )
 
-        # Sept 5: Receive 100 units @ 12.00 each.
-        ts1 = timezone.make_aware(timezone.datetime(2025, 9, 5, 10, 0, 0))
+class TestCostingWithOpeningBalance(AccountingServiceBaseTestCase):
+    """
+    Tests to verify that operations are correctly costed when starting
+    from an opening balance created via the new "operational record" method.
+    """
+    def setUp(self):
+        """Clear journal entries before each test to ensure isolation."""
+        super().setUp()
+        JournalEntry.objects.all().delete()
+
+    def test_operations_with_raw_material_opening_balance(self):
+        """
+        Verify that consumption costing is correct when inventory starts
+        from an opening balance log and is followed by another purchase.
+        """
+        # 1. Arrange: Create the opening balance as a standard InventoryLog
+        # This represents the physical stock at go-live.
+        ts_ob = timezone.make_aware(timezone.datetime(2025, 9, 1, 9, 0, 0))
         InventoryLog.objects.create(
             product=self.raw_material, company=self.supplier, quantity=100.0,
-            timestamp=ts1,
-            release_timestamp=ts1,
-            status=InventoryLog.Status.RELEASED, base_unit_price=Decimal("12.000")
+            timestamp=ts_ob, release_timestamp=ts_ob,
+            status=InventoryLog.Status.RELEASED, base_unit_price=Decimal("10.000")
         )
 
-        # 2. Act: Get the state after the receipt
-        state = costing_service.get_inventory_state_at_datetime(
-            self.raw_material.id, timezone.make_aware(timezone.datetime(2025, 9, 6, 0, 0, 0))
+        # 2. Arrange: A subsequent purchase at a different price
+        ts_purchase = timezone.make_aware(timezone.datetime(2025, 9, 5, 10, 0, 0))
+        InventoryLog.objects.create(
+            product=self.raw_material, company=self.supplier, quantity=50.0,
+            timestamp=ts_purchase, release_timestamp=ts_purchase,
+            status=InventoryLog.Status.RELEASED, base_unit_price=Decimal("13.000")
         )
 
-        # 3. Assert
-        # Expected Quantity = 50 (OB) + 100 (Log) = 150
-        # Expected Value = 525 (OB) + (100 * 12) = 525 + 1200 = 1725
-        self.assertEqual(state['quantity'], Decimal('150.0'))
-        self.assertAlmostEqual(state['value'], Decimal('1725.000'), places=3)
+        # 3. Arrange: A consumption event after both receipts
+        ts_consumption = timezone.make_aware(timezone.datetime(2025, 9, 10, 11, 0, 0))
+        batch = Batch.objects.create(
+            template=self.test_template, shop_order_number="SO-OB-1", batch_number="B-OB-1",
+            creation_date=ts_consumption
+        )
+        item_to_cost = BatchItem.objects.create(
+            batch=batch, primitive_product=self.raw_material,
+            theoretical_quantity=60.0, actual_quantity=60.0
+        )
 
-        # Verify MAC calculation
-        mac = state['value'] / state['quantity']
-        expected_mac = Decimal("1725.000") / Decimal("150.0") # 11.50
-        self.assertAlmostEqual(mac, expected_mac, places=3)
+        # 4. Act: Trigger the master recalculation service
+        costing_service.recalculate_cost_history_for_product(
+            self.raw_material.id,
+            start_datetime=ts_ob
+        )
+
+        # 5. Assert
+        # a) Verify the cost_at_consumption for the batch item
+        item_to_cost.refresh_from_db()
+        # Expected MAC at time of consumption:
+        # Value = (100 * 10.00) + (50 * 13.00) = 1000 + 650 = 1650
+        # Quantity = 100 + 50 = 150
+        # MAC = 1650 / 150 = 11.00
+        expected_mac_at_consumption = Decimal("11.000")
+        self.assertAlmostEqual(item_to_cost.cost_at_consumption, expected_mac_at_consumption, places=3)
+
+        # b) Verify the final MAC on the product object
+        self.raw_material.refresh_from_db()
+        # Expected final state:
+        # Final Quantity = 150 - 60 = 90
+        # Final Value = 1650 - (60 * 11.00) = 1650 - 660 = 990
+        # Final MAC = 990 / 90 = 11.00
+        expected_final_mac = Decimal("11.000")
+        self.assertAlmostEqual(self.raw_material.moving_average_cost, expected_final_mac, places=3)
+
+        # c) Verify the final inventory state using the state function
+        final_state = costing_service.get_inventory_state_at_datetime(
+            self.raw_material.id, timezone.make_aware(timezone.datetime(2025, 9, 28, 0, 0, 0))
+        )
+        self.assertEqual(final_state['quantity'], Decimal('90.0'))
+        self.assertAlmostEqual(final_state['value'], Decimal('990.000'), places=3)
+
+    def test_operations_with_finished_good_opening_balance(self):
+        """
+        Verify that a sale of a finished good that exists from an opening
+        balance is correctly costed and generates the correct COGS journal entry.
+        """
+        # 1. Arrange: Create a unique final product for this test to avoid conflicts
+        unique_final_product = Product.objects.create(
+            name="Unique IV Drip Bag 500ml",
+            code="UFP-IVDRIP-500",
+            product_type=Product.ProductType.FINAL_PRODUCT,
+            unit="Bag"
+        )
+        # ProductTypeAccountingSettings are already created in the base class setup.
+        # No need to create them again.
+
+        # Create the opening balance for a finished good using the
+        # "Migration Batch" method.
+        mig_template = ShopOrderTemplate.objects.create(
+            name="MIG-TPL-FP-01", final_product=unique_final_product
+        )
+        mig_batch = Batch.objects.create(
+            template=mig_template, shop_order_number="MIG-SO-FP-01", batch_number="MIGRATION",
+            creation_date=timezone.make_aware(timezone.datetime(2025, 9, 1, 8, 0, 0))
+        )
+        # This receipt represents the physical, costed stock at go-live.
+        # Its creation will trigger a JE (Debit FG Inv, Credit WIP), which is
+        # expected and will be balanced by the full opening balance JE.
+        ob_receipt = FinishedProductReceipt.objects.create(
+            batch=mig_batch, individual_batch_number="FPB-OB-001",
+            receipt_date=timezone.make_aware(timezone.datetime(2025, 9, 1, 9, 0, 0)),
+            total_quantity_produced=500.0,
+            total_cost=Decimal("25000.000"), # Unit cost = 50.00
+            status=FinishedProductReceipt.Status.RELEASED
+        )
+
+        # 2. Arrange: A subsequent production receipt at a different cost
+        prod_batch = Batch.objects.create(
+            template=mig_template, shop_order_number="PROD-SO-FP-01", batch_number="PROD-01",
+            creation_date=timezone.make_aware(timezone.datetime(2025, 9, 10, 8, 0, 0))
+        )
+        prod_receipt = FinishedProductReceipt.objects.create(
+            batch=prod_batch, individual_batch_number="FPB-PROD-001",
+            receipt_date=timezone.make_aware(timezone.datetime(2025, 9, 11, 9, 0, 0)),
+            total_quantity_produced=150.0,
+            total_cost=Decimal("8250.000"), # Unit cost = 55.00
+            status=FinishedProductReceipt.Status.RELEASED
+        )
+
+        # 3. Arrange: Create a sales order and dispatch for the opening balance stock.
+        so = SalesOrder.objects.create(
+            customer=self.customer,
+            order_date=timezone.make_aware(timezone.datetime(2025, 9, 15, 10, 0, 0)),
+            so_number="SO-OB-SALE-01"
+        )
+        so_item = SalesOrderItem.objects.create(
+            sales_order=so,
+            finished_product=ob_receipt,
+            quantity_ordered=40.0,
+            base_price_per_unit=Decimal("75.000")
+        )
+        # The dispatch will trigger the sales JE.
+        dispatch = FinishedProductDispatch.objects.create(
+            sales_order_item=so_item,
+            quantity=40.0,
+            dispatch_date=timezone.make_aware(timezone.datetime(2025, 9, 16, 11, 0, 0)),
+            cost_at_dispatch=Decimal("2000.000") # 40 units * 50.00 unit cost from OB
+        )
+
+        # 4. Assert
+        # a) Verify the final inventory state of the finished product
+        import logging
+        logging.basicConfig(level=logging.DEBUG)
+        final_state = costing_service.get_inventory_state_at_datetime(
+            unique_final_product.id, timezone.make_aware(timezone.datetime(2025, 9, 28, 0, 0, 0))
+        )
+        # Expected Quantity = 500 (OB) + 150 (Prod) - 40 (Sale) = 610
+        # Expected Value = 25000 (OB) + 8250 (Prod) - 2000 (COGS) = 31250
+        self.assertEqual(final_state['quantity'], Decimal('610.0'))
+        self.assertAlmostEqual(final_state['value'], Decimal('31250.000'), places=3)
+
+        # b) Verify the COGS portion of the sales journal entry
+        self.assertEqual(JournalEntry.objects.count(), 3) # 1 for OB, 1 for Prod, 1 for sale
+        sales_je = JournalEntry.objects.latest('date')
+        self.assertEqual(sales_je.source_object, dispatch)
+
+        cogs_debit_line = sales_je.lines.get(
+            account=ProductTypeAccountingSettings.objects.get(product_type=Product.ProductType.FINAL_PRODUCT, inventory_account=self.accounts['1020206']).cogs_or_expense_account,
+            entry_type=JournalEntryLine.EntryType.DEBIT
+        )
+        fg_credit_line = sales_je.lines.get(
+            account=self.general_settings.finished_goods_inventory,
+            entry_type=JournalEntryLine.EntryType.CREDIT
+        )
+
+        expected_cogs = Decimal("2000.000")
+        self.assertEqual(cogs_debit_line.amount, expected_cogs)
+        self.assertEqual(fg_credit_line.amount, expected_cogs)

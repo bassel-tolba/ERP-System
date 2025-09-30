@@ -483,6 +483,45 @@ def tax_reconciliation_report(request: HttpRequest) -> HttpResponse:
     return render(request, template_name, context)
 
 
+def stock_valuation_report(request: HttpRequest) -> HttpResponse:
+    """
+    Generates a report showing the current valuation of all inventory.
+    """
+    report_date = timezone.now()
+    
+    products = Product.objects.all().order_by('product_type', 'name')
+    
+    report_lines = []
+    grand_total_value = Decimal('0.0')
+
+    for product in products:
+        state = get_inventory_state_at_datetime(product.id, report_date)
+        quantity = state['quantity']
+        value = state['value']
+        
+        if quantity > 0:
+            report_lines.append({
+                'product': product,
+                'quantity': quantity,
+                'unit_cost': (value / quantity) if quantity else Decimal('0.0'),
+                'total_value': value,
+            })
+            grand_total_value += value
+
+    context = {
+        'active_page': 'analysis',
+        'report_date': report_date,
+        'report_lines': report_lines,
+        'grand_total_value': grand_total_value,
+    }
+    
+    template_name = 'inventory/reports/stock_valuation_report.html'
+    if 'X-Partial-Request' in request.headers:
+        template_name = 'inventory/partials/reports/stock_valuation_report_content.html'
+        
+    return render(request, template_name, context)
+
+
 def batch_production_variance_report(request: HttpRequest) -> HttpResponse:
     """
     Generates a report comparing theoretical vs. actual material consumption for production batches.

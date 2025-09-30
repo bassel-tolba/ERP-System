@@ -3,7 +3,7 @@
 from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.models import ContentType
 
-from .tests import AccountingServiceBaseTestCase
+from .test_base import AccountingServiceBaseTestCase
 from .models import JournalEntry, JournalEntryLine, Account, Customer
 
 class TestSubLedgerIntegrity(AccountingServiceBaseTestCase):
@@ -11,18 +11,17 @@ class TestSubLedgerIntegrity(AccountingServiceBaseTestCase):
     Test suite dedicated to ensuring the unbreakable link between the
     General Ledger and its sub-ledgers.
     """
-    @classmethod
-    def setUpTestData(cls):
-        super().setUpTestData()
+    def setUp(self):
+        super().setUp()
         
         # 1. Designate Accounts Receivable as a control account
-        cls.ar_account = cls.accounts['10203']
-        cls.ar_account.is_control_account = True
-        cls.ar_account.sub_ledger_model = ContentType.objects.get_for_model(Customer)
-        cls.ar_account.save()
+        self.ar_account = self.accounts['10203']
+        self.ar_account.is_control_account = True
+        self.ar_account.sub_ledger_model = ContentType.objects.get_for_model(Customer)
+        self.ar_account.save()
 
         # 2. Get a non-control account for comparison
-        cls.cash_account = cls.accounts['1020101'] # النقدية بالصندوق
+        self.cash_account = self.accounts['1020101'] # النقدية بالصندوق
 
     def test_je_line_to_control_account_without_sub_ledger_fails(self):
         """

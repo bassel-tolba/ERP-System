@@ -4,8 +4,8 @@ from decimal import Decimal
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 
-# Import the base test case and models from existing tests
-from .tests import AccountingServiceBaseTestCase
+# Import the base test case from the new base file
+from .test_base import AccountingServiceBaseTestCase
 from .models import (
     Account, FixedAsset, DepreciationLog, InventoryConsumption, InventoryLog, JournalEntry
 )
@@ -14,25 +14,25 @@ class TestFixedAssets(AccountingServiceBaseTestCase):
     """
     Test suite for the Fixed Assets & Depreciation module.
     """
-    @classmethod
-    def setUpTestData(cls):
-        super().setUpTestData()
-        # Add specific accounts for fixed assets if they don't exist in the base setup
-        cls.accounts['101'] = Account.objects.get_or_create(
-            code='101', name='الأصول الثابتة', account_type=Account.AccountType.ASSET, parent=cls.accounts['100']
-        )[0]
-        cls.accounts['10101'] = Account.objects.get_or_create(
-            code='10101', name='آلات ومعدات', account_type=Account.AccountType.ASSET, parent=cls.accounts['101']
-        )[0]
-        cls.accounts['20205'] = Account.objects.get_or_create(
-            code='20205', name='مجمع الإهلاك', account_type=Account.AccountType.LIABILITY, parent=cls.accounts['202']
-        )[0]
-        cls.accounts['50205'] = Account.objects.get_or_create(
-            code='50205', name='مصروف الإهلاك', account_type=Account.AccountType.EXPENSE, parent=cls.accounts['502']
-        )[0]
-
     def setUp(self):
         super().setUp()
+        # Clear journal entries to ensure test isolation
+        JournalEntry.objects.all().delete()
+        
+        # Add specific accounts for fixed assets if they don't exist in the base setup
+        self.accounts['101'] = Account.objects.get_or_create(
+            code='101', name='الأصول الثابتة', account_type=Account.AccountType.ASSET, parent=self.accounts['100']
+        )[0]
+        self.accounts['10101'] = Account.objects.get_or_create(
+            code='10101', name='آلات ومعدات', account_type=Account.AccountType.ASSET, parent=self.accounts['101']
+        )[0]
+        self.accounts['20205'] = Account.objects.get_or_create(
+            code='20205', name='مجمع الإهلاك', account_type=Account.AccountType.LIABILITY, parent=self.accounts['202']
+        )[0]
+        self.accounts['50205'] = Account.objects.get_or_create(
+            code='50205', name='مصروف الإهلاك', account_type=Account.AccountType.EXPENSE, parent=self.accounts['502']
+        )[0]
+
         self.asset = FixedAsset.objects.create(
             asset_tag="MACHINE-001",
             name="Production Filling Machine",

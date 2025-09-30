@@ -9,7 +9,7 @@ from django.db.models.functions import TruncMonth
 
 from .models import (
     Company, Product, ProductTag, InventoryLog, ShopOrderTemplate,
-    TemplateItem, Batch, BatchItem, OpeningBalance, ProductionReturn,
+    TemplateItem, Batch, BatchItem, ProductionReturn,
     PurchaseOrder, PurchaseOrderItem, FinishedProductReceipt, ReceiptSubBatch,
     Customer, Employee,
     SalesOrder, SalesOrderItem, FinishedProductDispatch, InventoryConsumption, ExpenseLog,
@@ -21,7 +21,7 @@ from .models import (
     CustomerInvoice, CustomerInvoiceItem, CustomerPaymentApplication,
     BankTransfer, DepreciationLog,
     # --- ADDED FOR FIX ---
-    BankReconciliation, BankStatementLine, FiscalYear
+    BankReconciliation, BankStatementLine, FiscalYear, TransactionCorrection
 )
 from .views.dashboard import update_po_status
 from .views.helpers import check_and_update_batch_customization
@@ -133,18 +133,6 @@ class BatchAdmin(admin.ModelAdmin):
         super().save_formset(request, form, formset, change)
         self._trigger_batch_logic(form.instance)
 
-@admin.register(OpeningBalance)
-class OpeningBalanceAdmin(admin.ModelAdmin):
-    list_display = ('product', 'quantity', 'balance_date', 'total_value', 'unit_cost')
-    search_fields = ('product__name', 'product__code')
-    date_hierarchy = 'balance_date'
-    autocomplete_fields = ('product',)
-    readonly_fields = ('unit_cost',)
-
-    def save_model(self, request, obj, form, change):
-        super().save_model(request, obj, form, change)
-        recalculate_cost_history_for_product(obj.product_id, obj.balance_date)
-
 @admin.register(ProductionReturn)
 class ProductionReturnAdmin(admin.ModelAdmin):
     list_display = ('product', 'quantity', 'return_date', 'source_log')
@@ -237,7 +225,61 @@ class FinishedProductDispatchAdmin(admin.ModelAdmin):
     search_fields = ('sales_order_item__sales_order__so_number', 'sales_order_item__finished_product__individual_batch_number')
     date_hierarchy = 'dispatch_date'
     autocomplete_fields = ('sales_order_item',)
-    readonly_fields = ('cost_at_dispatch',)
+    readonly_fields = ('cost_at_dispatch', 'adjustment_link')
+    fields = ('sales_order_item', 'quantity', 'dispatch_date', 'cost_at_dispatch', 'adjustment_link')
+
+    @admin.display(description="Correction Link")
+    def adjustment_link(self, obj):
+        from django.urls import reverse
+        from django.utils.html import format_html
+        from django.contrib.contenttypes.models import ContentType
+
+        correction = TransactionCorrection.objects.filter(
+            content_type=ContentType.objects.get_for_model(obj),
+            object_id=obj.pk
+        ).first()
+
+        if correction:
+            url = reverse('admin:inventory_journalentry_change', args=[correction.adjusting_journal_entry.pk])
+            return format_html('This transaction was corrected by <a href="{}">JE-{}</a>.', url, correction.adjusting_journal_entry.pk)
+        
+        try:
+            period = FinancialPeriod.objects.get(start_date__lte=obj.dispatch_date, end_date__gte=obj.dispatch_date)
+            if period.status in [FinancialPeriod.Status.CLOSED, FinancialPeriod.Status.PERMANENTLY_LOCKED]:
+                # In a full implementation, this would link to a new view.
+                # adjustment_url = reverse('inventory:create_adjustment', args=[ContentType.objects.get_for_model(obj).pk, obj.pk])
+                return format_html('<a href="#" class="button">{}</a>', "Create Adjustment")
+        except FinancialPeriod.DoesNotExist:
+            pass
+
+        return "No corrections found."
+
+    def has_change_permission(self, request, obj=None):
+        if obj and obj.dispatch_date:
+            try:
+                period = FinancialPeriod.objects.get(
+                    start_date__lte=obj.dispatch_date.date(),
+                    end_date__gte=obj.dispatch_date.date()
+                )
+                if period.status in [FinancialPeriod.Status.CLOSED, FinancialPeriod.Status.PERMANENTLY_LOCKED]:
+                    return False
+            except FinancialPeriod.DoesNotExist:
+                return False
+        return super().has_change_permission(request, obj)
+
+    def has_delete_permission(self, request, obj=None):
+        if obj and obj.dispatch_date:
+            try:
+                period = FinancialPeriod.objects.get(
+                    start_date__lte=obj.dispatch_date.date(),
+                    end_date__gte=obj.dispatch_date.date()
+                )
+                if period.status in [FinancialPeriod.Status.CLOSED, FinancialPeriod.Status.PERMANENTLY_LOCKED]:
+                    return False
+            except FinancialPeriod.DoesNotExist:
+                return False
+        return super().has_delete_permission(request, obj)
+
 
 @admin.register(ExpenseLog)
 class ExpenseLogAdmin(admin.ModelAdmin):
@@ -433,10 +475,19 @@ class FiscalYearAdmin(admin.ModelAdmin):
 
 @admin.register(FinancialPeriod)
 class FinancialPeriodAdmin(admin.ModelAdmin):
-    list_display = ('name', 'fiscal_year', 'start_date', 'end_date', 'status')
+    list_display = ('name', 'fiscal_year', 'start_date', 'end_date', 'status', 'closing_cockpit_link')
     list_filter = ('status', 'fiscal_year')
     search_fields = ('name', 'fiscal_year__name')
     ordering = ('-start_date',)
+
+    @admin.display(description="Closing Cockpit")
+    def closing_cockpit_link(self, obj):
+        from django.urls import reverse
+        from django.utils.html import format_html
+        if obj.status in [FinancialPeriod.Status.OPEN, FinancialPeriod.Status.PENDING_CLOSE]:
+            url = reverse('inventory:close_period_cockpit', args=[obj.pk])
+            return format_html('<a href="{}" class="button">Open Cockpit</a>', url)
+        return "N/A"
 
 @admin.register(Account)
 class AccountAdmin(admin.ModelAdmin): # Changed from ImportExportModelAdmin
@@ -485,6 +536,12 @@ class JournalEntryAdmin(admin.ModelAdmin):
         if obj.source_object:
             meta = obj.source_object._meta
             url = reverse(f'admin:{meta.app_label}_{meta.model_name}_change', args=[obj.object_id])
+            # --- NEW: Add special handling for TransactionCorrection ---
+            if meta.model_name == 'transactioncorrection':
+                original_obj = obj.source_object.source_object
+                original_meta = original_obj._meta
+                original_url = reverse(f'admin:{original_meta.app_label}_{original_meta.model_name}_change', args=[original_obj.pk])
+                return format_html('Correction for <a href="{}">{}</a>', original_url, original_obj)
             return format_html('<a href="{}">{}</a>', url, obj.source_object)
         return "Manual Entry"
 
@@ -492,6 +549,8 @@ class JournalEntryAdmin(admin.ModelAdmin):
 class ProductTypeAccountingSettingsAdmin(admin.ModelAdmin):
     list_display = ('product_type', 'inventory_account', 'cogs_or_expense_account', 'sales_revenue_account')
     autocomplete_fields = ('inventory_account', 'cogs_or_expense_account', 'sales_revenue_account')
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 @admin.register(GeneralAccountingSettings)
 class GeneralAccountingSettingsAdmin(admin.ModelAdmin):
@@ -502,6 +561,43 @@ class GeneralAccountingSettingsAdmin(admin.ModelAdmin):
     )
     def has_add_permission(self, request):
         return self.model.objects.count() == 0
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+
+@admin.register(TransactionCorrection)
+class TransactionCorrectionAdmin(admin.ModelAdmin):
+    list_display = ('source_object', 'adjusting_journal_entry', 'corrected_by', 'created_at')
+    readonly_fields = ('source_object_link', 'adjusting_journal_entry_link', 'corrected_by', 'created_at', 'justification')
+    search_fields = ('justification',)
+    date_hierarchy = 'created_at'
+
+    @admin.display(description="Source Document")
+    def source_object_link(self, obj):
+        from django.urls import reverse
+        from django.utils.html import format_html
+        if obj.source_object:
+            meta = obj.source_object._meta
+            url = reverse(f'admin:{meta.app_label}_{meta.model_name}_change', args=[obj.object_id])
+            return format_html('<a href="{}">{}</a>', url, obj.source_object)
+        return "-"
+
+    @admin.display(description="Adjusting Journal Entry")
+    def adjusting_journal_entry_link(self, obj):
+        from django.urls import reverse
+        from django.utils.html import format_html
+        if obj.adjusting_journal_entry:
+            url = reverse('admin:inventory_journalentry_change', args=[obj.adjusting_journal_entry.pk])
+            return format_html('<a href="{}">JE-{}</a>', url, obj.adjusting_journal_entry.pk)
+        return "-"
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
     def has_delete_permission(self, request, obj=None):
         return False
 
@@ -522,3 +618,5 @@ class InventoryConsumptionAdmin(admin.ModelAdmin):
         if obj.source_log and obj.quantity_consumed:
             obj.cost_at_consumption = obj.source_log.costing_unit_price * Decimal(str(obj.quantity_consumed))
         super().save_model(request, obj, form, change)
+
+

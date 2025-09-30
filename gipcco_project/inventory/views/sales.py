@@ -12,6 +12,7 @@ from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+from django.core.exceptions import ValidationError
 
 from ..models import Customer, SalesOrder, SalesOrderItem, FinishedProductReceipt, FinishedProductDispatch, Product
 
@@ -176,62 +177,159 @@ def view_sales_order(request: HttpRequest, pk: int) -> HttpResponse:
         return render(request, 'inventory/partials/sales_order_view_content.html', context)
     return render(request, 'inventory/sales_order_view.html', context)
 
-@require_POST
-def dispatch_from_sales_order(request: HttpRequest, pk: int) -> HttpResponse:
-    """The core transaction view for shipping items from an SO."""
-    so = get_object_or_404(SalesOrder, pk=pk)
-    item_ids = request.POST.getlist('item_id')
-    dispatch_quantities = request.POST.getlist('dispatch_quantity')
-    dispatch_date_str = request.POST.get('dispatch_date')
 
-    if not dispatch_date_str:
-        messages.error(request, "الرجاء تحديد تاريخ الصرف.")
+@require_POST
+def delete_sales_order(request: HttpRequest, pk: int) -> HttpResponse:
+    """Handles deleting a Sales Order."""
+    so = get_object_or_404(SalesOrder, pk=pk)
+    
+    # Check if any item in the sales order has been dispatched
+    if so.items.filter(dispatches__isnull=False).exists():
+        messages.error(request, 'لا يمكن حذف أمر البيع هذا لأنه تم صرف بعض البنود بالفعل.')
         return redirect('inventory:view_sales_order', pk=pk)
+    
+    so_number = so.so_number
+    so.delete()
+    messages.info(request, f"تم حذف أمر البيع '{so_number}' بنجاح.")
+    return redirect('inventory:sales_orders')
+
+
+@require_POST
+def edit_sales_order_item(request: HttpRequest, pk: int) -> HttpResponse:
+    """Handles editing a sales order item (e.g., from a modal)."""
+    item = get_object_or_404(SalesOrderItem.objects.select_related('sales_order'), pk=pk)
+    so_pk = item.sales_order.pk
+
+    if item.dispatches.exists():
+        messages.error(request, "لا يمكن تعديل هذا البند لأنه تم صرف كميات منه بالفعل.")
+        return redirect('inventory:view_sales_order', pk=so_pk)
+
+    quantity = request.POST.get('quantity_ordered')
+    price = request.POST.get('base_price_per_unit')
+    vat_rate = request.POST.get('vat_rate')
 
     try:
-        dispatch_datetime = timezone.make_aware(datetime.strptime(dispatch_date_str, '%Y-%m-%d'))
-        
+        item.quantity_ordered = float(quantity)
+        item.base_price_per_unit = Decimal(price)
+        item.vat_rate = Decimal(vat_rate) / 100
+        item.save()
+        messages.success(request, "تم تعديل بند أمر البيع بنجاح.")
+    except (ValueError, TypeError) as e:
+        messages.error(request, f"بيانات غير صالحة: {e}")
+
+    return redirect('inventory:view_sales_order', pk=so_pk)
+
+
+@require_POST
+def delete_sales_order_item(request: HttpRequest, pk: int) -> HttpResponse:
+    """Handles deleting a sales order item."""
+    item = get_object_or_404(SalesOrderItem.objects.select_related('sales_order'), pk=pk)
+    so_pk = item.sales_order.pk
+
+    if item.dispatches.exists():
+        messages.error(request, "لا يمكن حذف هذا البند لأنه تم صرف كميات منه بالفعل.")
+        return redirect('inventory:view_sales_order', pk=so_pk)
+
+    item.delete()
+    messages.success(request, "تم حذف بند أمر البيع بنجاح.")
+    return redirect('inventory:view_sales_order', pk=so_pk)
+
+
+# --- Dispatch Views ---
+
+@require_POST
+def create_dispatch(request: HttpRequest, so_item_pk: int) -> HttpResponse:
+    """Creates a dispatch for a single sales order item."""
+    so_item = get_object_or_404(
+        SalesOrderItem.objects.select_related('sales_order', 'finished_product')
+        .annotate(total_dispatched=Coalesce(Sum('dispatches__quantity'), 0.0)),
+        pk=so_item_pk
+    )
+    so = so_item.sales_order
+    
+    quantity_str = request.POST.get('quantity')
+    dispatch_date_str = request.POST.get('dispatch_date')
+
+    if not quantity_str or not dispatch_date_str:
+        messages.error(request, "الرجاء تحديد الكمية وتاريخ الصرف.")
+        return redirect('inventory:view_sales_order', pk=so.pk)
+
+    try:
+        quantity = float(quantity_str)
+        dispatch_date = timezone.make_aware(datetime.strptime(dispatch_date_str, '%Y-%m-%d'))
+
+        if quantity <= 0:
+            raise ValueError("الكمية يجب أن تكون أكبر من صفر.")
+
+        quantity_remaining = so_item.quantity_ordered - so_item.total_dispatched
+        if quantity > quantity_remaining + 0.001:
+            raise ValueError(f"كمية الصرف ({quantity}) أكبر من الكمية المتبقية ({quantity_remaining}).")
+
+        receipt = so_item.finished_product
+        unit_cost = (receipt.total_cost / Decimal(str(receipt.total_quantity_produced))) if receipt.total_quantity_produced > 0 else Decimal('0.0')
+        cost_at_dispatch = unit_cost * Decimal(str(quantity))
+
         with transaction.atomic():
-            dispatches_to_create = []
-            # --- ADDED .select_for_update() to lock the rows ---
-            so_items = {
-                str(item.id): item for item in SalesOrderItem.objects.select_for_update().filter(sales_order=so)
-                .annotate(total_dispatched=Coalesce(Sum('dispatches__quantity'), 0.0))
-            }
+            FinishedProductDispatch.objects.create(
+                sales_order_item=so_item,
+                quantity=quantity,
+                dispatch_date=dispatch_date,
+                cost_at_dispatch=cost_at_dispatch
+            )
+            # Update SO status
+            total_ordered = sum(i.quantity_ordered for i in so.items.all())
+            total_dispatched_after = sum(d.quantity for d in FinishedProductDispatch.objects.filter(sales_order_item__sales_order=so))
+            
+            if abs(total_dispatched_after - total_ordered) < 0.001:
+                so.status = SalesOrder.Status.COMPLETED
+            else:
+                so.status = SalesOrder.Status.PARTIALLY_SHIPPED
+            so.save(update_fields=['status'])
 
-            for item_id, qty_str in zip(item_ids, dispatch_quantities):
-                if not qty_str or float(qty_str) <= 0:
-                    continue
+        messages.success(request, "تم إنشاء الصرف بنجاح.")
+    except (ValueError, TypeError) as e:
+        messages.error(request, f"خطأ في إنشاء الصرف: {e}")
 
-                item = so_items.get(item_id)
-                if not item:
-                    raise ValueError(f"لم يتم العثور على البند رقم {item_id} في أمر البيع.")
-                
-                qty_to_dispatch = float(qty_str)
-                qty_remaining = item.quantity_ordered - item.total_dispatched
-                
-                if qty_to_dispatch > qty_remaining + 0.001:
-                    raise ValueError(f"كمية الصرف ({qty_to_dispatch}) أكبر من الكمية المتبقية ({qty_remaining}) للمنتج.")
-                
-                receipt = get_object_or_404(FinishedProductReceipt, pk=item.finished_product_id)
-                unit_cost = (receipt.total_cost / Decimal(str(receipt.total_quantity_produced))) if receipt.total_quantity_produced > 0 else Decimal('0.0')
+    return redirect('inventory:view_sales_order', pk=so.pk)
 
-                dispatches_to_create.append(
-                    FinishedProductDispatch(
-                        sales_order_item=item,
-                        quantity=qty_to_dispatch,
-                        dispatch_date=dispatch_datetime,
-                        cost_at_dispatch=unit_cost * Decimal(str(qty_to_dispatch))
-                    )
-                )
 
-            if not dispatches_to_create:
-                messages.warning(request, "لم يتم تحديد كميات للصرف.")
-                return redirect('inventory:view_sales_order', pk=pk)
+@require_POST
+def edit_dispatch(request: HttpRequest, pk: int) -> HttpResponse:
+    """Handles editing an existing dispatch."""
+    dispatch = get_object_or_404(
+        FinishedProductDispatch.objects.select_related(
+            'sales_order_item__sales_order',
+            'sales_order_item__finished_product'
+        ), 
+        pk=pk
+    )
+    so_item = dispatch.sales_order_item
+    so = so_item.sales_order
 
-            for dispatch in dispatches_to_create:
-                dispatch.save()
+    quantity_str = request.POST.get('quantity')
+    dispatch_date_str = request.POST.get('dispatch_date')
 
+    try:
+        new_quantity = float(quantity_str)
+        new_date = timezone.make_aware(datetime.strptime(dispatch_date_str, '%Y-%m-%d'))
+
+        with transaction.atomic():
+            # Calculate available quantity for this item, EXCLUDING the current dispatch
+            total_dispatched_for_item = so_item.dispatches.exclude(pk=pk).aggregate(total=Coalesce(Sum('quantity'), 0.0))['total']
+            quantity_remaining = so_item.quantity_ordered - total_dispatched_for_item
+
+            if new_quantity > quantity_remaining + 0.001:
+                raise ValueError("الكمية الجديدة تتجاوز الكمية المتاحة في أمر البيع.")
+
+            receipt = so_item.finished_product
+            unit_cost = (receipt.total_cost / Decimal(str(receipt.total_quantity_produced))) if receipt.total_quantity_produced > 0 else Decimal('0.0')
+            
+            dispatch.quantity = new_quantity
+            dispatch.dispatch_date = new_date
+            dispatch.cost_at_dispatch = unit_cost * Decimal(str(new_quantity))
+            dispatch.save()
+
+            # Update SO status
             total_ordered = sum(i.quantity_ordered for i in so.items.all())
             total_dispatched_after = sum(d.quantity for d in FinishedProductDispatch.objects.filter(sales_order_item__sales_order=so))
             
@@ -241,13 +339,93 @@ def dispatch_from_sales_order(request: HttpRequest, pk: int) -> HttpResponse:
                 so.status = SalesOrder.Status.PARTIALLY_SHIPPED
             else:
                 so.status = SalesOrder.Status.PENDING
-            so.save()
+            so.save(update_fields=['status'])
 
-        messages.success(request, "تم تسجيل عملية الصرف بنجاح.")
+        messages.success(request, "تم تعديل الصرف بنجاح.")
     except (ValueError, TypeError) as e:
-        messages.error(request, f"حدث خطأ: {e}")
+        messages.error(request, f"خطأ في تعديل الصرف: {e}")
+
+    return redirect('inventory:view_sales_order', pk=so.pk)
+
+
+@require_POST
+def delete_dispatch(request: HttpRequest, pk: int) -> HttpResponse:
+    """Handles deleting a dispatch."""
+    dispatch = get_object_or_404(FinishedProductDispatch.objects.select_related('sales_order_item__sales_order'), pk=pk)
+    so = dispatch.sales_order_item.sales_order
+
+    with transaction.atomic():
+        dispatch.delete()
+        # Update SO status
+        total_ordered = sum(i.quantity_ordered for i in so.items.all())
+        total_dispatched_after = sum(d.quantity for d in FinishedProductDispatch.objects.filter(sales_order_item__sales_order=so))
+        
+        if abs(total_dispatched_after - total_ordered) < 0.001:
+            so.status = SalesOrder.Status.COMPLETED
+        elif total_dispatched_after > 0:
+            so.status = SalesOrder.Status.PARTIALLY_SHIPPED
+        else:
+            so.status = SalesOrder.Status.PENDING
+        so.save(update_fields=['status'])
+
+    messages.success(request, "تم حذف الصرف بنجاح.")
+    return redirect('inventory:view_sales_order', pk=so.pk)
+
+
+@require_POST
+def dispatch_from_sales_order(request: HttpRequest, so_pk: int) -> HttpResponse:
+    """
+    Handles the creation of FinishedProductDispatch records from the sales order view.
+    """
+    sales_order = get_object_or_404(SalesOrder, pk=so_pk)
     
-    return redirect('inventory:view_sales_order', pk=pk)
+    try:
+        with transaction.atomic():
+            items_dispatched = 0
+            for key, quantity_str in request.POST.items():
+                if key.startswith('quantity_'):
+                    if not quantity_str or float(quantity_str) <= 0:
+                        continue
+                    
+                    so_item_id = key.split('_')[1]
+                    quantity_to_dispatch = float(quantity_str)
+                    
+                    so_item = get_object_or_404(SalesOrderItem.objects.select_related('finished_product'), pk=so_item_id)
+
+                    # Validation
+                    dispatched_qty = so_item.dispatches.aggregate(total=Sum('quantity'))['total'] or 0
+                    remaining_to_dispatch = so_item.quantity_ordered - dispatched_qty
+                    if quantity_to_dispatch > remaining_to_dispatch:
+                        raise ValidationError(f"Cannot dispatch {quantity_to_dispatch} for {so_item.finished_product}. Only {remaining_to_dispatch} remaining on order.")
+
+                    available_stock = so_item.finished_product.quantity_available
+                    if quantity_to_dispatch > available_stock:
+                         raise ValidationError(f"Cannot dispatch {quantity_to_dispatch} for {so_item.finished_product}. Only {available_stock} available in stock.")
+
+                    # Create Dispatch
+                    cost_per_unit = so_item.finished_product.unit_cost
+                    FinishedProductDispatch.objects.create(
+                        sales_order_item=so_item,
+                        quantity=quantity_to_dispatch,
+                        dispatch_date=timezone.now(),
+                        cost_at_dispatch=cost_per_unit * Decimal(str(quantity_to_dispatch))
+                    )
+                    items_dispatched += 1
+            
+            if items_dispatched > 0:
+                messages.success(request, f"Successfully created {items_dispatched} dispatch(es).")
+                # Update SO status after dispatching
+                sales_order.update_status()
+            else:
+                messages.warning(request, "No quantities were entered to dispatch.")
+
+    except ValidationError as e:
+        messages.error(request, f"Validation Error: {e.message}")
+    except Exception as e:
+        messages.error(request, f"An unexpected error occurred: {e}")
+
+    return redirect('inventory:view_sales_order', pk=so_pk)
+
 
 # --- Sales API Views (REMOVED REDUNDANT FUNCTION) ---
 

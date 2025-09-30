@@ -1,0 +1,42 @@
+<div id="close-period-container" data-period-id="{{ period.id }}" data-checklist-url="{% url 'inventory:api_period_checklist_status' period.id %}">
+    <div class="container-fluid">
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 text-primary">لوحة إغلاق الفترة المحاسبية</h1>
+            <a href="{% url 'inventory:fiscal_year_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> العودة إلى الفترات
+            </a>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">إغلاق الفترة: <span class="text-primary fw-bold">{{ period.name }}</span></h5>
+                <p class="mb-0 text-muted">الحالة الحالية: <span class="badge bg-{{ period.get_status_badge_class }}">{{ period.get_status_display }}</span></p>
+            </div>
+            <div class="card-body">
+                <h6 class="card-title">قائمة مهام ما قبل الإغلاق</h6>
+                <p>يجب إكمال جميع المهام التالية قبل أن تتمكن من إغلاق الفترة. سيتم تحديث الحالة تلقائيًا عند اكتمال المهام.</p>
+                
+                <div id="checklist-loading" class="text-center my-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">جاري تحميل حالة القائمة...</p>
+                </div>
+
+                <ul class="list-group" id="checklist-items" style="display: none;">
+                    <!-- Checklist items will be dynamically inserted here by JavaScript -->
+                </ul>
+
+                <div class="mt-4">
+                    <form id="closePeriodForm" action="{% url 'inventory:close_period_action' period.id %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" id="closePeriodBtn" class="btn btn-danger btn-lg w-100" disabled>
+                            <i class="bi bi-lock-fill me-2"></i> إغلاق الفترة بشكل نهائي
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

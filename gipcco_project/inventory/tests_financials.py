@@ -6,8 +6,8 @@ from django.test import Client
 from django.urls import reverse
 from django.utils import timezone
 
-# Import the base test case from the existing tests file
-from .tests import AccountingServiceBaseTestCase
+# Import the base test case from the new base file
+from .test_base import AccountingServiceBaseTestCase
 
 from .models import (
     Company, SupplierInvoice, InventoryLog, Payment, PaymentApplication,
@@ -21,23 +21,19 @@ class TestFinancialViews(AccountingServiceBaseTestCase):
     """
     Test suite for views in `financials.py`.
     """
-    @classmethod
-    def setUpTestData(cls):
-        """Set up data for the entire test class."""
-        super().setUpTestData()
-        # The user is already created in the parent class's setUpTestData.
+    def setUp(self):
+        """This method will run before each test to ensure a fresh client login."""
+        super().setUp()
         # Add permissions needed for financial views
         reopen_perm = Permission.objects.get(codename='can_reopen_period')
         lock_perm = Permission.objects.get(codename='can_permanently_lock_period')
         change_je_perm = Permission.objects.get(codename='change_journalentry')
         change_fp_perm = Permission.objects.get(codename='change_financialperiod')
         
-        cls.test_user.user_permissions.add(reopen_perm, lock_perm, change_je_perm, change_fp_perm)
+        self.test_user.user_permissions.add(reopen_perm, lock_perm, change_je_perm, change_fp_perm)
         # We need to get the user again from DB to refresh its permissions
-        cls.test_user = User.objects.get(pk=cls.test_user.pk)
+        self.test_user = User.objects.get(pk=self.test_user.pk)
 
-    def setUp(self):
-        """This method will run before each test to ensure a fresh client login."""
         self.client = Client()
         self.client.login(username='testuser', password='password')
 
@@ -113,7 +109,7 @@ class TestFinancialViews(AccountingServiceBaseTestCase):
             'description': 'Partial payment'
         }
         
-        response = self.client.post(reverse('inventory:apply_payment_to_invoice', kwargs={'pk': invoice.pk}), payment_data)
+        response = self.client.post(reverse('inventory:apply_payment_to_invoice', kwargs={'invoice_pk': invoice.pk}), payment_data)
         
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('inventory:view_supplier_invoice', kwargs={'pk': invoice.pk}))
@@ -126,25 +122,25 @@ class TestFinancialViews(AccountingServiceBaseTestCase):
 
     def test_api_get_uninvoiced_receipts(self):
         """Verify the API for uninvoiced receipts works correctly."""
-        # 1. Arrange
-        # This one should NOT be on an invoice yet
-        receipt1 = InventoryLog.objects.create(
-            product=self.raw_material, company=self.supplier, quantity=10.0,
-            timestamp=timezone.now(), release_timestamp=timezone.now(),
-            status=InventoryLog.Status.RELEASED, base_unit_price=Decimal("10.000")
+        # 1. Arrange: Create two receipts, one of which will be invoiced.
+        unvoiced_receipt = InventoryLog.objects.create(
+            product=self.raw_material, company=self.supplier, quantity=50.0,
+            status=InventoryLog.Status.RELEASED, base_unit_price=Decimal("10.000"),
+            release_timestamp=timezone.now(), timestamp=timezone.now()
         )
-        # This one WILL be on an invoice
-        receipt2 = InventoryLog.objects.create(
-            product=self.raw_material, company=self.supplier, quantity=20.0,
-            timestamp=timezone.now(), release_timestamp=timezone.now(),
-            status=InventoryLog.Status.RELEASED, base_unit_price=Decimal("10.000")
+        invoiced_receipt = InventoryLog.objects.create(
+            product=self.raw_material, company=self.supplier, quantity=30.0,
+            status=InventoryLog.Status.RELEASED, base_unit_price=Decimal("12.000"),
+            release_timestamp=timezone.now(), timestamp=timezone.now()
         )
+
         invoice = SupplierInvoice.objects.create(
-            supplier=self.supplier, invoice_number="API-TEST-INV",
-            invoice_date=timezone.now().date(), due_date=timezone.now().date(),
-            total_amount=Decimal("200.000")
+            supplier=self.supplier, invoice_number="INV-API-01",
+            invoice_date=timezone.now().date(),
+            due_date=timezone.now().date() + timezone.timedelta(days=30),
+            total_amount=invoiced_receipt.total_cost
         )
-        SupplierInvoiceItem.objects.create(invoice=invoice, receipt=receipt2, amount=Decimal("200.000"))
+        SupplierInvoiceItem.objects.create(invoice=invoice, receipt=invoiced_receipt, amount=invoiced_receipt.total_cost)
 
         # 2. Act
         response = self.client.get(reverse('inventory:api_get_uninvoiced_receipts', kwargs={'supplier_id': self.supplier.id}))
@@ -152,8 +148,27 @@ class TestFinancialViews(AccountingServiceBaseTestCase):
         # 3. Assert
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertEqual(len(data['receipts']), 1)
-        self.assertEqual(data['receipts'][0]['id'], receipt1.id)
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]['id'], unvoiced_receipt.id)
+
+
+class TestCustomerInvoicing(AccountingServiceBaseTestCase):
+    """Tests for customer-side (A/R) invoicing."""
+    def setUp(self):
+        """This method will run before each test to ensure a fresh client login."""
+        super().setUp()
+        # Add permissions needed for financial views
+        reopen_perm = Permission.objects.get(codename='can_reopen_period')
+        lock_perm = Permission.objects.get(codename='can_permanently_lock_period')
+        change_je_perm = Permission.objects.get(codename='change_journalentry')
+        change_fp_perm = Permission.objects.get(codename='change_financialperiod')
+        
+        self.test_user.user_permissions.add(reopen_perm, lock_perm, change_je_perm, change_fp_perm)
+        # We need to get the user again from DB to refresh its permissions
+        self.test_user = User.objects.get(pk=self.test_user.pk)
+
+        self.client = Client()
+        self.client.login(username='testuser', password='password')
 
     # A/R Tests
     def test_customer_invoices_list_view(self):

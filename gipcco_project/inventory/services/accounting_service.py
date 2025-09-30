@@ -15,8 +15,8 @@ from ..models import (
     InventoryLog, JournalEntry, JournalEntryLine, FinancialPeriod,
     GeneralAccountingSettings, ProductTypeAccountingSettings, Product,
     Batch, InventoryConsumption, FinishedProductDispatch, FinishedProductReceipt, ProductionReturn, Payment, BankTransfer, DepreciationLog, FixedAsset, FiscalYear,
-    InventoryAdjustment, EmployeeAdvance, OverheadAllocationRun, CostPool, ExpenseLog, Account,
-
+    InventoryAdjustment, EmployeeAdvance, OverheadAllocationRun, CostPool, ExpenseLog, Account, TransactionCorrection,
+    PeriodCloseChecklist
 )
 from ..services.costing_service import get_inventory_state_at_datetime
 
@@ -1103,6 +1103,92 @@ def create_je_for_depreciation(depreciation_log: DepreciationLog) -> Optional[Jo
     return je
 
 
+def create_reversing_je_for_correction(
+    original_object,
+    justification: str,
+    user,
+    correction_date: Optional[timezone.datetime] = None
+) -> JournalEntry:
+    """
+    Creates a new journal entry in the current open period that exactly reverses
+    the financial impact of an original transaction's journal entry.
+
+    This is the core of the "Immutable Ledger" pattern.
+
+    Args:
+        original_object: The instance of the model to be corrected (e.g., a FinishedProductDispatch).
+        justification: The reason for the correction, for audit purposes.
+        user: The user performing the correction.
+        correction_date: The date for the new JE. Defaults to now().
+
+    Returns:
+        The newly created adjusting JournalEntry.
+    """
+    content_type = ContentType.objects.get_for_model(original_object)
+
+    # 1. --- Pre-checks and Guards ---
+    # Find the original journal entry
+    original_je = JournalEntry.objects.filter(
+        content_type=content_type, object_id=original_object.pk
+    ).first()
+
+    if not original_je:
+        raise ValueError(f"Cannot create correction: No original journal entry found for {original_object}.")
+
+    # Check if it has already been corrected
+    if TransactionCorrection.objects.filter(content_type=content_type, object_id=original_object.pk).exists():
+        raise PermissionError(f"This transaction ({original_object}) has already been corrected and cannot be adjusted again.")
+
+    # The new JE must be in an open period
+    if not correction_date:
+        correction_date = timezone.now()
+    _check_period_is_open(correction_date)
+
+    # 2. --- Create the Reversing Journal Entry ---
+    with transaction.atomic():
+        description = _(
+            "Reversal of JE-%(original_je_id)s for: %(original_desc)s"
+        ) % {
+            'original_je_id': original_je.id,
+            'original_desc': original_je.description
+        }
+
+        # Create the new adjusting JE header
+        adjusting_je = JournalEntry.objects.create(
+            date=correction_date,
+            description=description,
+            notes=justification,
+            status=JournalEntry.Status.POSTED
+        )
+
+        # Create the reversing lines
+        for line in original_je.lines.all():
+            JournalEntryLine.objects.create(
+                journal_entry=adjusting_je,
+                account=line.account,
+                amount=line.amount,
+                # The core of the reversal: flip debit to credit and vice-versa
+                entry_type=JournalEntryLine.EntryType.CREDIT if line.entry_type == JournalEntryLine.EntryType.DEBIT else JournalEntryLine.EntryType.DEBIT,
+                sub_ledger_object=line.sub_ledger_object
+            )
+
+        # 3. --- Create the Audit Record ---
+        correction_record = TransactionCorrection.objects.create(
+            source_object=original_object,
+            adjusting_journal_entry=adjusting_je,
+            justification=justification,
+            corrected_by=user
+        )
+
+        # Link the new JE back to the correction record for a circular audit trail
+        adjusting_je.source_object = correction_record
+        adjusting_je.save(update_fields=['content_type', 'object_id'])
+
+        logger.info(f"Successfully created reversing JE-{adjusting_je.id} to correct {original_object}.")
+
+    return adjusting_je
+
+
 def run_monthly_depreciation(period: FinancialPeriod) -> dict:
     """
     Calculates and posts depreciation for all eligible fixed assets for a given period.
@@ -1132,14 +1218,25 @@ def run_monthly_depreciation(period: FinancialPeriod) -> dict:
 
     assets_to_process = assets_to_depreciate.exclude(id__in=existing_logs)
 
+    # --- FIX: The checklist should be updated REGARDLESS of whether assets were found. ---
+    # The act of running this service means the depreciation task for the period is "done".
+    try:
+        checklist, _ = PeriodCloseChecklist.objects.get_or_create(financial_period=period)
+        checklist.is_depreciation_run = True
+        checklist.save()
+        logger.info(f"Updated period close checklist for {period.name}: is_depreciation_run=True.")
+    except Exception as e:
+        # Log the error but don't let it crash the entire process
+        logger.error(f"Could not update period close checklist for '{period.name}': {e}", exc_info=True)
+
     if not assets_to_process.exists():
+        logger.info("No new assets found to depreciate for this period.")
         summary = {
             "status": "success",
-            "message": "No new assets to depreciate for this period.",
+            "message": "No new assets found to depreciate for this period.",
             "assets_processed": 0,
             "total_depreciation": Decimal("0.0")
         }
-        logger.info("No new assets found to depreciate for this period.")
         return summary
 
     processed_count = 0

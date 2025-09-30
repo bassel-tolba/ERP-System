@@ -17,7 +17,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 import logging
 
-from ..models import (Batch, BatchItem, Company, InventoryLog, OpeningBalance,
+from ..models import (Batch, BatchItem, Company, InventoryLog,
                      Product, ProductionReturn, ShopOrderTemplate, TemplateItem, FinishedProductReceipt)
 from .helpers import check_and_update_batch_customization, validate_stock_availability
 # --- MODIFIED: Import from the new costing service ---
@@ -79,15 +79,6 @@ def create_batch(request: HttpRequest) -> HttpResponse:
         primitive_products = Product.objects.filter(~Q(product_type=Product.ProductType.FINAL_PRODUCT))
         for prod in primitive_products:
             stock_list = []
-            latest_balance = prod.opening_balances.order_by('-balance_date').first()
-            if latest_balance:
-                used_from_ob = BatchItem.objects.filter(
-                    primitive_product=prod, source_type=BatchItem.SourceType.OPENING_BALANCE
-                ).aggregate(total=Coalesce(Sum('actual_quantity'), 0.0))['total']
-                remaining_ob_qty = latest_balance.quantity - used_from_ob
-                if remaining_ob_qty > 0.001:
-                    # --- MODIFIED: Use release_timestamp for sorting consistency ---
-                    stock_list.append({'id': -1, 'qc_no': 'رصيد افتتاحي', 'timestamp': latest_balance.balance_date, 'remaining_quantity': remaining_ob_qty})
             
             # --- MODIFIED: Only fetch RELEASED inventory logs ---
             inventory_logs = prod.inventory_logs.filter(status=InventoryLog.Status.RELEASED).annotate(
@@ -175,15 +166,12 @@ def create_batch(request: HttpRequest) -> HttpResponse:
                 items_to_create = []
                 for pid, t_qty, a_qty, src_id_str in zip(product_ids, theoretical_quantities, actual_quantities, source_log_ids):
                     if pid and t_qty and a_qty and src_id_str:
-                        source_id_from_form = int(src_id_str)
-                        source_type = BatchItem.SourceType.OPENING_BALANCE if source_id_from_form == -1 else BatchItem.SourceType.INVENTORY_LOG
-                        source_log_id = None if source_id_from_form == -1 else source_id_from_form
+                        source_log_id = int(src_id_str)
                         items_to_create.append(BatchItem(
                             batch=batch,
                             primitive_product_id=int(pid),
                             theoretical_quantity=float(t_qty),
                             actual_quantity=float(a_qty),
-                            source_type=source_type,
                             source_log_id=source_log_id
                         ))
                 BatchItem.objects.bulk_create(items_to_create)
@@ -284,12 +272,6 @@ def view_batch(request: HttpRequest, pk: int) -> HttpResponse:
         item.base_actual_quantity = (item.actual_quantity or 0) / num_batches
         product = item.primitive_product
         available_stock_rows = []
-        latest_balance = product.opening_balances.order_by('-balance_date').first()
-        if latest_balance:
-            used_from_ob = BatchItem.objects.filter(primitive_product=product, source_type=BatchItem.SourceType.OPENING_BALANCE).exclude(pk=item.pk).aggregate(total=Coalesce(Sum('actual_quantity'), 0.0))['total']
-            remaining_ob_qty = latest_balance.quantity - used_from_ob
-            if remaining_ob_qty > 0.001 or item.source_type == BatchItem.SourceType.OPENING_BALANCE:
-                available_stock_rows.append({'id': -1, 'qc_no': 'رصيد افتتاحي', 'timestamp': latest_balance.balance_date, 'remaining_quantity': remaining_ob_qty})
         
         # --- MODIFIED: Only query RELEASED logs for available stock ---
         all_logs = product.inventory_logs.filter(status=InventoryLog.Status.RELEASED)
@@ -360,7 +342,6 @@ def add_batch_item(request: HttpRequest, batch_pk: int) -> HttpResponse:
             primitive_product_id=product_id,
             theoretical_quantity=theoretical_quantity,
             actual_quantity=theoretical_quantity,
-            source_type=BatchItem.SourceType.INVENTORY_LOG,
             source_log=None
         )
         check_and_update_batch_customization(batch_pk)
@@ -458,9 +439,7 @@ def update_batch_items_bulk(request: HttpRequest, batch_pk: int) -> HttpResponse
                 item.theoretical_quantity = float(theoretical_qty or 0)
                 item.actual_quantity = float(actual_qty or 0)
                 if source_id_str:
-                    source_id_from_form = int(source_id_str)
-                    item.source_type = BatchItem.SourceType.OPENING_BALANCE if source_id_from_form == -1 else BatchItem.SourceType.INVENTORY_LOG
-                    item.source_log_id = None if source_id_from_form == -1 else source_id_from_form
+                    item.source_log_id = int(source_id_str)
                 else:
                     item.source_log_id = None
                 item.save()

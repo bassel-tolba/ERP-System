@@ -1107,3 +1107,163 @@ INFO 2025-09-29 12:21:48,090 django.utils.autoreload autoreload 10412 15124 C:\U
 INFO 2025-09-29 12:21:50,477 django.utils.autoreload autoreload 9856 11780 Watching for file changes with StatReloader
 INFO 2025-09-29 12:21:53,039 django.utils.autoreload autoreload 9856 11780 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\admin.py changed, reloading.
 INFO 2025-09-29 12:21:54,118 django.utils.autoreload autoreload 9964 716 Watching for file changes with StatReloader
+INFO 2025-09-29 12:31:32,458 django.server basehttp 9964 6580 "GET /admin/inventory/account/?all= HTTP/1.1" 200 131901
+INFO 2025-09-29 12:31:32,537 django.server basehttp 9964 6580 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-09-29 12:31:38,976 django.server basehttp 9964 6580 "GET /admin/inventory/account/?all= HTTP/1.1" 200 131901
+INFO 2025-09-29 12:31:39,019 django.server basehttp 9964 6580 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-09-29 12:31:43,259 django.server basehttp 9964 11104 "GET /admin/inventory/account/?all= HTTP/1.1" 200 131901
+INFO 2025-09-29 12:31:43,302 django.server basehttp 9964 11104 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-09-29 12:31:45,659 django.server basehttp 9964 11104 "GET /admin/inventory/account/?all= HTTP/1.1" 200 131901
+INFO 2025-09-29 12:31:45,703 django.server basehttp 9964 11104 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-09-29 12:31:47,799 django.server basehttp 9964 11104 "GET /admin/inventory/account/?all= HTTP/1.1" 200 131901
+INFO 2025-09-29 12:31:47,846 django.server basehttp 9964 11104 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-09-29 12:31:50,352 django.server basehttp 9964 4248 "GET /admin/inventory/account/?all= HTTP/1.1" 200 131901
+INFO 2025-09-29 12:31:50,414 django.server basehttp 9964 4248 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-09-29 12:32:44,177 django.utils.autoreload autoreload 9964 716 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-29 12:32:45,509 django.utils.autoreload autoreload 13860 3964 Watching for file changes with StatReloader
+INFO 2025-09-29 12:39:59,887 django.server basehttp 13860 12052 "GET /admin/inventory/account/?all=&o=3.1 HTTP/1.1" 200 133520
+INFO 2025-09-29 12:39:59,976 django.server basehttp 13860 12052 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-09-29 12:40:01,290 django.utils.autoreload autoreload 13860 3964 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-29 12:40:03,079 django.utils.autoreload autoreload 15164 16916 Watching for file changes with StatReloader
+INFO 2025-09-29 12:59:17,268 django.utils.autoreload autoreload 15164 16916 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\services\accounting_service.py changed, reloading.
+INFO 2025-09-29 12:59:18,524 django.utils.autoreload autoreload 9660 17964 Watching for file changes with StatReloader
+INFO 2025-09-29 13:02:28,770 django.utils.autoreload autoreload 9660 17964 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-29 13:02:29,906 django.utils.autoreload autoreload 5616 15764 Watching for file changes with StatReloader
+INFO 2025-09-29 13:04:39,137 django.utils.autoreload autoreload 5616 15764 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\services\accounting_service.py changed, reloading.
+INFO 2025-09-29 13:04:40,727 django.utils.autoreload autoreload 16964 4880 Watching for file changes with StatReloader
+INFO 2025-09-29 13:04:42,691 django.utils.autoreload autoreload 16964 4880 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-29 13:04:44,018 django.utils.autoreload autoreload 16180 10816 Watching for file changes with StatReloader
+INFO 2025-09-29 13:06:25,804 django.utils.autoreload autoreload 16180 10816 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-29 13:06:27,107 django.utils.autoreload autoreload 13284 11564 Watching for file changes with StatReloader
+INFO 2025-09-29 13:06:36,171 django.utils.autoreload autoreload 13284 11564 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-29 13:06:37,236 django.utils.autoreload autoreload 8752 8272 Watching for file changes with StatReloader
+INFO 2025-09-29 13:26:08,456 django.utils.autoreload autoreload 8752 8272 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-29 13:26:09,678 django.utils.autoreload autoreload 12640 4428 Watching for file changes with StatReloader
+INFO 2025-09-29 13:29:31,584 django.utils.autoreload autoreload 12640 4428 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\admin.py changed, reloading.
+INFO 2025-09-29 13:29:32,692 django.utils.autoreload autoreload 11872 11720 Watching for file changes with StatReloader
+INFO 2025-09-29 13:31:01,292 django.utils.autoreload autoreload 11872 11720 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\admin.py changed, reloading.
+INFO 2025-09-29 13:31:02,357 django.utils.autoreload autoreload 17844 17412 Watching for file changes with StatReloader
+INFO 2025-09-29 13:31:26,294 django.utils.autoreload autoreload 17844 17412 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\admin.py changed, reloading.
+INFO 2025-09-29 13:31:27,403 django.utils.autoreload autoreload 8572 16552 Watching for file changes with StatReloader
+INFO 2025-09-29 13:31:53,502 django.utils.autoreload autoreload 8572 16552 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\admin.py changed, reloading.
+INFO 2025-09-29 13:31:54,571 django.utils.autoreload autoreload 15168 15128 Watching for file changes with StatReloader
+INFO 2025-09-29 13:32:12,416 django.utils.autoreload autoreload 15168 15128 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\admin.py changed, reloading.
+INFO 2025-09-29 13:32:13,440 django.utils.autoreload autoreload 11592 13316 Watching for file changes with StatReloader
+INFO 2025-09-29 13:32:31,269 django.utils.autoreload autoreload 11592 13316 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\admin.py changed, reloading.
+INFO 2025-09-29 13:32:32,337 django.utils.autoreload autoreload 18352 8508 Watching for file changes with StatReloader
+INFO 2025-09-29 13:48:22,462 django.utils.autoreload autoreload 18352 8508 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\services\accounting_service.py changed, reloading.
+INFO 2025-09-29 13:48:23,472 django.utils.autoreload autoreload 12424 15792 Watching for file changes with StatReloader
+INFO 2025-09-29 13:48:48,410 django.utils.autoreload autoreload 12424 15792 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\services\accounting_service.py changed, reloading.
+INFO 2025-09-29 13:48:49,526 django.utils.autoreload autoreload 10432 5672 Watching for file changes with StatReloader
+INFO 2025-09-29 13:49:01,830 django.utils.autoreload autoreload 10432 5672 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\services\accounting_service.py changed, reloading.
+INFO 2025-09-29 13:49:03,005 django.utils.autoreload autoreload 1876 14408 Watching for file changes with StatReloader
+INFO 2025-09-29 13:56:26,298 django.utils.autoreload autoreload 1876 14408 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-29 13:56:27,643 django.utils.autoreload autoreload 4428 15408 Watching for file changes with StatReloader
+INFO 2025-09-29 13:56:29,205 django.utils.autoreload autoreload 4428 15408 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\admin.py changed, reloading.
+INFO 2025-09-29 13:56:30,285 django.utils.autoreload autoreload 7104 10388 Watching for file changes with StatReloader
+INFO 2025-09-29 13:56:32,897 django.utils.autoreload autoreload 7104 10388 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\services\accounting_service.py changed, reloading.
+INFO 2025-09-29 13:56:34,014 django.utils.autoreload autoreload 8916 17060 Watching for file changes with StatReloader
+INFO 2025-09-29 13:56:44,173 django.utils.autoreload autoreload 8916 17060 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\opening_balances.py changed, reloading.
+INFO 2025-09-29 13:56:45,250 django.utils.autoreload autoreload 14108 2512 Watching for file changes with StatReloader
+INFO 2025-09-29 13:56:47,852 django.utils.autoreload autoreload 14108 2512 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\signals.py changed, reloading.
+INFO 2025-09-29 13:56:49,026 django.utils.autoreload autoreload 15368 12792 Watching for file changes with StatReloader
+INFO 2025-09-29 14:09:46,233 django.utils.autoreload autoreload 15368 12792 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-29 14:09:47,805 django.utils.autoreload autoreload 17228 13500 Watching for file changes with StatReloader
+INFO 2025-09-29 14:16:35,266 django.utils.autoreload autoreload 17228 13500 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-09-29 14:16:36,597 django.utils.autoreload autoreload 5728 13840 Watching for file changes with StatReloader
+INFO 2025-09-29 14:24:58,752 django.server basehttp 5728 3228 "POST /admin/inventory/account/?all=&o=3.1 HTTP/1.1" 302 0
+INFO 2025-09-29 14:24:59,136 django.server basehttp 5728 3228 "GET /admin/inventory/account/?all=&o=3.1 HTTP/1.1" 200 134618
+INFO 2025-09-29 14:24:59,190 django.server basehttp 5728 3228 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-09-29 14:25:10,369 django.server basehttp 5728 3228 "POST /admin/inventory/account/?all=&o=3.1 HTTP/1.1" 302 0
+INFO 2025-09-29 14:25:10,637 django.server basehttp 5728 3228 "GET /admin/inventory/account/?all=&o=3.1 HTTP/1.1" 200 134618
+INFO 2025-09-29 14:25:10,706 django.server basehttp 5728 3228 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-09-30 18:46:06,070 django.utils.autoreload autoreload 692 14460 Watching for file changes with StatReloader
+WARNING 2025-09-30 18:46:09,451 django.request log 692 9780 Not Found: /reports/trial-balance/
+WARNING 2025-09-30 18:46:09,452 django.server basehttp 692 9780 "GET /reports/trial-balance/ HTTP/1.1" 404 38118
+WARNING 2025-09-30 18:46:09,598 django.request log 692 9780 Not Found: /favicon.ico
+WARNING 2025-09-30 18:46:09,599 django.server basehttp 692 9780 "GET /favicon.ico HTTP/1.1" 404 38085
+INFO 2025-09-30 18:46:13,764 django.server basehttp 692 9780 "GET / HTTP/1.1" 200 44041
+INFO 2025-09-30 18:46:13,939 django.server basehttp 692 16956 "GET /static/css/flatpickr.min.css HTTP/1.1" 200 16166
+INFO 2025-09-30 18:46:13,949 django.server basehttp 692 16956 "GET /static/js/bootstrap.bundle.min.js HTTP/1.1" 200 80663
+INFO 2025-09-30 18:46:13,950 django.server basehttp 692 9780 "GET /static/css/google-fonts.css HTTP/1.1" 200 12053
+INFO 2025-09-30 18:46:13,986 django.server basehttp 692 15568 "GET /static/css/bootstrap.rtl.css HTTP/1.1" 200 284704
+INFO 2025-09-30 18:46:13,988 django.server basehttp 692 17740 "GET /static/css/bootstrap-icons.min.css HTTP/1.1" 200 85887
+INFO 2025-09-30 18:46:13,995 django.server basehttp 692 7040 "GET /static/css/style.css HTTP/1.1" 200 19107
+INFO 2025-09-30 18:46:13,997 django.server basehttp 692 12328 "GET /static/css/tom-select.bootstrap5.min.css HTTP/1.1" 200 15345
+INFO 2025-09-30 18:46:14,002 django.server basehttp 692 16956 "GET /static/js/flatpickr.l10n.ar.js HTTP/1.1" 200 1928
+INFO 2025-09-30 18:46:14,020 django.server basehttp 692 15568 "GET /static/layout/js/dashboard_logic.js HTTP/1.1" 200 8620
+INFO 2025-09-30 18:46:14,023 django.server basehttp 692 12328 "GET /static/layout/js/create_batch_logic.js HTTP/1.1" 200 14297
+INFO 2025-09-30 18:46:14,024 django.server basehttp 692 9780 "GET /static/js/flatpickr.min.js HTTP/1.1" 200 50679
+INFO 2025-09-30 18:46:14,024 django.server basehttp 692 17740 "GET /static/js/tom-select.complete.min.js HTTP/1.1" 200 50720
+INFO 2025-09-30 18:46:14,024 django.server basehttp 692 7040 "GET /static/layout/js/records_logic.js HTTP/1.1" 200 7001
+INFO 2025-09-30 18:46:14,024 django.server basehttp 692 16956 "GET /static/layout/js/batch_view_logic.js HTTP/1.1" 200 5237
+INFO 2025-09-30 18:46:14,031 django.server basehttp 692 15568 "GET /static/layout/js/shop_order_templates_logic.js HTTP/1.1" 200 5660
+INFO 2025-09-30 18:46:14,034 django.server basehttp 692 12328 "GET /static/layout/js/production_returns_logic.js HTTP/1.1" 200 3162
+INFO 2025-09-30 18:46:14,042 django.server basehttp 692 17740 "GET /static/layout/js/receive_finished_product_logic.js HTTP/1.1" 200 1812
+INFO 2025-09-30 18:46:14,045 django.server basehttp 692 12328 "GET /static/layout/js/expenses_page_logic.js HTTP/1.1" 200 2482
+INFO 2025-09-30 18:46:14,048 django.server basehttp 692 9780 "GET /static/layout/js/ledger_logic.js HTTP/1.1" 200 6663
+INFO 2025-09-30 18:46:14,048 django.server basehttp 692 7040 "GET /static/layout/js/visuals_logic.js HTTP/1.1" 200 7357
+INFO 2025-09-30 18:46:14,049 django.server basehttp 692 16956 "GET /static/layout/js/batch_production_variance_report_logic.js HTTP/1.1" 200 3266
+INFO 2025-09-30 18:46:14,052 django.server basehttp 692 12328 "GET /static/layout/js/sales_order_create_logic.js HTTP/1.1" 200 5317
+INFO 2025-09-30 18:46:14,053 django.server basehttp 692 15568 "GET /static/layout/js/manage_expenses_logic.js HTTP/1.1" 200 2926
+INFO 2025-09-30 18:46:14,055 django.server basehttp 692 9780 "GET /static/layout/js/purchase_order_create_logic.js HTTP/1.1" 200 4801
+INFO 2025-09-30 18:46:14,056 django.server basehttp 692 17740 "GET /static/layout/js/financials_logic.js HTTP/1.1" 200 30715
+INFO 2025-09-30 18:46:14,059 django.server basehttp 692 7040 "GET /static/layout/js/tax_reconciliation_report_logic.js HTTP/1.1" 200 780
+INFO 2025-09-30 18:46:14,063 django.server basehttp 692 12328 "GET /static/layout/js/inventory_counts_logic.js HTTP/1.1" 200 19520
+INFO 2025-09-30 18:46:14,065 django.server basehttp 692 16956 "GET /static/layout/js/close_period_logic.js HTTP/1.1" 200 4685
+INFO 2025-09-30 18:46:14,085 django.server basehttp 692 15568 "GET /static/layout/js/employees_logic.js HTTP/1.1" 200 6979
+INFO 2025-09-30 18:46:14,092 django.server basehttp 692 17740 "GET /static/layout/js/dynamic_content_loader.js HTTP/1.1" 200 6706
+INFO 2025-09-30 18:46:14,096 django.server basehttp 692 7040 "GET /static/css/print.css HTTP/1.1" 200 2303
+INFO 2025-09-30 18:46:14,891 django.server basehttp 692 7040 "GET /static/webfonts/bootstrap-icons.woff2?dd67030699838ea613ee6dbda90effa6 HTTP/1.1" 200 130396
+INFO 2025-09-30 18:46:14,899 django.server basehttp 692 15568 "GET /static/webfonts/41.woff2 HTTP/1.1" 200 21168
+INFO 2025-09-30 18:46:14,900 django.server basehttp 692 17740 "GET /static/webfonts/NotoKufiArabic-VariableFont_wght.ttf HTTP/1.1" 200 433800
+INFO 2025-09-30 18:46:15,373 django.server basehttp 692 17740 "GET /static/img/favicon.ico HTTP/1.1" 200 41001
+ERROR 2025-09-30 18:46:40,737 django.request log 692 17740 Internal Server Error: /reports/balance_sheet/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\financial_reports.py", line 421, in balance_sheet
+    return render(request, template_name, context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: inventory/partials/reports/balance_sheet_content.html
+ERROR 2025-09-30 18:46:40,741 django.server basehttp 692 17740 "GET /reports/balance_sheet/ HTTP/1.1" 500 112751
+ERROR 2025-09-30 18:46:40,899 django.request log 692 17740 Internal Server Error: /reports/balance_sheet/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\financial_reports.py", line 421, in balance_sheet
+    return render(request, template_name, context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: inventory/reports/balance_sheet.html
+ERROR 2025-09-30 18:46:40,901 django.server basehttp 692 17740 "GET /reports/balance_sheet/ HTTP/1.1" 500 112635
+INFO 2025-09-30 18:46:47,561 django.server basehttp 692 17740 "GET /employees/financials/ HTTP/1.1" 200 1901
+INFO 2025-09-30 18:46:52,442 django.server basehttp 692 17740 "GET /financials/supplier_invoices/ HTTP/1.1" 200 4672
+INFO 2025-09-30 18:46:54,148 django.server basehttp 692 17740 "GET /financials/supplier_invoices/create/ HTTP/1.1" 200 5508
+INFO 2025-09-30 18:46:56,944 django.server basehttp 692 17740 "GET /financials/reconciliation/ HTTP/1.1" 200 1663
+INFO 2025-09-30 18:47:00,148 django.server basehttp 692 17740 "GET /financials/periods/ HTTP/1.1" 200 27881
+INFO 2025-09-30 18:47:16,311 django.server basehttp 692 17740 "GET /financials/reconciliation/ HTTP/1.1" 200 1663
+INFO 2025-09-30 18:47:28,801 django.server basehttp 692 17740 "GET /financials/cost_pools/ HTTP/1.1" 200 14990
+INFO 2025-09-30 18:47:30,211 django.server basehttp 692 17740 "GET /financials/overhead_allocation/ HTTP/1.1" 200 11432
+INFO 2025-09-30 18:47:31,171 django.server basehttp 692 17740 "GET /financials/allocation_drivers/ HTTP/1.1" 200 10778
+INFO 2025-09-30 18:47:32,896 django.server basehttp 692 17740 "GET /financials/periods/ HTTP/1.1" 200 27881
+INFO 2025-09-30 18:47:34,739 django.server basehttp 692 17740 "GET /reports/trial_balance/ HTTP/1.1" 200 19902
+INFO 2025-09-30 18:47:35,934 django.server basehttp 692 17740 "GET /financials/journal/create/ HTTP/1.1" 200 42331
+INFO 2025-09-30 18:47:36,552 django.server basehttp 692 17740 "GET /financials/journal/ HTTP/1.1" 200 3726
+INFO 2025-09-30 18:47:37,311 django.server basehttp 692 17740 "GET /financials/journal/create/ HTTP/1.1" 200 42331
+INFO 2025-09-30 18:47:45,899 django.server basehttp 692 17740 "GET /financials/journal/ HTTP/1.1" 200 3726
+INFO 2025-09-30 18:47:53,305 django.server basehttp 692 17740 "GET /financials/banking/ HTTP/1.1" 200 3593
+INFO 2025-09-30 18:47:56,709 django.server basehttp 692 17740 "GET /financials/fixed_assets/ HTTP/1.1" 200 3008

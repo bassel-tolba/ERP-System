@@ -1,7 +1,7 @@
 # gipcco_project/inventory/services/adjustment_service.py
 
 import logging
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from typing import List
 
 from django.db import transaction
@@ -39,14 +39,14 @@ def start_inventory_count(product_ids: List[int], reason: str, user: User, inclu
         for product_id in product_ids:
             logger.debug(f"Getting inventory state for product ID {product_id} at {timezone.now()}.")
             state = get_inventory_state_at_datetime(product_id, timezone.now(), include_quarantined=include_quarantined)
-            system_qty = state.get('quantity', 0.0)
+            system_qty = state.get('quantity', Decimal('0.0'))
             logger.debug(f"Product {product_id} has system quantity {system_qty}.")
             
             items_to_create.append(
                 InventoryCountItem(
                     inventory_count=inventory_count,
                     product_id=product_id,
-                    system_quantity=float(system_qty)
+                    system_quantity=system_qty
                 )
             )
         
@@ -137,7 +137,7 @@ def auto_distribute_finished_good_shortage(count_item_id: int, reason: str, note
 
     count_item = InventoryCountItem.objects.select_related('product', 'inventory_count').get(pk=count_item_id)
     product = count_item.product
-    shortage_qty = abs(count_item.variance_quantity)
+    shortage_qty = Decimal(str(abs(count_item.variance_quantity))).quantize(Decimal('0.001'))
     logger.debug(f"Product: '{product.name}' (ID: {product.id}), Total shortage quantity: {shortage_qty}.")
 
     if shortage_qty <= 0 or product.product_type != Product.ProductType.FINAL_PRODUCT:
@@ -171,7 +171,7 @@ def auto_distribute_finished_good_shortage(count_item_id: int, reason: str, note
         total_adjusted=Coalesce(Subquery(adjusted_subquery, output_field=FloatField()), 0.0)
     ).annotate(
         remaining_quantity=F('total_quantity_produced') - F('total_dispatched') + F('total_adjusted')
-    ).filter(remaining_quantity__gt=0.001).order_by('release_date') # Oldest first for distribution
+    ).filter(remaining_quantity__gt=0.001).order_by('release_date') # Oldest first (FIFO) for distribution
 
     receipts_with_remaining = [
         {
@@ -189,41 +189,34 @@ def auto_distribute_finished_good_shortage(count_item_id: int, reason: str, note
     # --- NEW PROPORTIONAL DISTRIBUTION LOGIC ---
     total_available_from_selection = sum(r['remaining_quantity'] for r in receipts_with_remaining)
     
-    if total_available_from_selection < Decimal(str(shortage_qty)):
+    if total_available_from_selection < shortage_qty:
         error_msg = f"لا يمكن توزيع عجز بقيمة {shortage_qty}. الدفعات المحددة لديها فقط {total_available_from_selection} متوفر."
         logger.error(error_msg)
         raise ValidationError(error_msg)
 
-    qty_to_distribute = int(shortage_qty)
+    qty_to_distribute = shortage_qty
     num_batches = len(receipts_with_remaining)
 
     if num_batches == 0:
         return [] # Should be caught by the validation above, but as a safeguard.
 
-    # --- NEW: Fair Even Distribution Logic ---
-    base_amount = qty_to_distribute // num_batches
-    remainder = qty_to_distribute % num_batches
-
+    # --- REVISED: Proportional Distribution Logic ---
     adjustments_to_make = {}
-    for r in receipts_with_remaining:
-        adjustments_to_make[r['receipt'].id] = base_amount
+    running_total = Decimal('0.0')
 
-    # Distribute the remainder, one unit at a time, to the batches
-    # In this simple case, we can just add it to the first few batches in the list.
-    # A more complex sort could be used if needed, but this is fair and predictable.
-    for i in range(remainder):
-        receipt_id_to_get_remainder = receipts_with_remaining[i]['receipt'].id
-        adjustments_to_make[receipt_id_to_get_remainder] += 1
-    
-    # Sanity check: ensure no batch is adjusted by more than its available quantity
-    for r in receipts_with_remaining:
-        receipt_id = r['receipt'].id
-        if adjustments_to_make[receipt_id] > r['remaining_quantity']:
-            # This is a complex edge case. For now, we will raise an error.
-            # A more advanced implementation could re-distribute the excess.
-            error_msg = f"التوزيع التلقائي فشل: لا يمكن تسوية {adjustments_to_make[receipt_id]} على دفعة {r['receipt'].individual_batch_number} لأنها تحتوي فقط على {r['remaining_quantity']}."
-            raise ValidationError(error_msg)
-    # --- END: Fair Even Distribution Logic ---
+    for i, r_data in enumerate(receipts_with_remaining):
+        receipt_id = r_data['receipt'].id
+        
+        # For the last item, assign the remaining shortage to avoid rounding errors
+        if i == num_batches - 1:
+            adjustment_for_this_receipt = qty_to_distribute - running_total
+        else:
+            proportion = r_data['remaining_quantity'] / total_available_from_selection
+            adjustment_for_this_receipt = (qty_to_distribute * proportion).quantize(Decimal('0.001'), rounding=ROUND_HALF_UP)
+        
+        adjustments_to_make[receipt_id] = adjustment_for_this_receipt
+        running_total += adjustment_for_this_receipt
+    # --- END: Proportional Distribution Logic ---
 
 
     # First, delete any existing adjustments for this count item
@@ -234,15 +227,15 @@ def auto_distribute_finished_good_shortage(count_item_id: int, reason: str, note
     with transaction.atomic():
         for r_data in receipts_with_remaining:
             receipt = r_data['receipt']
-            adjustment_for_this_receipt = adjustments_to_make.get(receipt.id, 0)
+            adjustment_for_this_receipt = adjustments_to_make.get(receipt.id, Decimal('0.0'))
 
             if adjustment_for_this_receipt > 0:
                 cost_per_unit = (r_data['total_cost'] / r_data['total_quantity_produced']) if r_data['total_quantity_produced'] > 0 else product.moving_average_cost
 
-                logger.info(f"Creating FAIR adjustment of {-adjustment_for_this_receipt} against receipt {receipt.id} with cost {cost_per_unit}.")
+                logger.info(f"Creating PROPORTIONAL adjustment of {-adjustment_for_this_receipt} against receipt {receipt.id} with cost {cost_per_unit}.")
                 adj = InventoryAdjustment.objects.create(
                     product=product,
-                    adjustment_quantity=-adjustment_for_this_receipt,
+                    adjustment_quantity=-float(adjustment_for_this_receipt),
                     adjustment_date=timezone.now(),
                     cost_at_adjustment=cost_per_unit,
                     reason_code=reason,
@@ -252,7 +245,7 @@ def auto_distribute_finished_good_shortage(count_item_id: int, reason: str, note
                 )
                 adjustments.append(adj)
 
-    final_distributed_qty = sum(adj.adjustment_quantity for adj in adjustments)
+    final_distributed_qty = sum(Decimal(str(adj.adjustment_quantity)) for adj in adjustments)
     logger.info(f"Finished auto-distribution for count item {count_item_id}. Created {len(adjustments)} adjustments totaling {final_distributed_qty}.")
 
     if abs(final_distributed_qty) != qty_to_distribute:

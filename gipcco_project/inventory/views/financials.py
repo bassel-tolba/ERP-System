@@ -3,7 +3,7 @@
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
 from decimal import Decimal
-import json
+from django.utils.translation import gettext_lazy as _
 
 from django.contrib import messages
 from django.db import transaction
@@ -17,6 +17,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.decorators import permission_required
 from django.urls import reverse
 from django.core.exceptions import ValidationError
+import logging
 
 
 from ..models import (
@@ -27,6 +28,10 @@ from ..models import (
 from ..forms import JournalEntryForm, JournalEntryLineFormSet
 from ..services.overhead_service import execute_overhead_allocation_run, apply_overhead_to_finished_goods
 from ..services.accounting_service import create_je_for_overhead_allocation, create_je_for_overhead_application
+from ..services.period_closing_service import update_checklist_for_period
+import logging
+
+logger = logging.getLogger(__name__)
 
 # --- Accounts Payable (A/P) Views ---
 
@@ -134,9 +139,52 @@ def view_supplier_invoice(request: HttpRequest, pk: int) -> HttpResponse:
 
 
 @require_POST
-def apply_payment_to_invoice(request: HttpRequest, pk: int) -> HttpResponse:
-    """Creates a payment and applies it to a specific invoice."""
+def delete_supplier_invoice(request: HttpRequest, pk: int) -> HttpResponse:
+    """Deletes a supplier invoice, but only if no payments are applied."""
     invoice = get_object_or_404(SupplierInvoice, pk=pk)
+    
+    if invoice.applications.exists():
+        messages.error(request, "لا يمكن حذف فاتورة تم تطبيق دفعات عليها.")
+        return redirect('inventory:view_supplier_invoice', pk=pk)
+        
+    try:
+        invoice_number = invoice.invoice_number
+        invoice.delete()
+        messages.success(request, f"تم حذف فاتورة المورد رقم {invoice_number} بنجاح.")
+    except Exception as e:
+        messages.error(request, f"حدث خطأ أثناء حذف الفاتورة: {e}")
+        return redirect('inventory:view_supplier_invoice', pk=pk)
+        
+    return redirect('inventory:supplier_invoices')
+
+
+def api_get_uninvoiced_receipts(request: HttpRequest, supplier_id: int) -> JsonResponse:
+    """
+    API endpoint to get all released, un-invoiced inventory receipts for a supplier.
+    """
+    receipts = InventoryLog.objects.filter(
+        company_id=supplier_id,
+        status=InventoryLog.Status.RELEASED,
+        invoice_item__isnull=True  # The key check: receipt is not linked to any invoice item
+    ).select_related('product').order_by('-release_timestamp')
+
+    data = [
+        {
+            'id': r.id,
+            'date': r.release_timestamp.strftime('%Y-%m-%d'),
+            'product_name': r.product.name,
+            'quantity': r.quantity,
+            'qc_no': r.qc_no,
+            'total_cost': float(r.total_cost),
+        } for r in receipts
+    ]
+    return JsonResponse(data, safe=False)
+
+
+@require_POST
+def apply_payment_to_invoice(request: HttpRequest, invoice_pk: int) -> HttpResponse:
+    """Creates a payment and applies it to a specific invoice."""
+    invoice = get_object_or_404(SupplierInvoice, pk=invoice_pk)
     
     bank_account_id = request.POST.get('bank_account')
     payment_date_str = request.POST.get('payment_date')
@@ -178,33 +226,9 @@ def apply_payment_to_invoice(request: HttpRequest, pk: int) -> HttpResponse:
     except Exception as e:
         messages.error(request, f"حدث خطأ غير متوقع: {e}")
         
-    return redirect('inventory:view_supplier_invoice', pk=pk)
+    return redirect('inventory:view_supplier_invoice', pk=invoice_pk)
 
-# --- A/P API Views ---
-
-def api_get_uninvoiced_receipts(request: HttpRequest, supplier_id: int) -> JsonResponse:
-    """Returns a JSON list of released receipts that are not yet on an invoice."""
-    receipts = InventoryLog.objects.filter(
-        company_id=supplier_id,
-        status=InventoryLog.Status.RELEASED,
-        invoice_item__isnull=True  # The crucial filter
-    ).select_related('product').order_by('-release_timestamp')
-    
-    data = [
-        {
-            'id': r.id,
-            'qc_no': r.qc_no,
-            'release_date': r.release_timestamp.strftime('%Y-%m-%d'),
-            'product_name': r.product.name,
-            'quantity': r.quantity,
-            'unit': r.product.unit,
-            'total_value': str(((r.base_unit_price * Decimal(str(r.quantity))) + r.vat_amount).quantize(Decimal('0.001')))
-        }
-        for r in receipts
-    ]
-    return JsonResponse({'receipts': data})
-
-
+# --- Accounts Receivable (A/R) Views ---
 
 def customer_invoices(request: HttpRequest) -> HttpResponse:
     """Lists all customer invoices with filtering."""
@@ -319,9 +343,29 @@ def view_customer_invoice(request: HttpRequest, pk: int) -> HttpResponse:
 
 
 @require_POST
-def receive_payment_for_invoice(request: HttpRequest, pk: int) -> HttpResponse:
-    """Creates a payment received and applies it to a specific invoice."""
+def delete_customer_invoice(request: HttpRequest, pk: int) -> HttpResponse:
+    """Deletes a customer invoice, but only if no payments are applied."""
     invoice = get_object_or_404(CustomerInvoice, pk=pk)
+    
+    if invoice.applications.exists():
+        messages.error(request, "لا يمكن حذف فاتورة تم تطبيق دفعات عليها.")
+        return redirect('inventory:view_customer_invoice', pk=pk)
+        
+    try:
+        invoice_number = invoice.invoice_number
+        invoice.delete()
+        messages.success(request, f"تم حذف فاتورة العميل رقم {invoice_number} بنجاح.")
+    except Exception as e:
+        messages.error(request, f"حدث خطأ أثناء حذف الفاتورة: {e}")
+        return redirect('inventory:view_customer_invoice', pk=pk)
+        
+    return redirect('inventory:customer_invoices')
+
+
+@require_POST
+def receive_payment_for_invoice(request: HttpRequest, invoice_pk: int) -> HttpResponse:
+    """Creates a payment received and applies it to a specific invoice."""
+    invoice = get_object_or_404(CustomerInvoice, pk=invoice_pk)
     
     bank_account_id = request.POST.get('bank_account')
     payment_date_str = request.POST.get('payment_date')
@@ -360,7 +404,7 @@ def receive_payment_for_invoice(request: HttpRequest, pk: int) -> HttpResponse:
     except Exception as e:
         messages.error(request, f"حدث خطأ غير متوقع: {e}")
         
-    return redirect('inventory:view_customer_invoice', pk=pk)
+    return redirect('inventory:view_customer_invoice', pk=invoice_pk)
 
 
 # --- A/R API Views ---
@@ -438,6 +482,119 @@ def bank_accounts_dashboard(request: HttpRequest) -> HttpResponse:
     if 'X-Partial-Request' in request.headers:
         return render(request, 'inventory/partials/banking_dashboard_content.html', context)
     return render(request, 'inventory/banking_dashboard.html', context)
+
+
+@require_POST
+def create_bank_account(request: HttpRequest) -> HttpResponse:
+    """Handles creation of a new bank account."""
+    try:
+        name = request.POST.get('name', '').strip()
+        gl_account_id = request.POST.get('gl_account')
+        if not name or not gl_account_id:
+            raise ValueError("Name and GL Account are required.")
+        BankAccount.objects.create(name=name, gl_account_id=gl_account_id)
+        messages.success(request, f"Bank account '{name}' created successfully.")
+    except Exception as e:
+        messages.error(request, f"Error creating bank account: {e}")
+    return redirect('inventory:bank_accounts_dashboard')
+
+@require_POST
+def edit_bank_account(request: HttpRequest, pk: int) -> HttpResponse:
+    """Handles editing an existing bank account."""
+    account = get_object_or_404(BankAccount, pk=pk)
+    try:
+        name = request.POST.get('name', '').strip()
+        gl_account_id = request.POST.get('gl_account')
+        if not name or not gl_account_id:
+            raise ValueError("Name and GL Account are required.")
+        account.name = name
+        account.gl_account_id = gl_account_id
+        account.save()
+        messages.success(request, f"Bank account '{name}' updated successfully.")
+    except Exception as e:
+        messages.error(request, f"Error updating bank account: {e}")
+    return redirect('inventory:bank_accounts_dashboard')
+
+@require_POST
+def delete_bank_account(request: HttpRequest, pk: int) -> HttpResponse:
+    """Handles deleting a bank account."""
+    account = get_object_or_404(BankAccount, pk=pk)
+    try:
+        account_name = account.name
+        account.delete()
+        messages.success(request, f"Bank account '{account_name}' deleted successfully.")
+    except Exception as e:
+        messages.error(request, f"Error deleting bank account: {e}. It might be in use.")
+    return redirect('inventory:bank_accounts_dashboard')
+
+@require_POST
+def create_payment(request: HttpRequest) -> HttpResponse:
+    """Handles creation of a standalone payment."""
+    try:
+        bank_account_id = request.POST.get('bank_account')
+        payment_date_str = request.POST.get('payment_date')
+        amount_str = request.POST.get('amount')
+        payment_type = request.POST.get('payment_type')
+        description = request.POST.get('description', '').strip()
+        supplier_id = request.POST.get('supplier') or None
+        customer_id = request.POST.get('customer') or None
+
+        if not all([bank_account_id, payment_date_str, amount_str, payment_type, description]):
+            raise ValueError("Please fill all required fields.")
+
+        Payment.objects.create(
+            bank_account_id=bank_account_id,
+            payment_date=datetime.strptime(payment_date_str, '%Y-%m-%d').date(),
+            amount=Decimal(amount_str),
+            payment_type=payment_type,
+            description=description,
+            supplier_id=supplier_id,
+            customer_id=customer_id
+        )
+        messages.success(request, "Payment created successfully.")
+    except Exception as e:
+        messages.error(request, f"Error creating payment: {e}")
+    return redirect('inventory:bank_accounts_dashboard')
+
+@require_POST
+def edit_payment(request: HttpRequest, pk: int) -> HttpResponse:
+    """Handles editing a standalone payment."""
+    payment = get_object_or_404(Payment, pk=pk)
+    try:
+        bank_account_id = request.POST.get('bank_account')
+        payment_date_str = request.POST.get('payment_date')
+        amount_str = request.POST.get('amount')
+        payment_type = request.POST.get('payment_type')
+        description = request.POST.get('description', '').strip()
+        supplier_id = request.POST.get('supplier') or None
+        customer_id = request.POST.get('customer') or None
+
+        if not all([bank_account_id, payment_date_str, amount_str, payment_type, description]):
+            raise ValueError("Please fill all required fields.")
+
+        payment.bank_account_id = bank_account_id
+        payment.payment_date = datetime.strptime(payment_date_str, '%Y-%m-%d').date()
+        payment.amount = Decimal(amount_str)
+        payment.payment_type = payment_type
+        payment.description = description
+        payment.supplier_id = supplier_id
+        payment.customer_id = customer_id
+        payment.save()
+        messages.success(request, "Payment updated successfully.")
+    except Exception as e:
+        messages.error(request, f"Error updating payment: {e}")
+    return redirect('inventory:bank_accounts_dashboard')
+
+@require_POST
+def delete_payment(request: HttpRequest, pk: int) -> HttpResponse:
+    """Handles deleting a standalone payment."""
+    payment = get_object_or_404(Payment, pk=pk)
+    try:
+        payment.delete()
+        messages.success(request, "Payment deleted successfully.")
+    except Exception as e:
+        messages.error(request, f"Error deleting payment: {e}. It might be in use.")
+    return redirect('inventory:bank_accounts_dashboard')
 
 
 # ==============================================================================
@@ -903,6 +1060,23 @@ def create_journal_entry(request: HttpRequest) -> HttpResponse:
     return render(request, 'inventory/journal_entry_create.html', context)
 
 
+def view_journal_entry(request: HttpRequest, pk: int) -> HttpResponse:
+    """Displays the details of a single journal entry."""
+    entry = get_object_or_404(
+        JournalEntry.objects.select_related('content_type').prefetch_related('lines__account', 'lines__sub_ledger_object'), 
+        pk=pk
+    )
+    
+    context = {
+        'active_page': 'financials',
+        'sub_page': 'journal_entries',
+        'entry': entry,
+    }
+    if 'X-Partial-Request' in request.headers:
+        return render(request, 'inventory/partials/journal_entry_view_content.html', context)
+    return render(request, 'inventory/journal_entry_view.html', context)
+
+
 def fixed_assets_dashboard(request: HttpRequest) -> HttpResponse:
     """Displays a list of fixed assets and their depreciation status."""
     assets = FixedAsset.objects.all()
@@ -1085,7 +1259,7 @@ def overhead_allocation_workspace(request: HttpRequest) -> HttpResponse:
                 total_applied_cost = apply_overhead_to_finished_goods(run)
                 # This service function creates the corresponding JE.
                 create_je_for_overhead_application(run, total_applied_cost)
-                messages.success(request, f"Successfully applied overhead of {total_applied_cost:,.2f} from run #{run.id} to Finished Goods inventory.")
+                messages.success(request, f"Successfully applied {total_applied_cost:,.2f} from run #{run.id} to Finished Goods inventory.")
 
         except Exception as e:
             messages.error(request, f"An error occurred: {e}")
@@ -1374,55 +1548,71 @@ def change_period_status(request: HttpRequest, period_id: int) -> HttpResponse:
     return redirect('inventory:fiscal_year_list')
 
 
-def close_period_view(request: HttpRequest, period_id: int) -> HttpResponse:
-    """Displays the checklist and interface for closing a financial period."""
-    period = get_object_or_404(FinancialPeriod, pk=period_id)
-    
-    # Ensure the period is in the correct state to be closed
-    if period.status != FinancialPeriod.Status.PENDING_CLOSE:
-        messages.error(request, f"الفترة '{period.name}' ليست في حالة 'قيد الإغلاق' ولا يمكن إغلاقها حاليًا.")
-        return redirect('inventory:fiscal_year_list')
-
-    context = {
-        'active_page': 'financials',
-        'sub_page': 'periods',
-        'period': period,
-    }
-    return render(request, 'inventory/close_period_view.html', context)
-
-
 @require_POST
 @permission_required('inventory.change_financialperiod', raise_exception=True)
 def close_period_action(request: HttpRequest, period_id: int) -> HttpResponse:
-    """Handles the final action of closing a financial period."""
+    """
+    Handles the final action of closing a financial period after all checks pass.
+    """
     period = get_object_or_404(FinancialPeriod, pk=period_id)
     
+    # Security and state check
     if period.status != FinancialPeriod.Status.PENDING_CLOSE:
-        messages.error(request, "يمكن فقط إغلاق الفترات التي تكون 'قيد الإغلاق'.")
+        messages.error(request, _("This period is not in the 'Pending Close' state and cannot be closed."))
         return redirect('inventory:fiscal_year_list')
 
-    # Here, you would re-run the validation checks from the API on the server-side
-    # as a final security measure before closing.
-    # For brevity, we'll assume the frontend checks were sufficient for this example.
+    # Re-run the checklist validation on the server side as the final gate.
+    # The service returns the updated checklist instance, guaranteed to be fresh.
+    checklist = update_checklist_for_period(period)
+
+    # Use the checklist object returned directly by the service for the final check.
+    if not checklist.is_complete:
+        messages.error(request, _("Cannot close the period. One or more pre-closing checks have not been completed."))
+        return redirect('inventory:close_period_cockpit', period_id=period.id)
 
     try:
         with transaction.atomic():
             period.status = FinancialPeriod.Status.CLOSED
             period.save()
             
-            # Create an audit log entry for closing
             PeriodClosingAuditLog.objects.create(
                 financial_period=period,
                 user=request.user,
                 action_type=PeriodClosingAuditLog.ActionType.CLOSE,
-                justification='Period closed after passing all checklist validations.'
+                justification="Period closed via closing cockpit."
             )
-
-        messages.success(request, f"تم إغلاق الفترة المحاسبية '{period.name}' بنجاح.")
+        
+        messages.success(request, _(f"Financial period '{period.name}' has been successfully closed."))
+        return redirect('inventory:fiscal_year_list')
     except Exception as e:
-        messages.error(request, f"حدث خطأ أثناء إغلاق الفترة: {e}")
+        messages.error(request, _(f"An unexpected error occurred: {e}"))
+        return redirect('inventory:close_period_cockpit', period_id=period.id)
 
-    return redirect('inventory:fiscal_year_list')
+
+def close_period_cockpit(request: HttpRequest, period_id: int) -> HttpResponse:
+    """
+    Displays the 'Closing Cockpit' UI for a specific financial period,
+    showing the checklist. This is now a GET-only view.
+    """
+    period = get_object_or_404(FinancialPeriod, pk=period_id)
+
+    # The POST logic has been moved to the 'close_period_action' view.
+    if period.status not in [FinancialPeriod.Status.OPEN, FinancialPeriod.Status.PENDING_CLOSE]:
+        messages.warning(request, _("This period is already closed and cannot be modified from this screen."))
+        return redirect('inventory:fiscal_year_list')
+
+    # The cockpit's job is to update the checklist so the user sees the latest status.
+    checklist = update_checklist_for_period(period)
+
+    context = {
+        'active_page': 'financials',
+        'sub_page': 'periods',
+        'period': period,
+        'checklist': checklist,
+    }
+    if 'X-Partial-Request' in request.headers:
+        return render(request, 'inventory/partials/close_period_cockpit_content.html', context)
+    return render(request, 'inventory/close_period_cockpit.html', context)
 
 
 def api_period_checklist_status(request: HttpRequest, period_id: int) -> JsonResponse:
@@ -1432,22 +1622,30 @@ def api_period_checklist_status(request: HttpRequest, period_id: int) -> JsonRes
     # --- REAL IMPLEMENTATION ---
     checks = {}
     
-    # 1. Check for un-reconciled bank accounts for the period
-    unreconciled_banks = BankReconciliation.objects.filter(
+    # 1. Check if all bank accounts have been reconciled for the period.
+    # This is more robust: it ensures every bank account has a corresponding
+    # reconciled statement, not just that there are no unreconciled ones.
+    all_bank_accounts = BankAccount.objects.all()
+    reconciled_banks_in_period_pks = BankReconciliation.objects.filter(
         statement_date__gte=period.start_date,
         statement_date__lte=period.end_date,
-    ).exclude(status=BankReconciliation.Status.RECONCILED)
-    bank_check = not unreconciled_banks.exists()
+        status=BankReconciliation.Status.RECONCILED
+    ).values_list('bank_account_id', flat=True)
+
+    unreconciled_bank_objects = all_bank_accounts.exclude(pk__in=reconciled_banks_in_period_pks)
+    bank_check = not unreconciled_bank_objects.exists()
+    
     bank_details = []
     if not bank_check:
-        for recon in unreconciled_banks:
+        for bank in unreconciled_bank_objects:
             bank_details.append({
-                'description': f"{recon.bank_account.name} - Statement Date: {recon.statement_date}",
-                'url': reverse('inventory:manage_bank_reconciliation', args=[recon.pk])
+                'description': f"Bank Account: {bank.name}",
+                'url': '#' # No direct URL for a bank account view
             })
-    checks['bank_reconciliations'] = {
+            
+    checks['all_banks_reconciled'] = {
         'status': bank_check,
-        'message': f"{unreconciled_banks.count()} unreconciled bank statements found." if not bank_check else "All bank accounts reconciled.",
+        'message': f"{unreconciled_bank_objects.count()} bank accounts are not reconciled." if not bank_check else "All bank accounts reconciled.",
         'details': bank_details
     }
 
@@ -1463,10 +1661,11 @@ def api_period_checklist_status(request: HttpRequest, period_id: int) -> JsonRes
     if not draft_check:
         for je in draft_jes:
             draft_details.append({
-                'description': f"JE-{je.id}: {je.description} ({je.date.strftime('%Y-%m-%d')})",
-                'url': reverse('inventory:journal_entries') # Link to the list view
+                'description': f"JE-{je.id}: {je.description}",
+                'url': reverse('inventory:view_journal_entry', kwargs={'pk': je.id})
             })
-    checks['draft_jes'] = {
+            
+    checks['no_draft_manual_jes'] = {
         'status': draft_check,
         'message': f"{draft_jes.count()} draft journal entries found." if not draft_check else "No manual journal entries in draft status.",
         'details': draft_details
@@ -1488,27 +1687,42 @@ def api_period_checklist_status(request: HttpRequest, period_id: int) -> JsonRes
     if not unposted_invoices_check:
         for inv in unposted_supplier_invoices:
             invoice_details.append({
-                'description': f"Supplier Invoice #{inv.invoice_number} for {inv.supplier.name}",
-                'url': reverse('inventory:view_supplier_invoice', args=[inv.pk])
+                'description': f"Supplier Invoice: {inv.invoice_number} ({inv.supplier.name})",
+                'url': reverse('inventory:view_supplier_invoice', kwargs={'pk': inv.id})
             })
         for inv in unposted_customer_invoices:
             invoice_details.append({
-                'description': f"Customer Invoice #{inv.invoice_number} for {inv.customer.name}",
-                'url': reverse('inventory:view_customer_invoice', args=[inv.pk])
+                'description': f"Customer Invoice: {inv.invoice_number} ({inv.customer.name})",
+                'url': reverse('inventory:view_customer_invoice', kwargs={'pk': inv.id})
             })
-    checks['unposted_invoices'] = {
+            
+    checks['no_unposted_invoices'] = {
         'status': unposted_invoices_check,
         'message': f"{len(invoice_details)} unposted invoices found." if not unposted_invoices_check else "All invoices are posted.",
         'details': invoice_details
     }
 
     # 4. Placeholder for a check that is always true for now
-    checks['inventory_valuation'] = {
+    checks['is_inventory_valuation_run'] = {
         'status': True,
         'message': 'Inventory valuation process completed successfully.',
         'details': []
     }
     
+    # 5. Get status of other checks from the checklist model
+    checklist = getattr(period, 'checklist', None)
+    if checklist:
+        checks['is_depreciation_run'] = {
+            'status': checklist.is_depreciation_run,
+            'message': 'Monthly depreciation has been run.' if checklist.is_depreciation_run else 'Monthly depreciation has not been run.',
+            'details': []
+        }
+        checks['is_overhead_posted'] = {
+            'status': checklist.is_overhead_posted,
+            'message': 'Manufacturing overhead has been posted.' if checklist.is_overhead_posted else 'Manufacturing overhead has not been posted.',
+            'details': []
+        }
+
     return JsonResponse(checks)
 
 def view_period_audit_log(request: HttpRequest, period_id: int) -> HttpResponse:

@@ -358,3 +358,15 @@ When generating code for this project, please adhere to the following guidelines
 -   **Utilize existing context**: Do not re-read files if the information is already present in these instructions.
 -   **Utilize already read files**: Do not re-read files if the file has already been read.
 -   **Debug mode**: Include print and logging statements to aid in debugging during development.
+-   **Editing Precision**: When replacing a specific function or class, ensure the `...existing code...` markers are placed immediately before and after the target block. This prevents accidental deletion of adjacent code. For example, to replace `function_b`:
+    ```python
+    # ...existing code...
+    def function_a():
+        pass
+
+    def function_b_replacement(): # New function
+        pass
+
+    def function_c():
+    # ...existing code...
+    ```

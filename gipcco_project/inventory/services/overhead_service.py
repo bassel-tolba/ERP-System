@@ -1,7 +1,7 @@
 # gipcco_project/inventory/services/overhead_service.py
 
 import logging
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from typing import List
 
 from django.db.models import Sum, Q, F, ExpressionWrapper, DecimalField
@@ -10,7 +10,7 @@ from django.db import transaction
 
 from ..models import (
     FinancialPeriod, CostPool, AllocationDriver, OverheadAllocationRun,
-    ExpenseLog, Batch, FinishedProductReceipt
+    ExpenseLog, Batch, FinishedProductReceipt, PeriodCloseChecklist
 )
 
 logger = logging.getLogger(__name__)
@@ -121,18 +121,20 @@ def execute_overhead_allocation_run(run: OverheadAllocationRun) -> OverheadAlloc
 
 def apply_overhead_to_finished_goods(run: OverheadAllocationRun) -> Decimal:
     """
-    Applies the calculated overhead rate from a run to all finished product
-    receipts within the run's financial period, based on the driver.
-    This is the step that adds the overhead cost to the inventory value.
-    """
-    if run.status != OverheadAllocationRun.Status.POSTED:
-        raise ValueError("Overhead can only be applied from a run that has been posted to the GL.")
+    Applies the calculated overhead rate from a run to all finished goods
+    receipts within the run's financial period.
 
+    This function is now responsible for setting the 'is_overhead_posted' flag
+    on the period's closing checklist.
+    """
     period = run.financial_period
-    driver = run.allocation_driver
+    driver_name = run.allocation_driver.name
     rate = run.calculated_rate
-    
-    # 2. Find all finished goods receipts for that period
+
+    # --- FIX: Ensure the checklist exists before trying to update it ---
+    checklist, _ = PeriodCloseChecklist.objects.get_or_create(financial_period=period)
+
+    # Find all FG receipts in the period that have a batch with the relevant driver data
     receipts_in_period = FinishedProductReceipt.objects.filter(
         receipt_date__gte=period.start_date,
         receipt_date__lte=period.end_date
@@ -141,55 +143,33 @@ def apply_overhead_to_finished_goods(run: OverheadAllocationRun) -> Decimal:
     if not receipts_in_period.exists():
         logger.warning(f"Overhead run {run.id} found no finished goods receipts in period {period.name}. No overhead will be applied.")
         # Even if no receipts, the process is complete. Mark as applied.
-        # run.status = OverheadAllocationRun.Status.APPLIED
-        # run.save()
+        # The checklist should be updated to reflect that the process ran.
+        # FIX: Always use the 'checklist' object fetched at the start of the function
+        # to avoid using a potentially stale 'period.checklist' prefetched object.
+        checklist.is_overhead_posted = True
+        checklist.save()
         return Decimal('0.0')
 
-    # 3. --- CORRECTED LOGIC ---
-    #    Calculate the total driver units based on the receipts in the period
-    total_driver_units_in_period = 0.0
-    for receipt in receipts_in_period:
-        driver_units_for_receipt = 0.0
-        if driver.name == AllocationDriver.DriverChoices.MACHINE_HOURS:
-            # Assumes machine hours are logged on the parent batch of the receipt
-            driver_units_for_receipt = receipt.batch.machine_hours_consumed or 0.0
-        elif driver.name == AllocationDriver.DriverChoices.LABOR_HOURS:
-            # Assumes labor hours are logged on the parent batch of the receipt
-            driver_units_for_receipt = receipt.batch.labor_hours_consumed or 0.0
-        elif driver.name == AllocationDriver.DriverChoices.BOTTLE_UNITS:
-            # CORRECTED: Use the actual quantity produced from the receipt
-            driver_units_for_receipt = receipt.total_quantity_produced or 0.0
-        elif driver.name == AllocationDriver.DriverChoices.LITERS_VOLUME:
-            # CORRECTED: Use bottle size from the template and quantity from the receipt
-            bottle_size_ml = receipt.batch.template.bottle_size_ml
-            quantity_produced = receipt.total_quantity_produced
-            if bottle_size_ml and quantity_produced:
-                # Convert mL to Liters
-                driver_units_for_receipt = (float(quantity_produced) * float(bottle_size_ml)) / 1000.0
-        
-        total_driver_units_in_period += driver_units_for_receipt
-
-    # 4. Apply the overhead cost to each receipt proportionally
+    # 3. Apply the overhead cost to each receipt
     total_applied_cost = Decimal('0.0')
     receipts_to_update = []
 
     for receipt in receipts_in_period:
         driver_units_for_receipt = 0.0
-        if driver.name == AllocationDriver.DriverChoices.MACHINE_HOURS:
+        if driver_name == AllocationDriver.DriverChoices.MACHINE_HOURS:
             driver_units_for_receipt = receipt.batch.machine_hours_consumed or 0.0
-        elif driver.name == AllocationDriver.DriverChoices.LABOR_HOURS:
+        elif driver_name == AllocationDriver.DriverChoices.LABOR_HOURS:
             driver_units_for_receipt = receipt.batch.labor_hours_consumed or 0.0
-        elif driver.name == AllocationDriver.DriverChoices.BOTTLE_UNITS:
+        elif driver_name == AllocationDriver.DriverChoices.BOTTLE_UNITS:
             driver_units_for_receipt = receipt.total_quantity_produced or 0.0
-        elif driver.name == AllocationDriver.DriverChoices.LITERS_VOLUME:
+        elif driver_name == AllocationDriver.DriverChoices.LITERS_VOLUME:
             bottle_size_ml = receipt.batch.template.bottle_size_ml
             quantity_produced = receipt.total_quantity_produced
             if bottle_size_ml and quantity_produced:
                 driver_units_for_receipt = (float(quantity_produced) * float(bottle_size_ml)) / 1000.0
 
-        if total_driver_units_in_period > 0:
-            proportion = Decimal(driver_units_for_receipt / total_driver_units_in_period)
-            applied_cost = (run.total_pool_amount * proportion).quantize(Decimal('0.001'))
+        if driver_units_for_receipt > 0:
+            applied_cost = (Decimal(str(driver_units_for_receipt)) * rate).quantize(Decimal('0.001'), rounding=ROUND_HALF_UP)
             
             # Update the receipt instance in memory
             receipt.allocated_overhead_cost = applied_cost
@@ -197,13 +177,18 @@ def apply_overhead_to_finished_goods(run: OverheadAllocationRun) -> Decimal:
             total_applied_cost += applied_cost
 
     with transaction.atomic():
-        # IMPORTANT: We use bulk_update here specifically to AVOID triggering the 
+        # IMPORTANT: We use bulk_update here specifically to AVOID triggering the
         # post_save signal on FinishedProductReceipt. Triggering that signal would
         # regenerate the original JE for the receipt with the new total cost,
         # which would double-count the overhead amount that is already being
         # handled by the dedicated overhead application JE.
         FinishedProductReceipt.objects.bulk_update(receipts_to_update, ['allocated_overhead_cost'])
         logger.info(f"Applied overhead of {total_applied_cost} to {len(receipts_to_update)} finished product receipts for run {run.id}.")
+
+        # --- NEW: Update the period close checklist ---
+        checklist.is_overhead_posted = True
+        checklist.save()
+        logger.info(f"Updated period close checklist for {period.name}: is_overhead_posted=True.")
 
     # Return the total cost that was applied, to be used in the JE
     return total_applied_cost

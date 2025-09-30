@@ -46,7 +46,7 @@ window.initializePluginsInContent = function (container = document) {
         '#createSalesOrderForm': initSalesOrderCreateLogic,
         '#createPurchaseOrderForm': initPurchaseOrderCreateLogic,
         '#taxReportForm': initTaxReconciliationReportLogic,
-        '#closePeriodContainer': initClosePeriodLogic,
+        '#close-period-container': initClosePeriodLogic,
         '#fiscalYearContainer': initFiscalYearListLogic,
         '#overhead-allocation-workspace-container': initOverheadAllocationWorkspaceLogic,
         '#variance-allocation-content': initInventoryCountsLogic,

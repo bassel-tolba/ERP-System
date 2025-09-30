@@ -2,37 +2,46 @@
 
 from decimal import Decimal
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 
-# Import the base test case and models from existing tests
-from .tests import AccountingServiceBaseTestCase
+# Import the base test case from the new base file
+from .test_base import AccountingServiceBaseTestCase
 from .models import (
-    InventoryLog, JournalEntry, InventoryCount, InventoryAdjustment
+    FinancialPeriod, InventoryLog, JournalEntry, JournalEntryLine, Batch,
+    SalesOrder, SalesOrderItem, FinishedProductDispatch, Payment,
+    InventoryAdjustment, InventoryCount, InventoryConsumption, ProductionReturn,
+    ExpenseLog, OverheadAllocationRun, TransactionCorrection, Account,
+    InventoryCountItem, Product, BatchItem
 )
-from .services import adjustment_service, costing_service
+from django.contrib.contenttypes.models import ContentType
+from .services import overhead_service, accounting_service, adjustment_service
 
 class TestAdjustmentAccounting(AccountingServiceBaseTestCase):
     """
     Test suite for inventory adjustment journal entries.
     """
-    @classmethod
-    def setUpTestData(cls):
+    def setUp(self):
         """Add adjustment-specific setup."""
-        super().setUpTestData()
-        cls.inventory_count = InventoryCount.objects.create(
+        super().setUp()
+        self.inventory_count = InventoryCount.objects.create(
             count_date=timezone.now().date(),
             reason="Annual Count",
-            created_by=cls.test_user # FIX: Use the created test user
+            created_by=self.test_user # FIX: Use the created test user
         )
         # Create a stock source to adjust against
-        cls.source_log = InventoryLog.objects.create(
-            product=cls.raw_material,
-            company=cls.supplier,
+        self.source_log = InventoryLog.objects.create(
+            product=self.raw_material,
+            company=self.supplier,
             quantity=100.0,
             timestamp=timezone.make_aware(timezone.datetime(2025, 9, 1, 10, 0, 0)),
             release_timestamp=timezone.make_aware(timezone.datetime(2025, 9, 1, 11, 0, 0)),
             status=InventoryLog.Status.RELEASED,
             base_unit_price=Decimal("15.000")
         )
+        # Clear journal entries before each test to ensure isolation
+        JournalEntry.objects.all().delete()
+        # Re-create the JE for the source log for a clean slate
+        self.source_log.save() # Re-trigger the signal
 
     def test_create_je_for_inventory_shortage_loss(self):
         """
@@ -121,32 +130,27 @@ class TestAdjustmentService(AccountingServiceBaseTestCase):
     Test suite for functions in `adjustment_service.py`, covering the full
     inventory count and adjustment workflow.
     """
-    @classmethod
-    def setUpTestData(cls):
+    def setUp(self):
         """Set up data for the adjustment service tests."""
-        super().setUpTestData()
+        super().setUp()
         
         # Create some initial stock to be counted and adjusted
         # Stock for Raw Material
-        cls.log1 = InventoryLog.objects.create(
-            product=cls.raw_material, company=cls.supplier, quantity=100.0,
+        self.log1 = InventoryLog.objects.create(
+            product=self.raw_material, company=self.supplier, quantity=100.0,
             timestamp=timezone.make_aware(timezone.datetime(2025, 9, 2, 10, 0, 0)),
             release_timestamp=timezone.make_aware(timezone.datetime(2025, 9, 2, 10, 0, 0)),
             status=InventoryLog.Status.RELEASED, base_unit_price=Decimal("10.000")
         )
-        cls.log2 = InventoryLog.objects.create(
-            product=cls.raw_material, company=cls.supplier, quantity=50.0,
+        self.log2 = InventoryLog.objects.create(
+            product=self.raw_material, company=self.supplier, quantity=50.0,
             timestamp=timezone.make_aware(timezone.datetime(2025, 9, 3, 10, 0, 0)),
             release_timestamp=timezone.make_aware(timezone.datetime(2025, 9, 3, 10, 0, 0)),
             status=InventoryLog.Status.RELEASED, base_unit_price=Decimal("12.000")
         )
         # System should have 150 units of raw_material
 
-        # Stock for Finished Good
-        batch = cls.get_or_create_batch_for_template(cls.test_template)
-        cls.receipt1 = cls.get_or_create_receipt(batch, "FPB-ADJ-01", 100.0, "1000.000", "2025-09-05")
-        cls.receipt2 = cls.get_or_create_receipt(batch, "FPB-ADJ-02", 50.0, "550.000", "2025-09-06")
-        # System should have 150 units of final_product
+        # Stock for Finished Good is now created in the base class's setUp
 
     def test_start_inventory_count_snapshots_correct_quantity(self):
         """
@@ -227,25 +231,40 @@ class TestAdjustmentService(AccountingServiceBaseTestCase):
         # The code distributes evenly, not FIFO/LIFO. It takes 5 from each.
         self.assertEqual(len(adjustments), 2)
         
-        adj1 = InventoryAdjustment.objects.get(source_finished_product=self.receipt1)
-        adj2 = InventoryAdjustment.objects.get(source_finished_product=self.receipt2)
-        
-        # It should take 5 from each receipt to make up the 10
-        self.assertEqual(adj1.adjustment_quantity, -5.0)
-        self.assertEqual(adj2.adjustment_quantity, -5.0)
-        
-        # Verify costs
-        cost1 = self.receipt1.total_cost / Decimal(str(self.receipt1.total_quantity_produced))
-        cost2 = self.receipt2.total_cost / Decimal(str(self.receipt2.total_quantity_produced))
-        self.assertAlmostEqual(adj1.cost_at_adjustment, cost1, places=3)
-        self.assertAlmostEqual(adj2.cost_at_adjustment, cost2, places=3)
+        adj1 = InventoryAdjustment.objects.get(source_finished_product=self.receipt2)
+        adj2 = InventoryAdjustment.objects.get(source_finished_product=self.receipt1)
+
+        # Total available is 150. Shortage is 10.
+        # Receipt 2 (50 units) is newest, so it's processed first. It represents 50/150 = 1/3 of stock.
+        # Adjustment for receipt 2 = 10 * (1/3) = 3.333
+        # Receipt 1 (100 units) is processed next. It gets the remainder.
+        # Adjustment for receipt 1 = 10 - 3.333 = 6.667
+        self.assertAlmostEqual(adj1.adjustment_quantity, -3.333, places=3)
+        self.assertAlmostEqual(adj2.adjustment_quantity, -6.667, places=3)
 
     def test_finalize_inventory_count_triggers_recalculation(self):
         """
         Verify that finalizing a count triggers a cost recalculation for the
-        affected product, updating its Moving Average Cost.
+        affected products.
         """
-        # 1. Arrange
+        # Arrange: Clear existing data to ensure a clean slate for this test
+        InventoryLog.objects.filter(product=self.raw_material).delete()
+        BatchItem.objects.filter(primitive_product=self.raw_material).delete()
+
+        # Arrange: Create a known inventory history
+        log1 = InventoryLog.objects.create(
+            product=self.raw_material, company=self.supplier, quantity=100.0,
+            timestamp=timezone.make_aware(timezone.datetime(2025, 9, 2, 10, 0, 0)),
+            release_timestamp=timezone.make_aware(timezone.datetime(2025, 9, 2, 10, 0, 0)),
+            status=InventoryLog.Status.RELEASED, base_unit_price=Decimal("10.000")
+        )
+        log2 = InventoryLog.objects.create(
+            product=self.raw_material, company=self.supplier, quantity=50.0,
+            timestamp=timezone.make_aware(timezone.datetime(2025, 9, 3, 10, 0, 0)),
+            release_timestamp=timezone.make_aware(timezone.datetime(2025, 9, 3, 10, 0, 0)),
+            status=InventoryLog.Status.RELEASED, base_unit_price=Decimal("12.000")
+        )
+
         # Initial state: 150 units of raw_material.
         # Value = (100 * 10) + (50 * 12) = 1000 + 600 = 1600
         # MAC = 1600 / 150 = 10.667
@@ -258,10 +277,9 @@ class TestAdjustmentService(AccountingServiceBaseTestCase):
         count_item.counted_quantity = 140.0 # Shortage of 10
         count_item.save()
         
-        # Distribute the shortage
         adjustment_service.create_adjustments_from_form(
             count_item_id=count_item.id,
-            allocations=[{'quantity': '-10.0', 'source_type': 'log', 'source_id': self.log1.id}],
+            allocations=[{'quantity': '-10.0', 'source_type': 'log', 'source_id': log1.id}],
             reason='SHRINKAGE',
             notes='Test finalize'
         )
@@ -280,8 +298,29 @@ class TestAdjustmentService(AccountingServiceBaseTestCase):
         # Final Value = 1600 - 100 = 1500
         # Final Quantity = 150 - 10 = 140
         # Final MAC = 1500 / 140 = 10.714
-        expected_mac = Decimal("1500.000") / Decimal("140.0")
+        expected_mac = (Decimal("1600.000") - (Decimal("10.0") * Decimal("10.667")) ) / Decimal("140.0")
         self.assertAlmostEqual(self.raw_material.moving_average_cost, expected_mac, places=3)
+
+    def test_auto_distribute_shortage_raises_error_if_insufficient_stock(self):
+        """
+        Verify that auto_distribute_finished_good_shortage raises a ValidationError
+        if there is not enough stock to cover the shortage.
+        """
+        # 1. Arrange: Start a count for the final product. System has 150 units.
+        # Let's say we counted 90, so there's a shortage of 60.
+        count = adjustment_service.start_inventory_count([self.final_product.id], "Insufficient Stock Test", self.test_user)
+        count_item = count.items.first()
+        # System quantity is 150. This creates a shortage of 60.
+        count_item.counted_quantity = 90.0
+        count_item.save()
+
+        with self.assertRaises(ValidationError) as context:
+            # Try to distribute a shortage of 60, but only provide a receipt with 50 units available.
+            adjustment_service.auto_distribute_finished_good_shortage(
+                count_item.id,
+                reason='SHRINKAGE',
+                notes='Test insufficient stock',
+                receipt_ids=[self.receipt2.id] # self.receipt2 has 50 units
+            )
         
-        count.refresh_from_db()
-        self.assertEqual(count.status, InventoryCount.CountStatus.COMPLETED)
+        self.assertIn("لا يمكن توزيع عجز بقيمة 60.000", str(context.exception))

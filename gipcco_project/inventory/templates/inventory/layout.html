@@ -78,26 +78,24 @@
                             <div class="collapse" id="shopOrdersSubmenu">
                                 <ul class="dropdown-menu show">
                                     <li><a class="dropdown-item" href="{% url 'inventory:batches' %}">عرض أوامر التشغيل</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'inventory:finished_goods_status' %}">حالة المنتج النهائي</a></li>
                                     <li><a class="dropdown-item" href="{% url 'inventory:shop_order_templates' %}">إدارة القوالب</a></li>
                                 </ul>
                             </div>
                         </li>
 
                         <li class="nav-item">
-                            <a class="nav-link dropdown-toggle {% if active_page == 'analysis' or active_page == 'production_returns' or active_page == 'opening_balances' or active_page == 'ledger' or active_page == 'visuals' or active_page == 'quarantine' or active_page == 'inventory_counts' %}active{% endif %}" href="#inventorySubmenu" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="inventorySubmenu">
+                            <a class="nav-link dropdown-toggle {% if active_page == 'analysis' or active_page == 'production_returns' or active_page == 'ledger' or active_page == 'visuals' or active_page == 'quarantine' or active_page == 'inventory_counts' %}active{% endif %}" href="#inventorySubmenu" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="inventorySubmenu">
                                 <i class="bi bi-bar-chart-line-fill nav-icon"></i>
                                 <span>التحليل والمخزون</span>
                             </a>
                             <div class="collapse" id="inventorySubmenu">
                                 <ul class="dropdown-menu show">
                                     <li><a class="dropdown-item" href="{% url 'inventory:quarantine_list' %}">إدارة المواد تحت الفحص</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'inventory:analysis' %}">تحليل حركة المخزون</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'inventory:opening_balances' %}">الأرصدة الافتتاحية</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'inventory:general_ledger' %}">تحليل حركة المخزون</a></li>
                                     <li><a class="dropdown-item" href="{% url 'inventory:production_returns' %}">إرجاع من الإنتاج</a></li>
                                     <li><a class="dropdown-item" href="{% url 'inventory:inventory_counts_list' %}">الجرد والمطابقة</a></li>
                                     <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" href="{% url 'inventory:ledger' %}">كشف حساب منتج/شركة</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'inventory:product_ledger' %}">كشف حساب منتج/شركة</a></li>
                                     <li><a class="dropdown-item" href="{% url 'inventory:product_ledger' %}">كشف حساب منتج (تفصيلي)</a></li>
                                     <li><a class="dropdown-item" href="{% url 'inventory:stock_valuation' %}">تقييم المخزون الحالي</a></li>
                                     <li><a class="dropdown-item" href="{% url 'inventory:visuals' %}">لوحة المؤشرات الرسومية</a></li>
@@ -161,6 +159,7 @@
                                     <li><hr class="dropdown-divider"></li>
                                     <li><h6 class="dropdown-header">التقارير المالية</h6></li>
                                     <li><a class="dropdown-item" href="{% url 'inventory:profit_and_loss_statement' %}">قائمة الدخل (P&L)</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'inventory:balance_sheet' %}">الميزانية العمومية</a></li>
                                     <li><a class="dropdown-item" href="{% url 'inventory:trial_balance' %}">ميزان المراجعة</a></li>
                                     <li><a class="dropdown-item" href="{% url 'inventory:tax_reconciliation_report' %}">تقرير التسوية الضريبية</a></li>
                                     <li><a class="dropdown-item" href="{% url 'inventory:reconciliation_report' %}">تقرير التسوية البنكية</a></li>
@@ -249,18 +248,19 @@
     <script>
         window.appUrls = {
             apiProductTags: "{% url 'inventory:api_product_tags' 0 %}",
-            apiSupplierOpenPos: "/api/supplier/<supplierId>/open_pos/",
-            apiUninvoicedReceipts: "/api/supplier/<supplierId>/uninvoiced_receipts/",
-            apiUninvoicedDispatches: "/api/sales_order/<soId>/uninvoiced_dispatches/",
-            apiPoItems: "/api/po/<poId>/items/",
-            apiBatchDetails: "/api/batch_details/<batchId>/",
-            apiGetUsedQcSources: "/api/get_used_qc_sources/<productId>/",
-            apiAvailableStock: "/api/available_stock/<productId>/",
-            expensesConsumptionEdit: "/expenses/consumption/edit/<pk>/",
-            expensesGeneralEdit: "/expenses/general/edit/<pk>/",
-            recordsEdit: "/records/edit/<logId>/",
+            apiSupplierOpenPos: "{% url 'inventory:api_get_open_pos_for_supplier' 0 %}",
+            apiUninvoicedReceipts: "{% url 'inventory:api_get_uninvoiced_receipts' 0 %}",
+            apiUninvoicedDispatches: "{% url 'inventory:api_get_uninvoiced_dispatches' 0 %}",
+            apiPoItems: "{% url 'inventory:api_get_po_items' 0 %}",
+            apiBatchDetails: "{% url 'inventory:api_batch_details' 0 %}",
+            apiGetSellableStock: "{% url 'inventory:api_get_sell_stock' %}",
+            apiGetAvailableStock: "{% url 'inventory:api_get_available_stock' 0 %}",
+            apiGetUsedQcSources: "{% url 'inventory:get_used_qc_sources' 0 %}",
+            apiGetUndispatchedSoItems: "{% url 'inventory:api_get_undispatched_so_items' 0 %}",
+            expensesConsumptionEdit: "{% url 'inventory:edit_inventory_consumption' 0 %}",
+            expensesGeneralEdit: "{% url 'inventory:edit_general_expense' 0 %}",
+            recordsEdit: "{% url 'inventory:edit_record' 0 %}",
             createBatch: "{% url 'inventory:create_batch' %}",
-            apiGetSellableStock: "{% url 'inventory:api_get_sellable_stock' %}",
         };
     </script>
     

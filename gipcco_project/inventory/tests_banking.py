@@ -3,8 +3,8 @@
 from decimal import Decimal
 from django.utils import timezone
 
-# Import the base test case and models from existing tests
-from .tests import AccountingServiceBaseTestCase
+# Import the base test case from the new base file
+from .test_base import AccountingServiceBaseTestCase
 from .models import (
     JournalEntry, BankTransfer, BankReconciliation, BankStatementLine, Payment
 )
@@ -13,6 +13,11 @@ class TestBankingAccounting(AccountingServiceBaseTestCase):
     """
     Test suite for banking-related journal entries and processes.
     """
+    def setUp(self):
+        """Clear journal entries before each test to ensure isolation."""
+        super().setUp()
+        JournalEntry.objects.all().delete()
+
     def test_create_je_for_bank_transfer_success(self):
         """
         Verify that a bank transfer correctly debits the destination account

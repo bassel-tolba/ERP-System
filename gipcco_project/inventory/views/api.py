@@ -11,7 +11,7 @@ from django.db.models.functions import Coalesce
 
 from ..models import (
     Product, ProductTag, PurchaseOrder, PurchaseOrderItem, InventoryLog, Batch,
-    FinishedProductReceipt, SalesOrderItem, FinishedProductDispatch,
+    FinishedProductReceipt, SalesOrderItem, FinishedProductDispatch, SalesOrder,
     InventoryAdjustment, Employee, ExpenseLog, BatchItem, InventoryConsumption,
     ProductionReturn, EmployeeAdvanceSettlement, JournalEntry
 )
@@ -74,7 +74,7 @@ def api_batch_details(request: HttpRequest, batch_pk: int) -> JsonResponse:
                 'primitive_product_unit': item.primitive_product.unit,
                 'theoretical_quantity': item.theoretical_quantity,
                 'actual_quantity': item.actual_quantity,
-                'source_qc_no': 'رصيد افتتاحي' if item.source_type == 'opening_balance' else (item.source_log.qc_no if item.source_log else 'N/A')
+                # 'source_qc_no': item.source_log.qc_no if item.source_log else 'N/A'
             } for item in batch.items.all()
         ]
     }
@@ -359,6 +359,52 @@ def api_get_stock_sources_for_product(request: HttpRequest, product_id: int) -> 
     return JsonResponse({'sources': sources})
 
 
+def api_get_uninvoiced_receipts(request: HttpRequest, supplier_id: int) -> JsonResponse:
+    """
+    API endpoint to get released, un-invoiced receipts for a specific supplier.
+    """
+    receipts = InventoryLog.objects.filter(
+        company_id=supplier_id,
+        status=InventoryLog.Status.RELEASED,
+        invoice_item__isnull=True
+    ).select_related('product').order_by('-release_timestamp')
+
+    data = [
+        {
+            'id': receipt.id,
+            'product_name': f"{receipt.product.name} ({receipt.product.code})",
+            'qc_no': receipt.qc_no,
+            'receipt_date': receipt.release_timestamp.strftime('%Y-%m-%d') if receipt.release_timestamp else '',
+            'quantity': receipt.quantity,
+            'total_cost': str(receipt.total_cost.quantize(Decimal('0.001')))
+        } for receipt in receipts
+    ]
+    return JsonResponse(data, safe=False)
+
+
+def api_get_uninvoiced_dispatches(request: HttpRequest, so_id: int) -> JsonResponse:
+    """
+    API endpoint to get un-invoiced dispatches for a specific Sales Order.
+    """
+    dispatches = FinishedProductDispatch.objects.filter(
+        sales_order_item__sales_order_id=so_id,
+        invoice_item__isnull=True
+    ).select_related(
+        'sales_order_item__finished_product__batch__template__final_product'
+    ).order_by('dispatch_date')
+
+    data = [
+        {
+            'id': dispatch.id,
+            'product_name': dispatch.sales_order_item.finished_product.batch.template.final_product.name,
+            'dispatch_date': dispatch.dispatch_date.strftime('%Y-%m-%d'),
+            'quantity': dispatch.quantity,
+            'total_value': str((Decimal(str(dispatch.quantity)) * dispatch.sales_order_item.base_price_per_unit).quantize(Decimal('0.001')))
+        } for dispatch in dispatches
+    ]
+    return JsonResponse(data, safe=False)
+
+
 def api_get_unsettled_transactions(request: HttpRequest, employee_id: int) -> JsonResponse:
     """
     Finds all InventoryLog and ExpenseLog transactions assigned to an employee
@@ -442,3 +488,32 @@ def api_get_journal_entry_details(request: HttpRequest, je_id: int) -> JsonRespo
         return JsonResponse(data)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+
+def api_get_undispatched_so_items(request: HttpRequest, so_id: int) -> JsonResponse:
+    """
+    API endpoint to get items for a specific Sales Order that have remaining quantities to be dispatched.
+    """
+    so_items = SalesOrderItem.objects.filter(
+        sales_order_id=so_id
+    ).select_related(
+        'finished_product__batch__template__final_product'
+    ).annotate(
+        total_dispatched=Coalesce(Sum('dispatches__quantity'), 0.0, output_field=FloatField())
+    ).annotate(
+        quantity_remaining=F('quantity_ordered') - F('total_dispatched')
+    ).filter(
+        quantity_remaining__gt=0.001
+    )
+
+    data = [
+        {
+            'id': item.id,
+            'product_name': item.finished_product.batch.template.final_product.name,
+            'batch_number': item.finished_product.individual_batch_number,
+            'quantity_ordered': item.quantity_ordered,
+            'quantity_remaining': item.quantity_remaining,
+            'unit': item.finished_product.batch.template.final_product.unit,
+        } for item in so_items
+    ]
+    return JsonResponse(data, safe=False)

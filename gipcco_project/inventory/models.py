@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django.conf import settings
 
 # ==============================================================================
@@ -188,6 +188,10 @@ class InventoryLog(models.Model):
     )
 
     @property
+    def total_cost(self):
+        return (self.base_unit_price or Decimal('0.0')) * Decimal(str(self.quantity or 0.0))
+
+    @property
     def costing_unit_price(self):
         """Calculates the unit price used for inventory valuation (MAC)."""
         if self.quantity == 0:
@@ -325,10 +329,6 @@ class Batch(models.Model):
 
 
 class BatchItem(models.Model):
-    class SourceType(models.TextChoices):
-        OPENING_BALANCE = 'opening_balance', _('Opening Balance')
-        INVENTORY_LOG = 'inventory_log', _('Inventory Log')
-
     batch = models.ForeignKey(
         Batch,
         on_delete=models.CASCADE,
@@ -343,11 +343,6 @@ class BatchItem(models.Model):
     )
     theoretical_quantity = models.FloatField(verbose_name=_("Theoretical Quantity"))
     actual_quantity = models.FloatField(null=True, blank=True, verbose_name=_("Actual Quantity"))
-    source_type = models.CharField(
-        max_length=20,
-        choices=SourceType.choices,
-        verbose_name=_("Source Type")
-    )
     source_log = models.ForeignKey(
         InventoryLog,
         on_delete=models.PROTECT,
@@ -367,35 +362,6 @@ class BatchItem(models.Model):
 
     def __str__(self):
         return f"{self.actual_quantity or 0} {self.primitive_product.unit} of {self.primitive_product.name} in {self.batch}"
-
-
-class OpeningBalance(models.Model):
-    product = models.ForeignKey(
-        Product,
-        on_delete=models.CASCADE,
-        related_name='opening_balances',
-        verbose_name=_("Product")
-    )
-    quantity = models.FloatField(verbose_name=_("Quantity"))
-    balance_date = models.DateTimeField(verbose_name=_("Balance Date"))
-    total_value = models.DecimalField(
-        max_digits=14, decimal_places=3, default=Decimal('0.000'), verbose_name=_("Total Value")
-    )
-
-    class Meta:
-        db_table = 'opening_balances'
-        verbose_name = _("Opening Balance")
-        verbose_name_plural = _("Opening Balances")
-        ordering = ['product__name', '-balance_date']
-
-    def __str__(self):
-        return f"Opening Balance for {self.product.name} on {self.balance_date.date()}: {self.quantity}"
-
-    @property
-    def unit_cost(self):
-        if self.quantity > 0:
-            return (self.total_value / Decimal(str(self.quantity))).quantize(Decimal('0.001'))
-        return Decimal('0.000')
 
 
 class ProductionReturn(models.Model):
@@ -720,13 +686,92 @@ class FinishedProductDispatch(models.Model):
         return f"Dispatched {self.quantity} for {self.sales_order_item}"
 
 
+class FixedAsset(models.Model):
+    """
+    Represents an individual fixed asset. This is the Fixed Asset Sub-Ledger.
+    """
+    class AssetStatus(models.TextChoices):
+        IN_SERVICE = 'in_service', _("In Service")
+        UNDER_CONSTRUCTION = 'under_construction', _("Under Construction")
+        IDLE = 'idle', _("Idle")
+        SOLD = 'sold', _("Sold")
+        RETIRED = 'retired', _("Retired")
+
+    asset_tag = models.CharField(max_length=100, unique=True, verbose_name=_("Asset Tag / Barcode"))
+    name = models.CharField(max_length=255, verbose_name=_("Asset Name"))
+    description = models.TextField(blank=True, null=True, verbose_name=_("Description"))
+    
+    # --- CORRECTED LINES ---
+    gl_account = models.ForeignKey(
+        'Account', # Use a string here
+        on_delete=models.PROTECT,
+        limit_choices_to={'code__startswith': '101'},
+        related_name='fixed_assets',
+        verbose_name=_("GL Control Account")
+    )
+    
+    depreciation_expense_account = models.ForeignKey(
+        'Account', # Use a string here
+        on_delete=models.PROTECT,
+        limit_choices_to={'account_type': 'expense'}, # The value should also be a string
+        related_name='+', 
+        verbose_name=_("Depreciation Expense Account")
+    )
+    accumulated_depreciation_account = models.ForeignKey(
+        'Account', # Use a string here
+        on_delete=models.PROTECT,
+        limit_choices_to={'code__startswith': '20205'},
+        related_name='+', 
+        verbose_name=_("Accumulated Depreciation Account")
+    )
+    # --- END CORRECTIONS ---
+    
+    purchase_date = models.DateField(verbose_name=_("Purchase Date"))
+    purchase_cost = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Original Purchase Cost"))
+    depreciation_start_date = models.DateField(verbose_name=_("Depreciation Start Date"))
+    useful_life_years = models.PositiveIntegerField(verbose_name=_("Useful Life (Years)"))
+    salvage_value = models.DecimalField(
+        max_digits=14, decimal_places=3, default=Decimal('0.000'), verbose_name=_("Salvage Value")
+    )
+
+    serial_number = models.CharField(max_length=255, blank=True, null=True, verbose_name=_("Serial Number"))
+    location = models.CharField(max_length=255, blank=True, null=True, verbose_name=_("Location"))
+    status = models.CharField(
+        max_length=20,
+        choices=AssetStatus.choices,
+        default=AssetStatus.IN_SERVICE,
+        verbose_name=_("Status")
+    )
+
+    class Meta:
+        db_table = 'fixed_assets'
+        verbose_name = _("Fixed Asset")
+        verbose_name_plural = _("Fixed Assets")
+        ordering = ['asset_tag']
+
+    def __str__(self):
+        return f"{self.asset_tag} - {self.name}"
+
+    @property
+    def depreciable_base(self):
+        return self.purchase_cost - self.salvage_value
+
+    @property
+    def accumulated_depreciation(self):
+        return self.depreciation_logs.aggregate(total=Sum('amount'))['total'] or Decimal('0.000')
+
+    @property
+    def net_book_value(self):
+        return self.purchase_cost - self.accumulated_depreciation
+
+
 class InventoryConsumption(models.Model):
     class Department(models.TextChoices):
-        PRODUCTION = 'production', _('الإنتاج')
-        ENGINEERING = 'engineering', _('الهندسة والصيانة')
-        ADMIN = 'admin', _('الإدارة')
-        QC = 'qc', _('الجودة')
-        OTHER = 'other', _('أخرى')
+        PRODUCTION = 'production', _("Production")
+        ENGINEERING = 'engineering', _("Engineering and Maintenance")
+        ADMIN = 'admin', _("Administration")
+        QC = 'qc', _("Quality Control")
+        OTHER = 'other', _("Other")
         
     # --- NEW: Consumption Type for Capitalization vs. Expense ---
     class ConsumptionType(models.TextChoices):
@@ -852,85 +897,6 @@ class ExpenseLog(models.Model):
 # ==============================================================================
 #  NEW SUB-LEDGER & BANKING MODELS
 # ==============================================================================
-
-class FixedAsset(models.Model):
-    """
-    Represents an individual fixed asset. This is the Fixed Asset Sub-Ledger.
-    """
-    class AssetStatus(models.TextChoices):
-        IN_SERVICE = 'in_service', _('In Service')
-        UNDER_CONSTRUCTION = 'under_construction', _('Under Construction')
-        IDLE = 'idle', _('Idle')
-        SOLD = 'sold', _('Sold')
-        RETIRED = 'retired', _('Retired/Scrapped')
-
-    asset_tag = models.CharField(max_length=100, unique=True, verbose_name=_("Asset Tag / Barcode"))
-    name = models.CharField(max_length=255, verbose_name=_("Asset Name"))
-    description = models.TextField(blank=True, null=True, verbose_name=_("Description"))
-    
-    # --- CORRECTED LINES ---
-    gl_account = models.ForeignKey(
-        'Account', # Use a string here
-        on_delete=models.PROTECT,
-        limit_choices_to={'code__startswith': '101'},
-        related_name='fixed_assets',
-        verbose_name=_("GL Control Account")
-    )
-    
-    depreciation_expense_account = models.ForeignKey(
-        'Account', # Use a string here
-        on_delete=models.PROTECT,
-        limit_choices_to={'account_type': 'expense'}, # The value should also be a string
-        related_name='+', 
-        verbose_name=_("Depreciation Expense Account")
-    )
-    accumulated_depreciation_account = models.ForeignKey(
-        'Account', # Use a string here
-        on_delete=models.PROTECT,
-        limit_choices_to={'code__startswith': '20205'},
-        related_name='+', 
-        verbose_name=_("Accumulated Depreciation Account")
-    )
-    # --- END CORRECTIONS ---
-    
-    purchase_date = models.DateField(verbose_name=_("Purchase Date"))
-    purchase_cost = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Original Purchase Cost"))
-    depreciation_start_date = models.DateField(verbose_name=_("Depreciation Start Date"))
-    useful_life_years = models.PositiveIntegerField(verbose_name=_("Useful Life (Years)"))
-    salvage_value = models.DecimalField(
-        max_digits=14, decimal_places=3, default=Decimal('0.000'), verbose_name=_("Salvage Value")
-    )
-
-    serial_number = models.CharField(max_length=255, blank=True, null=True, verbose_name=_("Serial Number"))
-    location = models.CharField(max_length=255, blank=True, null=True, verbose_name=_("Location"))
-    status = models.CharField(
-        max_length=20,
-        choices=AssetStatus.choices,
-        default=AssetStatus.IN_SERVICE,
-        verbose_name=_("Status")
-    )
-
-    class Meta:
-        db_table = 'fixed_assets'
-        verbose_name = _("Fixed Asset")
-        verbose_name_plural = _("Fixed Assets")
-        ordering = ['asset_tag']
-
-    def __str__(self):
-        return f"{self.asset_tag} - {self.name}"
-
-    @property
-    def depreciable_base(self):
-        return self.purchase_cost - self.salvage_value
-
-    @property
-    def accumulated_depreciation(self):
-        """Calculates total depreciation posted against this asset."""
-        return self.depreciation_logs.aggregate(total=models.Sum('amount'))['total'] or Decimal('0.000')
-
-    @property
-    def net_book_value(self):
-        return self.purchase_cost - self.accumulated_depreciation
 
 class BankAccount(models.Model):
     """
@@ -1836,7 +1802,9 @@ class SupplierInvoice(models.Model):
         max_digits=14, decimal_places=3, default=Decimal('0.000'), verbose_name=_("Amount Paid")
     )
     status = models.CharField(
-        max_length=20, choices=InvoiceStatus.choices, default=InvoiceStatus.AWAITING_PAYMENT,
+        max_length=20,
+        choices=InvoiceStatus.choices,
+        default=InvoiceStatus.AWAITING_PAYMENT,
         verbose_name=_("Status")
     )
     notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
@@ -1940,7 +1908,9 @@ class CustomerInvoice(models.Model):
         max_digits=14, decimal_places=3, default=Decimal('0.000'), verbose_name=_("Amount Paid")
     )
     status = models.CharField(
-        max_length=20, choices=InvoiceStatus.choices, default=InvoiceStatus.AWAITING_PAYMENT,
+        max_length=20,
+        choices=InvoiceStatus.choices,
+        default=InvoiceStatus.AWAITING_PAYMENT,
         verbose_name=_("Status")
     )
     notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
@@ -2004,18 +1974,12 @@ class CustomerInvoiceItem(models.Model):
 
 
 class CustomerPaymentApplication(models.Model):
-    """
-    Links a received payment to a specific customer invoice.
-    """
-    payment = models.ForeignKey(
-        'Payment', on_delete=models.CASCADE, related_name='customer_applications', verbose_name=_("Payment")
-    )
-    invoice = models.ForeignKey(
-        CustomerInvoice, on_delete=models.PROTECT, related_name='applications', verbose_name=_("Invoice")
-    )
+    """Links a received Payment to a CustomerInvoice."""
+    payment = models.ForeignKey(Payment, on_delete=models.CASCADE, related_name='customer_applications', verbose_name=_("Payment"))
+    invoice = models.ForeignKey(CustomerInvoice, on_delete=models.CASCADE, related_name='applications', verbose_name=_("Invoice"))
     amount_applied = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Amount Applied"))
     application_date = models.DateField(auto_now_add=True, verbose_name=_("Application Date"))
-    
+
     class Meta:
         db_table = 'customer_payment_applications'
         verbose_name = _("Customer Payment Application")
@@ -2123,7 +2087,108 @@ class PeriodClosingAuditLog(models.Model):
         ordering = ['-action_timestamp']
 
     def __str__(self):
-        return f"{self.get_action_type_display()} on {self.financial_period} by {self.user} at {self.action_timestamp}"
+        return f"{self.get_action_type_display()} on {self.financial_period} by {self.user} at {self.timestamp}"
+
+
+# ==============================================================================
+#  NEW PERIOD CLOSING CHECKLIST MODEL
+# ==============================================================================
+
+class PeriodCloseChecklist(models.Model):
+    """
+    A checklist of mandatory tasks to be completed before a financial period can be closed.
+    An instance of this is automatically created for each FinancialPeriod.
+    """
+    financial_period = models.OneToOneField(
+        'FinancialPeriod',
+        on_delete=models.CASCADE,
+        related_name='checklist',
+        verbose_name=_("Financial Period")
+    )
+    # --- Checklist Flags ---
+    is_depreciation_run = models.BooleanField(
+        default=False, verbose_name=_("Depreciation Run"),
+        help_text=_("Has the monthly depreciation for all fixed assets been calculated and posted?")
+    )
+    is_overhead_posted = models.BooleanField(
+        default=False, verbose_name=_("Overhead Allocated"),
+        help_text=_("Has the manufacturing overhead been fully allocated and posted to WIP/FG?")
+    )
+    all_banks_reconciled = models.BooleanField(
+        default=False, verbose_name=_("Banks Reconciled"),
+        help_text=_("Have all bank accounts been reconciled for the period?")
+    )
+    no_draft_manual_jes = models.BooleanField(
+        default=False, verbose_name=_("No Draft JEs"),
+        help_text=_("Are there any manual journal entries still in 'Draft' status for this period?")
+    )
+    no_unposted_invoices = models.BooleanField(
+        default=False, verbose_name=_("No Unposted Invoices"),
+        help_text=_("Are there any supplier or customer invoices still in 'Draft' status for this period?")
+    )
+    # This is a placeholder for a more complex process, often done manually or with another system.
+    is_inventory_valuation_run = models.BooleanField(
+        default=True, verbose_name=_("Inventory Valuation Complete"),
+        help_text=_("Is the period-end inventory valuation process complete? (Default: True)")
+    )
+
+    class Meta:
+        verbose_name = _("Period Close Checklist")
+        verbose_name_plural = _("Period Close Checklists")
+
+    def __str__(self):
+        return f"Checklist for {self.financial_period.name}"
+
+    @property
+    def is_complete(self):
+        """Returns True if all checklist items are marked as complete."""
+        return all([
+            self.is_depreciation_run,
+            self.is_overhead_posted,
+            self.all_banks_reconciled,
+            self.no_draft_manual_jes,
+            self.no_unposted_invoices,
+            self.is_inventory_valuation_run,
+        ])
+
+
+class TransactionCorrection(models.Model):
+    """
+    An audit model that records when a transaction from a closed period is
+    corrected. This links the original transaction to the adjusting journal entry.
+    """
+    # Generic FK to the source document being corrected
+    content_type = models.ForeignKey(ContentType, on_delete=models.PROTECT)
+    object_id = models.PositiveIntegerField()
+    source_object = GenericForeignKey('content_type', 'object_id')
+
+    # The new JE that corrects the original transaction
+    adjusting_journal_entry = models.OneToOneField(
+        'JournalEntry',
+        on_delete=models.PROTECT,
+        related_name='correction_for',
+        verbose_name=_("Adjusting Journal Entry")
+    )
+
+    justification = models.TextField(verbose_name=_("Justification for Correction"))
+    corrected_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        verbose_name=_("Corrected By")
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Correction Timestamp"))
+
+    class Meta:
+        db_table = 'transaction_corrections'
+        verbose_name = _("Transaction Correction")
+        verbose_name_plural = _("Transaction Corrections")
+        ordering = ['-created_at']
+        permissions = [
+            ("can_create_transaction_correction", "Can create transaction corrections for posted documents"),
+        ]
+
+    def __str__(self):
+        return f"Correction for {self.source_object} created at {self.created_at.strftime('%Y-%m-%d %H:%M')}"
 
 
 # ==============================================================================
@@ -2215,3 +2280,98 @@ class BankStatementLine(models.Model):
 
     def __str__(self):
         return f"{self.transaction_date}: {self.description} ({self.amount})"
+
+
+# ==============================================================================
+#  OPENING BALANCE MIGRATION MODELS
+# ==============================================================================
+
+class OpeningBalanceEntry(models.Model):
+    """
+    Header for an opening balance data migration event.
+    """
+    class Status(models.TextChoices):
+        DRAFT = 'draft', _("Draft")
+        POSTED = 'posted', _("Posted")
+
+    name = models.CharField(max_length=255, verbose_name=_("Migration Name / Event"))
+    migration_date = models.DateField(verbose_name=_("Migration Go-Live Date"))
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.DRAFT, verbose_name=_("Status"))
+    journal_entry = models.OneToOneField(
+        'JournalEntry',
+        on_delete=models.PROTECT,
+        null=True, blank=True,
+        related_name='opening_balance_entry',
+        verbose_name=_("Resulting Journal Entry")
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    posted_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'opening_balance_entries'
+        verbose_name = _("Opening Balance Entry")
+        verbose_name_plural = _("Opening Balance Entries")
+        ordering = ['-migration_date']
+
+    def __str__(self):
+        return self.name
+
+class OpeningBalanceEntryLine(models.Model):
+    """
+    A single line in an opening balance entry, corresponding to one GL account.
+    This line can be broken down into multiple sub-ledger entries.
+    """
+    class EntryType(models.TextChoices):
+        DEBIT = 'debit', _("Debit")
+        CREDIT = 'credit', _("Credit")
+
+    opening_balance_entry = models.ForeignKey(
+        OpeningBalanceEntry,
+        on_delete=models.CASCADE,
+        related_name='lines',
+        verbose_name=_("Opening Balance Entry")
+    )
+    account = models.ForeignKey(
+        'Account',
+        on_delete=models.PROTECT,
+        related_name='opening_balance_lines',
+        verbose_name=_("GL Account")
+    )
+    entry_type = models.CharField(max_length=6, choices=EntryType.choices, verbose_name=_("Entry Type"))
+    total_amount = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Total Amount for this Account"))
+
+    class Meta:
+        db_table = 'opening_balance_entry_lines'
+        verbose_name = _("Opening Balance Entry Line")
+        verbose_name_plural = _("Opening Balance Entry Lines")
+        unique_together = ('opening_balance_entry', 'account')
+
+    def __str__(self):
+        return f"{self.account} - {self.total_amount} ({self.get_entry_type_display()})"
+
+class OpeningBalanceSubLedgerDetail(models.Model):
+    """
+    Links a specific sub-ledger record (like a Customer or a specific batch of inventory)
+    to an opening balance line, detailing how the total amount is composed.
+    """
+    line = models.ForeignKey(
+        OpeningBalanceEntryLine,
+        on_delete=models.CASCADE,
+        related_name='sub_ledger_details',
+        verbose_name=_("Opening Balance Line")
+    )
+    amount = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Amount for this Sub-Ledger item"))
+
+    # Generic Foreign Key to the source sub-ledger record
+    content_type = models.ForeignKey(ContentType, on_delete=models.PROTECT)
+    object_id = models.PositiveIntegerField()
+    sub_ledger_object = GenericForeignKey('content_type', 'object_id')
+
+    class Meta:
+        db_table = 'opening_balance_sub_ledger_details'
+        verbose_name = _("Opening Balance Sub-Ledger Detail")
+        verbose_name_plural = _("Opening Balance Sub-Ledger Details")
+        unique_together = ('line', 'content_type', 'object_id')
+
+    def __str__(self):
+        return f"{self.sub_ledger_object}: {self.amount}"
