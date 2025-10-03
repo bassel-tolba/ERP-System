@@ -3,7 +3,7 @@
 from decimal import Decimal
 from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
-from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db.models import Q, Sum
@@ -68,6 +68,13 @@ class Product(models.Model):
     override_sales_revenue_account = models.ForeignKey(
         'Account', on_delete=models.SET_NULL, null=True, blank=True,
         related_name='+', verbose_name=_("Override Sales Revenue Account")
+    )
+
+    # --- NEW FIELD ---
+    is_amortizable = models.BooleanField(
+        default=False,
+        verbose_name=_("Is Amortizable"),
+        help_text=_("If checked, consuming this item will create a prepaid asset to be amortized over time.")
     )
 
     class Meta:
@@ -767,16 +774,16 @@ class FixedAsset(models.Model):
 
 class InventoryConsumption(models.Model):
     class Department(models.TextChoices):
-        PRODUCTION = 'production', _("Production")
-        ENGINEERING = 'engineering', _("Engineering and Maintenance")
-        ADMIN = 'admin', _("Administration")
-        QC = 'qc', _("Quality Control")
-        OTHER = 'other', _("Other")
+        PRODUCTION = 'Production', _('Production')
+        ENGINEERING = 'Engineering', _('Engineering')
+        QUALITY_CONTROL = 'Quality Control', _('Quality Control')
+        WAREHOUSE = 'Warehouse', _('Warehouse')
         
     # --- NEW: Consumption Type for Capitalization vs. Expense ---
     class ConsumptionType(models.TextChoices):
-        EXPENSE = 'expense', _('Expense (Repair)')
-        CAPITALIZE = 'capitalize', _('Capitalize (Enhancement)')
+        EXPENSE = 'Expense', _('Expense')
+        CAPITALIZE = 'Capitalize', _('Capitalize')
+        AMORTIZE = 'Amortize', _('Amortize')
 
     product = models.ForeignKey(
         Product,
@@ -811,6 +818,15 @@ class InventoryConsumption(models.Model):
         'FixedAsset', on_delete=models.SET_NULL, null=True, blank=True,
         related_name='consumptions', verbose_name=_("Target Fixed Asset (if capitalized)")
     )
+    cost_pool = models.ForeignKey(
+        'CostPool',
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name='consumptions',
+        verbose_name=_("Direct Expense Cost Pool"),
+        help_text=_("For non-amortizable items, select a cost pool to directly expense this consumption to.")
+    )
     
     class Meta:
         db_table = 'inventory_consumptions'
@@ -819,19 +835,39 @@ class InventoryConsumption(models.Model):
         ordering = ['-consumption_date']
 
     def __str__(self):
-        return f"Consumed {self.quantity_consumed} of {self.product.name} by {self.get_department_display()}"
+        return f"{self.quantity_consumed} of {self.product.name} on {self.consumption_date.date()}"
     
     def clean(self):
-        # Enforce that a fixed asset must be selected if type is 'Capitalize'
-        if self.consumption_type == self.ConsumptionType.CAPITALIZE and not self.fixed_asset:
-            raise ValidationError({
-                'fixed_asset': _("A fixed asset must be selected when the consumption type is 'Capitalize'.")
-            })
-        # Enforce that MRO/Consumable products are used
-        if self.product and self.product.product_type not in [Product.ProductType.MRO, Product.ProductType.CONSUMABLE]:
-             raise ValidationError({
-                'product': _("Only MRO and Consumable products can be used in internal consumption.")
-            })
+        """
+        Custom validation to ensure that:
+        1. If consumption_type is 'Capitalize', a fixed_asset must be linked.
+        2. If consumption_type is 'Expense', the product must be of a suitable type.
+        3. If consumption_type is 'Amortize', the product must be marked as amortizable.
+        """
+        # Validation 1: Capitalization requires a fixed asset
+        if self.consumption_type == self.ConsumptionType.CAPITALIZE:
+            if not self.fixed_asset:
+                raise ValidationError(
+                    {'fixed_asset': _("A fixed asset must be selected when capitalizing consumption.")}
+                )
+        # Validation 2: Expense consumption is only for certain product types
+        elif self.consumption_type == self.ConsumptionType.EXPENSE:
+            allowed_types = [
+                Product.ProductType.MRO,
+            ]
+            if self.product and self.product.product_type not in allowed_types:
+                raise ValidationError(
+                    _("Internal consumption as an expense is only allowed for 'MRO' product types. '%(product_name)s' is a '%(product_type)s'.") % {
+                        'product_name': self.product.name,
+                        'product_type': self.product.get_product_type_display()
+                    }
+                )
+        # Validation 3: Amortization requires an amortizable product
+        elif self.consumption_type == self.ConsumptionType.AMORTIZE:
+            if not self.product or not self.product.is_amortizable:
+                raise ValidationError(
+                    {'consumption_type': _("The 'Amortize' consumption type can only be used with products marked as amortizable.")}
+                )
 
 
 class ExpenseLog(models.Model):
@@ -1456,6 +1492,27 @@ class GeneralAccountingSettings(models.Model):
         help_text=_("The asset account for tracking money given to employees."),
         null=True, blank=True
     )
+    # --- NEW FIELDS FOR ADVANCED TRANSACTIONS ---
+    customer_deposits_account = models.ForeignKey(
+        Account, on_delete=models.PROTECT, related_name='+', null=True, blank=True,
+        verbose_name=_("Customer Deposits / Deferred Revenue Account")
+    )
+    sales_returns_account = models.ForeignKey(
+        Account, on_delete=models.PROTECT, related_name='+', null=True, blank=True,
+        verbose_name=_("Sales Returns & Allowances Account")
+    )
+    prepaid_expenses_account = models.ForeignKey(
+        Account, on_delete=models.PROTECT, related_name='+', null=True, blank=True,
+        verbose_name=_("Prepaid Expenses Account")
+    )
+    accrued_expenses_account = models.ForeignKey(
+        Account, on_delete=models.PROTECT, related_name='+', null=True, blank=True,
+        verbose_name=_("Accrued Expenses Account")
+    )
+    damaged_goods_expense_account = models.ForeignKey(
+        Account, on_delete=models.PROTECT, related_name='+', null=True, blank=True,
+        verbose_name=_("Damaged Goods / Scrap Expense Account")
+    )
 
     class Meta:
         db_table = 'general_accounting_settings'
@@ -1590,7 +1647,9 @@ class InventoryAdjustment(models.Model):
         InventoryCount,
         on_delete=models.CASCADE,
         related_name='adjustments',
-        verbose_name=_("Inventory Count Event")
+        verbose_name=_("Inventory Count Event"),
+        null=True, # Allow adjustments outside of a formal count
+        blank=True
     )
 
     class Meta:
@@ -1716,8 +1775,9 @@ class AllocationDriver(models.Model):
 
 class OverheadAllocationRun(models.Model):
     """
-    Records the execution and results of an overhead allocation for a specific period.
-    This creates an auditable snapshot of the entire calculation.
+    Represents a single run of the overhead allocation process for a given
+    financial period and cost pool. This model captures the allocation rate
+    and the total amount allocated.
     """
     class Status(models.TextChoices):
         PENDING = 'pending', _('Pending')
@@ -1769,7 +1829,189 @@ class OverheadAllocationRun(models.Model):
         unique_together = ('financial_period', 'cost_pool')
 
     def __str__(self):
-        return f"Allocation for {self.cost_pool.name} in {self.financial_period.name}"
+        return f"Run for {self.cost_pool.name} in {self.financial_period.name} ({self.get_status_display()})"
+
+
+# ==============================================================================
+#  NEW ADJUSTING ENTRIES MODELS (PREPAID & ACCRUED)
+# ==============================================================================
+
+class CostPoolSplit(models.Model):
+    """
+    A generic linking table to split the cost of a source object (like a
+    PrepaidExpense or AccruedExpense) across multiple cost pools by percentage.
+    """
+    percentage = models.DecimalField(
+        max_digits=5, decimal_places=2, verbose_name=_("Percentage"),
+        help_text=_("The percentage of the cost to allocate to this pool (e.g., 70.50).")
+    )
+    cost_pool = models.ForeignKey(
+        CostPool, on_delete=models.CASCADE, related_name='splits', verbose_name=_("Cost Pool")
+    )
+
+    # Generic Foreign Key to the source (PrepaidExpense, AccruedExpense, etc.)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    source_object = GenericForeignKey('content_type', 'object_id')
+
+    class Meta:
+        verbose_name = _("Cost Pool Split")
+        verbose_name_plural = _("Cost Pool Splits")
+        unique_together = ('content_type', 'object_id', 'cost_pool')
+
+    def __str__(self):
+        return f"{self.percentage}% to {self.cost_pool.name} for {self.source_object}"
+
+    def clean(self):
+        # Ensure percentages for a single source object do not exceed 100%
+        with transaction.atomic():
+            siblings = CostPoolSplit.objects.filter(
+                content_type=self.content_type,
+                object_id=self.object_id
+            ).exclude(id=self.id)
+            total_percentage = siblings.aggregate(total=Sum('percentage'))['total'] or Decimal('0.0')
+            if total_percentage + self.percentage > 100:
+                raise ValidationError(_("The total percentage for this item cannot exceed 100%."))
+
+
+class PrepaidExpense(models.Model):
+    """
+    Represents a prepaid asset, which will be amortized over time.
+    This is the Prepaid Expenses Sub-Ledger.
+    """
+    class Status(models.TextChoices):
+        ACTIVE = 'active', _("Active")
+        FULLY_AMORTIZED = 'amortized', _("Fully Amortized")
+        WRITTEN_OFF = 'written_off', _("Written Off")
+
+    total_amount = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Total Prepaid Amount"))
+    amortization_start_date = models.DateField(verbose_name=_("Amortization Start Date"))
+    amortization_end_date = models.DateField(verbose_name=_("Amortization End Date"))
+    expense_account = models.ForeignKey(
+        Account, on_delete=models.PROTECT, related_name='+',
+        verbose_name=_("Target Expense Account"),
+        help_text=_("The expense account to debit during amortization (e.g., Insurance Expense).")
+    )
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.ACTIVE, verbose_name=_("Status"))
+    notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
+
+    # Link to the source of the prepaid asset
+    source_consumption = models.OneToOneField(
+        InventoryConsumption, on_delete=models.PROTECT, null=True, blank=True,
+        related_name='prepaid_expense', verbose_name=_("Source Inventory Consumption")
+    )
+    source_payment = models.OneToOneField(
+        Payment, on_delete=models.PROTECT, null=True, blank=True,
+        related_name='prepaid_expense', verbose_name=_("Source Payment")
+    )
+
+    # Generic relation for cost pool splits
+    cost_pool_splits = GenericRelation(CostPoolSplit)
+
+    class Meta:
+        verbose_name = _("Prepaid Expense")
+        verbose_name_plural = _("Prepaid Expenses")
+
+    def __str__(self):
+        return f"Prepaid Asset ({self.total_amount}) starting {self.amortization_start_date}"
+
+    @property
+    def remaining_balance(self):
+        amortized_so_far = self.amortization_logs.aggregate(total=Sum('amount'))['total'] or Decimal('0.0')
+        return self.total_amount - amortized_so_far
+
+
+class AmortizationLog(models.Model):
+    """
+    Logs a single amortization event for a prepaid asset for a specific period.
+    """
+    prepaid_expense = models.ForeignKey(
+        PrepaidExpense, on_delete=models.CASCADE, related_name='amortization_logs', verbose_name=_("Prepaid Expense")
+    )
+    financial_period = models.ForeignKey(
+        FinancialPeriod, on_delete=models.PROTECT, related_name='amortization_logs', verbose_name=_("Financial Period")
+    )
+    amount = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Amortized Amount"))
+    journal_entry = models.ForeignKey(
+        'JournalEntry', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='+', verbose_name=_("Amortization Journal Entry")
+    )
+
+    class Meta:
+        verbose_name = _("Amortization Log")
+        verbose_name_plural = _("Amortization Logs")
+        unique_together = ('prepaid_expense', 'financial_period')
+
+    def __str__(self):
+        return f"Amortization of {self.amount} for {self.prepaid_expense} in {self.financial_period.name}"
+
+
+class AccruedExpense(models.Model):
+    """
+    Represents a recurring expense that is estimated and booked monthly,
+    to be trued-up later when an invoice arrives.
+    """
+    class Status(models.TextChoices):
+        ACTIVE = 'active', _("Active")
+        INACTIVE = 'inactive', _("Inactive")
+
+    description = models.CharField(max_length=255, verbose_name=_("Expense Description"))
+    estimated_monthly_amount = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Estimated Monthly Amount"))
+    target_expense_account = models.ForeignKey(
+        Account, on_delete=models.PROTECT, related_name='+',
+        verbose_name=_("Target Expense Account"),
+        help_text=_("The expense account to debit during the monthly accrual (e.g., Utilities Expense).")
+    )
+    target_liability_account = models.ForeignKey(
+        Account, on_delete=models.PROTECT, related_name='+',
+        verbose_name=_("Target Accrual Liability Account"),
+        help_text=_("The liability account to credit (e.g., Accrued Expenses Payable).")
+    )
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.ACTIVE, verbose_name=_("Status"))
+
+    # Generic relation for cost pool splits
+    cost_pool_splits = GenericRelation(CostPoolSplit)
+
+    class Meta:
+        verbose_name = _("Accrued Expense")
+        verbose_name_plural = _("Accrued Expenses")
+
+    def __str__(self):
+        return f"Accrual: {self.description} (~{self.estimated_monthly_amount}/month)"
+
+
+class AccrualLog(models.Model):
+    """
+    Logs a single accrual event for a recurring expense for a specific period.
+    """
+    accrued_expense = models.ForeignKey(
+        AccruedExpense, on_delete=models.CASCADE, related_name='accrual_logs', verbose_name=_("Accrued Expense")
+    )
+    financial_period = models.ForeignKey(
+        FinancialPeriod, on_delete=models.PROTECT, related_name='accrual_logs', verbose_name=_("Financial Period")
+    )
+    amount = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Accrued Amount"))
+    journal_entry = models.ForeignKey(
+        'JournalEntry', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='+', verbose_name=_("Accrual Journal Entry")
+    )
+    # --- NEW FIELDS FOR TRUE-UP ---
+    settling_invoice = models.ForeignKey(
+        'SupplierInvoice', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='settled_accruals', verbose_name=_("Settling Invoice")
+    )
+    true_up_journal_entry = models.ForeignKey(
+        'JournalEntry', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='+', verbose_name=_("True-Up Journal Entry")
+    )
+
+    class Meta:
+        verbose_name = _("Accrual Log")
+        verbose_name_plural = _("Accrual Logs")
+        unique_together = ('accrued_expense', 'financial_period')
+
+    def __str__(self):
+        return f"Accrual of {self.amount} for {self.accrued_expense} in {self.financial_period.name}"
 
 
 # ==============================================================================
@@ -1981,9 +2223,59 @@ class CustomerPaymentApplication(models.Model):
     application_date = models.DateField(auto_now_add=True, verbose_name=_("Application Date"))
 
     class Meta:
-        db_table = 'customer_payment_applications'
-        verbose_name = _("Customer Payment Application")
-        verbose_name_plural = _("Customer Payment Applications")
+        unique_together = ('payment', 'invoice')
+
+class CustomerCreditMemo(models.Model):
+    class Status(models.TextChoices):
+        DRAFT = 'draft', _('Draft')
+        OPEN = 'open', _('Open')
+        PARTIALLY_APPLIED = 'partially_applied', _('Partially Applied')
+        APPLIED = 'applied', _('Applied')
+
+    customer = models.ForeignKey(Customer, on_delete=models.PROTECT, related_name='credit_memos')
+    memo_number = models.CharField(max_length=100, unique=True)
+    memo_date = models.DateField()
+    total_amount = models.DecimalField(max_digits=14, decimal_places=3)
+    unapplied_amount = models.DecimalField(max_digits=14, decimal_places=3)
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.OPEN)
+    notes = models.TextField(blank=True, null=True)
+    # Link to the source of the credit, e.g., a Sales Return
+    content_type = models.ForeignKey(ContentType, on_delete=models.SET_NULL, null=True)
+    object_id = models.PositiveIntegerField(null=True)
+    source_object = GenericForeignKey('content_type', 'object_id')
+
+    def save(self, *args, **kwargs):
+        if not self.pk: # On creation
+            self.unapplied_amount = self.total_amount
+        super().save(*args, **kwargs)
+
+
+class SalesReturn(models.Model):
+    class Status(models.TextChoices):
+        PENDING_INSPECTION = 'pending', _('Pending Inspection')
+        COMPLETED = 'completed', _('Completed')
+
+    customer = models.ForeignKey(Customer, on_delete=models.PROTECT, related_name='sales_returns')
+    return_date = models.DateField()
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING_INSPECTION)
+    # Optional link to original SO for traceability
+    sales_order = models.ForeignKey(SalesOrder, on_delete=models.SET_NULL, null=True, blank=True)
+
+class SalesReturnItem(models.Model):
+    class Disposition(models.TextChoices):
+        RETURN_TO_STOCK = 'stock', _('Return to Stock')
+        SCRAP = 'scrap', _('Scrap')
+
+    sales_return = models.ForeignKey(SalesReturn, on_delete=models.CASCADE, related_name='items')
+    # Link to the original dispatch to get cost and product info
+    original_dispatch = models.OneToOneField(FinishedProductDispatch, on_delete=models.PROTECT)
+    quantity_returned = models.FloatField()
+    disposition = models.CharField(max_length=20, choices=Disposition.choices, null=True, blank=True)
+    # The JE that reverses the COGS for this item
+    reversing_journal_entry = models.ForeignKey(JournalEntry, on_delete=models.SET_NULL, null=True, blank=True)
+
+
+
 
 class BankTransfer(models.Model):
     """
@@ -2096,41 +2388,35 @@ class PeriodClosingAuditLog(models.Model):
 
 class PeriodCloseChecklist(models.Model):
     """
-    A checklist of mandatory tasks to be completed before a financial period can be closed.
-    An instance of this is automatically created for each FinancialPeriod.
+    A comprehensive checklist to guide and validate the period-closing process.
+    Each financial period will have one instance of this model.
     """
     financial_period = models.OneToOneField(
-        'FinancialPeriod',
-        on_delete=models.CASCADE,
-        related_name='checklist',
-        verbose_name=_("Financial Period")
+        FinancialPeriod, on_delete=models.CASCADE,
+        related_name='checklist', verbose_name=_("Financial Period")
     )
-    # --- Checklist Flags ---
-    is_depreciation_run = models.BooleanField(
-        default=False, verbose_name=_("Depreciation Run"),
-        help_text=_("Has the monthly depreciation for all fixed assets been calculated and posted?")
-    )
-    is_overhead_posted = models.BooleanField(
-        default=False, verbose_name=_("Overhead Allocated"),
-        help_text=_("Has the manufacturing overhead been fully allocated and posted to WIP/FG?")
-    )
-    all_banks_reconciled = models.BooleanField(
-        default=False, verbose_name=_("Banks Reconciled"),
-        help_text=_("Have all bank accounts been reconciled for the period?")
-    )
-    no_draft_manual_jes = models.BooleanField(
-        default=False, verbose_name=_("No Draft JEs"),
-        help_text=_("Are there any manual journal entries still in 'Draft' status for this period?")
-    )
-    no_unposted_invoices = models.BooleanField(
-        default=False, verbose_name=_("No Unposted Invoices"),
-        help_text=_("Are there any supplier or customer invoices still in 'Draft' status for this period?")
-    )
-    # This is a placeholder for a more complex process, often done manually or with another system.
+
+    # --- Calculated Flags (updated by services) ---
+    all_banks_reconciled = models.BooleanField(default=False, verbose_name=_("All Bank Accounts Reconciled"))
+    no_draft_manual_jes = models.BooleanField(default=False, verbose_name=_("No Draft Manual Journal Entries"))
+    no_unposted_invoices = models.BooleanField(default=False, verbose_name=_("No Unposted Invoices"))
+
+    # --- Process Flags (updated by running the specific process) ---
+    is_depreciation_run = models.BooleanField(default=False, verbose_name=_("Monthly Depreciation Has Been Run"))
+    is_overhead_posted = models.BooleanField(default=False, verbose_name=_("Overhead Allocation Has Been Posted"))
     is_inventory_valuation_run = models.BooleanField(
-        default=True, verbose_name=_("Inventory Valuation Complete"),
-        help_text=_("Is the period-end inventory valuation process complete? (Default: True)")
+        default=True, verbose_name=_("Inventory Valuation is Finalized"),
+        help_text=_("This is assumed to be true as valuation is perpetual.")
     )
+    is_amortization_run = models.BooleanField(default=False, verbose_name=_("Prepaid Expense Amortization Has Been Run"))
+    is_accruals_run = models.BooleanField(default=False, verbose_name=_("Expense Accruals Have Been Run"))
+
+
+    # --- Manual Review Flags (to be checked by an accountant) ---
+    is_ar_aging_reviewed = models.BooleanField(default=False, verbose_name=_("A/R Aging Report Reviewed"))
+    is_ap_aging_reviewed = models.BooleanField(default=False, verbose_name=_("A/P Aging Report Reviewed"))
+    is_inventory_reconciled = models.BooleanField(default=False, verbose_name=_("Inventory Reconciliation Reviewed"))
+    is_fixed_assets_reviewed = models.BooleanField(default=False, verbose_name=_("Fixed Assets Review Completed"))
 
     class Meta:
         verbose_name = _("Period Close Checklist")

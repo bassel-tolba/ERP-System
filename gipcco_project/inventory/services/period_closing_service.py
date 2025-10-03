@@ -2,8 +2,51 @@
 
 from django.db.models import Q
 from ..models import (
-    FinancialPeriod, BankReconciliation, JournalEntry, SupplierInvoice, CustomerInvoice, BankAccount, PeriodCloseChecklist
+    FinancialPeriod, BankReconciliation, JournalEntry, SupplierInvoice, CustomerInvoice, BankAccount, PeriodCloseChecklist,
+    OverheadAllocationRun
 )
+from . import accounting_service
+from .accounting_service import run_monthly_depreciation
+from .overhead_service import execute_overhead_allocation_run, apply_overhead_to_finished_goods
+from .adjusting_entries_service import run_monthly_amortization, run_monthly_accruals
+
+
+def run_all_period_end_tasks(period: FinancialPeriod):
+    """
+    Master orchestrator for all automated period-end financial tasks.
+    This ensures a logical and auditable sequence of operations.
+    """
+    # 1. Run Amortization for Prepaid Expenses
+    run_monthly_amortization(period)
+
+    # 2. Run Accruals for recurring expenses
+    run_monthly_accruals(period)
+
+    # 3. Run Depreciation for Fixed Assets
+    run_monthly_depreciation(period)
+
+    # 4. Run all Overhead Allocations
+    # Find all top-level cost pools to initiate runs
+    allocation_runs = OverheadAllocationRun.objects.filter(financial_period=period)
+    for run in allocation_runs:
+        if run.status == OverheadAllocationRun.Status.PENDING:
+            execute_overhead_allocation_run(run)
+            run.refresh_from_db()
+        
+        if run.status == OverheadAllocationRun.Status.CALCULATED:
+            # This service creates the first JE (Expenses -> WIP)
+            accounting_service.create_je_for_overhead_allocation(run)
+            run.refresh_from_db()
+
+        if run.status == OverheadAllocationRun.Status.POSTED:
+            # This service applies cost to FG receipts
+            total_applied_cost = apply_overhead_to_finished_goods(run)
+            # This service creates the second JE (WIP -> FG)
+            accounting_service.create_je_for_overhead_application(run, total_applied_cost)
+
+    # 5. Update the Period Close Checklist with the final calculated values
+    update_checklist_for_period(period)
+
 
 def update_checklist_for_period(period: FinancialPeriod):
     """
@@ -49,8 +92,8 @@ def update_checklist_for_period(period: FinancialPeriod):
     ).exists()
     checklist.no_unposted_invoices = not unposted_supplier_invoices and not unposted_customer_invoices
 
-    # Note: is_depreciation_run and is_overhead_posted are updated by their respective services.
-    # is_inventory_valuation_run is a placeholder and defaults to True.
+    # Note: is_depreciation_run, is_overhead_posted, is_amortization_run, and is_accruals_run
+    # are updated by their respective services. This function just reads their final state.
 
     # Save the entire object. The checklist object was loaded from the DB,
     # so it already contains the correct state for the manually-set flags.

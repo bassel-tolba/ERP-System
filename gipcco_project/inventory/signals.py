@@ -5,12 +5,15 @@ import logging
 from django.db.models.signals import post_save, post_delete, pre_save, pre_delete
 from django.dispatch import receiver
 from django.contrib.contenttypes.models import ContentType
+from django.utils import timezone
 
 from .models import (
     FinishedProductDispatch, FinishedProductReceipt, InventoryLog, JournalEntry,
     Batch, InventoryConsumption, ProductionReturn, Payment, BankTransfer,
     DepreciationLog, InventoryAdjustment, EmployeeAdvance, EmployeeAdvanceSettlement,
-    FinancialPeriod, PeriodCloseChecklist
+    FinancialPeriod, PeriodCloseChecklist,
+    # --- NEW IMPORTS ---
+    PrepaidExpense, ExpenseLog, AmortizationLog, AccrualLog
 )
 from .services.accounting_service import (
     _check_period_is_open, # Import the gatekeeper function
@@ -25,7 +28,10 @@ from .services.accounting_service import (
     create_je_for_bank_transfer,
     create_je_for_depreciation, # <-- IMPORT NEW SERVICE
     create_je_for_inventory_adjustment,
-    create_je_for_employee_advance
+    create_je_for_employee_advance,
+    # --- NEW IMPORTS ---
+    create_je_for_amortization,
+    create_je_for_accrual
 )
 
 logger = logging.getLogger(__name__)
@@ -121,33 +127,70 @@ def handle_batch_save(sender, instance: Batch, created, **kwargs):
     create_je_for_production_consumption(batch=instance)
 
 
-@receiver(post_delete, sender=Batch)
-def handle_batch_deletion(sender, instance: Batch, **kwargs):
-    """Deletes the associated Journal Entry when a Batch is deleted."""
-    try:
-        content_type = ContentType.objects.get_for_model(instance)
-        JournalEntry.objects.filter(content_type=content_type, object_id=instance.id).delete()
-        logger.info(f"Deleted Journal Entry/Entries associated with deleted Batch ID {instance.id}.")
-    except Exception as e:
-        logger.error(f"Error deleting Journal Entry for Batch ID {instance.id}: {e}")
+@receiver(pre_save, sender=InventoryConsumption)
+def set_consumption_type_for_amortizable(sender, instance: InventoryConsumption, **kwargs):
+    """
+    Automatically set the consumption type to AMORTIZE if the product is amortizable
+    and the type isn't already set to something else (like CAPITALIZE).
+    """
+    if instance.pk is None: # Only on creation
+        if instance.product and instance.product.is_amortizable and instance.consumption_type == InventoryConsumption.ConsumptionType.EXPENSE:
+            instance.consumption_type = InventoryConsumption.ConsumptionType.AMORTIZE
 
 
 @receiver(post_save, sender=InventoryConsumption)
 def handle_internal_consumption_save(sender, instance: InventoryConsumption, created, **kwargs):
     """
     Listens for an InventoryConsumption to be saved and triggers the creation of a 
-    Journal Entry. Also handles capitalization logic.
+    Journal Entry. Also handles capitalization, direct expense logging, and prepaid asset creation.
     """
     if created:
+        # The JE is always created, moving value from inventory to its next stage (Asset, Prepaid, or Expense)
         create_je_for_internal_consumption(consumption=instance)
         
-        # --- NEW: Handle capitalization ---
+        # --- WORKFLOW ROUTER ---
+        
+        # Path A: Capitalize the cost to a fixed asset
         if instance.consumption_type == InventoryConsumption.ConsumptionType.CAPITALIZE and instance.fixed_asset:
             asset = instance.fixed_asset
             cost_to_capitalize = instance.cost_at_consumption
             asset.purchase_cost += cost_to_capitalize
             asset.save(update_fields=['purchase_cost'])
             logger.info(f"Capitalized {cost_to_capitalize} to Fixed Asset {asset.asset_tag}. New cost: {asset.purchase_cost}")
+
+        # Path B: Create a Prepaid Expense for an amortizable item
+        elif instance.consumption_type == InventoryConsumption.ConsumptionType.AMORTIZE:
+            # This assumes a default amortization period. This should be configured elsewhere or set manually.
+            # For now, we'll use a placeholder of 12 months.
+            start_date = instance.consumption_date.date()
+            end_date = start_date + timezone.timedelta(days=364) # 1 year
+            
+            # The expense account is typically the same one that would have been used for a direct expense.
+            from .services.accounting_service import _get_product_expense_account
+            expense_account = _get_product_expense_account(instance.product)
+
+            PrepaidExpense.objects.create(
+                total_amount=instance.cost_at_consumption,
+                amortization_start_date=start_date,
+                amortization_end_date=end_date,
+                expense_account=expense_account,
+                source_consumption=instance,
+                notes=f"Created from consumption of '{instance.product.name}' on {start_date}."
+            )
+            logger.info(f"Created PrepaidExpense asset from consumption ID {instance.id}.")
+
+        # Path C: Create a direct ExpenseLog for overhead allocation
+        elif instance.cost_pool:
+            ExpenseLog.objects.create(
+                description=f"Direct consumption of '{instance.product.name}'",
+                expense_date=instance.consumption_date.date(),
+                amount=instance.cost_at_consumption,
+                category=ExpenseLog.Category.MAINTENANCE, # Or determine category dynamically
+                classification=ExpenseLog.Classification.MANUFACTURING_OVERHEAD,
+                cost_pool=instance.cost_pool,
+                notes=f"Source: InventoryConsumption ID {instance.id}"
+            )
+            logger.info(f"Created direct ExpenseLog for consumption ID {instance.id} in cost pool '{instance.cost_pool.name}'.")
 
 
 @receiver(post_delete, sender=InventoryConsumption)
@@ -288,6 +331,44 @@ def handle_depreciation_log_deletion(sender, instance: DepreciationLog, **kwargs
         logger.info(f"Deleted Journal Entry/Entries associated with deleted DepreciationLog ID {instance.id}.")
     except Exception as e:
         logger.error(f"Error deleting Journal Entry for DepreciationLog ID {instance.id}: {e}")
+
+
+# --- NEW SIGNALS FOR ADJUSTING ENTRIES ---
+@receiver(post_save, sender=AmortizationLog)
+def handle_amortization_log_save(sender, instance: AmortizationLog, created, **kwargs):
+    """
+    Listens for an AmortizationLog to be saved and triggers the creation of a
+    Journal Entry. This is called by the period-end service.
+    """
+    if created and not instance.journal_entry:
+        create_je_for_amortization(amortization_log=instance)
+
+@receiver(post_delete, sender=AmortizationLog)
+def handle_amortization_log_delete(sender, instance: AmortizationLog, **kwargs):
+    """Deletes the associated JE when an AmortizationLog is deleted."""
+    try:
+        if instance.journal_entry:
+            instance.journal_entry.delete()
+    except Exception as e:
+        logger.error(f"Error deleting Journal Entry for AmortizationLog ID {instance.id}: {e}")
+
+@receiver(post_save, sender=AccrualLog)
+def handle_accrual_log_save(sender, instance: AccrualLog, created, **kwargs):
+    """
+    Listens for an AccrualLog to be saved and triggers the creation of a
+    Journal Entry. This is called by the period-end service.
+    """
+    if created and not instance.journal_entry:
+        create_je_for_accrual(accrual_log=instance)
+
+@receiver(post_delete, sender=AccrualLog)
+def handle_accrual_log_delete(sender, instance: AccrualLog, **kwargs):
+    """Deletes the associated JE when an AccrualLog is deleted."""
+    try:
+        if instance.journal_entry:
+            instance.journal_entry.delete()
+    except Exception as e:
+        logger.error(f"Error deleting Journal Entry for AccrualLog ID {instance.id}: {e}")
 
 
 @receiver(post_save, sender=InventoryAdjustment)

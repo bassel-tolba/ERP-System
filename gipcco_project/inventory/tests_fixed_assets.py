@@ -19,20 +19,6 @@ class TestFixedAssets(AccountingServiceBaseTestCase):
         # Clear journal entries to ensure test isolation
         JournalEntry.objects.all().delete()
         
-        # Add specific accounts for fixed assets if they don't exist in the base setup
-        self.accounts['101'] = Account.objects.get_or_create(
-            code='101', name='الأصول الثابتة', account_type=Account.AccountType.ASSET, parent=self.accounts['100']
-        )[0]
-        self.accounts['10101'] = Account.objects.get_or_create(
-            code='10101', name='آلات ومعدات', account_type=Account.AccountType.ASSET, parent=self.accounts['101']
-        )[0]
-        self.accounts['20205'] = Account.objects.get_or_create(
-            code='20205', name='مجمع الإهلاك', account_type=Account.AccountType.LIABILITY, parent=self.accounts['202']
-        )[0]
-        self.accounts['50205'] = Account.objects.get_or_create(
-            code='50205', name='مصروف الإهلاك', account_type=Account.AccountType.EXPENSE, parent=self.accounts['502']
-        )[0]
-
         self.asset = FixedAsset.objects.create(
             asset_tag="MACHINE-001",
             name="Production Filling Machine",
@@ -118,7 +104,10 @@ class TestFixedAssets(AccountingServiceBaseTestCase):
                 fixed_asset=None # Missing asset
             ).clean()
         
-        self.assertIn('fixed_asset', context.exception.message_dict)
+        # --- FIX: Use a more robust way to check for the error ---
+        # This is better than checking message_dict, which might not exist
+        # if the validation error is raised with a single string.
+        self.assertIn('fixed_asset', str(context.exception))
 
     def test_depreciation_log_and_je_creation(self):
         """

@@ -1267,3 +1267,1979 @@ INFO 2025-09-30 18:47:37,311 django.server basehttp 692 17740 "GET /financials/j
 INFO 2025-09-30 18:47:45,899 django.server basehttp 692 17740 "GET /financials/journal/ HTTP/1.1" 200 3726
 INFO 2025-09-30 18:47:53,305 django.server basehttp 692 17740 "GET /financials/banking/ HTTP/1.1" 200 3593
 INFO 2025-09-30 18:47:56,709 django.server basehttp 692 17740 "GET /financials/fixed_assets/ HTTP/1.1" 200 3008
+INFO 2025-10-01 09:08:37,926 inventory.services.accounting_service accounting_service 5760 6300 Successfully created Journal Entry JE-1 for InventoryLog ID 1.
+WARNING 2025-10-01 09:08:37,930 inventory.services.accounting_service accounting_service 5760 6300 Attempted to create JE for Batch ID 1 with no items. Aborting.
+INFO 2025-10-01 09:08:37,936 inventory.signals signals 5760 6300 Deleted existing JE for updated Batch ID 1 to allow regeneration.
+INFO 2025-10-01 09:08:37,943 inventory.services.accounting_service accounting_service 5760 6300 Successfully created Journal Entry JE-2 for Batch ID 1.
+INFO 2025-10-01 09:08:37,954 inventory.services.accounting_service accounting_service 5760 6300 Successfully created Journal Entry JE-3 for FinishedProductReceipt ID 1.
+INFO 2025-10-01 09:08:37,970 inventory.services.accounting_service accounting_service 5760 6300 Successfully created JE-4 for FinishedProductDispatch ID 1.
+INFO 2025-10-01 09:08:37,978 inventory.services.accounting_service accounting_service 5760 6300 Successfully created JE-5 for supplier Payment ID 1.
+INFO 2025-10-01 09:08:37,989 inventory.services.accounting_service accounting_service 5760 6300 Successfully created JE-6 for DepreciationLog ID 1.
+INFO 2025-10-01 09:09:21,836 django.utils.autoreload autoreload 5016 388 Watching for file changes with StatReloader
+INFO 2025-10-01 09:09:23,747 django.server basehttp 5016 7520 "GET / HTTP/1.1" 200 28844
+INFO 2025-10-01 09:09:23,902 django.server basehttp 5016 6080 "GET /static/css/flatpickr.min.css HTTP/1.1" 200 16166
+INFO 2025-10-01 09:09:23,907 django.server basehttp 5016 6080 "GET /static/js/bootstrap.bundle.min.js HTTP/1.1" 200 80663
+INFO 2025-10-01 09:09:23,912 django.server basehttp 5016 6080 "GET /static/js/flatpickr.min.js HTTP/1.1" 200 50679
+INFO 2025-10-01 09:09:23,914 django.server basehttp 5016 7520 "GET /static/css/google-fonts.css HTTP/1.1" 200 12053
+INFO 2025-10-01 09:09:23,918 django.server basehttp 5016 7680 "GET /static/css/style.css HTTP/1.1" 200 19107
+INFO 2025-10-01 09:09:23,924 django.server basehttp 5016 6080 "GET /static/js/flatpickr.l10n.ar.js HTTP/1.1" 200 1928
+INFO 2025-10-01 09:09:23,924 django.server basehttp 5016 5400 "GET /static/css/bootstrap.rtl.css HTTP/1.1" 200 284704
+INFO 2025-10-01 09:09:23,925 django.server basehttp 5016 3628 "GET /static/css/bootstrap-icons.min.css HTTP/1.1" 200 85887
+INFO 2025-10-01 09:09:23,929 django.server basehttp 5016 2484 "GET /static/css/tom-select.bootstrap5.min.css HTTP/1.1" 200 15345
+INFO 2025-10-01 09:09:23,930 django.server basehttp 5016 7520 "GET /static/js/tom-select.complete.min.js HTTP/1.1" 200 50720
+INFO 2025-10-01 09:09:23,932 django.server basehttp 5016 6080 "GET /static/layout/js/create_batch_logic.js HTTP/1.1" 200 14297
+INFO 2025-10-01 09:09:23,936 django.server basehttp 5016 7680 "GET /static/layout/js/dashboard_logic.js HTTP/1.1" 200 8620
+INFO 2025-10-01 09:09:23,938 django.server basehttp 5016 5400 "GET /static/layout/js/records_logic.js HTTP/1.1" 200 7001
+INFO 2025-10-01 09:09:23,938 django.server basehttp 5016 3628 "GET /static/layout/js/batch_view_logic.js HTTP/1.1" 200 5237
+INFO 2025-10-01 09:09:23,941 django.server basehttp 5016 2484 "GET /static/layout/js/receive_finished_product_logic.js HTTP/1.1" 200 1812
+INFO 2025-10-01 09:09:23,946 django.server basehttp 5016 6080 "GET /static/layout/js/ledger_logic.js HTTP/1.1" 200 6663
+INFO 2025-10-01 09:09:23,949 django.server basehttp 5016 7680 "GET /static/layout/js/production_returns_logic.js HTTP/1.1" 200 3162
+INFO 2025-10-01 09:09:23,952 django.server basehttp 5016 6080 "GET /static/layout/js/expenses_page_logic.js HTTP/1.1" 200 2482
+INFO 2025-10-01 09:09:23,954 django.server basehttp 5016 7520 "GET /static/layout/js/shop_order_templates_logic.js HTTP/1.1" 200 5660
+INFO 2025-10-01 09:09:23,954 django.server basehttp 5016 3628 "GET /static/layout/js/batch_production_variance_report_logic.js HTTP/1.1" 200 3266
+INFO 2025-10-01 09:09:23,956 django.server basehttp 5016 5400 "GET /static/layout/js/visuals_logic.js HTTP/1.1" 200 7357
+INFO 2025-10-01 09:09:23,959 django.server basehttp 5016 2484 "GET /static/layout/js/manage_expenses_logic.js HTTP/1.1" 200 2926
+INFO 2025-10-01 09:09:23,960 django.server basehttp 5016 6080 "GET /static/layout/js/purchase_order_create_logic.js HTTP/1.1" 200 4801
+INFO 2025-10-01 09:09:23,961 django.server basehttp 5016 7520 "GET /static/layout/js/close_period_logic.js HTTP/1.1" 200 4685
+INFO 2025-10-01 09:09:23,962 django.server basehttp 5016 3628 "GET /static/layout/js/tax_reconciliation_report_logic.js HTTP/1.1" 200 780
+INFO 2025-10-01 09:09:23,962 django.server basehttp 5016 7680 "GET /static/layout/js/financials_logic.js HTTP/1.1" 200 30715
+INFO 2025-10-01 09:09:23,962 django.server basehttp 5016 5400 "GET /static/layout/js/sales_order_create_logic.js HTTP/1.1" 200 5317
+INFO 2025-10-01 09:09:23,965 django.server basehttp 5016 6080 "GET /static/layout/js/inventory_counts_logic.js HTTP/1.1" 200 19520
+INFO 2025-10-01 09:09:23,965 django.server basehttp 5016 2484 "GET /static/layout/js/employees_logic.js HTTP/1.1" 200 6979
+INFO 2025-10-01 09:09:23,967 django.server basehttp 5016 7680 "GET /static/layout/js/dynamic_content_loader.js HTTP/1.1" 200 6706
+INFO 2025-10-01 09:09:23,969 django.server basehttp 5016 3628 "GET /static/css/print.css HTTP/1.1" 200 2303
+INFO 2025-10-01 09:09:24,478 django.server basehttp 5016 3628 "GET /static/webfonts/bootstrap-icons.woff2?dd67030699838ea613ee6dbda90effa6 HTTP/1.1" 200 130396
+INFO 2025-10-01 09:09:24,478 django.server basehttp 5016 2484 "GET /static/webfonts/41.woff2 HTTP/1.1" 200 21168
+INFO 2025-10-01 09:09:24,480 django.server basehttp 5016 7680 "GET /static/webfonts/NotoKufiArabic-VariableFont_wght.ttf HTTP/1.1" 200 433800
+INFO 2025-10-01 09:09:40,418 django.server basehttp 5016 7680 "GET /purchase_orders/create/ HTTP/1.1" 200 3827
+INFO 2025-10-01 09:09:45,889 django.server basehttp 5016 7680 "GET /purchase_orders/ HTTP/1.1" 200 2493
+INFO 2025-10-01 09:09:52,767 django.server basehttp 5016 7680 "GET /purchase_order/1/ HTTP/1.1" 200 5009
+INFO 2025-10-01 09:10:01,085 django.server basehttp 5016 7680 "GET /purchase_orders/ HTTP/1.1" 200 2493
+INFO 2025-10-01 09:10:05,510 django.server basehttp 5016 7680 "GET /expenses/ HTTP/1.1" 200 9298
+INFO 2025-10-01 09:10:11,652 django.server basehttp 5016 7680 "GET /reports/tax_reconciliation/ HTTP/1.1" 200 6334
+INFO 2025-10-01 09:11:19,748 django.server basehttp 5016 7680 "GET /employees/financials/ HTTP/1.1" 200 1837
+INFO 2025-10-01 09:11:23,590 django.server basehttp 5016 7680 "GET /financials/overhead_allocation/ HTTP/1.1" 200 8534
+INFO 2025-10-01 09:11:24,529 django.server basehttp 5016 7680 "GET /financials/allocation_drivers/ HTTP/1.1" 200 6517
+INFO 2025-10-01 09:11:25,140 django.server basehttp 5016 7680 "GET /financials/cost_pools/ HTTP/1.1" 200 11591
+INFO 2025-10-01 09:11:26,004 django.server basehttp 5016 7680 "GET /financials/allocation_drivers/ HTTP/1.1" 200 6517
+INFO 2025-10-01 09:11:26,830 django.server basehttp 5016 7680 "GET /financials/allocation_drivers/ HTTP/1.1" 200 6517
+INFO 2025-10-01 09:11:27,183 django.server basehttp 5016 7680 "GET /financials/cost_pools/ HTTP/1.1" 200 11591
+INFO 2025-10-01 09:11:27,598 django.server basehttp 5016 7680 "GET /financials/periods/ HTTP/1.1" 200 17865
+INFO 2025-10-01 09:11:47,963 django.server basehttp 5016 7680 "GET /financials/fixed_assets/ HTTP/1.1" 200 3003
+INFO 2025-10-01 09:12:08,896 django.server basehttp 5016 7680 "GET /financials/journal/ HTTP/1.1" 200 688
+INFO 2025-10-01 09:12:12,250 django.server basehttp 5016 7680 "GET /financials/journal/create/ HTTP/1.1" 200 19271
+INFO 2025-10-01 09:12:16,613 django.server basehttp 5016 7680 "GET /financials/journal/ HTTP/1.1" 200 688
+INFO 2025-10-01 09:12:18,636 django.server basehttp 5016 7680 "GET /financials/journal/ HTTP/1.1" 200 20418
+INFO 2025-10-01 09:12:18,710 django.server basehttp 5016 7680 "GET /static/img/favicon.ico HTTP/1.1" 200 41001
+INFO 2025-10-01 09:12:48,516 django.server basehttp 5016 7680 "GET /shop_order_templates/ HTTP/1.1" 200 7561
+INFO 2025-10-01 09:12:49,575 django.server basehttp 5016 7680 "GET /batches/ HTTP/1.1" 200 3224
+INFO 2025-10-01 09:13:06,958 django.server basehttp 5016 7680 "GET /batch/1/ HTTP/1.1" 200 12315
+INFO 2025-10-01 09:13:37,174 django.server basehttp 5016 7680 "GET /batch/1/receive/B-DEMO-001/ HTTP/1.1" 200 7770
+INFO 2025-10-01 09:14:33,208 django.server basehttp 5016 7680 "POST /batch/1/receive/B-DEMO-001/ HTTP/1.1" 302 0
+INFO 2025-10-01 09:14:33,229 django.server basehttp 5016 7680 "GET /batch/1/receive/B-DEMO-001/ HTTP/1.1" 200 28104
+INFO 2025-10-01 09:14:45,693 django.server basehttp 5016 7680 "GET /shop_order_templates/ HTTP/1.1" 200 7561
+INFO 2025-10-01 09:14:47,632 django.server basehttp 5016 7680 "GET /shop_order_templates/?copy_from=1 HTTP/1.1" 200 7640
+INFO 2025-10-01 09:15:17,469 django.server basehttp 5016 7680 "GET /shop_order_template/1/ HTTP/1.1" 200 1576
+INFO 2025-10-01 09:15:21,268 django.server basehttp 5016 7680 "GET /shop_order_templates/ HTTP/1.1" 200 7561
+INFO 2025-10-01 09:15:23,228 django.server basehttp 5016 7680 "GET /shop_order_template/1/ HTTP/1.1" 200 1576
+INFO 2025-10-01 09:15:27,300 django.server basehttp 5016 7680 "GET /shop_order_template/1/ HTTP/1.1" 200 21349
+INFO 2025-10-01 09:15:29,413 django.server basehttp 5016 7680 "GET /shop_order_templates/ HTTP/1.1" 200 7561
+INFO 2025-10-01 09:15:33,059 django.server basehttp 5016 7680 "GET /purchase_orders/create/ HTTP/1.1" 200 3827
+INFO 2025-10-01 09:15:36,077 django.server basehttp 5016 7680 "GET / HTTP/1.1" 200 9086
+INFO 2025-10-01 09:15:39,186 django.server basehttp 5016 7680 "GET /records/ HTTP/1.1" 200 11684
+INFO 2025-10-01 09:15:49,552 django.server basehttp 5016 7680 "GET /products/ HTTP/1.1" 200 77993
+INFO 2025-10-01 09:17:06,244 django.server basehttp 5016 7680 "GET / HTTP/1.1" 200 9086
+INFO 2025-10-01 09:17:45,303 django.server basehttp 5016 7680 "GET /records/ HTTP/1.1" 200 11684
+INFO 2025-10-01 09:17:48,952 django.server basehttp 5016 7680 "GET /records/ HTTP/1.1" 200 11684
+INFO 2025-10-01 09:17:49,547 django.server basehttp 5016 7680 "GET /customers/ HTTP/1.1" 200 4521
+INFO 2025-10-01 09:21:14,107 django.server basehttp 5016 7680 "GET /companies/ HTTP/1.1" 200 4485
+INFO 2025-10-01 09:21:18,713 django.server basehttp 5016 7680 "GET /products/ HTTP/1.1" 200 77993
+INFO 2025-10-01 09:21:19,820 django.server basehttp 5016 7680 "GET /records/ HTTP/1.1" 200 11684
+INFO 2025-10-01 09:21:20,852 django.server basehttp 5016 7680 "GET /employees/manage/ HTTP/1.1" 200 6218
+INFO 2025-10-01 09:21:32,904 django.server basehttp 5016 7680 "GET /customers/ HTTP/1.1" 200 4521
+INFO 2025-10-01 09:21:33,863 django.server basehttp 5016 7680 "GET /employees/manage/ HTTP/1.1" 200 6218
+INFO 2025-10-01 09:21:35,360 django.server basehttp 5016 7680 "GET /customers/ HTTP/1.1" 200 4521
+INFO 2025-10-01 09:21:36,651 django.server basehttp 5016 7680 "GET /products/ HTTP/1.1" 200 77993
+INFO 2025-10-01 09:23:05,450 django.server basehttp 5016 7680 "GET /financials/reconciliation/ HTTP/1.1" 200 1096
+INFO 2025-10-01 09:23:08,107 django.server basehttp 5016 7680 "GET /financials/banking/ HTTP/1.1" 200 3519
+INFO 2025-10-01 09:30:07,163 django.server basehttp 5016 7864 "GET /financials/customer_invoices/ HTTP/1.1" 200 2980
+INFO 2025-10-01 09:30:08,556 django.server basehttp 5016 7864 "GET /financials/customer_invoices/create/ HTTP/1.1" 200 4041
+INFO 2025-10-01 09:30:10,316 django.server basehttp 5016 7864 "GET /financials/supplier_invoices/create/ HTTP/1.1" 200 4129
+INFO 2025-10-01 09:30:10,785 django.server basehttp 5016 7864 "GET /financials/supplier_invoices/ HTTP/1.1" 200 3432
+INFO 2025-10-01 09:30:13,006 django.server basehttp 5016 7864 "GET /quarantine/ HTTP/1.1" 200 3311
+INFO 2025-10-01 09:30:13,586 django.server basehttp 5016 7864 "GET /reports/general_ledger/ HTTP/1.1" 200 2211
+INFO 2025-10-01 09:30:14,678 django.server basehttp 5016 7864 "GET /production_returns/ HTTP/1.1" 200 3977
+INFO 2025-10-01 09:30:15,899 django.server basehttp 5016 7864 "GET /inventory_counts/ HTTP/1.1" 302 0
+WARNING 2025-10-01 09:30:15,918 django.request log 5016 7864 Not Found: /accounts/login/
+WARNING 2025-10-01 09:30:15,919 django.server basehttp 5016 7864 "GET /accounts/login/?next=/inventory_counts/ HTTP/1.1" 404 38121
+INFO 2025-10-01 09:30:15,938 django.server basehttp 5016 7864 "GET /inventory_counts/ HTTP/1.1" 302 0
+WARNING 2025-10-01 09:30:15,955 django.request log 5016 7864 Not Found: /accounts/login/
+WARNING 2025-10-01 09:30:15,956 django.server basehttp 5016 7864 "GET /accounts/login/?next=/inventory_counts/ HTTP/1.1" 404 38121
+WARNING 2025-10-01 09:30:16,014 django.request log 5016 7864 Not Found: /favicon.ico
+WARNING 2025-10-01 09:30:16,015 django.server basehttp 5016 7864 "GET /favicon.ico HTTP/1.1" 404 38085
+INFO 2025-10-01 09:30:18,614 django.server basehttp 5016 7864 "GET /reports/product_ledger/ HTTP/1.1" 200 3475
+INFO 2025-10-01 09:30:19,642 django.server basehttp 5016 7864 "GET /reports/product_ledger/ HTTP/1.1" 200 3475
+INFO 2025-10-01 09:30:20,202 django.server basehttp 5016 7864 "GET /reports/product_ledger/ HTTP/1.1" 200 3475
+INFO 2025-10-01 09:30:21,194 django.server basehttp 5016 7864 "GET /reports/product_ledger/ HTTP/1.1" 200 3475
+INFO 2025-10-01 09:30:21,570 django.server basehttp 5016 7864 "GET /reports/product_ledger/ HTTP/1.1" 200 3475
+INFO 2025-10-01 09:30:22,474 django.server basehttp 5016 7864 "GET /reports/product_ledger/ HTTP/1.1" 200 3475
+INFO 2025-10-01 09:30:22,842 django.server basehttp 5016 7864 "GET /reports/stock_valuation/ HTTP/1.1" 200 2570
+INFO 2025-10-01 09:30:24,835 django.server basehttp 5016 7864 "GET /visuals/ HTTP/1.1" 200 8170
+INFO 2025-10-01 09:30:24,880 django.server basehttp 5016 7864 "GET /visuals/ HTTP/1.1" 200 27937
+INFO 2025-10-01 09:30:27,739 django.server basehttp 5016 7864 "GET /visuals/?type=finished_product&final_product_id=&start_date=2025-10-01&end_date=2025-10-01 HTTP/1.1" 200 29501
+INFO 2025-10-01 09:30:34,847 django.server basehttp 5016 7864 "GET /visuals/?type=finished_product&final_product_id=&start_date=2025-08-01&end_date=2025-10-01 HTTP/1.1" 200 29806
+INFO 2025-10-01 09:30:35,022 django.server basehttp 5016 7864 "GET /visuals/?type=finished_product&final_product_id=&start_date=2025-08-01&end_date=2025-10-01 HTTP/1.1" 200 29806
+INFO 2025-10-01 09:30:49,475 django.server basehttp 5016 7864 "GET /visuals/?type=expense&expense_product_type=&expense_product_id=&start_date=2025-08-01&end_date=2025-10-01 HTTP/1.1" 200 29568
+INFO 2025-10-01 09:31:07,517 django.server basehttp 5016 7864 "GET /visuals/?type=raw_material&product_id=&company_id=&qc_no=&start_date=2025-08-01&end_date=2025-10-01 HTTP/1.1" 200 27937
+INFO 2025-10-01 09:31:08,128 django.server basehttp 5016 7864 "GET /visuals/?type=raw_material&product_id=&company_id=&qc_no=&start_date=2025-08-01&end_date=2025-10-01 HTTP/1.1" 200 27937
+INFO 2025-10-01 09:31:09,045 django.server basehttp 5016 7864 "GET /visuals/?type=raw_material&product_id=&company_id=&qc_no=&start_date=2025-08-01&end_date=2025-10-01 HTTP/1.1" 200 27937
+ERROR 2025-10-01 09:31:11,536 django.request log 5016 7864 Internal Server Error: /visuals/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py", line 449, in visuals
+    total_in_value = receipts.annotate(line_total=ExpressionWrapper(F('quantity') * F('costing_unit_price'), output_field=DecimalField())).aggregate(total=Coalesce(Sum('line_total'), Decimal('0.0')))['total']
+                     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1649, in annotate
+    return self._annotate(args, kwargs, select=True)
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1701, in _annotate
+    clone.query.add_annotation(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        annotation,
+        ^^^^^^^^^^^
+        alias,
+        ^^^^^^
+        select=select,
+        ^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\query.py", line 1218, in add_annotation
+    annotation = annotation.resolve_expression(self, allow_joins=True, reuse=None)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 300, in resolve_expression
+    expr.resolve_expression(query, allow_joins, reuse, summarize, for_save)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 775, in resolve_expression
+    resolved = super().resolve_expression(
+        query,
+    ...<3 lines>...
+        for_save,
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 300, in resolve_expression
+    expr.resolve_expression(query, allow_joins, reuse, summarize, for_save)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 902, in resolve_expression
+    return query.resolve_ref(self.name, allow_joins, reuse, summarize)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\query.py", line 2049, in resolve_ref
+    join_info = self.setup_joins(
+        field_list, self.get_meta(), self.get_initial_alias(), can_reuse=reuse
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\query.py", line 1900, in setup_joins
+    path, final_field, targets, rest = self.names_to_path(
+                                       ~~~~~~~~~~~~~~~~~~^
+        names[:pivot],
+        ^^^^^^^^^^^^^^
+    ...<2 lines>...
+        fail_on_missing=True,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\query.py", line 1805, in names_to_path
+    raise FieldError(
+    ...<2 lines>...
+    )
+django.core.exceptions.FieldError: Cannot resolve keyword 'costing_unit_price' into field. Choices are: adjustments, base_unit_price, batch_items, company, company_id, consumptions, employee, employee_id, id, invoice_item, po_item, po_item_id, product, product_id, production_returns, qc_no, quantity, release_timestamp, status, tags, timestamp, vat_amount, vat_treatment, withholding_tax_amount
+ERROR 2025-10-01 09:31:11,547 django.server basehttp 5016 7864 "GET /visuals/?type=raw_material&product_id=3&company_id=&qc_no=&start_date=2025-08-01&end_date=2025-10-01 HTTP/1.1" 500 131010
+ERROR 2025-10-01 09:31:14,800 django.request log 5016 7864 Internal Server Error: /visuals/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py", line 449, in visuals
+    total_in_value = receipts.annotate(line_total=ExpressionWrapper(F('quantity') * F('costing_unit_price'), output_field=DecimalField())).aggregate(total=Coalesce(Sum('line_total'), Decimal('0.0')))['total']
+                     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1649, in annotate
+    return self._annotate(args, kwargs, select=True)
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1701, in _annotate
+    clone.query.add_annotation(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        annotation,
+        ^^^^^^^^^^^
+        alias,
+        ^^^^^^
+        select=select,
+        ^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\query.py", line 1218, in add_annotation
+    annotation = annotation.resolve_expression(self, allow_joins=True, reuse=None)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 300, in resolve_expression
+    expr.resolve_expression(query, allow_joins, reuse, summarize, for_save)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 775, in resolve_expression
+    resolved = super().resolve_expression(
+        query,
+    ...<3 lines>...
+        for_save,
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 300, in resolve_expression
+    expr.resolve_expression(query, allow_joins, reuse, summarize, for_save)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 902, in resolve_expression
+    return query.resolve_ref(self.name, allow_joins, reuse, summarize)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\query.py", line 2049, in resolve_ref
+    join_info = self.setup_joins(
+        field_list, self.get_meta(), self.get_initial_alias(), can_reuse=reuse
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\query.py", line 1900, in setup_joins
+    path, final_field, targets, rest = self.names_to_path(
+                                       ~~~~~~~~~~~~~~~~~~^
+        names[:pivot],
+        ^^^^^^^^^^^^^^
+    ...<2 lines>...
+        fail_on_missing=True,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\query.py", line 1805, in names_to_path
+    raise FieldError(
+    ...<2 lines>...
+    )
+django.core.exceptions.FieldError: Cannot resolve keyword 'costing_unit_price' into field. Choices are: adjustments, base_unit_price, batch_items, company, company_id, consumptions, employee, employee_id, id, invoice_item, po_item, po_item_id, product, product_id, production_returns, qc_no, quantity, release_timestamp, status, tags, timestamp, vat_amount, vat_treatment, withholding_tax_amount
+ERROR 2025-10-01 09:31:14,804 django.server basehttp 5016 7864 "GET /visuals/?type=raw_material&product_id=1&company_id=&qc_no=&start_date=2025-08-01&end_date=2025-10-01 HTTP/1.1" 500 131340
+ERROR 2025-10-01 11:29:47,498 django.request log 5016 9588 Internal Server Error: /visuals/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py", line 449, in visuals
+    total_in_value = receipts.annotate(line_total=ExpressionWrapper(F('quantity') * F('costing_unit_price'), output_field=DecimalField())).aggregate(total=Coalesce(Sum('line_total'), Decimal('0.0')))['total']
+                     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1649, in annotate
+    return self._annotate(args, kwargs, select=True)
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1701, in _annotate
+    clone.query.add_annotation(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        annotation,
+        ^^^^^^^^^^^
+        alias,
+        ^^^^^^
+        select=select,
+        ^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\query.py", line 1218, in add_annotation
+    annotation = annotation.resolve_expression(self, allow_joins=True, reuse=None)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 300, in resolve_expression
+    expr.resolve_expression(query, allow_joins, reuse, summarize, for_save)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 775, in resolve_expression
+    resolved = super().resolve_expression(
+        query,
+    ...<3 lines>...
+        for_save,
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 300, in resolve_expression
+    expr.resolve_expression(query, allow_joins, reuse, summarize, for_save)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 902, in resolve_expression
+    return query.resolve_ref(self.name, allow_joins, reuse, summarize)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\query.py", line 2049, in resolve_ref
+    join_info = self.setup_joins(
+        field_list, self.get_meta(), self.get_initial_alias(), can_reuse=reuse
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\query.py", line 1900, in setup_joins
+    path, final_field, targets, rest = self.names_to_path(
+                                       ~~~~~~~~~~~~~~~~~~^
+        names[:pivot],
+        ^^^^^^^^^^^^^^
+    ...<2 lines>...
+        fail_on_missing=True,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\query.py", line 1805, in names_to_path
+    raise FieldError(
+    ...<2 lines>...
+    )
+django.core.exceptions.FieldError: Cannot resolve keyword 'costing_unit_price' into field. Choices are: adjustments, base_unit_price, batch_items, company, company_id, consumptions, employee, employee_id, id, invoice_item, po_item, po_item_id, product, product_id, production_returns, qc_no, quantity, release_timestamp, status, tags, timestamp, vat_amount, vat_treatment, withholding_tax_amount
+ERROR 2025-10-01 11:29:47,502 django.server basehttp 5016 9588 "GET /visuals/?type=raw_material&product_id=1&company_id=&qc_no=&start_date=2025-08-01&end_date=2025-10-01 HTTP/1.1" 500 131477
+ERROR 2025-10-01 11:36:07,519 django.request log 5016 9652 Internal Server Error: /visuals/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py", line 449, in visuals
+    total_in_value = receipts.annotate(line_total=ExpressionWrapper(F('quantity') * F('costing_unit_price'), output_field=DecimalField())).aggregate(total=Coalesce(Sum('line_total'), Decimal('0.0')))['total']
+                     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1649, in annotate
+    return self._annotate(args, kwargs, select=True)
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1701, in _annotate
+    clone.query.add_annotation(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        annotation,
+        ^^^^^^^^^^^
+        alias,
+        ^^^^^^
+        select=select,
+        ^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\query.py", line 1218, in add_annotation
+    annotation = annotation.resolve_expression(self, allow_joins=True, reuse=None)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 300, in resolve_expression
+    expr.resolve_expression(query, allow_joins, reuse, summarize, for_save)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 775, in resolve_expression
+    resolved = super().resolve_expression(
+        query,
+    ...<3 lines>...
+        for_save,
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 300, in resolve_expression
+    expr.resolve_expression(query, allow_joins, reuse, summarize, for_save)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 902, in resolve_expression
+    return query.resolve_ref(self.name, allow_joins, reuse, summarize)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\query.py", line 2049, in resolve_ref
+    join_info = self.setup_joins(
+        field_list, self.get_meta(), self.get_initial_alias(), can_reuse=reuse
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\query.py", line 1900, in setup_joins
+    path, final_field, targets, rest = self.names_to_path(
+                                       ~~~~~~~~~~~~~~~~~~^
+        names[:pivot],
+        ^^^^^^^^^^^^^^
+    ...<2 lines>...
+        fail_on_missing=True,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\query.py", line 1805, in names_to_path
+    raise FieldError(
+    ...<2 lines>...
+    )
+django.core.exceptions.FieldError: Cannot resolve keyword 'costing_unit_price' into field. Choices are: adjustments, base_unit_price, batch_items, company, company_id, consumptions, employee, employee_id, id, invoice_item, po_item, po_item_id, product, product_id, production_returns, qc_no, quantity, release_timestamp, status, tags, timestamp, vat_amount, vat_treatment, withholding_tax_amount
+ERROR 2025-10-01 11:36:07,523 django.server basehttp 5016 9652 "GET /visuals/?type=raw_material&product_id=1&company_id=&qc_no=&start_date=2025-08-01&end_date=2025-10-01 HTTP/1.1" 500 131475
+INFO 2025-10-01 11:36:20,206 inventory.services.accounting_service accounting_service 3064 9764 Successfully created Journal Entry JE-1 for InventoryLog ID 1.
+WARNING 2025-10-01 11:36:20,209 inventory.services.accounting_service accounting_service 3064 9764 Attempted to create JE for Batch ID 1 with no items. Aborting.
+INFO 2025-10-01 11:36:20,213 inventory.signals signals 3064 9764 Deleted existing JE for updated Batch ID 1 to allow regeneration.
+INFO 2025-10-01 11:36:20,219 inventory.services.accounting_service accounting_service 3064 9764 Successfully created Journal Entry JE-2 for Batch ID 1.
+INFO 2025-10-01 11:36:20,229 inventory.services.accounting_service accounting_service 3064 9764 Successfully created Journal Entry JE-3 for FinishedProductReceipt ID 1.
+INFO 2025-10-01 11:36:20,242 inventory.services.accounting_service accounting_service 3064 9764 Successfully created JE-4 for FinishedProductDispatch ID 1.
+INFO 2025-10-01 11:36:20,250 inventory.services.accounting_service accounting_service 3064 9764 Successfully created JE-5 for supplier Payment ID 1.
+INFO 2025-10-01 11:36:20,260 inventory.services.accounting_service accounting_service 3064 9764 Successfully created JE-6 for DepreciationLog ID 1.
+INFO 2025-10-01 11:36:42,110 django.server basehttp 5016 9652 "GET / HTTP/1.1" 200 29289
+INFO 2025-10-01 11:36:42,155 django.server basehttp 5016 9652 "GET /static/layout/js/close_period_logic.js HTTP/1.1" 304 0
+INFO 2025-10-01 11:36:42,160 django.server basehttp 5016 9620 "GET /static/layout/js/dynamic_content_loader.js HTTP/1.1" 304 0
+INFO 2025-10-01 11:36:44,430 django.server basehttp 5016 9620 "GET / HTTP/1.1" 200 29289
+INFO 2025-10-01 11:36:46,369 django.server basehttp 5016 9620 "GET /records/ HTTP/1.1" 200 12082
+INFO 2025-10-01 11:36:51,652 django.server basehttp 5016 9620 "GET /products/ HTTP/1.1" 200 147947
+INFO 2025-10-01 11:37:03,030 django.server basehttp 5016 9620 "GET /customers/ HTTP/1.1" 200 9327
+INFO 2025-10-01 11:37:03,388 django.server basehttp 5016 9620 "GET /employees/manage/ HTTP/1.1" 200 6218
+INFO 2025-10-01 11:37:04,419 django.server basehttp 5016 9620 "GET /companies/ HTTP/1.1" 200 9089
+INFO 2025-10-01 11:37:07,501 django.server basehttp 5016 9620 "GET /products/ HTTP/1.1" 200 147947
+INFO 2025-10-01 11:37:08,305 django.server basehttp 5016 9620 "GET /records/ HTTP/1.1" 200 12082
+INFO 2025-10-01 11:37:10,652 django.server basehttp 5016 9620 "GET /customers/ HTTP/1.1" 200 9327
+ERROR 2025-10-01 11:37:20,871 django.request log 5016 9620 Internal Server Error: /expenses/manage/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\expenses.py", line 197, in manage_expenses
+    return render(request, template_name, context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 199, in render
+    len_values = len(values)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 366, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1610, in execute_sql
+    sql, params = self.as_sql()
+                  ~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 766, in as_sql
+    extra_select, order_by, group_by = self.pre_sql_setup(
+                                       ~~~~~~~~~~~~~~~~~~^
+        with_col_aliases=with_col_aliases or bool(combinator),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 85, in pre_sql_setup
+    self.setup_query(with_col_aliases=with_col_aliases)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 74, in setup_query
+    self.select, self.klass_info, self.annotation_col_map = self.get_select(
+                                                            ~~~~~~~~~~~~~~~^
+        with_col_aliases=with_col_aliases,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 299, in get_select
+    related_klass_infos = self.get_related_selections(select, select_mask)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1396, in get_related_selections
+    raise FieldError(
+    ...<6 lines>...
+    )
+django.core.exceptions.FieldError: Invalid field name(s) given in select_related: 'employee'. Choices are: product, source_log, fixed_asset
+ERROR 2025-10-01 11:37:20,877 django.server basehttp 5016 9620 "GET /expenses/manage/ HTTP/1.1" 500 173051
+ERROR 2025-10-01 11:37:20,976 django.request log 5016 9620 Internal Server Error: /expenses/manage/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\expenses.py", line 197, in manage_expenses
+    return render(request, template_name, context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 210, in render
+    return template.render(context)
+           ~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 173, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 199, in render
+    len_values = len(values)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 366, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1610, in execute_sql
+    sql, params = self.as_sql()
+                  ~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 766, in as_sql
+    extra_select, order_by, group_by = self.pre_sql_setup(
+                                       ~~~~~~~~~~~~~~~~~~^
+        with_col_aliases=with_col_aliases or bool(combinator),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 85, in pre_sql_setup
+    self.setup_query(with_col_aliases=with_col_aliases)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 74, in setup_query
+    self.select, self.klass_info, self.annotation_col_map = self.get_select(
+                                                            ~~~~~~~~~~~~~~~^
+        with_col_aliases=with_col_aliases,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 299, in get_select
+    related_klass_infos = self.get_related_selections(select, select_mask)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1396, in get_related_selections
+    raise FieldError(
+    ...<6 lines>...
+    )
+django.core.exceptions.FieldError: Invalid field name(s) given in select_related: 'employee'. Choices are: product, source_log, fixed_asset
+ERROR 2025-10-01 11:37:20,982 django.server basehttp 5016 9620 "GET /expenses/manage/ HTTP/1.1" 500 232521
+INFO 2025-10-01 11:37:24,270 django.server basehttp 5016 9620 "GET /reports/profit_and_loss/ HTTP/1.1" 200 2677
+INFO 2025-10-01 11:37:27,070 django.server basehttp 5016 9620 "GET /employees/financials/ HTTP/1.1" 200 1837
+INFO 2025-10-01 11:37:28,845 django.server basehttp 5016 9620 "GET /financials/supplier_invoices/create/ HTTP/1.1" 200 4306
+INFO 2025-10-01 11:37:34,213 django.server basehttp 5016 9620 "GET /api/supplier/0/uninvoiced_receipts/ HTTP/1.1" 200 2
+INFO 2025-10-01 11:37:36,519 django.server basehttp 5016 9620 "GET /api/supplier/0/uninvoiced_receipts/ HTTP/1.1" 200 2
+INFO 2025-10-01 11:37:37,847 django.server basehttp 5016 9620 "GET /api/supplier/0/uninvoiced_receipts/ HTTP/1.1" 200 2
+INFO 2025-10-01 11:37:48,061 django.server basehttp 5016 9620 "GET /api/supplier/0/uninvoiced_receipts/ HTTP/1.1" 200 2
+INFO 2025-10-01 11:37:48,845 django.server basehttp 5016 9620 "GET /api/supplier/0/uninvoiced_receipts/ HTTP/1.1" 200 2
+INFO 2025-10-01 11:37:50,870 django.server basehttp 5016 9620 "GET /api/supplier/0/uninvoiced_receipts/ HTTP/1.1" 200 2
+INFO 2025-10-01 11:37:54,573 django.server basehttp 5016 9620 "GET /financials/supplier_invoices/ HTTP/1.1" 200 3595
+INFO 2025-10-01 11:38:05,562 django.server basehttp 5016 9620 "GET /financials/supplier_invoices/?supplier=2&status= HTTP/1.1" 200 22888
+INFO 2025-10-01 11:38:06,074 django.server basehttp 5016 9620 "GET /financials/supplier_invoices/?supplier=2&status= HTTP/1.1" 200 22888
+INFO 2025-10-01 11:38:08,413 django.server basehttp 5016 9620 "GET /financials/supplier_invoices/?supplier=1&status= HTTP/1.1" 200 23340
+INFO 2025-10-01 11:38:10,820 django.server basehttp 5016 9620 "GET /financials/supplier_invoice/1/ HTTP/1.1" 200 5197
+INFO 2025-10-01 11:38:14,753 django.server basehttp 5016 9620 "GET /financials/supplier_invoice/1/ HTTP/1.1" 200 24938
+INFO 2025-10-01 11:38:27,273 django.server basehttp 5016 9620 "POST /financials/supplier_invoice/1/apply_payment/ HTTP/1.1" 302 0
+INFO 2025-10-01 11:38:27,294 django.server basehttp 5016 9620 "GET /financials/supplier_invoice/1/ HTTP/1.1" 200 25512
+INFO 2025-10-01 11:38:43,115 inventory.services.accounting_service accounting_service 5016 9620 Successfully created JE-7 for supplier Payment ID 2.
+INFO 2025-10-01 11:38:43,124 django.server basehttp 5016 9620 "POST /financials/supplier_invoice/1/apply_payment/ HTTP/1.1" 302 0
+INFO 2025-10-01 11:38:43,141 django.server basehttp 5016 9620 "GET /financials/supplier_invoice/1/ HTTP/1.1" 200 23933
+INFO 2025-10-01 11:39:00,931 django.server basehttp 5016 9620 "GET /financials/reconciliation/ HTTP/1.1" 200 1096
+INFO 2025-10-01 11:39:02,868 django.server basehttp 5016 9620 "GET /financials/reconciliation/ HTTP/1.1" 200 23265
+INFO 2025-10-01 11:39:07,991 django.server basehttp 5016 9620 "GET /financials/reconciliation/?bank_account=1&status= HTTP/1.1" 200 23273
+INFO 2025-10-01 11:39:09,802 django.server basehttp 5016 9620 "GET /financials/reconciliation/?bank_account=1&status= HTTP/1.1" 200 23273
+INFO 2025-10-01 11:39:13,371 django.server basehttp 5016 9620 "GET /financials/reconciliation/?bank_account=1&status= HTTP/1.1" 200 23273
+ERROR 2025-10-01 11:39:17,590 django.request log 5016 9620 Internal Server Error: /financials/reconciliation/create/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\financials.py", line 669, in create_bank_reconciliation
+    return render(request, 'inventory/partials/reconciliation_create_content.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: inventory/partials/reconciliation_create_content.html
+ERROR 2025-10-01 11:39:17,594 django.server basehttp 5016 9620 "GET /financials/reconciliation/create/ HTTP/1.1" 500 87913
+INFO 2025-10-01 11:39:17,626 django.server basehttp 5016 9620 "GET /financials/reconciliation/create/ HTTP/1.1" 200 22582
+INFO 2025-10-01 11:39:26,548 django.server basehttp 5016 9620 "GET /financials/reconciliation/ HTTP/1.1" 200 1096
+INFO 2025-10-01 11:39:39,941 django.server basehttp 5016 9620 "GET /financials/reconciliation/ HTTP/1.1" 200 1096
+INFO 2025-10-01 11:39:43,627 django.server basehttp 5016 9620 "GET /financials/reconciliation/ HTTP/1.1" 200 23265
+ERROR 2025-10-01 11:39:45,750 django.request log 5016 9620 Internal Server Error: /financials/reconciliation/create/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\financials.py", line 669, in create_bank_reconciliation
+    return render(request, 'inventory/partials/reconciliation_create_content.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: inventory/partials/reconciliation_create_content.html
+ERROR 2025-10-01 11:39:45,752 django.server basehttp 5016 9620 "GET /financials/reconciliation/create/ HTTP/1.1" 500 87886
+INFO 2025-10-01 11:39:45,775 django.server basehttp 5016 9620 "GET /financials/reconciliation/create/ HTTP/1.1" 200 22582
+INFO 2025-10-01 11:40:18,625 django.server basehttp 5016 9620 "GET /financials/supplier_invoices/ HTTP/1.1" 200 3586
+INFO 2025-10-01 11:40:23,746 django.server basehttp 5016 9620 "GET /financials/reconciliation/ HTTP/1.1" 200 1096
+INFO 2025-10-01 11:40:25,593 django.server basehttp 5016 9620 "GET /financials/reconciliation/ HTTP/1.1" 200 23265
+ERROR 2025-10-01 11:40:26,207 django.request log 5016 9620 Internal Server Error: /financials/reconciliation/create/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\financials.py", line 669, in create_bank_reconciliation
+    return render(request, 'inventory/partials/reconciliation_create_content.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: inventory/partials/reconciliation_create_content.html
+ERROR 2025-10-01 11:40:26,210 django.server basehttp 5016 9620 "GET /financials/reconciliation/create/ HTTP/1.1" 500 87886
+INFO 2025-10-01 11:40:26,231 django.server basehttp 5016 9620 "GET /financials/reconciliation/create/ HTTP/1.1" 200 22582
+INFO 2025-10-01 11:40:34,455 django.server basehttp 5016 9620 "POST /financials/reconciliation/create/ HTTP/1.1" 302 0
+ERROR 2025-10-01 11:40:34,561 django.request log 5016 9620 Internal Server Error: /financials/reconciliation/1/manage/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\financials.py", line 761, in manage_bank_reconciliation
+    return render(request, 'inventory/reconciliation_manage.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 480, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\urls\base.py", line 98, in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\urls\resolvers.py", line 831, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'api_match_transactions' not found. 'api_match_transactions' is not a valid view function or pattern name.
+ERROR 2025-10-01 11:40:34,566 django.server basehttp 5016 9620 "GET /financials/reconciliation/1/manage/ HTTP/1.1" 500 226661
+INFO 2025-10-01 11:47:32,376 django.server basehttp 5016 9704 "GET /financials/overhead_allocation/ HTTP/1.1" 200 8534
+INFO 2025-10-01 11:47:32,928 django.server basehttp 5016 9704 "GET /financials/allocation_drivers/ HTTP/1.1" 200 6517
+INFO 2025-10-01 11:47:33,185 django.server basehttp 5016 9704 "GET /financials/allocation_drivers/ HTTP/1.1" 200 6517
+INFO 2025-10-01 11:47:33,746 django.server basehttp 5016 9704 "GET /financials/overhead_allocation/ HTTP/1.1" 200 8534
+INFO 2025-10-01 11:47:34,184 django.server basehttp 5016 9704 "GET /financials/allocation_drivers/ HTTP/1.1" 200 6517
+INFO 2025-10-01 11:47:34,539 django.server basehttp 5016 9704 "GET /financials/cost_pools/ HTTP/1.1" 200 11591
+INFO 2025-10-01 11:47:35,066 django.server basehttp 5016 9704 "GET /financials/cost_pools/ HTTP/1.1" 200 11591
+INFO 2025-10-01 11:49:22,186 django.server basehttp 5016 9704 "GET /financials/cost_pools/ HTTP/1.1" 200 31283
+INFO 2025-10-01 11:50:29,169 django.utils.autoreload autoreload 5016 388 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-01 11:50:30,509 django.utils.autoreload autoreload 8656 3300 Watching for file changes with StatReloader
+INFO 2025-10-01 11:51:51,225 django.server basehttp 8656 10036 "GET / HTTP/1.1" 200 29289
+INFO 2025-10-01 11:51:57,799 django.server basehttp 8656 10036 "GET /admin HTTP/1.1" 301 0
+INFO 2025-10-01 11:51:57,839 django.server basehttp 8656 7840 "GET /admin/ HTTP/1.1" 302 0
+INFO 2025-10-01 11:51:57,854 django.server basehttp 8656 7840 "GET /admin/login/?next=/admin/ HTTP/1.1" 200 3144
+WARNING 2025-10-01 11:51:57,894 django.server basehttp 8656 10128 "GET /static/img/ims_logo.png HTTP/1.1" 404 1862
+INFO 2025-10-01 11:51:57,992 django.server basehttp 8656 7840 "GET /static/vendor/fontawesome-free/css/all.min.css HTTP/1.1" 200 103009
+INFO 2025-10-01 11:51:57,993 django.server basehttp 8656 9132 "GET /static/vendor/bootswatch/darkly/bootstrap.min.css HTTP/1.1" 200 164202
+INFO 2025-10-01 11:51:58,003 django.server basehttp 8656 7840 "GET /static/vendor/adminlte/js/adminlte.min.js HTTP/1.1" 200 44244
+INFO 2025-10-01 11:51:58,009 django.server basehttp 8656 7688 "GET /static/jazzmin/css/main.css HTTP/1.1" 200 16969
+INFO 2025-10-01 11:51:58,020 django.server basehttp 8656 9672 "GET /static/admin/js/vendor/jquery/jquery.js HTTP/1.1" 200 285314
+INFO 2025-10-01 11:51:58,023 django.server basehttp 8656 8572 "GET /static/vendor/bootstrap/js/bootstrap.min.js HTTP/1.1" 200 62440
+INFO 2025-10-01 11:51:58,028 django.server basehttp 8656 9248 "GET /static/vendor/adminlte/css/adminlte.min.css HTTP/1.1" 200 1382975
+INFO 2025-10-01 11:51:58,244 django.server basehttp 8656 9248 "GET /static/vendor/fontawesome-free/webfonts/fa-solid-900.woff2 HTTP/1.1" 200 156400
+WARNING 2025-10-01 11:51:59,178 django.server basehttp 8656 9248 "GET /static/fas%20fa-warehouse HTTP/1.1" 404 1864
+INFO 2025-10-01 11:52:34,705 django.server basehttp 8656 8572 "POST /admin/login/?next=/admin/ HTTP/1.1" 302 0
+INFO 2025-10-01 11:52:34,765 django.server basehttp 8656 8572 "GET /admin/ HTTP/1.1" 200 62047
+INFO 2025-10-01 11:52:34,819 django.server basehttp 8656 9672 "GET /static/jazzmin/js/main.js HTTP/1.1" 200 2391
+INFO 2025-10-01 11:52:34,819 django.server basehttp 8656 8572 "GET /static/vendor/adminlte/img/AdminLTELogo.png HTTP/1.1" 200 2637
+INFO 2025-10-01 11:52:34,835 django.server basehttp 8656 8572 "GET /static/vendor/fontawesome-free/webfonts/fa-regular-400.woff2 HTTP/1.1" 200 25392
+INFO 2025-10-01 11:52:40,167 django.server basehttp 8656 8572 "GET /admin/inventory/journalentry/ HTTP/1.1" 200 39544
+INFO 2025-10-01 11:52:40,203 django.server basehttp 8656 7688 "GET /static/admin/js/jquery.init.js HTTP/1.1" 200 347
+INFO 2025-10-01 11:52:40,203 django.server basehttp 8656 8572 "GET /static/vendor/select2/css/select2.min.css HTTP/1.1" 200 16264
+INFO 2025-10-01 11:52:40,203 django.server basehttp 8656 9132 "GET /static/admin/js/admin/RelatedObjectLookups.js HTTP/1.1" 200 9777
+INFO 2025-10-01 11:52:40,203 django.server basehttp 8656 7840 "GET /static/admin/js/core.js HTTP/1.1" 200 6208
+INFO 2025-10-01 11:52:40,213 django.server basehttp 8656 9672 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-10-01 11:52:40,215 django.server basehttp 8656 8572 "GET /static/admin/js/urlify.js HTTP/1.1" 200 7887
+INFO 2025-10-01 11:52:40,216 django.server basehttp 8656 9132 "GET /static/admin/js/prepopulate.js HTTP/1.1" 200 1531
+INFO 2025-10-01 11:52:40,220 django.server basehttp 8656 7840 "GET /static/admin/img/icon-yes.svg HTTP/1.1" 200 436
+INFO 2025-10-01 11:52:40,220 django.server basehttp 8656 9672 "GET /static/vendor/select2/js/select2.min.js HTTP/1.1" 200 73170
+INFO 2025-10-01 11:52:40,220 django.server basehttp 8656 7688 "GET /static/admin/js/vendor/xregexp/xregexp.js HTTP/1.1" 200 325171
+INFO 2025-10-01 11:52:40,228 django.server basehttp 8656 7048 "GET /static/admin/js/actions.js HTTP/1.1" 200 8076
+INFO 2025-10-01 11:52:40,233 django.server basehttp 8656 7688 "GET /static/jazzmin/js/change_list.js HTTP/1.1" 200 2252
+INFO 2025-10-01 11:52:46,982 django.server basehttp 8656 7688 "GET /admin/inventory/journalentry/add/ HTTP/1.1" 200 79870
+INFO 2025-10-01 11:52:47,008 django.server basehttp 8656 7840 "GET /static/admin/js/calendar.js HTTP/1.1" 200 9141
+INFO 2025-10-01 11:52:47,011 django.server basehttp 8656 9672 "GET /static/admin/css/autocomplete.css HTTP/1.1" 200 9185
+INFO 2025-10-01 11:52:47,013 django.server basehttp 8656 7688 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-10-01 11:52:47,014 django.server basehttp 8656 7048 "GET /static/admin/css/vendor/select2/select2.css HTTP/1.1" 200 17358
+INFO 2025-10-01 11:52:47,015 django.server basehttp 8656 7840 "GET /static/admin/js/vendor/select2/i18n/en.js HTTP/1.1" 200 844
+INFO 2025-10-01 11:52:47,015 django.server basehttp 8656 8572 "GET /static/admin/js/admin/DateTimeShortcuts.js HTTP/1.1" 200 19319
+INFO 2025-10-01 11:52:47,017 django.server basehttp 8656 9672 "GET /static/admin/js/inlines.js HTTP/1.1" 200 15628
+INFO 2025-10-01 11:52:47,018 django.server basehttp 8656 9132 "GET /static/admin/js/vendor/select2/select2.full.js HTTP/1.1" 200 173566
+INFO 2025-10-01 11:52:47,023 django.server basehttp 8656 7688 "GET /static/admin/js/autocomplete.js HTTP/1.1" 200 1060
+INFO 2025-10-01 11:52:47,026 django.server basehttp 8656 7048 "GET /static/admin/js/change_form.js HTTP/1.1" 200 606
+INFO 2025-10-01 11:52:47,030 django.server basehttp 8656 7840 "GET /static/admin/js/prepopulate_init.js HTTP/1.1" 200 586
+INFO 2025-10-01 11:52:47,035 django.server basehttp 8656 7840 "GET /static/jazzmin/js/change_form.js HTTP/1.1" 200 6052
+INFO 2025-10-01 11:52:47,047 django.server basehttp 8656 7688 "GET /static/admin/img/icon-deletelink.svg HTTP/1.1" 200 392
+INFO 2025-10-01 11:52:47,047 django.server basehttp 8656 7840 "GET /static/admin/img/icon-changelink.svg HTTP/1.1" 200 380
+INFO 2025-10-01 11:52:47,049 django.server basehttp 8656 9132 "GET /static/admin/img/icon-viewlink.svg HTTP/1.1" 200 581
+INFO 2025-10-01 11:52:47,049 django.server basehttp 8656 7048 "GET /static/admin/img/icon-addlink.svg HTTP/1.1" 200 331
+INFO 2025-10-01 11:53:11,961 django.server basehttp 8656 9132 "GET /admin/autocomplete/?app_label=inventory&model_name=journalentryline&field_name=account HTTP/1.1" 200 2479
+INFO 2025-10-01 11:53:14,560 django.server basehttp 8656 9132 "GET /admin/autocomplete/?app_label=inventory&model_name=journalentryline&field_name=account HTTP/1.1" 200 2479
+INFO 2025-10-01 11:53:15,644 django.server basehttp 8656 9132 "GET /admin/autocomplete/?page=2&app_label=inventory&model_name=journalentryline&field_name=account HTTP/1.1" 200 2566
+INFO 2025-10-01 11:53:37,704 django.server basehttp 8656 9132 "GET /admin/inventory/journalentry/ HTTP/1.1" 200 39544
+INFO 2025-10-01 11:53:37,728 django.server basehttp 8656 9132 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-10-01 11:53:49,334 django.server basehttp 8656 9132 "GET /admin/inventory/journalentry/2/change/ HTTP/1.1" 200 105520
+INFO 2025-10-01 11:53:49,358 django.server basehttp 8656 9132 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-10-01 11:54:58,351 django.server basehttp 8656 9132 "GET /admin/autocomplete/?app_label=inventory&model_name=journalentryline&field_name=account HTTP/1.1" 200 2479
+INFO 2025-10-01 11:55:03,951 django.server basehttp 8656 9132 "GET /admin/ HTTP/1.1" 200 62047
+INFO 2025-10-01 11:55:08,485 django.server basehttp 8656 9132 "GET /admin/inventory/bankaccount/ HTTP/1.1" 200 32098
+INFO 2025-10-01 11:55:08,512 django.server basehttp 8656 9132 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-10-01 11:55:12,893 django.server basehttp 8656 9132 "GET /admin/inventory/bankaccount/1/change/ HTTP/1.1" 200 33650
+INFO 2025-10-01 11:55:12,916 django.server basehttp 8656 9132 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-10-01 11:55:15,270 django.server basehttp 8656 9132 "GET /admin/autocomplete/?app_label=inventory&model_name=bankaccount&field_name=gl_account HTTP/1.1" 200 585
+INFO 2025-10-01 11:55:23,816 django.server basehttp 8656 9132 "GET /admin/ HTTP/1.1" 200 62047
+INFO 2025-10-01 11:55:33,852 django.server basehttp 8656 9132 "GET /reports/general_ledger/ HTTP/1.1" 200 2211
+INFO 2025-10-01 11:55:39,032 django.server basehttp 8656 9132 "GET /sales_orders/create/ HTTP/1.1" 200 3171
+INFO 2025-10-01 11:55:39,062 django.server basehttp 8656 9132 "GET /api/sellable_stock/ HTTP/1.1" 200 126
+INFO 2025-10-01 11:55:40,617 django.server basehttp 8656 9132 "GET /batches/ HTTP/1.1" 200 3231
+INFO 2025-10-01 11:55:42,892 django.server basehttp 8656 9132 "GET /batch/1/ HTTP/1.1" 200 12554
+INFO 2025-10-01 11:55:47,594 django.server basehttp 8656 9132 "GET /batch/1/receive/B-DEMO-001/ HTTP/1.1" 200 7777
+INFO 2025-10-01 11:59:11,717 django.utils.autoreload autoreload 8656 3300 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-01 11:59:12,933 django.utils.autoreload autoreload 8756 9736 Watching for file changes with StatReloader
+INFO 2025-10-01 12:00:33,843 django.utils.autoreload autoreload 8756 9736 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-01 12:00:35,528 django.utils.autoreload autoreload 1508 9316 Watching for file changes with StatReloader
+INFO 2025-10-01 12:00:55,667 django.utils.autoreload autoreload 1508 9316 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\financials.py changed, reloading.
+INFO 2025-10-01 12:00:56,783 django.utils.autoreload autoreload 9444 8972 Watching for file changes with StatReloader
+INFO 2025-10-01 12:01:42,549 django.server basehttp 9444 9992 "GET /admin/inventory/transactioncorrection/ HTTP/1.1" 200 28269
+INFO 2025-10-01 12:01:44,980 django.server basehttp 9444 9992 "GET /admin/ HTTP/1.1" 200 62047
+INFO 2025-10-01 12:01:46,928 django.server basehttp 9444 9992 "GET /admin/inventory/transactioncorrection/ HTTP/1.1" 200 28269
+INFO 2025-10-01 12:01:48,083 django.server basehttp 9444 9992 "GET /admin/ HTTP/1.1" 200 62047
+INFO 2025-10-01 12:01:55,639 django.server basehttp 9444 9992 "GET /batches/ HTTP/1.1" 200 3231
+INFO 2025-10-01 12:01:57,794 django.server basehttp 9444 9992 "GET /batch/1/ HTTP/1.1" 200 12554
+INFO 2025-10-01 12:02:08,236 inventory.signals signals 9444 9992 Deleted existing JE for updated Batch ID 1 to allow regeneration.
+WARNING 2025-10-01 12:02:08,249 inventory.services.accounting_service accounting_service 9444 9992 cost_at_consumption is None for BatchItem 2. Calculating on the fly for JE creation.
+INFO 2025-10-01 12:02:08,269 inventory.services.accounting_service accounting_service 9444 9992 Successfully created Journal Entry JE-8 for Batch ID 1.
+INFO 2025-10-01 12:02:08,272 inventory.services.costing_service costing_service 9444 9992 Starting cost recalculation for 'Glucose Powder' from 2025-09-10...
+INFO 2025-10-01 12:02:08,294 inventory.services.costing_service costing_service 9444 9992 Updated cost_at_consumption for 1 batch items of 'Glucose Powder'.
+INFO 2025-10-01 12:02:08,297 inventory.services.costing_service costing_service 9444 9992 Finished recalculating cost history for 'Glucose Powder'. New MAC: 0.000
+INFO 2025-10-01 12:02:08,301 django.server basehttp 9444 9992 "POST /batch/item/add/1/ HTTP/1.1" 302 0
+INFO 2025-10-01 12:02:08,345 django.server basehttp 9444 9992 "GET /batch/1/ HTTP/1.1" 200 34566
+INFO 2025-10-01 12:02:14,187 django.utils.autoreload autoreload 9444 8972 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-01 12:02:15,267 django.utils.autoreload autoreload 3664 2352 Watching for file changes with StatReloader
+INFO 2025-10-01 12:10:59,238 django.utils.autoreload autoreload 3664 2352 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-01 12:11:00,286 django.utils.autoreload autoreload 9860 8604 Watching for file changes with StatReloader
+INFO 2025-10-01 12:12:19,925 django.server basehttp 9860 11988 "GET /admin/auth/user/add/ HTTP/1.1" 200 32996
+INFO 2025-10-01 12:12:19,963 django.server basehttp 9860 11988 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-10-01 12:13:13,475 django.server basehttp 9860 11988 "GET /admin/auth/user/1/change/ HTTP/1.1" 200 72804
+INFO 2025-10-01 12:13:13,517 django.server basehttp 9860 11376 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-10-01 12:13:13,567 django.server basehttp 9860 11988 "GET /static/admin/js/SelectBox.js HTTP/1.1" 200 4530
+INFO 2025-10-01 12:13:13,568 django.server basehttp 9860 11240 "GET /static/admin/js/SelectFilter2.js HTTP/1.1" 200 15845
+INFO 2025-10-01 12:13:39,954 django.server basehttp 9860 11240 "GET /static/jazzmin/img/selector-icons.svg HTTP/1.1" 200 3291
+INFO 2025-10-01 12:13:40,302 django.utils.autoreload autoreload 9860 8604 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\financials.py changed, reloading.
+INFO 2025-10-01 12:13:41,585 django.utils.autoreload autoreload 10544 10540 Watching for file changes with StatReloader
+INFO 2025-10-01 12:15:01,527 django.utils.autoreload autoreload 10544 10540 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\financials.py changed, reloading.
+INFO 2025-10-01 12:15:02,952 django.utils.autoreload autoreload 5368 10336 Watching for file changes with StatReloader
+INFO 2025-10-01 12:15:43,079 django.utils.autoreload autoreload 5368 10336 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\financials.py changed, reloading.
+INFO 2025-10-01 12:15:44,301 django.utils.autoreload autoreload 10092 7364 Watching for file changes with StatReloader
+INFO 2025-10-01 12:16:47,306 django.utils.autoreload autoreload 10092 7364 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\financials.py changed, reloading.
+INFO 2025-10-01 12:16:48,562 django.utils.autoreload autoreload 12268 11960 Watching for file changes with StatReloader
+INFO 2025-10-01 12:18:14,088 django.utils.autoreload autoreload 12268 11960 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\templatetags\__init__.py changed, reloading.
+INFO 2025-10-01 12:18:15,187 django.utils.autoreload autoreload 11560 12276 Watching for file changes with StatReloader
+INFO 2025-10-01 12:18:34,904 django.utils.autoreload autoreload 11560 12276 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-01 12:18:35,993 django.utils.autoreload autoreload 9960 4816 Watching for file changes with StatReloader
+INFO 2025-10-01 12:18:59,811 django.utils.autoreload autoreload 9960 4816 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-01 12:19:00,904 django.utils.autoreload autoreload 11528 9184 Watching for file changes with StatReloader
+INFO 2025-10-01 12:20:41,229 django.utils.autoreload autoreload 11528 9184 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-01 12:20:42,268 django.utils.autoreload autoreload 5216 11784 Watching for file changes with StatReloader
+INFO 2025-10-01 12:26:52,347 django.utils.autoreload autoreload 5216 11784 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-01 12:26:53,411 django.utils.autoreload autoreload 10432 232 Watching for file changes with StatReloader
+INFO 2025-10-01 12:26:56,061 django.utils.autoreload autoreload 10432 232 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\templatetags\inventory_tags.py changed, reloading.
+INFO 2025-10-01 12:26:57,310 django.utils.autoreload autoreload 11840 10348 Watching for file changes with StatReloader
+INFO 2025-10-01 12:54:01,349 inventory.services.accounting_service accounting_service 6160 2988 Successfully created Journal Entry JE-1 for InventoryLog ID 1.
+WARNING 2025-10-01 12:54:01,352 inventory.services.accounting_service accounting_service 6160 2988 Attempted to create JE for Batch ID 1 with no items. Aborting.
+INFO 2025-10-01 12:54:01,356 inventory.signals signals 6160 2988 Deleted existing JE for updated Batch ID 1 to allow regeneration.
+INFO 2025-10-01 12:54:01,363 inventory.services.accounting_service accounting_service 6160 2988 Successfully created Journal Entry JE-2 for Batch ID 1.
+INFO 2025-10-01 12:54:01,372 inventory.services.accounting_service accounting_service 6160 2988 Successfully created Journal Entry JE-3 for FinishedProductReceipt ID 1.
+INFO 2025-10-01 12:54:01,387 inventory.services.accounting_service accounting_service 6160 2988 Successfully created JE-4 for FinishedProductDispatch ID 1.
+INFO 2025-10-01 12:54:01,399 inventory.services.accounting_service accounting_service 6160 2988 Successfully created JE-5 for supplier Payment ID 1.
+INFO 2025-10-01 12:54:01,407 inventory.services.accounting_service accounting_service 6160 2988 Successfully created JE-6 for DepreciationLog ID 1.
+WARNING 2025-10-01 12:54:01,414 inventory.services.accounting_service accounting_service 6160 2988 Attempted to create JE for Batch ID 2 with no items. Aborting.
+INFO 2025-10-01 12:54:01,420 inventory.services.accounting_service accounting_service 6160 2988 Successfully created Journal Entry JE-7 for FinishedProductReceipt ID 2.
+INFO 2025-10-01 12:58:05,294 inventory.services.accounting_service accounting_service 5984 7768 Successfully created Journal Entry JE-1 for InventoryLog ID 1.
+WARNING 2025-10-01 12:58:05,299 inventory.services.accounting_service accounting_service 5984 7768 Attempted to create JE for Batch ID 1 with no items. Aborting.
+INFO 2025-10-01 12:58:05,303 inventory.signals signals 5984 7768 Deleted existing JE for updated Batch ID 1 to allow regeneration.
+INFO 2025-10-01 12:58:05,309 inventory.services.accounting_service accounting_service 5984 7768 Successfully created Journal Entry JE-2 for Batch ID 1.
+INFO 2025-10-01 12:58:05,320 inventory.services.accounting_service accounting_service 5984 7768 Successfully created Journal Entry JE-3 for FinishedProductReceipt ID 1.
+INFO 2025-10-01 12:58:05,335 inventory.services.accounting_service accounting_service 5984 7768 Successfully created JE-4 for FinishedProductDispatch ID 1.
+INFO 2025-10-01 12:58:05,343 inventory.services.accounting_service accounting_service 5984 7768 Successfully created JE-5 for supplier Payment ID 1.
+INFO 2025-10-01 12:58:05,354 inventory.services.accounting_service accounting_service 5984 7768 Successfully created JE-6 for DepreciationLog ID 1.
+WARNING 2025-10-01 12:58:05,358 inventory.services.accounting_service accounting_service 5984 7768 Attempted to create JE for Batch ID 2 with no items. Aborting.
+INFO 2025-10-01 12:58:05,367 inventory.services.accounting_service accounting_service 5984 7768 Successfully created Journal Entry JE-7 for FinishedProductReceipt ID 2.
+INFO 2025-10-01 12:58:05,375 inventory.services.accounting_service accounting_service 5984 7768 Successfully created Journal Entry JE-8 for InventoryLog ID 2.
+INFO 2025-10-01 12:58:05,386 inventory.services.accounting_service accounting_service 5984 7768 --> Starting Opening Balance JE creation for 'Go-Live 2025-01-01'.
+INFO 2025-10-01 12:58:05,388 inventory.services.accounting_service accounting_service 5984 7768     Created draft JE-9 for OB Entry 1.
+INFO 2025-10-01 12:58:05,391 inventory.services.accounting_service accounting_service 5984 7768     Processing OB Line for Account '1020102'...
+INFO 2025-10-01 12:58:05,392 inventory.services.accounting_service accounting_service 5984 7768         Created sub-ledger line: debit 1020102 for 250000.000 -> Main Business Bank Account
+INFO 2025-10-01 12:58:05,393 inventory.services.accounting_service accounting_service 5984 7768     Processing OB Line for Account '10203'...
+INFO 2025-10-01 12:58:05,394 inventory.services.accounting_service accounting_service 5984 7768         Created sub-ledger line: debit 10203 for 75000.000 -> County General Hospital
+INFO 2025-10-01 12:58:05,397 inventory.services.accounting_service accounting_service 5984 7768     Processing OB Line for Account '1020206'...
+INFO 2025-10-01 12:58:05,399 inventory.services.accounting_service accounting_service 5984 7768         Created sub-ledger line: debit 1020206 for 5750.000 -> Receipt for Batch #OB-FP-001 from Plan MIG-SO-01
+INFO 2025-10-01 12:58:05,400 inventory.services.accounting_service accounting_service 5984 7768     Processing OB Line for Account '1020201'...
+INFO 2025-10-01 12:58:05,401 inventory.services.accounting_service accounting_service 5984 7768         Created sub-ledger line: debit 1020201 for 5250.000 -> Saline Solution (RM-SALINE-001)
+INFO 2025-10-01 12:58:05,402 inventory.services.accounting_service accounting_service 5984 7768     Processing OB Line for Account '10101'...
+INFO 2025-10-01 12:58:05,403 inventory.services.accounting_service accounting_service 5984 7768         Created sub-ledger line: debit 10101 for 120000.000 -> MACHINE-001 - Production Filling Machine
+INFO 2025-10-01 12:58:05,404 inventory.services.accounting_service accounting_service 5984 7768     Processing OB Line for Account '20205'...
+INFO 2025-10-01 12:58:05,405 inventory.services.accounting_service accounting_service 5984 7768         Created sub-ledger line: credit 20205 for 10000.000 -> MACHINE-001 - Production Filling Machine
+INFO 2025-10-01 12:58:05,406 inventory.services.accounting_service accounting_service 5984 7768     Processing OB Line for Account '20201'...
+INFO 2025-10-01 12:58:05,407 inventory.services.accounting_service accounting_service 5984 7768         Created sub-ledger line: credit 20201 for 45000.000 -> Global Pharma Supplies
+INFO 2025-10-01 12:58:05,408 inventory.services.accounting_service accounting_service 5984 7768     Processing OB Line for Account '305'...
+INFO 2025-10-01 12:58:05,408 inventory.services.accounting_service accounting_service 5984 7768         Created aggregate line: credit 305 for 401000.000
+INFO 2025-10-01 12:58:05,409 inventory.services.accounting_service accounting_service 5984 7768     Validation: Total Debits = 456000.000, Total Credits = 456000.000
+INFO 2025-10-01 12:58:05,410 inventory.services.accounting_service accounting_service 5984 7768 <-- Successfully created and posted JE-9 for Opening Balance Entry 1.
+INFO 2025-10-01 12:58:27,089 django.utils.autoreload autoreload 3164 6108 Watching for file changes with StatReloader
+INFO 2025-10-01 12:58:29,917 django.server basehttp 3164 3280 "GET / HTTP/1.1" 200 30015
+INFO 2025-10-01 12:58:38,969 django.server basehttp 3164 3280 "GET /purchase_orders/create/ HTTP/1.1" 200 4157
+INFO 2025-10-01 12:58:40,944 django.server basehttp 3164 3280 "GET /purchase_orders/ HTTP/1.1" 200 2493
+INFO 2025-10-01 12:58:46,009 django.server basehttp 3164 3280 "GET /sales_orders/create/ HTTP/1.1" 200 3171
+INFO 2025-10-01 12:58:46,040 django.server basehttp 3164 3280 "GET /api/sellable_stock/ HTTP/1.1" 200 250
+INFO 2025-10-01 12:58:47,125 django.server basehttp 3164 3280 "GET /sales_orders/create/ HTTP/1.1" 200 3171
+INFO 2025-10-01 12:58:47,152 django.server basehttp 3164 3280 "GET /api/sellable_stock/ HTTP/1.1" 200 250
+INFO 2025-10-01 12:58:48,440 django.server basehttp 3164 3280 "GET /batches/ HTTP/1.1" 200 4622
+INFO 2025-10-01 12:58:57,446 django.server basehttp 3164 3280 "GET /shop_order_templates/ HTTP/1.1" 200 10863
+INFO 2025-10-01 12:58:59,259 django.server basehttp 3164 3280 "GET /shop_order_template/1/ HTTP/1.1" 200 2336
+INFO 2025-10-01 12:59:03,411 django.server basehttp 3164 3280 "GET /financials/supplier_invoices/ HTTP/1.1" 200 3595
+ERROR 2025-10-01 12:59:05,990 django.request log 3164 3280 Internal Server Error: /financials/overhead_allocation/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 199, in render
+    template = context.template.engine.select_template(template_name)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 214, in select_template
+    raise TemplateDoesNotExist(", ".join(not_found))
+django.template.exceptions.TemplateDoesNotExist: inventory/modals/view_journal_entry_modal.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\financials.py", line 1283, in overhead_allocation_workspace
+    return render(request, 'inventory/partials/overhead_allocation_workspace_content.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 109, in render
+    reraise(exc, self.backend)
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 130, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: inventory/modals/view_journal_entry_modal.html
+ERROR 2025-10-01 12:59:05,998 django.server basehttp 3164 3280 "GET /financials/overhead_allocation/ HTTP/1.1" 500 133753
+ERROR 2025-10-01 12:59:06,117 django.request log 3164 3280 Internal Server Error: /financials/overhead_allocation/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 210, in render
+    return template.render(context)
+           ~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 173, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 199, in render
+    template = context.template.engine.select_template(template_name)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 214, in select_template
+    raise TemplateDoesNotExist(", ".join(not_found))
+django.template.exceptions.TemplateDoesNotExist: inventory/modals/view_journal_entry_modal.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\financials.py", line 1284, in overhead_allocation_workspace
+    return render(request, 'inventory/overhead_allocation_workspace.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 109, in render
+    reraise(exc, self.backend)
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 130, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: inventory/modals/view_journal_entry_modal.html
+ERROR 2025-10-01 12:59:06,122 django.server basehttp 3164 3280 "GET /financials/overhead_allocation/ HTTP/1.1" 500 199504
+WARNING 2025-10-01 12:59:06,272 django.request log 3164 3280 Not Found: /favicon.ico
+WARNING 2025-10-01 12:59:06,273 django.server basehttp 3164 3280 "GET /favicon.ico HTTP/1.1" 404 38085
+INFO 2025-10-01 12:59:09,241 django.server basehttp 3164 3280 "GET /financials/allocation_drivers/ HTTP/1.1" 200 6517
+INFO 2025-10-01 12:59:10,106 django.server basehttp 3164 3280 "GET /financials/cost_pools/ HTTP/1.1" 200 11591
+INFO 2025-10-01 12:59:23,482 django.server basehttp 3164 3280 "GET / HTTP/1.1" 200 10257
+INFO 2025-10-01 12:59:27,172 django.server basehttp 3164 3280 "GET /records/ HTTP/1.1" 200 14880
+INFO 2025-10-01 12:59:51,063 django.server basehttp 3164 3280 "GET /batches/ HTTP/1.1" 200 4622
+INFO 2025-10-01 13:00:06,386 django.server basehttp 3164 3280 "GET /batch/2/ HTTP/1.1" 200 11103
+INFO 2025-10-01 13:00:25,598 django.server basehttp 3164 3280 "GET /batch/2/receive/MIGRATION-FG/ HTTP/1.1" 200 7777
+INFO 2025-10-01 13:00:33,042 django.server basehttp 3164 3280 "GET /batch/2/ HTTP/1.1" 200 11103
+INFO 2025-10-01 13:25:49,220 django.server basehttp 3164 4512 "GET /reports/trial_balance/ HTTP/1.1" 200 19682
+INFO 2025-10-01 13:25:53,195 django.server basehttp 3164 4512 "GET /reports/general_ledger/?account_id=1&start_date=2025-10-01&end_date=2025-10-01 HTTP/1.1" 200 19972
+INFO 2025-10-01 13:26:06,257 django.server basehttp 3164 4512 "GET /reports/general_ledger/?account_id=19&start_date=2025-10-01&end_date=2025-10-01 HTTP/1.1" 200 3219
+INFO 2025-10-01 13:26:07,520 django.server basehttp 3164 4512 "GET /reports/general_ledger/?account_id=19&start_date=2025-10-01&end_date=2025-10-01 HTTP/1.1" 200 3219
+INFO 2025-10-01 13:26:10,633 django.server basehttp 3164 4512 "GET /reports/general_ledger/?account_id=19&start_date=2025-10-01&end_date=2025-10-01 HTTP/1.1" 200 3219
+INFO 2025-10-01 13:26:13,516 django.server basehttp 3164 4512 "GET /reports/general_ledger/?account_id=19&start_date=2025-10-01&end_date=2025-10-01 HTTP/1.1" 200 3219
+INFO 2025-10-01 13:26:14,078 django.server basehttp 3164 4512 "GET /reports/general_ledger/?account_id=19&start_date=2025-10-01&end_date=2025-10-01 HTTP/1.1" 200 3219
+INFO 2025-10-01 13:26:14,582 django.server basehttp 3164 4512 "GET /reports/general_ledger/?account_id=1&start_date=2025-10-01&end_date=2025-10-01 HTTP/1.1" 200 19972
+INFO 2025-10-01 13:26:35,311 django.server basehttp 3164 4512 "GET /financials/banking/ HTTP/1.1" 200 3520
+INFO 2025-10-01 13:26:53,091 django.server basehttp 3164 4512 "GET /financials/periods/ HTTP/1.1" 200 22751
+ERROR 2025-10-01 13:26:59,516 django.request log 3164 4512 Internal Server Error: /financials/journal/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\financials.py", line 1011, in journal_entries
+    return render(request, 'inventory/partials/journal_entries_content.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: inventory/partials/journal_entries_content.html
+ERROR 2025-10-01 13:26:59,519 django.server basehttp 3164 4512 "GET /financials/journal/ HTTP/1.1" 500 87314
+ERROR 2025-10-01 13:26:59,574 django.request log 3164 4512 Internal Server Error: /financials/journal/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\financials.py", line 1012, in journal_entries
+    return render(request, 'inventory/journal_entries.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: inventory/journal_entries.html
+ERROR 2025-10-01 13:26:59,576 django.server basehttp 3164 4512 "GET /financials/journal/ HTTP/1.1" 500 87231
+ERROR 2025-10-01 13:27:01,970 django.request log 3164 4512 Internal Server Error: /financials/journal/create/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\financials.py", line 1059, in create_journal_entry
+    return render(request, 'inventory/partials/journal_entry_create_content.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: inventory/partials/journal_entry_create_content.html
+ERROR 2025-10-01 13:27:01,972 django.server basehttp 3164 4512 "GET /financials/journal/create/ HTTP/1.1" 500 88532
+ERROR 2025-10-01 13:27:02,021 django.request log 3164 4512 Internal Server Error: /financials/journal/create/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\financials.py", line 1060, in create_journal_entry
+    return render(request, 'inventory/journal_entry_create.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: inventory/journal_entry_create.html
+ERROR 2025-10-01 13:27:02,022 django.server basehttp 3164 4512 "GET /financials/journal/create/ HTTP/1.1" 500 88476
+INFO 2025-10-01 13:27:04,634 django.server basehttp 3164 4512 "GET /financials/fixed_assets/ HTTP/1.1" 200 3003
+INFO 2025-10-01 13:27:12,965 django.server basehttp 3164 4512 "GET /financials/fixed_assets/ HTTP/1.1" 200 22736
+INFO 2025-10-01 13:27:18,575 django.server basehttp 3164 4512 "GET /financials/reconciliation/ HTTP/1.1" 200 1096
+INFO 2025-10-01 13:27:21,550 django.server basehttp 3164 4512 "GET /reports/trial_balance/ HTTP/1.1" 200 19682
+INFO 2025-10-01 13:27:22,149 django.server basehttp 3164 4512 "GET /financials/periods/ HTTP/1.1" 200 22751
+INFO 2025-10-01 13:27:23,260 django.server basehttp 3164 4512 "GET /reports/trial_balance/ HTTP/1.1" 200 19682
+INFO 2025-10-01 13:27:34,601 django.server basehttp 3164 4512 "GET /reports/general_ledger/?account_id=19&start_date=2025-10-01&end_date=2025-10-01 HTTP/1.1" 200 29782
+INFO 2025-10-01 13:28:24,985 django.server basehttp 3164 4512 "GET /reports/general_ledger/?account_id=19&start_date=2025-10-01&end_date=2025-10-01 HTTP/1.1" 200 3219
+INFO 2025-10-01 13:28:29,536 django.server basehttp 3164 4512 "GET /reports/general_ledger/?account_id=19&start_date=2025-10-01&end_date=2025-10-01 HTTP/1.1" 200 3219
+INFO 2025-10-01 13:28:30,177 django.server basehttp 3164 4512 "GET /reports/general_ledger/?account_id=19&start_date=2025-10-01&end_date=2025-10-01 HTTP/1.1" 200 29782
+INFO 2025-10-01 13:28:30,808 django.server basehttp 3164 4512 "GET /reports/general_ledger/?account_id=19&start_date=2025-10-01&end_date=2025-10-01 HTTP/1.1" 200 29782
+INFO 2025-10-01 13:28:38,771 django.server basehttp 3164 4512 "GET /reports/general_ledger/?account_id=19&start_date=2025-10-01&end_date=2025-10-01 HTTP/1.1" 200 29782
+INFO 2025-10-01 13:28:52,603 django.server basehttp 3164 4512 "GET /reports/general_ledger/?account_id=19&start_date=2024-01-01&end_date=2025-10-01 HTTP/1.1" 200 30561
+INFO 2025-10-01 13:29:28,680 django.server basehttp 3164 4512 "GET /reports/general_ledger/?account_id=19&start_date=2025-01-01&end_date=2025-10-01 HTTP/1.1" 200 30561
+INFO 2025-10-01 13:29:30,434 django.server basehttp 3164 4512 "GET /reports/general_ledger/?account_id=19&start_date=2025-01-01&end_date=2025-10-01 HTTP/1.1" 200 3998
+INFO 2025-10-01 13:29:34,905 django.server basehttp 3164 4512 "GET /reports/general_ledger/?account_id=19&start_date=2025-01-01&end_date=2025-10-01 HTTP/1.1" 200 30561
+INFO 2025-10-01 13:29:39,286 django.server basehttp 3164 4512 "GET /reports/general_ledger/?account_id=19&start_date=2025-01-02&end_date=2025-10-01 HTTP/1.1" 200 29782
+INFO 2025-10-01 13:29:49,564 django.server basehttp 3164 4512 "GET /reports/general_ledger/?account_id=19&start_date=2025-01-01&end_date=2025-10-01 HTTP/1.1" 200 30561
+INFO 2025-10-01 13:30:10,978 django.server basehttp 3164 4512 "GET /reports/general_ledger/?account_id=15&start_date=2025-10-01&end_date=2025-10-01 HTTP/1.1" 200 4790
+INFO 2025-10-01 13:30:19,864 django.server basehttp 3164 4512 "GET /reports/trial_balance/ HTTP/1.1" 200 19682
+INFO 2025-10-01 13:30:28,601 django.server basehttp 3164 4512 "GET /reports/general_ledger/?account_id=16&start_date=2025-10-01&end_date=2025-10-01 HTTP/1.1" 200 3287
+INFO 2025-10-01 13:30:32,705 django.server basehttp 3164 4512 "GET /reports/trial_balance/ HTTP/1.1" 200 19682
+INFO 2025-10-01 13:30:38,490 django.server basehttp 3164 4512 "GET /reports/general_ledger/?account_id=16&start_date=2025-10-01&end_date=2025-10-01 HTTP/1.1" 200 3287
+INFO 2025-10-01 13:30:40,417 django.server basehttp 3164 4512 "GET /reports/general_ledger/?account_id=16&start_date=2025-10-01&end_date=2025-10-01 HTTP/1.1" 200 29850
+INFO 2025-10-01 13:30:45,015 django.server basehttp 3164 4512 "GET /reports/general_ledger/?account_id=16&start_date=2025-10-01&end_date=2025-10-01 HTTP/1.1" 200 29850
+INFO 2025-10-01 13:30:48,320 django.server basehttp 3164 4512 "GET /reports/general_ledger/?account_id=16&start_date=2025-10-02&end_date=2025-10-01 HTTP/1.1" 200 29850
+INFO 2025-10-01 13:30:49,168 django.server basehttp 3164 4512 "GET /reports/general_ledger/?account_id=16&start_date=2025-10-02&end_date=2025-10-01 HTTP/1.1" 200 29850
+INFO 2025-10-01 13:30:55,660 django.server basehttp 3164 4512 "GET /reports/general_ledger/?account_id=16&start_date=2025-09-30&end_date=2025-10-01 HTTP/1.1" 200 29850
+INFO 2025-10-01 13:30:56,757 django.server basehttp 3164 4512 "GET /reports/general_ledger/?account_id=16&start_date=2025-09-30&end_date=2025-10-01 HTTP/1.1" 200 29850
+INFO 2025-10-01 13:31:04,354 django.server basehttp 3164 4512 "GET /reports/general_ledger/?account_id=16&start_date=2025-01-01&end_date=2025-10-01 HTTP/1.1" 200 30681
+INFO 2025-10-01 13:31:32,405 django.server basehttp 3164 4512 "GET /reports/general_ledger/?account_id=39&start_date=2025-01-01&end_date=2025-10-01 HTTP/1.1" 200 28938
+INFO 2025-10-01 13:31:35,711 django.server basehttp 3164 4512 "GET /reports/general_ledger/?account_id=36&start_date=2025-01-01&end_date=2025-10-01 HTTP/1.1" 200 32129
+INFO 2025-10-01 13:32:14,452 django.server basehttp 3164 4512 "GET /reports/general_ledger/?account_id=19&start_date=2025-01-01&end_date=2025-10-01 HTTP/1.1" 200 30561
+INFO 2025-10-01 13:32:21,128 django.server basehttp 3164 4512 "GET /employees/financials/ HTTP/1.1" 200 1837
+INFO 2025-10-01 13:32:22,813 django.server basehttp 3164 4512 "GET /reports/tax_reconciliation/ HTTP/1.1" 200 6334
+INFO 2025-10-01 13:32:24,674 django.server basehttp 3164 4512 "GET /reports/reconciliation/ HTTP/1.1" 200 3109
+INFO 2025-10-01 13:32:32,774 django.server basehttp 3164 4512 "GET /reports/reconciliation/ HTTP/1.1" 200 24147
+INFO 2025-10-01 13:33:16,646 django.server basehttp 3164 4512 "GET /reports/reconciliation/?bank_account= HTTP/1.1" 200 24147
+INFO 2025-10-01 13:33:20,649 django.server basehttp 3164 4512 "GET /reports/reconciliation/?bank_account=1 HTTP/1.1" 200 24155
+INFO 2025-10-01 13:33:24,034 django.server basehttp 3164 4512 "GET /batches/ HTTP/1.1" 200 4622
+INFO 2025-10-01 13:33:25,786 django.server basehttp 3164 4512 "GET /batch/1/ HTTP/1.1" 200 13017
+INFO 2025-10-01 14:10:27,854 django.server basehttp 3164 8868 "GET /batches/ HTTP/1.1" 200 4622
+INFO 2025-10-01 14:10:29,276 django.server basehttp 3164 8868 "GET /shop_order_templates/ HTTP/1.1" 200 10863
+INFO 2025-10-01 14:10:30,832 django.server basehttp 3164 8868 "GET /quarantine/ HTTP/1.1" 200 3311
+INFO 2025-10-01 14:10:31,495 django.server basehttp 3164 8868 "GET /reports/general_ledger/ HTTP/1.1" 200 2211
+INFO 2025-10-01 14:10:32,254 django.server basehttp 3164 8868 "GET /reports/general_ledger/ HTTP/1.1" 200 2211
+INFO 2025-10-01 14:10:32,567 django.server basehttp 3164 8868 "GET /production_returns/ HTTP/1.1" 200 4192
+WARNING 2025-10-01 14:10:35,131 django.request log 3164 8868 Not Found: /api/get_used_qc_sources/0/
+WARNING 2025-10-01 14:10:35,131 django.server basehttp 3164 8868 "GET /api/get_used_qc_sources/0/ HTTP/1.1" 404 36405
+WARNING 2025-10-01 14:10:36,507 django.request log 3164 8868 Not Found: /api/get_used_qc_sources/0/
+WARNING 2025-10-01 14:10:36,508 django.server basehttp 3164 8868 "GET /api/get_used_qc_sources/0/ HTTP/1.1" 404 36405
+WARNING 2025-10-01 14:10:37,386 django.request log 3164 8868 Not Found: /api/get_used_qc_sources/0/
+WARNING 2025-10-01 14:10:37,386 django.server basehttp 3164 8868 "GET /api/get_used_qc_sources/0/ HTTP/1.1" 404 36405
+WARNING 2025-10-01 14:10:38,851 django.request log 3164 8868 Not Found: /api/get_used_qc_sources/0/
+WARNING 2025-10-01 14:10:38,852 django.server basehttp 3164 8868 "GET /api/get_used_qc_sources/0/ HTTP/1.1" 404 36405
+INFO 2025-10-01 14:10:51,349 django.server basehttp 3164 8868 "GET / HTTP/1.1" 200 10257
+INFO 2025-10-01 14:11:36,091 django.server basehttp 3164 8868 "GET /api/product_tags/2/ HTTP/1.1" 200 12
+INFO 2025-10-01 14:11:40,524 django.server basehttp 3164 8868 "GET /batches/ HTTP/1.1" 200 4622
+ERROR 2025-10-01 14:59:59,901 django.request log 3164 5356 Internal Server Error: /financials/overhead_allocation/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 199, in render
+    template = context.template.engine.select_template(template_name)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 214, in select_template
+    raise TemplateDoesNotExist(", ".join(not_found))
+django.template.exceptions.TemplateDoesNotExist: inventory/modals/view_journal_entry_modal.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\financials.py", line 1283, in overhead_allocation_workspace
+    return render(request, 'inventory/partials/overhead_allocation_workspace_content.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 109, in render
+    reraise(exc, self.backend)
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 130, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: inventory/modals/view_journal_entry_modal.html
+ERROR 2025-10-01 14:59:59,906 django.server basehttp 3164 5356 "GET /financials/overhead_allocation/ HTTP/1.1" 500 133583
+ERROR 2025-10-01 15:00:00,024 django.request log 3164 5356 Internal Server Error: /financials/overhead_allocation/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 210, in render
+    return template.render(context)
+           ~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 173, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 199, in render
+    template = context.template.engine.select_template(template_name)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 214, in select_template
+    raise TemplateDoesNotExist(", ".join(not_found))
+django.template.exceptions.TemplateDoesNotExist: inventory/modals/view_journal_entry_modal.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\financials.py", line 1284, in overhead_allocation_workspace
+    return render(request, 'inventory/overhead_allocation_workspace.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 109, in render
+    reraise(exc, self.backend)
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 130, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: inventory/modals/view_journal_entry_modal.html
+ERROR 2025-10-01 15:00:00,029 django.server basehttp 3164 5356 "GET /financials/overhead_allocation/ HTTP/1.1" 500 199483
+INFO 2025-10-01 15:00:02,198 django.server basehttp 3164 5356 "GET /financials/allocation_drivers/ HTTP/1.1" 200 6517
+INFO 2025-10-01 15:00:06,001 django.server basehttp 3164 5356 "GET /financials/cost_pools/ HTTP/1.1" 200 11591
+INFO 2025-10-01 15:00:16,517 django.server basehttp 3164 5356 "GET /reports/trial_balance/ HTTP/1.1" 200 19682
+INFO 2025-10-01 15:00:47,275 django.server basehttp 3164 5356 "GET /financials/cost_pools/ HTTP/1.1" 200 11591
+INFO 2025-10-01 15:00:48,518 django.server basehttp 3164 5356 "GET /reports/trial_balance/ HTTP/1.1" 200 19682
+ERROR 2025-10-01 15:00:49,486 django.request log 3164 5356 Internal Server Error: /financials/journal/create/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\financials.py", line 1059, in create_journal_entry
+    return render(request, 'inventory/partials/journal_entry_create_content.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: inventory/partials/journal_entry_create_content.html
+ERROR 2025-10-01 15:00:49,488 django.server basehttp 3164 5356 "GET /financials/journal/create/ HTTP/1.1" 500 88535
+ERROR 2025-10-01 15:00:49,537 django.request log 3164 5356 Internal Server Error: /financials/journal/create/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\financials.py", line 1060, in create_journal_entry
+    return render(request, 'inventory/journal_entry_create.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: inventory/journal_entry_create.html
+ERROR 2025-10-01 15:00:49,539 django.server basehttp 3164 5356 "GET /financials/journal/create/ HTTP/1.1" 500 88479
+ERROR 2025-10-01 15:00:51,705 django.request log 3164 5356 Internal Server Error: /financials/journal/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\financials.py", line 1011, in journal_entries
+    return render(request, 'inventory/partials/journal_entries_content.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: inventory/partials/journal_entries_content.html
+ERROR 2025-10-01 15:00:51,707 django.server basehttp 3164 5356 "GET /financials/journal/ HTTP/1.1" 500 87317
+ERROR 2025-10-01 15:00:51,760 django.request log 3164 5356 Internal Server Error: /financials/journal/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\financials.py", line 1012, in journal_entries
+    return render(request, 'inventory/journal_entries.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: inventory/journal_entries.html
+ERROR 2025-10-01 15:00:51,762 django.server basehttp 3164 5356 "GET /financials/journal/ HTTP/1.1" 500 87234
+INFO 2025-10-01 15:00:54,234 django.server basehttp 3164 5356 "GET /financials/periods/ HTTP/1.1" 200 22751
+INFO 2025-10-01 15:01:16,062 django.server basehttp 3164 5356 "GET /reports/trial_balance/ HTTP/1.1" 200 19682
+INFO 2025-10-01 15:01:41,692 django.server basehttp 3164 5356 "GET /reports/general_ledger/?account_id=19&start_date=2025-10-01&end_date=2025-10-01 HTTP/1.1" 200 3219
+INFO 2025-10-01 15:01:45,215 django.server basehttp 3164 5356 "GET /reports/trial_balance/ HTTP/1.1" 200 19682
+INFO 2025-10-01 15:01:47,234 django.server basehttp 3164 5356 "GET /reports/general_ledger/?account_id=3&start_date=2025-10-01&end_date=2025-10-01 HTTP/1.1" 200 4787
+INFO 2025-10-01 15:01:50,842 django.server basehttp 3164 5356 "GET /reports/trial_balance/ HTTP/1.1" 200 19682
+INFO 2025-10-01 15:01:56,782 django.server basehttp 3164 5356 "GET /financials/customer_invoices/ HTTP/1.1" 200 3134
+INFO 2025-10-01 15:01:58,487 django.server basehttp 3164 5356 "GET /financials/supplier_invoices/ HTTP/1.1" 200 3595
+INFO 2025-10-01 15:01:59,753 django.server basehttp 3164 5356 "GET /financials/banking/ HTTP/1.1" 200 3520
+INFO 2025-10-01 15:02:03,982 django.server basehttp 3164 5356 "GET /financials/reconciliation/ HTTP/1.1" 200 1096
+INFO 2025-10-01 15:02:05,648 django.server basehttp 3164 5356 "GET /financials/fixed_assets/ HTTP/1.1" 200 3003
+INFO 2025-10-01 15:05:47,742 django.server basehttp 3164 5356 "GET /financials/customer_invoices/ HTTP/1.1" 200 3134
+INFO 2025-10-01 22:03:48,536 django.utils.autoreload autoreload 3164 6108 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\services\accounting_service.py changed, reloading.
+INFO 2025-10-01 22:03:51,350 django.utils.autoreload autoreload 6684 9904 Watching for file changes with StatReloader
+INFO 2025-10-01 22:04:08,611 django.utils.autoreload autoreload 6684 9904 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\services\accounting_service.py changed, reloading.
+INFO 2025-10-01 22:04:10,268 django.utils.autoreload autoreload 9864 8936 Watching for file changes with StatReloader
+INFO 2025-10-01 22:04:15,287 inventory.services.accounting_service accounting_service 1968 8344 Successfully created Journal Entry JE-1 for InventoryLog ID 1.
+WARNING 2025-10-01 22:04:15,293 inventory.services.accounting_service accounting_service 1968 8344 Attempted to create JE for Batch ID 1 with no items. Aborting.
+INFO 2025-10-01 22:04:15,296 inventory.signals signals 1968 8344 Deleted existing JE for updated Batch ID 1 to allow regeneration.
+INFO 2025-10-01 22:04:15,304 inventory.services.accounting_service accounting_service 1968 8344 Successfully created Journal Entry JE-2 for Batch ID 1.
+INFO 2025-10-01 22:04:15,315 inventory.services.accounting_service accounting_service 1968 8344 Successfully created Journal Entry JE-3 for FinishedProductReceipt ID 1.
+INFO 2025-10-01 22:04:15,331 inventory.services.accounting_service accounting_service 1968 8344 Successfully created JE-4 for FinishedProductDispatch ID 1.
+INFO 2025-10-01 22:04:15,342 inventory.services.accounting_service accounting_service 1968 8344 Successfully created JE-5 for supplier Payment ID 1.
+INFO 2025-10-01 22:04:15,349 inventory.services.accounting_service accounting_service 1968 8344 Successfully created JE-6 for DepreciationLog ID 1.
+WARNING 2025-10-01 22:04:15,354 inventory.services.accounting_service accounting_service 1968 8344 Attempted to create JE for Batch ID 2 with no items. Aborting.
+INFO 2025-10-01 22:04:15,366 inventory.services.accounting_service accounting_service 1968 8344 Successfully created Journal Entry JE-7 for FinishedProductReceipt ID 2.
+WARNING 2025-10-01 22:04:15,369 inventory.services.accounting_service accounting_service 1968 8344 Attempted to create JE for Batch ID 3 with no items. Aborting.
+INFO 2025-10-01 22:04:15,378 inventory.services.accounting_service accounting_service 1968 8344 Successfully created Journal Entry JE-8 for FinishedProductReceipt ID 3.
+INFO 2025-10-01 22:04:15,386 inventory.services.accounting_service accounting_service 1968 8344 Successfully created Journal Entry JE-9 for InventoryLog ID 2.
+INFO 2025-10-01 22:04:15,397 inventory.services.accounting_service accounting_service 1968 8344 Successfully created Journal Entry JE-10 for InventoryLog ID 3.
+INFO 2025-10-01 22:05:50,516 inventory.services.accounting_service accounting_service 8140 7620 Successfully created Journal Entry JE-1 for InventoryLog ID 1.
+WARNING 2025-10-01 22:05:50,519 inventory.services.accounting_service accounting_service 8140 7620 Attempted to create JE for Batch ID 1 with no items. Aborting.
+INFO 2025-10-01 22:05:50,525 inventory.signals signals 8140 7620 Deleted existing JE for updated Batch ID 1 to allow regeneration.
+INFO 2025-10-01 22:05:50,533 inventory.services.accounting_service accounting_service 8140 7620 Successfully created Journal Entry JE-2 for Batch ID 1.
+INFO 2025-10-01 22:05:50,543 inventory.services.accounting_service accounting_service 8140 7620 Successfully created Journal Entry JE-3 for FinishedProductReceipt ID 1.
+INFO 2025-10-01 22:05:50,560 inventory.services.accounting_service accounting_service 8140 7620 Successfully created JE-4 for FinishedProductDispatch ID 1.
+INFO 2025-10-01 22:05:50,569 inventory.services.accounting_service accounting_service 8140 7620 Successfully created JE-5 for supplier Payment ID 1.
+INFO 2025-10-01 22:05:50,579 inventory.services.accounting_service accounting_service 8140 7620 Successfully created JE-6 for DepreciationLog ID 1.
+WARNING 2025-10-01 22:05:50,586 inventory.services.accounting_service accounting_service 8140 7620 Attempted to create JE for Batch ID 2 with no items. Aborting.
+INFO 2025-10-01 22:05:50,596 inventory.services.accounting_service accounting_service 8140 7620 Successfully created Journal Entry JE-7 for FinishedProductReceipt ID 2.
+WARNING 2025-10-01 22:05:50,598 inventory.services.accounting_service accounting_service 8140 7620 Attempted to create JE for Batch ID 3 with no items. Aborting.
+INFO 2025-10-01 22:05:50,604 inventory.services.accounting_service accounting_service 8140 7620 Successfully created Journal Entry JE-8 for FinishedProductReceipt ID 3.
+INFO 2025-10-01 22:05:50,615 inventory.services.accounting_service accounting_service 8140 7620 Successfully created Journal Entry JE-9 for InventoryLog ID 2.
+INFO 2025-10-01 22:05:50,626 inventory.services.accounting_service accounting_service 8140 7620 Successfully created Journal Entry JE-10 for InventoryLog ID 3.
+WARNING 2025-10-01 22:05:50,629 inventory.services.accounting_service accounting_service 8140 7620 Attempted to create JE for Batch ID 4 with no items. Aborting.
+INFO 2025-10-01 22:07:16,598 inventory.services.accounting_service accounting_service 9588 684 Successfully created Journal Entry JE-1 for InventoryLog ID 1.
+WARNING 2025-10-01 22:07:16,601 inventory.services.accounting_service accounting_service 9588 684 Attempted to create JE for Batch ID 1 with no items. Aborting.
+INFO 2025-10-01 22:07:16,607 inventory.signals signals 9588 684 Deleted existing JE for updated Batch ID 1 to allow regeneration.
+INFO 2025-10-01 22:07:16,615 inventory.services.accounting_service accounting_service 9588 684 Successfully created Journal Entry JE-2 for Batch ID 1.
+INFO 2025-10-01 22:07:16,628 inventory.services.accounting_service accounting_service 9588 684 Successfully created Journal Entry JE-3 for FinishedProductReceipt ID 1.
+INFO 2025-10-01 22:07:16,648 inventory.services.accounting_service accounting_service 9588 684 Successfully created JE-4 for FinishedProductDispatch ID 1.
+INFO 2025-10-01 22:07:16,659 inventory.services.accounting_service accounting_service 9588 684 Successfully created JE-5 for supplier Payment ID 1.
+INFO 2025-10-01 22:07:16,666 inventory.services.accounting_service accounting_service 9588 684 Successfully created JE-6 for DepreciationLog ID 1.
+WARNING 2025-10-01 22:07:16,677 inventory.services.accounting_service accounting_service 9588 684 Attempted to create JE for Batch ID 2 with no items. Aborting.
+INFO 2025-10-01 22:07:16,683 inventory.services.accounting_service accounting_service 9588 684 Successfully created Journal Entry JE-7 for FinishedProductReceipt ID 2.
+WARNING 2025-10-01 22:07:16,686 inventory.services.accounting_service accounting_service 9588 684 Attempted to create JE for Batch ID 3 with no items. Aborting.
+INFO 2025-10-01 22:07:16,696 inventory.services.accounting_service accounting_service 9588 684 Successfully created Journal Entry JE-8 for FinishedProductReceipt ID 3.
+INFO 2025-10-01 22:07:16,711 inventory.services.accounting_service accounting_service 9588 684 Successfully created Journal Entry JE-9 for InventoryLog ID 2.
+INFO 2025-10-01 22:07:16,719 inventory.services.accounting_service accounting_service 9588 684 Successfully created Journal Entry JE-10 for InventoryLog ID 3.
+WARNING 2025-10-01 22:07:16,725 inventory.services.accounting_service accounting_service 9588 684 Attempted to create JE for Batch ID 4 with no items. Aborting.
+INFO 2025-10-01 22:07:16,742 inventory.services.accounting_service accounting_service 9588 684 --> Starting Opening Balance JE creation for 'Go-Live 2025-01-01'.
+INFO 2025-10-01 22:07:16,743 inventory.services.accounting_service accounting_service 9588 684     Created draft JE-11 for OB Entry 1.
+INFO 2025-10-01 22:07:16,752 inventory.services.accounting_service accounting_service 9588 684     Processing OB Line for Account '1020102'...
+INFO 2025-10-01 22:07:16,753 inventory.services.accounting_service accounting_service 9588 684         Created sub-ledger line: debit 1020102 for 250000.000 -> Main Business Bank Account
+INFO 2025-10-01 22:07:16,753 inventory.services.accounting_service accounting_service 9588 684     Processing OB Line for Account '1020103'...
+INFO 2025-10-01 22:07:16,759 inventory.services.accounting_service accounting_service 9588 684         Created sub-ledger line: debit 1020103 for 50000.000 -> Secondary Business Bank Account
+INFO 2025-10-01 22:07:16,760 inventory.services.accounting_service accounting_service 9588 684     Processing OB Line for Account '10203'...
+INFO 2025-10-01 22:07:16,761 inventory.services.accounting_service accounting_service 9588 684         Created sub-ledger line: debit 10203 for 75000.000 -> County General Hospital
+INFO 2025-10-01 22:07:16,762 inventory.services.accounting_service accounting_service 9588 684         Created sub-ledger line: debit 10203 for 20000.000 -> City Central Pharmacy
+INFO 2025-10-01 22:07:16,763 inventory.services.accounting_service accounting_service 9588 684     Processing OB Line for Account '1020206'...
+INFO 2025-10-01 22:07:16,766 inventory.services.accounting_service accounting_service 9588 684         Created sub-ledger line: debit 1020206 for 5750.000 -> Receipt for Batch #OB-FP-SALINE-001 from Plan MIG-SO-SALINE
+INFO 2025-10-01 22:07:16,768 inventory.services.accounting_service accounting_service 9588 684         Created sub-ledger line: debit 1020206 for 4200.000 -> Receipt for Batch #OB-FP-GLUCOSE-001 from Plan MIG-SO-GLUCOSE
+INFO 2025-10-01 22:07:16,768 inventory.services.accounting_service accounting_service 9588 684     Processing OB Line for Account '1020201'...
+INFO 2025-10-01 22:07:16,769 inventory.services.accounting_service accounting_service 9588 684         Created sub-ledger line: debit 1020201 for 5250.000 -> Saline Solution (RM-SALINE-001)
+INFO 2025-10-01 22:07:16,770 inventory.services.accounting_service accounting_service 9588 684     Processing OB Line for Account '1020202'...
+INFO 2025-10-01 22:07:16,773 inventory.services.accounting_service accounting_service 9588 684         Created sub-ledger line: debit 1020202 for 2400.000 -> PVC Bag 500ml (RM-BAG-PVC-500)
+INFO 2025-10-01 22:07:16,775 inventory.services.accounting_service accounting_service 9588 684     Processing OB Line for Account '1020205'...
+INFO 2025-10-01 22:07:16,777 inventory.services.accounting_service accounting_service 9588 684         Created sub-ledger line: debit 1020205 for 645.000 -> Saline IV Drip Bag 500ml (FP-IVDRIP-500)
+INFO 2025-10-01 22:07:16,778 inventory.services.accounting_service accounting_service 9588 684     Processing OB Line for Account '10101'...
+INFO 2025-10-01 22:07:16,779 inventory.services.accounting_service accounting_service 9588 684         Created sub-ledger line: debit 10101 for 120000.000 -> MACHINE-001 - Production Filling Machine
+INFO 2025-10-01 22:07:16,780 inventory.services.accounting_service accounting_service 9588 684     Processing OB Line for Account '10102'...
+INFO 2025-10-01 22:07:16,780 inventory.services.accounting_service accounting_service 9588 684         Created sub-ledger line: debit 10102 for 30000.000 -> FURN-001 - Office Furniture Set
+INFO 2025-10-01 22:07:16,781 inventory.services.accounting_service accounting_service 9588 684     Processing OB Line for Account '2020501'...
+INFO 2025-10-01 22:07:16,782 inventory.services.accounting_service accounting_service 9588 684         Created sub-ledger line: credit 2020501 for 12000.000 -> MACHINE-001 - Production Filling Machine
+INFO 2025-10-01 22:07:16,783 inventory.services.accounting_service accounting_service 9588 684     Processing OB Line for Account '2020502'...
+INFO 2025-10-01 22:07:16,783 inventory.services.accounting_service accounting_service 9588 684         Created sub-ledger line: credit 2020502 for 9000.000 -> FURN-001 - Office Furniture Set
+INFO 2025-10-01 22:07:16,784 inventory.services.accounting_service accounting_service 9588 684     Processing OB Line for Account '20201'...
+INFO 2025-10-01 22:07:16,785 inventory.services.accounting_service accounting_service 9588 684         Created sub-ledger line: credit 20201 for 45000.000 -> Global Pharma Supplies
+INFO 2025-10-01 22:07:16,785 inventory.services.accounting_service accounting_service 9588 684         Created sub-ledger line: credit 20201 for 20000.000 -> Advanced Medical Packaging Inc.
+INFO 2025-10-01 22:07:16,786 inventory.services.accounting_service accounting_service 9588 684     Processing OB Line for Account '305'...
+INFO 2025-10-01 22:07:16,787 inventory.services.accounting_service accounting_service 9588 684         Created aggregate line: credit 305 for 477245.000
+INFO 2025-10-01 22:07:16,787 inventory.services.accounting_service accounting_service 9588 684     Validation: Total Debits = 563245.000, Total Credits = 563245.000
+INFO 2025-10-01 22:07:16,793 inventory.services.accounting_service accounting_service 9588 684 <-- Successfully created and posted JE-11 for Opening Balance Entry 1.
+INFO 2025-10-01 22:07:29,019 django.server basehttp 9864 4044 "GET /financials/customer_invoices/ HTTP/1.1" 200 22871
+INFO 2025-10-01 22:07:29,063 django.server basehttp 9864 4044 "GET /static/css/style.css HTTP/1.1" 304 0
+INFO 2025-10-01 22:07:29,083 django.server basehttp 9864 4516 "GET /static/layout/js/records_logic.js HTTP/1.1" 304 0
+INFO 2025-10-01 22:07:29,086 django.server basehttp 9864 4044 "GET /static/layout/js/financials_logic.js HTTP/1.1" 304 0
+INFO 2025-10-01 22:07:29,088 django.server basehttp 9864 9568 "GET /static/layout/js/close_period_logic.js HTTP/1.1" 304 0
+INFO 2025-10-01 22:07:29,090 django.server basehttp 9864 7536 "GET /static/layout/js/dynamic_content_loader.js HTTP/1.1" 304 0
+INFO 2025-10-01 22:07:33,357 django.server basehttp 9864 7536 "GET /batches/ HTTP/1.1" 200 7401
+INFO 2025-10-01 22:07:47,837 django.server basehttp 9864 7536 "GET /batch/2/ HTTP/1.1" 200 11480
+INFO 2025-10-01 22:07:57,993 django.server basehttp 9864 7536 "GET /batches/ HTTP/1.1" 200 7401
+INFO 2025-10-01 22:07:59,199 django.server basehttp 9864 7536 "GET /batch/4/ HTTP/1.1" 200 15373
+INFO 2025-10-01 22:08:01,638 django.server basehttp 9864 7536 "GET /batches/ HTTP/1.1" 200 7401
+INFO 2025-10-01 22:08:08,290 django.server basehttp 9864 7536 "GET /batch/4/ HTTP/1.1" 200 15373
+INFO 2025-10-01 22:08:16,355 django.server basehttp 9864 7536 "GET /batch/4/ HTTP/1.1" 200 35066
+INFO 2025-10-01 22:09:53,223 django.server basehttp 9864 7536 "GET /quarantine/ HTTP/1.1" 200 3311
+INFO 2025-10-01 22:09:54,047 django.server basehttp 9864 7536 "GET /reports/general_ledger/ HTTP/1.1" 200 2211
+INFO 2025-10-01 22:09:54,971 django.server basehttp 9864 7536 "GET /production_returns/ HTTP/1.1" 200 4192
+INFO 2025-10-01 22:09:56,057 django.server basehttp 9864 7536 "GET /inventory_counts/ HTTP/1.1" 302 0
+WARNING 2025-10-01 22:09:56,076 django.request log 9864 7536 Not Found: /accounts/login/
+WARNING 2025-10-01 22:09:56,076 django.server basehttp 9864 7536 "GET /accounts/login/?next=/inventory_counts/ HTTP/1.1" 404 38121
+INFO 2025-10-01 22:09:56,098 django.server basehttp 9864 7536 "GET /inventory_counts/ HTTP/1.1" 302 0
+WARNING 2025-10-01 22:09:56,115 django.request log 9864 7536 Not Found: /accounts/login/
+WARNING 2025-10-01 22:09:56,116 django.server basehttp 9864 7536 "GET /accounts/login/?next=/inventory_counts/ HTTP/1.1" 404 38121
+INFO 2025-10-01 22:09:58,690 django.server basehttp 9864 7536 "GET /visuals/ HTTP/1.1" 200 8718
+INFO 2025-10-01 22:09:58,742 django.server basehttp 9864 7536 "GET /visuals/ HTTP/1.1" 200 28485
+INFO 2025-10-01 22:10:03,141 django.server basehttp 9864 7536 "GET /reports/stock_valuation/ HTTP/1.1" 200 3541
+INFO 2025-10-01 22:10:06,810 django.server basehttp 9864 7536 "GET /reports/stock_valuation/ HTTP/1.1" 200 23231
+INFO 2025-10-01 22:10:10,355 django.server basehttp 9864 7536 "GET /reports/stock_valuation/ HTTP/1.1" 200 23231
+INFO 2025-10-01 22:10:31,465 django.server basehttp 9864 7536 "GET /reports/product_ledger/ HTTP/1.1" 200 3475
+INFO 2025-10-01 22:10:34,188 django.server basehttp 9864 7536 "GET /reports/product_ledger/ HTTP/1.1" 200 3475
+INFO 2025-10-01 22:10:35,524 django.server basehttp 9864 7536 "GET /reports/product_ledger/ HTTP/1.1" 200 3475
+INFO 2025-10-01 22:10:37,364 django.server basehttp 9864 7536 "GET /reports/product_ledger/ HTTP/1.1" 200 22507
+INFO 2025-10-01 22:10:48,852 django.server basehttp 9864 7536 "GET /reports/product_ledger/?product_id=5&start_date=2025-01-01&end_date=2025-10-01 HTTP/1.1" 200 25801
+INFO 2025-10-01 22:10:54,465 django.server basehttp 9864 7536 "GET /reports/product_ledger/?product_id=5&start_date=2025-01-01&end_date=2025-10-01 HTTP/1.1" 200 25801
+INFO 2025-10-01 22:10:59,941 django.server basehttp 9864 7536 "GET /reports/product_ledger/?product_id=2&start_date=2025-01-01&end_date=2025-10-01 HTTP/1.1" 200 25777
+INFO 2025-10-01 22:11:03,366 django.server basehttp 9864 7536 "GET /reports/product_ledger/?product_id=6&start_date=2025-01-01&end_date=2025-10-01 HTTP/1.1" 200 25780
+ERROR 2025-10-01 22:11:06,159 django.server basehttp 9864 7536 "GET /reports/product_ledger/?product_id=3&start_date=2025-01-01&end_date=2025-10-01 HTTP/1.1" 500 77598
+INFO 2025-10-01 22:11:10,222 django.server basehttp 9864 7536 "GET /reports/product_ledger/?product_id=4&start_date=2025-01-01&end_date=2025-10-01 HTTP/1.1" 200 26361
+INFO 2025-10-01 22:11:39,550 django.server basehttp 9864 7536 "GET /reports/product_ledger/?product_id=4&start_date=2024-12-11&end_date=2025-10-01 HTTP/1.1" 200 26350
+INFO 2025-10-02 08:09:02,870 django.server basehttp 9864 9152 "GET /admin/auth/user/1/change/ HTTP/1.1" 302 0
+INFO 2025-10-02 08:09:02,885 django.server basehttp 9864 9152 "GET /admin/login/?next=/admin/auth/user/1/change/ HTTP/1.1" 200 3163
+WARNING 2025-10-02 08:09:02,931 django.server basehttp 9864 9152 "GET /static/img/ims_logo.png HTTP/1.1" 404 1862
+WARNING 2025-10-02 08:09:03,044 django.server basehttp 9864 7184 "GET /static/fas%20fa-warehouse HTTP/1.1" 404 1864
+INFO 2025-10-02 08:09:09,441 django.server basehttp 9864 10076 "POST /admin/login/?next=/admin/auth/user/1/change/ HTTP/1.1" 200 3486
+WARNING 2025-10-02 08:09:09,470 django.server basehttp 9864 10076 "GET /static/img/ims_logo.png HTTP/1.1" 404 1862
+INFO 2025-10-02 08:09:32,253 django.server basehttp 9864 9252 "POST /admin/login/?next=/admin/auth/user/1/change/ HTTP/1.1" 302 0
+INFO 2025-10-02 08:09:32,376 django.server basehttp 9864 9252 "GET /admin/auth/user/1/change/ HTTP/1.1" 200 72804
+INFO 2025-10-02 08:09:32,414 django.server basehttp 9864 9252 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-10-02 08:09:35,159 django.server basehttp 9864 9252 "GET /admin/inventory/bankaccount/ HTTP/1.1" 200 32649
+INFO 2025-10-02 08:09:35,180 django.server basehttp 9864 9252 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-10-02 08:09:36,148 django.server basehttp 9864 9252 "GET /admin/inventory/bankreconciliation/ HTTP/1.1" 200 29831
+INFO 2025-10-02 08:09:36,170 django.server basehttp 9864 9252 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-10-02 08:09:37,894 django.server basehttp 9864 9252 "GET /admin/inventory/banktransfer/ HTTP/1.1" 200 29494
+INFO 2025-10-02 08:09:37,914 django.server basehttp 9864 9252 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-10-02 08:09:38,841 django.server basehttp 9864 9252 "GET /admin/inventory/account/ HTTP/1.1" 200 74152
+INFO 2025-10-02 08:09:38,864 django.server basehttp 9864 9252 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-10-02 08:09:41,270 django.server basehttp 9864 9252 "GET /admin/inventory/company/ HTTP/1.1" 200 31893
+INFO 2025-10-02 08:09:41,298 django.server basehttp 9864 9252 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-10-02 08:09:42,175 django.server basehttp 9864 9252 "GET /admin/inventory/customerinvoice/ HTTP/1.1" 200 31407
+INFO 2025-10-02 08:09:42,198 django.server basehttp 9864 9252 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-10-02 08:09:42,713 django.server basehttp 9864 9252 "GET /admin/inventory/company/ HTTP/1.1" 200 31893
+INFO 2025-10-02 08:09:42,734 django.server basehttp 9864 9252 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-10-02 08:09:44,032 django.server basehttp 9864 9252 "GET /admin/inventory/company/3/change/ HTTP/1.1" 200 29620
+INFO 2025-10-02 08:09:44,063 django.server basehttp 9864 9252 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-10-02 08:09:45,057 django.server basehttp 9864 9252 "GET /admin/inventory/company/ HTTP/1.1" 200 31893
+INFO 2025-10-02 08:09:45,078 django.server basehttp 9864 9252 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-10-02 08:09:47,964 django.server basehttp 9864 9252 "GET /admin/inventory/customerinvoice/ HTTP/1.1" 200 31407
+INFO 2025-10-02 08:09:47,994 django.server basehttp 9864 9252 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-10-02 08:09:50,293 django.server basehttp 9864 9252 "GET /admin/inventory/customer/ HTTP/1.1" 200 32859
+INFO 2025-10-02 08:09:50,314 django.server basehttp 9864 9252 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-10-02 08:09:53,593 django.server basehttp 9864 9252 "GET /admin/inventory/depreciationlog/ HTTP/1.1" 200 34409
+INFO 2025-10-02 08:09:53,615 django.server basehttp 9864 9252 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-10-02 08:10:10,879 django.server basehttp 9864 9252 "GET /admin/inventory/employee/ HTTP/1.1" 200 32567
+INFO 2025-10-02 08:10:10,907 django.server basehttp 9864 9252 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-10-02 08:10:14,601 django.server basehttp 9864 9252 "GET /admin/inventory/financialperiod/ HTTP/1.1" 200 36486
+INFO 2025-10-02 08:10:14,624 django.server basehttp 9864 9252 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-10-02 08:10:23,242 django.server basehttp 9864 9252 "GET /admin/inventory/finishedproductdispatch/ HTTP/1.1" 200 34743
+INFO 2025-10-02 08:10:23,270 django.server basehttp 9864 9252 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-10-02 08:10:29,740 django.server basehttp 9864 9252 "GET /admin/inventory/finishedproductreceipt/ HTTP/1.1" 200 38720
+INFO 2025-10-02 08:10:29,769 django.server basehttp 9864 9252 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-10-02 10:51:00,585 django.server basehttp 9864 2648 "GET /admin/inventory/finishedproductreceipt/1/change/ HTTP/1.1" 200 48315
+INFO 2025-10-02 10:51:00,616 django.server basehttp 9864 2648 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-10-02 10:51:04,359 django.server basehttp 9864 2648 "GET /admin/inventory/banktransfer/ HTTP/1.1" 200 29494
+INFO 2025-10-02 10:51:04,382 django.server basehttp 9864 2648 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-10-02 10:51:06,871 django.server basehttp 9864 2648 "GET /admin/inventory/account/ HTTP/1.1" 200 74152
+INFO 2025-10-02 10:51:06,903 django.server basehttp 9864 2648 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-10-02 10:51:08,014 django.server basehttp 9864 2648 "GET /admin/inventory/account/ HTTP/1.1" 200 74152
+INFO 2025-10-02 10:51:08,038 django.server basehttp 9864 2648 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-10-02 10:51:08,941 django.server basehttp 9864 2648 "GET /admin/inventory/banktransfer/ HTTP/1.1" 200 29494
+INFO 2025-10-02 10:51:08,970 django.server basehttp 9864 2648 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-10-02 10:51:10,406 django.server basehttp 9864 2648 "GET /admin/inventory/bankreconciliation/ HTTP/1.1" 200 29831
+INFO 2025-10-02 10:51:10,436 django.server basehttp 9864 2648 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-10-02 10:51:11,086 django.server basehttp 9864 2648 "GET /admin/inventory/bankaccount/ HTTP/1.1" 200 32649
+INFO 2025-10-02 10:51:11,114 django.server basehttp 9864 2648 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-10-02 10:51:11,710 django.server basehttp 9864 2648 "GET /admin/inventory/bankreconciliation/ HTTP/1.1" 200 29831
+INFO 2025-10-02 10:51:11,740 django.server basehttp 9864 2648 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-10-02 10:51:12,030 django.server basehttp 9864 2648 "GET /admin/inventory/banktransfer/ HTTP/1.1" 200 29494
+INFO 2025-10-02 10:51:12,065 django.server basehttp 9864 2648 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-10-02 10:51:14,599 django.server basehttp 9864 2648 "GET /admin/inventory/banktransfer/add/ HTTP/1.1" 200 44561
+INFO 2025-10-02 10:51:14,627 django.server basehttp 9864 2648 "GET /admin/jsi18n/ HTTP/1.1" 200 3342
+INFO 2025-10-02 10:51:17,246 django.server basehttp 9864 2648 "GET /admin/autocomplete/?app_label=inventory&model_name=banktransfer&field_name=source_account HTTP/1.1" 200 151
+INFO 2025-10-02 10:51:18,959 django.server basehttp 9864 2648 "GET /admin/autocomplete/?app_label=inventory&model_name=banktransfer&field_name=destination_account HTTP/1.1" 200 151
+INFO 2025-10-02 10:51:19,367 django.server basehttp 9864 2648 "GET /admin/autocomplete/?app_label=inventory&model_name=banktransfer&field_name=destination_account HTTP/1.1" 200 151
+INFO 2025-10-02 10:53:43,078 django.server basehttp 9864 2648 "GET / HTTP/1.1" 200 30740
+INFO 2025-10-02 10:53:43,104 django.server basehttp 9864 2648 "GET /static/css/style.css HTTP/1.1" 304 0
+INFO 2025-10-02 10:53:43,121 django.server basehttp 9864 2648 "GET /static/layout/js/records_logic.js HTTP/1.1" 304 0
+INFO 2025-10-02 10:53:43,126 django.server basehttp 9864 8812 "GET /static/layout/js/shop_order_templates_logic.js HTTP/1.1" 304 0
+INFO 2025-10-02 10:53:43,128 django.server basehttp 9864 2648 "GET /static/layout/js/close_period_logic.js HTTP/1.1" 304 0
+INFO 2025-10-02 10:53:43,129 django.server basehttp 9864 9308 "GET /static/layout/js/manage_expenses_logic.js HTTP/1.1" 304 0
+INFO 2025-10-02 10:53:43,137 django.server basehttp 9864 9128 "GET /static/layout/js/financials_logic.js HTTP/1.1" 304 0
+INFO 2025-10-02 10:53:43,137 django.server basehttp 9864 8812 "GET /static/layout/js/dynamic_content_loader.js HTTP/1.1" 304 0
+INFO 2025-10-02 10:53:43,141 django.server basehttp 9864 9680 "GET /static/layout/js/employees_logic.js HTTP/1.1" 304 0
+INFO 2025-10-02 10:53:43,141 django.server basehttp 9864 10028 "GET /static/layout/js/inventory_counts_logic.js HTTP/1.1" 304 0
+INFO 2025-10-02 10:53:46,607 django.server basehttp 9864 9680 "GET / HTTP/1.1" 200 30740
+INFO 2025-10-02 10:53:48,146 django.server basehttp 9864 9680 "GET /api/product_tags/6/ HTTP/1.1" 200 12
+INFO 2025-10-02 10:54:25,912 django.server basehttp 9864 9680 "GET /sales_orders/create/ HTTP/1.1" 200 3171
+INFO 2025-10-02 10:54:25,947 django.server basehttp 9864 9680 "GET /api/sellable_stock/ HTTP/1.1" 200 386
+INFO 2025-10-02 10:54:46,335 django.server basehttp 9864 9680 "GET /sales_orders/create/ HTTP/1.1" 200 3171
+INFO 2025-10-02 10:54:46,360 django.server basehttp 9864 9680 "GET /api/sellable_stock/ HTTP/1.1" 200 386
+INFO 2025-10-02 10:54:49,092 django.server basehttp 9864 9680 "GET /sales_orders/ HTTP/1.1" 200 2039
+INFO 2025-10-02 10:54:50,775 django.server basehttp 9864 9680 "GET /sales_order/1/ HTTP/1.1" 200 3042
+INFO 2025-10-02 10:54:56,208 django.server basehttp 9864 9680 "GET /sales_orders/ HTTP/1.1" 200 2039
+INFO 2025-10-02 10:54:58,676 django.server basehttp 9864 9680 "GET /sales_order/1/ HTTP/1.1" 200 3042
+INFO 2025-10-02 10:55:07,679 django.server basehttp 9864 9680 "GET /sales_orders/ HTTP/1.1" 200 2039
+INFO 2025-10-02 10:59:51,806 django.server basehttp 9864 10032 "GET /sales_orders/?q= HTTP/1.1" 200 21727
+INFO 2025-10-02 10:59:52,018 django.server basehttp 9864 10032 "GET /sales_orders/?q= HTTP/1.1" 200 21727
+INFO 2025-10-02 10:59:53,303 django.server basehttp 9864 10032 "GET /sales_orders/?q= HTTP/1.1" 200 21727
+INFO 2025-10-02 10:59:53,852 django.server basehttp 9864 10032 "GET /sales_orders/?q= HTTP/1.1" 200 21727
+INFO 2025-10-02 10:59:54,286 django.server basehttp 9864 10032 "GET /sales_orders/?q= HTTP/1.1" 200 21727
+INFO 2025-10-02 10:59:57,363 django.server basehttp 9864 10116 "GET /sales_orders/?q= HTTP/1.1" 200 21727
+INFO 2025-10-02 10:59:57,364 django.server basehttp 9864 9660 "GET /sales_orders/create/ HTTP/1.1" 200 3171
+INFO 2025-10-02 11:00:00,761 django.server basehttp 9864 9720 "GET /sales_orders/create/ HTTP/1.1" 200 3171
+INFO 2025-10-02 11:00:00,795 django.server basehttp 9864 9720 "GET /api/sellable_stock/ HTTP/1.1" 200 386
+INFO 2025-10-02 11:00:01,009 django.server basehttp 9864 9720 "GET /sales_orders/create/ HTTP/1.1" 200 22866
+INFO 2025-10-02 11:00:01,134 django.server basehttp 9864 9720 "GET /static/css/google-fonts.css HTTP/1.1" 200 12053
+INFO 2025-10-02 11:00:01,140 django.server basehttp 9864 9720 "GET /static/js/bootstrap.bundle.min.js HTTP/1.1" 200 80663
+INFO 2025-10-02 11:00:01,146 django.server basehttp 9864 9720 "GET /static/js/flatpickr.min.js HTTP/1.1" 200 50679
+INFO 2025-10-02 11:00:01,148 django.server basehttp 9864 9720 "GET /static/js/flatpickr.l10n.ar.js HTTP/1.1" 200 1928
+INFO 2025-10-02 11:00:01,156 django.server basehttp 9864 9720 "GET /static/js/tom-select.complete.min.js HTTP/1.1" 200 50720
+INFO 2025-10-02 11:00:01,157 django.server basehttp 9864 5244 "GET /static/css/flatpickr.min.css HTTP/1.1" 200 16166
+INFO 2025-10-02 11:00:01,162 django.server basehttp 9864 9292 "GET /static/css/style.css HTTP/1.1" 200 19107
+INFO 2025-10-02 11:00:01,162 django.server basehttp 9864 9720 "GET /static/layout/js/dashboard_logic.js HTTP/1.1" 200 8620
+INFO 2025-10-02 11:00:01,165 django.server basehttp 9864 9780 "GET /static/css/tom-select.bootstrap5.min.css HTTP/1.1" 200 15345
+INFO 2025-10-02 11:00:01,168 django.server basehttp 9864 5244 "GET /static/layout/js/records_logic.js HTTP/1.1" 200 7001
+INFO 2025-10-02 11:00:01,169 django.server basehttp 9864 9292 "GET /static/layout/js/create_batch_logic.js HTTP/1.1" 200 14297
+INFO 2025-10-02 11:00:01,174 django.server basehttp 9864 9720 "GET /static/layout/js/batch_view_logic.js HTTP/1.1" 200 5237
+INFO 2025-10-02 11:00:01,178 django.server basehttp 9864 9640 "GET /static/css/bootstrap-icons.min.css HTTP/1.1" 200 85887
+INFO 2025-10-02 11:00:01,183 django.server basehttp 9864 9720 "GET /static/layout/js/production_returns_logic.js HTTP/1.1" 200 3162
+INFO 2025-10-02 11:00:01,183 django.server basehttp 9864 5244 "GET /static/layout/js/ledger_logic.js HTTP/1.1" 200 6663
+INFO 2025-10-02 11:00:01,183 django.server basehttp 9864 9264 "GET /static/css/bootstrap.rtl.css HTTP/1.1" 200 284704
+INFO 2025-10-02 11:00:01,184 django.server basehttp 9864 9292 "GET /static/layout/js/shop_order_templates_logic.js HTTP/1.1" 200 5660
+INFO 2025-10-02 11:00:01,187 django.server basehttp 9864 9720 "GET /static/layout/js/manage_expenses_logic.js HTTP/1.1" 200 2926
+INFO 2025-10-02 11:00:01,187 django.server basehttp 9864 9780 "GET /static/layout/js/receive_finished_product_logic.js HTTP/1.1" 200 1812
+INFO 2025-10-02 11:00:01,191 django.server basehttp 9864 9640 "GET /static/layout/js/visuals_logic.js HTTP/1.1" 200 7357
+INFO 2025-10-02 11:00:01,195 django.server basehttp 9864 5244 "GET /static/layout/js/expenses_page_logic.js HTTP/1.1" 200 2482
+INFO 2025-10-02 11:00:01,195 django.server basehttp 9864 9292 "GET /static/layout/js/purchase_order_create_logic.js HTTP/1.1" 200 4801
+INFO 2025-10-02 11:00:01,196 django.server basehttp 9864 9720 "GET /static/layout/js/financials_logic.js HTTP/1.1" 200 30715
+INFO 2025-10-02 11:00:01,205 django.server basehttp 9864 9264 "GET /static/layout/js/batch_production_variance_report_logic.js HTTP/1.1" 200 3266
+INFO 2025-10-02 11:00:01,207 django.server basehttp 9864 5244 "GET /static/layout/js/close_period_logic.js HTTP/1.1" 200 4685
+INFO 2025-10-02 11:00:01,207 django.server basehttp 9864 9780 "GET /static/layout/js/sales_order_create_logic.js HTTP/1.1" 200 5317
+INFO 2025-10-02 11:00:01,208 django.server basehttp 9864 9292 "GET /static/layout/js/inventory_counts_logic.js HTTP/1.1" 200 19520
+INFO 2025-10-02 11:00:01,208 django.server basehttp 9864 9720 "GET /static/layout/js/employees_logic.js HTTP/1.1" 200 6979
+INFO 2025-10-02 11:00:01,211 django.server basehttp 9864 5244 "GET /static/css/print.css HTTP/1.1" 200 2303
+INFO 2025-10-02 11:00:01,213 django.server basehttp 9864 9640 "GET /static/layout/js/tax_reconciliation_report_logic.js HTTP/1.1" 200 780
+INFO 2025-10-02 11:00:01,213 django.server basehttp 9864 9264 "GET /static/layout/js/dynamic_content_loader.js HTTP/1.1" 200 6706
+INFO 2025-10-02 11:00:03,264 django.server basehttp 9864 8576 "GET /api/sellable_stock/ HTTP/1.1" 200 386
+INFO 2025-10-02 11:00:03,266 django.server basehttp 9864 10092 "GET /sales_orders/ HTTP/1.1" 200 2039
+INFO 2025-10-02 11:00:03,266 django.server basehttp 9864 4620 "GET /static/webfonts/bootstrap-icons.woff2?dd67030699838ea613ee6dbda90effa6 HTTP/1.1" 200 130396
+INFO 2025-10-02 11:00:03,269 django.server basehttp 9864 8508 "GET /static/webfonts/NotoKufiArabic-VariableFont_wght.ttf HTTP/1.1" 200 433800
+INFO 2025-10-02 11:00:04,374 django.server basehttp 9864 8508 "GET /sales_orders/create/ HTTP/1.1" 200 3171
+INFO 2025-10-02 11:00:04,407 django.server basehttp 9864 8508 "GET /api/sellable_stock/ HTTP/1.1" 200 386
+INFO 2025-10-02 11:39:07,688 django.server basehttp 9864 9616 "GET /reports/product_ledger/?product_id=4&start_date=2024-12-11&end_date=2025-10-01 HTTP/1.1" 200 26350
+INFO 2025-10-02 11:39:28,484 django.server basehttp 9864 9616 "GET /batches/ HTTP/1.1" 200 7401
+INFO 2025-10-02 11:39:29,821 django.server basehttp 9864 9616 "GET /shop_order_templates/ HTTP/1.1" 200 10863
+INFO 2025-10-02 11:39:32,678 django.server basehttp 9864 9616 "GET /sales_orders/create/ HTTP/1.1" 200 3171
+INFO 2025-10-02 11:39:32,715 django.server basehttp 9864 9616 "GET /api/sellable_stock/ HTTP/1.1" 200 386
+INFO 2025-10-02 11:39:33,630 django.server basehttp 9864 9616 "GET /sales_orders/ HTTP/1.1" 200 2039
+INFO 2025-10-02 11:39:35,014 django.server basehttp 9864 9616 "GET /sales_orders/create/ HTTP/1.1" 200 3171
+INFO 2025-10-02 11:39:35,045 django.server basehttp 9864 9616 "GET /api/sellable_stock/ HTTP/1.1" 200 386
+INFO 2025-10-02 11:39:36,078 django.server basehttp 9864 9616 "GET /sales_orders/ HTTP/1.1" 200 2039
+INFO 2025-10-02 11:39:38,167 django.server basehttp 9864 9616 "GET /purchase_orders/create/ HTTP/1.1" 200 4157
+INFO 2025-10-02 11:39:38,721 django.server basehttp 9864 9616 "GET /purchase_orders/ HTTP/1.1" 200 2493
+INFO 2025-10-02 11:39:39,262 django.server basehttp 9864 9616 "GET /purchase_orders/create/ HTTP/1.1" 200 4157
+INFO 2025-10-02 11:39:39,830 django.server basehttp 9864 9616 "GET /purchase_orders/ HTTP/1.1" 200 2493
+INFO 2025-10-02 11:39:40,936 django.server basehttp 9864 9616 "GET /shop_order_templates/ HTTP/1.1" 200 10863
+INFO 2025-10-02 11:39:42,512 django.server basehttp 9864 9616 "GET /quarantine/ HTTP/1.1" 200 3311
+INFO 2025-10-02 11:39:43,171 django.server basehttp 9864 9616 "GET /reports/general_ledger/ HTTP/1.1" 200 2211
+INFO 2025-10-02 11:39:45,224 django.server basehttp 9864 9616 "GET /production_returns/ HTTP/1.1" 200 4192
+INFO 2025-10-02 11:39:46,654 django.server basehttp 9864 9616 "GET /inventory_counts/ HTTP/1.1" 200 1321
+INFO 2025-10-02 11:39:48,676 django.server basehttp 9864 9616 "GET /reports/product_ledger/ HTTP/1.1" 200 3475
+INFO 2025-10-02 11:39:49,451 django.server basehttp 9864 9616 "GET /reports/product_ledger/ HTTP/1.1" 200 3475
+INFO 2025-10-02 11:39:50,822 django.server basehttp 9864 9616 "GET /reports/stock_valuation/ HTTP/1.1" 200 3541
+INFO 2025-10-02 11:39:51,540 django.server basehttp 9864 9616 "GET /visuals/ HTTP/1.1" 200 8718
+INFO 2025-10-02 11:39:51,601 django.server basehttp 9864 9616 "GET /visuals/ HTTP/1.1" 200 28485
+ERROR 2025-10-02 11:39:58,108 django.request log 9864 9616 Internal Server Error: /visuals/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py", line 449, in visuals
+    total_in_value = receipts.annotate(line_total=ExpressionWrapper(F('quantity') * F('costing_unit_price'), output_field=DecimalField())).aggregate(total=Coalesce(Sum('line_total'), Decimal('0.0')))['total']
+                     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1649, in annotate
+    return self._annotate(args, kwargs, select=True)
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1701, in _annotate
+    clone.query.add_annotation(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        annotation,
+        ^^^^^^^^^^^
+        alias,
+        ^^^^^^
+        select=select,
+        ^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\query.py", line 1218, in add_annotation
+    annotation = annotation.resolve_expression(self, allow_joins=True, reuse=None)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 300, in resolve_expression
+    expr.resolve_expression(query, allow_joins, reuse, summarize, for_save)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 775, in resolve_expression
+    resolved = super().resolve_expression(
+        query,
+    ...<3 lines>...
+        for_save,
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 300, in resolve_expression
+    expr.resolve_expression(query, allow_joins, reuse, summarize, for_save)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 902, in resolve_expression
+    return query.resolve_ref(self.name, allow_joins, reuse, summarize)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\query.py", line 2049, in resolve_ref
+    join_info = self.setup_joins(
+        field_list, self.get_meta(), self.get_initial_alias(), can_reuse=reuse
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\query.py", line 1900, in setup_joins
+    path, final_field, targets, rest = self.names_to_path(
+                                       ~~~~~~~~~~~~~~~~~~^
+        names[:pivot],
+        ^^^^^^^^^^^^^^
+    ...<2 lines>...
+        fail_on_missing=True,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\query.py", line 1805, in names_to_path
+    raise FieldError(
+    ...<2 lines>...
+    )
+django.core.exceptions.FieldError: Cannot resolve keyword 'costing_unit_price' into field. Choices are: adjustments, base_unit_price, batch_items, company, company_id, consumptions, employee, employee_id, id, invoice_item, po_item, po_item_id, product, product_id, production_returns, qc_no, quantity, release_timestamp, status, tags, timestamp, vat_amount, vat_treatment, withholding_tax_amount
+ERROR 2025-10-02 11:39:58,114 django.server basehttp 9864 9616 "GET /visuals/?type=raw_material&product_id=2&company_id=&qc_no=&start_date=2025-10-01&end_date=2025-10-02 HTTP/1.1" 500 131294
+WARNING 2025-10-02 11:39:58,213 django.request log 9864 9616 Not Found: /favicon.ico
+WARNING 2025-10-02 11:39:58,236 django.server basehttp 9864 9616 "GET /favicon.ico HTTP/1.1" 404 38085
+ERROR 2025-10-02 11:40:03,710 django.request log 9864 9616 Internal Server Error: /visuals/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\analysis_ledger_visuals.py", line 449, in visuals
+    total_in_value = receipts.annotate(line_total=ExpressionWrapper(F('quantity') * F('costing_unit_price'), output_field=DecimalField())).aggregate(total=Coalesce(Sum('line_total'), Decimal('0.0')))['total']
+                     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1649, in annotate
+    return self._annotate(args, kwargs, select=True)
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1701, in _annotate
+    clone.query.add_annotation(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        annotation,
+        ^^^^^^^^^^^
+        alias,
+        ^^^^^^
+        select=select,
+        ^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\query.py", line 1218, in add_annotation
+    annotation = annotation.resolve_expression(self, allow_joins=True, reuse=None)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 300, in resolve_expression
+    expr.resolve_expression(query, allow_joins, reuse, summarize, for_save)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 775, in resolve_expression
+    resolved = super().resolve_expression(
+        query,
+    ...<3 lines>...
+        for_save,
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 300, in resolve_expression
+    expr.resolve_expression(query, allow_joins, reuse, summarize, for_save)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\expressions.py", line 902, in resolve_expression
+    return query.resolve_ref(self.name, allow_joins, reuse, summarize)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\query.py", line 2049, in resolve_ref
+    join_info = self.setup_joins(
+        field_list, self.get_meta(), self.get_initial_alias(), can_reuse=reuse
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\query.py", line 1900, in setup_joins
+    path, final_field, targets, rest = self.names_to_path(
+                                       ~~~~~~~~~~~~~~~~~~^
+        names[:pivot],
+        ^^^^^^^^^^^^^^
+    ...<2 lines>...
+        fail_on_missing=True,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\query.py", line 1805, in names_to_path
+    raise FieldError(
+    ...<2 lines>...
+    )
+django.core.exceptions.FieldError: Cannot resolve keyword 'costing_unit_price' into field. Choices are: adjustments, base_unit_price, batch_items, company, company_id, consumptions, employee, employee_id, id, invoice_item, po_item, po_item_id, product, product_id, production_returns, qc_no, quantity, release_timestamp, status, tags, timestamp, vat_amount, vat_treatment, withholding_tax_amount
+ERROR 2025-10-02 11:40:03,714 django.server basehttp 9864 9616 "GET /visuals/?type=raw_material&product_id=2&company_id=&qc_no=&start_date=2025-04-01&end_date=2025-10-02 HTTP/1.1" 500 131293
+INFO 2025-10-02 11:40:11,042 django.server basehttp 9864 9616 "GET /visuals/?type=finished_product&final_product_id=5&start_date=2025-01-01&end_date=2025-10-02 HTTP/1.1" 200 30064
+INFO 2025-10-02 11:40:28,874 django.server basehttp 9864 9616 "GET /visuals/?type=expense&expense_product_type=%D9%82%D8%B7%D8%B9+%D8%BA%D9%8A%D8%A7%D8%B1+%D9%88+%D8%B5%D9%8A%D8%A7%D9%86%D8%A9&expense_product_id=6&start_date=2025-01-01&end_date=2025-10-02 HTTP/1.1" 200 30132
+INFO 2025-10-02 11:40:32,884 django.server basehttp 9864 9616 "GET /visuals/?type=expense&expense_product_type=%D9%82%D8%B7%D8%B9+%D8%BA%D9%8A%D8%A7%D8%B1+%D9%88+%D8%B5%D9%8A%D8%A7%D9%86%D8%A9&expense_product_id=6&start_date=2025-01-01&end_date=2025-10-02 HTTP/1.1" 200 30132
+INFO 2025-10-02 11:40:41,000 django.utils.autoreload autoreload 9864 8936 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\services\accounting_service.py changed, reloading.
+INFO 2025-10-02 11:40:42,746 django.utils.autoreload autoreload 8512 10048 Watching for file changes with StatReloader
+INFO 2025-10-02 11:44:39,228 django.utils.autoreload autoreload 8512 10048 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\services\accounting_service.py changed, reloading.
+INFO 2025-10-02 11:44:40,744 django.utils.autoreload autoreload 9320 9808 Watching for file changes with StatReloader
+INFO 2025-10-02 12:10:50,295 django.utils.autoreload autoreload 9320 9808 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-02 12:10:51,355 django.utils.autoreload autoreload 7892 8296 Watching for file changes with StatReloader
+INFO 2025-10-02 14:13:45,229 django.utils.autoreload autoreload 9472 8892 Watching for file changes with StatReloader
+INFO 2025-10-02 14:13:53,492 django.server basehttp 9472 5984 "GET /visuals/?type=expense&expense_product_type=%D9%82%D8%B7%D8%B9+%D8%BA%D9%8A%D8%A7%D8%B1+%D9%88+%D8%B5%D9%8A%D8%A7%D9%86%D8%A9&expense_product_id=6&start_date=2025-01-01&end_date=2025-10-02 HTTP/1.1" 200 30132
+INFO 2025-10-02 14:14:00,087 django.server basehttp 9472 5984 "GET /financials/allocation_drivers/ HTTP/1.1" 200 6517
+ERROR 2025-10-02 14:14:00,908 django.request log 9472 5984 Internal Server Error: /financials/overhead_allocation/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 199, in render
+    template = context.template.engine.select_template(template_name)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 214, in select_template
+    raise TemplateDoesNotExist(", ".join(not_found))
+django.template.exceptions.TemplateDoesNotExist: inventory/modals/view_journal_entry_modal.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\financials.py", line 1283, in overhead_allocation_workspace
+    return render(request, 'inventory/partials/overhead_allocation_workspace_content.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 109, in render
+    reraise(exc, self.backend)
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 130, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: inventory/modals/view_journal_entry_modal.html
+ERROR 2025-10-02 14:14:00,914 django.server basehttp 9472 5984 "GET /financials/overhead_allocation/ HTTP/1.1" 500 134489
+ERROR 2025-10-02 14:14:01,031 django.request log 9472 5984 Internal Server Error: /financials/overhead_allocation/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 210, in render
+    return template.render(context)
+           ~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 173, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 199, in render
+    template = context.template.engine.select_template(template_name)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 214, in select_template
+    raise TemplateDoesNotExist(", ".join(not_found))
+django.template.exceptions.TemplateDoesNotExist: inventory/modals/view_journal_entry_modal.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\financials.py", line 1284, in overhead_allocation_workspace
+    return render(request, 'inventory/overhead_allocation_workspace.html', context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 109, in render
+    reraise(exc, self.backend)
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 130, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: inventory/modals/view_journal_entry_modal.html
+ERROR 2025-10-02 14:14:01,037 django.server basehttp 9472 5984 "GET /financials/overhead_allocation/ HTTP/1.1" 500 201277
+INFO 2025-10-02 14:14:03,152 django.server basehttp 9472 5984 "GET /financials/cost_pools/ HTTP/1.1" 200 11889
+INFO 2025-10-02 14:14:04,470 django.server basehttp 9472 5984 "GET /financials/periods/ HTTP/1.1" 200 34123
+INFO 2025-10-02 14:14:05,349 django.server basehttp 9472 5984 "GET /financials/cost_pools/ HTTP/1.1" 200 11889
+INFO 2025-10-02 14:14:05,937 django.server basehttp 9472 5984 "GET /reports/trial_balance/ HTTP/1.1" 200 23248
+INFO 2025-10-02 14:14:45,304 django.server basehttp 9472 5984 "GET /reports/general_ledger/?account_id=39&start_date=2025-10-01&end_date=2025-10-02 HTTP/1.1" 200 6315
+INFO 2025-10-02 14:15:04,210 django.server basehttp 9472 5984 "GET /reports/trial_balance/ HTTP/1.1" 200 23248
+INFO 2025-10-02 14:15:16,674 django.server basehttp 9472 5984 "GET /reports/general_ledger/?account_id=29&start_date=2025-10-01&end_date=2025-10-02 HTTP/1.1" 200 3273
+INFO 2025-10-02 14:15:28,034 django.server basehttp 9472 5984 "GET /financials/fixed_assets/ HTTP/1.1" 200 3427
+INFO 2025-10-02 14:15:49,991 django.server basehttp 9472 5984 "GET /financials/fixed_assets/ HTTP/1.1" 200 23160
+INFO 2025-10-02 14:16:01,319 django.server basehttp 9472 5984 "GET /reports/trial_balance/ HTTP/1.1" 200 23248
+INFO 2025-10-02 14:16:04,137 django.server basehttp 9472 5984 "GET /reports/general_ledger/?account_id=20&start_date=2025-10-01&end_date=2025-10-02 HTTP/1.1" 200 3225
+INFO 2025-10-02 14:16:07,154 django.server basehttp 9472 5984 "GET /reports/trial_balance/ HTTP/1.1" 200 23248
+INFO 2025-10-02 14:16:14,618 django.server basehttp 9472 5984 "GET /reports/general_ledger/?account_id=28&start_date=2025-10-01&end_date=2025-10-02 HTTP/1.1" 200 3267
+INFO 2025-10-02 14:18:22,763 django.utils.autoreload autoreload 9472 8892 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-02 14:18:24,216 django.utils.autoreload autoreload 9928 8388 Watching for file changes with StatReloader
+INFO 2025-10-02 14:20:59,409 django.utils.autoreload autoreload 9928 8388 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-02 14:21:00,497 django.utils.autoreload autoreload 9040 7692 Watching for file changes with StatReloader
+INFO 2025-10-02 14:22:04,618 django.utils.autoreload autoreload 9040 7692 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-02 14:22:05,721 django.utils.autoreload autoreload 1592 1212 Watching for file changes with StatReloader
+INFO 2025-10-02 14:22:07,276 django.utils.autoreload autoreload 1592 1212 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-02 14:22:08,626 django.utils.autoreload autoreload 9084 2420 Watching for file changes with StatReloader
+INFO 2025-10-02 14:24:00,042 django.utils.autoreload autoreload 9084 2420 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-02 14:24:01,301 django.utils.autoreload autoreload 7256 256 Watching for file changes with StatReloader
+INFO 2025-10-02 14:24:57,152 django.utils.autoreload autoreload 7256 256 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-02 14:24:58,291 django.utils.autoreload autoreload 1836 5868 Watching for file changes with StatReloader
+INFO 2025-10-02 15:01:55,355 django.utils.autoreload autoreload 1836 5868 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-02 15:01:56,523 django.utils.autoreload autoreload 6896 8120 Watching for file changes with StatReloader
+INFO 2025-10-02 15:14:55,578 django.utils.autoreload autoreload 6896 8120 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\services\accounting_service.py changed, reloading.
+INFO 2025-10-02 15:14:56,715 django.utils.autoreload autoreload 3284 7736 Watching for file changes with StatReloader
+INFO 2025-10-02 15:15:29,217 django.utils.autoreload autoreload 3284 7736 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\services\accounting_service.py changed, reloading.
+INFO 2025-10-02 15:15:30,423 django.utils.autoreload autoreload 9564 4512 Watching for file changes with StatReloader
+INFO 2025-10-02 15:23:42,230 django.utils.autoreload autoreload 9564 4512 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\services\accounting_service.py changed, reloading.
+INFO 2025-10-02 15:23:43,332 django.utils.autoreload autoreload 9656 7480 Watching for file changes with StatReloader
+INFO 2025-10-02 15:24:24,307 django.utils.autoreload autoreload 9656 7480 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\services\accounting_service.py changed, reloading.
+INFO 2025-10-02 15:24:25,487 django.utils.autoreload autoreload 4808 7720 Watching for file changes with StatReloader
+INFO 2025-10-02 21:28:54,674 django.server basehttp 4808 12260 "GET /admin/inventory/account/?all=&o=3.1 HTTP/1.1" 302 0
+INFO 2025-10-02 21:28:54,704 django.server basehttp 4808 12260 "GET /admin/login/?next=/admin/inventory/account/%3Fall%3D%26o%3D3.1 HTTP/1.1" 200 3181
+WARNING 2025-10-02 21:28:54,813 django.server basehttp 4808 12260 "GET /static/img/ims_logo.png HTTP/1.1" 404 1862
+WARNING 2025-10-02 21:28:57,117 django.server basehttp 4808 11464 "GET /static/fas%20fa-warehouse HTTP/1.1" 404 1864
+WARNING 2025-10-02 21:29:00,107 django.request log 4808 11080 Not Found: /reports/trial-balance/
+WARNING 2025-10-02 21:29:00,108 django.server basehttp 4808 11080 "GET /reports/trial-balance/ HTTP/1.1" 404 38118
+WARNING 2025-10-02 21:29:00,693 django.request log 4808 11080 Not Found: /favicon.ico
+WARNING 2025-10-02 21:29:00,694 django.server basehttp 4808 11080 "GET /favicon.ico HTTP/1.1" 404 38085
+INFO 2025-10-02 22:49:34,909 django.server basehttp 4808 12632 "GET /admin/login/?next=/admin/inventory/account/%3Fall%3D%26o%3D3.1 HTTP/1.1" 200 3181
+WARNING 2025-10-02 22:49:35,424 django.server basehttp 4808 12632 "GET /static/fas%20fa-warehouse HTTP/1.1" 404 1864
+WARNING 2025-10-02 22:49:39,209 django.request log 4808 4600 Not Found: /favicon.ico
+WARNING 2025-10-02 22:49:39,210 django.server basehttp 4808 4600 "GET /favicon.ico HTTP/1.1" 404 38085
+INFO 2025-10-02 22:51:29,683 django.server basehttp 4808 12064 "GET /admin/login/?next=/admin/inventory/account/%3Fall%3D%26o%3D3.1 HTTP/1.1" 200 3181
+WARNING 2025-10-02 22:51:30,394 django.server basehttp 4808 12064 "GET /static/fas%20fa-warehouse HTTP/1.1" 404 1864
+WARNING 2025-10-02 22:51:33,567 django.request log 4808 12532 Not Found: /favicon.ico
+WARNING 2025-10-02 22:51:33,567 django.server basehttp 4808 12532 "GET /favicon.ico HTTP/1.1" 404 38085
+INFO 2025-10-02 22:55:40,336 django.server basehttp 4808 10372 "GET /admin/login/?next=/admin/inventory/account/%3Fall%3D%26o%3D3.1 HTTP/1.1" 200 3181
+WARNING 2025-10-02 22:55:41,047 django.server basehttp 4808 10372 "GET /static/fas%20fa-warehouse HTTP/1.1" 404 1864
+WARNING 2025-10-02 22:55:41,767 django.request log 4808 10636 Not Found: /favicon.ico
+WARNING 2025-10-02 22:55:41,768 django.server basehttp 4808 10636 "GET /favicon.ico HTTP/1.1" 404 38085
+INFO 2025-10-03 12:34:04,405 django.utils.autoreload autoreload 4808 7720 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-03 12:34:06,454 django.utils.autoreload autoreload 10200 13620 Watching for file changes with StatReloader
+INFO 2025-10-03 12:35:35,759 django.utils.autoreload autoreload 10200 13620 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\services\period_closing_service.py changed, reloading.
+INFO 2025-10-03 12:35:36,966 django.utils.autoreload autoreload 11788 9840 Watching for file changes with StatReloader
+INFO 2025-10-03 12:36:58,286 django.utils.autoreload autoreload 11788 9840 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\services\accounting_service.py changed, reloading.
+INFO 2025-10-03 12:36:59,745 django.utils.autoreload autoreload 12968 12784 Watching for file changes with StatReloader
+INFO 2025-10-03 12:43:01,435 django.utils.autoreload autoreload 12968 12784 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-03 12:43:03,059 django.utils.autoreload autoreload 2132 12200 Watching for file changes with StatReloader
+INFO 2025-10-03 13:54:35,673 django.utils.autoreload autoreload 11776 13116 Watching for file changes with StatReloader
+INFO 2025-10-03 14:01:10,568 django.utils.autoreload autoreload 11776 13116 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\services\adjusting_entries_service.py changed, reloading.
+INFO 2025-10-03 14:01:11,843 django.utils.autoreload autoreload 12892 12624 Watching for file changes with StatReloader
+INFO 2025-10-03 14:01:29,814 django.utils.autoreload autoreload 12892 12624 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\services\adjusting_entries_service.py changed, reloading.
+INFO 2025-10-03 14:01:31,084 django.utils.autoreload autoreload 5556 8432 Watching for file changes with StatReloader
+INFO 2025-10-03 14:02:39,817 django.utils.autoreload autoreload 5556 8432 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\services\adjusting_entries_service.py changed, reloading.
+INFO 2025-10-03 14:02:41,231 django.utils.autoreload autoreload 10188 1420 Watching for file changes with StatReloader
+INFO 2025-10-03 14:03:17,013 django.utils.autoreload autoreload 10188 1420 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\signals.py changed, reloading.
+INFO 2025-10-03 14:03:18,133 django.utils.autoreload autoreload 6572 12744 Watching for file changes with StatReloader
+INFO 2025-10-03 14:03:27,134 django.utils.autoreload autoreload 6572 12744 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\signals.py changed, reloading.
+INFO 2025-10-03 14:03:28,377 django.utils.autoreload autoreload 6884 11288 Watching for file changes with StatReloader
+INFO 2025-10-03 14:05:10,067 django.utils.autoreload autoreload 6884 11288 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\services\adjusting_entries_service.py changed, reloading.
+INFO 2025-10-03 14:05:11,261 django.utils.autoreload autoreload 14072 13872 Watching for file changes with StatReloader
+INFO 2025-10-03 14:05:27,167 django.utils.autoreload autoreload 14072 13872 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\signals.py changed, reloading.
+INFO 2025-10-03 14:05:28,337 django.utils.autoreload autoreload 1592 9188 Watching for file changes with StatReloader
+INFO 2025-10-03 14:05:43,727 django.utils.autoreload autoreload 1592 9188 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\services\adjusting_entries_service.py changed, reloading.
+INFO 2025-10-03 14:05:44,835 django.utils.autoreload autoreload 13412 9084 Watching for file changes with StatReloader
+INFO 2025-10-03 14:32:05,610 django.utils.autoreload autoreload 13412 9084 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\services\accounting_service.py changed, reloading.
+INFO 2025-10-03 14:32:06,738 django.utils.autoreload autoreload 4956 12216 Watching for file changes with StatReloader
+INFO 2025-10-03 15:14:46,579 django.utils.autoreload autoreload 4956 12216 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-03 15:14:48,205 django.utils.autoreload autoreload 11320 10732 Watching for file changes with StatReloader
+INFO 2025-10-03 15:18:34,561 django.utils.autoreload autoreload 11320 10732 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-03 15:18:36,374 django.utils.autoreload autoreload 3788 12888 Watching for file changes with StatReloader
+INFO 2025-10-03 15:19:02,504 django.utils.autoreload autoreload 3788 12888 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\signals.py changed, reloading.
+INFO 2025-10-03 15:19:03,939 django.utils.autoreload autoreload 9072 8448 Watching for file changes with StatReloader
+INFO 2025-10-03 15:20:04,339 django.utils.autoreload autoreload 9072 8448 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\services\accounting_service.py changed, reloading.
+INFO 2025-10-03 15:20:05,555 django.utils.autoreload autoreload 11568 7224 Watching for file changes with StatReloader
+INFO 2025-10-03 15:23:28,654 django.utils.autoreload autoreload 11568 7224 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-03 15:23:30,350 django.utils.autoreload autoreload 11812 12312 Watching for file changes with StatReloader
+INFO 2025-10-03 15:25:17,882 django.utils.autoreload autoreload 11812 12312 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-03 15:25:20,276 django.utils.autoreload autoreload 2032 10512 Watching for file changes with StatReloader
+INFO 2025-10-03 15:32:23,119 django.utils.autoreload autoreload 2032 10512 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-03 15:32:24,461 django.utils.autoreload autoreload 5136 10260 Watching for file changes with StatReloader

@@ -19,6 +19,7 @@ from .models import (
     SupplierInvoiceItem,
     CustomerInvoiceItem,
     BankTransfer,
+    FixedAsset,
 )
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -54,6 +55,10 @@ def create_chart_of_accounts():
     create_account('10204', 'أرصدة مدينة أخرى', Account.AccountType.ASSET, '102')
     create_account('1020404', 'ضريبة القيمة المضافة (المدخلات)', Account.AccountType.ASSET, '10204')
     create_account('1020405', 'سلف الموظفين', Account.AccountType.ASSET, '10204')
+    create_account('10205', 'مصروفات مدفوعة مقدماً', Account.AccountType.ASSET, '10204') # Prepaid Expenses
+    create_account('101', 'الأصول الثابتة', Account.AccountType.ASSET, '100')
+    create_account('10101', 'آلات ومعدات', Account.AccountType.ASSET, '101')
+    create_account('10102', 'أثاث وتركيبات', Account.AccountType.ASSET, '101')
 
     # 200 - Liabilities
     create_account('200', 'الالتزامات', Account.AccountType.LIABILITY)
@@ -62,6 +67,11 @@ def create_chart_of_accounts():
     create_account('20202', 'أرصدة دائنة أخرى', Account.AccountType.LIABILITY, '202')
     create_account('2020201', 'ضريبة القيمة المضافة (المخرجات)', Account.AccountType.LIABILITY, '20202')
     create_account('2020202', 'ضريبة الخصم من المنبع', Account.AccountType.LIABILITY, '20202')
+    create_account('20205', 'مجمعات الإهلاك', Account.AccountType.LIABILITY, '202')
+    create_account('2020501', 'مجمع إهلاك - آلات ومعدات', Account.AccountType.LIABILITY, '20205')
+    create_account('2020502', 'مجمع إهلاك - أثاث وتركيبات', Account.AccountType.LIABILITY, '20205')
+    create_account('20203', 'إيرادات مؤجلة (عملاء)', Account.AccountType.LIABILITY, '202') # Deferred Revenue / Customer Deposits
+    create_account('20204', 'مصروفات مستحقة', Account.AccountType.LIABILITY, '202') # Accrued Expenses
 
     # 400 - Revenue
     create_account('400', 'الإيرادات', Account.AccountType.REVENUE)
@@ -70,6 +80,7 @@ def create_chart_of_accounts():
     create_account('402', 'إيرادات أخرى', Account.AccountType.REVENUE, '400')
     create_account('40201', 'عوائد بيع خردة', Account.AccountType.REVENUE, '402')
     create_account('40202', 'مكاسب فروق المخزون', Account.AccountType.REVENUE, '402')
+    create_account('40102', 'مردودات ومسموحات المبيعات', Account.AccountType.REVENUE, '401') # Sales Returns & Allowances
 
     # 500 - Expenses
     create_account('500', 'المصروفات', Account.AccountType.EXPENSE)
@@ -80,6 +91,35 @@ def create_chart_of_accounts():
     create_account('50202', 'مصروفات مستهلكات', Account.AccountType.EXPENSE, '502')
     create_account('50203', 'إيجار المصنع', Account.AccountType.EXPENSE, '502')
     create_account('503', 'خسائر فروق المخزون', Account.AccountType.EXPENSE, '500')
+    create_account('50205', 'مصروفات الإهلاك', Account.AccountType.EXPENSE, '502')
+    create_account('5020501', 'مصروف إهلاك - آلات ومعدات', Account.AccountType.EXPENSE, '50205')
+    create_account('5020502', 'مصروف إهلاك - أثاث وتركيبات', Account.AccountType.EXPENSE, '50205')
+    create_account('50206', 'مصروف بضاعة تالفة', Account.AccountType.EXPENSE, '502') # Damaged Goods Expense
+    create_account('50207', 'مصروف تأمين', Account.AccountType.EXPENSE, '502') # Insurance Expense
+    create_account('50208', 'مصروف كهرباء ومياه', Account.AccountType.EXPENSE, '502') # Utilities Expense
+
+    # --- Configure Control Accounts ---
+    from django.contrib.contenttypes.models import ContentType
+    from .models import Customer, Company, Product, FinishedProductReceipt, FixedAsset, BankAccount, Employee
+
+    def set_control(code, model_class):
+        acc = accounts.get(code)
+        if acc:
+            acc.is_control_account = True
+            acc.sub_ledger_model = ContentType.objects.get_for_model(model_class)
+            acc.save()
+
+    set_control('10203', Customer)
+    set_control('20201', Company)
+    set_control('1020201', Product)
+    set_control('1020206', FinishedProductReceipt)
+    set_control('1020207', Product)
+    # Add other control accounts as needed for tests
+    set_control('1020102', BankAccount)
+    set_control('1020103', BankAccount)
+    set_control('1020405', Employee)
+    set_control('10101', FixedAsset)
+    set_control('10102', FixedAsset)
 
     return accounts
 
@@ -112,6 +152,22 @@ class AccountingServiceBaseTestCase(TransactionTestCase):
             end_date=date(2025, 9, 30),
             status=FinancialPeriod.Status.OPEN
         )
+        # --- FIX: Add more periods to prevent test failures on different dates ---
+        FinancialPeriod.objects.create(
+            fiscal_year=self.fiscal_year,
+            name="October 2025",
+            start_date=date(2025, 10, 1),
+            end_date=date(2025, 10, 31),
+            status=FinancialPeriod.Status.OPEN
+        )
+        FinancialPeriod.objects.create(
+            fiscal_year=self.fiscal_year,
+            name="January 2025",
+            start_date=date(2025, 1, 1),
+            end_date=date(2025, 1, 31),
+            status=FinancialPeriod.Status.OPEN
+        )
+
 
         # 2. Create Chart of Accounts
         self.accounts = create_chart_of_accounts()
@@ -130,12 +186,23 @@ class AccountingServiceBaseTestCase(TransactionTestCase):
             inventory_adjustment_gain_account=self.accounts['40202'],
             employee_advances_receivable=self.accounts['1020405']
         )
+        self.general_settings.customer_deposits_account = self.accounts['20203']
+        self.general_settings.sales_returns_account = self.accounts['40102']
+        self.general_settings.prepaid_expenses_account = self.accounts['10205']
+        self.general_settings.accrued_expenses_account = self.accounts['20204']
+        self.general_settings.damaged_goods_expense_account = self.accounts['50206']
+        self.general_settings.save()
 
         # 4. Configure Product Type Accounting Settings
         ProductTypeAccountingSettings.objects.create(
             product_type=Product.ProductType.RAW_MATERIAL,
             inventory_account=self.accounts['1020201'],
             cogs_or_expense_account=self.accounts['50101'] # Not typically used for RM, but required
+        )
+        ProductTypeAccountingSettings.objects.create(
+            product_type=Product.ProductType.PACKAGING,
+            inventory_account=self.accounts['1020202'],
+            cogs_or_expense_account=self.accounts['50101']
         )
         ProductTypeAccountingSettings.objects.create(
             product_type=Product.ProductType.FINAL_PRODUCT,
@@ -158,6 +225,12 @@ class AccountingServiceBaseTestCase(TransactionTestCase):
             product_type=Product.ProductType.RAW_MATERIAL,
             unit="Liter"
         )
+        self.packaging_material = Product.objects.create(
+            name="PVC Bag 500ml",
+            code="PKG-BAG-500",
+            product_type=Product.ProductType.PACKAGING,
+            unit="Unit"
+        )
         self.final_product = Product.objects.create(
             name="IV Drip Bag 500ml",
             code="FP-IVDRIP-500",
@@ -169,6 +242,13 @@ class AccountingServiceBaseTestCase(TransactionTestCase):
             code="MRO-LUBE-001",
             product_type=Product.ProductType.MRO,
             unit="Can"
+        )
+        self.amortizable_product = Product.objects.create(
+            name="Amortizable Filter",
+            code="MRO-FILT-001A",
+            product_type=Product.ProductType.MRO,
+            unit="Unit",
+            is_amortizable=True
         )
 
         # 6. Create a Bank Account for transactions
@@ -226,6 +306,32 @@ class AccountingServiceBaseTestCase(TransactionTestCase):
         batch = self.get_or_create_batch_for_template(self.test_template, "SO-SETUP-01", "B-SETUP-01")
         self.receipt1 = self.get_or_create_receipt(batch, "FPB-SETUP-01", 100.0, "1000.000", "2025-09-05")
         self.receipt2 = self.get_or_create_receipt(batch, "FPB-SETUP-02", 50.0, "550.000", "2025-09-06")
+
+        # 11. Create Fixed Assets
+        self.asset1 = FixedAsset.objects.create(
+            asset_tag="MACHINE-TEST-001",
+            name="Test Production Filling Machine",
+            gl_account=self.accounts['10101'],
+            depreciation_expense_account=self.accounts['5020501'],
+            accumulated_depreciation_account=self.accounts['2020501'],
+            purchase_date="2024-01-01",
+            purchase_cost=Decimal("120000.000"),
+            depreciation_start_date="2024-01-01",
+            useful_life_years=10,
+            salvage_value=Decimal("0.000")
+        )
+        self.asset2 = FixedAsset.objects.create(
+            asset_tag="FURN-TEST-001",
+            name="Test Office Furniture Set",
+            gl_account=self.accounts['10102'],
+            depreciation_expense_account=self.accounts['5020502'],
+            accumulated_depreciation_account=self.accounts['2020502'],
+            purchase_date="2023-07-01",
+            purchase_cost=Decimal("30000.000"),
+            depreciation_start_date="2023-07-01",
+            useful_life_years=5,
+            salvage_value=Decimal("0.000")
+        )
 
     @classmethod
     def get_product_type_setting(cls, product_type):

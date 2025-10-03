@@ -16,7 +16,9 @@ from ..models import (
     GeneralAccountingSettings, ProductTypeAccountingSettings, Product,
     Batch, InventoryConsumption, FinishedProductDispatch, FinishedProductReceipt, ProductionReturn, Payment, BankTransfer, DepreciationLog, FixedAsset, FiscalYear,
     InventoryAdjustment, EmployeeAdvance, OverheadAllocationRun, CostPool, ExpenseLog, Account, TransactionCorrection,
-    PeriodCloseChecklist
+    PeriodCloseChecklist, OpeningBalanceEntry, OpeningBalanceEntryLine,
+    # --- NEW IMPORTS ---
+    PrepaidExpense, AmortizationLog, AccrualLog
 )
 from ..services.costing_service import get_inventory_state_at_datetime
 
@@ -116,8 +118,14 @@ def create_je_for_inventory_adjustment(adjustment: InventoryAdjustment) -> Optio
 
     settings = GeneralAccountingSettings.load()
     inventory_account = _get_product_inventory_account(adjustment.product)
-    loss_account = settings.inventory_adjustment_loss_account
+
+    # Determine the correct loss/expense account based on the reason
+    if adjustment.reason_code == InventoryAdjustment.ReasonCode.DAMAGE:
+        loss_account = settings.damaged_goods_expense_account
+    else: # Default to the general shrinkage/loss account for other reasons
+        loss_account = settings.inventory_adjustment_loss_account
     gain_account = settings.inventory_adjustment_gain_account
+    
     logger.info(f"    Accounts determined: Inventory='{inventory_account}', Loss='{loss_account}', Gain='{gain_account}'.")
 
     if not all([inventory_account, loss_account, gain_account]):
@@ -413,6 +421,14 @@ def create_je_for_internal_consumption(consumption: InventoryConsumption) -> Opt
             raise ValueError(_("Cannot create capitalization JE for consumption without a linked Fixed Asset."))
         debit_account = consumption.fixed_asset.gl_account
         debit_sub_ledger = consumption.fixed_asset
+    # --- NEW: Handle creation of a prepaid asset from an amortizable item ---
+    elif consumption.consumption_type == InventoryConsumption.ConsumptionType.AMORTIZE:
+        # The debit is to the universal Prepaid Expenses account.
+        settings = GeneralAccountingSettings.load()
+        if not settings.prepaid_expenses_account:
+            raise ValueError(_("The master Prepaid Expenses account is not configured in General Accounting Settings."))
+        debit_account = settings.prepaid_expenses_account
+        debit_sub_ledger = None # The sub-ledger will be the PrepaidExpense object itself, linked later.
     else: # Default to EXPENSE
         debit_account = _get_product_expense_account(consumption.product)
         debit_sub_ledger = None # Expenses don't typically have a sub-ledger here
@@ -746,6 +762,9 @@ def create_je_for_customer_payment(payment: Payment) -> Optional[JournalEntry]:
         raise ValueError(_("A/R account or the Bank's GL account is not configured."))
         
     # 3. --- Create Journal Entry and Lines ---
+    # Check if this is an on-account payment (no invoice applications)
+    is_on_account = not payment.customer_applications.exists()
+
     with transaction.atomic():
         description = _(
             "Payment received from customer '%(customer)s'. Ref: %(desc)s"
@@ -764,9 +783,20 @@ def create_je_for_customer_payment(payment: Payment) -> Optional[JournalEntry]:
             entry_type=JournalEntryLine.EntryType.DEBIT,
             sub_ledger_object=payment.bank_account
         )
-        # Credit Accounts Receivable
+        # --- MODIFIED LOGIC FOR CREDIT ---
+        if is_on_account:
+            # Credit Customer Deposits (Liability)
+            credit_account = settings.customer_deposits_account
+            if not credit_account:
+                raise ValueError(_("Customer Deposits account not configured in General Settings."))
+        else:
+            # Credit Accounts Receivable (as before)
+            credit_account = settings.accounts_receivable
+        
         JournalEntryLine.objects.create(
-            journal_entry=je, account=ar_account, amount=payment.amount,
+            journal_entry=je,
+            account=credit_account,
+            amount=payment.amount,
             entry_type=JournalEntryLine.EntryType.CREDIT,
             sub_ledger_object=payment.customer
         )
@@ -1037,6 +1067,7 @@ def create_je_for_bank_transfer(transfer: BankTransfer) -> Optional[JournalEntry
             entry_type=JournalEntryLine.EntryType.CREDIT
         )
         logger.info(f"Successfully created JE-{je.id} for BankTransfer ID {transfer.id}.")
+    return je
 
 
 # --- NEW SERVICE FUNCTION FOR DEPRECIATION ---
@@ -1100,6 +1131,234 @@ def create_je_for_depreciation(depreciation_log: DepreciationLog) -> Optional[Jo
         depreciation_log.save(update_fields=['journal_entry'])
         
         logger.info(f"Successfully created JE-{je.id} for DepreciationLog ID {depreciation_log.id}.")
+    return je
+
+
+# --- NEW SERVICE FUNCTIONS FOR ADJUSTING ENTRIES ---
+
+def create_je_for_amortization(amortization_log: AmortizationLog) -> Optional[JournalEntry]:
+    """
+    Creates a journal entry for a monthly prepaid expense amortization.
+
+    Accounting Logic:
+    - DEBIT: The specific expense account defined on the PrepaidExpense record.
+    - CREDIT: The master Prepaid Expenses control account.
+    """
+    # 1. --- Pre-checks and Guards ---
+    if JournalEntry.objects.filter(
+        content_type=ContentType.objects.get_for_model(amortization_log), object_id=amortization_log.id
+    ).exists():
+        logger.debug(f"Journal entry for AmortizationLog ID {amortization_log.id} already exists. Aborting.")
+        return None
+
+    _check_period_is_open(amortization_log.financial_period.end_date)
+    
+    # 2. --- Get Accounts and Amount ---
+    prepaid = amortization_log.prepaid_expense
+    amortization_amount = amortization_log.amount
+    
+    debit_account = prepaid.expense_account
+    
+    settings = GeneralAccountingSettings.load()
+    credit_account = settings.prepaid_expenses_account
+
+    if not all([debit_account, credit_account]):
+        raise ValueError(_(f"The prepaid expense '{prepaid}' is missing its target expense account or the master prepaid account is not set."))
+        
+    # 3. --- Create Journal Entry and Lines ---
+    with transaction.atomic():
+        description = _(
+            "Monthly amortization for: %(prepaid_desc)s"
+        ) % {
+            'prepaid_desc': str(prepaid)
+        }
+        je = JournalEntry.objects.create(
+            date=amortization_log.financial_period.end_date,
+            description=description,
+            source_object=amortization_log,
+            status=JournalEntry.Status.POSTED
+        )
+
+        # Debit Expense Account
+        JournalEntryLine.objects.create(
+            journal_entry=je, account=debit_account, amount=amortization_amount,
+            entry_type=JournalEntryLine.EntryType.DEBIT
+        )
+        # Credit Prepaid Expenses Control Account
+        JournalEntryLine.objects.create(
+            journal_entry=je, account=credit_account, amount=amortization_amount,
+            entry_type=JournalEntryLine.EntryType.CREDIT,
+            sub_ledger_object=prepaid
+        )
+        
+        # Link the JE back to the log for traceability
+        amortization_log.journal_entry = je
+        amortization_log.save(update_fields=['journal_entry'])
+        
+        logger.info(f"Successfully created JE-{je.id} for AmortizationLog ID {amortization_log.id}.")
+    return je
+
+
+def create_je_for_accrual(accrual_log: AccrualLog) -> Optional[JournalEntry]:
+    """
+    Creates a journal entry for a monthly expense accrual.
+
+    Accounting Logic:
+    - DEBIT: The specific expense account defined on the AccruedExpense record.
+    - CREDIT: The specific accrued liability account defined on the AccruedExpense record.
+    """
+    # 1. --- Pre-checks and Guards ---
+    if JournalEntry.objects.filter(
+        content_type=ContentType.objects.get_for_model(accrual_log), object_id=accrual_log.id
+    ).exists():
+        logger.debug(f"Journal entry for AccrualLog ID {accrual_log.id} already exists. Aborting.")
+        return None
+
+    _check_period_is_open(accrual_log.financial_period.end_date)
+    
+    # 2. --- Get Accounts and Amount ---
+    accrual = accrual_log.accrued_expense
+    accrual_amount = accrual_log.amount
+    
+    debit_account = accrual.target_expense_account
+    credit_account = accrual.target_liability_account
+
+    if not all([debit_account, credit_account]):
+        raise ValueError(_(f"The accrued expense '{accrual.description}' is missing its target expense or liability account configuration."))
+        
+    # 3. --- Create Journal Entry and Lines ---
+    with transaction.atomic():
+        description = _(
+            "Monthly expense accrual for: %(accrual_desc)s"
+        ) % {
+            'accrual_desc': accrual.description
+        }
+        je = JournalEntry.objects.create(
+            date=accrual_log.financial_period.end_date,
+            description=description,
+            source_object=accrual_log,
+            status=JournalEntry.Status.POSTED
+        )
+
+        # Debit Expense Account
+        JournalEntryLine.objects.create(
+            journal_entry=je, account=debit_account, amount=accrual_amount,
+            entry_type=JournalEntryLine.EntryType.DEBIT
+        )
+        # Credit Accrued Liability Account
+        JournalEntryLine.objects.create(
+            journal_entry=je, account=credit_account, amount=accrual_amount,
+            entry_type=JournalEntryLine.EntryType.CREDIT,
+            sub_ledger_object=accrual
+        )
+        
+        # Link the JE back to the log for traceability
+        accrual_log.journal_entry = je
+        accrual_log.save(update_fields=['journal_entry'])
+        
+        logger.info(f"Successfully created JE-{je.id} for AccrualLog ID {accrual_log.id}.")
+    return je
+
+
+def create_je_for_opening_balance(ob_entry: 'OpeningBalanceEntry') -> JournalEntry:
+    """
+    Posts the master opening balance entry.
+
+    Iterates through all lines and sub-ledger details of an OpeningBalanceEntry
+    and creates a single, balanced JournalEntry. This is the financial posting
+    step of the migration process.
+    """
+    logger.info(f"--> Starting Opening Balance JE creation for '{ob_entry.name}'.")
+    
+    if ob_entry.status == OpeningBalanceEntry.Status.POSTED:
+        raise PermissionError(_("This opening balance entry has already been posted."))
+    
+    _check_period_is_open(ob_entry.migration_date)
+
+    with transaction.atomic():
+        # 1. Create the JE Header
+        je = JournalEntry.objects.create(
+            date=ob_entry.migration_date,
+            description=_(f"Opening Balance as of {ob_entry.migration_date}: {ob_entry.name}"),
+            source_object=ob_entry,
+            status=JournalEntry.Status.DRAFT # Start as draft
+        )
+        logger.info(f"    Created draft JE-{je.id} for OB Entry {ob_entry.id}.")
+
+        total_debits = Decimal("0.0")
+        total_credits = Decimal("0.0")
+
+        # 2. Iterate through lines and create JE Lines
+        for line in ob_entry.lines.prefetch_related('sub_ledger_details__sub_ledger_object').all():
+            logger.info(f"    Processing OB Line for Account '{line.account.code}'...")
+            
+            # If there are sub-ledger details, create a JE line for each one
+            if line.sub_ledger_details.exists():
+                # --- MODIFICATION START ---
+                # For product-based accounts, we might have multiple details pointing to the SAME product.
+                # We need to aggregate these. For other sub-ledgers (Customer, Asset), each detail is unique.
+                if line.account.sub_ledger_model == ContentType.objects.get_for_model(Product):
+                    details_by_product = {}
+                    for detail in line.sub_ledger_details.all():
+                        product_id = detail.sub_ledger_object.pk
+                        details_by_product[product_id] = details_by_product.get(product_id, Decimal('0.0')) + detail.amount
+                    
+                    for product_id, total_amount in details_by_product.items():
+                        product_instance = Product.objects.get(pk=product_id)
+                        JournalEntryLine.objects.create(
+                            journal_entry=je,
+                            account=line.account,
+                            entry_type=line.entry_type,
+                            amount=total_amount,
+                            sub_ledger_object=product_instance
+                        )
+                        logger.info(f"        Created aggregated sub-ledger line for Product '{product_instance.name}': {line.entry_type} {line.account.code} for {total_amount}")
+
+                else: # For non-product sub-ledgers, create one line per detail
+                    for detail in line.sub_ledger_details.all():
+                        JournalEntryLine.objects.create(
+                            journal_entry=je,
+                            account=line.account,
+                            entry_type=line.entry_type,
+                            amount=detail.amount,
+                            sub_ledger_object=detail.sub_ledger_object
+                        )
+                        logger.info(f"        Created sub-ledger line: {line.entry_type} {line.account.code} for {detail.amount} -> {detail.sub_ledger_object}")
+                # --- MODIFICATION END ---
+            # Otherwise, create a single line for the total amount
+            else:
+                JournalEntryLine.objects.create(
+                    journal_entry=je,
+                    account=line.account,
+                    entry_type=line.entry_type,
+                    amount=line.total_amount
+                )
+                logger.info(f"        Created aggregate line: {line.entry_type} {line.account.code} for {line.total_amount}")
+
+            # Keep track of totals for validation
+            if line.entry_type == OpeningBalanceEntryLine.EntryType.DEBIT:
+                total_debits += line.total_amount
+            else:
+                total_credits += line.total_amount
+
+        # 3. Final Validation and Posting
+        logger.info(f"    Validation: Total Debits = {total_debits}, Total Credits = {total_credits}")
+        if total_debits != total_credits:
+            # The transaction will be rolled back due to the exception
+            raise ValueError(
+                _(f"Opening Balance JE is not balanced. Debits ({total_debits}) do not equal Credits ({total_credits}).")
+            )
+        
+        je.status = JournalEntry.Status.POSTED
+        je.save(update_fields=['status'])
+        
+        ob_entry.journal_entry = je
+        ob_entry.status = OpeningBalanceEntry.Status.POSTED
+        ob_entry.posted_at = timezone.now()
+        ob_entry.save(update_fields=['journal_entry', 'status', 'posted_at'])
+        
+        logger.info(f"<-- Successfully created and posted JE-{je.id} for Opening Balance Entry {ob_entry.id}.")
+        
     return je
 
 

@@ -11,9 +11,7 @@ from .models import (
     FinancialPeriod, PeriodCloseChecklist, BankReconciliation, JournalEntry, 
     BankAccount, SupplierInvoice, CustomerInvoice, FinishedProductReceipt, Batch
 )
-from .services.period_closing_service import update_checklist_for_period
-from .services.accounting_service import run_monthly_depreciation
-from .services.overhead_service import apply_overhead_to_finished_goods, execute_overhead_allocation_run
+from .services.period_closing_service import update_checklist_for_period, run_all_period_end_tasks
 from .models import OverheadAllocationRun
 
 
@@ -164,16 +162,15 @@ class TestPeriodClosingCockpit(AccountingServiceBaseTestCase):
             status=CustomerInvoice.InvoiceStatus.DRAFT
         ).delete()
 
-        # 4. Run the actual services that set the manual flags.
-        run_monthly_depreciation(period)
+        # 4. --- NEW: Set up data for and run the master period-end task orchestrator ---
         
-        # --- FIX: Create a FinishedProductReceipt to allow the overhead service to run correctly ---
+        # a) Create a FinishedProductReceipt with driver data to allow overhead to run
         batch = Batch.objects.create(
             template=self.test_template,
             shop_order_number="SO-CLOSE-TEST",
             batch_number="B-CLOSE-TEST",
             creation_date=period.start_date,
-            machine_hours_consumed=10  # Provide driver data
+            machine_hours_consumed=10
         )
         FinishedProductReceipt.objects.create(
             batch=batch,
@@ -183,18 +180,17 @@ class TestPeriodClosingCockpit(AccountingServiceBaseTestCase):
             total_quantity_produced=10
         )
         
-        # Simulate a successful overhead run
-        overhead_run = OverheadAllocationRun.objects.create(
+        # b) Create the OverheadAllocationRun instance that the service will find
+        OverheadAllocationRun.objects.create(
             financial_period=period,
             cost_pool=self.parent_pool,
             allocation_driver=self.machine_hours_driver,
-            status=OverheadAllocationRun.Status.CALCULATED,
-            total_pool_amount=Decimal("1000.00"),
-            calculated_rate=Decimal("10.00")
         )
-        apply_overhead_to_finished_goods(overhead_run)
+
+        # c) Call the master service to run all automated tasks (Depreciation, Amortization, etc.)
+        run_all_period_end_tasks(period)
         
-        # 5. Now, call the service one last time to ensure calculated fields are fresh
+        # 5. Now, call the update service one last time to refresh calculated fields
         #    and get the final checklist object for assertion.
         final_checklist = update_checklist_for_period(period)
 
