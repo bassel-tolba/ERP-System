@@ -3243,3 +3243,2324 @@ INFO 2025-10-03 15:25:17,882 django.utils.autoreload autoreload 11812 12312 C:\U
 INFO 2025-10-03 15:25:20,276 django.utils.autoreload autoreload 2032 10512 Watching for file changes with StatReloader
 INFO 2025-10-03 15:32:23,119 django.utils.autoreload autoreload 2032 10512 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
 INFO 2025-10-03 15:32:24,461 django.utils.autoreload autoreload 5136 10260 Watching for file changes with StatReloader
+INFO 2025-10-03 20:07:32,296 django.utils.autoreload autoreload 5136 10260 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-03 20:07:34,429 django.utils.autoreload autoreload 3572 5892 Watching for file changes with StatReloader
+INFO 2025-10-03 20:08:30,535 django.utils.autoreload autoreload 3572 5892 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-03 20:08:31,988 django.utils.autoreload autoreload 12892 8196 Watching for file changes with StatReloader
+INFO 2025-10-03 20:11:58,562 django.utils.autoreload autoreload 12892 8196 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-03 20:12:00,630 django.utils.autoreload autoreload 9332 11016 Watching for file changes with StatReloader
+INFO 2025-10-03 20:13:06,469 django.utils.autoreload autoreload 9332 11016 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\services\accounting_service.py changed, reloading.
+INFO 2025-10-03 20:13:07,629 django.utils.autoreload autoreload 10692 11656 Watching for file changes with StatReloader
+INFO 2025-10-03 20:14:01,011 django.utils.autoreload autoreload 10692 11656 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-03 20:14:02,404 django.utils.autoreload autoreload 12632 11148 Watching for file changes with StatReloader
+INFO 2025-10-03 20:41:29,368 django.utils.autoreload autoreload 12632 11148 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-03 20:41:31,111 django.utils.autoreload autoreload 8868 5908 Watching for file changes with StatReloader
+INFO 2025-10-03 20:42:16,883 django.utils.autoreload autoreload 8868 5908 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\services\accounting_service.py changed, reloading.
+INFO 2025-10-03 20:42:18,235 django.utils.autoreload autoreload 11656 10700 Watching for file changes with StatReloader
+INFO 2025-10-03 20:42:28,979 django.utils.autoreload autoreload 11656 10700 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\signals.py changed, reloading.
+INFO 2025-10-03 20:42:30,363 django.utils.autoreload autoreload 13252 11340 Watching for file changes with StatReloader
+INFO 2025-10-03 21:14:22,616 django.utils.autoreload autoreload 13252 11340 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\services\accounting_service.py changed, reloading.
+INFO 2025-10-03 21:14:24,361 django.utils.autoreload autoreload 5556 11316 Watching for file changes with StatReloader
+INFO 2025-10-03 21:49:56,728 django.utils.autoreload autoreload 5556 11316 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\forms.py changed, reloading.
+INFO 2025-10-03 21:49:58,369 django.utils.autoreload autoreload 11304 11256 Watching for file changes with StatReloader
+INFO 2025-10-03 21:53:46,957 django.utils.autoreload autoreload 11776 7268 Watching for file changes with StatReloader
+INFO 2025-10-03 22:12:54,945 inventory.services.accounting_service accounting_service 9740 1592 Successfully created Journal Entry JE-1 for InventoryLog ID 1.
+WARNING 2025-10-03 22:12:54,949 inventory.services.accounting_service accounting_service 9740 1592 Attempted to create JE for Batch ID 1 with no items. Aborting.
+INFO 2025-10-03 22:12:54,952 inventory.signals signals 9740 1592 Deleted existing JE for updated Batch ID 1 to allow regeneration.
+INFO 2025-10-03 22:12:54,961 inventory.services.accounting_service accounting_service 9740 1592 Successfully created Journal Entry JE-2 for Batch ID 1.
+INFO 2025-10-03 22:12:54,970 inventory.services.accounting_service accounting_service 9740 1592 Successfully created Journal Entry JE-3 for FinishedProductReceipt ID 1.
+INFO 2025-10-03 22:12:54,987 inventory.services.accounting_service accounting_service 9740 1592 Successfully created JE-4 for FinishedProductDispatch ID 1.
+INFO 2025-10-03 22:12:54,998 inventory.services.accounting_service accounting_service 9740 1592 Successfully created JE-5 for supplier Payment ID 1.
+INFO 2025-10-03 22:12:55,006 inventory.services.accounting_service accounting_service 9740 1592 Successfully created JE-6 for DepreciationLog ID 1.
+INFO 2025-10-03 22:15:53,280 inventory.services.accounting_service accounting_service 9728 11316 Successfully created Journal Entry JE-1 for InventoryLog ID 1.
+WARNING 2025-10-03 22:15:53,283 inventory.services.accounting_service accounting_service 9728 11316 Attempted to create JE for Batch ID 1 with no items. Aborting.
+INFO 2025-10-03 22:15:53,286 inventory.signals signals 9728 11316 Deleted existing JE for updated Batch ID 1 to allow regeneration.
+INFO 2025-10-03 22:15:53,295 inventory.services.accounting_service accounting_service 9728 11316 Successfully created Journal Entry JE-2 for Batch ID 1.
+INFO 2025-10-03 22:15:53,303 inventory.services.accounting_service accounting_service 9728 11316 Successfully created Journal Entry JE-3 for FinishedProductReceipt ID 1.
+INFO 2025-10-03 22:15:53,318 inventory.services.accounting_service accounting_service 9728 11316 Successfully created JE-4 for FinishedProductDispatch ID 1.
+INFO 2025-10-03 22:15:53,328 inventory.services.accounting_service accounting_service 9728 11316 Successfully created JE-5 for supplier Payment ID 1.
+INFO 2025-10-03 22:15:53,336 inventory.services.accounting_service accounting_service 9728 11316 Successfully created JE-6 for DepreciationLog ID 1.
+INFO 2025-10-03 22:17:49,079 inventory.services.accounting_service accounting_service 10368 5460 Successfully created Journal Entry JE-1 for InventoryLog ID 1.
+WARNING 2025-10-03 22:17:49,087 inventory.services.accounting_service accounting_service 10368 5460 Attempted to create JE for Batch ID 1 with no items. Aborting.
+INFO 2025-10-03 22:17:49,101 inventory.signals signals 10368 5460 Deleted existing JE for updated Batch ID 1 to allow regeneration.
+INFO 2025-10-03 22:17:49,122 inventory.services.accounting_service accounting_service 10368 5460 Successfully created Journal Entry JE-2 for Batch ID 1.
+INFO 2025-10-03 22:17:49,148 inventory.services.accounting_service accounting_service 10368 5460 Successfully created Journal Entry JE-3 for FinishedProductReceipt ID 1.
+INFO 2025-10-03 22:17:49,222 inventory.services.accounting_service accounting_service 10368 5460 Successfully created JE-4 for FinishedProductDispatch ID 1.
+INFO 2025-10-03 22:17:49,250 inventory.services.accounting_service accounting_service 10368 5460 Successfully created JE-5 for supplier Payment ID 1.
+INFO 2025-10-03 22:17:49,272 inventory.services.accounting_service accounting_service 10368 5460 Successfully created Journal Entry JE-6 for InventoryLog ID 2.
+INFO 2025-10-03 22:17:49,316 inventory.services.accounting_service accounting_service 10368 5460 Successfully created JE-7 for DepreciationLog ID 1.
+INFO 2025-10-03 22:17:49,365 inventory.services.accounting_service accounting_service 10368 5460 Successfully created Journal Entry JE-8 for InventoryConsumption ID 1.
+INFO 2025-10-03 22:17:49,367 inventory.services.approval_service approval_service 10368 5460 User 'testuser' approved ExpenseRequest ID 2.
+INFO 2025-10-03 22:17:49,370 inventory.services.approval_service approval_service 10368 5460 User 'testuser' rejected ExpenseRequest ID 3.
+WARNING 2025-10-03 22:17:49,400 inventory.services.accounting_service accounting_service 10368 5460 Attempted to create JE for Batch ID 2 with no items. Aborting.
+INFO 2025-10-03 22:17:49,419 inventory.services.accounting_service accounting_service 10368 5460 Successfully created Journal Entry JE-9 for FinishedProductReceipt ID 2.
+WARNING 2025-10-03 22:17:49,422 inventory.services.accounting_service accounting_service 10368 5460 Attempted to create JE for Batch ID 3 with no items. Aborting.
+INFO 2025-10-03 22:17:49,453 inventory.services.accounting_service accounting_service 10368 5460 Successfully created Journal Entry JE-10 for FinishedProductReceipt ID 3.
+INFO 2025-10-03 22:17:49,480 inventory.services.accounting_service accounting_service 10368 5460 Successfully created Journal Entry JE-11 for InventoryLog ID 3.
+INFO 2025-10-03 22:17:49,494 inventory.services.accounting_service accounting_service 10368 5460 Successfully created Journal Entry JE-12 for InventoryLog ID 4.
+INFO 2025-10-03 22:17:49,505 inventory.services.accounting_service accounting_service 10368 5460 Successfully created Journal Entry JE-13 for InventoryLog ID 5.
+INFO 2025-10-03 22:17:49,522 inventory.services.accounting_service accounting_service 10368 5460 Successfully created Journal Entry JE-14 for InventoryLog ID 6.
+WARNING 2025-10-03 22:17:49,532 inventory.services.accounting_service accounting_service 10368 5460 Attempted to create JE for Batch ID 4 with no items. Aborting.
+INFO 2025-10-03 22:17:49,554 inventory.services.accounting_service accounting_service 10368 5460 --> Starting Opening Balance JE creation for 'Go-Live 2025-01-01'.
+INFO 2025-10-03 22:17:49,560 inventory.services.accounting_service accounting_service 10368 5460     Created draft JE-15 for OB Entry 1.
+INFO 2025-10-03 22:17:49,582 inventory.services.accounting_service accounting_service 10368 5460     Processing OB Line for Account '1020102'...
+INFO 2025-10-03 22:17:49,583 inventory.services.accounting_service accounting_service 10368 5460         Created sub-ledger line: debit 1020102 for 250000.000 -> Main Business Bank Account
+INFO 2025-10-03 22:17:49,584 inventory.services.accounting_service accounting_service 10368 5460     Processing OB Line for Account '1020103'...
+INFO 2025-10-03 22:17:49,585 inventory.services.accounting_service accounting_service 10368 5460         Created sub-ledger line: debit 1020103 for 50000.000 -> Secondary Business Bank Account
+INFO 2025-10-03 22:17:49,586 inventory.services.accounting_service accounting_service 10368 5460     Processing OB Line for Account '10203'...
+INFO 2025-10-03 22:17:49,587 inventory.services.accounting_service accounting_service 10368 5460         Created sub-ledger line: debit 10203 for 75000.000 -> County General Hospital
+INFO 2025-10-03 22:17:49,588 inventory.services.accounting_service accounting_service 10368 5460         Created sub-ledger line: debit 10203 for 20000.000 -> City Central Pharmacy
+INFO 2025-10-03 22:17:49,589 inventory.services.accounting_service accounting_service 10368 5460     Processing OB Line for Account '1020206'...
+INFO 2025-10-03 22:17:49,593 inventory.services.accounting_service accounting_service 10368 5460         Created sub-ledger line: debit 1020206 for 5750.000 -> Receipt for Batch #OB-FP-SALINE-001 from Plan MIG-SO-SALINE
+INFO 2025-10-03 22:17:49,596 inventory.services.accounting_service accounting_service 10368 5460         Created sub-ledger line: debit 1020206 for 4200.000 -> Receipt for Batch #OB-FP-GLUCOSE-001 from Plan MIG-SO-GLUCOSE
+INFO 2025-10-03 22:17:49,598 inventory.services.accounting_service accounting_service 10368 5460     Processing OB Line for Account '1020201'...
+INFO 2025-10-03 22:17:49,599 inventory.services.accounting_service accounting_service 10368 5460         Created sub-ledger line: debit 1020201 for 5250.000 -> Saline Solution (RM-SALINE-001)
+INFO 2025-10-03 22:17:49,600 inventory.services.accounting_service accounting_service 10368 5460     Processing OB Line for Account '1020202'...
+INFO 2025-10-03 22:17:49,600 inventory.services.accounting_service accounting_service 10368 5460         Created sub-ledger line: debit 1020202 for 2400.000 -> PVC Bag 500ml (RM-BAG-PVC-500)
+INFO 2025-10-03 22:17:49,601 inventory.services.accounting_service accounting_service 10368 5460     Processing OB Line for Account '1020207'...
+INFO 2025-10-03 22:17:49,602 inventory.services.accounting_service accounting_service 10368 5460         Created sub-ledger line: debit 1020207 for 1250.000 -> Machine Lubricant (MRO-LUBE-001)
+INFO 2025-10-03 22:17:49,602 inventory.services.accounting_service accounting_service 10368 5460     Processing OB Line for Account '1020208'...
+INFO 2025-10-03 22:17:49,603 inventory.services.accounting_service accounting_service 10368 5460         Created sub-ledger line: debit 1020208 for 12000.000 -> Annual Antivirus License (CONSUM-SFW-001)
+INFO 2025-10-03 22:17:49,604 inventory.services.accounting_service accounting_service 10368 5460     Processing OB Line for Account '1020205'...
+INFO 2025-10-03 22:17:49,605 inventory.services.accounting_service accounting_service 10368 5460         Created sub-ledger line: debit 1020205 for 645.000 -> Saline IV Drip Bag 500ml (FP-IVDRIP-500)
+INFO 2025-10-03 22:17:49,606 inventory.services.accounting_service accounting_service 10368 5460     Processing OB Line for Account '10101'...
+INFO 2025-10-03 22:17:49,611 inventory.services.accounting_service accounting_service 10368 5460         Created sub-ledger line: debit 10101 for 120000.000 -> MACHINE-001 - Production Filling Machine
+INFO 2025-10-03 22:17:49,613 inventory.services.accounting_service accounting_service 10368 5460     Processing OB Line for Account '10102'...
+INFO 2025-10-03 22:17:49,614 inventory.services.accounting_service accounting_service 10368 5460         Created sub-ledger line: debit 10102 for 30000.000 -> FURN-001 - Office Furniture Set
+INFO 2025-10-03 22:17:49,615 inventory.services.accounting_service accounting_service 10368 5460     Processing OB Line for Account '2020501'...
+INFO 2025-10-03 22:17:49,616 inventory.services.accounting_service accounting_service 10368 5460         Created sub-ledger line: credit 2020501 for 12000.000 -> MACHINE-001 - Production Filling Machine
+INFO 2025-10-03 22:17:49,617 inventory.services.accounting_service accounting_service 10368 5460     Processing OB Line for Account '2020502'...
+INFO 2025-10-03 22:17:49,618 inventory.services.accounting_service accounting_service 10368 5460         Created sub-ledger line: credit 2020502 for 9000.000 -> FURN-001 - Office Furniture Set
+INFO 2025-10-03 22:17:49,619 inventory.services.accounting_service accounting_service 10368 5460     Processing OB Line for Account '20201'...
+INFO 2025-10-03 22:17:49,620 inventory.services.accounting_service accounting_service 10368 5460         Created sub-ledger line: credit 20201 for 45000.000 -> Global Pharma Supplies
+INFO 2025-10-03 22:17:49,621 inventory.services.accounting_service accounting_service 10368 5460         Created sub-ledger line: credit 20201 for 20000.000 -> Advanced Medical Packaging Inc.
+INFO 2025-10-03 22:17:49,622 inventory.services.accounting_service accounting_service 10368 5460     Processing OB Line for Account '305'...
+INFO 2025-10-03 22:17:49,622 inventory.services.accounting_service accounting_service 10368 5460         Created aggregate line: credit 305 for 490495.000
+INFO 2025-10-03 22:17:49,622 inventory.services.accounting_service accounting_service 10368 5460     Validation: Total Debits = 576495.000, Total Credits = 576495.000
+INFO 2025-10-03 22:17:49,627 inventory.services.accounting_service accounting_service 10368 5460 <-- Successfully created and posted JE-15 for Opening Balance Entry 1.
+INFO 2025-10-03 22:18:06,418 django.utils.autoreload autoreload 4708 10784 Watching for file changes with StatReloader
+INFO 2025-10-03 22:18:08,212 django.server basehttp 4708 2184 "GET /expenses/requests/ HTTP/1.1" 302 0
+WARNING 2025-10-03 22:18:08,232 django.request log 4708 2184 Not Found: /accounts/login/
+WARNING 2025-10-03 22:18:08,232 django.server basehttp 4708 2184 "GET /accounts/login/?next=/expenses/requests/ HTTP/1.1" 404 39591
+INFO 2025-10-03 22:18:22,379 django.server basehttp 4708 2184 "GET /expenses/requests HTTP/1.1" 301 0
+INFO 2025-10-03 22:18:22,386 django.server basehttp 4708 12560 "GET /expenses/requests/ HTTP/1.1" 302 0
+WARNING 2025-10-03 22:18:22,402 django.request log 4708 12560 Not Found: /accounts/login/
+WARNING 2025-10-03 22:18:22,403 django.server basehttp 4708 12560 "GET /accounts/login/?next=/expenses/requests/ HTTP/1.1" 404 39591
+INFO 2025-10-03 22:19:18,421 django.utils.autoreload autoreload 4708 10784 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\gipcco_project\settings.py changed, reloading.
+INFO 2025-10-03 22:19:19,809 django.utils.autoreload autoreload 8324 14184 Watching for file changes with StatReloader
+INFO 2025-10-03 22:19:23,629 django.utils.autoreload autoreload 8324 14184 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\gipcco_project\settings.py changed, reloading.
+INFO 2025-10-03 22:19:25,118 django.utils.autoreload autoreload 8340 5748 Watching for file changes with StatReloader
+WARNING 2025-10-03 22:19:31,118 django.request log 8340 10452 Not Found: /accounts/login/
+WARNING 2025-10-03 22:19:31,119 django.server basehttp 8340 10452 "GET /accounts/login/?next=/expenses/requests/ HTTP/1.1" 404 39591
+WARNING 2025-10-03 22:19:32,044 django.request log 8340 10452 Not Found: /accounts/login/
+WARNING 2025-10-03 22:19:32,045 django.server basehttp 8340 10452 "GET /accounts/login/?next=/expenses/requests/ HTTP/1.1" 404 39591
+INFO 2025-10-03 22:19:39,186 django.server basehttp 8340 10452 "GET /expenses/requests/ HTTP/1.1" 302 0
+INFO 2025-10-03 22:19:39,202 django.server basehttp 8340 10452 "GET /admin/login/?next=/expenses/requests/ HTTP/1.1" 200 3156
+WARNING 2025-10-03 22:19:39,238 django.server basehttp 8340 5368 "GET /static/img/ims_logo.png HTTP/1.1" 404 1862
+INFO 2025-10-03 22:19:39,353 django.server basehttp 8340 7320 "GET /static/vendor/adminlte/css/adminlte.min.css HTTP/1.1" 200 1382975
+INFO 2025-10-03 22:19:39,359 django.server basehttp 8340 12596 "GET /static/jazzmin/css/main.css HTTP/1.1" 200 16969
+INFO 2025-10-03 22:19:39,359 django.server basehttp 8340 7752 "GET /static/vendor/bootswatch/darkly/bootstrap.min.css HTTP/1.1" 200 164202
+INFO 2025-10-03 22:19:39,361 django.server basehttp 8340 11312 "GET /static/admin/js/vendor/jquery/jquery.js HTTP/1.1" 200 285314
+INFO 2025-10-03 22:19:39,374 django.server basehttp 8340 12596 "GET /static/vendor/adminlte/js/adminlte.min.js HTTP/1.1" 200 44244
+INFO 2025-10-03 22:19:39,367 django.server basehttp 8340 4104 "GET /static/vendor/bootstrap/js/bootstrap.min.js HTTP/1.1" 200 62440
+INFO 2025-10-03 22:19:39,379 django.server basehttp 8340 10452 "GET /static/vendor/fontawesome-free/css/all.min.css HTTP/1.1" 200 103009
+INFO 2025-10-03 22:19:39,510 django.server basehttp 8340 10452 "GET /static/vendor/fontawesome-free/webfonts/fa-solid-900.woff2 HTTP/1.1" 200 156400
+WARNING 2025-10-03 22:19:39,665 django.server basehttp 8340 10452 "GET /static/fas%20fa-warehouse HTTP/1.1" 404 1864
+INFO 2025-10-03 22:19:49,113 django.server basehttp 8340 7320 "POST /admin/login/?next=/expenses/requests/ HTTP/1.1" 200 3479
+WARNING 2025-10-03 22:19:49,148 django.server basehttp 8340 7320 "GET /static/img/ims_logo.png HTTP/1.1" 404 1862
+INFO 2025-10-03 22:20:59,996 django.server basehttp 8340 12596 "POST /admin/login/?next=/expenses/requests/ HTTP/1.1" 302 0
+ERROR 2025-10-03 22:21:00,090 django.request log 8340 12596 Internal Server Error: /expenses/requests/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 134, in render
+    compiled_parent = self.get_parent(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 131, in get_parent
+    return self.find_template(parent, context)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 109, in find_template
+    template, origin = context.template.engine.find_template(
+                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        template_name,
+        ^^^^^^^^^^^^^^
+        skip=history,
+        ^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 163, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 220, in _get_response
+    response = response.render()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 109, in render
+    reraise(exc, self.backend)
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 130, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+ERROR 2025-10-03 22:21:00,095 django.server basehttp 8340 12596 "GET /expenses/requests/ HTTP/1.1" 500 135290
+ERROR 2025-10-03 22:21:05,546 django.request log 8340 12596 Internal Server Error: /expenses/requests/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 134, in render
+    compiled_parent = self.get_parent(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 131, in get_parent
+    return self.find_template(parent, context)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 109, in find_template
+    template, origin = context.template.engine.find_template(
+                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        template_name,
+        ^^^^^^^^^^^^^^
+        skip=history,
+        ^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 163, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 220, in _get_response
+    response = response.render()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 109, in render
+    reraise(exc, self.backend)
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 130, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+ERROR 2025-10-03 22:21:05,549 django.server basehttp 8340 12596 "GET /expenses/requests/ HTTP/1.1" 500 134965
+INFO 2025-10-03 22:22:06,230 django.utils.autoreload autoreload 8340 5748 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\gipcco_project\settings.py changed, reloading.
+INFO 2025-10-03 22:22:07,463 django.utils.autoreload autoreload 11916 6852 Watching for file changes with StatReloader
+INFO 2025-10-03 22:23:08,051 django.utils.autoreload autoreload 11916 6852 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\gipcco_project\settings.py changed, reloading.
+INFO 2025-10-03 22:23:09,923 django.utils.autoreload autoreload 11256 10064 Watching for file changes with StatReloader
+INFO 2025-10-03 22:23:15,630 django.server basehttp 11256 9372 "GET /expenses/requests/ HTTP/1.1" 200 4693
+INFO 2025-10-03 22:23:19,000 django.server basehttp 11256 9372 "GET /expenses/request/3/ HTTP/1.1" 200 3698
+INFO 2025-10-03 22:23:23,327 django.server basehttp 11256 9372 "GET /expenses/request/new/ HTTP/1.1" 200 15458
+INFO 2025-10-03 22:23:53,401 django.server basehttp 11256 9372 "POST /expenses/request/new/ HTTP/1.1" 200 15717
+INFO 2025-10-03 22:24:05,946 django.server basehttp 11256 9372 "GET /expenses/requests/ HTTP/1.1" 200 4693
+INFO 2025-10-03 22:24:08,042 django.server basehttp 11256 9372 "GET /expenses/request/1/ HTTP/1.1" 200 4253
+INFO 2025-10-03 22:24:13,345 django.server basehttp 11256 9372 "GET /expenses/request/3/ HTTP/1.1" 200 3698
+INFO 2025-10-03 22:24:30,549 django.server basehttp 11256 9372 "GET /expenses/request/2/ HTTP/1.1" 200 3608
+INFO 2025-10-03 22:24:34,485 django.server basehttp 11256 9372 "GET /expenses/request/1/ HTTP/1.1" 200 4253
+INFO 2025-10-03 22:24:35,283 django.server basehttp 11256 9372 "POST /expenses/request/1/approve/ HTTP/1.1" 302 0
+INFO 2025-10-03 22:24:35,301 django.server basehttp 11256 9372 "GET /expenses/request/1/ HTTP/1.1" 200 4253
+INFO 2025-10-03 22:24:38,177 django.server basehttp 11256 9372 "GET /expenses/request/1/ HTTP/1.1" 200 4253
+INFO 2025-10-03 22:24:41,611 django.server basehttp 11256 9372 "GET /expenses/requests/ HTTP/1.1" 200 4693
+INFO 2025-10-03 22:24:43,975 django.server basehttp 11256 9372 "GET /expenses/requests/ HTTP/1.1" 200 4693
+INFO 2025-10-03 22:24:44,360 django.server basehttp 11256 9372 "GET /expenses/requests/ HTTP/1.1" 200 4693
+INFO 2025-10-03 22:24:44,548 django.server basehttp 11256 9372 "GET /expenses/requests/ HTTP/1.1" 200 4693
+INFO 2025-10-03 22:24:44,743 django.server basehttp 11256 9372 "GET /expenses/requests/ HTTP/1.1" 200 4693
+INFO 2025-10-03 22:24:44,926 django.server basehttp 11256 9372 "GET /expenses/requests/ HTTP/1.1" 200 4693
+INFO 2025-10-03 22:24:45,498 django.server basehttp 11256 9372 "GET /expenses/requests/ HTTP/1.1" 200 4693
+INFO 2025-10-03 22:24:46,194 django.server basehttp 11256 9372 "GET /expenses/requests/ HTTP/1.1" 200 4693
+WARNING 2025-10-03 22:24:46,524 django.request log 11256 9372 Not Found: /favicon.ico
+WARNING 2025-10-03 22:24:46,525 django.server basehttp 11256 9372 "GET /favicon.ico HTTP/1.1" 404 39554
+INFO 2025-10-03 22:24:48,657 django.server basehttp 11256 9372 "GET /expenses/requests/ HTTP/1.1" 200 4693
+INFO 2025-10-03 22:24:52,678 django.server basehttp 11256 9372 "GET /expenses/request/new/ HTTP/1.1" 200 15458
+INFO 2025-10-03 22:24:53,877 django.server basehttp 11256 9372 "GET /expenses/requests/ HTTP/1.1" 200 4693
+INFO 2025-10-03 22:24:57,882 django.server basehttp 11256 9372 "GET /expenses/request/1/ HTTP/1.1" 200 4253
+INFO 2025-10-03 22:25:03,081 django.server basehttp 11256 9372 "POST /expenses/request/1/approve/ HTTP/1.1" 302 0
+INFO 2025-10-03 22:25:03,094 django.server basehttp 11256 9372 "GET /expenses/request/1/ HTTP/1.1" 200 4253
+INFO 2025-10-03 22:25:04,512 django.server basehttp 11256 9372 "POST /expenses/request/1/approve/ HTTP/1.1" 302 0
+INFO 2025-10-03 22:25:04,526 django.server basehttp 11256 9372 "GET /expenses/request/1/ HTTP/1.1" 200 4253
+WARNING 2025-10-03 22:25:08,946 django.request log 11256 9372 Not Found: /expenses/request
+WARNING 2025-10-03 22:25:08,947 django.server basehttp 11256 9372 "GET /expenses/request HTTP/1.1" 404 39569
+INFO 2025-10-03 22:25:14,583 django.server basehttp 11256 9372 "GET /expenses/requests/ HTTP/1.1" 200 4693
+INFO 2025-10-03 22:25:16,348 django.server basehttp 11256 9372 "GET /expenses/request/2/ HTTP/1.1" 200 3608
+INFO 2025-10-03 22:25:19,490 django.server basehttp 11256 9372 "GET /expenses/request/new/ HTTP/1.1" 200 15458
+WARNING 2025-10-03 22:25:23,136 django.request log 11256 9372 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-03 22:25:23,137 django.server basehttp 11256 9372 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 39665
+INFO 2025-10-03 22:25:25,401 django.server basehttp 11256 9372 "GET /expenses/request/new/ HTTP/1.1" 200 15458
+WARNING 2025-10-03 22:25:25,444 django.request log 11256 9372 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-03 22:25:25,444 django.server basehttp 11256 9372 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 39665
+INFO 2025-10-03 22:25:37,523 django.server basehttp 11256 9372 "POST /expenses/request/new/ HTTP/1.1" 200 15717
+WARNING 2025-10-03 22:25:37,576 django.request log 11256 9372 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-03 22:25:37,577 django.server basehttp 11256 9372 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 39665
+INFO 2025-10-03 22:25:39,233 django.server basehttp 11256 9372 "GET /expenses/requests/ HTTP/1.1" 200 4693
+WARNING 2025-10-03 22:25:39,270 django.request log 11256 9372 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-03 22:25:39,272 django.server basehttp 11256 9372 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 39665
+INFO 2025-10-03 22:27:06,573 django.utils.autoreload autoreload 8044 9960 Watching for file changes with StatReloader
+INFO 2025-10-03 22:27:14,312 django.server basehttp 8044 8936 "GET /expenses/requests/ HTTP/1.1" 200 4693
+WARNING 2025-10-03 22:27:14,357 django.request log 8044 8936 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-03 22:27:14,358 django.server basehttp 8044 8936 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 39665
+INFO 2025-10-03 22:27:16,816 django.server basehttp 8044 8936 "GET /expenses/request/new/ HTTP/1.1" 200 15458
+WARNING 2025-10-03 22:27:16,862 django.request log 8044 8936 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-03 22:27:16,863 django.server basehttp 8044 8936 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 39665
+INFO 2025-10-03 22:28:08,059 django.server basehttp 8044 8936 "GET /expenses/requests/ HTTP/1.1" 200 4693
+WARNING 2025-10-03 22:28:08,127 django.request log 8044 8936 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-03 22:28:08,128 django.server basehttp 8044 8936 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 39665
+INFO 2025-10-03 22:28:14,963 django.server basehttp 8044 8936 "GET /expenses/request/new/ HTTP/1.1" 200 15458
+INFO 2025-10-03 22:28:33,381 django.utils.autoreload autoreload 8044 9960 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\forms.py changed, reloading.
+INFO 2025-10-03 22:28:34,808 django.utils.autoreload autoreload 4064 9404 Watching for file changes with StatReloader
+INFO 2025-10-03 22:29:06,487 django.utils.autoreload autoreload 4064 9404 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\forms.py changed, reloading.
+INFO 2025-10-03 22:29:07,962 django.utils.autoreload autoreload 880 728 Watching for file changes with StatReloader
+INFO 2025-10-03 22:29:10,722 django.server basehttp 880 7384 "GET /expenses/request/new/ HTTP/1.1" 200 16380
+INFO 2025-10-03 22:29:34,464 django.server basehttp 880 7384 "GET /expenses/requests/ HTTP/1.1" 200 4762
+INFO 2025-10-03 22:29:36,680 django.server basehttp 880 7384 "GET /expenses/request/1/ HTTP/1.1" 200 4499
+INFO 2025-10-03 22:29:37,628 django.server basehttp 880 7384 "POST /expenses/request/1/approve/ HTTP/1.1" 302 0
+INFO 2025-10-03 22:29:37,643 django.server basehttp 880 7384 "GET /expenses/request/1/ HTTP/1.1" 200 4499
+INFO 2025-10-03 22:29:41,288 django.server basehttp 880 7384 "GET /expenses/request/1/ HTTP/1.1" 200 4499
+INFO 2025-10-03 22:29:41,791 django.server basehttp 880 7384 "GET /expenses/request/1/ HTTP/1.1" 200 4499
+INFO 2025-10-03 22:29:41,974 django.server basehttp 880 7384 "GET /expenses/request/1/ HTTP/1.1" 200 4499
+INFO 2025-10-03 22:29:42,151 django.server basehttp 880 7384 "GET /expenses/request/1/ HTTP/1.1" 200 4499
+INFO 2025-10-03 22:29:42,340 django.server basehttp 880 7384 "GET /expenses/request/1/ HTTP/1.1" 200 4499
+INFO 2025-10-03 22:29:45,178 django.server basehttp 880 7384 "POST /expenses/request/1/approve/ HTTP/1.1" 302 0
+INFO 2025-10-03 22:29:45,193 django.server basehttp 880 7384 "GET /expenses/request/1/ HTTP/1.1" 200 4499
+INFO 2025-10-03 22:29:45,794 django.server basehttp 880 7384 "POST /expenses/request/1/approve/ HTTP/1.1" 302 0
+INFO 2025-10-03 22:29:45,808 django.server basehttp 880 7384 "GET /expenses/request/1/ HTTP/1.1" 200 4499
+INFO 2025-10-03 22:29:47,437 django.server basehttp 880 7384 "POST /expenses/request/1/approve/ HTTP/1.1" 302 0
+INFO 2025-10-03 22:29:47,458 django.server basehttp 880 7384 "GET /expenses/request/1/ HTTP/1.1" 200 4499
+INFO 2025-10-03 22:29:47,629 django.server basehttp 880 7384 "POST /expenses/request/1/approve/ HTTP/1.1" 302 0
+INFO 2025-10-03 22:29:47,644 django.server basehttp 880 7384 "GET /expenses/request/1/ HTTP/1.1" 200 4499
+INFO 2025-10-03 22:29:47,811 django.server basehttp 880 7384 "POST /expenses/request/1/approve/ HTTP/1.1" 302 0
+INFO 2025-10-03 22:29:47,825 django.server basehttp 880 7384 "GET /expenses/request/1/ HTTP/1.1" 200 4499
+INFO 2025-10-03 22:29:47,988 django.server basehttp 880 7384 "POST /expenses/request/1/approve/ HTTP/1.1" 302 0
+INFO 2025-10-03 22:29:48,007 django.server basehttp 880 7384 "GET /expenses/request/1/ HTTP/1.1" 200 4499
+INFO 2025-10-03 22:29:48,172 django.server basehttp 880 7384 "POST /expenses/request/1/approve/ HTTP/1.1" 302 0
+INFO 2025-10-03 22:29:48,191 django.server basehttp 880 7384 "GET /expenses/request/1/ HTTP/1.1" 200 4499
+INFO 2025-10-03 22:29:48,338 django.server basehttp 880 7384 "POST /expenses/request/1/approve/ HTTP/1.1" 302 0
+INFO 2025-10-03 22:29:48,361 django.server basehttp 880 7384 "GET /expenses/request/1/ HTTP/1.1" 200 4499
+INFO 2025-10-03 22:29:48,882 django.server basehttp 880 7384 "GET /expenses/requests/ HTTP/1.1" 200 4762
+INFO 2025-10-03 22:29:49,785 django.server basehttp 880 7384 "GET /expenses/request/new/ HTTP/1.1" 200 16380
+INFO 2025-10-03 22:30:33,254 django.utils.autoreload autoreload 880 728 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\forms.py changed, reloading.
+INFO 2025-10-03 22:30:34,555 django.utils.autoreload autoreload 11248 13860 Watching for file changes with StatReloader
+INFO 2025-10-03 22:31:05,391 django.utils.autoreload autoreload 11248 13860 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\forms.py changed, reloading.
+INFO 2025-10-03 22:31:06,590 django.utils.autoreload autoreload 5612 1232 Watching for file changes with StatReloader
+INFO 2025-10-03 22:31:11,733 django.server basehttp 5612 12988 "GET /expenses/request/new/ HTTP/1.1" 200 15569
+INFO 2025-10-03 22:31:16,401 django.server basehttp 5612 12988 "GET /expenses/request/new/ HTTP/1.1" 200 15569
+WARNING 2025-10-03 22:31:16,739 django.request log 5612 12988 Not Found: /favicon.ico
+WARNING 2025-10-03 22:31:16,740 django.server basehttp 5612 12988 "GET /favicon.ico HTTP/1.1" 404 39554
+WARNING 2025-10-03 22:33:36,311 django.request log 5612 12988 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-03 22:33:36,311 django.server basehttp 5612 12988 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 39665
+INFO 2025-10-03 22:34:38,293 django.utils.autoreload autoreload 5612 1232 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\forms.py changed, reloading.
+INFO 2025-10-03 22:34:39,396 django.utils.autoreload autoreload 11828 10464 Watching for file changes with StatReloader
+INFO 2025-10-03 22:35:11,100 django.utils.autoreload autoreload 11828 10464 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\forms.py changed, reloading.
+INFO 2025-10-03 22:35:12,631 django.utils.autoreload autoreload 7192 12268 Watching for file changes with StatReloader
+INFO 2025-10-03 22:35:13,642 django.server basehttp 7192 1928 "GET /expenses/request/new/ HTTP/1.1" 200 15716
+WARNING 2025-10-03 22:35:13,683 django.request log 7192 1928 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-03 22:35:13,687 django.server basehttp 7192 1928 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 39665
+INFO 2025-10-03 22:37:10,839 django.utils.autoreload autoreload 7192 12268 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\forms.py changed, reloading.
+INFO 2025-10-03 22:37:13,507 django.utils.autoreload autoreload 6332 10580 Watching for file changes with StatReloader
+INFO 2025-10-03 22:37:16,181 django.utils.autoreload autoreload 6332 10580 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\forms.py changed, reloading.
+INFO 2025-10-03 22:37:17,795 django.utils.autoreload autoreload 8116 10044 Watching for file changes with StatReloader
+INFO 2025-10-03 22:37:35,757 django.utils.autoreload autoreload 8116 10044 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\forms.py changed, reloading.
+INFO 2025-10-03 22:37:38,046 django.utils.autoreload autoreload 1208 6304 Watching for file changes with StatReloader
+INFO 2025-10-03 22:37:39,250 django.server basehttp 1208 1000 "GET /expenses/request/new/ HTTP/1.1" 200 15745
+WARNING 2025-10-03 22:37:39,299 django.request log 1208 1000 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-03 22:37:39,300 django.server basehttp 1208 1000 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 39665
+INFO 2025-10-03 22:38:23,300 django.server basehttp 1208 1000 "POST /expenses/request/new/ HTTP/1.1" 302 0
+INFO 2025-10-03 22:38:23,322 django.server basehttp 1208 1000 "GET /expenses/requests/ HTTP/1.1" 200 5434
+WARNING 2025-10-03 22:38:23,369 django.request log 1208 1000 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-03 22:38:23,411 django.server basehttp 1208 1000 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 39665
+INFO 2025-10-03 22:38:26,409 django.server basehttp 1208 1000 "GET /expenses/request/1/ HTTP/1.1" 200 4513
+WARNING 2025-10-03 22:38:26,463 django.request log 1208 1000 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-03 22:38:26,464 django.server basehttp 1208 1000 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 39665
+INFO 2025-10-03 22:38:27,276 django.server basehttp 1208 1000 "POST /expenses/request/1/approve/ HTTP/1.1" 302 0
+INFO 2025-10-03 22:38:27,291 django.server basehttp 1208 1000 "GET /expenses/request/1/ HTTP/1.1" 200 4513
+WARNING 2025-10-03 22:38:27,331 django.request log 1208 1000 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-03 22:38:27,333 django.server basehttp 1208 1000 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 39665
+WARNING 2025-10-03 22:38:29,762 django.request log 1208 1000 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-03 22:38:29,763 django.server basehttp 1208 1000 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 39665
+WARNING 2025-10-03 22:38:30,992 django.request log 1208 1000 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-03 22:38:30,996 django.server basehttp 1208 1000 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 39665
+WARNING 2025-10-03 22:38:31,037 django.request log 1208 1000 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-03 22:38:31,038 django.server basehttp 1208 1000 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 39665
+INFO 2025-10-03 22:38:33,090 django.server basehttp 1208 1000 "GET /expenses/requests/ HTTP/1.1" 200 5434
+WARNING 2025-10-03 22:38:33,125 django.request log 1208 1000 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-03 22:38:33,127 django.server basehttp 1208 1000 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 39665
+INFO 2025-10-03 22:38:35,195 django.server basehttp 1208 1000 "GET /expenses/request/new/ HTTP/1.1" 200 15745
+WARNING 2025-10-03 22:38:35,257 django.request log 1208 1000 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-03 22:38:35,258 django.server basehttp 1208 1000 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 39665
+INFO 2025-10-03 22:40:02,104 django.server basehttp 1208 1000 "POST /expenses/request/new/ HTTP/1.1" 302 0
+INFO 2025-10-03 22:40:02,121 django.server basehttp 1208 1000 "GET /expenses/requests/ HTTP/1.1" 200 6107
+WARNING 2025-10-03 22:40:02,192 django.request log 1208 1000 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-03 22:40:02,195 django.server basehttp 1208 1000 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 39665
+INFO 2025-10-03 22:40:13,277 django.server basehttp 1208 1000 "GET /expenses/request/new/ HTTP/1.1" 200 15745
+WARNING 2025-10-03 22:40:13,322 django.request log 1208 1000 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-03 22:40:13,323 django.server basehttp 1208 1000 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 39665
+INFO 2025-10-03 22:40:37,473 django.server basehttp 1208 1000 "POST /expenses/request/new/ HTTP/1.1" 302 0
+INFO 2025-10-03 22:40:37,490 django.server basehttp 1208 1000 "GET /expenses/requests/ HTTP/1.1" 200 6783
+WARNING 2025-10-03 22:40:37,535 django.request log 1208 1000 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-03 22:40:37,545 django.server basehttp 1208 1000 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 39665
+INFO 2025-10-03 22:40:41,373 django.server basehttp 1208 1000 "GET /expenses/request/new/ HTTP/1.1" 200 15745
+WARNING 2025-10-03 22:40:41,422 django.request log 1208 1000 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-03 22:40:41,423 django.server basehttp 1208 1000 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 39665
+INFO 2025-10-03 22:41:55,473 django.server basehttp 1208 1000 "POST /expenses/request/new/ HTTP/1.1" 302 0
+INFO 2025-10-03 22:41:55,492 django.server basehttp 1208 1000 "GET /expenses/requests/ HTTP/1.1" 200 7456
+WARNING 2025-10-03 22:41:55,564 django.request log 1208 1000 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-03 22:41:55,569 django.server basehttp 1208 1000 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 39665
+INFO 2025-10-03 22:41:57,872 django.server basehttp 1208 1000 "GET /expenses/request/new/ HTTP/1.1" 200 15745
+WARNING 2025-10-03 22:41:57,922 django.request log 1208 1000 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-03 22:41:57,924 django.server basehttp 1208 1000 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 39665
+INFO 2025-10-03 22:43:40,871 django.utils.autoreload autoreload 1208 6304 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\expense_workflow.py changed, reloading.
+INFO 2025-10-03 22:43:41,949 django.utils.autoreload autoreload 8604 13952 Watching for file changes with StatReloader
+INFO 2025-10-03 22:44:09,288 django.utils.autoreload autoreload 8604 13952 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\expense_workflow.py changed, reloading.
+INFO 2025-10-03 22:44:10,783 django.utils.autoreload autoreload 8236 3952 Watching for file changes with StatReloader
+INFO 2025-10-03 22:44:11,615 django.server basehttp 8236 11784 "GET /expenses/request/new/ HTTP/1.1" 200 15745
+INFO 2025-10-03 22:44:16,334 django.server basehttp 8236 11784 "GET /expenses/requests/ HTTP/1.1" 200 21547
+INFO 2025-10-03 22:44:52,751 django.server basehttp 8236 11784 "POST /expenses/request/new/ HTTP/1.1" 200 16004
+INFO 2025-10-03 22:45:02,694 django.server basehttp 8236 11784 "GET /expenses/requests/ HTTP/1.1" 200 21547
+INFO 2025-10-03 22:45:06,463 django.server basehttp 8236 11784 "GET /expenses/request/1/ HTTP/1.1" 200 4513
+INFO 2025-10-03 22:45:07,523 django.server basehttp 8236 11784 "POST /expenses/request/1/approve/ HTTP/1.1" 302 0
+INFO 2025-10-03 22:45:07,537 django.server basehttp 8236 11784 "GET /expenses/request/1/ HTTP/1.1" 200 4513
+WARNING 2025-10-03 22:45:12,393 django.request log 8236 11784 Not Found: /expenses/request
+WARNING 2025-10-03 22:45:12,394 django.server basehttp 8236 11784 "GET /expenses/request HTTP/1.1" 404 39569
+INFO 2025-10-03 22:46:58,911 django.server basehttp 8236 11784 "GET /expenses/requests/ HTTP/1.1" 200 21547
+INFO 2025-10-03 22:47:01,288 django.server basehttp 8236 11784 "GET /expenses/request/7/ HTTP/1.1" 200 4557
+INFO 2025-10-03 22:47:02,277 django.server basehttp 8236 11784 "POST /expenses/request/7/approve/ HTTP/1.1" 302 0
+INFO 2025-10-03 22:47:02,292 django.server basehttp 8236 11784 "GET /expenses/request/7/ HTTP/1.1" 200 4557
+WARNING 2025-10-03 22:47:06,629 django.request log 8236 11784 Not Found: /expenses/request/
+WARNING 2025-10-03 22:47:06,629 django.server basehttp 8236 11784 "GET /expenses/request/ HTTP/1.1" 404 39572
+INFO 2025-10-03 22:47:11,125 django.server basehttp 8236 11784 "GET /expenses/requests/ HTTP/1.1" 200 21547
+INFO 2025-10-03 22:49:19,939 django.server basehttp 8236 11784 "GET /expenses/request/7/ HTTP/1.1" 200 4557
+INFO 2025-10-03 22:49:22,779 django.server basehttp 8236 11784 "GET /expenses/request/4/ HTTP/1.1" 200 4491
+INFO 2025-10-03 22:49:33,843 django.server basehttp 8236 11784 "GET /expenses/request/7/ HTTP/1.1" 200 4557
+INFO 2025-10-03 22:49:43,597 django.server basehttp 8236 11784 "GET /expenses/request/7/ HTTP/1.1" 200 4557
+INFO 2025-10-03 22:49:49,120 django.server basehttp 8236 11784 "GET /expenses/request/6/ HTTP/1.1" 200 4553
+INFO 2025-10-03 22:49:52,600 django.server basehttp 8236 11784 "GET /expenses/request/5/ HTTP/1.1" 200 4548
+INFO 2025-10-03 22:49:55,152 django.utils.autoreload autoreload 8236 3952 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-03 22:49:56,678 django.utils.autoreload autoreload 9112 10700 Watching for file changes with StatReloader
+INFO 2025-10-03 22:51:22,008 django.utils.autoreload autoreload 9112 10700 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-03 22:51:23,142 django.utils.autoreload autoreload 13580 12704 Watching for file changes with StatReloader
+INFO 2025-10-03 22:52:05,556 django.utils.autoreload autoreload 13580 12704 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-03 22:52:07,177 django.utils.autoreload autoreload 11488 11204 Watching for file changes with StatReloader
+INFO 2025-10-03 22:52:22,899 django.utils.autoreload autoreload 11488 11204 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-03 22:52:24,336 django.utils.autoreload autoreload 8120 13392 Watching for file changes with StatReloader
+INFO 2025-10-03 22:52:26,992 django.utils.autoreload autoreload 8120 13392 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-03 22:52:28,186 django.utils.autoreload autoreload 1520 12504 Watching for file changes with StatReloader
+INFO 2025-10-03 22:55:42,240 django.utils.autoreload autoreload 1520 12504 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-03 22:55:43,902 django.utils.autoreload autoreload 10292 13464 Watching for file changes with StatReloader
+INFO 2025-10-03 22:57:15,603 django.utils.autoreload autoreload 10292 13464 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-03 22:57:17,099 django.utils.autoreload autoreload 11528 7416 Watching for file changes with StatReloader
+INFO 2025-10-03 23:05:01,672 django.utils.autoreload autoreload 11528 7416 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\services\accounting_service.py changed, reloading.
+INFO 2025-10-03 23:05:02,906 django.utils.autoreload autoreload 9636 14184 Watching for file changes with StatReloader
+INFO 2025-10-03 23:05:55,932 django.utils.autoreload autoreload 9636 14184 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-03 23:05:57,313 django.utils.autoreload autoreload 6976 6000 Watching for file changes with StatReloader
+INFO 2025-10-03 23:06:11,645 django.utils.autoreload autoreload 6976 6000 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-03 23:06:13,049 django.utils.autoreload autoreload 14096 1464 Watching for file changes with StatReloader
+INFO 2025-10-03 23:12:43,267 django.utils.autoreload autoreload 14096 1464 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\services\accounting_service.py changed, reloading.
+INFO 2025-10-03 23:12:44,720 django.utils.autoreload autoreload 10364 7580 Watching for file changes with StatReloader
+INFO 2025-10-03 23:16:11,916 django.utils.autoreload autoreload 10364 7580 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\services\accounting_service.py changed, reloading.
+INFO 2025-10-03 23:16:13,229 django.utils.autoreload autoreload 6928 1836 Watching for file changes with StatReloader
+INFO 2025-10-03 23:16:34,023 django.utils.autoreload autoreload 6928 1836 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\services\accounting_service.py changed, reloading.
+INFO 2025-10-03 23:16:35,116 django.utils.autoreload autoreload 11516 9812 Watching for file changes with StatReloader
+ERROR 2025-10-03 23:16:45,857 django.request log 11516 1512 Internal Server Error: /expenses/requests/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such column: inventory_expenserequest.notes
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 220, in _get_response
+    response = response.render()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 199, in render
+    len_values = len(values)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 366, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: no such column: inventory_expenserequest.notes
+ERROR 2025-10-03 23:16:45,870 django.server basehttp 11516 1512 "GET /expenses/requests/ HTTP/1.1" 500 231900
+ERROR 2025-10-03 23:16:49,483 django.request log 11516 1512 Internal Server Error: /expenses/requests/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such column: inventory_expenserequest.notes
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 220, in _get_response
+    response = response.render()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 199, in render
+    len_values = len(values)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 366, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: no such column: inventory_expenserequest.notes
+ERROR 2025-10-03 23:16:49,490 django.server basehttp 11516 1512 "GET /expenses/requests/ HTTP/1.1" 500 231756
+INFO 2025-10-03 23:20:02,625 django.utils.autoreload autoreload 11516 9812 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-03 23:20:04,646 django.utils.autoreload autoreload 2060 8116 Watching for file changes with StatReloader
+INFO 2025-10-03 23:24:39,963 django.utils.autoreload autoreload 2060 8116 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\forms.py changed, reloading.
+INFO 2025-10-03 23:24:41,494 django.utils.autoreload autoreload 13212 6048 Watching for file changes with StatReloader
+INFO 2025-10-03 23:24:43,421 django.utils.autoreload autoreload 13212 6048 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\expense_workflow.py changed, reloading.
+INFO 2025-10-03 23:24:44,941 django.utils.autoreload autoreload 8984 12036 Watching for file changes with StatReloader
+INFO 2025-10-03 23:25:02,331 django.utils.autoreload autoreload 8984 12036 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\urls.py changed, reloading.
+INFO 2025-10-03 23:25:03,962 django.utils.autoreload autoreload 8308 808 Watching for file changes with StatReloader
+INFO 2025-10-03 23:26:02,781 django.utils.autoreload autoreload 8308 808 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\forms.py changed, reloading.
+INFO 2025-10-03 23:26:04,579 django.utils.autoreload autoreload 14068 584 Watching for file changes with StatReloader
+INFO 2025-10-03 23:26:06,269 django.utils.autoreload autoreload 14068 584 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\views\expense_workflow.py changed, reloading.
+INFO 2025-10-03 23:26:07,683 django.utils.autoreload autoreload 12596 10392 Watching for file changes with StatReloader
+INFO 2025-10-03 23:26:19,850 django.utils.autoreload autoreload 12596 10392 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\urls.py changed, reloading.
+INFO 2025-10-03 23:26:21,425 django.utils.autoreload autoreload 12744 10928 Watching for file changes with StatReloader
+INFO 2025-10-03 23:26:57,361 django.utils.autoreload autoreload 12744 10928 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\urls.py changed, reloading.
+INFO 2025-10-03 23:26:58,965 django.utils.autoreload autoreload 9404 9584 Watching for file changes with StatReloader
+ERROR 2025-10-03 23:27:04,663 django.request log 9404 7956 Internal Server Error: /expenses/requests/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such column: inventory_expenserequest.notes
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 220, in _get_response
+    response = response.render()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 199, in render
+    len_values = len(values)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 366, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: no such column: inventory_expenserequest.notes
+ERROR 2025-10-03 23:27:04,672 django.server basehttp 9404 7956 "GET /expenses/requests/ HTTP/1.1" 500 231893
+ERROR 2025-10-03 23:27:05,679 django.request log 9404 7956 Internal Server Error: /expenses/requests/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such column: inventory_expenserequest.notes
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 220, in _get_response
+    response = response.render()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 199, in render
+    len_values = len(values)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 366, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: no such column: inventory_expenserequest.notes
+ERROR 2025-10-03 23:27:05,685 django.server basehttp 9404 7956 "GET /expenses/requests/ HTTP/1.1" 500 231893
+ERROR 2025-10-03 23:27:05,998 django.request log 9404 7956 Internal Server Error: /expenses/requests/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such column: inventory_expenserequest.notes
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 220, in _get_response
+    response = response.render()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 199, in render
+    len_values = len(values)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 366, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: no such column: inventory_expenserequest.notes
+ERROR 2025-10-03 23:27:06,004 django.server basehttp 9404 7956 "GET /expenses/requests/ HTTP/1.1" 500 231893
+ERROR 2025-10-03 23:27:06,176 django.request log 9404 7956 Internal Server Error: /expenses/requests/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such column: inventory_expenserequest.notes
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 220, in _get_response
+    response = response.render()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 199, in render
+    len_values = len(values)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 366, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: no such column: inventory_expenserequest.notes
+ERROR 2025-10-03 23:27:06,182 django.server basehttp 9404 7956 "GET /expenses/requests/ HTTP/1.1" 500 231893
+ERROR 2025-10-03 23:27:06,372 django.request log 9404 7956 Internal Server Error: /expenses/requests/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such column: inventory_expenserequest.notes
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 220, in _get_response
+    response = response.render()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 199, in render
+    len_values = len(values)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 366, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: no such column: inventory_expenserequest.notes
+ERROR 2025-10-03 23:27:06,378 django.server basehttp 9404 7956 "GET /expenses/requests/ HTTP/1.1" 500 231893
+ERROR 2025-10-03 23:27:06,767 django.request log 9404 7956 Internal Server Error: /expenses/requests/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such column: inventory_expenserequest.notes
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 220, in _get_response
+    response = response.render()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 199, in render
+    len_values = len(values)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 366, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: no such column: inventory_expenserequest.notes
+ERROR 2025-10-03 23:27:06,773 django.server basehttp 9404 7956 "GET /expenses/requests/ HTTP/1.1" 500 231893
+ERROR 2025-10-03 23:27:06,965 django.request log 9404 7956 Internal Server Error: /expenses/requests/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such column: inventory_expenserequest.notes
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 220, in _get_response
+    response = response.render()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 199, in render
+    len_values = len(values)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 366, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: no such column: inventory_expenserequest.notes
+ERROR 2025-10-03 23:27:06,971 django.server basehttp 9404 7956 "GET /expenses/requests/ HTTP/1.1" 500 231893
+ERROR 2025-10-03 23:27:07,329 django.request log 9404 7956 Internal Server Error: /expenses/requests/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such column: inventory_expenserequest.notes
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 220, in _get_response
+    response = response.render()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 199, in render
+    len_values = len(values)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 366, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: no such column: inventory_expenserequest.notes
+ERROR 2025-10-03 23:27:07,336 django.server basehttp 9404 7956 "GET /expenses/requests/ HTTP/1.1" 500 231893
+ERROR 2025-10-03 23:27:08,046 django.request log 9404 7956 Internal Server Error: /expenses/requests/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such column: inventory_expenserequest.notes
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 220, in _get_response
+    response = response.render()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 199, in render
+    len_values = len(values)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 366, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: no such column: inventory_expenserequest.notes
+ERROR 2025-10-03 23:27:08,052 django.server basehttp 9404 7956 "GET /expenses/requests/ HTTP/1.1" 500 231893
+ERROR 2025-10-03 23:27:09,442 django.request log 9404 7956 Internal Server Error: /expenses/requests/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such column: inventory_expenserequest.notes
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 220, in _get_response
+    response = response.render()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 199, in render
+    len_values = len(values)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 366, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: no such column: inventory_expenserequest.notes
+ERROR 2025-10-03 23:27:09,448 django.server basehttp 9404 7956 "GET /expenses/requests/ HTTP/1.1" 500 232021
+WARNING 2025-10-03 23:27:09,546 django.request log 9404 7956 Not Found: /favicon.ico
+WARNING 2025-10-03 23:27:09,547 django.server basehttp 9404 7956 "GET /favicon.ico HTTP/1.1" 404 39859
+ERROR 2025-10-03 23:27:10,505 django.request log 9404 7956 Internal Server Error: /expenses/requests/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such column: inventory_expenserequest.notes
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 220, in _get_response
+    response = response.render()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 199, in render
+    len_values = len(values)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 366, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: no such column: inventory_expenserequest.notes
+ERROR 2025-10-03 23:27:10,510 django.server basehttp 9404 7956 "GET /expenses/requests/ HTTP/1.1" 500 232021
+WARNING 2025-10-03 23:27:10,608 django.request log 9404 7956 Not Found: /favicon.ico
+WARNING 2025-10-03 23:27:10,609 django.server basehttp 9404 7956 "GET /favicon.ico HTTP/1.1" 404 39859
+ERROR 2025-10-03 23:27:11,881 django.request log 9404 7956 Internal Server Error: /expenses/requests/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such column: inventory_expenserequest.notes
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 220, in _get_response
+    response = response.render()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 199, in render
+    len_values = len(values)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 366, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: no such column: inventory_expenserequest.notes
+ERROR 2025-10-03 23:27:11,888 django.server basehttp 9404 7956 "GET /expenses/requests/ HTTP/1.1" 500 232021
+WARNING 2025-10-03 23:27:11,990 django.request log 9404 7956 Not Found: /favicon.ico
+WARNING 2025-10-03 23:27:11,993 django.server basehttp 9404 7956 "GET /favicon.ico HTTP/1.1" 404 39859
+ERROR 2025-10-03 23:27:12,080 django.request log 9404 9392 Internal Server Error: /expenses/requests/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such column: inventory_expenserequest.notes
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 220, in _get_response
+    response = response.render()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 199, in render
+    len_values = len(values)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 366, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: no such column: inventory_expenserequest.notes
+ERROR 2025-10-03 23:27:12,086 django.server basehttp 9404 9392 "GET /expenses/requests/ HTTP/1.1" 500 232021
+ERROR 2025-10-03 23:27:12,612 django.request log 9404 9392 Internal Server Error: /expenses/requests/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such column: inventory_expenserequest.notes
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 220, in _get_response
+    response = response.render()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 199, in render
+    len_values = len(values)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 366, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: no such column: inventory_expenserequest.notes
+ERROR 2025-10-03 23:27:12,618 django.server basehttp 9404 9392 "GET /expenses/requests/ HTTP/1.1" 500 232021
+WARNING 2025-10-03 23:27:12,720 django.request log 9404 9392 Not Found: /favicon.ico
+WARNING 2025-10-03 23:27:12,721 django.server basehttp 9404 9392 "GET /favicon.ico HTTP/1.1" 404 39859
+ERROR 2025-10-03 23:27:12,953 django.request log 9404 9392 Internal Server Error: /expenses/requests/
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such column: inventory_expenserequest.notes
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 220, in _get_response
+    response = response.render()
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 977, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 199, in render
+    len_values = len(values)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 366, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Bassel\AppData\Roaming\Python\Python313\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: no such column: inventory_expenserequest.notes
+ERROR 2025-10-03 23:27:12,958 django.server basehttp 9404 9392 "GET /expenses/requests/ HTTP/1.1" 500 232021
+WARNING 2025-10-03 23:27:13,063 django.request log 9404 9392 Not Found: /favicon.ico
+WARNING 2025-10-03 23:27:13,063 django.server basehttp 9404 9392 "GET /favicon.ico HTTP/1.1" 404 39859
+INFO 2025-10-03 23:27:36,351 django.utils.autoreload autoreload 3244 13496 Watching for file changes with StatReloader
+INFO 2025-10-03 23:27:49,305 inventory.services.accounting_service accounting_service 12528 2744 Successfully created Journal Entry JE-1 for InventoryLog ID 1.
+WARNING 2025-10-03 23:27:49,309 inventory.services.accounting_service accounting_service 12528 2744 Attempted to create JE for Batch ID 1 with no items. Aborting.
+INFO 2025-10-03 23:27:49,312 inventory.signals signals 12528 2744 Deleted existing JE for updated Batch ID 1 to allow regeneration.
+INFO 2025-10-03 23:27:49,321 inventory.services.accounting_service accounting_service 12528 2744 Successfully created Journal Entry JE-2 for Batch ID 1.
+INFO 2025-10-03 23:27:49,329 inventory.services.accounting_service accounting_service 12528 2744 Successfully created Journal Entry JE-3 for FinishedProductReceipt ID 1.
+INFO 2025-10-03 23:27:49,343 inventory.services.accounting_service accounting_service 12528 2744 Successfully created JE-4 for FinishedProductDispatch ID 1.
+INFO 2025-10-03 23:27:49,354 inventory.services.accounting_service accounting_service 12528 2744 Successfully created JE-5 for supplier Payment ID 1.
+INFO 2025-10-03 23:27:49,366 inventory.services.accounting_service accounting_service 12528 2744 Successfully created Journal Entry JE-6 for InventoryLog ID 2.
+INFO 2025-10-03 23:27:49,375 inventory.services.accounting_service accounting_service 12528 2744 Successfully created JE-7 for DepreciationLog ID 1.
+INFO 2025-10-03 23:29:18,547 inventory.services.accounting_service accounting_service 13572 4740 Successfully created Journal Entry JE-1 for InventoryLog ID 1.
+WARNING 2025-10-03 23:29:18,550 inventory.services.accounting_service accounting_service 13572 4740 Attempted to create JE for Batch ID 1 with no items. Aborting.
+INFO 2025-10-03 23:29:18,555 inventory.signals signals 13572 4740 Deleted existing JE for updated Batch ID 1 to allow regeneration.
+INFO 2025-10-03 23:29:18,561 inventory.services.accounting_service accounting_service 13572 4740 Successfully created Journal Entry JE-2 for Batch ID 1.
+INFO 2025-10-03 23:29:18,570 inventory.services.accounting_service accounting_service 13572 4740 Successfully created Journal Entry JE-3 for FinishedProductReceipt ID 1.
+INFO 2025-10-03 23:29:18,582 inventory.services.accounting_service accounting_service 13572 4740 Successfully created JE-4 for FinishedProductDispatch ID 1.
+INFO 2025-10-03 23:29:18,592 inventory.services.accounting_service accounting_service 13572 4740 Successfully created JE-5 for supplier Payment ID 1.
+INFO 2025-10-03 23:29:18,604 inventory.services.accounting_service accounting_service 13572 4740 Successfully created Journal Entry JE-6 for InventoryLog ID 2.
+INFO 2025-10-03 23:29:18,611 inventory.services.accounting_service accounting_service 13572 4740 Successfully created JE-7 for DepreciationLog ID 1.
+INFO 2025-10-03 23:30:44,687 inventory.services.accounting_service accounting_service 1844 8596 Successfully created Journal Entry JE-1 for InventoryLog ID 1.
+WARNING 2025-10-03 23:30:44,691 inventory.services.accounting_service accounting_service 1844 8596 Attempted to create JE for Batch ID 1 with no items. Aborting.
+INFO 2025-10-03 23:30:44,694 inventory.signals signals 1844 8596 Deleted existing JE for updated Batch ID 1 to allow regeneration.
+INFO 2025-10-03 23:30:44,701 inventory.services.accounting_service accounting_service 1844 8596 Successfully created Journal Entry JE-2 for Batch ID 1.
+INFO 2025-10-03 23:30:44,710 inventory.services.accounting_service accounting_service 1844 8596 Successfully created Journal Entry JE-3 for FinishedProductReceipt ID 1.
+INFO 2025-10-03 23:30:44,725 inventory.services.accounting_service accounting_service 1844 8596 Successfully created JE-4 for FinishedProductDispatch ID 1.
+INFO 2025-10-03 23:30:44,734 inventory.services.accounting_service accounting_service 1844 8596 Successfully created JE-5 for supplier Payment ID 1.
+INFO 2025-10-03 23:30:44,748 inventory.services.accounting_service accounting_service 1844 8596 Successfully created Journal Entry JE-6 for InventoryLog ID 2.
+INFO 2025-10-03 23:30:44,758 inventory.services.accounting_service accounting_service 1844 8596 Successfully created JE-7 for DepreciationLog ID 1.
+INFO 2025-10-03 23:33:38,091 inventory.services.accounting_service accounting_service 10736 6180 Successfully created Journal Entry JE-1 for InventoryLog ID 1.
+WARNING 2025-10-03 23:33:38,095 inventory.services.accounting_service accounting_service 10736 6180 Attempted to create JE for Batch ID 1 with no items. Aborting.
+INFO 2025-10-03 23:33:38,098 inventory.signals signals 10736 6180 Deleted existing JE for updated Batch ID 1 to allow regeneration.
+INFO 2025-10-03 23:33:38,107 inventory.services.accounting_service accounting_service 10736 6180 Successfully created Journal Entry JE-2 for Batch ID 1.
+INFO 2025-10-03 23:33:38,115 inventory.services.accounting_service accounting_service 10736 6180 Successfully created Journal Entry JE-3 for FinishedProductReceipt ID 1.
+INFO 2025-10-03 23:33:38,132 inventory.services.accounting_service accounting_service 10736 6180 Successfully created JE-4 for FinishedProductDispatch ID 1.
+INFO 2025-10-03 23:33:38,144 inventory.services.accounting_service accounting_service 10736 6180 Successfully created JE-5 for supplier Payment ID 1.
+INFO 2025-10-03 23:33:38,159 inventory.services.accounting_service accounting_service 10736 6180 Successfully created Journal Entry JE-6 for InventoryLog ID 2.
+INFO 2025-10-03 23:33:38,169 inventory.services.accounting_service accounting_service 10736 6180 Successfully created JE-7 for DepreciationLog ID 1.
+INFO 2025-10-03 23:33:38,188 inventory.services.accounting_service accounting_service 10736 6180 Successfully created Journal Entry JE-8 for InventoryConsumption ID 1.
+INFO 2025-10-03 23:33:38,190 inventory.services.approval_service approval_service 10736 6180 User 'testuser' approved ExpenseRequest ID 2.
+INFO 2025-10-03 23:33:38,192 inventory.services.approval_service approval_service 10736 6180 User 'testuser' rejected ExpenseRequest ID 3.
+WARNING 2025-10-03 23:33:38,202 inventory.services.accounting_service accounting_service 10736 6180 Attempted to create JE for Batch ID 2 with no items. Aborting.
+INFO 2025-10-03 23:33:38,210 inventory.services.accounting_service accounting_service 10736 6180 Successfully created Journal Entry JE-9 for FinishedProductReceipt ID 2.
+WARNING 2025-10-03 23:33:38,212 inventory.services.accounting_service accounting_service 10736 6180 Attempted to create JE for Batch ID 3 with no items. Aborting.
+INFO 2025-10-03 23:33:38,220 inventory.services.accounting_service accounting_service 10736 6180 Successfully created Journal Entry JE-10 for FinishedProductReceipt ID 3.
+INFO 2025-10-03 23:33:38,229 inventory.services.accounting_service accounting_service 10736 6180 Successfully created Journal Entry JE-11 for InventoryLog ID 3.
+INFO 2025-10-03 23:33:38,241 inventory.services.accounting_service accounting_service 10736 6180 Successfully created Journal Entry JE-12 for InventoryLog ID 4.
+INFO 2025-10-03 23:33:38,251 inventory.services.accounting_service accounting_service 10736 6180 Successfully created Journal Entry JE-13 for InventoryLog ID 5.
+INFO 2025-10-03 23:33:38,260 inventory.services.accounting_service accounting_service 10736 6180 Successfully created Journal Entry JE-14 for InventoryLog ID 6.
+WARNING 2025-10-03 23:33:38,263 inventory.services.accounting_service accounting_service 10736 6180 Attempted to create JE for Batch ID 4 with no items. Aborting.
+INFO 2025-10-03 23:33:38,281 inventory.services.accounting_service accounting_service 10736 6180 --> Starting Opening Balance JE creation for 'Go-Live 2025-01-01'.
+INFO 2025-10-03 23:33:38,285 inventory.services.accounting_service accounting_service 10736 6180     Created draft JE-15 for OB Entry 1.
+INFO 2025-10-03 23:33:38,295 inventory.services.accounting_service accounting_service 10736 6180     Processing OB Line for Account '1020102'...
+INFO 2025-10-03 23:33:38,295 inventory.services.accounting_service accounting_service 10736 6180         Created sub-ledger line: debit 1020102 for 250000.000 -> Main Business Bank Account
+INFO 2025-10-03 23:33:38,296 inventory.services.accounting_service accounting_service 10736 6180     Processing OB Line for Account '1020103'...
+INFO 2025-10-03 23:33:38,297 inventory.services.accounting_service accounting_service 10736 6180         Created sub-ledger line: debit 1020103 for 50000.000 -> Secondary Business Bank Account
+INFO 2025-10-03 23:33:38,298 inventory.services.accounting_service accounting_service 10736 6180     Processing OB Line for Account '10203'...
+INFO 2025-10-03 23:33:38,299 inventory.services.accounting_service accounting_service 10736 6180         Created sub-ledger line: debit 10203 for 75000.000 -> County General Hospital
+INFO 2025-10-03 23:33:38,301 inventory.services.accounting_service accounting_service 10736 6180         Created sub-ledger line: debit 10203 for 20000.000 -> City Central Pharmacy
+INFO 2025-10-03 23:33:38,303 inventory.services.accounting_service accounting_service 10736 6180     Processing OB Line for Account '1020206'...
+INFO 2025-10-03 23:33:38,305 inventory.services.accounting_service accounting_service 10736 6180         Created sub-ledger line: debit 1020206 for 5750.000 -> Receipt for Batch #OB-FP-SALINE-001 from Plan MIG-SO-SALINE
+INFO 2025-10-03 23:33:38,307 inventory.services.accounting_service accounting_service 10736 6180         Created sub-ledger line: debit 1020206 for 4200.000 -> Receipt for Batch #OB-FP-GLUCOSE-001 from Plan MIG-SO-GLUCOSE
+INFO 2025-10-03 23:33:38,307 inventory.services.accounting_service accounting_service 10736 6180     Processing OB Line for Account '1020201'...
+INFO 2025-10-03 23:33:38,308 inventory.services.accounting_service accounting_service 10736 6180         Created sub-ledger line: debit 1020201 for 5250.000 -> Saline Solution (RM-SALINE-001)
+INFO 2025-10-03 23:33:38,309 inventory.services.accounting_service accounting_service 10736 6180     Processing OB Line for Account '1020202'...
+INFO 2025-10-03 23:33:38,310 inventory.services.accounting_service accounting_service 10736 6180         Created sub-ledger line: debit 1020202 for 2400.000 -> PVC Bag 500ml (RM-BAG-PVC-500)
+INFO 2025-10-03 23:33:38,311 inventory.services.accounting_service accounting_service 10736 6180     Processing OB Line for Account '1020207'...
+INFO 2025-10-03 23:33:38,312 inventory.services.accounting_service accounting_service 10736 6180         Created sub-ledger line: debit 1020207 for 1250.000 -> Machine Lubricant (MRO-LUBE-001)
+INFO 2025-10-03 23:33:38,312 inventory.services.accounting_service accounting_service 10736 6180     Processing OB Line for Account '1020208'...
+INFO 2025-10-03 23:33:38,313 inventory.services.accounting_service accounting_service 10736 6180         Created sub-ledger line: debit 1020208 for 12000.000 -> Annual Antivirus License (CONSUM-SFW-001)
+INFO 2025-10-03 23:33:38,314 inventory.services.accounting_service accounting_service 10736 6180     Processing OB Line for Account '1020205'...
+INFO 2025-10-03 23:33:38,315 inventory.services.accounting_service accounting_service 10736 6180         Created sub-ledger line: debit 1020205 for 645.000 -> Saline IV Drip Bag 500ml (FP-IVDRIP-500)
+INFO 2025-10-03 23:33:38,317 inventory.services.accounting_service accounting_service 10736 6180     Processing OB Line for Account '10101'...
+INFO 2025-10-03 23:33:38,319 inventory.services.accounting_service accounting_service 10736 6180         Created sub-ledger line: debit 10101 for 120000.000 -> MACHINE-001 - Production Filling Machine
+INFO 2025-10-03 23:33:38,320 inventory.services.accounting_service accounting_service 10736 6180     Processing OB Line for Account '10102'...
+INFO 2025-10-03 23:33:38,321 inventory.services.accounting_service accounting_service 10736 6180         Created sub-ledger line: debit 10102 for 30000.000 -> FURN-001 - Office Furniture Set
+INFO 2025-10-03 23:33:38,322 inventory.services.accounting_service accounting_service 10736 6180     Processing OB Line for Account '2020501'...
+INFO 2025-10-03 23:33:38,323 inventory.services.accounting_service accounting_service 10736 6180         Created sub-ledger line: credit 2020501 for 12000.000 -> MACHINE-001 - Production Filling Machine
+INFO 2025-10-03 23:33:38,324 inventory.services.accounting_service accounting_service 10736 6180     Processing OB Line for Account '2020502'...
+INFO 2025-10-03 23:33:38,324 inventory.services.accounting_service accounting_service 10736 6180         Created sub-ledger line: credit 2020502 for 9000.000 -> FURN-001 - Office Furniture Set
+INFO 2025-10-03 23:33:38,325 inventory.services.accounting_service accounting_service 10736 6180     Processing OB Line for Account '20201'...
+INFO 2025-10-03 23:33:38,326 inventory.services.accounting_service accounting_service 10736 6180         Created sub-ledger line: credit 20201 for 45000.000 -> Global Pharma Supplies
+INFO 2025-10-03 23:33:38,327 inventory.services.accounting_service accounting_service 10736 6180         Created sub-ledger line: credit 20201 for 20000.000 -> Advanced Medical Packaging Inc.
+INFO 2025-10-03 23:33:38,328 inventory.services.accounting_service accounting_service 10736 6180     Processing OB Line for Account '305'...
+INFO 2025-10-03 23:33:38,328 inventory.services.accounting_service accounting_service 10736 6180         Created aggregate line: credit 305 for 490495.000
+INFO 2025-10-03 23:33:38,329 inventory.services.accounting_service accounting_service 10736 6180     Validation: Total Debits = 576495.000, Total Credits = 576495.000
+INFO 2025-10-03 23:33:38,330 inventory.services.accounting_service accounting_service 10736 6180 <-- Successfully created and posted JE-15 for Opening Balance Entry 1.
+INFO 2025-10-03 23:33:49,665 django.utils.autoreload autoreload 11032 12396 Watching for file changes with StatReloader
+INFO 2025-10-03 23:33:57,425 django.server basehttp 11032 10604 "GET /expenses/requests/ HTTP/1.1" 302 0
+INFO 2025-10-03 23:33:57,443 django.server basehttp 11032 10604 "GET /admin/login/?next=/expenses/requests/ HTTP/1.1" 200 3156
+WARNING 2025-10-03 23:33:57,474 django.server basehttp 11032 10604 "GET /static/img/ims_logo.png HTTP/1.1" 404 1862
+WARNING 2025-10-03 23:33:57,570 django.server basehttp 11032 10952 "GET /static/fas%20fa-warehouse HTTP/1.1" 404 1864
+INFO 2025-10-03 23:34:07,277 django.server basehttp 11032 9136 "POST /admin/login/?next=/expenses/requests/ HTTP/1.1" 200 3479
+WARNING 2025-10-03 23:34:07,305 django.server basehttp 11032 9136 "GET /static/img/ims_logo.png HTTP/1.1" 404 1862
+INFO 2025-10-03 23:34:19,101 django.server basehttp 11032 7104 "POST /admin/login/?next=/expenses/requests/ HTTP/1.1" 302 0
+INFO 2025-10-03 23:34:19,148 django.server basehttp 11032 7104 "GET /expenses/requests/ HTTP/1.1" 200 18867
+INFO 2025-10-03 23:34:22,433 django.server basehttp 11032 7104 "GET /expenses/request/3/ HTTP/1.1" 200 5620
+INFO 2025-10-03 23:34:27,249 django.server basehttp 11032 7104 "GET /expenses/request/1/ HTTP/1.1" 200 5919
+INFO 2025-10-03 23:34:28,075 django.server basehttp 11032 7104 "POST /expenses/request/1/approve/ HTTP/1.1" 302 0
+INFO 2025-10-03 23:34:28,092 django.server basehttp 11032 7104 "GET /expenses/request/1/ HTTP/1.1" 200 5919
+INFO 2025-10-03 23:34:29,007 django.server basehttp 11032 7104 "POST /expenses/request/1/approve/ HTTP/1.1" 302 0
+INFO 2025-10-03 23:34:29,022 django.server basehttp 11032 7104 "GET /expenses/request/1/ HTTP/1.1" 200 5919
+INFO 2025-10-03 23:34:29,175 django.server basehttp 11032 7104 "POST /expenses/request/1/approve/ HTTP/1.1" 302 0
+INFO 2025-10-03 23:34:29,188 django.server basehttp 11032 7104 "GET /expenses/request/1/ HTTP/1.1" 200 5919
+INFO 2025-10-03 23:34:29,358 django.server basehttp 11032 7104 "POST /expenses/request/1/approve/ HTTP/1.1" 302 0
+INFO 2025-10-03 23:34:29,374 django.server basehttp 11032 7104 "GET /expenses/request/1/ HTTP/1.1" 200 5919
+INFO 2025-10-03 23:34:29,540 django.server basehttp 11032 7104 "POST /expenses/request/1/approve/ HTTP/1.1" 302 0
+INFO 2025-10-03 23:34:29,554 django.server basehttp 11032 7104 "GET /expenses/request/1/ HTTP/1.1" 200 5919
+INFO 2025-10-03 23:34:29,708 django.server basehttp 11032 7104 "POST /expenses/request/1/approve/ HTTP/1.1" 302 0
+INFO 2025-10-03 23:34:29,721 django.server basehttp 11032 7104 "GET /expenses/request/1/ HTTP/1.1" 200 5919
+INFO 2025-10-03 23:34:29,908 django.server basehttp 11032 7104 "POST /expenses/request/1/approve/ HTTP/1.1" 302 0
+INFO 2025-10-03 23:34:29,924 django.server basehttp 11032 7104 "GET /expenses/request/1/ HTTP/1.1" 200 5919
+INFO 2025-10-03 23:34:36,780 django.server basehttp 11032 7104 "GET /expenses HTTP/1.1" 301 0
+INFO 2025-10-03 23:34:36,816 django.server basehttp 11032 7384 "GET /expenses/ HTTP/1.1" 200 42968
+INFO 2025-10-03 23:34:36,862 django.server basehttp 11032 7384 "GET /static/css/bootstrap.rtl.css HTTP/1.1" 304 0
+INFO 2025-10-03 23:34:36,862 django.server basehttp 11032 5328 "GET /static/css/style.css HTTP/1.1" 304 0
+INFO 2025-10-03 23:34:36,876 django.server basehttp 11032 7384 "GET /static/layout/js/tax_reconciliation_report_logic.js HTTP/1.1" 304 0
+INFO 2025-10-03 23:34:36,881 django.server basehttp 11032 5328 "GET /static/layout/js/close_period_logic.js HTTP/1.1" 304 0
+INFO 2025-10-03 23:34:36,885 django.server basehttp 11032 8464 "GET /static/layout/js/records_logic.js HTTP/1.1" 304 0
+INFO 2025-10-03 23:34:36,887 django.server basehttp 11032 7384 "GET /static/layout/js/inventory_counts_logic.js HTTP/1.1" 304 0
+INFO 2025-10-03 23:34:36,887 django.server basehttp 11032 10464 "GET /static/layout/js/shop_order_templates_logic.js HTTP/1.1" 304 0
+INFO 2025-10-03 23:34:36,889 django.server basehttp 11032 5328 "GET /static/layout/js/employees_logic.js HTTP/1.1" 304 0
+INFO 2025-10-03 23:34:36,890 django.server basehttp 11032 11832 "GET /static/layout/js/manage_expenses_logic.js HTTP/1.1" 304 0
+INFO 2025-10-03 23:34:36,892 django.server basehttp 11032 12492 "GET /static/layout/js/financials_logic.js HTTP/1.1" 304 0
+INFO 2025-10-03 23:34:36,892 django.server basehttp 11032 8464 "GET /static/layout/js/dynamic_content_loader.js HTTP/1.1" 304 0
+INFO 2025-10-03 23:37:37,297 django.utils.autoreload autoreload 11032 12396 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-03 23:37:39,158 django.utils.autoreload autoreload 5224 13904 Watching for file changes with StatReloader
+INFO 2025-10-03 23:38:05,441 django.utils.autoreload autoreload 5224 13904 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\models.py changed, reloading.
+INFO 2025-10-03 23:38:06,945 django.utils.autoreload autoreload 7084 12816 Watching for file changes with StatReloader
+INFO 2025-10-03 23:38:28,054 django.utils.autoreload autoreload 9096 12216 Watching for file changes with StatReloader
+INFO 2025-10-03 23:38:42,095 django.utils.autoreload autoreload 8316 10292 Watching for file changes with StatReloader
+INFO 2025-10-03 23:38:53,917 django.server basehttp 8316 13912 "GET /expenses/requests/ HTTP/1.1" 200 18867
+INFO 2025-10-03 23:38:55,823 django.server basehttp 8316 13912 "GET /expenses/request/1/ HTTP/1.1" 200 5919
+INFO 2025-10-03 23:38:56,863 inventory.services.approval_service approval_service 8316 13912 User 'testuser' approved ExpenseRequest ID 1.
+INFO 2025-10-03 23:38:56,869 django.server basehttp 8316 13912 "POST /expenses/request/1/approve/ HTTP/1.1" 302 0
+INFO 2025-10-03 23:38:56,886 django.server basehttp 8316 13912 "GET /expenses/request/1/ HTTP/1.1" 200 5629
+INFO 2025-10-03 23:39:02,001 django.server basehttp 8316 13912 "GET /expenses/request/1/ HTTP/1.1" 200 5629
+INFO 2025-10-03 23:39:06,832 django.server basehttp 8316 13912 "GET /expenses/requests/ HTTP/1.1" 200 18849
+INFO 2025-10-03 23:39:20,671 django.server basehttp 8316 13912 "GET /expenses/requests/ HTTP/1.1" 200 18849
+INFO 2025-10-03 23:39:37,710 django.server basehttp 8316 13912 "GET /expenses/request/1/ HTTP/1.1" 200 5629
+INFO 2025-10-03 23:39:45,727 django.server basehttp 8316 13912 "POST /expenses/request/1/correct/ HTTP/1.1" 302 0
+INFO 2025-10-03 23:39:45,746 django.server basehttp 8316 13912 "GET /expenses/request/1/ HTTP/1.1" 200 5629
+INFO 2025-10-03 23:39:51,292 django.server basehttp 8316 13912 "GET /expenses/request/1/ HTTP/1.1" 200 5629
+INFO 2025-10-04 08:06:53,971 django.server basehttp 8316 584 "GET /expenses/requests/ HTTP/1.1" 200 18849
+INFO 2025-10-04 08:14:57,188 django.server basehttp 8316 12592 "GET /expenses/requests/ HTTP/1.1" 200 20148
+INFO 2025-10-04 08:15:10,048 django.server basehttp 8316 12592 "GET /expenses/requests/ HTTP/1.1" 200 20148
+INFO 2025-10-04 08:15:17,559 django.server basehttp 8316 12592 "GET /expenses/requests/ HTTP/1.1" 200 20148
+INFO 2025-10-04 08:15:23,131 django.server basehttp 8316 12592 "GET /expenses/requests/ HTTP/1.1" 200 20148
+INFO 2025-10-04 08:15:23,564 django.server basehttp 8316 12592 "GET /expenses/requests/ HTTP/1.1" 200 20148
+INFO 2025-10-04 08:15:23,732 django.server basehttp 8316 12592 "GET /expenses/requests/ HTTP/1.1" 200 20148
+INFO 2025-10-04 08:15:23,916 django.server basehttp 8316 12592 "GET /expenses/requests/ HTTP/1.1" 200 20148
+INFO 2025-10-04 08:15:24,113 django.server basehttp 8316 12592 "GET /expenses/requests/ HTTP/1.1" 200 20148
+INFO 2025-10-04 08:15:25,796 django.server basehttp 8316 12592 "GET /expenses/requests/ HTTP/1.1" 200 20148
+WARNING 2025-10-04 08:15:27,707 django.request log 8316 12592 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-04 08:15:27,711 django.server basehttp 8316 12592 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 39970
+WARNING 2025-10-04 08:15:31,394 django.request log 8316 12592 Not Found: /favicon.ico
+WARNING 2025-10-04 08:15:31,395 django.server basehttp 8316 12592 "GET /favicon.ico HTTP/1.1" 404 39859
+INFO 2025-10-04 08:15:40,902 django.server basehttp 8316 12592 "GET /expenses/requests/ HTTP/1.1" 200 20148
+WARNING 2025-10-04 08:15:40,956 django.request log 8316 12592 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-04 08:15:40,962 django.server basehttp 8316 12592 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 39970
+INFO 2025-10-04 08:16:41,643 django.server basehttp 8316 12592 "GET /expenses/requests/ HTTP/1.1" 200 20148
+INFO 2025-10-04 08:16:42,486 django.server basehttp 8316 12592 "GET /expenses/requests/ HTTP/1.1" 200 20148
+INFO 2025-10-04 08:16:43,707 django.server basehttp 8316 12592 "GET /expenses/requests/ HTTP/1.1" 200 20148
+INFO 2025-10-04 08:16:45,804 django.server basehttp 8316 12592 "GET /expenses/requests/ HTTP/1.1" 200 20148
+INFO 2025-10-04 08:18:32,905 django.utils.autoreload autoreload 8316 10292 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\gipcco_project\settings.py changed, reloading.
+INFO 2025-10-04 08:18:34,151 django.utils.autoreload autoreload 9356 4600 Watching for file changes with StatReloader
+INFO 2025-10-04 08:20:08,459 django.utils.autoreload autoreload 9356 4600 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\gipcco_project\settings.py changed, reloading.
+INFO 2025-10-04 08:20:09,807 django.utils.autoreload autoreload 5232 13696 Watching for file changes with StatReloader
+INFO 2025-10-04 08:20:12,144 django.server basehttp 5232 7484 "GET /expenses/requests/ HTTP/1.1" 200 21503
+INFO 2025-10-04 08:20:23,963 django.server basehttp 5232 7484 "GET /expenses/requests/ HTTP/1.1" 200 21044
+INFO 2025-10-04 08:20:26,174 django.server basehttp 5232 7484 "GET /expenses/requests/ HTTP/1.1" 200 21044
+INFO 2025-10-04 08:20:28,176 django.server basehttp 5232 7484 "GET /expenses/request/3/ HTTP/1.1" 200 7633
+INFO 2025-10-04 08:20:43,511 django.server basehttp 5232 7484 "GET /expenses/request/2/ HTTP/1.1" 200 7694
+INFO 2025-10-04 08:25:54,783 django.utils.autoreload autoreload 5232 13696 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\gipcco_project\settings.py changed, reloading.
+INFO 2025-10-04 08:25:56,021 django.utils.autoreload autoreload 7116 6424 Watching for file changes with StatReloader
+INFO 2025-10-04 08:27:38,538 django.utils.autoreload autoreload 7116 6424 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\urls.py changed, reloading.
+INFO 2025-10-04 08:27:39,736 django.utils.autoreload autoreload 12408 8488 Watching for file changes with StatReloader
+INFO 2025-10-04 08:27:56,188 django.utils.autoreload autoreload 12408 8488 C:\Users\Bassel\Music\DjangoMigration\gipcco_project\inventory\forms.py changed, reloading.
+INFO 2025-10-04 08:27:57,637 django.utils.autoreload autoreload 7244 10500 Watching for file changes with StatReloader

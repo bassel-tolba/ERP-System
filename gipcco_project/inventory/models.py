@@ -36,11 +36,11 @@ class Product(models.Model):
     Maps to the 'products' table.
     """
     class ProductType(models.TextChoices):
-        RAW_MATERIAL = 'مواد خام', _('مواد خام')
-        PACKAGING = 'تعبئه و تغليف', _('تعبئه و تغليف')
-        FINAL_PRODUCT = 'منتج نهائي', _('منتج نهائي')
-        MRO = 'قطع غيار و صيانة', _('قطع غيار و صيانة')
-        CONSUMABLE = 'مستهلكات', _('مستهلكات')
+        RAW_MATERIAL = 'RAW_MATERIAL', _('Raw Material')
+        PACKAGING = 'PACKAGING', _('Packaging')
+        FINAL_PRODUCT = 'FINAL_PRODUCT', _('Final Product')
+        MRO = 'MRO', _('MRO (Maintenance, Repair, Operations)')
+        CONSUMABLE = 'CONSUMABLE', _('Consumable')
 
     name = models.CharField(max_length=255, verbose_name=_("Product Name"))
     code = models.CharField(max_length=100, unique=True, verbose_name=_("Product Code"))
@@ -827,6 +827,12 @@ class InventoryConsumption(models.Model):
         verbose_name=_("Direct Expense Cost Pool"),
         help_text=_("For non-amortizable items, select a cost pool to directly expense this consumption to.")
     )
+    source_request = models.OneToOneField(
+        'ExpenseRequest',
+        on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='final_consumption',
+        help_text=_("The approved request that triggered this consumption.")
+    )
     
     class Meta:
         db_table = 'inventory_consumptions'
@@ -891,12 +897,14 @@ class ExpenseLog(models.Model):
     category = models.CharField(
         max_length=50,
         choices=Category.choices,
-        verbose_name=_("Category")
+        verbose_name=_("Category"),
+        null=True, blank=True
     )
     classification = models.CharField(
         max_length=50,
         choices=Classification.choices,
-        verbose_name=_("Classification")
+        verbose_name=_("Classification"),
+        null=True, blank=True
     )
     notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
 
@@ -920,6 +928,12 @@ class ExpenseLog(models.Model):
         verbose_name=_("Cost Pool")
     )
 
+    source_request = models.ForeignKey(
+        'ExpenseRequest',
+        on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='final_expense_logs'
+    )
+
     class Meta:
         db_table = 'expense_logs'
         verbose_name = _("General Expense Log")
@@ -930,6 +944,51 @@ class ExpenseLog(models.Model):
         return f"Expense: {self.description} for {self.amount} on {self.expense_date}"
     
     
+# ==============================================================================
+#  NEW EXPENSE WORKFLOW MODELS
+# ==============================================================================
+
+class ExpenseRequest(models.Model):
+    class Status(models.TextChoices):
+        PENDING = 'PENDING', _('Pending Approval')
+        APPROVED = 'APPROVED', _('Approved')
+        REJECTED = 'REJECTED', _('Rejected')
+        CANCELLED = 'CANCELLED', _('Cancelled')
+
+    class RequestType(models.TextChoices):
+        DIRECT_EXPENSE = 'DIRECT_EXPENSE', _('Direct Expense')
+        INVENTORY_EXPENSE = 'INVENTORY_EXPENSE', _('Inventory Consumption to Expense')
+        INVENTORY_CAPITALIZE = 'INVENTORY_CAPITALIZE', _('Inventory Consumption to Capitalize')
+        INVENTORY_PREPAID = 'INVENTORY_PREPAID', _('Inventory Consumption to Prepaid')
+        INVOICE_PREPAID = 'INVOICE_PREPAID', _('Prepaid Expense from Invoice')
+
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING, db_index=True)
+    request_type = models.CharField(max_length=30, choices=RequestType.choices, db_index=True)
+    description = models.TextField()
+    request_date = models.DateField(help_text=_("The intended date of the expense."))
+    requested_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='expense_requests_made', on_delete=models.PROTECT)
+    created_at = models.DateTimeField(auto_now_add=True)
+    processed_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='expense_requests_processed', on_delete=models.PROTECT, null=True, blank=True)
+    processed_at = models.DateTimeField(null=True, blank=True)
+    rejection_reason = models.TextField(blank=True, null=True)
+    notes = models.TextField(blank=True, null=True)
+
+    # Data Fields for All Types
+    amount = models.DecimalField(max_digits=15, decimal_places=3, null=True, blank=True)
+    category = models.CharField(max_length=50, choices=ExpenseLog.Category.choices, null=True, blank=True)
+    classification = models.CharField(max_length=50, choices=ExpenseLog.Classification.choices, null=True, blank=True)
+    product = models.ForeignKey('Product', on_delete=models.PROTECT, null=True, blank=True)
+    quantity = models.DecimalField(max_digits=15, decimal_places=3, null=True, blank=True)
+    cost_pool = models.ForeignKey('CostPool', on_delete=models.PROTECT, null=True, blank=True)
+    fixed_asset = models.ForeignKey('FixedAsset', on_delete=models.PROTECT, null=True, blank=True)
+    source_invoice = models.ForeignKey('SupplierInvoice', on_delete=models.PROTECT, null=True, blank=True)
+    asset_account = models.ForeignKey('Account', related_name='+', on_delete=models.PROTECT, null=True, blank=True)
+    expense_account = models.ForeignKey('Account', related_name='+', on_delete=models.PROTECT, null=True, blank=True)
+    amortization_start_date = models.DateField(null=True, blank=True)
+    amortization_end_date = models.DateField(null=True, blank=True)
+    notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
+
+
 # ==============================================================================
 #  NEW SUB-LEDGER & BANKING MODELS
 # ==============================================================================
@@ -1295,7 +1354,6 @@ class JournalEntry(models.Model):
 
     class Meta:
         db_table = 'journal_entries'
-        verbose_name = _("Journal Entry")
         verbose_name_plural = _("Journal Entries")
         ordering = ['-date']
 
@@ -1821,6 +1879,8 @@ class OverheadAllocationRun(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     posted_at = models.DateTimeField(null=True, blank=True)
 
+
+
     class Meta:
         db_table = 'overhead_allocation_runs'
         verbose_name = _("Overhead Allocation Run")
@@ -1845,14 +1905,12 @@ class CostPoolSplit(models.Model):
         max_digits=5, decimal_places=2, verbose_name=_("Percentage"),
         help_text=_("The percentage of the cost to allocate to this pool (e.g., 70.50).")
     )
-    cost_pool = models.ForeignKey(
-        CostPool, on_delete=models.CASCADE, related_name='splits', verbose_name=_("Cost Pool")
-    )
+    cost_pool = models.ForeignKey(CostPool, on_delete=models.CASCADE, verbose_name=_("Cost Pool"))
 
-    # Generic Foreign Key to the source (PrepaidExpense, AccruedExpense, etc.)
+    # Generic Foreign Key to link to either PrepaidExpense or AccruedExpense
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
-    source_object = GenericForeignKey('content_type', 'object_id')
+    content_object = GenericForeignKey('content_type', 'object_id')
 
     class Meta:
         verbose_name = _("Cost Pool Split")
@@ -1884,9 +1942,11 @@ class PrepaidExpense(models.Model):
         FULLY_AMORTIZED = 'amortized', _("Fully Amortized")
         WRITTEN_OFF = 'written_off', _("Written Off")
 
-    total_amount = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Total Prepaid Amount"))
+    description = models.CharField(max_length=255)
+    initial_amount = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Initial Prepaid Amount"))
     amortization_start_date = models.DateField(verbose_name=_("Amortization Start Date"))
     amortization_end_date = models.DateField(verbose_name=_("Amortization End Date"))
+    asset_account = models.ForeignKey('Account', on_delete=models.PROTECT, related_name='+', verbose_name=_("Asset Control Account"))
     expense_account = models.ForeignKey(
         Account, on_delete=models.PROTECT, related_name='+',
         verbose_name=_("Target Expense Account"),
@@ -1894,17 +1954,13 @@ class PrepaidExpense(models.Model):
     )
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.ACTIVE, verbose_name=_("Status"))
     notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
-
-    # Link to the source of the prepaid asset
-    source_consumption = models.OneToOneField(
-        InventoryConsumption, on_delete=models.PROTECT, null=True, blank=True,
-        related_name='prepaid_expense', verbose_name=_("Source Inventory Consumption")
-    )
-    source_payment = models.OneToOneField(
-        Payment, on_delete=models.PROTECT, null=True, blank=True,
-        related_name='prepaid_expense', verbose_name=_("Source Payment")
-    )
-
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='prepaid_expenses_created')
+    
+    # Unified source link using GenericForeignKey
+    source_content_type = models.ForeignKey(ContentType, on_delete=models.PROTECT)
+    source_object_id = models.PositiveIntegerField()
+    source_content_object = GenericForeignKey('source_content_type', 'source_object_id')
+    
     # Generic relation for cost pool splits
     cost_pool_splits = GenericRelation(CostPoolSplit)
 
@@ -1913,12 +1969,12 @@ class PrepaidExpense(models.Model):
         verbose_name_plural = _("Prepaid Expenses")
 
     def __str__(self):
-        return f"Prepaid Asset ({self.total_amount}) starting {self.amortization_start_date}"
+        return f"Prepaid Asset ({self.initial_amount}) starting {self.amortization_start_date}"
 
     @property
     def remaining_balance(self):
         amortized_so_far = self.amortization_logs.aggregate(total=Sum('amount'))['total'] or Decimal('0.0')
-        return self.total_amount - amortized_so_far
+        return self.initial_amount - amortized_so_far
 
 
 class AmortizationLog(models.Model):
@@ -1993,7 +2049,7 @@ class AccrualLog(models.Model):
     amount = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Accrued Amount"))
     journal_entry = models.ForeignKey(
         'JournalEntry', on_delete=models.SET_NULL, null=True, blank=True,
-        related_name='+', verbose_name=_("Accrual Journal Entry")
+        related_name='+', verbose_name=_("True-Up Journal Entry")
     )
     # --- NEW FIELDS FOR TRUE-UP ---
     settling_invoice = models.ForeignKey(

@@ -10,6 +10,7 @@ from django.db.models import Sum
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import PermissionDenied, ValidationError
 
 from ..models import (
     InventoryLog, JournalEntry, JournalEntryLine, FinancialPeriod,
@@ -18,7 +19,7 @@ from ..models import (
     InventoryAdjustment, EmployeeAdvance, OverheadAllocationRun, CostPool, ExpenseLog, Account, TransactionCorrection,
     PeriodCloseChecklist, OpeningBalanceEntry, OpeningBalanceEntryLine,
     # --- NEW IMPORTS ---
-    PrepaidExpense, AmortizationLog, AccrualLog
+    PrepaidExpense, AmortizationLog, AccrualLog, ExpenseRequest
 )
 from ..services.costing_service import get_inventory_state_at_datetime
 
@@ -1361,6 +1362,62 @@ def create_je_for_opening_balance(ob_entry: 'OpeningBalanceEntry') -> JournalEnt
         
     return je
 
+
+def correct_approved_expense(request_id: int, user, justification: str) -> TransactionCorrection:
+    """
+    Finds an approved expense request and its resulting transaction, and creates
+    a reversing journal entry and an audit record for the correction.
+    """
+    with transaction.atomic():
+        # 1. Find the request and ensure it's correctable.
+        try:
+            request = ExpenseRequest.objects.select_for_update().get(id=request_id)
+        except ExpenseRequest.DoesNotExist:
+            raise ValidationError(f"ExpenseRequest with ID {request_id} not found.")
+
+        if request.status != ExpenseRequest.Status.APPROVED:
+            raise PermissionDenied(f"Cannot correct a request with status '{request.status}'. Only approved requests can be corrected.")
+
+        # 2. Find the original transaction (ExpenseLog or InventoryConsumption).
+        original_object = None
+        if request.request_type == ExpenseRequest.RequestType.DIRECT_EXPENSE:
+            original_object = request.final_expense_logs.first()
+        elif request.request_type in [
+            ExpenseRequest.RequestType.INVENTORY_EXPENSE,
+            ExpenseRequest.RequestType.INVENTORY_CAPITALIZE,
+            ExpenseRequest.RequestType.INVENTORY_PREPAID
+        ]:
+            original_object = request.final_consumption
+
+        if not original_object:
+            raise ValidationError("Could not find the original transaction linked to this expense request.")
+
+        # 3. Create the reversing journal entry
+        reversing_je = create_reversing_je_for_correction(
+            original_object=original_object,
+            justification=justification,
+            user=user,
+            correction_date=timezone.now()
+        )
+
+        # 4. Create the audit record for the correction using get_or_create for safety.
+        # This prevents errors if a signal also tries to create this record.
+        correction_record, created = TransactionCorrection.objects.get_or_create(
+            adjusting_journal_entry=reversing_je,
+            defaults={
+                'source_object': original_object,
+                'justification': justification,
+                'corrected_by': user
+            }
+        )
+
+        # 5. Update the original request with a note about the correction
+        request.notes = f"{request.notes or ''}\n\nCORRECTION: This request was reversed on {timezone.now().date()} by {user.username}. Justification: {justification}. See JE-{reversing_je.id}."
+        request.save(update_fields=['notes'])
+
+        logger.info(f"User '{user.username}' corrected ExpenseRequest ID {request.id}. Reversing JE-{reversing_je.id} created.")
+
+        return correction_record
 
 def create_reversing_je_for_correction(
     original_object,

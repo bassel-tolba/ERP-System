@@ -22,7 +22,7 @@ from inventory.models import (
     SupplierInvoice, SupplierInvoiceItem, Payment, PaymentApplication,
     CustomerInvoice, CustomerInvoiceItem, CustomerPaymentApplication,
     BankTransfer, FixedAsset, DepreciationLog, InventoryConsumption,
-    InventoryCount, InventoryAdjustment, TemplateItem
+    InventoryCount, InventoryAdjustment, TemplateItem, ExpenseRequest
 )
 
 # A dictionary to hold created objects for easy reference
@@ -60,6 +60,7 @@ def create_chart_of_accounts():
     create_account('10204', 'أرصدة مدينة أخرى', Account.AccountType.ASSET, '102')
     create_account('1020404', 'ضريبة القيمة المضافة (المدخلات)', Account.AccountType.ASSET, '10204')
     create_account('1020405', 'سلف الموظفين', Account.AccountType.ASSET, '10204')
+    create_account('10205', 'مصروفات مدفوعة مقدماً', Account.AccountType.ASSET, '102')
     create_account('101', 'الأصول الثابتة', Account.AccountType.ASSET, '100')
     create_account('10101', 'آلات ومعدات', Account.AccountType.ASSET, '101')
     create_account('10102', 'أثاث وتركيبات', Account.AccountType.ASSET, '101')
@@ -91,6 +92,8 @@ def create_chart_of_accounts():
     create_account('50201', 'مصروفات صيانة', Account.AccountType.EXPENSE, '502')
     create_account('50202', 'مصروفات مستهلكات', Account.AccountType.EXPENSE, '502')
     create_account('50203', 'إيجار المصنع', Account.AccountType.EXPENSE, '502')
+    create_account('50206', 'مصروفات برامج وتراخيص', Account.AccountType.EXPENSE, '502')
+    create_account('50207', 'مصروفات إدارية وعمومية', Account.AccountType.EXPENSE, '502')
     create_account('503', 'خسائر فروق المخزون', Account.AccountType.EXPENSE, '500')
     create_account('50205', 'مصروفات الإهلاك', Account.AccountType.EXPENSE, '502')
     create_account('5020501', 'مصروف إهلاك - آلات ومعدات', Account.AccountType.EXPENSE, '50205')
@@ -165,7 +168,8 @@ class Command(BaseCommand):
             finished_goods_inventory=accounts['1020206'],
             inventory_adjustment_loss_account=accounts['503'],
             inventory_adjustment_gain_account=accounts['40202'],
-            employee_advances_receivable=accounts['1020405']
+            employee_advances_receivable=accounts['1020405'],
+            prepaid_expenses_account=accounts['10205']
         )
         ProductTypeAccountingSettings.objects.create(
             product_type=Product.ProductType.RAW_MATERIAL,
@@ -187,6 +191,11 @@ class Command(BaseCommand):
             product_type=Product.ProductType.MRO,
             inventory_account=accounts['1020207'],
             cogs_or_expense_account=accounts['50201']
+        )
+        ProductTypeAccountingSettings.objects.create(
+            product_type=Product.ProductType.CONSUMABLE,
+            inventory_account=accounts['1020208'],
+            cogs_or_expense_account=accounts['50207']
         )
 
         self.stdout.write("3. Creating base operational objects (companies, products, etc.)...")
@@ -212,11 +221,13 @@ class Command(BaseCommand):
 
         # MRO & Consumables
         mro1, _ = Product.objects.get_or_create(code="MRO-LUBE-001", defaults={'name': "Machine Lubricant", 'product_type': Product.ProductType.MRO, 'unit': "Can"})
+        consumable1, _ = Product.objects.get_or_create(code="CONSUM-SFW-001", defaults={'name': "Annual Antivirus License", 'product_type': Product.ProductType.CONSUMABLE, 'unit': "Unit", 'is_amortizable': True})
         
         CONTEXT['products'] = {
             'saline': rm1, 'glucose': rm2, 'pvc_bag': rm3,
             'saline_drip': fp1, 'glucose_drip': fp2,
-            'lubricant': mro1
+            'lubricant': mro1,
+            'antivirus': consumable1
         }
 
         bank_acct, _ = BankAccount.objects.get_or_create(name="Main Business Bank Account", defaults={'gl_account': accounts['1020102']})
@@ -236,6 +247,13 @@ class Command(BaseCommand):
         parent_pool, _ = CostPool.objects.get_or_create(name="Factory Overhead", code="FOH")
         CostPool.objects.get_or_create(name="Factory Rent", code="FOH-RENT", parent=parent_pool, defaults={'gl_account': accounts['50203']})
         CostPool.objects.get_or_create(name="Factory Maintenance", code="FOH-MAINT", parent=parent_pool, defaults={'gl_account': accounts['50201']})
+        admin_pool, _ = CostPool.objects.get_or_create(name="General & Admin", code="G&A")
+        CostPool.objects.get_or_create(name="G&A Software Costs", code="G&A-SFW", parent=admin_pool, defaults={'gl_account': accounts['50206']})
+        CONTEXT['cost_pools'] = {
+            'rent': CostPool.objects.get(code="FOH-RENT"),
+            'maintenance': CostPool.objects.get(code="FOH-MAINT"),
+            'software': CostPool.objects.get(code="G&A-SFW")
+        }
         AllocationDriver.objects.get_or_create(name=AllocationDriver.DriverChoices.MACHINE_HOURS)
 
         # Create Fixed Assets
@@ -402,6 +420,41 @@ class Command(BaseCommand):
         PaymentApplication.objects.create(payment=payment_out, invoice=sup_inv, amount_applied=payment_out.amount)
         self.stdout.write("   - Created and paid a supplier invoice.")
 
+        # Purchase and receive MRO item (lubricant) so it's in stock
+        po_mro, _ = PurchaseOrder.objects.get_or_create(
+            po_number="PO-DEMO-MRO-001",
+            defaults={
+                'supplier': CONTEXT['suppliers']['mro'],
+                'order_date': date(2025, 9, 3)
+            }
+        )
+        po_item_mro, _ = PurchaseOrderItem.objects.get_or_create(
+            purchase_order=po_mro,
+            product=CONTEXT['products']['lubricant'],
+            defaults={
+                'quantity_ordered': 10.0,
+                'base_price_per_unit': Decimal("50.000"),
+                'vat_rate': Decimal("0.14"),
+                'withholding_tax_rate': Decimal("0.00")
+            }
+        )
+        log_mro, _ = InventoryLog.objects.get_or_create(
+            po_item=po_item_mro,
+            defaults={
+                'product': CONTEXT['products']['lubricant'],
+                'company': CONTEXT['suppliers']['mro'],
+                'quantity': 10.0,
+                'timestamp': timezone.make_aware(timezone.datetime(2025, 9, 6, 10, 0, 0)),
+                'release_timestamp': timezone.make_aware(timezone.datetime(2025, 9, 6, 11, 0, 0)),
+                'status': InventoryLog.Status.RELEASED,
+                'base_unit_price': Decimal("50.000"),
+                'vat_amount': Decimal("70.000"),
+                'withholding_tax_amount': Decimal("0.000")
+            }
+        )
+        CONTEXT['log_mro'] = log_mro
+        self.stdout.write("   - Received 10 Cans of Machine Lubricant into inventory.")
+
         # Run depreciation for the current period
         DepreciationLog.objects.create(
             asset=CONTEXT['asset1'], 
@@ -409,6 +462,48 @@ class Command(BaseCommand):
             amount=Decimal("1000.000") # 120,000 / 10 years / 12 months
         )
         self.stdout.write("   - Ran depreciation for September for the Filling Machine.")
+
+        self.stdout.write("   - Creating sample Expense Requests...")
+        from inventory.services import approval_service
+
+        # a) Pending Direct Expense
+        ExpenseRequest.objects.create(
+            requested_by=CONTEXT['user'],
+            request_type=ExpenseRequest.RequestType.DIRECT_EXPENSE,
+            request_date=date(2025, 9, 18),
+            description="Catering for team meeting",
+            amount=Decimal("350.00"),
+            cost_pool=CONTEXT['cost_pools']['software'],
+            status=ExpenseRequest.Status.PENDING
+        )
+
+        # b) Approved Inventory Expense
+        approved_req = ExpenseRequest.objects.create(
+            requested_by=CONTEXT['user'],
+            request_type=ExpenseRequest.RequestType.INVENTORY_EXPENSE,
+            request_date=date(2025, 9, 15),
+            description="Lubricant for Machine-001",
+            product=CONTEXT['products']['lubricant'],
+            quantity=Decimal("2.0"),
+            cost_pool=CONTEXT['cost_pools']['maintenance'],
+            status=ExpenseRequest.Status.PENDING # Will be approved next
+        )
+        approval_service.approve_request(approved_req.id, CONTEXT['user'])
+
+        # c) Rejected Capitalization Request
+        rejected_req = ExpenseRequest.objects.create(
+            requested_by=CONTEXT['user'],
+            request_type=ExpenseRequest.RequestType.INVENTORY_CAPITALIZE,
+            request_date=date(2025, 9, 11),
+            description="Upgrade parts for Office Furniture",
+            product=CONTEXT['products']['lubricant'], # Not a realistic product, but fine for demo
+            quantity=Decimal("5.0"),
+            fixed_asset=CONTEXT['asset2'],
+            status=ExpenseRequest.Status.PENDING,
+        )
+        approval_service.reject_request(rejected_req.id, CONTEXT['user'], "This is not a capitalizable expense.")
+        self.stdout.write("   - Created PENDING, APPROVED, and REJECTED expense requests.")
+
 
     def create_opening_balances(self):
         """Creates and posts a comprehensive opening balance entry."""
@@ -491,7 +586,25 @@ class Command(BaseCommand):
             }
         )
 
-        # c) Work-in-Progress Inventory
+        # c) MRO & Consumables Inventory
+        ob_log_lube, _ = InventoryLog.objects.get_or_create(
+            qc_no="MIG-MRO-LUBE",
+            defaults={
+                'product': CONTEXT['products']['lubricant'], 'quantity': 50.0,
+                'timestamp': migration_date, 'status': InventoryLog.Status.RELEASED,
+                'base_unit_price': Decimal("25.000"), 'release_timestamp': migration_date
+            }
+        )
+        ob_log_antivirus, _ = InventoryLog.objects.get_or_create(
+            qc_no="MIG-CONSUM-AV",
+            defaults={
+                'product': CONTEXT['products']['antivirus'], 'quantity': 10.0,
+                'timestamp': migration_date, 'status': InventoryLog.Status.RELEASED,
+                'base_unit_price': Decimal("1200.000"), 'release_timestamp': migration_date
+            }
+        )
+
+        # d) Work-in-Progress Inventory
         wip_batch, _ = Batch.objects.get_or_create(
             shop_order_number="WIP-SO-001",
             defaults={
@@ -505,7 +618,7 @@ class Command(BaseCommand):
                          (Decimal(str(wip_item2.actual_quantity)) * wip_item2.cost_at_consumption)
 
 
-        # d) Fixed Assets (already created in base_data)
+        # e) Fixed Assets (already created in base_data)
         asset1 = CONTEXT['asset1']
         asset2 = CONTEXT['asset2']
         # Calculate accumulated depreciation up to migration date
@@ -578,6 +691,24 @@ class Command(BaseCommand):
         )
         OpeningBalanceSubLedgerDetail.objects.create(line=line_pkg, sub_ledger_object=ob_log_pvc.product, amount=rm_value_pvc)
         total_debits += rm_value_pvc
+
+        # MRO Inventory
+        mro_value_lube = Decimal(str(ob_log_lube.quantity)) * ob_log_lube.costing_unit_price
+        line_mro = OpeningBalanceEntryLine.objects.create(
+            opening_balance_entry=ob_entry, account=CONTEXT['accounts']['1020207'],
+            entry_type='debit', total_amount=mro_value_lube
+        )
+        OpeningBalanceSubLedgerDetail.objects.create(line=line_mro, sub_ledger_object=ob_log_lube.product, amount=mro_value_lube)
+        total_debits += mro_value_lube
+
+        # Consumables Inventory
+        consumable_value_av = Decimal(str(ob_log_antivirus.quantity)) * ob_log_antivirus.costing_unit_price
+        line_consumable = OpeningBalanceEntryLine.objects.create(
+            opening_balance_entry=ob_entry, account=CONTEXT['accounts']['1020208'],
+            entry_type='debit', total_amount=consumable_value_av
+        )
+        OpeningBalanceSubLedgerDetail.objects.create(line=line_consumable, sub_ledger_object=ob_log_antivirus.product, amount=consumable_value_av)
+        total_debits += consumable_value_av
 
         # WIP Inventory
         line_wip = OpeningBalanceEntryLine.objects.create(

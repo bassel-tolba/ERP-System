@@ -13,7 +13,7 @@ from .models import (
     DepreciationLog, InventoryAdjustment, EmployeeAdvance, EmployeeAdvanceSettlement,
     FinancialPeriod, PeriodCloseChecklist,
     # --- NEW IMPORTS ---
-    PrepaidExpense, ExpenseLog, AmortizationLog, AccrualLog
+    PrepaidExpense, ExpenseLog, AmortizationLog, AccrualLog, ExpenseRequest
 )
 from .services.accounting_service import (
     _check_period_is_open, # Import the gatekeeper function
@@ -140,57 +140,44 @@ def set_consumption_type_for_amortizable(sender, instance: InventoryConsumption,
 
 @receiver(post_save, sender=InventoryConsumption)
 def handle_internal_consumption_save(sender, instance: InventoryConsumption, created, **kwargs):
-    """
-    Listens for an InventoryConsumption to be saved and triggers the creation of a 
-    Journal Entry. Also handles capitalization, direct expense logging, and prepaid asset creation.
-    """
-    if created:
-        # The JE is always created, moving value from inventory to its next stage (Asset, Prepaid, or Expense)
-        create_je_for_internal_consumption(consumption=instance)
-        
-        # --- WORKFLOW ROUTER ---
-        
-        # Path A: Capitalize the cost to a fixed asset
-        if instance.consumption_type == InventoryConsumption.ConsumptionType.CAPITALIZE and instance.fixed_asset:
-            asset = instance.fixed_asset
-            cost_to_capitalize = instance.cost_at_consumption
-            asset.purchase_cost += cost_to_capitalize
-            asset.save(update_fields=['purchase_cost'])
-            logger.info(f"Capitalized {cost_to_capitalize} to Fixed Asset {asset.asset_tag}. New cost: {asset.purchase_cost}")
+    if not created:
+        return
 
-        # Path B: Create a Prepaid Expense for an amortizable item
-        elif instance.consumption_type == InventoryConsumption.ConsumptionType.AMORTIZE:
-            # This assumes a default amortization period. This should be configured elsewhere or set manually.
-            # For now, we'll use a placeholder of 12 months.
-            start_date = instance.consumption_date.date()
-            end_date = start_date + timezone.timedelta(days=364) # 1 year
-            
-            # The expense account is typically the same one that would have been used for a direct expense.
-            from .services.accounting_service import _get_product_expense_account
-            expense_account = _get_product_expense_account(instance.product)
+    # STEP 1: Always create the primary Journal Entry for the consumption.
+    create_je_for_internal_consumption(consumption=instance)
 
-            PrepaidExpense.objects.create(
-                total_amount=instance.cost_at_consumption,
-                amortization_start_date=start_date,
-                amortization_end_date=end_date,
-                expense_account=expense_account,
-                source_consumption=instance,
-                notes=f"Created from consumption of '{instance.product.name}' on {start_date}."
-            )
-            logger.info(f"Created PrepaidExpense asset from consumption ID {instance.id}.")
+    # STEP 2: Execute follow-on business logic based on the original request's intent.
+    request = instance.source_request
+    
+    # Path A: Capitalize cost onto a Fixed Asset
+    if instance.consumption_type == InventoryConsumption.ConsumptionType.CAPITALIZE and instance.fixed_asset:
+        instance.fixed_asset.purchase_cost += instance.cost_at_consumption
+        instance.fixed_asset.save(update_fields=['purchase_cost'])
+        return
 
-        # Path C: Create a direct ExpenseLog for overhead allocation
-        elif instance.cost_pool:
-            ExpenseLog.objects.create(
-                description=f"Direct consumption of '{instance.product.name}'",
-                expense_date=instance.consumption_date.date(),
-                amount=instance.cost_at_consumption,
-                category=ExpenseLog.Category.MAINTENANCE, # Or determine category dynamically
-                classification=ExpenseLog.Classification.MANUFACTURING_OVERHEAD,
-                cost_pool=instance.cost_pool,
-                notes=f"Source: InventoryConsumption ID {instance.id}"
-            )
-            logger.info(f"Created direct ExpenseLog for consumption ID {instance.id} in cost pool '{instance.cost_pool.name}'.")
+    # Path B: Create a Prepaid Asset (using the 'bridge' field)
+    if request and request.request_type == ExpenseRequest.RequestType.INVENTORY_PREPAID:
+        PrepaidExpense.objects.create(
+            description=request.description,
+            initial_amount=instance.cost_at_consumption,
+            amortization_start_date=request.amortization_start_date,
+            amortization_end_date=request.amortization_end_date,
+            asset_account=request.asset_account,
+            expense_account=request.expense_account,
+            created_by=request.requested_by,
+            source_content_object=instance  # Link back to the consumption
+        )
+        return
+
+    # Path C (Default): Create a direct ExpenseLog for overhead tracking
+    if instance.cost_pool:
+        ExpenseLog.objects.create(
+            description=f"Direct consumption of '{instance.product.name}'",
+            expense_date=instance.consumption_date.date(),
+            amount=instance.cost_at_consumption,
+            cost_pool=instance.cost_pool,
+            source_request=request
+        )
 
 
 @receiver(post_delete, sender=InventoryConsumption)
