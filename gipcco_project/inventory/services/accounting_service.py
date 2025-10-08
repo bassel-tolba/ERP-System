@@ -1261,9 +1261,110 @@ def create_je_for_accrual(accrual_log: AccrualLog) -> Optional[JournalEntry]:
     return je
 
 
+def create_je_for_expense_log(expense_log: 'ExpenseLog'):
+    """
+    Creates a journal entry for a direct expense that is being accrued.
+    Debits the expense account linked to the cost pool and credits Accrued Expenses.
+    """
+    _check_period_is_open(expense_log.expense_date)
+
+    settings = GeneralAccountingSettings.load()
+    if not expense_log.cost_pool or not expense_log.cost_pool.gl_account:
+        raise ValidationError(f"ExpenseLog #{expense_log.id} is missing a cost pool with a linked GL account.")
+    if not settings.accrued_expenses_account:
+        raise ValidationError("The Accrued Expenses liability account is not configured in General Accounting Settings.")
+
+    debit_account = expense_log.cost_pool.gl_account
+    credit_account = settings.accrued_expenses_account
+
+    je = JournalEntry.objects.create(
+        date=expense_log.expense_date,
+        description=f"Direct expense: {expense_log.description}",
+        source_object=expense_log,
+        status=JournalEntry.Status.POSTED
+    )
+
+    JournalEntryLine.objects.create(
+        journal_entry=je,
+        account=debit_account,
+        amount=expense_log.amount,
+        entry_type=JournalEntryLine.EntryType.DEBIT
+    )
+    JournalEntryLine.objects.create(
+        journal_entry=je,
+        account=credit_account,
+        amount=expense_log.amount,
+        entry_type=JournalEntryLine.EntryType.CREDIT
+    )
+
+
+def create_transaction_for_direct_payment_expense(request: 'ExpenseRequest') -> 'ExpenseLog':
+    """
+    Creates an ExpenseLog and a direct payment Journal Entry for an approved
+    direct expense request. This bypasses the standard accrual process.
+
+    Accounting Logic:
+    - DEBIT: Expense Account (from the request's Cost Pool)
+    - CREDIT: Bank/Cash Account (from the request's Bank Account)
+    """
+    _check_period_is_open(request.request_date)
+
+    if not request.cost_pool or not request.cost_pool.gl_account:
+        raise ValidationError(f"ExpenseRequest #{request.id} is missing a cost pool with a linked GL account.")
+    if not request.bank_account or not request.bank_account.gl_account:
+        raise ValidationError(f"ExpenseRequest #{request.id} is missing a bank account with a linked GL account.")
+
+    debit_account = request.cost_pool.gl_account
+    credit_account = request.bank_account.gl_account
+
+    with transaction.atomic():
+        # First, create the ExpenseLog for tracking purposes.
+        # We add a flag to prevent the post_save signal from creating a duplicate JE.
+        expense_log = ExpenseLog(
+            description=request.description,
+            expense_date=request.request_date,
+            amount=request.amount,
+            category=request.category,
+            classification=request.classification,
+            cost_pool=request.cost_pool,
+            source_request=request,
+            settlement_status=ExpenseLog.SettlementStatus.SETTLED
+        )
+        expense_log._skip_je_creation = True  # Set the flag
+        expense_log.save()
+
+        # Now, create the correct journal entry for a direct payment.
+        je = JournalEntry.objects.create(
+            date=request.request_date,
+            description=f"Direct expense payment: {request.description}",
+            source_object=expense_log, # Link JE to the ExpenseLog
+            status=JournalEntry.Status.POSTED
+        )
+
+        JournalEntryLine.objects.create(
+            journal_entry=je,
+            account=debit_account,
+            amount=request.amount,
+            entry_type=JournalEntryLine.EntryType.DEBIT
+        )
+        JournalEntryLine.objects.create(
+            journal_entry=je,
+            account=credit_account,
+            amount=request.amount,
+            entry_type=JournalEntryLine.EntryType.CREDIT,
+            sub_ledger_object=request.bank_account
+        )
+
+        # Link the JE to the expense log as the settlement object
+        expense_log.settlement_object = je
+        expense_log.save(update_fields=['settlement_content_type', 'settlement_object_id'])
+
+    return expense_log
+
+
 def create_je_for_opening_balance(ob_entry: 'OpeningBalanceEntry') -> JournalEntry:
     """
-    Posts the master opening balance entry.
+    Creates a single, multi-line journal entry from an Opening Balance Entry record.
 
     Iterates through all lines and sub-ledger details of an OpeningBalanceEntry
     and creates a single, balanced JournalEntry. This is the financial posting
@@ -1292,7 +1393,7 @@ def create_je_for_opening_balance(ob_entry: 'OpeningBalanceEntry') -> JournalEnt
         # 2. Iterate through lines and create JE Lines
         for line in ob_entry.lines.prefetch_related('sub_ledger_details__sub_ledger_object').all():
             logger.info(f"    Processing OB Line for Account '{line.account.code}'...")
-            
+
             # If there are sub-ledger details, create a JE line for each one
             if line.sub_ledger_details.exists():
                 # --- MODIFICATION START ---

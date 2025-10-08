@@ -1,0 +1,454 @@
+{% extends 'inventory/layout.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">إدارة طلبات المصروفات</h1>
+    </div>
+
+    <div class="row">
+        <!-- Create New Request Form -->
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary"><i class="bi bi-plus-circle-fill me-2"></i>إنشاء طلب جديد</h6>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{% url 'inventory:manage_expense_requests' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="create">
+
+                        <!-- Request Type -->
+                        <div class="mb-3">
+                            <label for="request_type" class="form-label">نوع الطلب</label>
+                            <select id="request_type" name="request_type" class="form-select" required>
+                                <option value="" selected disabled>-- اختر نوع الطلب --</option>
+                                {% for value, label in request_types %}
+                                <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Common Fields -->
+                        <div class="mb-3">
+                            <label for="request_date" class="form-label">تاريخ الطلب</label>
+                            <input type="text" id="request_date" name="request_date" class="form-control flatpickr-date" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">الوصف / الغرض</label>
+                            <textarea id="description" name="description" class="form-control" rows="3" required></textarea>
+                        </div>
+
+                        <!-- Dynamic Fields Container -->
+                        <div id="dynamic-fields-container">
+                            <!-- Direct Expense Fields -->
+                            <div class="request-fields" data-type="DIRECT_EXPENSE" style="display: none;">
+                                <div class="mb-3">
+                                    <label for="amount" class="form-label">المبلغ</label>
+                                    <input type="number" step="0.01" id="amount" name="amount" class="form-control">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="cost_pool_direct" class="form-label">مركز التكلفة</label>
+                                    <select name="cost_pool" class="form-select tom-select">
+                                        {% for pool in cost_pools %}<option value="{{ pool.id }}">{{ pool.name }}</option>{% endfor %}
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="category" class="form-label">الفئة</label>
+                                    <select name="category" class="form-select">
+                                        {% for value, label in categories %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="classification" class="form-label">التصنيف</label>
+                                    <select name="classification" class="form-select">
+                                        {% for value, label in classifications %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+                                    </select>
+                                </div>
+                                <hr>
+                                <div class="mb-3">
+                                    <label for="settlement_method" class="form-label">طريقة السداد</label>
+                                    <select id="settlement_method" name="settlement_method" class="form-select">
+                                        <option value="" selected disabled>-- اختر طريقة السداد --</option>
+                                        {% for value, label in settlement_methods %}
+                                        <option value="{{ value }}">{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div id="supplier-field-group" class="mb-3" style="display: none;">
+                                    <label for="supplier" class="form-label">المورد</label>
+                                    <select id="supplier" name="supplier" class="form-select tom-select">
+                                        <option value="">-- اختر المورد --</option>
+                                        {% for supplier in suppliers %}
+                                        <option value="{{ supplier.id }}">{{ supplier.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div id="bank-account-field-group" class="mb-3" style="display: none;">
+                                    <label for="bank_account" class="form-label">الحساب البنكي / الخزينة</label>
+                                    <select id="bank_account" name="bank_account" class="form-select tom-select">
+                                        <option value="">-- اختر الحساب --</option>
+                                        {% for account in bank_accounts %}
+                                        <option value="{{ account.id }}">{{ account.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Inventory Expense Fields -->
+                            <div class="request-fields" data-type="INVENTORY_EXPENSE" style="display: none;">
+                                <div class="mb-3">
+                                    <label for="product_inv_exp" class="form-label">المنتج</label>
+                                    <select name="product" class="form-select tom-select">
+                                        {% for product in products %}<option value="{{ product.id }}">{{ product.name }}</option>{% endfor %}
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="quantity_inv_exp" class="form-label">الكمية</label>
+                                    <input type="number" step="any" name="quantity" class="form-control">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="cost_pool_inv" class="form-label">مركز التكلفة</label>
+                                    <select name="cost_pool" class="form-select tom-select">
+                                        {% for pool in cost_pools %}<option value="{{ pool.id }}">{{ pool.name }}</option>{% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Inventory Capitalize Fields -->
+                            <div class="request-fields" data-type="INVENTORY_CAPITALIZE" style="display: none;">
+                                <div class="mb-3">
+                                    <label for="product_cap" class="form-label">المنتج</label>
+                                    <select name="product" class="form-select tom-select">
+                                        {% for product in products %}<option value="{{ product.id }}">{{ product.name }}</option>{% endfor %}
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="quantity_cap" class="form-label">الكمية</label>
+                                    <input type="number" step="any" name="quantity" class="form-control">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="fixed_asset" class="form-label">الأصل الثابت</label>
+                                    <select name="fixed_asset" class="form-select tom-select">
+                                        {% for asset in fixed_assets %}<option value="{{ asset.id }}">{{ asset.name }}</option>{% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Inventory Prepaid Fields -->
+                            <div class="request-fields" data-type="INVENTORY_PREPAID" style="display: none;">
+                                <div class="mb-3">
+                                    <label class="form-label">المنتج</label>
+                                    <select name="product" class="form-select tom-select">
+                                        {% for product in products %}<option value="{{ product.id }}">{{ product.name }}</option>{% endfor %}
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">الكمية</label>
+                                    <input type="number" step="any" name="quantity" class="form-control">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">حساب الأصل (المدفوع مقدماً)</label>
+                                    <select name="asset_account" class="form-select tom-select">
+                                        {% for account in asset_accounts %}<option value="{{ account.id }}">{{ account.name }}</option>{% endfor %}
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">حساب المصروف</label>
+                                    <select name="expense_account" class="form-select tom-select">
+                                        {% for account in expense_accounts %}<option value="{{ account.id }}">{{ account.name }}</option>{% endfor %}
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">تاريخ بدء الإطفاء</label>
+                                    <input type="text" name="amortization_start_date" class="form-control flatpickr-date">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">تاريخ انتهاء الإطفاء</label>
+                                    <input type="text" name="amortization_end_date" class="form-control flatpickr-date">
+                                </div>
+                            </div>
+
+                            <!-- Invoice Prepaid Fields -->
+                            <div class="request-fields" data-type="INVOICE_PREPAID" style="display: none;">
+                                <div class="mb-3">
+                                    <label class="form-label">فاتورة المورد المصدر</label>
+                                    <select name="source_invoice" class="form-select tom-select">
+                                        <option value="">-- اختر فاتورة --</option>
+                                        {% for invoice in invoices %}<option value="{{ invoice.id }}">#{{ invoice.invoice_number }} - {{ invoice.supplier.name }} ({{ invoice.total_amount }})</option>{% endfor %}
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">حساب الأصل (المدفوع مقدماً)</label>
+                                    <select name="asset_account" class="form-select tom-select">
+                                        {% for account in asset_accounts %}<option value="{{ account.id }}">{{ account.name }}</option>{% endfor %}
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">حساب المصروف</label>
+                                    <select name="expense_account" class="form-select tom-select">
+                                        {% for account in expense_accounts %}<option value="{{ account.id }}">{{ account.name }}</option>{% endfor %}
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">تاريخ بدء الإطفاء</label>
+                                    <input type="text" name="amortization_start_date" class="form-control flatpickr-date">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">تاريخ انتهاء الإطفاء</label>
+                                    <input type="text" name="amortization_end_date" class="form-control flatpickr-date">
+                                </div>
+                            </div>
+
+                            <!-- Accrual Fields -->
+                            <div class="request-fields" data-type="ACCRUAL" style="display: none;">
+                                <div class="mb-3">
+                                    <label for="amount_accrual" class="form-label">إجمالي المبلغ التقديري</label>
+                                    <input type="number" step="0.01" id="amount_accrual" name="amount" class="form-control">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">حساب المصروف</label>
+                                    <select name="expense_account" class="form-select tom-select">
+                                        <option value="">-- اختر حساب المصروف --</option>
+                                        {% for account in expense_accounts %}<option value="{{ account.id }}">{{ account.code }} - {{ account.name }}</option>{% endfor %}
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">تاريخ بدء الاستحقاق</label>
+                                    <input type="text" name="accrual_start_date" class="form-control flatpickr-date">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">تاريخ انتهاء الاستحقاق</label>
+                                    <input type="text" name="accrual_end_date" class="form-control flatpickr-date">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">تقديم الطلب</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Settle Accrual Form -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary"><i class="bi bi-patch-check-fill me-2"></i>تسوية المصروفات المستحقة</h6>
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted">استخدم هذا النموذج لتسوية مصروف مستحق تم تسجيله مسبقًا مع فاتورة المورد الفعلية.</p>
+                    <form method="POST" action="{% url 'inventory:manage_expense_requests' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="settle_accrual">
+
+                        <div class="mb-3">
+                            <label for="accrual_log_id" class="form-label">المصروف المستحق (من سجل الاستحقاق)</label>
+                            <select id="accrual_log_id" name="accrual_log_id" class="form-select tom-select" required>
+                                <option value="">-- اختر مصروف مستحق لتسويته --</option>
+                                {% for log in unsettled_accrual_logs %}
+                                <option value="{{ log.id }}">
+                                    #{{ log.id }} - {{ log.accrued_expense.description }} ({{ log.amount|floatformat:2 }}) - {{ log.financial_period.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="invoice_id" class="form-label">فاتورة المورد الفعلية</label>
+                            <select id="invoice_id" name="invoice_id" class="form-select tom-select" required>
+                                <option value="">-- اختر الفاتورة --</option>
+                                {% for invoice in invoices %}
+                                <option value="{{ invoice.id }}">
+                                    #{{ invoice.invoice_number }} - {{ invoice.supplier.name }} ({{ invoice.total_amount }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-info">تسوية المصروف</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Requests List -->
+        <div class="col-xl-8 col-lg-7">
+            <!-- Pending Requests -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary"><i class="bi bi-clock-history me-2"></i>طلبات قيد المراجعة</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>النوع</th>
+                                    <th>الوصف</th>
+                                    <th>المبلغ/الكمية</th>
+                                    <th>مقدم الطلب</th>
+                                    <th>التاريخ</th>
+                                    <th>إجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for req in pending_requests %}
+                                <tr>
+                                    <td>{{ req.id }}</td>
+                                    <td><span class="badge bg-light text-dark">{{ req.get_request_type_display }}</span></td>
+                                    <td>{{ req.description|truncatechars:30 }}</td>
+                                    <td>{{ req.amount|default:req.quantity }}</td>
+                                    <td>{{ req.requested_by.username }}</td>
+                                    <td>{{ req.request_date }}</td>
+                                    <td>
+                                        <div class="d-flex gap-1">
+                                            {% if user.is_staff %}
+                                            <form method="POST" class="d-inline">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="approve">
+                                                <input type="hidden" name="request_id" value="{{ req.id }}">
+                                                <button type="submit" class="btn btn-success btn-sm" title="Approve"><i class="bi bi-check-lg"></i></button>
+                                            </form>
+                                            <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#rejectModal" data-request-id="{{ req.id }}" title="Reject"><i class="bi bi-x-lg"></i></button>
+                                            {% endif %}
+                                            {% if user == req.requested_by %}
+                                            <form method="POST" class="d-inline">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="cancel">
+                                                <input type="hidden" name="request_id" value="{{ req.id }}">
+                                                <button type="submit" class="btn btn-secondary btn-sm" title="Cancel"><i class="bi bi-trash"></i></button>
+                                            </form>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="7" class="text-center">لا توجد طلبات معلقة.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recently Processed Requests -->
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary"><i class="bi bi-check2-all me-2"></i>أحدث الطلبات المكتملة</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>النوع</th>
+                                    <th>الوصف</th>
+                                    <th>الحالة</th>
+                                    <th>تاريخ الإجراء</th>
+                                    <th>بواسطة</th>
+                                    <th>إجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for req in processed_requests %}
+                                <tr>
+                                    <td>{{ req.id }}</td>
+                                    <td>{{ req.get_request_type_display }}</td>
+                                    <td>{{ req.description|truncatechars:40 }}</td>
+                                    <td>
+                                        {% if req.status == 'APPROVED' %}
+                                            <span class="badge bg-success-subtle text-success-emphasis rounded-pill">{{ req.get_status_display }}</span>
+                                        {% elif req.status == 'REJECTED' %}
+                                            <span class="badge bg-danger-subtle text-danger-emphasis rounded-pill">{{ req.get_status_display }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill">{{ req.get_status_display }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ req.processed_at|date:"Y-m-d" }}</td>
+                                    <td>{{ req.processed_by.username }}</td>
+                                    <td>
+                                        {% if req.status == 'APPROVED' and user.is_staff %}
+                                        <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#correctionModal" data-request-id="{{ req.id }}" title="Correct Transaction">
+                                            <i class="bi bi-arrow-counterclockwise"></i> تصحيح
+                                        </button>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="7" class="text-center">لا توجد طلبات مكتملة حديثاً.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reject Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="rejectModalLabel">رفض الطلب</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="POST">
+          {% csrf_token %}
+          <div class="modal-body">
+              <input type="hidden" name="action" value="reject">
+              <input type="hidden" name="request_id" id="rejectRequestId">
+              <div class="mb-3">
+                  <label for="rejection_reason" class="form-label">سبب الرفض</label>
+                  <textarea class="form-control" id="rejection_reason" name="rejection_reason" rows="3" required></textarea>
+              </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+            <button type="submit" class="btn btn-danger">تأكيد الرفض</button>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Correction Modal -->
+<div class="modal fade" id="correctionModal" tabindex="-1" aria-labelledby="correctionModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="correctionModalLabel">تصحيح معاملة تمت الموافقة عليها</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="POST">
+          {% csrf_token %}
+          <div class="modal-body">
+              <p class="small text-muted">سيؤدي هذا الإجراء إلى إنشاء قيد عكسي للمعاملة الأصلية. يرجى تقديم مبرر واضح لهذا التصحيح.</p>
+              <input type="hidden" name="action" value="correct">
+              <input type="hidden" name="request_id" id="correctionRequestId">
+              <div class="mb-3">
+                  <label for="justification" class="form-label">سبب التصحيح</label>
+                  <textarea class="form-control" id="justification" name="justification" rows="3" required></textarea>
+              </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+            <button type="submit" class="btn btn-warning">تأكيد التصحيح</button>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'layout/js/expense_requests_logic.js' %}"></script>
+{% endblock %}

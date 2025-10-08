@@ -543,9 +543,10 @@ class TestMiscAccountingTransactions(AccountingServiceBaseTestCase):
         self.assertEqual(consumption.consumption_type, InventoryConsumption.ConsumptionType.AMORTIZE)
 
         # b) Verify the PrepaidExpense object was created
-        self.assertTrue(PrepaidExpense.objects.filter(source_consumption=consumption).exists())
-        prepaid_asset = PrepaidExpense.objects.get(source_consumption=consumption)
-        self.assertEqual(prepaid_asset.total_amount, Decimal("1200.000"))
+        ct = ContentType.objects.get_for_model(consumption)
+        self.assertTrue(PrepaidExpense.objects.filter(source_content_type=ct, source_object_id=consumption.id).exists())
+        prepaid_asset = PrepaidExpense.objects.get(source_content_type=ct, source_object_id=consumption.id)
+        self.assertEqual(prepaid_asset.initial_amount, Decimal("1200.000"))
 
         # c) Verify the Journal Entry (should be JE #2)
         self.assertEqual(JournalEntry.objects.count(), 2)
@@ -1251,11 +1252,14 @@ class TestOpeningBalanceSystem(AccountingServiceBaseTestCase):
 
         # e) Prepaid Expenses
         ob_prepaid = PrepaidExpense.objects.create(
-            total_amount=Decimal("6000.000"),
+            description="Opening Balance Prepaid Insurance",
+            initial_amount=Decimal("6000.000"),
             amortization_start_date="2024-10-01",
             amortization_end_date="2025-09-30",
+            asset_account=self.general_settings.prepaid_expenses_account,
             expense_account=self.accounts['50207'], # Insurance Expense
-            notes="Opening Balance Prepaid Insurance"
+            created_by=self.test_user,
+            source_content_object=FiscalYear.objects.first() # Dummy source object
         )
 
 
@@ -1291,8 +1295,8 @@ class TestOpeningBalanceSystem(AccountingServiceBaseTestCase):
         fa2_line = OpeningBalanceEntryLine.objects.create(opening_balance_entry=ob_entry, account=self.accounts['10102'], entry_type='debit', total_amount=self.asset2.purchase_cost)
         OpeningBalanceSubLedgerDetail.objects.create(line=fa2_line, sub_ledger_object=self.asset2, amount=self.asset2.purchase_cost)
         # Prepaid Expenses
-        prepaid_line = OpeningBalanceEntryLine.objects.create(opening_balance_entry=ob_entry, account=self.general_settings.prepaid_expenses_account, entry_type='debit', total_amount=ob_prepaid.total_amount)
-        OpeningBalanceSubLedgerDetail.objects.create(line=prepaid_line, sub_ledger_object=ob_prepaid, amount=ob_prepaid.total_amount)
+        prepaid_line = OpeningBalanceEntryLine.objects.create(opening_balance_entry=ob_entry, account=self.general_settings.prepaid_expenses_account, entry_type='debit', total_amount=ob_prepaid.initial_amount)
+        OpeningBalanceSubLedgerDetail.objects.create(line=prepaid_line, sub_ledger_object=ob_prepaid, amount=ob_prepaid.initial_amount)
 
 
         # --- CREDIT LINES ---

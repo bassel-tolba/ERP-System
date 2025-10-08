@@ -302,16 +302,19 @@ class TestValidationAndProtection(AccountingServiceBaseTestCase):
         """
         Verify InventoryConsumption.clean() prevents consumption of non-MRO/Consumable items.
         """
+        # The clean method for this case raises a validation error with a single string,
+        # which populates the .messages attribute, not .message_dict.
         with self.assertRaises(ValidationError) as context:
-            # Try to consume a Raw Material, which should not be allowed
+            # Try to consume a Raw Material, which should not be allowed for internal expense
             consumption = InventoryConsumption(
                 product=self.raw_material,
                 quantity_consumed=1.0,
                 consumption_date=timezone.now(),
-                department=InventoryConsumption.Department.ENGINEERING
+                department=InventoryConsumption.Department.ENGINEERING,
+                consumption_type=InventoryConsumption.ConsumptionType.EXPENSE
             )
             consumption.clean()
-        self.assertIn('product', context.exception.message_dict)
+        self.assertIn("Internal consumption as an expense is only allowed for 'MRO' product types", str(context.exception))
 
     def test_bank_transfer_to_same_account_raises_error(self):
         """

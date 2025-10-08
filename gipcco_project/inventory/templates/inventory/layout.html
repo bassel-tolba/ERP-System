@@ -148,14 +148,13 @@
                         </li>
                         
                         <li class="nav-item">
-                            <a class="nav-link dropdown-toggle {% if active_page == 'expenses_reports' %}active{% endif %}" href="#reportsSubmenu" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="reportsSubmenu">
+                            <a class="nav-link dropdown-toggle {% if active_page == 'expenses' or active_page == 'reports' %}active{% endif %}" href="#reportsSubmenu" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="reportsSubmenu">
                                 <i class="bi bi-calculator-fill nav-icon"></i>
                                 <span>المصروفات والتقارير</span>
                             </a>
                             <div class="collapse" id="reportsSubmenu">
                                 <ul class="dropdown-menu show">
-                                    <li><a class="dropdown-item" href="{% url 'inventory:expenses_dashboard' %}">تسجيل المصروفات</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'inventory:manage_expenses' %}">إدارة المصروفات</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'inventory:manage_expense_requests' %}">إدارة طلبات المصروفات</a></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li><h6 class="dropdown-header">التقارير المالية</h6></li>
                                     <li><a class="dropdown-item" href="{% url 'inventory:profit_and_loss_statement' %}">قائمة الدخل (P&L)</a></li>
@@ -257,8 +256,6 @@
             apiGetAvailableStock: "{% url 'inventory:api_get_available_stock' 0 %}",
             apiGetUsedQcSources: "{% url 'inventory:get_used_qc_sources' 0 %}",
             apiGetUndispatchedSoItems: "{% url 'inventory:api_get_undispatched_so_items' 0 %}",
-            expensesConsumptionEdit: "{% url 'inventory:edit_inventory_consumption' 0 %}",
-            expensesGeneralEdit: "{% url 'inventory:edit_general_expense' 0 %}",
             recordsEdit: "{% url 'inventory:edit_record' 0 %}",
             createBatch: "{% url 'inventory:create_batch' %}",
         };
@@ -303,8 +300,6 @@
     <script src="{% static 'layout/js/production_returns_logic.js' %}"></script>
     <script src="{% static 'layout/js/visuals_logic.js' %}"></script>
     <script src="{% static 'layout/js/batch_production_variance_report_logic.js' %}"></script>
-    <script src="{% static 'layout/js/manage_expenses_logic.js' %}"></script>
-    <script src="{% static 'layout/js/expenses_page_logic.js' %}"></script>
     <script src="{% static 'layout/js/financials_logic.js' %}"></script>
     <script src="{% static 'layout/js/sales_order_create_logic.js' %}"></script>
     <script src="{% static 'layout/js/purchase_order_create_logic.js' %}"></script>

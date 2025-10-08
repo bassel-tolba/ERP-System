@@ -21,7 +21,8 @@ from .models import (
     CustomerInvoice, CustomerInvoiceItem, CustomerPaymentApplication,
     BankTransfer, DepreciationLog,
     # --- ADDED FOR FIX ---
-    BankReconciliation, BankStatementLine, FiscalYear, TransactionCorrection
+  BankReconciliation, BankStatementLine, FiscalYear, TransactionCorrection,
+    OpeningBalanceEntry, OpeningBalanceEntryLine, OpeningBalanceSubLedgerDetail
 )
 from .views.dashboard import update_po_status
 from .views.helpers import check_and_update_batch_customization
@@ -450,6 +451,42 @@ class BankReconciliationAdmin(admin.ModelAdmin):
             'fields': ('created_at', 'updated_at')
         })
     )
+    
+    
+# ==============================================================================
+#  OPENING BALANCE ADMINS
+# ==============================================================================
+
+class OpeningBalanceSubLedgerDetailInline(admin.TabularInline):
+    model = OpeningBalanceSubLedgerDetail
+    extra = 0
+    fields = ('content_type', 'object_id', 'sub_ledger_object', 'amount')
+    readonly_fields = ('sub_ledger_object',)
+
+@admin.register(OpeningBalanceEntryLine)
+class OpeningBalanceEntryLineAdmin(admin.ModelAdmin):
+    inlines = [OpeningBalanceSubLedgerDetailInline]
+    autocomplete_fields = ('account',)
+    search_fields = ('account__name', 'account__code')
+    def has_module_permission(self, request):
+        return False # Hide from main admin index
+
+class OpeningBalanceEntryLineInline(admin.TabularInline):
+    model = OpeningBalanceEntryLine
+    extra = 1
+    autocomplete_fields = ('account',)
+    readonly_fields = ('total_amount',)
+    fields = ('account', 'entry_type', 'total_amount')
+    show_change_link = True
+
+@admin.register(OpeningBalanceEntry)
+class OpeningBalanceEntryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'migration_date', 'status', 'journal_entry')
+    list_filter = ('status',)
+    inlines = [OpeningBalanceEntryLineInline]
+    readonly_fields = ('journal_entry',)
+    date_hierarchy = 'migration_date'
+    
 
 # ==============================================================================
 #  CORE ACCOUNTING & SETTINGS ADMINS

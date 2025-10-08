@@ -25,7 +25,7 @@ from .views.sales import (
     view_sales_order, delete_sales_order, edit_sales_order_item, delete_sales_order_item,
     create_dispatch, edit_dispatch, delete_dispatch, dispatch_from_sales_order
 )
-from .views.expenses import expenses_dashboard, manage_expenses, edit_inventory_consumption, delete_inventory_consumption, edit_general_expense, delete_general_expense
+from .views import expense_requests
 # --- MODIFIED: Corrected financial report views import ---
 from .views.financial_reports import (
     trial_balance, profit_and_loss_statement, batch_production_variance_report, 
@@ -129,12 +129,8 @@ urlpatterns = [
     path('employees/manage/', employees.manage_employees, name='manage_employees'),
 
     # Expense Management
-    path('expenses/', expenses_dashboard, name='expenses_dashboard'),
-    path('expenses/manage/', manage_expenses, name='manage_expenses'),
-    path('expenses/consumption/<int:pk>/edit/', edit_inventory_consumption, name='edit_inventory_consumption'),
-    path('expenses/consumption/<int:pk>/delete/', delete_inventory_consumption, name='delete_inventory_consumption'),
-    path('expenses/general/<int:pk>/edit/', edit_general_expense, name='edit_general_expense'),
-    path('expenses/general/<int:pk>/delete/', delete_general_expense, name='delete_general_expense'),
+    path('expense_requests/', expense_requests.manage_expense_requests, name='manage_expense_requests'),
+
 
     # Financials (A/P, A/R, Banking)
     path('financials/supplier_invoices/', financials.supplier_invoices, name='supplier_invoices'),

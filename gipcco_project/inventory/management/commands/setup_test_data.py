@@ -153,7 +153,17 @@ class Command(BaseCommand):
                 'status': FinancialPeriod.Status.OPEN
             }
         )
+        period_2, _ = FinancialPeriod.objects.get_or_create(
+            fiscal_year=fiscal_year,
+            name="October 2025",
+            defaults={
+                'start_date': date(2025, 10, 1),
+                'end_date': date(2025, 10, 30),
+                'status': FinancialPeriod.Status.OPEN
+            }
+        )
         CONTEXT['period'] = period
+        CONTEXT['period_2'] = period_2
         accounts = create_chart_of_accounts()
 
         self.stdout.write("2. Configuring accounting settings...")
@@ -169,7 +179,8 @@ class Command(BaseCommand):
             inventory_adjustment_loss_account=accounts['503'],
             inventory_adjustment_gain_account=accounts['40202'],
             employee_advances_receivable=accounts['1020405'],
-            prepaid_expenses_account=accounts['10205']
+            prepaid_expenses_account=accounts['10205'],
+            accrued_expenses_account=accounts['20202']
         )
         ProductTypeAccountingSettings.objects.create(
             product_type=Product.ProductType.RAW_MATERIAL,
@@ -466,7 +477,7 @@ class Command(BaseCommand):
         self.stdout.write("   - Creating sample Expense Requests...")
         from inventory.services import approval_service
 
-        # a) Pending Direct Expense
+        # a) Pending Direct Expense (Direct Payment)
         ExpenseRequest.objects.create(
             requested_by=CONTEXT['user'],
             request_type=ExpenseRequest.RequestType.DIRECT_EXPENSE,
@@ -474,10 +485,25 @@ class Command(BaseCommand):
             description="Catering for team meeting",
             amount=Decimal("350.00"),
             cost_pool=CONTEXT['cost_pools']['software'],
-            status=ExpenseRequest.Status.PENDING
+            status=ExpenseRequest.Status.PENDING,
+            settlement_method=ExpenseRequest.SettlementMethod.DIRECT_PAYMENT,
+            bank_account=CONTEXT['bank_account']
         )
 
-        # b) Approved Inventory Expense
+        # b) Pending Direct Expense (Accrue & Pay Later)
+        ExpenseRequest.objects.create(
+            requested_by=CONTEXT['user'],
+            request_type=ExpenseRequest.RequestType.DIRECT_EXPENSE,
+            request_date=date(2025, 9, 19),
+            description="Urgent maintenance supplies from local vendor",
+            amount=Decimal("800.00"),
+            cost_pool=CONTEXT['cost_pools']['maintenance'],
+            status=ExpenseRequest.Status.PENDING,
+            settlement_method=ExpenseRequest.SettlementMethod.ACCRUE_AND_PAY_LATER,
+            supplier=CONTEXT['suppliers']['mro']
+        )
+
+        # c) Approved Inventory Expense
         approved_req = ExpenseRequest.objects.create(
             requested_by=CONTEXT['user'],
             request_type=ExpenseRequest.RequestType.INVENTORY_EXPENSE,
@@ -490,7 +516,7 @@ class Command(BaseCommand):
         )
         approval_service.approve_request(approved_req.id, CONTEXT['user'])
 
-        # c) Rejected Capitalization Request
+        # d) Rejected Capitalization Request
         rejected_req = ExpenseRequest.objects.create(
             requested_by=CONTEXT['user'],
             request_type=ExpenseRequest.RequestType.INVENTORY_CAPITALIZE,

@@ -73,8 +73,8 @@ class TestAdjustingEntries(AccountingServiceBaseTestCase):
         self.assertEqual(PrepaidExpense.objects.count(), 1)
         prepaid = PrepaidExpense.objects.first()
         self.assertIsNotNone(prepaid)
-        self.assertEqual(prepaid.source_consumption, consumption)
-        self.assertEqual(prepaid.total_amount, Decimal("120.000"))
+        self.assertEqual(prepaid.source_content_object, consumption)
+        self.assertEqual(prepaid.initial_amount, Decimal("120.000"))
         self.assertEqual(prepaid.amortization_start_date, date(2025, 9, 15))
 
         # b) Verify the initial Journal Entry
@@ -157,15 +157,18 @@ class TestAdjustingEntries(AccountingServiceBaseTestCase):
         # 1. Arrange
         # a) Create a PrepaidExpense starting mid-month
         prepaid = PrepaidExpense.objects.create(
-            total_amount=Decimal("1200.000"),
+            description="Test Prepaid Insurance",
+            initial_amount=Decimal("1200.000"),
             amortization_start_date=date(2025, 9, 16),
             amortization_end_date=date(2026, 9, 15), # 365 days
+            asset_account=self.general_settings.prepaid_expenses_account,
             expense_account=self.accounts['50207'], # Insurance Expense
-            source_payment=self.create_dummy_payment()
+            created_by=self.test_user,
+            source_content_object=self.create_dummy_payment()
         )
         # b) Create the 70/30 split
-        CostPoolSplit.objects.create(source_object=prepaid, cost_pool=self.child_pool_rent, percentage=Decimal("70.00"))
-        CostPoolSplit.objects.create(source_object=prepaid, cost_pool=self.child_pool_maintenance, percentage=Decimal("30.00"))
+        CostPoolSplit.objects.create(content_object=prepaid, cost_pool=self.child_pool_rent, percentage=Decimal("70.00"))
+        CostPoolSplit.objects.create(content_object=prepaid, cost_pool=self.child_pool_maintenance, percentage=Decimal("30.00"))
 
         # 2. Act: Run the amortization service for the September period
         run_monthly_amortization(self.period)

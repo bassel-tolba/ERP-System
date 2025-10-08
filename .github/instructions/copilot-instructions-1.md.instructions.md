@@ -1,1 +1,0 @@
-you are strong. keep going.

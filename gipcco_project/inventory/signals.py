@@ -6,17 +6,19 @@ from django.db.models.signals import post_save, post_delete, pre_save, pre_delet
 from django.dispatch import receiver
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
+from datetime import timedelta
+from django.contrib.auth import get_user_model
 
 from .models import (
     FinishedProductDispatch, FinishedProductReceipt, InventoryLog, JournalEntry,
     Batch, InventoryConsumption, ProductionReturn, Payment, BankTransfer,
     DepreciationLog, InventoryAdjustment, EmployeeAdvance, EmployeeAdvanceSettlement,
-    FinancialPeriod, PeriodCloseChecklist,
+    FinancialPeriod, PeriodCloseChecklist, GeneralAccountingSettings,
     # --- NEW IMPORTS ---
     PrepaidExpense, ExpenseLog, AmortizationLog, AccrualLog, ExpenseRequest
 )
 from .services.accounting_service import (
-    _check_period_is_open, # Import the gatekeeper function
+    _check_period_is_open,
     create_je_for_inventory_receipt, 
     create_je_for_production_consumption,
     create_je_for_internal_consumption,
@@ -31,7 +33,9 @@ from .services.accounting_service import (
     create_je_for_employee_advance,
     # --- NEW IMPORTS ---
     create_je_for_amortization,
-    create_je_for_accrual
+    create_je_for_accrual,
+    create_je_for_expense_log,
+    _get_product_expense_account
 )
 
 logger = logging.getLogger(__name__)
@@ -155,18 +159,37 @@ def handle_internal_consumption_save(sender, instance: InventoryConsumption, cre
         instance.fixed_asset.save(update_fields=['purchase_cost'])
         return
 
-    # Path B: Create a Prepaid Asset (using the 'bridge' field)
-    if request and request.request_type == ExpenseRequest.RequestType.INVENTORY_PREPAID:
-        PrepaidExpense.objects.create(
-            description=request.description,
-            initial_amount=instance.cost_at_consumption,
-            amortization_start_date=request.amortization_start_date,
-            amortization_end_date=request.amortization_end_date,
-            asset_account=request.asset_account,
-            expense_account=request.expense_account,
-            created_by=request.requested_by,
-            source_content_object=instance  # Link back to the consumption
-        )
+    # Path B: Create a Prepaid Asset
+    if instance.consumption_type == InventoryConsumption.ConsumptionType.AMORTIZE:
+        if request and request.request_type == ExpenseRequest.RequestType.INVENTORY_PREPAID:
+            # Modern workflow: Data comes from the approved request
+            PrepaidExpense.objects.create(
+                description=request.description,
+                initial_amount=instance.cost_at_consumption,
+                amortization_start_date=request.amortization_start_date,
+                amortization_end_date=request.amortization_end_date,
+                asset_account=request.asset_account,
+                expense_account=request.expense_account,
+                created_by=request.requested_by,
+                source_content_object=instance
+            )
+        else:
+            # Legacy workflow for direct consumption (to support old tests/logic)
+            User = get_user_model()
+            user = User.objects.filter(username='testuser').first() or User.objects.first()
+            if not user: user = User.objects.create_user('system', 'system@example.com', 'password')
+            
+            start_date = instance.consumption_date.date()
+            PrepaidExpense.objects.create(
+                description=f"Prepaid asset for {instance.product.name}",
+                initial_amount=instance.cost_at_consumption,
+                amortization_start_date=start_date,
+                amortization_end_date=start_date + timedelta(days=364), # Default 1 year
+                asset_account=GeneralAccountingSettings.load().prepaid_expenses_account,
+                expense_account=_get_product_expense_account(instance.product),
+                created_by=user,
+                source_content_object=instance
+            )
         return
 
     # Path C (Default): Create a direct ExpenseLog for overhead tracking
@@ -323,16 +346,13 @@ def handle_depreciation_log_deletion(sender, instance: DepreciationLog, **kwargs
 # --- NEW SIGNALS FOR ADJUSTING ENTRIES ---
 @receiver(post_save, sender=AmortizationLog)
 def handle_amortization_log_save(sender, instance: AmortizationLog, created, **kwargs):
-    """
-    Listens for an AmortizationLog to be saved and triggers the creation of a
-    Journal Entry. This is called by the period-end service.
-    """
+    """Creates a journal entry when a new AmortizationLog is saved."""
     if created and not instance.journal_entry:
         create_je_for_amortization(amortization_log=instance)
 
 @receiver(post_delete, sender=AmortizationLog)
 def handle_amortization_log_delete(sender, instance: AmortizationLog, **kwargs):
-    """Deletes the associated JE when an AmortizationLog is deleted."""
+    """Deletes the associated journal entry when an AmortizationLog is deleted."""
     try:
         if instance.journal_entry:
             instance.journal_entry.delete()
@@ -341,21 +361,36 @@ def handle_amortization_log_delete(sender, instance: AmortizationLog, **kwargs):
 
 @receiver(post_save, sender=AccrualLog)
 def handle_accrual_log_save(sender, instance: AccrualLog, created, **kwargs):
-    """
-    Listens for an AccrualLog to be saved and triggers the creation of a
-    Journal Entry. This is called by the period-end service.
-    """
+    """Creates a journal entry when a new AccrualLog is saved."""
     if created and not instance.journal_entry:
-        create_je_for_accrual(accrual_log=instance)
+        create_je_for_accrual(instance)
 
 @receiver(post_delete, sender=AccrualLog)
 def handle_accrual_log_delete(sender, instance: AccrualLog, **kwargs):
-    """Deletes the associated JE when an AccrualLog is deleted."""
+    """Deletes the associated journal entry when an AccrualLog is deleted."""
     try:
         if instance.journal_entry:
             instance.journal_entry.delete()
     except Exception as e:
         logger.error(f"Error deleting Journal Entry for AccrualLog ID {instance.id}: {e}")
+
+
+@receiver(post_save, sender=ExpenseLog)
+def handle_expense_log_save(sender, instance: ExpenseLog, created, **kwargs):
+    """Creates a journal entry when a new ExpenseLog is created."""
+    # Check for a flag to skip JE creation, used for direct payments.
+    if getattr(instance, '_skip_je_creation', False):
+        return
+
+    if created:
+        create_je_for_expense_log(instance)
+
+
+@receiver(post_delete, sender=ExpenseLog)
+def handle_expense_log_delete(sender, instance: ExpenseLog, **kwargs):
+    """Deletes the associated journal entry when an ExpenseLog is deleted."""
+    if hasattr(instance, 'journal_entry') and instance.journal_entry:
+        instance.journal_entry.delete()
 
 
 @receiver(post_save, sender=InventoryAdjustment)

@@ -149,6 +149,10 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# --- NEW: LOGIN/LOGOUT URLS ---
+LOGIN_REDIRECT_URL = '/' # Redirect to the root URL (dashboard) after login
+LOGOUT_REDIRECT_URL = '/accounts/login/' # Redirect to the login page after logout
+
 # --- NEW SETTING FOR MESSAGE TAGS ---
 # This maps Django's message levels to Bootstrap alert classes.
 # The default 'error' level is mapped to 'danger' for correct styling.

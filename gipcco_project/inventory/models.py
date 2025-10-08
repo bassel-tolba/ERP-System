@@ -891,6 +891,10 @@ class ExpenseLog(models.Model):
         FEES = 'fees', _('رسوم حكومية وتراخيص')
         OTHER = 'other', _('مصاريف أخرى')
 
+    class SettlementStatus(models.TextChoices):
+        UNSETTLED = 'UNSETTLED', _('Unsettled')
+        SETTLED = 'SETTLED', _('Settled')
+
     description = models.CharField(max_length=255, verbose_name=_("Description"))
     expense_date = models.DateField(verbose_name=_("Expense Date"))
     amount = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Amount"))
@@ -934,6 +938,16 @@ class ExpenseLog(models.Model):
         related_name='final_expense_logs'
     )
 
+    settlement_status = models.CharField(
+        max_length=20, choices=SettlementStatus.choices, default=SettlementStatus.UNSETTLED,
+        verbose_name=_("Settlement Status")
+    )
+    settlement_content_type = models.ForeignKey(
+        ContentType, on_delete=models.SET_NULL, null=True, blank=True
+    )
+    settlement_object_id = models.PositiveIntegerField(null=True, blank=True)
+    settlement_object = GenericForeignKey('settlement_content_type', 'settlement_object_id')
+
     class Meta:
         db_table = 'expense_logs'
         verbose_name = _("General Expense Log")
@@ -961,6 +975,11 @@ class ExpenseRequest(models.Model):
         INVENTORY_CAPITALIZE = 'INVENTORY_CAPITALIZE', _('Inventory Consumption to Capitalize')
         INVENTORY_PREPAID = 'INVENTORY_PREPAID', _('Inventory Consumption to Prepaid')
         INVOICE_PREPAID = 'INVOICE_PREPAID', _('Prepaid Expense from Invoice')
+        ACCRUAL = 'ACCRUAL', _('Expense Accrual')
+
+    class SettlementMethod(models.TextChoices):
+        ACCRUE_AND_PAY_LATER = 'ACCRUE_AND_PAY_LATER', _('Accrue and Pay via Supplier Invoice')
+        DIRECT_PAYMENT = 'DIRECT_PAYMENT', _('Direct Payment from Bank/Cash')
 
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING, db_index=True)
     request_type = models.CharField(max_length=30, choices=RequestType.choices, db_index=True)
@@ -986,6 +1005,21 @@ class ExpenseRequest(models.Model):
     expense_account = models.ForeignKey('Account', related_name='+', on_delete=models.PROTECT, null=True, blank=True)
     amortization_start_date = models.DateField(null=True, blank=True)
     amortization_end_date = models.DateField(null=True, blank=True)
+
+    # --- NEW SETTLEMENT FIELDS ---
+    settlement_method = models.CharField(
+        max_length=30, choices=SettlementMethod.choices, null=True, blank=True,
+        help_text=_("Required for Direct Expense requests.")
+    )
+    supplier = models.ForeignKey(
+        'Company', on_delete=models.PROTECT, null=True, blank=True,
+        help_text=_("Required if settlement method is Accrue and Pay Later.")
+    )
+    bank_account = models.ForeignKey(
+        'BankAccount', on_delete=models.PROTECT, null=True, blank=True,
+        help_text=_("Required if settlement method is Direct Payment.")
+    )
+
     notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
 
 
@@ -1359,6 +1393,12 @@ class JournalEntry(models.Model):
 
     def __str__(self):
         return f"JE-{self.id} on {self.date.strftime('%Y-%m-%d')}: {self.description}"
+
+    def is_balanced(self):
+        """Checks if the sum of debits equals the sum of credits."""
+        debits = self.lines.filter(entry_type='debit').aggregate(total=Sum('amount'))['total'] or Decimal('0.0')
+        credits = self.lines.filter(entry_type='credit').aggregate(total=Sum('amount'))['total'] or Decimal('0.0')
+        return debits == credits
 
     def get_description(self):
         """

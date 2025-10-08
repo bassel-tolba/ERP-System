@@ -21,6 +21,8 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    # Add this line to include Django's built-in auth URLs
+    path('accounts/', include('django.contrib.auth.urls')),
     # This line includes all URLs from our 'inventory' app.
     # All requests to the root of the site will be handled by inventory.urls.
     path('', include('inventory.urls')),

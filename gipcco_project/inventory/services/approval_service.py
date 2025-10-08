@@ -1,3 +1,4 @@
+# inventory/services/approval_service.py
 import logging
 from django.db import transaction, models
 from django.utils import timezone
@@ -7,7 +8,7 @@ from django.db.models import Sum, F, Value, FloatField
 from django.db.models.functions import Coalesce
 
 from .. import models as inventory_models
-from . import costing_service
+from . import costing_service, accounting_service
 
 logger = logging.getLogger(__name__)
 
@@ -62,20 +63,30 @@ def _create_inventory_consumption_from_request(request: inventory_models.Expense
     elif request.request_type == inventory_models.ExpenseRequest.RequestType.INVENTORY_PREPAID:
         consumption_type = inventory_models.InventoryConsumption.ConsumptionType.AMORTIZE
 
-    consumption = inventory_models.InventoryConsumption.objects.create(
+    # DEVELOPER NOTE: The 'department' field on InventoryConsumption is likely
+    # a legacy field after a recent refactor. The CostPool model no longer
+    # has a 'department' attribute. We are setting a sensible default here
+    # to satisfy the database constraint. This may need to be revisited if
+    # different consumption types require different departments.
+    if not request.cost_pool:
+        raise ValidationError("A Cost Pool is required to determine the department for an inventory consumption.")
+    
+    # For inventory expenses like MRO, 'PRODUCTION' is a safe default.
+    department_value = inventory_models.InventoryConsumption.Department.PRODUCTION
+
+    return inventory_models.InventoryConsumption.objects.create(
         product=product,
-        source_log=source_log, # --- ADDED THIS LINE ---
-        quantity_consumed=float(request.quantity),
-        consumption_date=timezone.make_aware(timezone.datetime.combine(request.request_date, timezone.now().time())),
+        source_log=source_log,
+        quantity_consumed=request.quantity,
+        consumption_date=timezone.now(),
+        department=department_value,
         cost_at_consumption=total_cost,
         notes=request.description,
-        source_request=request,
         consumption_type=consumption_type,
-        fixed_asset=request.fixed_asset,
+        fixed_asset=request.fixed_asset if request.request_type == inventory_models.ExpenseRequest.RequestType.INVENTORY_CAPITALIZE else None,
         cost_pool=request.cost_pool,
-        department=inventory_models.InventoryConsumption.Department.PRODUCTION
+        source_request=request
     )
-    return consumption
 
 def _execute_approval(request: inventory_models.ExpenseRequest) -> models.Model:
     """
@@ -84,15 +95,22 @@ def _execute_approval(request: inventory_models.ExpenseRequest) -> models.Model:
     request_type = request.request_type
 
     if request_type == inventory_models.ExpenseRequest.RequestType.DIRECT_EXPENSE:
-        return inventory_models.ExpenseLog.objects.create(
-            description=request.description,
-            expense_date=request.request_date,
-            amount=request.amount,
-            category=request.category,
-            classification=request.classification,
-            cost_pool=request.cost_pool,
-            source_request=request
-        )
+        if request.settlement_method == inventory_models.ExpenseRequest.SettlementMethod.DIRECT_PAYMENT:
+            # This path creates the ExpenseLog and the correct JE (Debit Expense, Credit Bank)
+            return accounting_service.create_transaction_for_direct_payment_expense(request)
+        else:  # Default to ACCRUE_AND_PAY_LATER
+            # This path creates an ExpenseLog that the signal will turn into a JE
+            # (Debit Expense, Credit Accrued Liability)
+            return inventory_models.ExpenseLog.objects.create(
+                description=request.description,
+                expense_date=request.request_date,
+                amount=request.amount,
+                category=request.category,
+                classification=request.classification,
+                cost_pool=request.cost_pool,
+                source_request=request,
+                settlement_status=inventory_models.ExpenseLog.SettlementStatus.UNSETTLED
+            )
     
     elif request_type == inventory_models.ExpenseRequest.RequestType.INVOICE_PREPAID:
         return inventory_models.PrepaidExpense.objects.create(
@@ -113,6 +131,23 @@ def _execute_approval(request: inventory_models.ExpenseRequest) -> models.Model:
     ]:
         return _create_inventory_consumption_from_request(request)
     
+    elif request_type == inventory_models.ExpenseRequest.RequestType.ACCRUAL:
+        settings = inventory_models.GeneralAccountingSettings.load()
+        if not settings.accrued_expenses_account:
+            raise ValidationError("The master Accrued Expenses Liability account is not configured in General Settings.")
+
+        # Create a scheduled AccruedExpense object. The period-end process will handle the monthly JEs.
+        return inventory_models.AccruedExpense.objects.create(
+            description=request.description,
+            total_estimated_amount=request.amount,
+            accrual_start_date=request.amortization_start_date,
+            accrual_end_date=request.amortization_end_date,
+            target_expense_account=request.expense_account,
+            target_liability_account=settings.accrued_expenses_account,
+            status=inventory_models.AccruedExpense.Status.ACTIVE,
+            source_request=request
+        )
+
     else:
         raise NotImplementedError(f"Approval logic for request type '{request_type}' is not implemented.")
 

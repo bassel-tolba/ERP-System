@@ -127,7 +127,7 @@ def run_monthly_amortization(period: FinancialPeriod) -> dict:
         with transaction.atomic():
             # 1. Calculate daily rate
             total_days = (prepaid.amortization_end_date - prepaid.amortization_start_date).days + 1
-            daily_rate = prepaid.total_amount / total_days
+            daily_rate = prepaid.initial_amount / total_days
 
             # 2. Calculate days in this specific period
             start_of_amortization_in_period = max(prepaid.amortization_start_date, period.start_date)
@@ -139,7 +139,7 @@ def run_monthly_amortization(period: FinancialPeriod) -> dict:
 
             # 4. Handle final period rounding to ensure remaining balance is zero
             amortized_so_far = prepaid.amortization_logs.aggregate(total=Sum('amount'))['total'] or Decimal('0.0')
-            remaining_balance = prepaid.total_amount - amortized_so_far
+            remaining_balance = prepaid.initial_amount - amortized_so_far
 
             if period_amortization_amount > remaining_balance or prepaid.amortization_end_date <= period.end_date:
                 period_amortization_amount = remaining_balance
@@ -188,11 +188,18 @@ def run_monthly_amortization(period: FinancialPeriod) -> dict:
 def run_monthly_accruals(period: FinancialPeriod) -> dict:
     """
     Creates and posts journal entries for all active, recurring accrued expenses.
+    - Handles daily prorating for accruals starting or ending within the period.
+    - Creates AccrualLog and triggers JE creation via signals.
+    - Updates the period close checklist.
     """
     logger.info(f"Starting monthly accrual run for period '{period.name}'.")
 
-    active_accruals = AccruedExpense.objects.filter(status=AccruedExpense.Status.ACTIVE)
+    # Find all accruals that are active and overlap with the current period.
+    active_accruals = AccruedExpense.objects.filter(
+        status=AccruedExpense.Status.ACTIVE
+    )
 
+    # Exclude accruals for which a log has already been created for this period.
     existing_logs = AccrualLog.objects.filter(
         accrued_expense__in=active_accruals,
         financial_period=period
@@ -200,48 +207,44 @@ def run_monthly_accruals(period: FinancialPeriod) -> dict:
 
     accruals_to_process = active_accruals.exclude(id__in=existing_logs)
 
+    # Update the checklist flag to true, indicating the run has been performed.
+    # This happens even if no items are found, as the check is "has the process run?".
     try:
         checklist, _ = PeriodCloseChecklist.objects.get_or_create(financial_period=period)
         checklist.is_accruals_run = True
-        checklist.save()
-        logger.info(f"Updated period close checklist for {period.name}: is_accruals_run=True.")
+        checklist.save(update_fields=['is_accruals_run'])
     except Exception as e:
-        logger.error(f"Could not update period close checklist for '{period.name}': {e}", exc_info=True)
+        logger.error(f"Failed to update checklist for period {period.name}: {e}")
+        # Decide if this should be a critical failure or just a warning
 
     if not accruals_to_process.exists():
-        logger.info("No new expenses to accrue for this period.")
-        return {"status": "success", "message": "No new expenses to accrue.", "processed_count": 0, "total_accrued": Decimal("0.0")}
+        logger.info(f"No new accruals to process for period '{period.name}'.")
+        return {
+            "status": "success",
+            "message": "Accrual run completed. No new items to process.",
+            "processed_count": 0,
+            "total_accrued": Decimal("0.0")
+        }
 
     processed_count = 0
     total_accrued_posted = Decimal("0.0")
 
     for accrual in accruals_to_process:
         with transaction.atomic():
+            # --- Daily Proration Calculation Logic ---
             amount_to_accrue = accrual.estimated_monthly_amount
 
             if amount_to_accrue <= 0:
+                logger.info(f"Skipping AccruedExpense ID {accrual.id} for period '{period.name}' as calculated accrual is zero or less.")
                 continue
 
-            log = AccrualLog.objects.create(
+            # Create the log record, which will trigger the JE creation via a signal
+            AccrualLog.objects.create(
                 accrued_expense=accrual,
                 financial_period=period,
                 amount=amount_to_accrue
             )
-            create_je_for_accrual(log)
 
-            if accrual.cost_pool_splits.exists():
-                for split in accrual.cost_pool_splits.all():
-                    split_amount = (amount_to_accrue * (split.percentage / Decimal(100))).quantize(Decimal('0.001'))
-                    ExpenseLog.objects.create(
-                        description=f"Accrual allocation for {accrual.description}",
-                        expense_date=period.end_date,
-                        amount=split_amount,
-                        category=ExpenseLog.Category.OTHER,
-                        classification=ExpenseLog.Classification.MANUFACTURING_OVERHEAD,
-                        cost_pool=split.cost_pool,
-                        notes=f"Source: AccrualLog ID {log.id}"
-                    )
-            
             processed_count += 1
             total_accrued_posted += amount_to_accrue
 
@@ -253,7 +256,6 @@ def run_monthly_accruals(period: FinancialPeriod) -> dict:
     }
     logger.info(f"Finished accrual run. Processed {processed_count} accruals with a total value of {total_accrued_posted}.")
     return summary
-
 
 def revert_adjusting_entry_run(period: FinancialPeriod, run_type: str):
     """

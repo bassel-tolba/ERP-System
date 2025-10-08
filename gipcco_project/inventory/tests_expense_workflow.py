@@ -7,7 +7,8 @@ from datetime import date
 from .test_base import AccountingServiceBaseTestCase
 from .models import (
     ExpenseRequest, InventoryConsumption, PrepaidExpense, ExpenseLog, JournalEntry,
-    FixedAsset, InventoryLog, Product
+    FixedAsset, InventoryLog, Product, AccruedExpense, AccrualLog, SupplierInvoice, FinancialPeriod,
+    BankAccount
 )
 from .services import expense_service, approval_service, accounting_service
 
@@ -60,6 +61,10 @@ class TestExpenseWorkflow(AccountingServiceBaseTestCase):
             base_unit_price=Decimal("1200.000"),
             release_timestamp=timezone.make_aware(timezone.datetime(2025, 9, 3, 10, 0, 0))
         )
+        self.bank_account = BankAccount.objects.create(
+            name="Test Bank Account for Expenses",
+            gl_account=self.accounts['1020101'] # Main Bank Account
+        )
 
     def test_create_and_cancel_request(self):
         """Confirms a request can be created and then cancelled without creating any financial records."""
@@ -68,9 +73,11 @@ class TestExpenseWorkflow(AccountingServiceBaseTestCase):
             amount=Decimal("100.00"),
             request_date=date(2025, 9, 10),
             description="Test direct expense",
-            cost_pool=self.child_pool_maintenance,
+            cost_pool_id=self.child_pool_maintenance.id,
             category=ExpenseLog.Category.MAINTENANCE,
-            classification=ExpenseLog.Classification.MANUFACTURING_OVERHEAD
+            classification=ExpenseLog.Classification.MANUFACTURING_OVERHEAD,
+            settlement_method=ExpenseRequest.SettlementMethod.DIRECT_PAYMENT,
+            bank_account_id=self.bank_account.id
         )
         self.assertEqual(request.status, ExpenseRequest.Status.PENDING)
 
@@ -86,11 +93,11 @@ class TestExpenseWorkflow(AccountingServiceBaseTestCase):
         """Confirms a request can be rejected, again with no financial impact."""
         request = expense_service.request_inventory_expense(
             user=self.test_user,
-            product=self.mro_product,
+            product_id=self.mro_product.id,
             quantity=Decimal("2.0"),
             request_date=date(2025, 9, 11),
             description="Test inventory expense",
-            cost_pool=self.child_pool_maintenance
+            cost_pool_id=self.child_pool_maintenance.id
         )
         self.assertEqual(request.status, ExpenseRequest.Status.PENDING)
 
@@ -108,11 +115,11 @@ class TestExpenseWorkflow(AccountingServiceBaseTestCase):
         
         request = expense_service.request_inventory_capitalization(
             user=self.test_user,
-            product=self.mro_product,
+            product_id=self.mro_product.id,
             quantity=Decimal("5.0"),
             request_date=date(2025, 9, 16),
             description="Attempt to capitalize MRO items",
-            fixed_asset=self.fixed_asset
+            fixed_asset_id=self.fixed_asset.id
         )
         
         self.assertEqual(request.status, ExpenseRequest.Status.PENDING)
@@ -135,12 +142,12 @@ class TestExpenseWorkflow(AccountingServiceBaseTestCase):
         """Asserts that approving a prepaid request correctly creates all linked objects."""
         request = expense_service.request_inventory_prepaid(
             user=self.test_user,
-            product=self.amortizable_product,
+            product_id=self.amortizable_product.id,
             quantity=Decimal("1.0"),
             request_date=date(2025, 9, 15),
             description="Annual software license",
-            asset_account=self.general_settings.prepaid_expenses_account,
-            expense_account=self.accounts['50207'], # Insurance Expense
+            asset_account_id=self.general_settings.prepaid_expenses_account.id,
+            expense_account_id=self.accounts['50207'].id, # Insurance Expense
             start_date=date(2025, 9, 15),
             end_date=date(2026, 9, 14)
         )
@@ -171,11 +178,11 @@ class TestExpenseWorkflow(AccountingServiceBaseTestCase):
         
         request = expense_service.request_inventory_capitalization(
             user=self.test_user,
-            product=self.mro_product,
+            product_id=self.mro_product.id,
             quantity=Decimal("10.0"),
             request_date=date(2025, 9, 12),
             description="Capitalize spare parts onto asset",
-            fixed_asset=self.fixed_asset
+            fixed_asset_id=self.fixed_asset.id
         )
         
         approval_service.approve_request(request.id, self.test_user)
@@ -193,9 +200,11 @@ class TestExpenseWorkflow(AccountingServiceBaseTestCase):
             amount=Decimal("250.00"),
             request_date=date(2025, 9, 13),
             description="Urgent repairs",
-            cost_pool=self.child_pool_maintenance,
+            cost_pool_id=self.child_pool_maintenance.id,
             category=ExpenseLog.Category.MAINTENANCE,
-            classification=ExpenseLog.Classification.MANUFACTURING_OVERHEAD
+            classification=ExpenseLog.Classification.MANUFACTURING_OVERHEAD,
+            settlement_method=ExpenseRequest.SettlementMethod.ACCRUE_AND_PAY_LATER,
+            supplier_id=self.supplier.id
         )
         
         approval_service.approve_request(request.id, self.test_user)
@@ -210,8 +219,10 @@ class TestExpenseWorkflow(AccountingServiceBaseTestCase):
         """Ensures that an already processed request cannot be approved again."""
         request = expense_service.request_direct_expense(
             user=self.test_user, amount=Decimal("50.00"), request_date=date(2025, 9, 14),
-            description="Test", cost_pool=self.child_pool_rent, category=ExpenseLog.Category.RENT,
-            classification=ExpenseLog.Classification.MANUFACTURING_OVERHEAD
+            description="Test", cost_pool_id=self.child_pool_rent.id, category=ExpenseLog.Category.RENT,
+            classification=ExpenseLog.Classification.MANUFACTURING_OVERHEAD,
+            settlement_method=ExpenseRequest.SettlementMethod.ACCRUE_AND_PAY_LATER,
+            supplier_id=self.supplier.id
         )
         
         # Approve it once
@@ -224,8 +235,10 @@ class TestExpenseWorkflow(AccountingServiceBaseTestCase):
         # Create and reject another request
         request2 = expense_service.request_direct_expense(
             user=self.test_user, amount=Decimal("60.00"), request_date=date(2025, 9, 15),
-            description="Test 2", cost_pool=self.child_pool_rent, category=ExpenseLog.Category.RENT,
-            classification=ExpenseLog.Classification.MANUFACTURING_OVERHEAD
+            description="Test 2", cost_pool_id=self.child_pool_rent.id, category=ExpenseLog.Category.RENT,
+            classification=ExpenseLog.Classification.MANUFACTURING_OVERHEAD,
+            settlement_method=ExpenseRequest.SettlementMethod.ACCRUE_AND_PAY_LATER,
+            supplier_id=self.supplier.id
         )
         approval_service.reject_request(request2.id, self.test_user, "Rejected")
         
@@ -237,19 +250,19 @@ class TestExpenseWorkflow(AccountingServiceBaseTestCase):
         """Approves a request, then corrects it, asserting a reversing JE is created."""
         request = expense_service.request_inventory_expense(
             user=self.test_user,
-            product=self.mro_product,
+            product_id=self.mro_product.id,
             quantity=Decimal("4.0"),
             request_date=date(2025, 9, 20),
             description="Expense for production line A",
-            cost_pool=self.child_pool_maintenance
+            cost_pool_id=self.child_pool_maintenance.id
         )
         approval_service.approve_request(request.id, self.test_user)
         
         self.assertEqual(JournalEntry.objects.count(), 3) # 2 setup + 1 consumption
         original_je = JournalEntry.objects.latest('date')
         
-        # Now, correct it
-        accounting_service.correct_approved_expense(
+        # Now, correct it using the new service function
+        expense_service.correct_approved_request(
             request_id=request.id,
             user=self.test_user,
             justification="Wrong quantity expensed, should have been 2 units."
@@ -269,3 +282,271 @@ class TestExpenseWorkflow(AccountingServiceBaseTestCase):
         
         self.assertEqual(original_debits, new_credits)
         self.assertEqual(original_credits, new_debits)
+
+    def test_approve_direct_expense_for_accrual(self):
+        """
+        Tests approving a direct expense that will be paid later via supplier invoice.
+        This should create an ExpenseLog and a JE debiting the expense and crediting Accrued Liabilities.
+        """
+        request = expense_service.request_direct_expense(
+            user=self.test_user,
+            amount=Decimal("300.00"),
+            request_date=date(2025, 9, 25),
+            description="Consulting services for September",
+            cost_pool_id=self.child_pool_maintenance.id,
+            category=ExpenseLog.Category.FEES,
+            classification=ExpenseLog.Classification.MANUFACTURING_OVERHEAD,
+            settlement_method=ExpenseRequest.SettlementMethod.ACCRUE_AND_PAY_LATER,
+            supplier_id=self.supplier.id
+        )
+
+        approval_service.approve_request(request.id, self.test_user)
+
+        self.assertEqual(ExpenseLog.objects.count(), 1)
+        log = ExpenseLog.objects.first()
+        self.assertEqual(log.source_request, request)
+        self.assertEqual(log.settlement_status, ExpenseLog.SettlementStatus.UNSETTLED)
+
+        # 2 setup JEs + 1 for this expense
+        self.assertEqual(JournalEntry.objects.count(), 3)
+        je = JournalEntry.objects.latest('date')
+        self.assertEqual(je.source_object, log)
+
+        debit_line = je.lines.get(entry_type='debit')
+        credit_line = je.lines.get(entry_type='credit')
+
+        self.assertEqual(debit_line.account, self.child_pool_maintenance.gl_account)
+        self.assertEqual(credit_line.account, self.general_settings.accrued_expenses_account)
+        self.assertEqual(debit_line.amount, request.amount)
+
+    def test_approve_direct_expense_for_direct_payment(self):
+        """
+        Tests approving a direct expense that was paid directly from a bank account.
+        This should create an ExpenseLog and a JE debiting the expense and crediting the Bank Account.
+        """
+        request = expense_service.request_direct_expense(
+            user=self.test_user,
+            amount=Decimal("150.00"),
+            request_date=date(2025, 9, 26),
+            description="Office supplies paid with debit card",
+            cost_pool_id=self.child_pool_maintenance.id,
+            category=ExpenseLog.Category.OTHER,
+            classification=ExpenseLog.Classification.SG_A,
+            settlement_method=ExpenseRequest.SettlementMethod.DIRECT_PAYMENT,
+            bank_account_id=self.bank_account.id
+        )
+
+        approval_service.approve_request(request.id, self.test_user)
+
+        self.assertEqual(ExpenseLog.objects.count(), 1)
+        log = ExpenseLog.objects.first()
+        self.assertEqual(log.source_request, request)
+        self.assertEqual(log.settlement_status, ExpenseLog.SettlementStatus.SETTLED)
+
+        # 2 setup JEs + 1 for this expense. Crucially, the signal should NOT have fired a second JE.
+        self.assertEqual(JournalEntry.objects.count(), 3)
+        je = JournalEntry.objects.latest('date')
+        self.assertEqual(je.source_object, log)
+        
+        # Check that the log's settlement object is this JE
+        log.refresh_from_db()
+        self.assertEqual(log.settlement_object, je)
+
+        debit_line = je.lines.get(entry_type='debit')
+        credit_line = je.lines.get(entry_type='credit')
+
+        self.assertEqual(debit_line.account, self.child_pool_maintenance.gl_account)
+        self.assertEqual(credit_line.account, self.bank_account.gl_account)
+        self.assertEqual(debit_line.amount, request.amount)
+
+
+class TestAccrualSettlement(AccountingServiceBaseTestCase):
+    def setUp(self):
+        super().setUp()
+        JournalEntry.objects.all().delete() # Start fresh
+
+        # 1. Define accounts
+        self.utilities_expense_account = self.accounts['50208'] # Utilities Expense
+        self.accrued_liability_account = self.general_settings.accrued_expenses_account # Accrued Expenses Liability
+
+        # 2. Create a recurring accrued expense
+        self.accrued_utility = AccruedExpense.objects.create(
+            description="Estimated Monthly Electricity Bill",
+            status=AccruedExpense.Status.ACTIVE,
+            target_expense_account=self.utilities_expense_account,
+            target_liability_account=self.accrued_liability_account,
+            estimated_monthly_amount=Decimal("1000.00")
+        )
+
+        # 3. Create a log for the period we are testing (September)
+        # This simulates the month-end accrual process having run
+        self.accrual_log_sept = AccrualLog.objects.create(
+            accrued_expense=self.accrued_utility,
+            financial_period=self.period, # September 2025
+            amount=Decimal("1000.00") # Estimated amount for Sept
+        )
+        # The signal on AccrualLog creates the initial JE
+        self.initial_je = self.accrual_log_sept.journal_entry
+        self.assertIsNotNone(self.initial_je)
+        self.assertEqual(JournalEntry.objects.count(), 1)
+
+        # 4. Create a supplier invoice that arrives in the next period (October)
+        self.october_period = FinancialPeriod.objects.get(name="October 2025")
+        self.invoice = SupplierInvoice.objects.create(
+            supplier=self.supplier,
+            invoice_number="INV-UTILITY-SEP",
+            invoice_date=date(2025, 10, 5), # Invoice received in October for September's expense
+            due_date=date(2025, 10, 25),
+            total_amount=Decimal("1250.00") # Actual amount is higher
+        )
+
+    def test_settle_accrual_invoice_greater_than_accrual(self):
+        """
+        Tests settling an accrual where the actual invoice is MORE than the estimate.
+        The variance should be expensed in the current period (October).
+        """
+        original_accrual = self.accrual_log_sept.amount
+        invoice_amount = self.invoice.total_amount
+        self.assertGreater(invoice_amount, original_accrual)
+
+        # Action: Settle the accrual
+        settlement_je = expense_service.settle_accrual(
+            user=self.test_user,
+            accrual_log_id=self.accrual_log_sept.id,
+            invoice_id=self.invoice.id
+        )
+
+        # Assertions
+        self.assertEqual(JournalEntry.objects.count(), 2) # Initial accrual + settlement
+        self.accrual_log_sept.refresh_from_db()
+        self.assertEqual(self.accrual_log_sept.settling_invoice, self.invoice)
+        self.assertEqual(self.accrual_log_sept.true_up_journal_entry, settlement_je)
+
+        # Verify the JE details
+        self.assertEqual(settlement_je.date, self.invoice.invoice_date)
+        self.assertEqual(settlement_je.source_object, self.invoice)
+        self.assertEqual(settlement_je.lines.count(), 4)
+        self.assertTrue(settlement_je.is_balanced())
+
+        # DEBIT: Accrued Liability (reversing the original credit)
+        debit_accrued_liability = settlement_je.lines.get(account=self.accrued_liability_account, entry_type='debit')
+        self.assertEqual(debit_accrued_liability.amount, original_accrual)
+
+        # DEBIT: Expense Account (for the full actual invoice amount)
+        debit_expense = settlement_je.lines.get(account=self.utilities_expense_account, entry_type='debit')
+        self.assertEqual(debit_expense.amount, invoice_amount)
+
+        # CREDIT: Accounts Payable (for the full actual invoice amount)
+        credit_ap = settlement_je.lines.get(account=self.general_settings.accounts_payable, entry_type='credit')
+        self.assertEqual(credit_ap.amount, invoice_amount)
+        self.assertEqual(credit_ap.sub_ledger_object, self.supplier)
+
+        # CREDIT: Expense Account (reversing the original estimated debit)
+        credit_expense = settlement_je.lines.get(account=self.utilities_expense_account, entry_type='credit')
+        self.assertEqual(credit_expense.amount, original_accrual)
+
+    def test_settle_accrual_invoice_less_than_accrual(self):
+        """
+        Tests settling an accrual where the actual invoice is LESS than the estimate.
+        The variance should be a credit to the expense account in the current period.
+        """
+        self.invoice.total_amount = Decimal("900.00")
+        self.invoice.save()
+
+        original_accrual = self.accrual_log_sept.amount
+        invoice_amount = self.invoice.total_amount
+        self.assertLess(invoice_amount, original_accrual)
+
+        # Action
+        settlement_je = expense_service.settle_accrual(
+            user=self.test_user,
+            accrual_log_id=self.accrual_log_sept.id,
+            invoice_id=self.invoice.id
+        )
+
+        # Assertions
+        self.assertEqual(JournalEntry.objects.count(), 2)
+        self.assertTrue(settlement_je.is_balanced())
+        self.assertEqual(settlement_je.lines.count(), 4)
+
+        # Check the key lines
+        self.assertEqual(settlement_je.lines.get(account=self.accrued_liability_account, entry_type='debit').amount, original_accrual)
+        self.assertEqual(settlement_je.lines.get(account=self.utilities_expense_account, entry_type='debit').amount, invoice_amount)
+        self.assertEqual(settlement_je.lines.get(account=self.general_settings.accounts_payable, entry_type='credit').amount, invoice_amount)
+        self.assertEqual(settlement_je.lines.get(account=self.utilities_expense_account, entry_type='credit').amount, original_accrual)
+
+    def test_settle_accrual_invoice_equals_accrual(self):
+        """
+        Tests settling an accrual where the actual invoice is EXACTLY the estimate.
+        The net effect on the expense account in the current period should be zero.
+        """
+        self.invoice.total_amount = self.accrual_log_sept.amount
+        self.invoice.save()
+
+        original_accrual = self.accrual_log_sept.amount
+        invoice_amount = self.invoice.total_amount
+        self.assertEqual(invoice_amount, original_accrual)
+
+        # Action
+        settlement_je = expense_service.settle_accrual(
+            user=self.test_user,
+            accrual_log_id=self.accrual_log_sept.id,
+            invoice_id=self.invoice.id
+        )
+
+        # Assertions
+        self.assertEqual(JournalEntry.objects.count(), 2)
+        self.assertTrue(settlement_je.is_balanced())
+        self.assertEqual(settlement_je.lines.count(), 4)
+
+        # Check the key lines
+        self.assertEqual(settlement_je.lines.get(account=self.accrued_liability_account, entry_type='debit').amount, original_accrual)
+        self.assertEqual(settlement_je.lines.get(account=self.utilities_expense_account, entry_type='debit').amount, invoice_amount)
+        self.assertEqual(settlement_je.lines.get(account=self.general_settings.accounts_payable, entry_type='credit').amount, invoice_amount)
+        self.assertEqual(settlement_je.lines.get(account=self.utilities_expense_account, entry_type='credit').amount, original_accrual)
+
+    def test_cannot_settle_already_settled_accrual(self):
+        """Ensures an already settled accrual log cannot be settled again."""
+        # Settle it once
+        expense_service.settle_accrual(
+            user=self.test_user,
+            accrual_log_id=self.accrual_log_sept.id,
+            invoice_id=self.invoice.id
+        )
+        self.assertEqual(JournalEntry.objects.count(), 2)
+
+        # Create a new invoice for the second attempt
+        second_invoice = SupplierInvoice.objects.create(
+            supplier=self.supplier,
+            invoice_number="INV-UTILITY-SEP-DUPE",
+            invoice_date=date(2025, 10, 6),
+            due_date=date(2025, 10, 26),
+            total_amount=Decimal("100.00")
+        )
+
+        # Try to settle it again
+        with self.assertRaises(ValidationError) as e:
+            expense_service.settle_accrual(
+                user=self.test_user,
+                accrual_log_id=self.accrual_log_sept.id,
+                invoice_id=second_invoice.id
+            )
+        
+        self.assertIn("has already been settled", str(e.exception))
+        self.assertEqual(JournalEntry.objects.count(), 2) # No new JE created
+
+    def test_cannot_settle_in_closed_period(self):
+        """Ensures settlement fails if the invoice date is in a closed period."""
+        # Close the October period
+        self.october_period.status = FinancialPeriod.Status.CLOSED
+        self.october_period.save()
+
+        with self.assertRaises(PermissionError) as e:
+            expense_service.settle_accrual(
+                user=self.test_user,
+                accrual_log_id=self.accrual_log_sept.id,
+                invoice_id=self.invoice.id
+            )
+        
+        self.assertIn("is Closed and cannot be posted to", str(e.exception))
+        self.assertEqual(JournalEntry.objects.count(), 2) # No new JE created
