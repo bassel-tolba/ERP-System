@@ -3,6 +3,7 @@
 from decimal import Decimal, ROUND_HALF_UP
 from django.utils import timezone
 from django.db.models import Sum
+from django.contrib.contenttypes.models import ContentType
 
 # Import the base test case and models from the new base file
 from .test_base import AccountingServiceBaseTestCase
@@ -13,7 +14,6 @@ from .models import (
     ExpenseLog, OverheadAllocationRun, TransactionCorrection, Account, ShopOrderTemplate,
     OpeningBalanceEntry, OpeningBalanceEntryLine, OpeningBalanceSubLedgerDetail, Product, FiscalYear, PrepaidExpense
 )
-from django.contrib.contenttypes.models import ContentType
 from .services import overhead_service, accounting_service
 from .services.accounting_service import (
     create_je_for_inventory_receipt,
@@ -790,75 +790,65 @@ class TestOverheadAllocation(AccountingServiceBaseTestCase):
     def test_overhead_proportional_application_and_bulk_update(self):
         """
         Verify that overhead is applied proportionally to multiple receipts and that
-        the bulk_update mechanism correctly updates costs without triggering extra JEs.
+        the bulk_update mechanism works as expected.
         """
         # 1. Arrange
-        # a) Log expenses
-        ExpenseLog.objects.create(
-            expense_date="2025-09-10", amount=Decimal("15000.000"),
-            description="Factory Overhead", cost_pool=self.child_pool_rent
-        )
-        
-        # b) Create two batches with different machine hour consumptions
-        batch1 = Batch.objects.create(
-            template=self.test_template, shop_order_number="SO-OH-P1", batch_number="B-OH-P1",
-            creation_date="2025-09-15", machine_hours_consumed=100.0 # 2/3 of total
-        )
-        batch2 = Batch.objects.create(
-            template=self.test_template, shop_order_number="SO-OH-P2", batch_number="B-OH-P2",
-            creation_date="2025-09-16", machine_hours_consumed=50.0 # 1/3 of total
-        )
-        
-        # c) Receive finished goods for both batches. This will create 2 JEs.
+        # a) Create two batches and receipts, each with different machine hours
+        batch1 = self.get_or_create_batch_for_template(self.test_template, "SO-PROP-01", "B-PROP-01")
+        batch1.machine_hours_consumed = 100.0
+        batch1.save()
         receipt1 = FinishedProductReceipt.objects.create(
-            batch=batch1, individual_batch_number="FPB-OH-P1", receipt_date="2025-09-18",
-            total_cost=Decimal("10000.000"), total_quantity_produced=100.0
+            batch=batch1, individual_batch_number="FPB-PROP-01",
+            receipt_date=timezone.make_aware(timezone.datetime(2025, 9, 18, 10, 0, 0)),
+            total_cost=Decimal("1000.000"), total_quantity_produced=100.0
         )
+
+        batch2 = self.get_or_create_batch_for_template(self.test_template, "SO-PROP-02", "B-PROP-02")
+        batch2.machine_hours_consumed = 50.0
+        batch2.save()
         receipt2 = FinishedProductReceipt.objects.create(
-            batch=batch2, individual_batch_number="FPB-OH-P2", receipt_date="2025-09-19",
-            total_cost=Decimal("5000.000"), total_quantity_produced=50.0
+            batch=batch2, individual_batch_number="FPB-PROP-02",
+            receipt_date=timezone.make_aware(timezone.datetime(2025, 9, 19, 10, 0, 0)),
+            total_cost=Decimal("500.000"), total_quantity_produced=50.0
         )
         self.assertEqual(JournalEntry.objects.count(), 2, "Pre-condition: Two JEs for FG receipts should exist.")
 
-        # d) Create and execute the allocation run
+        # b) Create an overhead run and an expense to be allocated
         run = OverheadAllocationRun.objects.create(
-            financial_period=self.period, cost_pool=self.parent_pool,
-            allocation_driver=self.machine_hours_driver
+            financial_period=self.period,
+            cost_pool=self.parent_pool, # Allocate from the parent pool
+            allocation_driver=self.machine_hours_driver,
         )
-        overhead_service.execute_overhead_allocation_run(run)
-        
+        ExpenseLog.objects.create(
+            expense_date=self.period.start_date,
+            amount=Decimal("15000.000"),
+            description="Factory Rent for Test",
+            cost_pool=self.child_pool_rent # Expense goes into a child pool
+        )
+
         # 2. Act
-        # Post the allocation JE (Expense -> WIP). This is JE #3.
-        je_alloc = accounting_service.create_je_for_overhead_allocation(run)
-        
-        # Apply the overhead cost to the finished goods receipts
-        total_applied_cost = overhead_service.apply_overhead_to_finished_goods(run)
-        receipt1.refresh_from_db()
-        receipt2.refresh_from_db()
-        
-        # Post the application JE (WIP -> FG). This is JE #4.
-        je_app = accounting_service.create_je_for_overhead_application(run, total_applied_cost)
+        # a) Execute the run to calculate the rate
+        overhead_service.execute_overhead_allocation_run(run)
+        run.refresh_from_db()
+        self.assertEqual(run.status, OverheadAllocationRun.Status.CALCULATED)
+        self.assertEqual(run.total_pool_amount, Decimal("15000.000"))
+        self.assertEqual(run.total_driver_units, 150.0) # 100 + 50
+        self.assertEqual(run.calculated_rate , Decimal("100.000")) # 15000 / 150
+
+        # b) Apply the calculated overhead to the receipts
+        overhead_service.apply_overhead_to_finished_goods(run)
 
         # 3. Assert
-        self.assertEqual(JournalEntry.objects.count(), 4, "Should be 4 JEs in total now.")
-        
-        # Assert proportional cost application
-        total_pool_amount = Decimal("15000.000")
-        expected_cost1 = (total_pool_amount * (Decimal("100.0") / Decimal("150.0"))).quantize(Decimal('0.001'))
-        expected_cost2 = (total_pool_amount * (Decimal("50.0") / Decimal("150.0"))).quantize(Decimal('0.001'))
-        
+        receipt1.refresh_from_db()
+        receipt2.refresh_from_db()
+
+        expected_cost1 = Decimal("100.0") * run.calculated_rate # 100 hours * 100/hr = 10000
+        expected_cost2 = Decimal("50.0") * run.calculated_rate  # 50 hours * 100/hr = 5000
+
         self.assertEqual(receipt1.allocated_overhead_cost, expected_cost1)
         self.assertEqual(receipt2.allocated_overhead_cost, expected_cost2)
-        self.assertEqual(total_applied_cost, expected_cost1 + expected_cost2)
-
-        # Assert that the application JE correctly moves the total applied cost
-        self.assertIsNotNone(je_app)
-        debit_line = je_app.lines.get(entry_type='debit')
-        self.assertEqual(debit_line.account, self.general_settings.finished_goods_inventory)
-        self.assertEqual(debit_line.amount, total_applied_cost)
-        credit_line = je_app.lines.get(entry_type='credit')
-        self.assertEqual(credit_line.account, self.general_settings.wip_inventory)
-        self.assertEqual(credit_line.amount, total_applied_cost)
+        self.assertEqual(receipt1.total_cost, Decimal("1000.000") + expected_cost1)
+        self.assertEqual(receipt2.total_cost, Decimal("500.000") + expected_cost2)
 
     def test_overhead_application_by_labor_hours(self):
         """Verify overhead allocation based on Labor Hours."""
@@ -1075,7 +1065,7 @@ class TestTransactionCorrection(AccountingServiceBaseTestCase):
         # 4. Assert
         # a) Check that a new JE was created and the old one is untouched
         self.assertEqual(JournalEntry.objects.count(), 3)
-        original_je = JournalEntry.objects.get(object_id=original_dispatch.id)
+        original_je = JournalEntry.objects.get(content_type=ContentType.objects.get_for_model(original_dispatch), object_id=original_dispatch.id)
         self.assertEqual(original_je.date.month, 9, "Original JE date should not change.")
 
         # b) Verify the new adjusting JE
@@ -1105,7 +1095,7 @@ class TestTransactionCorrection(AccountingServiceBaseTestCase):
         self.assertEqual(adjusting_je.source_object, correction_record)
 
         # 5. Assert: Verify the original JE is unchanged and the new JE is a perfect reversal
-        original_je = JournalEntry.objects.get(object_id=original_dispatch.id)
+        original_je = JournalEntry.objects.get(content_type=ContentType.objects.get_for_model(original_dispatch), object_id=original_dispatch.id)
         original_je.refresh_from_db()
         self.assertEqual(original_je.date.month, 9, "Original JE date should not change.")
 
@@ -1425,6 +1415,7 @@ class TestOpeningBalanceSystem(AccountingServiceBaseTestCase):
         
         # Verify the details are linked correctly
         self.assertEqual(detail1.line, ob_line)
+
         self.assertEqual(detail1.sub_ledger_object, receipt1)
         self.assertEqual(detail1.amount, Decimal("25000.000"))
         

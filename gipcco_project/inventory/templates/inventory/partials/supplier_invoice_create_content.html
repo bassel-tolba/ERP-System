@@ -4,15 +4,27 @@
 
 <form method="post" id="createSupplierInvoiceForm">
   {% csrf_token %}
+  <input type="hidden" name="source_type" id="source_type" value="receipts">
   <div class="row">
     <div class="col-lg-8">
       <div class="card shadow-sm">
         <div class="card-header">
-          <h5 class="card-title mb-0">بنود الفاتورة (إيصالات الاستلام غير المفوترة)</h5>
+          <ul class="nav nav-tabs card-header-tabs" id="invoice-source-tabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="receipts-tab" data-bs-toggle="tab" data-bs-target="#receipts-panel" type="button" role="tab" aria-controls="receipts-panel" aria-selected="true" data-source="receipts">
+                <i class="bi bi-box-seam me-1"></i>إيصالات الاستلام
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="expenses-tab" data-bs-toggle="tab" data-bs-target="#expenses-panel" type="button" role="tab" aria-controls="expenses-panel" aria-selected="false" data-source="expenses">
+                <i class="bi bi-wallet2 me-1"></i>المصروفات المعتمدة
+              </button>
+            </li>
+          </ul>
         </div>
         <div class="card-body">
             <div class="mb-3">
-              <label for="supplier" class="form-label">اختر المورد لعرض إيصالاته</label>
+              <label for="supplier" class="form-label">اختر المورد لعرض البنود</label>
               <select name="supplier" id="supplier" class="form-select searchable-select" required>
                 <option value="">--- اختر مورد ---</option>
                 {% for s in suppliers %}
@@ -20,35 +32,42 @@
                 {% endfor %}
               </select>
             </div>
-            <div class="table-responsive">
-              <table class="table table-sm">
-                <thead>
-                  <tr>
-                    <th style="width: 5%;"><input class="form-check-input" type="checkbox" id="select-all-receipts" title="تحديد الكل"></th>
-                    <th>تاريخ الإفراج</th>
-                    <th>رقم الفحص</th>
-                    <th>المنتج</th>
-                    <th>الكمية</th>
-                    <th class="text-end">القيمة</th>
-                  </tr>
-                </thead>
-                <tbody id="receipts-table-body">
-                  <!-- JS will populate this -->
-                </tbody>
-                <tfoot>
-                  <tr id="no-receipts-row">
-                    <td colspan="6" class="text-center py-3 text-muted">يرجى اختيار مورد لعرض الإيصالات المتاحة.</td>
-                  </tr>
-                  <tr id="receipts-loading" class="d-none">
-                    <td colspan="6" class="text-center py-3">
-                      <div class="spinner-border spinner-border-sm" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                      </div>
-                      <span class="ms-2">جاري تحميل الإيصالات...</span>
-                    </td>
-                  </tr>
-                </tfoot>
-              </table>
+
+            <div class="tab-content" id="invoice-source-tab-content">
+              <!-- Receipts Panel -->
+              <div class="tab-pane fade show active" id="receipts-panel" role="tabpanel" aria-labelledby="receipts-tab">
+                <div class="table-responsive">
+                  <table class="table table-sm">
+                    <thead>
+                      <tr>
+                        <th style="width: 5%;"><input class="form-check-input" type="checkbox" id="select-all-items" title="تحديد الكل"></th>
+                        <th>تاريخ الإفراج</th>
+                        <th>رقم الفحص</th>
+                        <th>المنتج</th>
+                        <th>الكمية</th>
+                        <th class="text-end">القيمة</th>
+                      </tr>
+                    </thead>
+                    <tbody id="items-table-body">
+                      <!-- JS will populate this -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <!-- Expenses Panel (Initially empty structure) -->
+              <div class="tab-pane fade" id="expenses-panel" role="tabpanel" aria-labelledby="expenses-tab">
+                <!-- The same table structure will be used, but JS will populate it with different headers and data -->
+              </div>
+            </div>
+
+            <div id="no-items-row" class="text-center py-3 text-muted">
+              يرجى اختيار مورد لعرض البنود المتاحة.
+            </div>
+            <div id="items-loading" class="d-none text-center py-3">
+              <div class="spinner-border spinner-border-sm" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <span class="ms-2">جاري تحميل البنود...</span>
             </div>
         </div>
       </div>

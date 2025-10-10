@@ -121,7 +121,6 @@ def _get_account_tree_with_balances(root_account_type: str, start_date, end_date
                 node['total_credits'] += child_node['total_credits']
                 node['opening_balance'] += child_node['opening_balance'] # Opening balance also rolls up
             
-            # Determine final balances for this node (including children)
             node['period_change'] = node['total_debits'] - node['total_credits']
             node['closing_balance'] = node['opening_balance'] + node['period_change']
             
@@ -129,12 +128,9 @@ def _get_account_tree_with_balances(root_account_type: str, start_date, end_date
             node['debit_balance'] = Decimal('0.0')
             node['credit_balance'] = Decimal('0.0')
             
-            # For Trial Balance, we show the end-of-period balance for A/L/E accounts
-            # and the period change for R/E accounts.
-            if account.account_type in [Account.AccountType.ASSET, Account.AccountType.LIABILITY, Account.AccountType.EQUITY]:
-                balance = node['closing_balance']
-            else: # Revenue or Expense
-                balance = node['period_change']
+            # For a Trial Balance, we always use the closing balance for all account types
+            # to ensure the fundamental accounting equation (Debits = Credits) is validated.
+            balance = node['closing_balance']
 
             # Assign to debit or credit column based on natural account type and balance sign
             if account.account_type in [Account.AccountType.ASSET, Account.AccountType.EXPENSE]:

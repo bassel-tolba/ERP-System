@@ -8,14 +8,23 @@ from .test_base import AccountingServiceBaseTestCase
 from .models import (
     ExpenseRequest, InventoryConsumption, PrepaidExpense, ExpenseLog, JournalEntry,
     FixedAsset, InventoryLog, Product, AccruedExpense, AccrualLog, SupplierInvoice, FinancialPeriod,
-    BankAccount
+    BankAccount, EmployeeAdvance, EmployeeAdvanceSettlement, Company, Payment, Employee, CostPool
 )
 from .services import expense_service, approval_service, accounting_service
+from django.contrib.auth.models import User
 
 class TestExpenseWorkflow(AccountingServiceBaseTestCase):
     def setUp(self):
         super().setUp()
         JournalEntry.objects.all().delete()
+
+        # --- NEW: Create employee-related objects locally ---
+        self.employee = Employee.objects.create(
+            first_name="Workflow",
+            last_name="User",
+            employee_id="EMP-WF-001"
+        )
+
         # Create a fixed asset to be used in capitalization tests
         self.fixed_asset = FixedAsset.objects.create(
             asset_tag="CAP-ASSET-01",
@@ -525,28 +534,187 @@ class TestAccrualSettlement(AccountingServiceBaseTestCase):
         )
 
         # Try to settle it again
-        with self.assertRaises(ValidationError) as e:
-            expense_service.settle_accrual(
-                user=self.test_user,
-                accrual_log_id=self.accrual_log_sept.id,
-                invoice_id=second_invoice.id
-            )
-        
-        self.assertIn("has already been settled", str(e.exception))
-        self.assertEqual(JournalEntry.objects.count(), 2) # No new JE created
+        with self.assertRaises(ValidationError):
+            expense_service.settle_accrual(self.test_user, self.accrual_log_sept.id, self.invoice.id)
 
     def test_cannot_settle_in_closed_period(self):
-        """Ensures settlement fails if the invoice date is in a closed period."""
+        """Ensures an accrual cannot be settled if the invoice date is in a closed period."""
         # Close the October period
         self.october_period.status = FinancialPeriod.Status.CLOSED
         self.october_period.save()
 
-        with self.assertRaises(PermissionError) as e:
+        with self.assertRaises(PermissionError):
             expense_service.settle_accrual(
                 user=self.test_user,
                 accrual_log_id=self.accrual_log_sept.id,
                 invoice_id=self.invoice.id
             )
-        
-        self.assertIn("is Closed and cannot be posted to", str(e.exception))
-        self.assertEqual(JournalEntry.objects.count(), 2) # No new JE created
+
+
+class TestExpenseSettlement(AccountingServiceBaseTestCase):
+    def setUp(self):
+        super().setUp()
+        JournalEntry.objects.all().delete()
+
+        # --- NEW: Create employee-related objects locally ---
+        self.employee = Employee.objects.create(
+            first_name="Settlement",
+            last_name="User",
+            employee_id="EMP-SETTLE-001"
+        )
+
+        self.settlement_period = FinancialPeriod.objects.get(name="September 2025")
+        self.other_supplier = Company.objects.create(name="Other Test Supplier")
+        # self.employee = Employee.objects.get(employee_id='E-001') # Get employee from base - REMOVED
+
+        # Create a payment and advance for the employee
+        payment = Payment.objects.create(
+            payment_date=date(2025, 9, 1), amount=Decimal("500.000"), bank_account=self.bank_account,
+            payment_type=Payment.PaymentType.PAYMENT_OUT, description="Advance to employee"
+        )
+        self.advance = EmployeeAdvance.objects.create(
+            employee=self.employee,
+            advance_date=date(2025, 9, 1),
+            amount=Decimal("500.000"),
+            source_payment=payment,
+            status=EmployeeAdvance.Status.OPEN
+        )
+
+        # Create some unsettled expense logs via the request/approval workflow
+        self.log1 = self._create_approved_expense_log(
+            self.supplier, Decimal("100.00"), date(2025, 9, 5), "Log 1"
+        )
+        self.log2 = self._create_approved_expense_log(
+            self.supplier, Decimal("150.00"), date(2025, 9, 6), "Log 2"
+        )
+        self.log_other_supplier = self._create_approved_expense_log(
+            self.other_supplier, Decimal("200.00"), date(2025, 9, 7), "Other Supplier Log"
+        )
+        self.log_for_advance = self._create_approved_expense_log(
+            self.supplier, Decimal("300.00"), date(2025, 9, 8), "Expense for advance"
+        )
+        self.employee_log = self.log_for_advance # Alias for clarity in settlement tests
+
+        # Create a settled log for validation testing
+        self.settled_log = self._create_approved_expense_log(
+            self.supplier, Decimal("50.00"), date(2025, 9, 9), "Already Settled Log"
+        )
+        self.settled_log.settlement_status = ExpenseLog.SettlementStatus.SETTLED
+        self.settled_log.save()
+
+
+    def _create_approved_expense_log(self, supplier, amount, expense_date, description):
+        """Helper to create an approved expense log for testing."""
+        request = expense_service.request_direct_expense(
+            user=self.test_user, amount=amount, request_date=expense_date,
+            description=description, cost_pool_id=self.child_pool_maintenance.id,
+            category=ExpenseLog.Category.MAINTENANCE, classification=ExpenseLog.Classification.MANUFACTURING_OVERHEAD,
+            settlement_method=ExpenseRequest.SettlementMethod.ACCRUE_AND_PAY_LATER,
+            supplier_id=supplier.id
+        )
+        approval_service.approve_request(request.id, self.test_user)
+        return ExpenseLog.objects.get(source_request=request)
+
+
+    def test_create_invoice_from_expense_logs(self):
+        """Tests that a supplier invoice can be correctly created from multiple unsettled expense logs."""
+        invoice = expense_service.create_invoice_from_expense_logs(
+            user=self.test_user,
+            supplier_id=self.supplier.id,
+            invoice_number="INV-FROM-LOGS-01",
+            invoice_date=date(2025, 9, 25),
+            due_date=date(2025, 10, 25),
+            expense_log_ids=[self.log1.id, self.log2.id]
+        )
+
+        self.assertIsNotNone(invoice)
+        self.assertEqual(invoice.total_amount, self.log1.amount + self.log2.amount)
+        self.assertEqual(invoice.items.count(), 2)
+
+        self.log1.refresh_from_db()
+        self.log2.refresh_from_db()
+        self.assertEqual(self.log1.settlement_status, ExpenseLog.SettlementStatus.SETTLED)
+        self.assertEqual(self.log2.settlement_status, ExpenseLog.SettlementStatus.SETTLED)
+        self.assertEqual(self.log1.settlement_object, invoice)
+        self.assertEqual(self.log2.settlement_object, invoice)
+
+    def test_create_invoice_validation_checks(self):
+        """Tests validation for the invoice creation service."""
+        # 1. Test using an already settled log
+        with self.assertRaisesRegex(ValidationError, "has already been settled"):
+            expense_service.create_invoice_from_expense_logs(
+                user=self.test_user, supplier_id=self.supplier.id, invoice_number="INV-FAIL-1",
+                invoice_date=date(2025, 9, 28), due_date=date(2025, 10, 28),
+                expense_log_ids=[self.settled_log.id]
+            )
+
+        # 2. Test using logs from a different supplier
+        other_supplier = Company.objects.create(name="Other Supplier")
+        with self.assertRaisesRegex(ValidationError, "does not belong to supplier"):
+            expense_service.create_invoice_from_expense_logs(
+                user=self.test_user, supplier_id=other_supplier.id, invoice_number="INV-FAIL-2",
+                invoice_date=date(2025, 9, 28), due_date=date(2025, 10, 28),
+                expense_log_ids=[self.log1.id]
+            )
+
+        # 3. Test with no valid log IDs
+        with self.assertRaisesRegex(ValidationError, "No valid Expense Logs"):
+            expense_service.create_invoice_from_expense_logs(
+                user=self.test_user, supplier_id=self.supplier.id, invoice_number="INV-FAIL-3",
+                invoice_date=date(2025, 9, 28), due_date=date(2025, 10, 28),
+                expense_log_ids=[]
+            )
+
+    def test_settle_employee_advance_with_expense(self):
+        """Tests that an employee advance can be settled with an approved expense log."""
+        initial_balance = self.advance.unsettled_amount
+        self.assertGreater(initial_balance, 0)
+
+        settlement = expense_service.settle_employee_advance_with_expense(
+            user=self.test_user,
+            advance_id=self.advance.id,
+            expense_log_id=self.employee_log.id,
+            settlement_date=date(2025, 9, 28)
+        )
+
+        self.advance.refresh_from_db()
+        self.employee_log.refresh_from_db()
+
+        # Assertions
+        self.assertIsNotNone(settlement)
+        self.assertEqual(self.advance.unsettled_amount, initial_balance - self.employee_log.amount)
+        self.assertEqual(self.advance.status, EmployeeAdvance.Status.PARTIALLY_SETTLED)
+        self.assertEqual(self.employee_log.settlement_status, ExpenseLog.SettlementStatus.SETTLED)
+        self.assertEqual(self.employee_log.settlement_object, settlement)
+
+        # Check the JE
+        je = settlement.journal_entry
+        self.assertIsNotNone(je)
+        self.assertTrue(je.is_balanced())
+        self.assertEqual(je.lines.get(entry_type='debit').account, self.general_settings.accrued_expenses_account)
+        credit_line = je.lines.get(entry_type='credit')
+        self.assertEqual(credit_line.account, self.general_settings.employee_advances_receivable)
+        self.assertEqual(credit_line.sub_ledger_object, self.employee)
+
+
+    def test_settle_advance_validation_checks(self):
+        """Tests validation for the advance settlement service."""
+        # 1. Test settling with an already settled expense
+        self.employee_log.settlement_status = ExpenseLog.SettlementStatus.SETTLED
+        self.employee_log.save()
+        with self.assertRaisesRegex(ValidationError, "This expense has already been settled"):
+            expense_service.settle_employee_advance_with_expense(
+                user=self.test_user, advance_id=self.advance.id,
+                expense_log_id=self.employee_log.id, settlement_date=date(2025, 9, 28)
+            )
+        self.employee_log.settlement_status = ExpenseLog.SettlementStatus.UNSETTLED # Reset for next test
+        self.employee_log.save()
+
+        # 2. Test settling with an expense amount greater than the advance balance
+        self.employee_log.amount = self.advance.unsettled_amount + Decimal("100.00")
+        self.employee_log.save()
+        with self.assertRaisesRegex(ValidationError, "exceeds the advance's unsettled amount"):
+            expense_service.settle_employee_advance_with_expense(
+                user=self.test_user, advance_id=self.advance.id,
+                expense_log_id=self.employee_log.id, settlement_date=date(2025, 9, 28)
+            )

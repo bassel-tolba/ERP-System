@@ -3,9 +3,11 @@
 import logging
 from decimal import Decimal
 from datetime import date
+from dateutil.relativedelta import relativedelta
 
 from django.db import transaction
 from django.db.models import Sum, F, Q
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 
 from ..models import (
@@ -21,15 +23,14 @@ def settle_accrual_with_invoice(accrual_log: AccrualLog, invoice: SupplierInvoic
     """
     Creates a "true-up" journal entry when an actual invoice is received for
     a previously accrued expense. This reverses the original accrual and books
-    the actual cost.
+    the actual cost in a single, balanced entry.
 
     The resulting JE has a net effect of expensing the variance in the current period.
 
     JE Logic:
     - DEBIT: Accrued Liability (to reverse the original credit)
-    - DEBIT: Expense Account (for the full actual invoice amount)
+    - DEBIT/CREDIT: Expense Account (for the VARIANCE between actual and accrued)
     - CREDIT: Accounts Payable (for the full actual invoice amount)
-    - CREDIT: Expense Account (to reverse the original estimated debit)
     """
     logger.info(f"Starting accrual settlement for AccrualLog ID {accrual_log.id} with Invoice {invoice.invoice_number}.")
     _check_period_is_open(invoice.invoice_date)
@@ -38,46 +39,53 @@ def settle_accrual_with_invoice(accrual_log: AccrualLog, invoice: SupplierInvoic
     accrual = accrual_log.accrued_expense
     original_accrual_amount = accrual_log.amount
     actual_invoice_amount = invoice.total_amount
+    variance = actual_invoice_amount - original_accrual_amount
 
     with transaction.atomic():
         je = JournalEntry.objects.create(
             date=invoice.invoice_date,
             description=f"True-up for {accrual.description} with Invoice {invoice.invoice_number}",
-            source_object=invoice, # The invoice is the source of the true-up
+            source_object=invoice,
             status=JournalEntry.Status.POSTED
         )
 
-        # 1. Reverse the original accrual (Debit Accrued Liability)
+        # 1. DEBIT: Reverse the original accrual from the liability account
         JournalEntryLine.objects.create(
-            journal_entry=je, account=accrual.target_liability_account,
-            amount=original_accrual_amount, entry_type='debit'
+            journal_entry=je,
+            account=accrual.target_liability_account,
+            amount=original_accrual_amount,
+            entry_type='debit'
         )
 
-        # 2. Book the full actual expense (Debit Expense Account)
-        JournalEntryLine.objects.create(
-            journal_entry=je, account=accrual.target_expense_account,
-            amount=actual_invoice_amount, entry_type='debit'
-        )
+        # 2. DEBIT/CREDIT: Book the variance to the expense account.
+        # If the actual was higher, this is a debit (more expense).
+        # If the actual was lower, this will be a credit (less expense).
+        if variance != 0:
+            JournalEntryLine.objects.create(
+                journal_entry=je,
+                account=accrual.target_expense_account,
+                amount=abs(variance),
+                entry_type='debit' if variance > 0 else 'credit'
+            )
 
-        # 3. Create the final Accounts Payable liability (Credit A/P)
+        # 3. CREDIT: Create the final Accounts Payable liability
         JournalEntryLine.objects.create(
-            journal_entry=je, account=settings.accounts_payable,
-            amount=actual_invoice_amount, entry_type='credit',
+            journal_entry=je,
+            account=settings.accounts_payable,
+            amount=actual_invoice_amount,
+            entry_type='credit',
             sub_ledger_object=invoice.supplier
         )
 
-        # 4. Credit the expense account for the original estimate to true-up the P&L
-        JournalEntryLine.objects.create(
-            journal_entry=je, account=accrual.target_expense_account,
-            amount=original_accrual_amount, entry_type='credit'
-        )
+        # 4. VALIDATE the final entry before committing.
+        je.validate_balance()
 
         # Link the invoice to the log for a complete audit trail
         accrual_log.settling_invoice = invoice
         accrual_log.true_up_journal_entry = je
         accrual_log.save(update_fields=['settling_invoice', 'true_up_journal_entry'])
 
-        logger.info(f"Successfully created true-up JE-{je.id} for AccrualLog ID {accrual_log.id}.")
+        logger.info(f"Successfully created and validated true-up JE-{je.id} for AccrualLog ID {accrual_log.id}.")
 
     return je
 
@@ -185,77 +193,58 @@ def run_monthly_amortization(period: FinancialPeriod) -> dict:
     return summary
 
 
-def run_monthly_accruals(period: FinancialPeriod) -> dict:
+def run_monthly_accruals(period: FinancialPeriod):
     """
-    Creates and posts journal entries for all active, recurring accrued expenses.
-    - Handles daily prorating for accruals starting or ending within the period.
-    - Creates AccrualLog and triggers JE creation via signals.
-    - Updates the period close checklist.
+    Processes and posts monthly journal entries for all active, recurring accrued expenses.
     """
-    logger.info(f"Starting monthly accrual run for period '{period.name}'.")
-
-    # Find all accruals that are active and overlap with the current period.
+    logger.info(f"Starting monthly accrual run for period: {period.name}")
+    
+    # Find all active accrual schedules that overlap with the given financial period
     active_accruals = AccruedExpense.objects.filter(
-        status=AccruedExpense.Status.ACTIVE
+        status=AccruedExpense.Status.ACTIVE,
+        accrual_start_date__lte=period.end_date,
+        accrual_end_date__gte=period.start_date
     )
-
-    # Exclude accruals for which a log has already been created for this period.
-    existing_logs = AccrualLog.objects.filter(
-        accrued_expense__in=active_accruals,
+    
+    # Get IDs of accruals that already have a log for this period to prevent duplicates
+    existing_log_ids = AccrualLog.objects.filter(
         financial_period=period
     ).values_list('accrued_expense_id', flat=True)
+    
+    accruals_to_process = active_accruals.exclude(id__in=existing_log_ids)
+    
+    logs_created_count = 0
+    for accrual in accruals_to_process:
+        # Calculate the number of days in the accrual period that fall within the current financial period
+        overlap_start = max(accrual.accrual_start_date, period.start_date)
+        overlap_end = min(accrual.accrual_end_date, period.end_date)
+        days_in_period = (overlap_end - overlap_start).days + 1
+        
+        # Calculate the total number of days in the entire accrual schedule
+        total_days = (accrual.accrual_end_date - accrual.accrual_start_date).days + 1
+        
+        if total_days <= 0:
+            logger.warning(f"Skipping accrual ID {accrual.id} due to invalid date range (total_days={total_days}).")
+            continue
+            
+        # Prorate the amount for the current period
+        prorated_amount = (accrual.total_estimated_amount / total_days) * days_in_period
+        
+        AccrualLog.objects.create(
+            accrued_expense=accrual,
+            financial_period=period,
+            amount=prorated_amount
+        )
+        logs_created_count += 1
+        logger.info(f"Created AccrualLog for '{accrual.description}' in period '{period.name}' for amount {prorated_amount:.2f}")
 
-    accruals_to_process = active_accruals.exclude(id__in=existing_logs)
-
-    # Update the checklist flag to true, indicating the run has been performed.
-    # This happens even if no items are found, as the check is "has the process run?".
-    try:
+    # --- CORRECTED: Update the checklist directly ---
+    if logs_created_count > 0:
         checklist, _ = PeriodCloseChecklist.objects.get_or_create(financial_period=period)
         checklist.is_accruals_run = True
         checklist.save(update_fields=['is_accruals_run'])
-    except Exception as e:
-        logger.error(f"Failed to update checklist for period {period.name}: {e}")
-        # Decide if this should be a critical failure or just a warning
-
-    if not accruals_to_process.exists():
-        logger.info(f"No new accruals to process for period '{period.name}'.")
-        return {
-            "status": "success",
-            "message": "Accrual run completed. No new items to process.",
-            "processed_count": 0,
-            "total_accrued": Decimal("0.0")
-        }
-
-    processed_count = 0
-    total_accrued_posted = Decimal("0.0")
-
-    for accrual in accruals_to_process:
-        with transaction.atomic():
-            # --- Daily Proration Calculation Logic ---
-            amount_to_accrue = accrual.estimated_monthly_amount
-
-            if amount_to_accrue <= 0:
-                logger.info(f"Skipping AccruedExpense ID {accrual.id} for period '{period.name}' as calculated accrual is zero or less.")
-                continue
-
-            # Create the log record, which will trigger the JE creation via a signal
-            AccrualLog.objects.create(
-                accrued_expense=accrual,
-                financial_period=period,
-                amount=amount_to_accrue
-            )
-
-            processed_count += 1
-            total_accrued_posted += amount_to_accrue
-
-    summary = {
-        "status": "success",
-        "message": f"Accrual run completed for period '{period.name}'.",
-        "processed_count": processed_count,
-        "total_accrued": total_accrued_posted
-    }
-    logger.info(f"Finished accrual run. Processed {processed_count} accruals with a total value of {total_accrued_posted}.")
-    return summary
+        
+    logger.info(f"Monthly accrual run completed for period: {period.name}. Created {logs_created_count} new logs.")
 
 def revert_adjusting_entry_run(period: FinancialPeriod, run_type: str):
     """

@@ -5,7 +5,10 @@ from django.core.exceptions import ValidationError, PermissionDenied
 from django.db.models import Q
 from decimal import Decimal, InvalidOperation
 
-from ..models import ExpenseRequest, Product, CostPool, FixedAsset, Account, SupplierInvoice, AccrualLog, Company, BankAccount, ExpenseLog
+from ..models import (
+    ExpenseRequest, Product, CostPool, FixedAsset, Account, SupplierInvoice, AccrualLog, Company, BankAccount, ExpenseLog,
+    Employee, EmployeeAdvance
+)
 from ..services import expense_service, approval_service
 
 @login_required
@@ -181,6 +184,42 @@ def manage_expense_requests(request):
                 )
                 messages.success(request, f"Accrual Log #{accrual_log_id_str} has been successfully settled.")
 
+            elif action == 'create_invoice_from_logs':
+                supplier_id_str = request.POST.get('supplier_id')
+                invoice_number = request.POST.get('invoice_number')
+                invoice_date = request.POST.get('invoice_date')
+                due_date = request.POST.get('due_date')
+                log_ids = request.POST.getlist('log_ids')
+
+                if not all([supplier_id_str, invoice_number, invoice_date, due_date, log_ids]):
+                    raise ValidationError("Supplier, invoice details, and at least one expense log are required.")
+
+                invoice = expense_service.create_invoice_from_expense_logs(
+                    user=request.user,
+                    supplier_id=int(supplier_id_str),
+                    invoice_number=invoice_number,
+                    invoice_date=invoice_date,
+                    due_date=due_date,
+                    expense_log_ids=[int(pk) for pk in log_ids]
+                )
+                messages.success(request, f"Successfully created Invoice #{invoice.invoice_number} from {len(log_ids)} expense logs.")
+
+            elif action == 'settle_advance':
+                advance_id_str = request.POST.get('advance_id')
+                expense_log_id_str = request.POST.get('expense_log_id')
+                settlement_date = request.POST.get('settlement_date')
+
+                if not all([advance_id_str, expense_log_id_str, settlement_date]):
+                    raise ValidationError("Employee Advance, Expense Log, and Settlement Date are required.")
+
+                settlement = expense_service.settle_employee_advance_with_expense(
+                    user=request.user,
+                    advance_id=int(advance_id_str),
+                    expense_log_id=int(expense_log_id_str),
+                    settlement_date=settlement_date
+                )
+                messages.success(request, f"Successfully settled advance for {settlement.advance.employee.full_name} with expense log #{expense_log_id_str}.")
+
         except (ValidationError, PermissionDenied, ValueError, TypeError, InvalidOperation) as e:
             messages.error(request, f"An error occurred: {e}")
         
@@ -192,6 +231,14 @@ def manage_expense_requests(request):
     unsettled_accrual_logs = AccrualLog.objects.filter(
         settling_invoice__isnull=True
     ).select_related('accrued_expense', 'financial_period').order_by('-financial_period__start_date')
+
+    unsettled_expense_logs = ExpenseLog.objects.filter(
+        settlement_status=ExpenseLog.SettlementStatus.UNSETTLED
+    ).select_related('source_request__supplier', 'source_request__requested_by')
+
+    open_advances = EmployeeAdvance.objects.filter(
+        status__in=[EmployeeAdvance.Status.OPEN, EmployeeAdvance.Status.PARTIALLY_SETTLED]
+    ).select_related('employee')
 
     context = {
         'active_page': 'expenses',
@@ -208,7 +255,10 @@ def manage_expense_requests(request):
         'categories': ExpenseLog.Category.choices,
         'classifications': ExpenseLog.Classification.choices,
         'settlement_methods': ExpenseRequest.SettlementMethod.choices,
-        'suppliers': Company.objects.filter(is_supplier=True),
+        'suppliers': Company.objects.all(),
         'bank_accounts': BankAccount.objects.all(),
+        'unsettled_expense_logs': unsettled_expense_logs,
+        'open_advances': open_advances,
+        'employees_with_advances': Employee.objects.filter(advances__in=open_advances).distinct(),
     }
     return render(request, 'inventory/expense_requests/manage.html', context)

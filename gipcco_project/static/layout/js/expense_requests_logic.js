@@ -33,6 +33,77 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     // --- END NEW LOGIC ---
 
+    // --- NEW: Logic for Invoice Creation from Logs ---
+    const invoiceSupplierFilter = document.getElementById('invoice_supplier_filter');
+    const logIdsSelect = document.getElementById('log_ids');
+    if (invoiceSupplierFilter && logIdsSelect) {
+        const logOptions = Array.from(logIdsSelect.options);
+        const logIdsTomSelect = new TomSelect(logIdsSelect, {
+            plugins: ['remove_button'],
+            hideSelected: true,
+        });
+
+        invoiceSupplierFilter.addEventListener('change', function() {
+            const selectedSupplierId = this.value;
+            logIdsTomSelect.clear();
+            logIdsTomSelect.clearOptions();
+
+            const filteredOptions = logOptions.filter(option => {
+                return !selectedSupplierId || option.dataset.supplier === selectedSupplierId;
+            });
+
+            logIdsTomSelect.addOptions(filteredOptions.map(opt => ({ value: opt.value, text: opt.textContent })));
+            
+            if (selectedSupplierId) {
+                logIdsTomSelect.enable();
+            } else {
+                logIdsTomSelect.disable();
+            }
+        });
+        // Initial state
+        logIdsTomSelect.disable();
+    }
+
+    // --- NEW: Logic for Employee Advance Settlement ---
+    const employeeFilter = document.getElementById('advance_employee_filter');
+    const advanceSelectInput = document.getElementById('advance_id');
+    const expenseLogSelectInput = document.getElementById('expense_log_id');
+
+    if (employeeFilter && advanceSelectInput && expenseLogSelectInput) {
+        const advanceTomSelect = advanceSelectInput.tomselect;
+        const expenseLogTomSelect = expenseLogSelectInput.tomselect;
+        
+        const allAdvanceOptions = advanceTomSelect ? Object.values(advanceTomSelect.options) : [];
+        const allExpenseLogOptions = expenseLogTomSelect ? Object.values(expenseLogTomSelect.options) : [];
+
+        employeeFilter.addEventListener('change', function() {
+            const selectedEmployeeId = this.value;
+
+            // Filter Advances
+            if (advanceTomSelect) {
+                advanceTomSelect.clear();
+                advanceTomSelect.clearOptions();
+                const filteredAdvances = allAdvanceOptions.filter(opt => !selectedEmployeeId || opt.data.employee === selectedEmployeeId);
+                advanceTomSelect.addOptions(filteredAdvances);
+                selectedEmployeeId ? advanceTomSelect.enable() : advanceTomSelect.disable();
+            }
+
+            // Filter Expense Logs
+            if (expenseLogTomSelect) {
+                expenseLogTomSelect.clear();
+                expenseLogTomSelect.clearOptions();
+                const filteredLogs = allExpenseLogOptions.filter(opt => !selectedEmployeeId || opt.data.employee === selectedEmployeeId);
+                expenseLogTomSelect.addOptions(filteredLogs);
+                selectedEmployeeId ? expenseLogTomSelect.enable() : expenseLogTomSelect.disable();
+            }
+        });
+
+        // Initial state
+        if (advanceTomSelect) advanceTomSelect.disable();
+        if (expenseLogTomSelect) expenseLogTomSelect.disable();
+    }
+
+
     if (requestTypeSelect) {
         requestTypeSelect.addEventListener('change', function() {
             const selectedType = this.value;

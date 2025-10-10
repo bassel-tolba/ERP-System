@@ -10,5 +10,4 @@ from .sales import *
 from .finished_products import *
 from .purchase_orders import *
 from .templates import *
-from .expenses import *
 from .financial_reports import * # New import for financial reports views

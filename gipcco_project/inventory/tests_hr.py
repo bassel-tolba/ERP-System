@@ -2,12 +2,15 @@
 
 from decimal import Decimal
 from django.utils import timezone
+from datetime import date
 
 # Import the base test case from the new base file
 from .test_base import AccountingServiceBaseTestCase
 from .models import (
-    JournalEntry, Payment, EmployeeAdvance, EmployeeAdvanceSettlement, InventoryLog, ExpenseLog
+    Employee, EmployeeAdvance, EmployeeAdvanceSettlement, Payment, BankAccount,
+    ExpenseLog, JournalEntry, CostPool
 )
+from .services import accounting_service
 
 class TestEmployeeFinances(AccountingServiceBaseTestCase):
     """
@@ -18,14 +21,20 @@ class TestEmployeeFinances(AccountingServiceBaseTestCase):
         super().setUp()
         JournalEntry.objects.all().delete()
 
-    def test_create_je_for_employee_advance_success(self):
-        """
-        Verify that an employee advance correctly debits the employee advances
-        receivable account and credits the bank account.
-        """
-        # 1. Arrange
-        # An advance requires a source payment transaction
-        payment = Payment.objects.create(
+        # Create test-specific data
+        self.employee = Employee.objects.create(
+            first_name="John",
+            last_name="Doe",
+            employee_id="EMP001"
+        )
+        # self.bank_account is inherited from AccountingServiceBaseTestCase
+        self.cost_pool = CostPool.objects.create(
+            name="HR Test Cost Pool",
+            gl_account=self.accounts['50207']
+        )
+
+        # Create a payment to source the advance
+        self.payment = Payment.objects.create(
             payment_date=timezone.make_aware(timezone.datetime(2025, 9, 28, 9, 0, 0)),
             amount=Decimal("1000.000"),
             bank_account=self.bank_account,
@@ -33,13 +42,21 @@ class TestEmployeeFinances(AccountingServiceBaseTestCase):
             description=f"Advance for {self.employee.full_name}"
         )
         
-        advance = EmployeeAdvance.objects.create(
+        self.advance = EmployeeAdvance.objects.create(
             employee=self.employee,
             advance_date=timezone.make_aware(timezone.datetime(2025, 9, 28, 9, 0, 0)),
             amount=Decimal("1000.000"),
-            source_payment=payment
+            source_payment=self.payment
         )
 
+    def test_create_je_for_employee_advance_success(self):
+        """
+        Verify that an employee advance correctly debits the employee advances
+        receivable account and credits the bank account.
+        """
+        # 1. Arrange
+        # An advance requires a source payment transaction
+        
         # 2. Act: The post_save signal on EmployeeAdvance will fire. The signal
         # on Payment will not create a JE because there is no supplier/customer.
         
@@ -47,7 +64,7 @@ class TestEmployeeFinances(AccountingServiceBaseTestCase):
         self.assertEqual(JournalEntry.objects.count(), 1)
         je = JournalEntry.objects.first()
         self.assertIsNotNone(je)
-        self.assertEqual(je.source_object, advance)
+        self.assertEqual(je.source_object, self.advance)
         self.assertEqual(je.lines.count(), 2)
 
         # Verify the debit to Employee Advances Receivable
@@ -61,61 +78,47 @@ class TestEmployeeFinances(AccountingServiceBaseTestCase):
         self.assertEqual(credit_line.amount, Decimal("1000.000"))
 
     def test_employee_advance_settlement_and_status_change(self):
-        """
-        Verify that settling an advance updates its status and unsettled amount correctly.
-        """
-        # 1. Arrange: Create an advance to be settled
-        payment = Payment.objects.create(
-            payment_date="2025-09-01", amount=Decimal("2000.000"),
-            bank_account=self.bank_account, payment_type=Payment.PaymentType.PAYMENT_OUT
-        )
-        advance = EmployeeAdvance.objects.create(
-            employee=self.employee, advance_date="2025-09-01",
-            amount=Decimal("2000.000"), source_payment=payment
-        )
-        self.assertEqual(advance.status, EmployeeAdvance.Status.OPEN)
-        self.assertEqual(self.employee.outstanding_advance_balance, Decimal("2000.000"))
-
-        # Create an expense log that will be used to settle part of the advance
+        """Verify that settling an advance updates its status and unsettled amount correctly."""
+        # 1. Settle a portion of the advance
         expense = ExpenseLog.objects.create(
             expense_date="2025-09-05",
-            amount=Decimal("500.000"),
-            description="Travel Expenses",
-            category=ExpenseLog.Category.TRANSPORT,
-            classification=ExpenseLog.Classification.SG_A,
+            amount=Decimal("150.000"),
+            description="Partial settlement",
+            cost_pool=self.cost_pool,
             employee=self.employee
         )
-
-        # 2. Act: Create a settlement record linking the expense to the advance
-        settlement = EmployeeAdvanceSettlement.objects.create(
-            advance=advance,
-            amount_settled=Decimal("500.000"),
-            source_transaction=expense
+        settlement1 = EmployeeAdvanceSettlement.objects.create(
+            advance=self.advance,
+            amount_settled=Decimal("150.000"),
+            source_transaction=expense,
+            settlement_date=date(2025, 9, 5)
         )
-        # The signal on the settlement should trigger the advance status update
-        advance.refresh_from_db()
+        self.advance.refresh_from_db()
 
-        # 3. Assert
-        self.assertEqual(advance.total_settled, Decimal("500.000"))
-        self.assertEqual(advance.unsettled_amount, Decimal("1500.000"))
-        self.assertEqual(advance.status, EmployeeAdvance.Status.PARTIALLY_SETTLED)
-        self.assertEqual(self.employee.outstanding_advance_balance, Decimal("1500.000"))
+        # 2. Assert: Check that the advance is partially settled
+        self.assertEqual(self.advance.total_settled, Decimal("150.000"))
+        self.assertEqual(self.advance.unsettled_amount, Decimal("850.000"))
+        self.assertEqual(self.advance.status, EmployeeAdvance.Status.PARTIALLY_SETTLED)
+        self.assertEqual(self.employee.outstanding_advance_balance, Decimal("850.000"))
 
-        # 4. Act: Settle the rest of the advance
+        # 3. Settle the remaining amount of the advance
         expense2 = ExpenseLog.objects.create(
-            expense_date="2025-09-10", amount=Decimal("1500.000"),
-            description="Conference Fee", category=ExpenseLog.Category.FEES,
-            classification=ExpenseLog.Classification.SG_A, employee=self.employee
+            expense_date="2025-09-10",
+            amount=Decimal("850.000"),
+            description="Final settlement",
+            cost_pool=self.cost_pool,
+            employee=self.employee
         )
-        EmployeeAdvanceSettlement.objects.create(
-            advance=advance,
-            amount_settled=Decimal("1500.000"),
-            source_transaction=expense2
+        settlement2 = EmployeeAdvanceSettlement.objects.create(
+            advance=self.advance,
+            amount_settled=Decimal("850.000"),
+            source_transaction=expense2,
+            settlement_date=date(2025, 9, 10)
         )
-        advance.refresh_from_db()
+        self.advance.refresh_from_db()
 
-        # 5. Assert
-        self.assertEqual(advance.total_settled, Decimal("2000.000"))
-        self.assertEqual(advance.unsettled_amount, Decimal("0.000"))
-        self.assertEqual(advance.status, EmployeeAdvance.Status.SETTLED)
+        # 4. Assert: Check that the advance is fully settled
+        self.assertEqual(self.advance.total_settled, Decimal("1000.000"))
+        self.assertEqual(self.advance.unsettled_amount, Decimal("0.000"))
+        self.assertEqual(self.advance.status, EmployeeAdvance.Status.SETTLED)
         self.assertEqual(self.employee.outstanding_advance_balance, Decimal("0.000"))

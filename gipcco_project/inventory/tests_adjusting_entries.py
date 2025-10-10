@@ -204,60 +204,63 @@ class TestAdjustingEntries(AccountingServiceBaseTestCase):
     def test_full_accrual_and_true_up_lifecycle(self):
         """
         Test the full accrual lifecycle:
-        1. Initial estimated JE is created by the monthly service.
-        2. A SupplierInvoice with a different value is linked.
-        3. Verify the three-part "true-up" JE is generated correctly.
+        1. An AccruedExpense is created covering multiple months.
+        2. The monthly service runs, creating a prorated AccrualLog and JE.
+        3. A SupplierInvoice with a different value is linked.
+        4. Verify the three-part "true-up" JE is generated correctly.
         """
-        # 1. Arrange: Create an AccruedExpense for utilities
+        # 1. Arrange: Create an AccruedExpense for utilities spanning 3 months
         accrual = AccruedExpense.objects.create(
-            description="Factory Utilities",
-            estimated_monthly_amount=Decimal("5000.000"),
-            target_expense_account=self.accounts['50208'], # Utilities Expense
-            target_liability_account=self.accounts['20204'] # Accrued Expenses
+            description="Factory Utilities (Q4)",
+            total_estimated_amount=Decimal("15000.000"), # For 3 months
+            accrual_start_date=date(2025, 10, 1),
+            accrual_end_date=date(2025, 12, 31),
+            target_expense_account=self.accounts['50207'], # Using G&A for test
+            target_liability_account=self.general_settings.accrued_expenses_account,
+            status=AccruedExpense.Status.ACTIVE
         )
 
-        # 2. Act (Part 1): Run the accrual service for September
-        run_monthly_accruals(self.period)
+        # 2. Act (Part 1): Run the accrual service for October
+        october_period = FinancialPeriod.objects.get(name="October 2025")
+        run_monthly_accruals(october_period)
 
         # 3. Assert (Part 1): Verify the initial accrual JE
         self.assertEqual(AccrualLog.objects.count(), 1)
         log = AccrualLog.objects.first()
-        self.assertEqual(log.amount, Decimal("5000.000"))
+        
+        # Oct has 31 days. Total period is 92 days (Oct, Nov, Dec).
+        # Expected amount = (15000 / 92) * 31
+        expected_amount = (Decimal("15000.000") / 92 * 31).quantize(Decimal('0.001'))
+        self.assertAlmostEqual(log.amount, expected_amount, places=3)
         
         je1 = log.journal_entry
-        self.assertEqual(je1.lines.get(entry_type='debit').account, self.accounts['50208'])
-        self.assertEqual(je1.lines.get(entry_type='credit').account, self.accounts['20204'])
-        self.assertEqual(je1.lines.get(entry_type='debit').amount, Decimal("5000.000"))
+        self.assertEqual(je1.lines.get(entry_type='debit').account, self.accounts['50207'])
+        self.assertEqual(je1.lines.get(entry_type='credit').account, self.general_settings.accrued_expenses_account)
+        self.assertAlmostEqual(je1.lines.get(entry_type='debit').amount, expected_amount, places=3)
 
-        # 4. Arrange (Part 2): The actual invoice arrives in October
-        october_period = FinancialPeriod.objects.get(name="October 2025")
+        # 4. Arrange (Part 2): The actual invoice arrives in November
+        november_period, _ = FinancialPeriod.objects.get_or_create(
+            fiscal_year=self.fiscal_year, name="November 2025",
+            defaults={'start_date': date(2025, 11, 1), 'end_date': date(2025, 11, 30)}
+        )
         invoice = SupplierInvoice.objects.create(
             supplier=self.supplier,
-            invoice_number="UTIL-SEP-2025",
-            invoice_date=date(2025, 10, 5),
-            due_date=date(2025, 10, 20),
-            total_amount=Decimal("5500.000") # Actual cost is higher
+            invoice_number="UTIL-OCT-2025",
+            invoice_date=date(2025, 11, 5),
+            due_date=date(2025, 11, 20),
+            total_amount=Decimal("5500.000") # Actual cost for Oct is higher than estimate
         )
-        # This is a placeholder for the goods/services received
         dummy_log = InventoryLog.objects.create(
-            product=self.consumable_part,
-            quantity=1,
-            timestamp=timezone.now(),
-            status=InventoryLog.Status.RELEASED,
-            base_unit_price=0,
-            release_timestamp=timezone.make_aware(timezone.datetime(2025, 10, 5, 0, 0, 0))
+            product=self.consumable_part, quantity=1, timestamp=timezone.now(),
+            status=InventoryLog.Status.RELEASED, base_unit_price=0,
+            release_timestamp=timezone.make_aware(timezone.datetime(2025, 11, 5, 0, 0, 0))
         )
         SupplierInvoiceItem.objects.create(invoice=invoice, receipt=dummy_log, amount=invoice.total_amount)
 
-        # 5. Act (Part 2): Link the invoice to the accrual to trigger the true-up
-        # This logic will be in a separate service function, which we call here.
+        # 5. Act (Part 2): Link the invoice to the October accrual to trigger the true-up
         from .services.adjusting_entries_service import settle_accrual_with_invoice
         je2 = settle_accrual_with_invoice(log, invoice)
-        # For now, we will simulate the JE creation manually to test the concept.
         
-        # This is what the `settle_accrual_with_invoice` service *would* do:
-        
-
         # 6. Assert (Part 2): Verify the true-up JE
         self.assertIsNotNone(je2)
         self.assertEqual(je2.lines.count(), 4)
@@ -265,17 +268,15 @@ class TestAdjustingEntries(AccountingServiceBaseTestCase):
         debits = {l.account.code: l.amount for l in je2.lines.filter(entry_type='debit')}
         credits = {l.account.code: l.amount for l in je2.lines.filter(entry_type='credit')}
 
-        # Debits: Accrued Liability (5000) + Expense (5500)
-        self.assertEqual(debits[self.accounts['20204'].code], Decimal("5000.000"))
-        self.assertEqual(debits[self.accounts['50208'].code], Decimal("5500.000"))
+        # Debits: Accrued Liability (original estimate) + Expense (actual invoice)
+        self.assertAlmostEqual(debits[self.general_settings.accrued_expenses_account.code], expected_amount, places=3)
+        self.assertEqual(debits[self.accounts['50207'].code], Decimal("5500.000"))
         
-        # Credits: A/P (5500) + Expense (5000)
-        self.assertEqual(credits[self.accounts['20201'].code], Decimal("5500.000"))
-        self.assertEqual(credits[self.accounts['50208'].code], Decimal("5000.000"))
+        # Credits: A/P (actual invoice) + Expense (original estimate)
+        self.assertEqual(credits[self.general_settings.accounts_payable.code], Decimal("5500.000"))
+        self.assertAlmostEqual(credits[self.accounts['50207'].code], expected_amount, places=3)
 
-        self.assertEqual(sum(debits.values()), sum(credits.values())) # Balanced
-        
-        # Net effect on expense account for October: Debit 5500, Credit 5000 -> Net Debit of 500, which is the variance. Correct.
+        self.assertAlmostEqual(sum(debits.values()), sum(credits.values()), places=3) # Balanced
 
     def create_dummy_payment(self):
         """Helper to create a payment for linking to a prepaid."""

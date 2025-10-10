@@ -11,71 +11,144 @@ function initCustomerInvoiceListLogic(container) {
 
 function initCreateSupplierInvoiceLogic(container) {
   const supplierSelect = container.querySelector("#supplier");
-  const receiptsTableBody = container.querySelector("#receipts-table-body");
+  const itemsTableBody = container.querySelector("#items-table-body");
   const totalAmountSpan = container.querySelector("#total-amount");
-  const noReceiptsRow = container.querySelector("#no-receipts-row");
-  const loadingSpinner = container.querySelector("#receipts-loading");
+  const noItemsRow = container.querySelector("#no-items-row");
+  const loadingSpinner = container.querySelector("#items-loading");
+  const sourceTypeInput = container.querySelector("#source_type");
+  const tabs = container.querySelectorAll('#invoice-source-tabs .nav-link');
+  const selectAllCheckbox = container.querySelector('#select-all-items');
 
-  if (!supplierSelect || !receiptsTableBody) return;
+  if (!supplierSelect || !itemsTableBody || !sourceTypeInput) return;
+
+  let currentSource = 'receipts'; // Default source
 
   const updateTotal = () => {
     let total = 0;
-    receiptsTableBody.querySelectorAll('input[type="checkbox"]:checked').forEach(checkbox => {
+    itemsTableBody.querySelectorAll('input[type="checkbox"]:checked').forEach(checkbox => {
       total += parseFloat(checkbox.dataset.value);
     });
     totalAmountSpan.textContent = total.toFixed(3);
   };
 
-  receiptsTableBody.addEventListener("change", event => {
-    if (event.target.type === "checkbox") {
-      updateTotal();
+  const renderTable = (source, data) => {
+    itemsTableBody.innerHTML = ''; // Clear previous data
+    if (source === 'receipts') {
+      itemsTableBody.closest('table').querySelector('thead').innerHTML = `
+        <tr>
+          <th style="width: 5%;"><input class="form-check-input" type="checkbox" id="select-all-items" title="تحديد الكل"></th>
+          <th>تاريخ الإفراج</th>
+          <th>رقم الفحص</th>
+          <th>المنتج</th>
+          <th>الكمية</th>
+          <th class="text-end">القيمة</th>
+        </tr>
+      `;
+      data.forEach(item => {
+        const row = `
+          <tr>
+            <td><input class="form-check-input item-checkbox" type="checkbox" name="item_ids" value="${item.id}" data-value="${item.total_value}"></td>
+            <td>${item.release_date}</td>
+            <td>${item.qc_no || 'N/A'}</td>
+            <td>${item.product_name}</td>
+            <td>${item.quantity} ${item.unit}</td>
+            <td class="text-end">${parseFloat(item.total_value).toFixed(3)}</td>
+          </tr>
+        `;
+        itemsTableBody.insertAdjacentHTML("beforeend", row);
+      });
+    } else if (source === 'expenses') {
+      itemsTableBody.closest('table').querySelector('thead').innerHTML = `
+        <tr>
+          <th style="width: 5%;"><input class="form-check-input" type="checkbox" id="select-all-items" title="تحديد الكل"></th>
+          <th>تاريخ المصروف</th>
+          <th>الوصف</th>
+          <th>الفئة</th>
+          <th>رقم الطلب</th>
+          <th class="text-end">المبلغ</th>
+        </tr>
+      `;
+      data.forEach(item => {
+        const row = `
+          <tr>
+            <td><input class="form-check-input item-checkbox" type="checkbox" name="item_ids" value="${item.id}" data-value="${item.amount}"></td>
+            <td>${item.date}</td>
+            <td>${item.description}</td>
+            <td>${item.category}</td>
+            <td>#${item.request_id}</td>
+            <td class="text-end">${parseFloat(item.amount).toFixed(3)}</td>
+          </tr>
+        `;
+        itemsTableBody.insertAdjacentHTML("beforeend", row);
+      });
     }
-  });
+    // Re-bind the select-all checkbox logic after re-rendering the header
+    const newSelectAllCheckbox = itemsTableBody.closest('table').querySelector('#select-all-items');
+    if (newSelectAllCheckbox) {
+        newSelectAllCheckbox.addEventListener('change', (e) => {
+            itemsTableBody.querySelectorAll('.item-checkbox').forEach(checkbox => {
+                checkbox.checked = e.target.checked;
+            });
+            updateTotal();
+        });
+    }
+  };
 
-  supplierSelect.addEventListener("change", async event => {
-    const supplierId = event.target.value;
-    receiptsTableBody.innerHTML = "";
+  const fetchData = async () => {
+    const supplierId = supplierSelect.value;
+    itemsTableBody.innerHTML = "";
     totalAmountSpan.textContent = "0.000";
-    noReceiptsRow.classList.add("d-none");
+    noItemsRow.classList.add("d-none");
     loadingSpinner.classList.remove("d-none");
 
     if (!supplierId) {
       loadingSpinner.classList.add("d-none");
-      noReceiptsRow.classList.remove("d-none");
+      noItemsRow.classList.remove("d-none");
+      noItemsRow.textContent = "يرجى اختيار مورد لعرض البنود المتاحة.";
       return;
     }
 
     try {
-      const url = window.appUrls.apiUninvoicedReceipts.replace("<supplierId>", supplierId);
+      const url = currentSource === 'receipts' 
+        ? window.appUrls.apiUninvoicedReceipts.replace('0', supplierId)
+        : window.appUrls.apiUninvoicedExpenses.replace('0', supplierId);
+        
       const response = await fetch(url);
-      if (!response.ok) throw new Error("Network response was not ok");
+      if (!response.ok) throw new Error(`Network response was not ok (${response.status})`);
       const data = await response.json();
       
       loadingSpinner.classList.add("d-none");
-      
-      if (data.receipts.length === 0) {
-        noReceiptsRow.classList.remove("d-none");
+      const items = data.receipts || data.expenses;
+
+      if (items.length === 0) {
+        noItemsRow.classList.remove("d-none");
+        noItemsRow.textContent = "لا توجد بنود متاحة لهذا المورد.";
         return;
       }
+      
+      renderTable(currentSource, items);
 
-      data.receipts.forEach(receipt => {
-        const row = `
-          <tr>
-            <td><input class="form-check-input" type="checkbox" name="receipt_ids" value="${receipt.id}" data-value="${receipt.total_value}"></td>
-            <td>${receipt.release_date}</td>
-            <td>${receipt.qc_no || 'N/A'}</td>
-            <td>${receipt.product_name}</td>
-            <td>${receipt.quantity} ${receipt.unit}</td>
-            <td class="text-end">${parseFloat(receipt.total_value).toFixed(3)}</td>
-          </tr>
-        `;
-        receiptsTableBody.insertAdjacentHTML("beforeend", row);
-      });
     } catch (error) {
-      console.error("Failed to fetch receipts:", error);
+      console.error(`Failed to fetch ${currentSource}:`, error);
       loadingSpinner.classList.add("d-none");
-      noReceiptsRow.querySelector('td').textContent = "حدث خطأ أثناء تحميل البيانات.";
-      noReceiptsRow.classList.remove("d-none");
+      noItemsRow.textContent = "حدث خطأ أثناء تحميل البيانات.";
+      noItemsRow.classList.remove("d-none");
+    }
+  };
+
+  tabs.forEach(tab => {
+    tab.addEventListener('show.bs.tab', event => {
+      currentSource = event.target.dataset.source;
+      sourceTypeInput.value = currentSource;
+      fetchData();
+    });
+  });
+
+  supplierSelect.addEventListener("change", fetchData);
+
+  itemsTableBody.addEventListener("change", event => {
+    if (event.target.classList.contains('item-checkbox')) {
+      updateTotal();
     }
   });
 }

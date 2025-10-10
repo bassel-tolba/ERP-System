@@ -22,8 +22,10 @@ from inventory.models import (
     SupplierInvoice, SupplierInvoiceItem, Payment, PaymentApplication,
     CustomerInvoice, CustomerInvoiceItem, CustomerPaymentApplication,
     BankTransfer, FixedAsset, DepreciationLog, InventoryConsumption,
-    InventoryCount, InventoryAdjustment, TemplateItem, ExpenseRequest
+    InventoryCount, InventoryAdjustment, TemplateItem, ExpenseRequest, EmployeeAdvance,
+    AccruedExpense, AccrualLog
 )
+from inventory.services.adjusting_entries_service import run_monthly_accruals
 
 # A dictionary to hold created objects for easy reference
 # This avoids querying the DB repeatedly
@@ -72,6 +74,7 @@ def create_chart_of_accounts():
     create_account('20202', 'أرصدة دائنة أخرى', Account.AccountType.LIABILITY, '202')
     create_account('2020201', 'ضريبة القيمة المضافة (المخرجات)', Account.AccountType.LIABILITY, '20202')
     create_account('2020202', 'ضريبة الخصم من المنبع', Account.AccountType.LIABILITY, '20202')
+    create_account('2020203', 'مصروفات مستحقة', Account.AccountType.LIABILITY, '20202')
     create_account('20205', 'مجمعات الإهلاك', Account.AccountType.LIABILITY, '202')
     create_account('2020501', 'مجمع إهلاك - آلات ومعدات', Account.AccountType.LIABILITY, '20205')
     create_account('2020502', 'مجمع إهلاك - أثاث وتركيبات', Account.AccountType.LIABILITY, '20205')
@@ -98,6 +101,7 @@ def create_chart_of_accounts():
     create_account('50205', 'مصروفات الإهلاك', Account.AccountType.EXPENSE, '502')
     create_account('5020501', 'مصروف إهلاك - آلات ومعدات', Account.AccountType.EXPENSE, '50205')
     create_account('5020502', 'مصروف إهلاك - أثاث وتركيبات', Account.AccountType.EXPENSE, '50205')
+    create_account('50208', 'رسوم استشارات', Account.AccountType.EXPENSE, '502')
 
     CONTEXT['accounts'] = accounts
     return accounts
@@ -180,7 +184,7 @@ class Command(BaseCommand):
             inventory_adjustment_gain_account=accounts['40202'],
             employee_advances_receivable=accounts['1020405'],
             prepaid_expenses_account=accounts['10205'],
-            accrued_expenses_account=accounts['20202']
+            accrued_expenses_account=accounts['2020203']
         )
         ProductTypeAccountingSettings.objects.create(
             product_type=Product.ProductType.RAW_MATERIAL,
@@ -214,7 +218,8 @@ class Command(BaseCommand):
         supplier1, _ = Company.objects.get_or_create(name="Global Pharma Supplies")
         supplier2, _ = Company.objects.get_or_create(name="Advanced Medical Packaging Inc.")
         supplier3, _ = Company.objects.get_or_create(name="PetroChem Lubricants")
-        CONTEXT['suppliers'] = {'pharma': supplier1, 'packaging': supplier2, 'mro': supplier3}
+        supplier4, _ = Company.objects.get_or_create(name="Innovate Solutions Consulting")
+        CONTEXT['suppliers'] = {'pharma': supplier1, 'packaging': supplier2, 'mro': supplier3, 'consulting': supplier4}
 
         customer1, _ = Customer.objects.get_or_create(name="City Central Pharmacy")
         customer2, _ = Customer.objects.get_or_create(name="County General Hospital")
@@ -475,7 +480,7 @@ class Command(BaseCommand):
         self.stdout.write("   - Ran depreciation for September for the Filling Machine.")
 
         self.stdout.write("   - Creating sample Expense Requests...")
-        from inventory.services import approval_service
+        from inventory.services import approval_service, expense_service
 
         # a) Pending Direct Expense (Direct Payment)
         ExpenseRequest.objects.create(
@@ -530,12 +535,78 @@ class Command(BaseCommand):
         approval_service.reject_request(rejected_req.id, CONTEXT['user'], "This is not a capitalizable expense.")
         self.stdout.write("   - Created PENDING, APPROVED, and REJECTED expense requests.")
 
+        self.stdout.write("   - Creating full Accrual-to-Settlement workflow...")
+        # e) Create and approve an Accrual request
+        accrual_req = ExpenseRequest.objects.create(
+            requested_by=CONTEXT['user'],
+            request_type=ExpenseRequest.RequestType.ACCRUAL,
+            request_date=date(2025, 9, 1),
+            description="Q4 Financial Consulting Services",
+            amount=Decimal("6000.00"), # Total for 3 months
+            expense_account=CONTEXT['accounts']['50208'],
+            amortization_start_date=date(2025, 9, 1), # Using amortization fields for date range
+            amortization_end_date=date(2025, 11, 30),
+            status=ExpenseRequest.Status.PENDING,
+            supplier=CONTEXT['suppliers']['consulting']
+        )
+        approval_service.approve_request(accrual_req.id, CONTEXT['user'])
+        
+        # Simulate the September period-end process by calling the actual service
+        self.stdout.write("     - Running monthly accrual service for September...")
+        run_monthly_accruals(CONTEXT['period'])
+
+        # Find the log that was just created by the service
+        accrued_expense_schedule = AccruedExpense.objects.get(source_request=accrual_req)
+        sept_log = AccrualLog.objects.get(
+            accrued_expense=accrued_expense_schedule,
+            financial_period=CONTEXT['period']
+        )
+
+        # Create the actual invoice that arrives later
+        consulting_invoice = SupplierInvoice.objects.create(
+            supplier=CONTEXT['suppliers']['consulting'],
+            invoice_number="INV-CONSULT-SEP",
+            invoice_date=date(2025, 10, 5),
+            due_date=date(2025, 10, 31),
+            total_amount=Decimal("2150.00") # Actual is higher
+        )
+        
+        # Settle the September accrual with the actual invoice
+        expense_service.settle_accrual(
+            user=CONTEXT['user'],
+            accrual_log_id=sept_log.id,
+            invoice_id=consulting_invoice.id
+        )
+        self.stdout.write("   - Created and settled a sample accrual for consulting services.")
+
+
+        self.stdout.write("   - Creating sample Employee Advance...")
+        # Create a dummy payment for the advance source
+        advance_payment = Payment.objects.create(
+            payment_date=date(2025, 9, 8),
+            amount=Decimal("750.00"),
+            bank_account=CONTEXT['bank_account'],
+            payment_type=Payment.PaymentType.PAYMENT_OUT,
+            description="Cash advance for John Doe"
+        )
+        EmployeeAdvance.objects.create(
+            employee=CONTEXT['employee'],
+            advance_date=date(2025, 9, 8),
+            amount=Decimal("750.00"),
+            source_payment=advance_payment,
+            status=EmployeeAdvance.Status.OPEN
+        )
+        self.stdout.write("   - Created an OPEN employee advance.")
+
 
     def create_opening_balances(self):
         """Creates and posts a comprehensive opening balance entry."""
         self.stdout.write("5. Creating and posting opening balances for Jan 1, 2025...")
         from inventory.services.accounting_service import create_je_for_opening_balance
         from inventory.models import OpeningBalanceEntry, OpeningBalanceEntryLine, OpeningBalanceSubLedgerDetail
+        # --- FIX: Import signal components to temporarily disconnect the receiver ---
+        from django.db.models.signals import post_save
+        from inventory.signals import handle_fg_receipt_save
 
         migration_date = date(2025, 1, 1)
         fy_2025 = FiscalYear.objects.first()
@@ -565,34 +636,45 @@ class Command(BaseCommand):
         )
 
         # 1. Create Operational Sub-Ledger Records for Opening Balances
-        # a) Finished Goods Inventory
-        mig_template_saline = CONTEXT['template1']
-        mig_batch_saline, _ = Batch.objects.get_or_create(
-            shop_order_number="MIG-SO-SALINE",
-            defaults={'template': mig_template_saline, 'batch_number': "MIG-FG-1", 'creation_date': migration_date}
-        )
-        ob_receipt1, _ = FinishedProductReceipt.objects.get_or_create(
-            individual_batch_number="OB-FP-SALINE-001",
-            defaults={
-                'batch': mig_batch_saline, 'total_quantity_produced': 1000.0,
-                'total_cost': Decimal("5750.000"), 'receipt_date': migration_date,
-                'status': FinishedProductReceipt.Status.RELEASED
-            }
-        )
+        
+        # --- FIX: Temporarily disconnect the post_save signal for FinishedProductReceipt ---
+        post_save.disconnect(handle_fg_receipt_save, sender=FinishedProductReceipt)
+        self.stdout.write("   - (Temporarily disconnected FG receipt signal to prevent duplicate JEs)")
 
-        mig_template_glucose = CONTEXT['template2']
-        mig_batch_glucose, _ = Batch.objects.get_or_create(
-            shop_order_number="MIG-SO-GLUCOSE",
-            defaults={'template': mig_template_glucose, 'batch_number': "MIG-FG-2", 'creation_date': migration_date}
-        )
-        ob_receipt2, _ = FinishedProductReceipt.objects.get_or_create(
-            individual_batch_number="OB-FP-GLUCOSE-001",
-            defaults={
-                'batch': mig_batch_glucose, 'total_quantity_produced': 500.0,
-                'total_cost': Decimal("4200.000"), 'receipt_date': migration_date,
-                'status': FinishedProductReceipt.Status.RELEASED
-            }
-        )
+        try:
+            # a) Finished Goods Inventory
+            mig_template_saline = CONTEXT['template1']
+            mig_batch_saline, _ = Batch.objects.get_or_create(
+                shop_order_number="MIG-SO-SALINE",
+                defaults={'template': mig_template_saline, 'batch_number': "MIG-FG-1", 'creation_date': migration_date}
+            )
+            ob_receipt1, _ = FinishedProductReceipt.objects.get_or_create(
+                individual_batch_number="OB-FP-SALINE-001",
+                defaults={
+                    'batch': mig_batch_saline, 'total_quantity_produced': 1000.0,
+                    'total_cost': Decimal("5750.000"), 'receipt_date': migration_date,
+                    'status': FinishedProductReceipt.Status.RELEASED
+                }
+            )
+
+            mig_template_glucose = CONTEXT['template2']
+            mig_batch_glucose, _ = Batch.objects.get_or_create(
+                shop_order_number="MIG-SO-GLUCOSE",
+                defaults={'template': mig_template_glucose, 'batch_number': "MIG-FG-2", 'creation_date': migration_date}
+            )
+            ob_receipt2, _ = FinishedProductReceipt.objects.get_or_create(
+                individual_batch_number="OB-FP-GLUCOSE-001",
+                defaults={
+                    'batch': mig_batch_glucose, 'total_quantity_produced': 500.0,
+                    'total_cost': Decimal("4200.000"), 'receipt_date': migration_date,
+                    'status': FinishedProductReceipt.Status.RELEASED
+                }
+            )
+        finally:
+            # --- FIX: Reconnect the signal to ensure normal operation continues ---
+            post_save.connect(handle_fg_receipt_save, sender=FinishedProductReceipt)
+            self.stdout.write("   - (Reconnected FG receipt signal)")
+
 
         # b) Raw Materials Inventory
         ob_log_saline, _ = InventoryLog.objects.get_or_create(

@@ -195,6 +195,7 @@ urlpatterns = [
     path('api/get_used_qc_sources/<int:product_pk>/', get_used_qc_sources, name='get_used_qc_sources'),
     path('api/available_stock/<int:product_pk>/', api_get_available_stock, name='api_get_available_stock'),
     path('api/supplier/<int:supplier_id>/uninvoiced_receipts/', financials.api_get_uninvoiced_receipts, name='api_get_uninvoiced_receipts'),
+    path('api/supplier/<int:supplier_id>/unsettled_expenses/', financials.api_get_unsettled_expenses, name='api_get_unsettled_expenses'),
     path('api/sales_order/<int:so_id>/undispatched_items/', api.api_get_undispatched_so_items, name='api_get_undispatched_so_items'),
     path('api/product/<int:product_id>/sources/', api_get_stock_sources_for_product, name='api_get_stock_sources_for_product'),
     path('api/sales_order/<int:so_id>/uninvoiced_dispatches/', financials.api_get_uninvoiced_dispatches, name='api_get_uninvoiced_dispatches'),

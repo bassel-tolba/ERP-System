@@ -19,7 +19,7 @@ from ..models import (
     InventoryAdjustment, EmployeeAdvance, OverheadAllocationRun, CostPool, ExpenseLog, Account, TransactionCorrection,
     PeriodCloseChecklist, OpeningBalanceEntry, OpeningBalanceEntryLine,
     # --- NEW IMPORTS ---
-    PrepaidExpense, AmortizationLog, AccrualLog, ExpenseRequest
+    PrepaidExpense, AmortizationLog, AccrualLog, ExpenseRequest, EmployeeAdvanceSettlement
 )
 from ..services.costing_service import get_inventory_state_at_datetime
 
@@ -176,6 +176,7 @@ def create_je_for_inventory_adjustment(adjustment: InventoryAdjustment) -> Optio
                 journal_entry=je, account=gain_account, amount=adjustment_value, entry_type=JournalEntryLine.EntryType.CREDIT
             )
         
+        je.validate_balance()
         logger.info(f"    Successfully created JE-{je.id} for InventoryAdjustment ID {adjustment.id}.")
         logger.info(f"<-- Exiting 'create_je_for_inventory_adjustment' for Adjustment ID {adjustment.id}.")
     return je
@@ -282,6 +283,7 @@ def create_je_for_inventory_receipt(inventory_log: InventoryLog) -> Optional[Jou
                 entry_type=JournalEntryLine.EntryType.CREDIT
             )
 
+        je.validate_balance()
         logger.info(f"Successfully created Journal Entry JE-{je.id} for InventoryLog ID {inventory_log.id}.")
 
     return je
@@ -381,6 +383,7 @@ def create_je_for_production_consumption(batch: Batch) -> Optional[JournalEntry]
                     sub_ledger_object=product_sub_ledger
                 )
         
+        je.validate_balance()
         logger.info(f"Successfully created Journal Entry JE-{je.id} for Batch ID {batch.id}.")
     
     return je
@@ -470,6 +473,7 @@ def create_je_for_internal_consumption(consumption: InventoryConsumption) -> Opt
             sub_ledger_object=consumption.product
         )
         
+        je.validate_balance()
         logger.info(f"Successfully created Journal Entry JE-{je.id} for InventoryConsumption ID {consumption.id}.")
         
     return je
@@ -538,6 +542,7 @@ def create_je_for_finished_goods_receipt(receipt: FinishedProductReceipt) -> Opt
             sub_ledger_object=final_product
         )
 
+        je.validate_balance()
         logger.info(f"Successfully created Journal Entry JE-{je.id} for FinishedProductReceipt ID {receipt.id}.")
     return je
 
@@ -591,6 +596,7 @@ def create_je_for_production_return(prod_return: ProductionReturn) -> Optional[J
             journal_entry=je, account=wip_account, amount=return_value, entry_type=JournalEntryLine.EntryType.CREDIT,
             sub_ledger_object=prod_return.product
         )
+        je.validate_balance()
         logger.info(f"Successfully created JE-{je.id} for ProductionReturn ID {prod_return.id}.")
     return je
 
@@ -671,6 +677,7 @@ def create_je_for_sales_dispatch(dispatch: FinishedProductDispatch) -> Optional[
             JournalEntryLine.objects.create(
                 journal_entry=je, account=vat_payable_account, amount=vat_amount, entry_type=JournalEntryLine.EntryType.CREDIT
             )
+        je.validate_balance()
         logger.info(f"Successfully created JE-{je.id} for FinishedProductDispatch ID {dispatch.id}.")
     return je
 
@@ -730,6 +737,7 @@ def create_je_for_supplier_payment(payment: Payment) -> Optional[JournalEntry]:
             entry_type=JournalEntryLine.EntryType.CREDIT,
             sub_ledger_object=payment.bank_account
         )
+        je.validate_balance()
         logger.info(f"Successfully created JE-{je.id} for supplier Payment ID {payment.id}.")
     return je
 
@@ -801,6 +809,7 @@ def create_je_for_customer_payment(payment: Payment) -> Optional[JournalEntry]:
             entry_type=JournalEntryLine.EntryType.CREDIT,
             sub_ledger_object=payment.customer
         )
+        je.validate_balance()
         logger.info(f"Successfully created JE-{je.id} for customer Payment ID {payment.id}.")
     return je
 
@@ -855,7 +864,89 @@ def create_je_for_employee_advance(advance: EmployeeAdvance) -> Optional[Journal
             entry_type=JournalEntryLine.EntryType.CREDIT,
             sub_ledger_object=advance.source_payment.bank_account
         )
+        je.validate_balance()
         logger.info(f"Successfully created JE-{je.id} for EmployeeAdvance ID {advance.id}.")
+    return je
+
+def create_je_for_employee_advance_settlement(settlement: EmployeeAdvanceSettlement) -> Optional[JournalEntry]:
+    """
+    Creates a journal entry when an employee advance is settled.
+    The settlement source is determined via a GenericForeignKey (`source_transaction`).
+
+    - If the source is an ExpenseLog, it moves value from 'Accrued Expenses'
+      to 'Employee Advances Receivable'.
+    - If the source is None, it implies a direct repayment and moves value
+      from the default cash account to 'Employee Advances Receivable'.
+    """
+    # 1. --- Pre-checks and Guards ---
+    if JournalEntry.objects.filter(
+        content_type=ContentType.objects.get_for_model(settlement), object_id=settlement.id
+    ).exists():
+        logger.debug(f"Journal entry for EmployeeAdvanceSettlement ID {settlement.id} already exists. Aborting.")
+        return None
+
+    _check_period_is_open(settlement.settlement_date)
+
+    # 2. --- Get Accounts ---
+    settings = GeneralAccountingSettings.load()
+    employee_advances_account = settings.employee_advances_receivable
+    if not employee_advances_account:
+        raise ValueError(_("The Employee Advances Receivable account is not configured in General Settings."))
+
+    # 3. --- Determine Settlement Type and Prepare JE Details ---
+    description = ""
+    debit_account = None
+    source = settlement.source_transaction # <-- CORRECTED: Use source_transaction instead of source_object
+
+    if isinstance(source, ExpenseLog):
+        # Case 1: Settlement via an Expense Log
+        debit_account = settings.accrued_expenses_account
+        if not debit_account:
+            raise ValueError(_("The Accrued Expenses account is not configured in General Settings for expense-based settlement."))
+        
+        description = _(
+            "Settlement of advance for '%(employee)s' with expense log #%(log_id)s"
+        ) % {
+            'employee': settlement.advance.employee.full_name,
+            'log_id': source.id
+        }
+    else:
+        # Case 2: Direct repayment (source is None or another type like Payment)
+        debit_account = settings.default_cash_account
+        if not debit_account:
+            raise ValueError(_("The Default Cash Account is not configured in General Settings for direct advance repayment."))
+
+        description = _(
+            "Direct repayment of advance for '%(employee)s'"
+        ) % {
+            'employee': settlement.advance.employee.full_name
+        }
+
+    # 4. --- Create Journal Entry and Lines ---
+    with transaction.atomic():
+        je = JournalEntry.objects.create(
+            date=settlement.settlement_date, description=description, source_object=settlement,
+            status=JournalEntry.Status.POSTED
+        )
+
+        # Debit the determined account
+        JournalEntryLine.objects.create(
+            journal_entry=je, account=debit_account, amount=settlement.amount_settled, # <-- CORRECTED: Use amount_settled
+            entry_type=JournalEntryLine.EntryType.DEBIT
+        )
+        # Credit Employee Advances Receivable
+        JournalEntryLine.objects.create(
+            journal_entry=je, account=employee_advances_account, amount=settlement.amount_settled, # <-- CORRECTED: Use amount_settled
+            entry_type=JournalEntryLine.EntryType.CREDIT,
+            sub_ledger_object=settlement.advance.employee
+        )
+
+        je.validate_balance()
+        # Link the JE back to the settlement for traceability
+        settlement.journal_entry = je
+        settlement.save(update_fields=['journal_entry'])
+
+        logger.info(f"Successfully created JE-{je.id} for EmployeeAdvanceSettlement ID {settlement.id}.")
     return je
 
 
@@ -954,6 +1045,7 @@ def create_je_for_overhead_allocation(run: OverheadAllocationRun) -> Optional[Jo
                     entry_type=JournalEntryLine.EntryType.CREDIT
                 )
         
+        je.validate_balance()
         # Link the JE back to the run and update status
         run.journal_entry = je
         run.status = OverheadAllocationRun.Status.POSTED
@@ -1018,6 +1110,7 @@ def create_je_for_overhead_application(run: OverheadAllocationRun, total_applied
             journal_entry=je, account=wip_account, amount=total_applied_cost, entry_type=JournalEntryLine.EntryType.CREDIT
         )
 
+        je.validate_balance()
         # Link this new JE to the run and update the final status
         run.application_journal_entry = je
         run.status = OverheadAllocationRun.Status.APPLIED
@@ -1067,6 +1160,7 @@ def create_je_for_bank_transfer(transfer: BankTransfer) -> Optional[JournalEntry
             journal_entry=je, account=source_gl, amount=transfer.amount,
             entry_type=JournalEntryLine.EntryType.CREDIT
         )
+        je.validate_balance()
         logger.info(f"Successfully created JE-{je.id} for BankTransfer ID {transfer.id}.")
     return je
 
@@ -1127,6 +1221,7 @@ def create_je_for_depreciation(depreciation_log: DepreciationLog) -> Optional[Jo
             sub_ledger_object=asset
         )
         
+        je.validate_balance()
         # Link the JE back to the log for traceability
         depreciation_log.journal_entry = je
         depreciation_log.save(update_fields=['journal_entry'])
@@ -1192,6 +1287,7 @@ def create_je_for_amortization(amortization_log: AmortizationLog) -> Optional[Jo
             sub_ledger_object=prepaid
         )
         
+        je.validate_balance()
         # Link the JE back to the log for traceability
         amortization_log.journal_entry = je
         amortization_log.save(update_fields=['journal_entry'])
@@ -1253,6 +1349,7 @@ def create_je_for_accrual(accrual_log: AccrualLog) -> Optional[JournalEntry]:
             sub_ledger_object=accrual
         )
         
+        je.validate_balance()
         # Link the JE back to the log for traceability
         accrual_log.journal_entry = je
         accrual_log.save(update_fields=['journal_entry'])
@@ -1296,6 +1393,7 @@ def create_je_for_expense_log(expense_log: 'ExpenseLog'):
         amount=expense_log.amount,
         entry_type=JournalEntryLine.EntryType.CREDIT
     )
+    je.validate_balance()
 
 
 def create_transaction_for_direct_payment_expense(request: 'ExpenseRequest') -> 'ExpenseLog':
@@ -1355,6 +1453,7 @@ def create_transaction_for_direct_payment_expense(request: 'ExpenseRequest') -> 
             sub_ledger_object=request.bank_account
         )
 
+        je.validate_balance()
         # Link the JE to the expense log as the settlement object
         expense_log.settlement_object = je
         expense_log.save(update_fields=['settlement_content_type', 'settlement_object_id'])
@@ -1445,6 +1544,7 @@ def create_je_for_opening_balance(ob_entry: 'OpeningBalanceEntry') -> JournalEnt
 
         # 3. Final Validation and Posting
         logger.info(f"    Validation: Total Debits = {total_debits}, Total Credits = {total_credits}")
+        je.validate_balance()
         if total_debits != total_credits:
             # The transaction will be rolled back due to the exception
             raise ValueError(
@@ -1589,6 +1689,7 @@ def create_reversing_je_for_correction(
                 sub_ledger_object=line.sub_ledger_object
             )
 
+        je.validate_balance()
         # 3. --- Create the Audit Record ---
         correction_record = TransactionCorrection.objects.create(
             source_object=original_object,

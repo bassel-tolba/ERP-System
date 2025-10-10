@@ -1,15 +1,20 @@
 # inventory/services/expense_service.py
-from datetime import date
-from decimal import Decimal
+from datetime import date 
+from decimal import Decimal 
+from typing import List 
 from django.db.models import QuerySet
 from django.conf import settings
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
+from django.db import transaction 
+from django.contrib.contenttypes.models import ContentType # <-- ADD THIS IMPORT
 
 from ..models import (
     ExpenseRequest, Product, CostPool, FixedAsset, SupplierInvoice, Account, PrepaidExpense, AccrualLog,
-    TransactionCorrection, Company, BankAccount
+    TransactionCorrection, Company, BankAccount, ExpenseLog, SupplierInvoiceItem, EmployeeAdvance,
+    EmployeeAdvanceSettlement, GeneralAccountingSettings, JournalEntry, JournalEntryLine
+    
 )
 from . import adjusting_entries_service, accounting_service
 
@@ -174,6 +179,111 @@ def settle_accrual(user: User, accrual_log_id: int, invoice_id: int):
     return je
 
 
+# --- SETTLEMENT & A/P INTEGRATION ---
+
+def create_invoice_from_expense_logs(
+    user: User, supplier_id: int, invoice_number: str, invoice_date: date, due_date: date,
+    expense_log_ids: List[int]
+) -> SupplierInvoice:
+    """
+    Creates a SupplierInvoice from one or more unsettled ExpenseLogs.
+
+    This service is used to formalize expenses that were approved with the
+    'Accrue and Pay Later' method into a payable invoice. It marks the
+    source logs as settled.
+    """
+    with transaction.atomic():
+        supplier = get_object_or_404(Company, pk=supplier_id)
+        logs_to_settle = ExpenseLog.objects.select_related('source_request').filter(id__in=expense_log_ids)
+
+        if not logs_to_settle.exists():
+            raise ValidationError("No valid Expense Logs were provided.")
+
+        total_amount = Decimal('0.0')
+        for log in logs_to_settle:
+            if log.settlement_status != ExpenseLog.SettlementStatus.UNSETTLED:
+                raise ValidationError(f"Expense Log #{log.id} ('{log.description}') has already been settled.")
+            if log.source_request.supplier != supplier:
+                raise ValidationError(f"Expense Log #{log.id} does not belong to supplier '{supplier.name}'.")
+            total_amount += log.amount
+
+        # Create the invoice header
+        invoice = SupplierInvoice.objects.create(
+            supplier=supplier,
+            invoice_number=invoice_number,
+            invoice_date=invoice_date,
+            due_date=due_date,
+            total_amount=total_amount,
+            status=SupplierInvoice.InvoiceStatus.DRAFT
+        )
+
+        # Create invoice items from the expense logs
+        for log in logs_to_settle:
+            SupplierInvoiceItem.objects.create(
+                invoice=invoice,
+                expense_log=log,
+                amount=log.amount
+            )
+            # Settle the log
+            log.settlement_status = ExpenseLog.SettlementStatus.SETTLED
+            log.settlement_object = invoice
+        
+        ExpenseLog.objects.bulk_update(logs_to_settle, ['settlement_status', 'settlement_content_type', 'settlement_object_id'])
+
+    return invoice
+
+
+@transaction.atomic
+def settle_employee_advance_with_expense(
+    user: User, advance_id: int, expense_log_id: int, settlement_date: date
+) -> EmployeeAdvanceSettlement:
+    """
+    Settles an employee advance using an approved expense log.
+
+    This creates a settlement record linking the advance to the expense,
+    updates the expense log's status, and relies on a signal to create
+    the corresponding journal entry.
+    """
+    advance = get_object_or_404(EmployeeAdvance.objects.select_for_update(), pk=advance_id)
+    expense_log = get_object_or_404(ExpenseLog.objects.select_for_update(), pk=expense_log_id)
+
+    # --- Validations ---
+    if advance.status == EmployeeAdvance.Status.SETTLED:
+        raise ValidationError(f"Advance {advance.id} is already settled.")
+
+    # --- FIX: Validate against the expense log's status directly ---
+    if expense_log.settlement_status == ExpenseLog.SettlementStatus.SETTLED:
+        raise ValidationError("This expense has already been settled.")
+
+    if expense_log.amount > advance.unsettled_amount:
+        raise ValidationError(
+            f"Expense amount ({expense_log.amount}) exceeds the advance's unsettled amount ({advance.unsettled_amount})."
+        )
+    
+    # This check is still valid as a safeguard against race conditions or duplicate submissions
+    if EmployeeAdvanceSettlement.objects.filter(
+        object_id=expense_log.id, 
+        content_type=ContentType.objects.get_for_model(ExpenseLog)
+    ).exists():
+        raise ValidationError(f"Expense Log {expense_log.id} has already been used to settle an advance.")
+
+    # --- Create Settlement ---
+    settlement = EmployeeAdvanceSettlement.objects.create(
+        advance=advance,
+        source_transaction=expense_log,
+        amount_settled=expense_log.amount,
+        settlement_date=settlement_date
+    )
+    
+    # --- FIX: Explicitly update the expense log ---
+    expense_log.settlement_status = ExpenseLog.SettlementStatus.SETTLED
+    expense_log.settlement_object = settlement
+    expense_log.save(update_fields=['settlement_status', 'settlement_content_type', 'settlement_object_id'])
+    
+    # The post_save signal on EmployeeAdvanceSettlement will handle JE creation
+    # and updating the advance status.
+    
+    return settlement
 # --- CORRECTION ---
 def correct_approved_request(request_id: int, user: User, justification: str) -> TransactionCorrection:
     """

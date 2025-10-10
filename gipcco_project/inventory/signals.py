@@ -31,6 +31,7 @@ from .services.accounting_service import (
     create_je_for_depreciation, # <-- IMPORT NEW SERVICE
     create_je_for_inventory_adjustment,
     create_je_for_employee_advance,
+    create_je_for_employee_advance_settlement,
     # --- NEW IMPORTS ---
     create_je_for_amortization,
     create_je_for_accrual,
@@ -192,15 +193,21 @@ def handle_internal_consumption_save(sender, instance: InventoryConsumption, cre
             )
         return
 
-    # Path C (Default): Create a direct ExpenseLog for overhead tracking
-    if instance.cost_pool:
-        ExpenseLog.objects.create(
-            description=f"Direct consumption of '{instance.product.name}'",
-            expense_date=instance.consumption_date.date(),
-            amount=instance.cost_at_consumption,
-            cost_pool=instance.cost_pool,
-            source_request=request
-        )
+    # Path C (Default): Create a direct ExpenseLog for overhead tracking,
+    # but ONLY if this consumption didn't originate from an INVENTORY_EXPENSE request.
+    if instance.consumption_type == InventoryConsumption.ConsumptionType.EXPENSE and instance.cost_pool:
+        # This logic is for consumptions created manually, not through the request workflow.
+        # The request workflow for INVENTORY_EXPENSE creates its own ExpenseLog.
+        if not request:
+            ExpenseLog.objects.create(
+                description=f"Internal consumption of {instance.product.name}",
+                expense_date=instance.consumption_date.date(),
+                amount=instance.cost_at_consumption,
+                category=ExpenseLog.Category.MAINTENANCE, # A sensible default
+                classification=ExpenseLog.Classification.MANUFACTURING_OVERHEAD, # A sensible default
+                cost_pool=instance.cost_pool,
+                source_content_object=instance
+            )
 
 
 @receiver(post_delete, sender=InventoryConsumption)
@@ -382,6 +389,13 @@ def handle_expense_log_save(sender, instance: ExpenseLog, created, **kwargs):
     if getattr(instance, '_skip_je_creation', False):
         return
 
+    # --- MODIFICATION START ---
+    # If the source is an InventoryConsumption, the JE has already been created by that signal.
+    if instance.source_content_type == ContentType.objects.get_for_model(InventoryConsumption):
+        logger.debug(f"JE creation skipped for ExpenseLog ID {instance.id} because its source is an InventoryConsumption.")
+        return
+    # --- MODIFICATION END ---
+
     if created:
         create_je_for_expense_log(instance)
 
@@ -439,18 +453,23 @@ def handle_employee_advance_deletion(sender, instance: EmployeeAdvance, **kwargs
         logger.error(f"Error deleting Journal Entry for EmployeeAdvance ID {instance.id}: {e}")
 
 
-# --- NEW SIGNAL FOR EMPLOYEE ADVANCE SETTLEMENT ---
 @receiver(post_save, sender=EmployeeAdvanceSettlement)
 def handle_advance_settlement_save(sender, instance: EmployeeAdvanceSettlement, created, **kwargs):
     """
-    Listens for a settlement to be saved and triggers an update on the parent
-    EmployeeAdvance's status.
+    Listens for a settlement to be saved. If new, it creates the settlement JE
+    and then triggers an update on the parent EmployeeAdvance's status.
     """
     if created:
+        # --- MODIFICATION START ---
+        # Create the journal entry to move the value from Accrued Expenses to the Employee Advance Receivable.
+        if not instance.journal_entry:
+            create_je_for_employee_advance_settlement(settlement=instance)
+        # --- MODIFICATION END ---
+
+        # Update the status of the parent advance.
         advance = instance.advance
         advance.update_status(save=True)
         logger.info(f"Updated status for EmployeeAdvance ID {advance.id} due to new settlement.")
-
 
 @receiver(post_save, sender=FinancialPeriod)
 def create_period_close_checklist(sender, instance, created, **kwargs):

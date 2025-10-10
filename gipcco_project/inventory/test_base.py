@@ -1,7 +1,7 @@
 # gipcco_project/inventory/test_base.py
 
 from decimal import Decimal
-from django.test import TransactionTestCase
+from django.test import TestCase
 from django.contrib.auth.models import User
 from django.utils import timezone
 from datetime import date
@@ -123,30 +123,28 @@ def create_chart_of_accounts():
 
     return accounts
 
-class AccountingServiceBaseTestCase(TransactionTestCase):
+class AccountingServiceBaseTestCase(TestCase):
     """
     A base test case that sets up a scalable and reusable testing environment
     for accounting-related services.
     """
-    # Using serialized_rollback=True can speed up tests that don't need to interact
-    # with transaction-sensitive code (like testing third-party payment gateways).
-    # For this case, we need real commits, so we don't set it.
+    # Using TestCase with setUpTestData is much more efficient than TransactionTestCase
+    # as it creates the common data only once per test class run.
 
-    def setUp(self):
+    @classmethod
+    def setUpTestData(cls):
         """
         Set up non-modified objects used by all test methods in this class.
-        This is run before every test since TransactionTestCase flushes the DB.
+        This is run once per class, making it much faster.
         """
-        super().setUp()
-
         # 1. Create Fiscal Year and an Open Period
-        self.fiscal_year = FiscalYear.objects.create(
+        cls.fiscal_year = FiscalYear.objects.create(
             name="Test Fiscal Year 2025",
             start_date=date(2025, 1, 1),
             end_date=date(2025, 12, 31)
         )
-        self.period = FinancialPeriod.objects.create(
-            fiscal_year=self.fiscal_year,
+        cls.period = FinancialPeriod.objects.create(
+            fiscal_year=cls.fiscal_year,
             name="September 2025",
             start_date=date(2025, 9, 1),
             end_date=date(2025, 9, 30),
@@ -154,14 +152,14 @@ class AccountingServiceBaseTestCase(TransactionTestCase):
         )
         # --- FIX: Add more periods to prevent test failures on different dates ---
         FinancialPeriod.objects.create(
-            fiscal_year=self.fiscal_year,
+            fiscal_year=cls.fiscal_year,
             name="October 2025",
             start_date=date(2025, 10, 1),
             end_date=date(2025, 10, 31),
             status=FinancialPeriod.Status.OPEN
         )
         FinancialPeriod.objects.create(
-            fiscal_year=self.fiscal_year,
+            fiscal_year=cls.fiscal_year,
             name="January 2025",
             start_date=date(2025, 1, 1),
             end_date=date(2025, 1, 31),
@@ -170,80 +168,80 @@ class AccountingServiceBaseTestCase(TransactionTestCase):
 
 
         # 2. Create Chart of Accounts
-        self.accounts = create_chart_of_accounts()
+        cls.accounts = create_chart_of_accounts()
 
         # 3. Configure General Accounting Settings
-        self.general_settings = GeneralAccountingSettings.objects.create(
+        cls.general_settings = GeneralAccountingSettings.objects.create(
             pk=1, # Enforce singleton behavior
-            accounts_payable=self.accounts['20201'],
-            accounts_receivable=self.accounts['10203'],
-            vat_receivable=self.accounts['1020404'],
-            vat_payable=self.accounts['2020201'],
-            wip_inventory=self.accounts['1020205'],
-            withholding_tax_payable=self.accounts['2020202'],
-            finished_goods_inventory=self.accounts['1020206'],
-            inventory_adjustment_loss_account=self.accounts['503'],
-            inventory_adjustment_gain_account=self.accounts['40202'],
-            employee_advances_receivable=self.accounts['1020405']
+            accounts_payable=cls.accounts['20201'],
+            accounts_receivable=cls.accounts['10203'],
+            vat_receivable=cls.accounts['1020404'],
+            vat_payable=cls.accounts['2020201'],
+            wip_inventory=cls.accounts['1020205'],
+            withholding_tax_payable=cls.accounts['2020202'],
+            finished_goods_inventory=cls.accounts['1020206'],
+            inventory_adjustment_loss_account=cls.accounts['503'],
+            inventory_adjustment_gain_account=cls.accounts['40202'],
+            employee_advances_receivable=cls.accounts['1020405']
         )
-        self.general_settings.customer_deposits_account = self.accounts['20203']
-        self.general_settings.sales_returns_account = self.accounts['40102']
-        self.general_settings.prepaid_expenses_account = self.accounts['10205']
-        self.general_settings.accrued_expenses_account = self.accounts['20204']
-        self.general_settings.damaged_goods_expense_account = self.accounts['50206']
-        self.general_settings.save()
+        cls.general_settings.customer_deposits_account = cls.accounts['20203']
+        cls.general_settings.sales_returns_account = cls.accounts['40102']
+        cls.general_settings.prepaid_expenses_account = cls.accounts['10205']
+        cls.general_settings.accrued_expenses_account = cls.accounts['20204']
+        cls.general_settings.damaged_goods_expense_account = cls.accounts['50206']
+        cls.general_settings.save()
 
         # 4. Configure Product Type Accounting Settings
         ProductTypeAccountingSettings.objects.create(
             product_type=Product.ProductType.RAW_MATERIAL,
-            inventory_account=self.accounts['1020201'],
-            cogs_or_expense_account=self.accounts['50101'] # Not typically used for RM, but required
+            inventory_account=cls.accounts['1020201'],
+            cogs_or_expense_account=cls.accounts['50101'] # Not typically used for RM, but required
         )
         ProductTypeAccountingSettings.objects.create(
             product_type=Product.ProductType.PACKAGING,
-            inventory_account=self.accounts['1020202'],
-            cogs_or_expense_account=self.accounts['50101']
+            inventory_account=cls.accounts['1020202'],
+            cogs_or_expense_account=cls.accounts['50101']
         )
         ProductTypeAccountingSettings.objects.create(
             product_type=Product.ProductType.FINAL_PRODUCT,
-            inventory_account=self.accounts['1020206'],
-            cogs_or_expense_account=self.accounts['50101'],
-            sales_revenue_account=self.accounts['40101']
+            inventory_account=cls.accounts['1020206'],
+            cogs_or_expense_account=cls.accounts['50101'],
+            sales_revenue_account=cls.accounts['40101']
         )
         ProductTypeAccountingSettings.objects.create(
             product_type=Product.ProductType.MRO,
-            inventory_account=self.accounts['1020207'],
-            cogs_or_expense_account=self.accounts['50201']
+            inventory_account=cls.accounts['1020207'],
+            cogs_or_expense_account=cls.accounts['50201']
         )
 
         # 5. Create Base Operational Objects
-        self.supplier = Company.objects.create(name="Test Supplier Pharma")
-        self.customer = Customer.objects.create(name="Test Customer Pharmacy")
-        self.raw_material = Product.objects.create(
+        cls.supplier = Company.objects.create(name="Test Supplier Pharma")
+        cls.customer = Customer.objects.create(name="Test Customer Pharmacy")
+        cls.raw_material = Product.objects.create(
             name="Saline Solution",
             code="RM-SALINE-001",
             product_type=Product.ProductType.RAW_MATERIAL,
             unit="Liter"
         )
-        self.packaging_material = Product.objects.create(
+        cls.packaging_material = Product.objects.create(
             name="PVC Bag 500ml",
             code="PKG-BAG-500",
             product_type=Product.ProductType.PACKAGING,
             unit="Unit"
         )
-        self.final_product = Product.objects.create(
+        cls.final_product = Product.objects.create(
             name="IV Drip Bag 500ml",
             code="FP-IVDRIP-500",
             product_type=Product.ProductType.FINAL_PRODUCT,
             unit="Bag"
         )
-        self.mro_product = Product.objects.create(
+        cls.mro_product = Product.objects.create(
             name="Machine Lubricant",
             code="MRO-LUBE-001",
             product_type=Product.ProductType.MRO,
             unit="Can"
         )
-        self.amortizable_product = Product.objects.create(
+        cls.amortizable_product = Product.objects.create(
             name="Amortizable Filter",
             code="MRO-FILT-001A",
             product_type=Product.ProductType.MRO,
@@ -252,80 +250,75 @@ class AccountingServiceBaseTestCase(TransactionTestCase):
         )
 
         # 6. Create a Bank Account for transactions
-        self.bank_account = BankAccount.objects.create(
+        cls.bank_account = BankAccount.objects.create(
             name="Test Bank Account",
-            gl_account=self.accounts['1020102'] # النقدية بالبنوك
+            gl_account=cls.accounts['1020102'] # النقدية بالبنوك
         )
-        self.secondary_bank_account = BankAccount.objects.create(
+        cls.secondary_bank_account = BankAccount.objects.create(
             name="Secondary Test Bank Account",
-            gl_account=self.accounts['1020103']
+            gl_account=cls.accounts['1020103']
         )
 
-        # 7. Create a Test User and Employee
-        self.test_user = User.objects.create_user(username='testuser', password='password')
-        self.employee = Employee.objects.create(
-            employee_id='E-001',
-            first_name='Test',
-            last_name='Employee'
-        )
+        # 7. Create a Test User
+        cls.test_user = User.objects.create_user(username='testuser', password='password')
 
         # 8. Create Overhead Allocation Objects
-        self.parent_pool = CostPool.objects.create(
+        cls.parent_pool = CostPool.objects.create(
             name="Factory Overhead", code="FOH",
             gl_account=None # Parent pools don't need a direct GL link
         )
-        self.child_pool_rent = CostPool.objects.create(
-            name="Factory Rent", code="FOH-RENT", parent=self.parent_pool,
-            gl_account=self.accounts['50203']
+        cls.child_pool_rent = CostPool.objects.create(
+            name="Factory Rent", code="FOH-RENT", parent=cls.parent_pool,
+            gl_account=cls.accounts['50203']
         )
-        self.child_pool_maintenance = CostPool.objects.create(
-            name="Factory Maintenance", code="FOH-MAINT", parent=self.parent_pool,
-            gl_account=self.accounts['50201']
+        cls.child_pool_maintenance = CostPool.objects.create(
+            name="Factory Maintenance", code="FOH-MAINT", parent=cls.parent_pool,
+            gl_account=cls.accounts['50201']
         )
-        self.machine_hours_driver = AllocationDriver.objects.create(
+        cls.machine_hours_driver = AllocationDriver.objects.create(
             name=AllocationDriver.DriverChoices.MACHINE_HOURS
         )
-        self.labor_hours_driver = AllocationDriver.objects.create(
+        cls.labor_hours_driver = AllocationDriver.objects.create(
             name=AllocationDriver.DriverChoices.LABOR_HOURS
         )
-        self.bottle_units_driver = AllocationDriver.objects.create(
+        cls.bottle_units_driver = AllocationDriver.objects.create(
             name=AllocationDriver.DriverChoices.BOTTLE_UNITS
         )
-        self.liters_volume_driver = AllocationDriver.objects.create(
+        cls.liters_volume_driver = AllocationDriver.objects.create(
             name=AllocationDriver.DriverChoices.LITERS_VOLUME
         )
 
         # 9. Create a Shop Order Template for use in multiple tests
-        self.test_template = ShopOrderTemplate.objects.create(
+        cls.test_template = ShopOrderTemplate.objects.create(
             name="Standard IV Drip Template",
-            final_product=self.final_product,
+            final_product=cls.final_product,
             bottle_size_ml=500 
         )
 
         # 10. Create common receipts for adjustment/financial tests
-        batch = self.get_or_create_batch_for_template(self.test_template, "SO-SETUP-01", "B-SETUP-01")
-        self.receipt1 = self.get_or_create_receipt(batch, "FPB-SETUP-01", 100.0, "1000.000", "2025-09-05")
-        self.receipt2 = self.get_or_create_receipt(batch, "FPB-SETUP-02", 50.0, "550.000", "2025-09-06")
+        batch = cls.get_or_create_batch_for_template(cls.test_template, "SO-SETUP-01", "B-SETUP-01")
+        cls.receipt1 = cls.get_or_create_receipt(batch, "FPB-SETUP-01", 100.0, "1000.000", "2025-09-05")
+        cls.receipt2 = cls.get_or_create_receipt(batch, "FPB-SETUP-02", 50.0, "550.000", "2025-09-06")
 
         # 11. Create Fixed Assets
-        self.asset1 = FixedAsset.objects.create(
+        cls.asset1 = FixedAsset.objects.create(
             asset_tag="MACHINE-TEST-001",
             name="Test Production Filling Machine",
-            gl_account=self.accounts['10101'],
-            depreciation_expense_account=self.accounts['5020501'],
-            accumulated_depreciation_account=self.accounts['2020501'],
+            gl_account=cls.accounts['10101'],
+            depreciation_expense_account=cls.accounts['5020501'],
+            accumulated_depreciation_account=cls.accounts['2020501'],
             purchase_date="2024-01-01",
             purchase_cost=Decimal("120000.000"),
             depreciation_start_date="2024-01-01",
             useful_life_years=10,
             salvage_value=Decimal("0.000")
         )
-        self.asset2 = FixedAsset.objects.create(
+        cls.asset2 = FixedAsset.objects.create(
             asset_tag="FURN-TEST-001",
             name="Test Office Furniture Set",
-            gl_account=self.accounts['10102'],
-            depreciation_expense_account=self.accounts['5020502'],
-            accumulated_depreciation_account=self.accounts['2020502'],
+            gl_account=cls.accounts['10102'],
+            depreciation_expense_account=cls.accounts['5020502'],
+            accumulated_depreciation_account=cls.accounts['2020502'],
             purchase_date="2023-07-01",
             purchase_cost=Decimal("30000.000"),
             depreciation_start_date="2023-07-01",

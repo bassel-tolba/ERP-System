@@ -26,6 +26,7 @@ from ..models import (
     CostPool, AllocationDriver, OverheadAllocationRun, ExpenseLog
 )
 from ..forms import JournalEntryForm, JournalEntryLineFormSet
+from ..services import expense_service
 from ..services.overhead_service import execute_overhead_allocation_run, apply_overhead_to_finished_goods
 from ..services.accounting_service import create_je_for_overhead_allocation, create_je_for_overhead_application
 from ..services.period_closing_service import update_checklist_for_period
@@ -62,58 +63,92 @@ def supplier_invoices(request: HttpRequest) -> HttpResponse:
 
 
 def create_supplier_invoice(request: HttpRequest) -> HttpResponse:
-    """Handles the creation of a new supplier invoice from unbilled receipts."""
+    """
+    Handles the creation of a new supplier invoice from unbilled receipts OR unsettled expenses.
+    """
     if request.method == 'POST':
-        supplier_id = request.POST.get('supplier')
-        invoice_number = request.POST.get('invoice_number').strip()
-        invoice_date_str = request.POST.get('invoice_date')
-        due_date_str = request.POST.get('due_date')
-        receipt_ids = request.POST.getlist('receipt_ids')
-
-        if not all([supplier_id, invoice_number, invoice_date_str, due_date_str, receipt_ids]):
-            messages.error(request, "يرجى تعبئة جميع الحقول واختيار فاتورة استلام واحدة على الأقل.")
-            return redirect('inventory:create_supplier_invoice')
-
-        if SupplierInvoice.objects.filter(supplier_id=supplier_id, invoice_number=invoice_number).exists():
-            messages.error(request, f"فاتورة بنفس الرقم '{invoice_number}' موجودة بالفعل لهذا المورد.")
-            return redirect('inventory:create_supplier_invoice')
-
         try:
-            with transaction.atomic():
-                invoice = SupplierInvoice.objects.create(
-                    supplier_id=supplier_id,
+            supplier_id = request.POST.get('supplier')
+            invoice_number = request.POST.get('invoice_number').strip()
+            invoice_date_str = request.POST.get('invoice_date')
+            due_date_str = request.POST.get('due_date')
+            
+            # Determine the source of the invoice items
+            source_type = request.POST.get('source_type', 'receipts') # Default to receipts
+
+            if not all([supplier_id, invoice_number, invoice_date_str, due_date_str]):
+                messages.error(request, "يرجى تعبئة جميع الحقول الأساسية.")
+                return redirect('inventory:create_supplier_invoice')
+
+            if SupplierInvoice.objects.filter(supplier_id=supplier_id, invoice_number=invoice_number).exists():
+                messages.error(request, f"فاتورة بنفس الرقم '{invoice_number}' موجودة بالفعل لهذا المورد.")
+                return redirect('inventory:create_supplier_invoice')
+
+            invoice_date = datetime.strptime(invoice_date_str, '%Y-%m-%d').date()
+            due_date = datetime.strptime(due_date_str, '%Y-%m-%d').date()
+
+            if source_type == 'expenses':
+                expense_log_ids = request.POST.getlist('item_ids')
+                if not expense_log_ids:
+                    messages.error(request, "يرجى اختيار مصروف واحد على الأقل لإنشاء الفاتورة.")
+                    return redirect('inventory:create_supplier_invoice')
+                
+                # Use the dedicated service function for this workflow
+                invoice = expense_service.create_invoice_from_expense_logs(
+                    user=request.user,
+                    supplier_id=int(supplier_id),
                     invoice_number=invoice_number,
-                    invoice_date=datetime.strptime(invoice_date_str, '%Y-%m-%d').date(),
-                    due_date=datetime.strptime(due_date_str, '%Y-%m-%d').date(),
-                    status=SupplierInvoice.InvoiceStatus.AWAITING_PAYMENT
+                    invoice_date=invoice_date,
+                    due_date=due_date,
+                    expense_log_ids=[int(pk) for pk in expense_log_ids]
                 )
-                
-                receipts = InventoryLog.objects.filter(id__in=receipt_ids, company_id=supplier_id)
-                total_amount = Decimal('0.0')
-                
-                items_to_create = []
-                for receipt in receipts:
-                    receipt_total = (receipt.base_unit_price * Decimal(str(receipt.quantity))) + receipt.vat_amount
-                    items_to_create.append(
-                        SupplierInvoiceItem(invoice=invoice, receipt=receipt, amount=receipt_total)
+            
+            else: # Default to 'receipts' workflow
+                receipt_ids = request.POST.getlist('item_ids')
+                if not receipt_ids:
+                    messages.error(request, "يرجى اختيار فاتورة استلام واحدة على الأقل.")
+                    return redirect('inventory:create_supplier_invoice')
+
+                with transaction.atomic():
+                    invoice = SupplierInvoice.objects.create(
+                        supplier_id=supplier_id,
+                        invoice_number=invoice_number,
+                        invoice_date=invoice_date,
+                        due_date=due_date,
+                        status=SupplierInvoice.InvoiceStatus.AWAITING_PAYMENT
                     )
-                    total_amount += receipt_total
-                
-                SupplierInvoiceItem.objects.bulk_create(items_to_create)
-                invoice.total_amount = total_amount
-                invoice.save()
+                    
+                    receipts = InventoryLog.objects.filter(id__in=receipt_ids, company_id=supplier_id)
+                    total_amount = Decimal('0.0')
+                    
+                    items_to_create = []
+                    for receipt in receipts:
+                        receipt_total = (receipt.base_unit_price * Decimal(str(receipt.quantity))) + receipt.vat_amount
+                        items_to_create.append(
+                            SupplierInvoiceItem(invoice=invoice, receipt=receipt, amount=receipt_total)
+                        )
+                        total_amount += receipt_total
+                    
+                    SupplierInvoiceItem.objects.bulk_create(items_to_create)
+                    invoice.total_amount = total_amount
+                    invoice.save()
 
             messages.success(request, f"تم إنشاء فاتورة المورد رقم {invoice.invoice_number} بنجاح.")
             return redirect('inventory:view_supplier_invoice', pk=invoice.pk)
+        except ValidationError as e:
+            messages.error(request, f"خطأ في البيانات: {e}")
+            return redirect('inventory:create_supplier_invoice')
         except Exception as e:
-            messages.error(request, f"حدث خطأ: {e}")
+            logger.exception("Error creating supplier invoice")
+            messages.error(request, f"حدث خطأ غير متوقع: {e}")
             return redirect('inventory:create_supplier_invoice')
 
+    today = timezone.now().date()
     context = {
         'active_page': 'financials',
         'sub_page': 'supplier_invoices',
         'suppliers': Company.objects.all(),
-        'today_date': timezone.now().strftime('%Y-%m-%d'),
+        'today_date': today.strftime('%Y-%m-%d'),
     }
     if 'X-Partial-Request' in request.headers:
         return render(request, 'inventory/partials/supplier_invoice_create_content.html', context)
@@ -160,25 +195,58 @@ def delete_supplier_invoice(request: HttpRequest, pk: int) -> HttpResponse:
 
 def api_get_uninvoiced_receipts(request: HttpRequest, supplier_id: int) -> JsonResponse:
     """
-    API endpoint to get all released, un-invoiced inventory receipts for a supplier.
+    API endpoint to get all 'Released' InventoryLogs for a supplier
+    that have not yet been invoiced.
     """
     receipts = InventoryLog.objects.filter(
         company_id=supplier_id,
         status=InventoryLog.Status.RELEASED,
-        invoice_item__isnull=True  # The key check: receipt is not linked to any invoice item
-    ).select_related('product').order_by('-release_timestamp')
+        supplierinvoiceitem__isnull=True
+    ).order_by('-release_date')
 
-    data = [
-        {
-            'id': r.id,
-            'date': r.release_timestamp.strftime('%Y-%m-%d'),
-            'product_name': r.product.name,
-            'quantity': r.quantity,
-            'qc_no': r.qc_no,
-            'total_cost': float(r.total_cost),
-        } for r in receipts
-    ]
-    return JsonResponse(data, safe=False)
+    data = {
+        'receipts': [
+            {
+                'id': r.id,
+                'release_date': r.release_date.strftime('%Y-%m-%d'),
+                'qc_no': r.qc_no,
+                'product_name': r.product.name,
+                'quantity': r.quantity,
+                'unit': r.product.unit,
+                'total_value': str((r.base_unit_price * Decimal(str(r.quantity))) + r.vat_amount)
+            } for r in receipts
+        ]
+    }
+    return JsonResponse(data)
+
+
+def api_get_unsettled_expenses(request: HttpRequest, supplier_id: int) -> JsonResponse:
+    """
+    API endpoint to get all approved, unsettled ExpenseLogs for a supplier.
+    These are expenses that have been accrued but not yet invoiced.
+    """
+    get_object_or_404(Company, pk=supplier_id)
+    
+    # Expenses are linked to a supplier via the ExpenseRequest that created them
+    expenses = ExpenseLog.objects.filter(
+        settlement_status=ExpenseLog.SettlementStatus.UNSETTLED,
+        source_request__supplier_id=supplier_id,
+        supplierinvoiceitem__isnull=True # Ensure it's not already on an invoice
+    ).select_related('source_request').order_by('-expense_date')
+
+    data = {
+        'expenses': [
+            {
+                'id': e.id,
+                'date': e.expense_date.strftime('%Y-%m-%d'),
+                'description': e.description,
+                'amount': str(e.amount),
+                'category': e.get_category_display(),
+                'request_id': e.source_request.id,
+            } for e in expenses
+        ]
+    }
+    return JsonResponse(data)
 
 
 @require_POST

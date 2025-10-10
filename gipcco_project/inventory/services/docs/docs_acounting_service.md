@@ -63,6 +63,11 @@
   - Debits Employee Advances Receivable and credits the source Bank account.
   - **Calls:** `_check_period_is_open()` from the current file.
 
+- `create_je_for_employee_advance_settlement(settlement: EmployeeAdvanceSettlement)`: Creates a journal entry for an employee advance settlement, with logic depending on the settlement's source.
+  - It inspects the `source_transaction` generic foreign key.
+  - If the source is an `ExpenseLog`, it creates a JE to Debit Accrued Expenses and Credit Employee Advances Receivable.
+  - If the source is not an expense (i.e., a direct cash repayment), it creates a JE to Debit Cash and Credit Employee Advances Receivable.
+
 - `create_je_for_overhead_allocation(run: OverheadAllocationRun)`: Creates a journal entry to move collected overhead costs into WIP.
   - Aggregates expenses from all cost pools in the run.
   - Debits Work-in-Progress (WIP) and credits the various source expense accounts.

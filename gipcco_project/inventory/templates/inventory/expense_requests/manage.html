@@ -274,6 +274,116 @@
                     </form>
                 </div>
             </div>
+
+            <!-- NEW: Create Invoice from Expense Logs -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary"><i class="bi bi-receipt-cutoff me-2"></i>إنشاء فاتورة من المصروفات</h6>
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted">اجمع المصروفات غير المسددة لمورد معين في فاتورة واحدة للدفع.</p>
+                    <form method="POST" action="{% url 'inventory:manage_expense_requests' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="create_invoice_from_logs">
+
+                        <div class="mb-3">
+                            <label for="invoice_supplier_filter" class="form-label">تصفية حسب المورد</label>
+                            <select id="invoice_supplier_filter" name="supplier_id" class="form-select tom-select" required>
+                                <option value="">-- اختر مورد لعرض مصروفاته --</option>
+                                {% for supplier in suppliers %}
+                                <option value="{{ supplier.id }}">{{ supplier.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="log_ids" class="form-label">المصروفات غير المسددة</label>
+                            <select id="log_ids" name="log_ids" class="form-select" multiple required>
+                                {% for log in unsettled_expense_logs %}
+                                <option value="{{ log.id }}" data-supplier="{{ log.source_request.supplier.id }}">
+                                    #{{ log.id }} - {{ log.description }} ({{ log.amount|floatformat:2 }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="invoice_number" class="form-label">رقم الفاتورة</label>
+                                <input type="text" id="invoice_number" name="invoice_number" class="form-control" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="invoice_date" class="form-label">تاريخ الفاتورة</label>
+                                <input type="text" name="invoice_date" class="form-control flatpickr-date" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="due_date" class="form-label">تاريخ الاستحقاق</label>
+                            <input type="text" id="due_date" name="due_date" class="form-control flatpickr-date" required>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success">إنشاء فاتورة</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- NEW: Settle Employee Advance -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary"><i class="bi bi-person-check-fill me-2"></i>تسوية سلفة موظف</h6>
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted">استخدم مصروفًا تمت الموافقة عليه لتسوية سلفة مفتوحة لموظف.</p>
+                    <form method="POST" action="{% url 'inventory:manage_expense_requests' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="settle_advance">
+
+                        <div class="mb-3">
+                            <label for="advance_employee_filter" class="form-label">تصفية حسب الموظف</label>
+                            <select id="advance_employee_filter" class="form-select tom-select">
+                                <option value="">-- اختر موظف لعرض سلفه ومصروفاته --</option>
+                                {% for employee in employees_with_advances %}
+                                <option value="{{ employee.id }}">{{ employee.full_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="advance_id" class="form-label">السلفة المفتوحة</label>
+                            <select id="advance_id" name="advance_id" class="form-select tom-select" required>
+                                <option value="">-- اختر سلفة --</option>
+                                {% for advance in open_advances %}
+                                <option value="{{ advance.id }}" data-employee="{{ advance.employee.id }}">
+                                    #{{ advance.id }} - {{ advance.description }} (المتبقي: {{ advance.remaining_balance|floatformat:2 }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="expense_log_id" class="form-label">المصروف الموافق عليه (لتسوية السلفة)</label>
+                            <select id="expense_log_id" name="expense_log_id" class="form-select tom-select" required>
+                                <option value="">-- اختر مصروف --</option>
+                                {% for log in unsettled_expense_logs %}
+                                <option value="{{ log.id }}" data-employee="{{ log.source_request.requested_by.id }}">
+                                    #{{ log.id }} - {{ log.description }} ({{ log.amount|floatformat:2 }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="settlement_date" class="form-label">تاريخ التسوية</label>
+                            <input type="text" id="settlement_date" name="settlement_date" class="form-control flatpickr-date" required>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">تسوية السلفة</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
 
         <!-- Requests List -->

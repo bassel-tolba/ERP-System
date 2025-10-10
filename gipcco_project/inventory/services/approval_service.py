@@ -6,6 +6,8 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from decimal import Decimal
 from django.db.models import Sum, F, Value, FloatField
 from django.db.models.functions import Coalesce
+from typing import Optional
+from datetime import date
 
 from .. import models as inventory_models
 from . import costing_service, accounting_service
@@ -63,15 +65,13 @@ def _create_inventory_consumption_from_request(request: inventory_models.Expense
     elif request.request_type == inventory_models.ExpenseRequest.RequestType.INVENTORY_PREPAID:
         consumption_type = inventory_models.InventoryConsumption.ConsumptionType.AMORTIZE
 
-    # DEVELOPER NOTE: The 'department' field on InventoryConsumption is likely
-    # a legacy field after a recent refactor. The CostPool model no longer
-    # has a 'department' attribute. We are setting a sensible default here
-    # to satisfy the database constraint. This may need to be revisited if
-    # different consumption types require different departments.
-    if not request.cost_pool:
-        raise ValidationError("A Cost Pool is required to determine the department for an inventory consumption.")
-    
-    # For inventory expenses like MRO, 'PRODUCTION' is a safe default.
+    cost_pool = request.cost_pool
+    # An inventory expense must be allocated to a cost pool.
+    # Capitalization and Prepaid requests do not have cost pools as they affect asset accounts.
+    if consumption_type == inventory_models.InventoryConsumption.ConsumptionType.EXPENSE and not cost_pool:
+        raise ValidationError("A Cost Pool is required for an inventory expense request.")
+
+    # For inventory expenses like MRO, 'PRODUCTION' is a safe default for the legacy 'department' field.
     department_value = inventory_models.InventoryConsumption.Department.PRODUCTION
 
     return inventory_models.InventoryConsumption.objects.create(
@@ -84,7 +84,7 @@ def _create_inventory_consumption_from_request(request: inventory_models.Expense
         notes=request.description,
         consumption_type=consumption_type,
         fixed_asset=request.fixed_asset if request.request_type == inventory_models.ExpenseRequest.RequestType.INVENTORY_CAPITALIZE else None,
-        cost_pool=request.cost_pool,
+        cost_pool=cost_pool,
         source_request=request
     )
 
@@ -151,27 +151,38 @@ def _execute_approval(request: inventory_models.ExpenseRequest) -> models.Model:
     else:
         raise NotImplementedError(f"Approval logic for request type '{request_type}' is not implemented.")
 
-@transaction.atomic
-def approve_request(request_id: int, user) -> inventory_models.ExpenseRequest:
-    """
-    Approves an expense request, triggering the creation of the relevant financial transaction.
-    """
-    request = inventory_models.ExpenseRequest.objects.select_for_update().get(pk=request_id)
-    
-    if request.status != inventory_models.ExpenseRequest.Status.PENDING:
-        raise PermissionDenied(f"Cannot approve a request with status '{request.get_status_display()}'.")
 
-    _execute_approval(request)
+def approve_request(request_id: int, user, processed_date: Optional[date] = None):
+    """
+    Approves a pending request. This is the main entry point for the approval workflow.
+    - Sets the request status to APPROVED.
+    - Sets the processed_at timestamp.
+    - Calls the dispatcher to create the resulting financial transaction.
+    """
+    with transaction.atomic():
+        try:
+            request = inventory_models.ExpenseRequest.objects.select_for_update().get(pk=request_id)
+        except inventory_models.ExpenseRequest.DoesNotExist:
+            raise ValidationError(f"Expense Request with ID {request_id} not found.")
 
-    request.status = inventory_models.ExpenseRequest.Status.APPROVED
-    request.processed_by = user
-    request.processed_at = timezone.now()
-    request.save(update_fields=['status', 'processed_by', 'processed_at'])
-    
-    logger.info(f"User '{user.username}' approved ExpenseRequest ID {request.id}.")
+        if request.status != inventory_models.ExpenseRequest.Status.PENDING:
+            raise PermissionDenied(f"Request #{request.id} is not in a pending state and cannot be approved.")
+
+        # This is where the main logic happens
+        _execute_approval(request)
+
+        # Update the request status after the transaction is successfully created
+        request.status = inventory_models.ExpenseRequest.Status.APPROVED
+        request.processed_by = user
+        request.processed_at = processed_date or timezone.now()
+        request.save()
+
+        logger.info(f"User '{user.username}' approved ExpenseRequest #{request.id}.")
+
     return request
 
-def reject_request(request_id: int, user, reason: str) -> inventory_models.ExpenseRequest:
+
+def reject_request(request_id: int, user, reason: str):
     """
     Rejects a pending expense request.
     """

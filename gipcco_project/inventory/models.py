@@ -931,6 +931,14 @@ class ExpenseLog(models.Model):
         related_name='expenses',
         verbose_name=_("Cost Pool")
     )
+    # Generic FK to link to the source of the expense (e.g., an InventoryConsumption)
+    source_content_type = models.ForeignKey(
+        ContentType, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='expense_logs'
+    )
+    source_object_id = models.PositiveIntegerField(null=True, blank=True)
+    source_content_object = GenericForeignKey('source_content_type', 'source_object_id')
+
 
     source_request = models.ForeignKey(
         'ExpenseRequest',
@@ -1249,6 +1257,13 @@ class EmployeeAdvanceSettlement(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.PROTECT)
     object_id = models.PositiveIntegerField()
     source_transaction = GenericForeignKey('content_type', 'object_id')
+    
+    journal_entry = models.OneToOneField(
+        'JournalEntry',
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='employee_advance_settlement'
+    )
 
     class Meta:
         db_table = 'employee_advance_settlements'
@@ -1400,6 +1415,31 @@ class JournalEntry(models.Model):
         credits = self.lines.filter(entry_type='credit').aggregate(total=Sum('amount'))['total'] or Decimal('0.0')
         return debits == credits
 
+    def validate_balance(self):
+        """
+        Explicitly checks if the entry is balanced.
+        This MUST be called by services after creating an entry and all its lines.
+        """
+        debits = self.lines.filter(entry_type='debit').aggregate(total=Sum('amount'))['total'] or Decimal('0.0')
+        credits = self.lines.filter(entry_type='credit').aggregate(total=Sum('amount'))['total'] or Decimal('0.0')
+
+        if not abs(debits - credits) < Decimal('0.001'):
+            raise ValidationError(
+                _("The journal entry is not balanced. Debits (%(debits)s) do not equal Credits (%(credits)s).") % {
+                    'debits': debits.quantize(Decimal('0.001')),
+                    'credits': credits.quantize(Decimal('0.001'))
+                }
+            )
+
+    def clean(self):
+        """
+        Validation for Django Admin and ModelForms.
+        """
+        super().clean()
+        # This check is only useful if the instance has been saved and has lines.
+        if self.pk and self.lines.exists():
+            self.validate_balance()
+                
     def get_description(self):
         """
         Provides a translated, user-friendly description of the journal entry's purpose
@@ -2052,7 +2092,13 @@ class AccruedExpense(models.Model):
         INACTIVE = 'inactive', _("Inactive")
 
     description = models.CharField(max_length=255, verbose_name=_("Expense Description"))
-    estimated_monthly_amount = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Estimated Monthly Amount"))
+    total_estimated_amount = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Total Estimated Amount"))
+    accrual_start_date = models.DateField(verbose_name=_("Accrual Start Date"))
+    accrual_end_date = models.DateField(verbose_name=_("Accrual End Date"))
+    source_request = models.OneToOneField(
+        'ExpenseRequest', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='created_accrual', verbose_name=_("Source Expense Request")
+    )
     target_expense_account = models.ForeignKey(
         Account, on_delete=models.PROTECT, related_name='+',
         verbose_name=_("Target Expense Account"),
@@ -2182,10 +2228,13 @@ class SupplierInvoiceItem(models.Model):
     invoice = models.ForeignKey(
         SupplierInvoice, on_delete=models.CASCADE, related_name='items', verbose_name=_("Invoice")
     )
-    # Using OneToOneField ensures a receipt can only be on ONE invoice.
-    receipt = models.OneToOneField(
-        InventoryLog, on_delete=models.PROTECT, related_name='invoice_item',
+    receipt = models.ForeignKey(
+        InventoryLog, on_delete=models.PROTECT, null=True, blank=True,
         verbose_name=_("Inventory Receipt (Log)")
+    )
+    expense_log = models.ForeignKey(
+        ExpenseLog, on_delete=models.PROTECT, null=True, blank=True,
+        verbose_name=_("Expense Log")
     )
     amount = models.DecimalField(
         max_digits=14, decimal_places=3, verbose_name=_("Amount for this item")
@@ -2197,23 +2246,21 @@ class SupplierInvoiceItem(models.Model):
         verbose_name_plural = _("Supplier Invoice Items")
 
     def __str__(self):
-        return f"Item for receipt {self.receipt_id} on Invoice {self.invoice.invoice_number}"
+        return f"Item for Invoice {self.invoice.invoice_number} - Amount: {self.amount}"
+
+    def clean(self):
+        if self.receipt and self.expense_log:
+            raise ValidationError(_("An invoice item can be linked to either a receipt or an expense log, not both."))
+        if not self.receipt and not self.expense_log:
+            raise ValidationError(_("An invoice item must be linked to either a receipt or an expense log."))
 
 
 class PaymentApplication(models.Model):
-    """
-    A linking table that details how much of a single payment was applied
-    to a specific invoice. This is crucial for handling partial payments.
-    """
-    payment = models.ForeignKey(
-        'Payment', on_delete=models.CASCADE, related_name='applications', verbose_name=_("Payment")
-    )
-    invoice = models.ForeignKey(
-        SupplierInvoice, on_delete=models.PROTECT, related_name='applications', verbose_name=_("Invoice")
-    )
+    payment = models.ForeignKey(Payment, on_delete=models.CASCADE, related_name='applications', verbose_name=_("Payment"))
+    invoice = models.ForeignKey(SupplierInvoice, on_delete=models.PROTECT, related_name='applications', verbose_name=_("Invoice"))
     amount_applied = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Amount Applied"))
     application_date = models.DateField(auto_now_add=True, verbose_name=_("Application Date"))
-    
+
     class Meta:
         db_table = 'payment_applications'
         verbose_name = _("Payment Application")
@@ -2425,7 +2472,7 @@ class DepreciationLog(models.Model):
     period_date = models.DateField(verbose_name=_("Period End Date"))
     amount = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Depreciation Amount"))
     journal_entry = models.ForeignKey(
-        JournalEntry, on_delete=models.SET_NULL, null=True, blank=True,
+        'JournalEntry', on_delete=models.SET_NULL, null=True, blank=True,
         related_name='depreciation_logs', verbose_name=_("Journal Entry")
     )
 

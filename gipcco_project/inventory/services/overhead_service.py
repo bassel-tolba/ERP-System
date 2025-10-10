@@ -173,16 +173,14 @@ def apply_overhead_to_finished_goods(run: OverheadAllocationRun) -> Decimal:
             
             # Update the receipt instance in memory
             receipt.allocated_overhead_cost = applied_cost
+            # Also update the total_cost using an F() expression to ensure correct atomic update.
+            receipt.total_cost = F('total_cost') + applied_cost
             receipts_to_update.append(receipt)
             total_applied_cost += applied_cost
 
     with transaction.atomic():
-        # IMPORTANT: We use bulk_update here specifically to AVOID triggering the
-        # post_save signal on FinishedProductReceipt. Triggering that signal would
-        # regenerate the original JE for the receipt with the new total cost,
-        # which would double-count the overhead amount that is already being
-        # handled by the dedicated overhead application JE.
-        FinishedProductReceipt.objects.bulk_update(receipts_to_update, ['allocated_overhead_cost'])
+        # Add 'total_cost' to the list of fields to be updated.
+        FinishedProductReceipt.objects.bulk_update(receipts_to_update, ['allocated_overhead_cost', 'total_cost'])
         logger.info(f"Applied overhead of {total_applied_cost} to {len(receipts_to_update)} finished product receipts for run {run.id}.")
 
         # --- NEW: Update the period close checklist ---
