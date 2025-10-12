@@ -1,0 +1,20 @@
+# File: gipcco_project/inventory/services/accounting/sales_transactions.py
+- **Purpose:** Handles the creation of journal entries related to customer sales and dispatches.
+
+### Functions:
+
+- `create_je_for_sales_dispatch(dispatch: FinishedProductDispatch)`:
+  - **Description:** Creates a single, compound journal entry that records both the Cost of Goods Sold (COGS) and the revenue from a customer sale at the time of dispatch.
+  - **Accounting Logic:**
+    - **COGS Entry:**
+      - **Debit:** Cost of Goods Sold (COGS) Expense account.
+      - **Credit:** Finished Goods Inventory account.
+    - **Revenue Entry:**
+      - **Debit:** Accounts Receivable account.
+      - **Credit:** Sales Revenue account.
+      - **Credit:** VAT Payable account (if applicable).
+  - **Key Features:**
+    - Combines two logical transactions into one balanced journal entry for efficiency.
+    - Ensures the sale is recorded in an open financial period.
+    - Links the customer and final product as sub-ledgers for detailed reporting.
+  - **Calls:** `_check_period_is_open()`, `_get_product_expense_account()`, `_get_product_revenue_account()` from `_helpers.py`.

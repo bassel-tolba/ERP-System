@@ -4,6 +4,7 @@ from decimal import Decimal, ROUND_HALF_UP
 from django.utils import timezone
 from django.db.models import Sum
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import PermissionDenied
 
 # Import the base test case and models from the new base file
 from .test_base import AccountingServiceBaseTestCase
@@ -162,8 +163,8 @@ class TestAccountingService(AccountingServiceBaseTestCase):
             "base_unit_price": Decimal("10.000")
         }
 
-        # 2. Act & Assert: Attempt to create a log and expect a PermissionError
-        with self.assertRaises(PermissionError) as context:
+        # 2. Act & Assert: Attempt to create a log and expect a PermissionDenied error
+        with self.assertRaises(PermissionDenied) as context:
             InventoryLog.objects.create(**log_data)
         
         self.assertIn("period 'September 2025' for date 2025-09-15 is Closed", str(context.exception))
@@ -638,14 +639,14 @@ class TestOverheadAllocation(AccountingServiceBaseTestCase):
         # 1. Arrange
         # a) Log expenses into the child cost pools during the period
         ExpenseLog.objects.create(
-            expense_date="2025-09-10",
+            expense_date=timezone.make_aware(timezone.datetime(2025, 9, 10)),
             amount=Decimal("10000.000"),
             description="Factory Rent for Sep 2025",
             cost_pool=self.child_pool_rent,
             category=ExpenseLog.Category.RENT
         )
         ExpenseLog.objects.create(
-            expense_date="2025-09-15",
+            expense_date=timezone.make_aware(timezone.datetime(2025, 9, 15)),
             amount=Decimal("5000.000"),
             description="Machine Repair Services",
             cost_pool=self.child_pool_maintenance,
@@ -664,7 +665,7 @@ class TestOverheadAllocation(AccountingServiceBaseTestCase):
         receipt = FinishedProductReceipt.objects.create(
             batch=batch,
             individual_batch_number="FPB-OH-001",
-            receipt_date="2025-09-22",
+            receipt_date=timezone.make_aware(timezone.datetime(2025, 9, 22)),
             total_cost=Decimal("20000.000"), # Prime cost
             total_quantity_produced=1000.0
         )
@@ -736,7 +737,7 @@ class TestOverheadAllocation(AccountingServiceBaseTestCase):
         """
         # 1. Arrange: Log an expense, but create no batches/receipts
         ExpenseLog.objects.create(
-            expense_date="2025-09-10",
+            expense_date=timezone.make_aware(timezone.datetime(2025, 9, 10)),
             amount=Decimal("10000.000"),
             description="Factory Rent for Sep 2025",
             cost_pool=self.child_pool_rent
@@ -820,7 +821,7 @@ class TestOverheadAllocation(AccountingServiceBaseTestCase):
             allocation_driver=self.machine_hours_driver,
         )
         ExpenseLog.objects.create(
-            expense_date=self.period.start_date,
+            expense_date=timezone.make_aware(timezone.datetime.fromisoformat(self.period.start_date.isoformat())),
             amount=Decimal("15000.000"),
             description="Factory Rent for Test",
             cost_pool=self.child_pool_rent # Expense goes into a child pool
@@ -854,23 +855,23 @@ class TestOverheadAllocation(AccountingServiceBaseTestCase):
         """Verify overhead allocation based on Labor Hours."""
         # 1. Arrange
         ExpenseLog.objects.create(
-            expense_date="2025-09-10", amount=Decimal("3000.000"),
+            expense_date=timezone.make_aware(timezone.datetime(2025, 9, 10)), amount=Decimal("3000.000"),
             description="Supervision Salaries", cost_pool=self.child_pool_rent
         )
         batch1 = Batch.objects.create(
             template=self.test_template, shop_order_number="SO-LH-1", batch_number="B-LH-1",
-            creation_date="2025-09-15", labor_hours_consumed=75.0 # 75%
+            creation_date=timezone.make_aware(timezone.datetime(2025, 9, 15)), labor_hours_consumed=75.0 # 75%
         )
         batch2 = Batch.objects.create(
             template=self.test_template, shop_order_number="SO-LH-2", batch_number="B-LH-2",
-            creation_date="2025-09-16", labor_hours_consumed=25.0 # 25%
+            creation_date=timezone.make_aware(timezone.datetime(2025, 9, 16)), labor_hours_consumed=25.0 # 25%
         )
         receipt1 = FinishedProductReceipt.objects.create(
-            batch=batch1, individual_batch_number="FPB-LH-1", receipt_date="2025-09-18",
+            batch=batch1, individual_batch_number="FPB-LH-1", receipt_date=timezone.make_aware(timezone.datetime(2025, 9, 18)),
             total_cost=Decimal("1000.000"), total_quantity_produced=100.0
         )
         receipt2 = FinishedProductReceipt.objects.create(
-            batch=batch2, individual_batch_number="FPB-LH-2", receipt_date="2025-09-19",
+            batch=batch2, individual_batch_number="FPB-LH-2", receipt_date=timezone.make_aware(timezone.datetime(2025, 9, 19)),
             total_cost=Decimal("500.000"), total_quantity_produced=50.0
         )
         run = OverheadAllocationRun.objects.create(
@@ -899,23 +900,23 @@ class TestOverheadAllocation(AccountingServiceBaseTestCase):
         unique_template = ShopOrderTemplate.objects.create(name="Bottle Unit Test Template", final_product=unique_product, bottle_size_ml=100)
 
         ExpenseLog.objects.create(
-            expense_date="2025-09-10", amount=Decimal("1500.000"),
+            expense_date=timezone.make_aware(timezone.datetime(2025, 9, 10)), amount=Decimal("1500.000"),
             description="Packaging Supplies", cost_pool=self.child_pool_rent
         )
-        batch1 = Batch.objects.create(template=unique_template, shop_order_number="SO-BU-1", batch_number="B-BU-1", creation_date="2025-09-15")
-        batch2 = Batch.objects.create(template=unique_template, shop_order_number="SO-BU-2", batch_number="B-BU-2", creation_date="2025-09-16")
+        batch1 = Batch.objects.create(template=unique_template, shop_order_number="SO-BU-1", batch_number="B-BU-1", creation_date=timezone.make_aware(timezone.datetime(2025, 9, 15)))
+        batch2 = Batch.objects.create(template=unique_template, shop_order_number="SO-BU-2", batch_number="B-BU-2", creation_date=timezone.make_aware(timezone.datetime(2025, 9, 16)))
         
         receipt1 = FinishedProductReceipt.objects.create(
             batch=batch1,
             individual_batch_number="FPB-BU-1",
             total_quantity_produced=100.0, total_cost=Decimal("1000.000"),
-            receipt_date="2025-09-18", status=FinishedProductReceipt.Status.RELEASED
+            receipt_date=timezone.make_aware(timezone.datetime(2025, 9, 18)), status=FinishedProductReceipt.Status.RELEASED
         )
         receipt2 = FinishedProductReceipt.objects.create(
             batch=batch2,
             individual_batch_number="FPB-BU-2",
             total_quantity_produced=50.0, total_cost=Decimal("500.000"),
-            receipt_date="2025-09-19", status=FinishedProductReceipt.Status.RELEASED
+            receipt_date=timezone.make_aware(timezone.datetime(2025, 9, 19)), status=FinishedProductReceipt.Status.RELEASED
         )
         run = OverheadAllocationRun.objects.create(
             financial_period=self.period, cost_pool=self.parent_pool,
@@ -945,18 +946,18 @@ class TestOverheadAllocation(AccountingServiceBaseTestCase):
         unique_template = ShopOrderTemplate.objects.create(name="Liter Volume Test Template", final_product=unique_product, bottle_size_ml=500)
 
         ExpenseLog.objects.create(
-            expense_date="2025-09-10", amount=Decimal("500.000"),
+            expense_date=timezone.make_aware(timezone.datetime(2025, 9, 10)), amount=Decimal("500.000"),
             description="Water Treatment Costs", cost_pool=self.child_pool_rent
         )
-        batch1 = Batch.objects.create(template=unique_template, shop_order_number="SO-LV-1", batch_number="B-LV-1", creation_date="2025-09-15")
-        batch2 = Batch.objects.create(template=unique_template, shop_order_number="SO-LV-2", batch_number="B-LV-2", creation_date="2025-09-16")
+        batch1 = Batch.objects.create(template=unique_template, shop_order_number="SO-LV-1", batch_number="B-LV-1", creation_date=timezone.make_aware(timezone.datetime(2025, 9, 15)))
+        batch2 = Batch.objects.create(template=unique_template, shop_order_number="SO-LV-2", batch_number="B-LV-2", creation_date=timezone.make_aware(timezone.datetime(2025, 9, 16)))
         # Receipt 1: 100 bottles * 500ml = 50,000 ml = 50 Liters (2/3 of volume)
         receipt1 = FinishedProductReceipt.objects.create(
             batch=batch1,
             individual_batch_number="FPB-LV-1",
             total_quantity_produced=100.0, total_cost=Decimal("1000.000"),
             # --- FIX: Use a date within the allocation period (September) ---
-            receipt_date="2025-09-20",
+            receipt_date=timezone.make_aware(timezone.datetime(2025, 9, 20)),
             status=FinishedProductReceipt.Status.RELEASED
         )
         # Receipt 2: 50 bottles * 500ml = 25,000 ml = 25 Liters (1/3 of volume)
@@ -965,7 +966,7 @@ class TestOverheadAllocation(AccountingServiceBaseTestCase):
             individual_batch_number="FPB-LV-2",
             total_quantity_produced=50.0, total_cost=Decimal("500.000"),
             # --- FIX: Use a date within the allocation period (September) ---
-            receipt_date="2025-09-21",
+            receipt_date=timezone.make_aware(timezone.datetime(2025, 9, 21)),
             status=FinishedProductReceipt.Status.RELEASED
         )
         run = OverheadAllocationRun.objects.create(
@@ -1010,8 +1011,8 @@ class TestTransactionCorrection(AccountingServiceBaseTestCase):
             fiscal_year=cls.fiscal_year,
             name="October 2025",
             defaults={
-                'start_date': "2025-10-01",
-                'end_date': "2025-10-31",
+                'start_date': timezone.make_aware(timezone.datetime(2025, 10, 1)),
+                'end_date': timezone.make_aware(timezone.datetime(2025, 10, 31)),
                 'status': FinancialPeriod.Status.OPEN
             }
         )
@@ -1127,16 +1128,16 @@ class TestOpeningBalanceSystem(AccountingServiceBaseTestCase):
         fy_2024, _ = FiscalYear.objects.get_or_create(
             name="Test Fiscal Year 2024",
             defaults={
-                'start_date': "2024-01-01",
-                'end_date': "2024-12-31"
+                'start_date': timezone.make_aware(timezone.datetime(2024, 1, 1)),
+                'end_date': timezone.make_aware(timezone.datetime(2024, 12, 31))
             }
         )
         FinancialPeriod.objects.get_or_create(
             fiscal_year=fy_2024,
             name="December 2024",
             defaults={
-                'start_date': "2024-12-01",
-                'end_date': "2024-12-31",
+                'start_date': timezone.make_aware(timezone.datetime(2024, 12, 1)),
+                'end_date': timezone.make_aware(timezone.datetime(2024, 12, 31)),
                 'status': FinancialPeriod.Status.OPEN
             }
         )
@@ -1149,8 +1150,8 @@ class TestOpeningBalanceSystem(AccountingServiceBaseTestCase):
             fiscal_year=cls.fiscal_year,
             name="January 2025",
             defaults={
-                'start_date':"2025-01-01",
-                'end_date':"2025-01-31",
+                'start_date': timezone.make_aware(timezone.datetime(2025, 1, 1)),
+                'end_date': timezone.make_aware(timezone.datetime(2025, 1, 31)),
                 'status':FinancialPeriod.Status.OPEN
             }
         )
@@ -1163,7 +1164,7 @@ class TestOpeningBalanceSystem(AccountingServiceBaseTestCase):
         # 1. Arrange & Act
         ob_entry = OpeningBalanceEntry.objects.create(
             name="Go-Live 2025-01-01",
-            migration_date="2025-01-01"
+            migration_date=timezone.make_aware(timezone.datetime(2025, 1, 1))
         )
         line1 = OpeningBalanceEntryLine.objects.create(
             opening_balance_entry=ob_entry,

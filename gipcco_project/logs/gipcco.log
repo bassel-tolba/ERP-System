@@ -10027,3 +10027,44 @@ INFO 2025-10-10 22:48:08,844 django.utils.autoreload autoreload 10484 7624 C:\Us
 INFO 2025-10-10 22:48:10,297 django.utils.autoreload autoreload 6736 6820 Watching for file changes with StatReloader
 INFO 2025-10-10 22:48:13,667 django.server basehttp 6736 6992 "GET /reports/trial_balance/ HTTP/1.1" 200 47675
 INFO 2025-10-10 22:48:13,693 django.server basehttp 6736 6992 "GET /static/layout/js/dynamic_content_loader.js HTTP/1.1" 304 0
+INFO 2025-10-12 09:07:18,076 django.utils.autoreload autoreload 3440 7836 Watching for file changes with StatReloader
+INFO 2025-10-12 09:07:22,596 django.server basehttp 3440 10784 "GET / HTTP/1.1" 200 32871
+INFO 2025-10-12 09:07:22,961 django.server basehttp 3440 10784 "GET /static/css/google-fonts.css HTTP/1.1" 200 12422
+INFO 2025-10-12 09:07:22,974 django.server basehttp 3440 10792 "GET /static/css/bootstrap.rtl.css HTTP/1.1" 200 296973
+INFO 2025-10-12 09:07:23,029 django.server basehttp 3440 7808 "GET /static/css/bootstrap-icons.min.css HTTP/1.1" 200 85891
+INFO 2025-10-12 09:07:23,041 django.server basehttp 3440 2056 "GET /static/css/style.css HTTP/1.1" 200 19107
+INFO 2025-10-12 09:07:23,059 django.server basehttp 3440 10792 "GET /static/js/flatpickr.min.js HTTP/1.1" 200 50680
+INFO 2025-10-12 09:07:23,065 django.server basehttp 3440 7808 "GET /static/js/flatpickr.l10n.ar.js HTTP/1.1" 200 1990
+INFO 2025-10-12 09:07:23,084 django.server basehttp 3440 9732 "GET /static/css/tom-select.bootstrap5.min.css HTTP/1.1" 200 15346
+INFO 2025-10-12 09:07:23,089 django.server basehttp 3440 4032 "GET /static/css/flatpickr.min.css HTTP/1.1" 200 16178
+INFO 2025-10-12 09:07:23,097 django.server basehttp 3440 10784 "GET /static/js/bootstrap.bundle.min.js HTTP/1.1" 200 80669
+INFO 2025-10-12 09:07:23,116 django.server basehttp 3440 7808 "GET /static/layout/js/records_logic.js HTTP/1.1" 200 7001
+INFO 2025-10-12 09:07:23,129 django.server basehttp 3440 10792 "GET /static/layout/js/dashboard_logic.js HTTP/1.1" 200 8620
+INFO 2025-10-12 09:07:23,131 django.server basehttp 3440 9732 "GET /static/layout/js/create_batch_logic.js HTTP/1.1" 200 14297
+INFO 2025-10-12 09:07:23,134 django.server basehttp 3440 2056 "GET /static/js/tom-select.complete.min.js HTTP/1.1" 200 51160
+INFO 2025-10-12 09:07:23,139 django.server basehttp 3440 4032 "GET /static/layout/js/batch_view_logic.js HTTP/1.1" 200 5237
+INFO 2025-10-12 09:07:23,164 django.server basehttp 3440 10784 "GET /static/layout/js/receive_finished_product_logic.js HTTP/1.1" 200 1812
+INFO 2025-10-12 09:07:23,173 django.server basehttp 3440 9732 "GET /static/layout/js/production_returns_logic.js HTTP/1.1" 200 3162
+INFO 2025-10-12 09:07:23,173 django.server basehttp 3440 10792 "GET /static/layout/js/ledger_logic.js HTTP/1.1" 200 6663
+INFO 2025-10-12 09:07:23,175 django.server basehttp 3440 7808 "GET /static/layout/js/shop_order_templates_logic.js HTTP/1.1" 200 5660
+INFO 2025-10-12 09:07:23,214 django.server basehttp 3440 4032 "GET /static/layout/js/batch_production_variance_report_logic.js HTTP/1.1" 200 3266
+INFO 2025-10-12 09:07:23,216 django.server basehttp 3440 9732 "GET /static/layout/js/sales_order_create_logic.js HTTP/1.1" 200 5317
+INFO 2025-10-12 09:07:23,228 django.server basehttp 3440 2056 "GET /static/layout/js/visuals_logic.js HTTP/1.1" 200 7357
+INFO 2025-10-12 09:07:23,229 django.server basehttp 3440 10784 "GET /static/layout/js/financials_logic.js HTTP/1.1" 200 33741
+INFO 2025-10-12 09:07:23,236 django.server basehttp 3440 7808 "GET /static/layout/js/tax_reconciliation_report_logic.js HTTP/1.1" 200 780
+INFO 2025-10-12 09:07:23,246 django.server basehttp 3440 4032 "GET /static/layout/js/close_period_logic.js HTTP/1.1" 200 4685
+INFO 2025-10-12 09:07:23,247 django.server basehttp 3440 10792 "GET /static/layout/js/purchase_order_create_logic.js HTTP/1.1" 200 4801
+INFO 2025-10-12 09:07:23,274 django.server basehttp 3440 7808 "GET /static/css/print.css HTTP/1.1" 200 2303
+INFO 2025-10-12 09:07:23,280 django.server basehttp 3440 2056 "GET /static/layout/js/employees_logic.js HTTP/1.1" 200 6979
+INFO 2025-10-12 09:07:23,293 django.server basehttp 3440 10784 "GET /static/layout/js/dynamic_content_loader.js HTTP/1.1" 200 6706
+INFO 2025-10-12 09:07:23,294 django.server basehttp 3440 9732 "GET /static/layout/js/inventory_counts_logic.js HTTP/1.1" 200 19520
+INFO 2025-10-12 09:07:23,801 django.server basehttp 3440 9732 "GET /static/webfonts/NotoKufiArabic-VariableFont_wght.ttf HTTP/1.1" 200 433800
+INFO 2025-10-12 09:07:23,805 django.server basehttp 3440 10784 "GET /static/webfonts/bootstrap-icons.woff2?dd67030699838ea613ee6dbda90effa6 HTTP/1.1" 200 130396
+INFO 2025-10-12 09:07:23,806 django.server basehttp 3440 2056 "GET /static/webfonts/41.woff2 HTTP/1.1" 200 21168
+INFO 2025-10-12 09:07:23,909 django.server basehttp 3440 9732 "GET /static/img/favicon.ico HTTP/1.1" 200 41001
+INFO 2025-10-12 09:07:27,987 django.server basehttp 3440 9732 "GET /batches/ HTTP/1.1" 200 7401
+INFO 2025-10-12 09:07:28,046 django.server basehttp 3440 9732 "GET /batches/ HTTP/1.1" 200 26849
+INFO 2025-10-12 09:07:30,784 django.server basehttp 3440 9732 "GET /batches/create/ HTTP/1.1" 200 11264
+INFO 2025-10-12 09:07:30,862 django.server basehttp 3440 9732 "GET /batches/create/ HTTP/1.1" 200 32326
+INFO 2025-10-12 09:20:15,477 django.utils.autoreload autoreload 3440 7836 D:\DjangoMigration\gipcco_project\inventory\services\accounting_service.py changed, reloading.
+INFO 2025-10-12 09:20:16,563 django.utils.autoreload autoreload 8584 5548 Watching for file changes with StatReloader
