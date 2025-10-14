@@ -110,7 +110,7 @@
                                     <option value="">اختر مصدر المخزون...</option>
                                     {% for stock in item.available_stock %}
                                     <option value="{{ stock.id }}" 
-                                         {% if item.source_type == 'opening_balance' and stock.id == -1 or item.source_log_id and stock.id == item.source_log_id %}
+                                         {% if item.source_log_id and stock.id == item.source_log_id %}
                                         selected
                                         {% endif %}>
                                         QC: {{ stock.qc_no|default:"N/A" }} | متاح: {{ stock.remaining_quantity|floatformat:3 }} | {{ stock.timestamp|date:"Y-m-d" }}
@@ -236,6 +236,19 @@
                     <div class="mb-3">
                         <label class="form-label">الكمية النظرية</label>
                         <input type="number" step="any" name="theoretical_quantity" class="form-control" required>
+                    </div>
+                     <div class="mb-3">
+                        <label class="form-label">الكمية الفعلية</label>
+                        <input type="number" step="any" name="actual_quantity" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">مصدر المخزون (QC)</label>
+                        <select class="form-select searchable-select" name="source_log_id" required>
+                            <option value="">اختر مصدر...</option>
+                            <!-- This will be populated dynamically via JavaScript if needed, 
+                                 or you can pre-populate it if the logic is simple enough.
+                                 For now, we leave it empty and require the user to select a product first. -->
+                        </select>
                     </div>
                 </div>
                 <div class="modal-footer">

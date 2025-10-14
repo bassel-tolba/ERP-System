@@ -10104,3 +10104,428 @@ INFO 2025-10-12 09:55:07,586 django.server basehttp 8808 6620 "GET /static/webfo
 INFO 2025-10-12 09:55:07,586 django.server basehttp 8808 11356 "GET /static/webfonts/NotoKufiArabic-VariableFont_wght.ttf HTTP/1.1" 304 0
 INFO 2025-10-12 09:55:19,576 django.server basehttp 8808 11356 "GET /records/ HTTP/1.1" 200 26486
 INFO 2025-10-12 09:55:19,647 django.server basehttp 8808 11356 "GET /records/ HTTP/1.1" 200 45928
+INFO 2025-10-13 14:20:06,499 django.utils.autoreload autoreload 323580 139961362260032 Watching for file changes with StatReloader
+INFO 2025-10-13 14:20:47,456 django.utils.autoreload autoreload 323723 140102206525504 Watching for file changes with StatReloader
+INFO 2025-10-13 14:20:49,698 django.server basehttp 323723 140102154749632 "GET / HTTP/1.1" 200 32871
+INFO 2025-10-13 14:20:49,776 django.server basehttp 323723 140102154749632 "GET /static/css/google-fonts.css HTTP/1.1" 200 12053
+INFO 2025-10-13 14:20:49,790 django.server basehttp 323723 140102154749632 "GET /static/js/bootstrap.bundle.min.js HTTP/1.1" 200 80663
+INFO 2025-10-13 14:20:49,795 django.server basehttp 323723 140102127474368 "GET /static/css/flatpickr.min.css HTTP/1.1" 200 16166
+INFO 2025-10-13 14:20:49,801 django.server basehttp 323723 140102119081664 "GET /static/css/tom-select.bootstrap5.min.css HTTP/1.1" 200 15345
+INFO 2025-10-13 14:20:49,811 django.server basehttp 323723 140102154749632 "GET /static/js/tom-select.complete.min.js HTTP/1.1" 200 50720
+INFO 2025-10-13 14:20:49,813 django.server basehttp 323723 140102127474368 "GET /static/js/flatpickr.min.js HTTP/1.1" 200 50679
+INFO 2025-10-13 14:20:49,816 django.server basehttp 323723 140102119081664 "GET /static/js/flatpickr.l10n.ar.js HTTP/1.1" 200 1928
+INFO 2025-10-13 14:20:49,826 django.server basehttp 323723 140102154749632 "GET /static/layout/js/records_logic.js HTTP/1.1" 200 6848
+INFO 2025-10-13 14:20:49,826 django.server basehttp 323723 140102127474368 "GET /static/layout/js/dashboard_logic.js HTTP/1.1" 200 8433
+INFO 2025-10-13 14:20:49,827 django.server basehttp 323723 140102144259776 "GET /static/css/bootstrap.rtl.css HTTP/1.1" 200 284704
+INFO 2025-10-13 14:20:49,828 django.server basehttp 323723 140102110688960 "GET /static/css/style.css HTTP/1.1" 200 18501
+INFO 2025-10-13 14:20:49,828 django.server basehttp 323723 140102135867072 "GET /static/css/bootstrap-icons.min.css HTTP/1.1" 200 85887
+INFO 2025-10-13 14:20:49,831 django.server basehttp 323723 140102110688960 "GET /static/layout/js/create_batch_logic.js HTTP/1.1" 200 13995
+INFO 2025-10-13 14:20:49,835 django.server basehttp 323723 140102135867072 "GET /static/layout/js/receive_finished_product_logic.js HTTP/1.1" 200 1770
+INFO 2025-10-13 14:20:49,836 django.server basehttp 323723 140102144259776 "GET /static/layout/js/batch_view_logic.js HTTP/1.1" 200 5121
+INFO 2025-10-13 14:20:49,857 django.server basehttp 323723 140102119081664 "GET /static/layout/js/shop_order_templates_logic.js HTTP/1.1" 200 5531
+INFO 2025-10-13 14:20:49,874 django.server basehttp 323723 140102127474368 "GET /static/layout/js/ledger_logic.js HTTP/1.1" 200 6550
+INFO 2025-10-13 14:20:49,876 django.server basehttp 323723 140102154749632 "GET /static/layout/js/production_returns_logic.js HTTP/1.1" 200 3097
+INFO 2025-10-13 14:20:49,880 django.server basehttp 323723 140102110688960 "GET /static/layout/js/visuals_logic.js HTTP/1.1" 200 7263
+INFO 2025-10-13 14:20:49,886 django.server basehttp 323723 140102135867072 "GET /static/layout/js/batch_production_variance_report_logic.js HTTP/1.1" 200 3204
+INFO 2025-10-13 14:20:49,888 django.server basehttp 323723 140102144259776 "GET /static/layout/js/financials_logic.js HTTP/1.1" 200 32932
+INFO 2025-10-13 14:20:49,904 django.server basehttp 323723 140102119081664 "GET /static/layout/js/sales_order_create_logic.js HTTP/1.1" 200 5204
+INFO 2025-10-13 14:20:49,924 django.server basehttp 323723 140102154749632 "GET /static/layout/js/purchase_order_create_logic.js HTTP/1.1" 200 4710
+INFO 2025-10-13 14:20:49,925 django.server basehttp 323723 140102127474368 "GET /static/layout/js/tax_reconciliation_report_logic.js HTTP/1.1" 200 760
+INFO 2025-10-13 14:20:49,931 django.server basehttp 323723 140102110688960 "GET /static/layout/js/close_period_logic.js HTTP/1.1" 200 4585
+INFO 2025-10-13 14:20:49,938 django.server basehttp 323723 140102135867072 "GET /static/layout/js/inventory_counts_logic.js HTTP/1.1" 200 19179
+INFO 2025-10-13 14:20:49,940 django.server basehttp 323723 140102144259776 "GET /static/layout/js/employees_logic.js HTTP/1.1" 200 6814
+INFO 2025-10-13 14:20:49,948 django.server basehttp 323723 140102119081664 "GET /static/layout/js/dynamic_content_loader.js HTTP/1.1" 200 6537
+INFO 2025-10-13 14:20:50,078 django.server basehttp 323723 140102119081664 "GET /static/css/print.css HTTP/1.1" 200 2200
+INFO 2025-10-13 14:20:50,416 django.server basehttp 323723 140102119081664 "GET /static/webfonts/bootstrap-icons.woff2?dd67030699838ea613ee6dbda90effa6 HTTP/1.1" 200 130396
+INFO 2025-10-13 14:20:50,429 django.server basehttp 323723 140102119081664 "GET /static/webfonts/NotoKufiArabic-VariableFont_wght.ttf HTTP/1.1" 200 433800
+INFO 2025-10-13 14:20:50,430 django.server basehttp 323723 140102135867072 "GET /static/webfonts/41.woff2 HTTP/1.1" 200 21168
+INFO 2025-10-13 14:20:53,277 django.server basehttp 323723 140102119081664 "GET /batches/ HTTP/1.1" 200 7401
+INFO 2025-10-13 14:20:53,342 django.server basehttp 323723 140102119081664 "GET /batches/ HTTP/1.1" 200 26849
+ERROR 2025-10-13 14:30:23,428 inventory.views.batches batches 323723 140102119081664 Error deleting batch 1: ("Cannot delete some instances of model 'Batch' because they are referenced through protected foreign keys: 'FinishedProductReceipt.batch'.", {<FinishedProductReceipt: Receipt for Batch #FPB-DEMO-001 from Plan SO-DEMO-001>})
+Traceback (most recent call last):
+  File "/home/bassel/projects/python/erb/DjangoMigration/gipcco_project/inventory/views/batches.py", line 255, in delete_batch
+    info = batch_service.delete_batch(batch=batch)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bassel/projects/python/erb/DjangoMigration/gipcco_project/inventory/services/batch_service.py", line 207, in delete_batch
+    batch.delete()
+  File "/home/bassel/projects/python/erb/DjangoMigration/gipcco_project/venv/lib/python3.11/site-packages/django/db/models/base.py", line 1280, in delete
+    collector.collect([self], keep_parents=keep_parents)
+  File "/home/bassel/projects/python/erb/DjangoMigration/gipcco_project/venv/lib/python3.11/site-packages/django/db/models/deletion.py", line 350, in collect
+    raise ProtectedError(
+django.db.models.deletion.ProtectedError: ("Cannot delete some instances of model 'Batch' because they are referenced through protected foreign keys: 'FinishedProductReceipt.batch'.", {<FinishedProductReceipt: Receipt for Batch #FPB-DEMO-001 from Plan SO-DEMO-001>})
+INFO 2025-10-13 14:30:23,435 django.server basehttp 323723 140102119081664 "POST /batch/delete/1/ HTTP/1.1" 302 0
+INFO 2025-10-13 14:30:23,485 django.server basehttp 323723 140102119081664 "GET /batches/ HTTP/1.1" 200 27622
+INFO 2025-10-13 14:30:41,731 django.server basehttp 323723 140102119081664 "GET /batches/ HTTP/1.1" 200 26849
+INFO 2025-10-13 14:30:41,964 django.server basehttp 323723 140102119081664 "GET /static/img/favicon.ico HTTP/1.1" 200 41001
+INFO 2025-10-13 14:30:42,714 django.server basehttp 323723 140102119081664 "GET /batches/ HTTP/1.1" 200 26849
+ERROR 2025-10-13 14:30:45,211 inventory.views.batches batches 323723 140102119081664 Error deleting batch 1: ("Cannot delete some instances of model 'Batch' because they are referenced through protected foreign keys: 'FinishedProductReceipt.batch'.", {<FinishedProductReceipt: Receipt for Batch #FPB-DEMO-001 from Plan SO-DEMO-001>})
+Traceback (most recent call last):
+  File "/home/bassel/projects/python/erb/DjangoMigration/gipcco_project/inventory/views/batches.py", line 255, in delete_batch
+    info = batch_service.delete_batch(batch=batch)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bassel/projects/python/erb/DjangoMigration/gipcco_project/inventory/services/batch_service.py", line 207, in delete_batch
+    batch.delete()
+  File "/home/bassel/projects/python/erb/DjangoMigration/gipcco_project/venv/lib/python3.11/site-packages/django/db/models/base.py", line 1280, in delete
+    collector.collect([self], keep_parents=keep_parents)
+  File "/home/bassel/projects/python/erb/DjangoMigration/gipcco_project/venv/lib/python3.11/site-packages/django/db/models/deletion.py", line 350, in collect
+    raise ProtectedError(
+django.db.models.deletion.ProtectedError: ("Cannot delete some instances of model 'Batch' because they are referenced through protected foreign keys: 'FinishedProductReceipt.batch'.", {<FinishedProductReceipt: Receipt for Batch #FPB-DEMO-001 from Plan SO-DEMO-001>})
+INFO 2025-10-13 14:30:45,213 django.server basehttp 323723 140102119081664 "POST /batch/delete/1/ HTTP/1.1" 302 0
+INFO 2025-10-13 14:30:45,231 django.server basehttp 323723 140102119081664 "GET /batches/ HTTP/1.1" 200 27622
+INFO 2025-10-13 14:30:47,852 django.server basehttp 323723 140102119081664 "GET /batch/1/ HTTP/1.1" 200 12273
+INFO 2025-10-13 14:30:47,912 django.server basehttp 323723 140102119081664 "GET /batch/1/ HTTP/1.1" 200 31658
+INFO 2025-10-13 14:34:08,472 django.server basehttp 323723 140102119081664 "GET /batch/1/ HTTP/1.1" 200 31658
+INFO 2025-10-13 14:42:33,375 django.utils.autoreload autoreload 323723 140102206525504 /home/bassel/projects/python/erb/DjangoMigration/gipcco_project/inventory/services/batch_service.py changed, reloading.
+INFO 2025-10-13 14:42:34,009 django.utils.autoreload autoreload 328899 140385288048704 Watching for file changes with StatReloader
+INFO 2025-10-13 14:43:38,952 django.utils.autoreload autoreload 328899 140385288048704 /home/bassel/projects/python/erb/DjangoMigration/gipcco_project/inventory/signals.py changed, reloading.
+INFO 2025-10-13 14:43:39,428 django.utils.autoreload autoreload 329122 140206347882560 Watching for file changes with StatReloader
+INFO 2025-10-13 14:43:40,685 django.utils.autoreload autoreload 329122 140206347882560 /home/bassel/projects/python/erb/DjangoMigration/gipcco_project/inventory/signals.py changed, reloading.
+INFO 2025-10-13 14:43:41,158 django.utils.autoreload autoreload 329126 139685709422656 Watching for file changes with StatReloader
+INFO 2025-10-13 14:44:06,043 django.utils.autoreload autoreload 329126 139685709422656 /home/bassel/projects/python/erb/DjangoMigration/gipcco_project/inventory/signals.py changed, reloading.
+INFO 2025-10-13 14:44:06,545 django.utils.autoreload autoreload 329165 140711610708032 Watching for file changes with StatReloader
+INFO 2025-10-13 14:44:51,996 django.utils.autoreload autoreload 329165 140711610708032 /home/bassel/projects/python/erb/DjangoMigration/gipcco_project/inventory/services/batch_service.py changed, reloading.
+INFO 2025-10-13 14:44:52,470 django.utils.autoreload autoreload 329279 140477250564160 Watching for file changes with StatReloader
+INFO 2025-10-13 14:44:53,732 django.utils.autoreload autoreload 329279 140477250564160 /home/bassel/projects/python/erb/DjangoMigration/gipcco_project/inventory/services/batch_service.py changed, reloading.
+INFO 2025-10-13 14:44:54,182 django.utils.autoreload autoreload 329284 140329818349632 Watching for file changes with StatReloader
+INFO 2025-10-13 14:44:56,469 django.utils.autoreload autoreload 329284 140329818349632 /home/bassel/projects/python/erb/DjangoMigration/gipcco_project/inventory/services/batch_service.py changed, reloading.
+INFO 2025-10-13 14:44:56,926 django.utils.autoreload autoreload 329286 139704625336384 Watching for file changes with StatReloader
+INFO 2025-10-13 14:44:59,212 django.utils.autoreload autoreload 329286 139704625336384 /home/bassel/projects/python/erb/DjangoMigration/gipcco_project/inventory/services/batch_service.py changed, reloading.
+INFO 2025-10-13 14:44:59,721 django.utils.autoreload autoreload 329308 140603358089280 Watching for file changes with StatReloader
+INFO 2025-10-13 15:03:07,670 django.utils.autoreload autoreload 329308 140603358089280 /home/bassel/projects/python/erb/DjangoMigration/gipcco_project/inventory/services/batch_service.py changed, reloading.
+INFO 2025-10-13 15:03:08,183 django.utils.autoreload autoreload 331999 140356583112768 Watching for file changes with StatReloader
+INFO 2025-10-13 15:03:22,788 django.utils.autoreload autoreload 331999 140356583112768 /home/bassel/projects/python/erb/DjangoMigration/gipcco_project/inventory/services/batch_service.py changed, reloading.
+INFO 2025-10-13 15:03:23,404 django.utils.autoreload autoreload 332024 139829693448256 Watching for file changes with StatReloader
+INFO 2025-10-13 15:04:31,663 django.utils.autoreload autoreload 332024 139829693448256 /home/bassel/projects/python/erb/DjangoMigration/gipcco_project/inventory/views/batches.py changed, reloading.
+INFO 2025-10-13 15:04:32,305 django.utils.autoreload autoreload 332198 139899371724864 Watching for file changes with StatReloader
+INFO 2025-10-13 15:07:42,548 django.utils.autoreload autoreload 332198 139899371724864 /home/bassel/projects/python/erb/DjangoMigration/gipcco_project/inventory/signals.py changed, reloading.
+INFO 2025-10-13 15:07:43,066 django.utils.autoreload autoreload 332760 140478704087104 Watching for file changes with StatReloader
+INFO 2025-10-13 15:07:45,317 django.utils.autoreload autoreload 332760 140478704087104 /home/bassel/projects/python/erb/DjangoMigration/gipcco_project/inventory/signals.py changed, reloading.
+INFO 2025-10-13 15:07:45,975 django.utils.autoreload autoreload 332769 140051564294208 Watching for file changes with StatReloader
+INFO 2025-10-13 15:30:42,097 django.utils.autoreload autoreload 332769 140051564294208 /home/bassel/projects/python/erb/DjangoMigration/gipcco_project/inventory/services/batch_service.py changed, reloading.
+INFO 2025-10-13 15:30:42,733 django.utils.autoreload autoreload 336016 140377013039168 Watching for file changes with StatReloader
+INFO 2025-10-13 15:30:56,314 django.utils.autoreload autoreload 336016 140377013039168 /home/bassel/projects/python/erb/DjangoMigration/gipcco_project/inventory/views/batches.py changed, reloading.
+INFO 2025-10-13 15:30:56,903 django.utils.autoreload autoreload 336074 140526656561216 Watching for file changes with StatReloader
+INFO 2025-10-13 15:32:14,483 django.server basehttp 336074 140526604682944 "GET /batch/1/ HTTP/1.1" 200 31658
+INFO 2025-10-13 15:32:14,527 django.server basehttp 336074 140526604682944 "GET /static/css/google-fonts.css HTTP/1.1" 304 0
+INFO 2025-10-13 15:32:14,530 django.server basehttp 336074 140526604682944 "GET /static/css/bootstrap.rtl.css HTTP/1.1" 304 0
+INFO 2025-10-13 15:32:14,536 django.server basehttp 336074 140526594193088 "GET /static/css/bootstrap-icons.min.css HTTP/1.1" 304 0
+INFO 2025-10-13 15:32:14,539 django.server basehttp 336074 140526585800384 "GET /static/css/flatpickr.min.css HTTP/1.1" 304 0
+INFO 2025-10-13 15:32:14,541 django.server basehttp 336074 140526577407680 "GET /static/css/tom-select.bootstrap5.min.css HTTP/1.1" 304 0
+INFO 2025-10-13 15:32:14,547 django.server basehttp 336074 140526585800384 "GET /static/js/flatpickr.l10n.ar.js HTTP/1.1" 304 0
+INFO 2025-10-13 15:32:14,548 django.server basehttp 336074 140526594193088 "GET /static/js/flatpickr.min.js HTTP/1.1" 304 0
+INFO 2025-10-13 15:32:14,550 django.server basehttp 336074 140526229649088 "GET /static/css/style.css HTTP/1.1" 304 0
+INFO 2025-10-13 15:32:14,550 django.server basehttp 336074 140526577407680 "GET /static/js/tom-select.complete.min.js HTTP/1.1" 304 0
+INFO 2025-10-13 15:32:14,551 django.server basehttp 336074 140526221256384 "GET /static/js/bootstrap.bundle.min.js HTTP/1.1" 304 0
+INFO 2025-10-13 15:32:14,555 django.server basehttp 336074 140526229649088 "GET /static/layout/js/dashboard_logic.js HTTP/1.1" 304 0
+INFO 2025-10-13 15:32:14,559 django.server basehttp 336074 140526221256384 "GET /static/layout/js/records_logic.js HTTP/1.1" 304 0
+INFO 2025-10-13 15:32:14,573 django.server basehttp 336074 140526604682944 "GET /static/layout/js/create_batch_logic.js HTTP/1.1" 304 0
+INFO 2025-10-13 15:32:14,594 django.server basehttp 336074 140526594193088 "GET /static/layout/js/batch_view_logic.js HTTP/1.1" 304 0
+INFO 2025-10-13 15:32:14,599 django.server basehttp 336074 140526585800384 "GET /static/layout/js/receive_finished_product_logic.js HTTP/1.1" 304 0
+INFO 2025-10-13 15:32:14,603 django.server basehttp 336074 140526577407680 "GET /static/layout/js/shop_order_templates_logic.js HTTP/1.1" 304 0
+INFO 2025-10-13 15:32:14,605 django.server basehttp 336074 140526221256384 "GET /static/layout/js/production_returns_logic.js HTTP/1.1" 304 0
+INFO 2025-10-13 15:32:14,608 django.server basehttp 336074 140526229649088 "GET /static/layout/js/ledger_logic.js HTTP/1.1" 304 0
+INFO 2025-10-13 15:32:14,618 django.server basehttp 336074 140526604682944 "GET /static/layout/js/visuals_logic.js HTTP/1.1" 304 0
+INFO 2025-10-13 15:32:14,638 django.server basehttp 336074 140526594193088 "GET /static/layout/js/batch_production_variance_report_logic.js HTTP/1.1" 304 0
+INFO 2025-10-13 15:32:14,646 django.server basehttp 336074 140526585800384 "GET /static/layout/js/financials_logic.js HTTP/1.1" 304 0
+INFO 2025-10-13 15:32:14,648 django.server basehttp 336074 140526577407680 "GET /static/layout/js/sales_order_create_logic.js HTTP/1.1" 304 0
+INFO 2025-10-13 15:32:14,649 django.server basehttp 336074 140526221256384 "GET /static/layout/js/purchase_order_create_logic.js HTTP/1.1" 304 0
+INFO 2025-10-13 15:32:14,654 django.server basehttp 336074 140526229649088 "GET /static/layout/js/tax_reconciliation_report_logic.js HTTP/1.1" 304 0
+INFO 2025-10-13 15:32:14,661 django.server basehttp 336074 140526604682944 "GET /static/layout/js/close_period_logic.js HTTP/1.1" 304 0
+INFO 2025-10-13 15:32:14,681 django.server basehttp 336074 140526594193088 "GET /static/layout/js/inventory_counts_logic.js HTTP/1.1" 304 0
+INFO 2025-10-13 15:32:14,690 django.server basehttp 336074 140526577407680 "GET /static/layout/js/employees_logic.js HTTP/1.1" 304 0
+INFO 2025-10-13 15:32:14,690 django.server basehttp 336074 140526585800384 "GET /static/layout/js/dynamic_content_loader.js HTTP/1.1" 304 0
+INFO 2025-10-13 15:32:14,779 django.server basehttp 336074 140526577407680 "GET /static/css/print.css HTTP/1.1" 304 0
+INFO 2025-10-13 15:32:14,945 django.server basehttp 336074 140526577407680 "GET /static/webfonts/bootstrap-icons.woff2?dd67030699838ea613ee6dbda90effa6 HTTP/1.1" 304 0
+INFO 2025-10-13 15:32:14,946 django.server basehttp 336074 140526585800384 "GET /static/webfonts/NotoKufiArabic-VariableFont_wght.ttf HTTP/1.1" 304 0
+INFO 2025-10-13 15:32:14,947 django.server basehttp 336074 140526594193088 "GET /static/webfonts/41.woff2 HTTP/1.1" 304 0
+INFO 2025-10-13 15:32:15,329 django.server basehttp 336074 140526594193088 "GET /static/img/favicon.ico HTTP/1.1" 304 0
+WARNING 2025-10-13 15:33:28,133 django.request log 336074 140526594193088 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-13 15:33:28,136 django.server basehttp 336074 140526594193088 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 37188
+WARNING 2025-10-13 15:33:28,943 django.server basehttp 336074 140526594193088 "GET /static/js/bootstrap.bundle.min.js.map HTTP/1.1" 404 1904
+WARNING 2025-10-13 15:33:28,944 django.server basehttp 336074 140526585800384 "GET /static/js/tom-select.complete.min.js.map HTTP/1.1" 404 1913
+WARNING 2025-10-13 15:33:29,041 django.server basehttp 336074 140526577407680 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-10-13 15:33:55,795 django.server basehttp 336074 140526604682944 "GET /batch/1/ HTTP/1.1" 200 31658
+WARNING 2025-10-13 15:33:55,871 django.request log 336074 140526604682944 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-13 15:33:55,873 django.server basehttp 336074 140526604682944 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 37188
+WARNING 2025-10-13 15:33:56,193 django.server basehttp 336074 140526604682944 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+WARNING 2025-10-13 15:33:56,215 django.server basehttp 336074 140526229649088 "GET /static/js/bootstrap.bundle.min.js.map HTTP/1.1" 404 1904
+WARNING 2025-10-13 15:33:56,238 django.server basehttp 336074 140526221256384 "GET /static/js/tom-select.complete.min.js.map HTTP/1.1" 404 1913
+INFO 2025-10-13 15:34:11,121 django.server basehttp 336074 140526221256384 "GET /batch/1/ HTTP/1.1" 200 31658
+WARNING 2025-10-13 15:34:11,182 django.request log 336074 140526221256384 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-13 15:34:11,190 django.server basehttp 336074 140526221256384 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 37188
+INFO 2025-10-13 15:34:11,213 django.server basehttp 336074 140526221256384 "GET /static/css/google-fonts.css HTTP/1.1" 200 12053
+INFO 2025-10-13 15:34:11,227 django.server basehttp 336074 140526577407680 "GET /static/css/flatpickr.min.css HTTP/1.1" 200 16166
+INFO 2025-10-13 15:34:11,228 django.server basehttp 336074 140526229649088 "GET /static/css/bootstrap.rtl.css HTTP/1.1" 200 284704
+INFO 2025-10-13 15:34:11,232 django.server basehttp 336074 140526594193088 "GET /static/css/tom-select.bootstrap5.min.css HTTP/1.1" 200 15345
+INFO 2025-10-13 15:34:11,233 django.server basehttp 336074 140526604682944 "GET /static/css/bootstrap-icons.min.css HTTP/1.1" 200 85887
+INFO 2025-10-13 15:34:11,234 django.server basehttp 336074 140526585800384 "GET /static/css/style.css HTTP/1.1" 200 18501
+INFO 2025-10-13 15:34:11,236 django.server basehttp 336074 140526229649088 "GET /static/js/flatpickr.min.js HTTP/1.1" 200 50679
+INFO 2025-10-13 15:34:11,237 django.server basehttp 336074 140526577407680 "GET /static/js/bootstrap.bundle.min.js HTTP/1.1" 200 80663
+INFO 2025-10-13 15:34:11,239 django.server basehttp 336074 140526594193088 "GET /static/js/flatpickr.l10n.ar.js HTTP/1.1" 200 1928
+INFO 2025-10-13 15:34:11,245 django.server basehttp 336074 140526585800384 "GET /static/js/tom-select.complete.min.js HTTP/1.1" 200 50720
+INFO 2025-10-13 15:34:11,247 django.server basehttp 336074 140526604682944 "GET /static/layout/js/dashboard_logic.js HTTP/1.1" 200 8433
+INFO 2025-10-13 15:34:11,248 django.server basehttp 336074 140526577407680 "GET /static/layout/js/records_logic.js HTTP/1.1" 200 6848
+INFO 2025-10-13 15:34:11,259 django.server basehttp 336074 140526585800384 "GET /static/layout/js/create_batch_logic.js HTTP/1.1" 200 13995
+INFO 2025-10-13 15:34:11,262 django.server basehttp 336074 140526221256384 "GET /static/layout/js/batch_view_logic.js HTTP/1.1" 200 5121
+INFO 2025-10-13 15:34:11,295 django.server basehttp 336074 140526229649088 "GET /static/layout/js/receive_finished_product_logic.js HTTP/1.1" 200 1770
+INFO 2025-10-13 15:34:11,295 django.server basehttp 336074 140526594193088 "GET /static/layout/js/shop_order_templates_logic.js HTTP/1.1" 200 5531
+INFO 2025-10-13 15:34:11,300 django.server basehttp 336074 140526604682944 "GET /static/layout/js/ledger_logic.js HTTP/1.1" 200 6550
+INFO 2025-10-13 15:34:11,303 django.server basehttp 336074 140526577407680 "GET /static/layout/js/production_returns_logic.js HTTP/1.1" 200 3097
+INFO 2025-10-13 15:34:11,308 django.server basehttp 336074 140526585800384 "GET /static/layout/js/visuals_logic.js HTTP/1.1" 200 7263
+INFO 2025-10-13 15:34:11,313 django.server basehttp 336074 140526221256384 "GET /static/layout/js/batch_production_variance_report_logic.js HTTP/1.1" 200 3204
+INFO 2025-10-13 15:34:11,342 django.server basehttp 336074 140526229649088 "GET /static/layout/js/financials_logic.js HTTP/1.1" 200 32932
+INFO 2025-10-13 15:34:11,344 django.server basehttp 336074 140526594193088 "GET /static/layout/js/sales_order_create_logic.js HTTP/1.1" 200 5204
+INFO 2025-10-13 15:34:11,347 django.server basehttp 336074 140526604682944 "GET /static/layout/js/purchase_order_create_logic.js HTTP/1.1" 200 4710
+INFO 2025-10-13 15:34:11,352 django.server basehttp 336074 140526577407680 "GET /static/layout/js/tax_reconciliation_report_logic.js HTTP/1.1" 200 760
+INFO 2025-10-13 15:34:11,354 django.server basehttp 336074 140526585800384 "GET /static/layout/js/close_period_logic.js HTTP/1.1" 200 4585
+INFO 2025-10-13 15:34:11,360 django.server basehttp 336074 140526221256384 "GET /static/layout/js/inventory_counts_logic.js HTTP/1.1" 200 19179
+INFO 2025-10-13 15:34:11,391 django.server basehttp 336074 140526594193088 "GET /static/layout/js/employees_logic.js HTTP/1.1" 200 6814
+INFO 2025-10-13 15:34:11,393 django.server basehttp 336074 140526229649088 "GET /static/layout/js/dynamic_content_loader.js HTTP/1.1" 200 5887
+INFO 2025-10-13 15:34:11,511 django.server basehttp 336074 140526229649088 "GET /static/css/print.css HTTP/1.1" 200 2200
+INFO 2025-10-13 15:34:11,669 django.server basehttp 336074 140526229649088 "GET /static/webfonts/bootstrap-icons.woff2?dd67030699838ea613ee6dbda90effa6 HTTP/1.1" 200 130396
+INFO 2025-10-13 15:34:11,671 django.server basehttp 336074 140526594193088 "GET /static/webfonts/NotoKufiArabic-VariableFont_wght.ttf HTTP/1.1" 200 433800
+WARNING 2025-10-13 15:34:11,961 django.server basehttp 336074 140526594193088 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-10-13 15:34:11,977 django.server basehttp 336074 140526229649088 "GET /static/webfonts/41.woff2 HTTP/1.1" 200 21168
+WARNING 2025-10-13 15:34:12,257 django.server basehttp 336074 140526229649088 "GET /static/js/bootstrap.bundle.min.js.map HTTP/1.1" 404 1904
+WARNING 2025-10-13 15:34:12,267 django.server basehttp 336074 140526221256384 "GET /static/js/tom-select.complete.min.js.map HTTP/1.1" 404 1913
+INFO 2025-10-13 15:34:12,767 django.server basehttp 336074 140526585800384 "GET /static/img/favicon.ico HTTP/1.1" 200 41001
+INFO 2025-10-13 15:34:38,133 django.server basehttp 336074 140526585800384 "GET /batches/ HTTP/1.1" 200 7401
+INFO 2025-10-13 15:34:39,344 django.server basehttp 336074 140526585800384 "GET /batches/create/ HTTP/1.1" 200 11263
+INFO 2025-10-13 15:35:11,295 django.server basehttp 336074 140526585800384 "GET /batches/create/ HTTP/1.1" 200 32324
+WARNING 2025-10-13 15:35:11,340 django.request log 336074 140526585800384 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-13 15:35:11,343 django.server basehttp 336074 140526585800384 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 37188
+INFO 2025-10-13 15:35:11,348 django.server basehttp 336074 140526577407680 "GET /static/layout/js/dynamic_content_loader.js HTTP/1.1" 304 0
+WARNING 2025-10-13 15:35:11,684 django.server basehttp 336074 140526585800384 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+WARNING 2025-10-13 15:35:11,695 django.server basehttp 336074 140526577407680 "GET /static/js/bootstrap.bundle.min.js.map HTTP/1.1" 404 1904
+WARNING 2025-10-13 15:35:11,724 django.server basehttp 336074 140526604682944 "GET /static/js/tom-select.complete.min.js.map HTTP/1.1" 404 1913
+INFO 2025-10-13 15:49:20,602 django.server basehttp 336074 140526604682944 "GET /batches/ HTTP/1.1" 200 7401
+INFO 2025-10-13 15:49:21,810 django.server basehttp 336074 140526604682944 "GET /batch/1/ HTTP/1.1" 200 12273
+INFO 2025-10-13 15:49:27,374 django.server basehttp 336074 140526604682944 "GET /batches/ HTTP/1.1" 200 7401
+INFO 2025-10-13 15:49:28,915 django.server basehttp 336074 140526604682944 "GET /batch/2/ HTTP/1.1" 200 10988
+INFO 2025-10-13 15:49:57,949 django.server basehttp 336074 140526604682944 "GET /batches/ HTTP/1.1" 200 7401
+INFO 2025-10-13 15:50:02,764 django.server basehttp 336074 140526604682944 "GET /shop_order_templates/ HTTP/1.1" 200 10936
+INFO 2025-10-13 15:50:08,992 django.server basehttp 336074 140526604682944 "GET /shop_order_template/edit/2/ HTTP/1.1" 200 8755
+INFO 2025-10-13 15:50:10,803 django.server basehttp 336074 140526604682944 "GET /shop_order_templates/ HTTP/1.1" 200 10936
+INFO 2025-10-13 15:50:11,663 django.server basehttp 336074 140526604682944 "GET /shop_order_template/edit/2/ HTTP/1.1" 200 8755
+INFO 2025-10-13 15:50:12,688 django.server basehttp 336074 140526604682944 "GET /shop_order_templates/ HTTP/1.1" 200 10936
+INFO 2025-10-13 15:50:13,463 django.server basehttp 336074 140526604682944 "GET /shop_order_template/2/ HTTP/1.1" 200 2334
+INFO 2025-10-13 15:50:31,393 django.server basehttp 336074 140526604682944 "GET /shop_order_templates/ HTTP/1.1" 200 10936
+INFO 2025-10-13 15:50:32,947 django.server basehttp 336074 140526604682944 "GET /shop_order_templates/?copy_from=2 HTTP/1.1" 200 11135
+INFO 2025-10-13 15:51:37,309 django.server basehttp 336074 140526604682944 "GET /shop_order_templates/ HTTP/1.1" 200 10936
+INFO 2025-10-13 15:51:37,578 django.server basehttp 336074 140526604682944 "GET /batches/ HTTP/1.1" 200 7401
+INFO 2025-10-13 15:51:39,237 django.server basehttp 336074 140526604682944 "GET /batch/1/ HTTP/1.1" 200 12273
+WARNING 2025-10-13 15:51:42,003 django.request log 336074 140526604682944 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-13 15:51:42,009 django.server basehttp 336074 140526604682944 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 37188
+WARNING 2025-10-13 15:51:42,097 django.server basehttp 336074 140526604682944 "GET /static/js/bootstrap.bundle.min.js.map HTTP/1.1" 404 1904
+WARNING 2025-10-13 15:51:42,104 django.server basehttp 336074 140526577407680 "GET /static/js/tom-select.complete.min.js.map HTTP/1.1" 404 1913
+WARNING 2025-10-13 15:51:42,188 django.server basehttp 336074 140526577407680 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-10-13 15:51:46,128 django.server basehttp 336074 140526577407680 "GET /batch/1/ HTTP/1.1" 200 31658
+INFO 2025-10-13 15:51:46,167 django.server basehttp 336074 140526577407680 "GET /static/layout/js/dynamic_content_loader.js HTTP/1.1" 304 0
+WARNING 2025-10-13 15:51:46,198 django.request log 336074 140526577407680 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-13 15:51:46,201 django.server basehttp 336074 140526577407680 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 37188
+WARNING 2025-10-13 15:51:46,509 django.server basehttp 336074 140526577407680 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+WARNING 2025-10-13 15:51:46,520 django.server basehttp 336074 140526577407680 "GET /static/js/bootstrap.bundle.min.js.map HTTP/1.1" 404 1904
+WARNING 2025-10-13 15:51:46,527 django.server basehttp 336074 140526577407680 "GET /static/js/tom-select.complete.min.js.map HTTP/1.1" 404 1913
+INFO 2025-10-13 15:52:35,257 django.server basehttp 336074 140526577407680 "GET /batches/ HTTP/1.1" 200 7401
+INFO 2025-10-13 15:52:36,493 django.server basehttp 336074 140526577407680 "GET /batches/create/ HTTP/1.1" 200 11263
+INFO 2025-10-13 16:06:28,918 django.server basehttp 336074 140526577407680 "GET /batches/ HTTP/1.1" 200 7401
+INFO 2025-10-13 16:06:30,657 django.server basehttp 336074 140526577407680 "GET /batches/ HTTP/1.1" 200 26849
+INFO 2025-10-13 16:06:30,741 django.server basehttp 336074 140526577407680 "GET /static/layout/js/dynamic_content_loader.js HTTP/1.1" 304 0
+INFO 2025-10-13 16:06:33,640 django.server basehttp 336074 140526577407680 "GET /batches/ HTTP/1.1" 200 26849
+INFO 2025-10-13 16:06:33,689 django.server basehttp 336074 140526577407680 "GET /static/css/google-fonts.css HTTP/1.1" 200 12053
+INFO 2025-10-13 16:06:33,693 django.server basehttp 336074 140526221256384 "GET /static/css/flatpickr.min.css HTTP/1.1" 200 16166
+INFO 2025-10-13 16:06:33,694 django.server basehttp 336074 140526604682944 "GET /static/css/bootstrap.rtl.css HTTP/1.1" 200 284704
+INFO 2025-10-13 16:06:33,695 django.server basehttp 336074 140526229649088 "GET /static/css/tom-select.bootstrap5.min.css HTTP/1.1" 200 15345
+INFO 2025-10-13 16:06:33,695 django.server basehttp 336074 140526585800384 "GET /static/css/bootstrap-icons.min.css HTTP/1.1" 200 85887
+INFO 2025-10-13 16:06:33,696 django.server basehttp 336074 140526212863680 "GET /static/css/style.css HTTP/1.1" 200 18501
+INFO 2025-10-13 16:06:33,704 django.server basehttp 336074 140526577407680 "GET /static/js/bootstrap.bundle.min.js HTTP/1.1" 200 80663
+INFO 2025-10-13 16:06:33,708 django.server basehttp 336074 140526221256384 "GET /static/js/flatpickr.min.js HTTP/1.1" 200 50679
+INFO 2025-10-13 16:06:33,709 django.server basehttp 336074 140526585800384 "GET /static/js/flatpickr.l10n.ar.js HTTP/1.1" 200 1928
+INFO 2025-10-13 16:06:33,712 django.server basehttp 336074 140526229649088 "GET /static/js/tom-select.complete.min.js HTTP/1.1" 200 50720
+INFO 2025-10-13 16:06:33,713 django.server basehttp 336074 140526604682944 "GET /static/layout/js/dashboard_logic.js HTTP/1.1" 200 8433
+INFO 2025-10-13 16:06:33,714 django.server basehttp 336074 140526221256384 "GET /static/layout/js/create_batch_logic.js HTTP/1.1" 200 13995
+INFO 2025-10-13 16:06:33,715 django.server basehttp 336074 140526212863680 "GET /static/layout/js/records_logic.js HTTP/1.1" 200 6848
+INFO 2025-10-13 16:06:33,717 django.server basehttp 336074 140526229649088 "GET /static/layout/js/batch_view_logic.js HTTP/1.1" 200 13666
+INFO 2025-10-13 16:06:33,747 django.server basehttp 336074 140526577407680 "GET /static/layout/js/receive_finished_product_logic.js HTTP/1.1" 200 1770
+INFO 2025-10-13 16:06:33,755 django.server basehttp 336074 140526585800384 "GET /static/layout/js/shop_order_templates_logic.js HTTP/1.1" 200 5531
+INFO 2025-10-13 16:06:33,768 django.server basehttp 336074 140526604682944 "GET /static/layout/js/ledger_logic.js HTTP/1.1" 200 6550
+INFO 2025-10-13 16:06:33,771 django.server basehttp 336074 140526229649088 "GET /static/layout/js/batch_production_variance_report_logic.js HTTP/1.1" 200 3204
+INFO 2025-10-13 16:06:33,772 django.server basehttp 336074 140526221256384 "GET /static/layout/js/visuals_logic.js HTTP/1.1" 200 7263
+INFO 2025-10-13 16:06:33,774 django.server basehttp 336074 140526212863680 "GET /static/layout/js/production_returns_logic.js HTTP/1.1" 200 3097
+INFO 2025-10-13 16:06:33,791 django.server basehttp 336074 140526577407680 "GET /static/layout/js/financials_logic.js HTTP/1.1" 200 32932
+INFO 2025-10-13 16:06:33,802 django.server basehttp 336074 140526585800384 "GET /static/layout/js/sales_order_create_logic.js HTTP/1.1" 200 5204
+INFO 2025-10-13 16:06:33,846 django.server basehttp 336074 140526229649088 "GET /static/layout/js/purchase_order_create_logic.js HTTP/1.1" 200 4710
+INFO 2025-10-13 16:06:33,852 django.server basehttp 336074 140526604682944 "GET /static/layout/js/tax_reconciliation_report_logic.js HTTP/1.1" 200 760
+INFO 2025-10-13 16:06:33,854 django.server basehttp 336074 140526212863680 "GET /static/layout/js/close_period_logic.js HTTP/1.1" 200 4585
+INFO 2025-10-13 16:06:33,863 django.server basehttp 336074 140526221256384 "GET /static/layout/js/inventory_counts_logic.js HTTP/1.1" 200 19179
+INFO 2025-10-13 16:06:33,867 django.server basehttp 336074 140526577407680 "GET /static/layout/js/employees_logic.js HTTP/1.1" 200 6814
+INFO 2025-10-13 16:06:33,878 django.server basehttp 336074 140526585800384 "GET /static/layout/js/dynamic_content_loader.js HTTP/1.1" 200 5887
+INFO 2025-10-13 16:06:33,917 django.server basehttp 336074 140526577407680 "GET /static/css/print.css HTTP/1.1" 200 2200
+INFO 2025-10-13 16:06:33,942 django.server basehttp 336074 140526585800384 "GET /static/webfonts/bootstrap-icons.woff2?dd67030699838ea613ee6dbda90effa6 HTTP/1.1" 200 130396
+INFO 2025-10-13 16:06:33,944 django.server basehttp 336074 140526212863680 "GET /static/webfonts/41.woff2 HTTP/1.1" 200 21168
+INFO 2025-10-13 16:06:33,947 django.server basehttp 336074 140526604682944 "GET /static/webfonts/NotoKufiArabic-VariableFont_wght.ttf HTTP/1.1" 200 433800
+INFO 2025-10-13 16:06:34,131 django.server basehttp 336074 140526577407680 "GET /static/img/favicon.ico HTTP/1.1" 200 41001
+INFO 2025-10-13 16:06:35,001 django.server basehttp 336074 140526577407680 "GET /batch/3/ HTTP/1.1" 200 10990
+INFO 2025-10-13 16:06:37,609 django.server basehttp 336074 140526577407680 "GET /batches/ HTTP/1.1" 200 7401
+INFO 2025-10-13 16:06:38,411 django.server basehttp 336074 140526577407680 "GET /batch/1/ HTTP/1.1" 200 12273
+INFO 2025-10-13 16:09:24,823 django.utils.autoreload autoreload 336074 140526656561216 /home/bassel/projects/python/erb/DjangoMigration/gipcco_project/inventory/views/batches.py changed, reloading.
+INFO 2025-10-13 16:09:25,455 django.utils.autoreload autoreload 340491 140488332185664 Watching for file changes with StatReloader
+INFO 2025-10-13 16:09:39,014 django.utils.autoreload autoreload 340491 140488332185664 /home/bassel/projects/python/erb/DjangoMigration/gipcco_project/inventory/views/batches.py changed, reloading.
+INFO 2025-10-13 16:09:39,514 django.utils.autoreload autoreload 340543 139704192098368 Watching for file changes with StatReloader
+INFO 2025-10-13 16:09:44,720 django.utils.autoreload autoreload 340543 139704192098368 /home/bassel/projects/python/erb/DjangoMigration/gipcco_project/inventory/views/batches.py changed, reloading.
+INFO 2025-10-13 16:09:45,204 django.utils.autoreload autoreload 340590 139678137344064 Watching for file changes with StatReloader
+INFO 2025-10-13 16:10:04,517 django.utils.autoreload autoreload 340590 139678137344064 /home/bassel/projects/python/erb/DjangoMigration/gipcco_project/inventory/views/batches.py changed, reloading.
+INFO 2025-10-13 16:10:05,067 django.utils.autoreload autoreload 340646 139937707163712 Watching for file changes with StatReloader
+INFO 2025-10-13 16:12:00,231 django.utils.autoreload autoreload 340646 139937707163712 /home/bassel/projects/python/erb/DjangoMigration/gipcco_project/inventory/views/batches.py changed, reloading.
+INFO 2025-10-13 16:12:00,724 django.utils.autoreload autoreload 340942 140554773078080 Watching for file changes with StatReloader
+INFO 2025-10-13 16:12:31,041 django.utils.autoreload autoreload 340942 140554773078080 /home/bassel/projects/python/erb/DjangoMigration/gipcco_project/inventory/views/batches.py changed, reloading.
+INFO 2025-10-13 16:12:31,643 django.utils.autoreload autoreload 341045 140009180115008 Watching for file changes with StatReloader
+INFO 2025-10-13 16:14:42,477 django.utils.autoreload autoreload 341045 140009180115008 /home/bassel/projects/python/erb/DjangoMigration/gipcco_project/inventory/views/api.py changed, reloading.
+INFO 2025-10-13 16:14:43,031 django.utils.autoreload autoreload 341329 139858337046592 Watching for file changes with StatReloader
+INFO 2025-10-13 16:15:44,439 django.utils.autoreload autoreload 341329 139858337046592 /home/bassel/projects/python/erb/DjangoMigration/gipcco_project/inventory/views/batches.py changed, reloading.
+INFO 2025-10-13 16:15:44,928 django.utils.autoreload autoreload 341467 139775889096768 Watching for file changes with StatReloader
+INFO 2025-10-13 16:16:39,117 django.utils.autoreload autoreload 341467 139775889096768 /home/bassel/projects/python/erb/DjangoMigration/gipcco_project/inventory/views/batches.py changed, reloading.
+INFO 2025-10-13 16:16:39,796 django.utils.autoreload autoreload 341630 139663635173440 Watching for file changes with StatReloader
+INFO 2025-10-13 16:16:44,214 django.utils.autoreload autoreload 341630 139663635173440 /home/bassel/projects/python/erb/DjangoMigration/gipcco_project/inventory/views/api.py changed, reloading.
+INFO 2025-10-13 16:16:44,907 django.utils.autoreload autoreload 341652 140660635983936 Watching for file changes with StatReloader
+INFO 2025-10-13 16:19:46,075 django.utils.autoreload autoreload 341652 140660635983936 /home/bassel/projects/python/erb/DjangoMigration/gipcco_project/inventory/views/batches.py changed, reloading.
+INFO 2025-10-13 16:19:46,681 django.utils.autoreload autoreload 342166 140667791528000 Watching for file changes with StatReloader
+INFO 2025-10-13 16:20:17,804 django.utils.autoreload autoreload 342166 140667791528000 /home/bassel/projects/python/erb/DjangoMigration/gipcco_project/inventory/views/batches.py changed, reloading.
+INFO 2025-10-13 16:20:18,330 django.utils.autoreload autoreload 342244 140458452115520 Watching for file changes with StatReloader
+INFO 2025-10-13 16:21:27,201 django.utils.autoreload autoreload 342244 140458452115520 /home/bassel/projects/python/erb/DjangoMigration/gipcco_project/inventory/views/batches.py changed, reloading.
+INFO 2025-10-13 16:21:27,787 django.utils.autoreload autoreload 342441 140573866311744 Watching for file changes with StatReloader
+INFO 2025-10-13 16:21:37,182 django.server basehttp 342441 140573742724800 "GET /batch/1/ HTTP/1.1" 200 33558
+INFO 2025-10-13 16:21:37,272 django.server basehttp 342441 140573742724800 "GET /static/css/google-fonts.css HTTP/1.1" 200 12053
+INFO 2025-10-13 16:21:37,276 django.server basehttp 342441 140573734332096 "GET /static/css/bootstrap.rtl.css HTTP/1.1" 200 284704
+INFO 2025-10-13 16:21:37,281 django.server basehttp 342441 140573734332096 "GET /static/js/flatpickr.min.js HTTP/1.1" 200 50679
+INFO 2025-10-13 16:21:37,282 django.server basehttp 342441 140573742724800 "GET /static/js/bootstrap.bundle.min.js HTTP/1.1" 200 80663
+INFO 2025-10-13 16:21:37,291 django.server basehttp 342441 140573725939392 "GET /static/css/bootstrap-icons.min.css HTTP/1.1" 200 85887
+INFO 2025-10-13 16:21:37,293 django.server basehttp 342441 140573717546688 "GET /static/css/flatpickr.min.css HTTP/1.1" 200 16166
+INFO 2025-10-13 16:21:37,301 django.server basehttp 342441 140573742724800 "GET /static/js/flatpickr.l10n.ar.js HTTP/1.1" 200 1928
+INFO 2025-10-13 16:21:37,302 django.server basehttp 342441 140573709153984 "GET /static/css/tom-select.bootstrap5.min.css HTTP/1.1" 200 15345
+INFO 2025-10-13 16:21:37,311 django.server basehttp 342441 140573717546688 "GET /static/js/tom-select.complete.min.js HTTP/1.1" 200 50720
+INFO 2025-10-13 16:21:37,318 django.server basehttp 342441 140573700761280 "GET /static/css/style.css HTTP/1.1" 200 18501
+INFO 2025-10-13 16:21:37,319 django.server basehttp 342441 140573709153984 "GET /static/layout/js/dashboard_logic.js HTTP/1.1" 200 8433
+INFO 2025-10-13 16:21:37,322 django.server basehttp 342441 140573725939392 "GET /static/layout/js/records_logic.js HTTP/1.1" 200 6848
+INFO 2025-10-13 16:21:37,341 django.server basehttp 342441 140573717546688 "GET /static/layout/js/create_batch_logic.js HTTP/1.1" 200 13118
+INFO 2025-10-13 16:21:37,346 django.server basehttp 342441 140573700761280 "GET /static/layout/js/batch_view_logic.js HTTP/1.1" 200 6528
+INFO 2025-10-13 16:21:37,347 django.server basehttp 342441 140573734332096 "GET /static/layout/js/receive_finished_product_logic.js HTTP/1.1" 200 1770
+INFO 2025-10-13 16:21:37,353 django.server basehttp 342441 140573742724800 "GET /static/layout/js/shop_order_templates_logic.js HTTP/1.1" 200 5531
+INFO 2025-10-13 16:21:37,366 django.server basehttp 342441 140573709153984 "GET /static/layout/js/ledger_logic.js HTTP/1.1" 200 6550
+INFO 2025-10-13 16:21:37,373 django.server basehttp 342441 140573725939392 "GET /static/layout/js/production_returns_logic.js HTTP/1.1" 200 3097
+INFO 2025-10-13 16:21:37,388 django.server basehttp 342441 140573717546688 "GET /static/layout/js/visuals_logic.js HTTP/1.1" 200 7263
+INFO 2025-10-13 16:21:37,396 django.server basehttp 342441 140573734332096 "GET /static/layout/js/batch_production_variance_report_logic.js HTTP/1.1" 200 3204
+INFO 2025-10-13 16:21:37,398 django.server basehttp 342441 140573700761280 "GET /static/layout/js/financials_logic.js HTTP/1.1" 200 32932
+INFO 2025-10-13 16:21:37,402 django.server basehttp 342441 140573742724800 "GET /static/layout/js/sales_order_create_logic.js HTTP/1.1" 200 5204
+INFO 2025-10-13 16:21:37,406 django.server basehttp 342441 140573700761280 "GET /static/layout/js/purchase_order_create_logic.js HTTP/1.1" 200 4710
+INFO 2025-10-13 16:21:37,413 django.server basehttp 342441 140573709153984 "GET /static/layout/js/tax_reconciliation_report_logic.js HTTP/1.1" 200 760
+INFO 2025-10-13 16:21:37,419 django.server basehttp 342441 140573725939392 "GET /static/layout/js/close_period_logic.js HTTP/1.1" 200 4585
+INFO 2025-10-13 16:21:37,434 django.server basehttp 342441 140573717546688 "GET /static/layout/js/inventory_counts_logic.js HTTP/1.1" 200 19179
+INFO 2025-10-13 16:21:37,440 django.server basehttp 342441 140573734332096 "GET /static/layout/js/employees_logic.js HTTP/1.1" 200 6814
+INFO 2025-10-13 16:21:37,453 django.server basehttp 342441 140573742724800 "GET /static/layout/js/dynamic_content_loader.js HTTP/1.1" 200 5887
+INFO 2025-10-13 16:21:37,488 django.server basehttp 342441 140573734332096 "GET /static/css/print.css HTTP/1.1" 200 2200
+INFO 2025-10-13 16:21:37,876 django.server basehttp 342441 140573717546688 "GET /static/webfonts/41.woff2 HTTP/1.1" 200 21168
+INFO 2025-10-13 16:21:37,877 django.server basehttp 342441 140573742724800 "GET /static/webfonts/NotoKufiArabic-VariableFont_wght.ttf HTTP/1.1" 200 433800
+INFO 2025-10-13 16:21:37,879 django.server basehttp 342441 140573734332096 "GET /static/webfonts/bootstrap-icons.woff2?dd67030699838ea613ee6dbda90effa6 HTTP/1.1" 200 130396
+INFO 2025-10-13 16:21:38,414 django.server basehttp 342441 140573742724800 "GET /static/img/favicon.ico HTTP/1.1" 200 41001
+WARNING 2025-10-13 16:22:17,599 django.request log 342441 140573742724800 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-13 16:22:17,601 django.server basehttp 342441 140573742724800 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 37188
+WARNING 2025-10-13 16:22:18,383 django.server basehttp 342441 140573742724800 "GET /static/js/bootstrap.bundle.min.js.map HTTP/1.1" 404 1904
+WARNING 2025-10-13 16:22:18,390 django.server basehttp 342441 140573734332096 "GET /static/js/tom-select.complete.min.js.map HTTP/1.1" 404 1913
+WARNING 2025-10-13 16:22:18,455 django.server basehttp 342441 140573717546688 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+WARNING 2025-10-13 16:22:25,563 django.request log 342441 140573725939392 Not Found: /favicon.ico
+WARNING 2025-10-13 16:22:25,564 django.server basehttp 342441 140573725939392 "GET /favicon.ico HTTP/1.1" 404 37077
+INFO 2025-10-13 16:24:53,703 django.server basehttp 342441 140573725939392 "GET /batch/1/ HTTP/1.1" 200 33558
+WARNING 2025-10-13 16:24:53,779 django.request log 342441 140573725939392 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+INFO 2025-10-13 16:24:53,781 django.server basehttp 342441 140573709153984 "GET /static/css/google-fonts.css HTTP/1.1" 200 12053
+INFO 2025-10-13 16:24:53,789 django.server basehttp 342441 140573700761280 "GET /static/css/bootstrap.rtl.css HTTP/1.1" 200 284704
+INFO 2025-10-13 16:24:53,804 django.server basehttp 342441 140573709153984 "GET /static/css/style.css HTTP/1.1" 200 18501
+WARNING 2025-10-13 16:24:53,806 django.server basehttp 342441 140573725939392 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 37188
+INFO 2025-10-13 16:24:53,806 django.server basehttp 342441 140573734332096 "GET /static/css/flatpickr.min.css HTTP/1.1" 200 16166
+INFO 2025-10-13 16:24:53,806 django.server basehttp 342441 140573717546688 "GET /static/css/bootstrap-icons.min.css HTTP/1.1" 200 85887
+INFO 2025-10-13 16:24:53,809 django.server basehttp 342441 140573742724800 "GET /static/css/tom-select.bootstrap5.min.css HTTP/1.1" 200 15345
+INFO 2025-10-13 16:24:53,818 django.server basehttp 342441 140573700761280 "GET /static/js/bootstrap.bundle.min.js HTTP/1.1" 200 80663
+INFO 2025-10-13 16:24:53,819 django.server basehttp 342441 140573725939392 - Broken pipe from ('127.0.0.1', 45440)
+INFO 2025-10-13 16:24:53,820 django.server basehttp 342441 140573734332096 "GET /static/js/flatpickr.min.js HTTP/1.1" 200 50679
+INFO 2025-10-13 16:24:53,824 django.server basehttp 342441 140573717546688 "GET /static/js/flatpickr.l10n.ar.js HTTP/1.1" 200 1928
+INFO 2025-10-13 16:24:53,828 django.server basehttp 342441 140573742724800 "GET /static/js/tom-select.complete.min.js HTTP/1.1" 200 50720
+INFO 2025-10-13 16:24:53,828 django.server basehttp 342441 140573734332096 "GET /static/layout/js/records_logic.js HTTP/1.1" 200 6848
+INFO 2025-10-13 16:24:53,830 django.server basehttp 342441 140573692368576 "GET /static/layout/js/dashboard_logic.js HTTP/1.1" 200 8433
+INFO 2025-10-13 16:24:53,836 django.server basehttp 342441 140573742724800 "GET /static/layout/js/create_batch_logic.js HTTP/1.1" 200 13118
+INFO 2025-10-13 16:24:53,839 django.server basehttp 342441 140573692368576 "GET /static/layout/js/batch_view_logic.js HTTP/1.1" 200 6631
+INFO 2025-10-13 16:24:53,852 django.server basehttp 342441 140573709153984 "GET /static/layout/js/receive_finished_product_logic.js HTTP/1.1" 200 1770
+INFO 2025-10-13 16:24:53,863 django.server basehttp 342441 140573700761280 "GET /static/layout/js/shop_order_templates_logic.js HTTP/1.1" 200 5531
+INFO 2025-10-13 16:24:53,871 django.server basehttp 342441 140573717546688 "GET /static/layout/js/ledger_logic.js HTTP/1.1" 200 6550
+INFO 2025-10-13 16:24:53,877 django.server basehttp 342441 140573734332096 "GET /static/layout/js/production_returns_logic.js HTTP/1.1" 200 3097
+INFO 2025-10-13 16:24:53,884 django.server basehttp 342441 140573742724800 "GET /static/layout/js/visuals_logic.js HTTP/1.1" 200 7263
+INFO 2025-10-13 16:24:53,889 django.server basehttp 342441 140573692368576 "GET /static/layout/js/batch_production_variance_report_logic.js HTTP/1.1" 200 3204
+INFO 2025-10-13 16:24:53,896 django.server basehttp 342441 140573709153984 "GET /static/layout/js/financials_logic.js HTTP/1.1" 200 32932
+INFO 2025-10-13 16:24:53,900 django.server basehttp 342441 140573709153984 "GET /static/layout/js/sales_order_create_logic.js HTTP/1.1" 200 5204
+INFO 2025-10-13 16:24:53,908 django.server basehttp 342441 140573700761280 "GET /static/layout/js/purchase_order_create_logic.js HTTP/1.1" 200 4710
+INFO 2025-10-13 16:24:53,918 django.server basehttp 342441 140573717546688 "GET /static/layout/js/tax_reconciliation_report_logic.js HTTP/1.1" 200 760
+INFO 2025-10-13 16:24:53,922 django.server basehttp 342441 140573734332096 "GET /static/layout/js/close_period_logic.js HTTP/1.1" 200 4585
+INFO 2025-10-13 16:24:53,932 django.server basehttp 342441 140573742724800 "GET /static/layout/js/inventory_counts_logic.js HTTP/1.1" 200 19179
+INFO 2025-10-13 16:24:53,937 django.server basehttp 342441 140573692368576 "GET /static/layout/js/employees_logic.js HTTP/1.1" 200 6814
+INFO 2025-10-13 16:24:53,950 django.server basehttp 342441 140573709153984 "GET /static/layout/js/dynamic_content_loader.js HTTP/1.1" 200 5887
+INFO 2025-10-13 16:24:54,077 django.server basehttp 342441 140573709153984 "GET /static/css/print.css HTTP/1.1" 200 2200
+INFO 2025-10-13 16:24:54,208 django.server basehttp 342441 140573709153984 "GET /static/webfonts/bootstrap-icons.woff2?dd67030699838ea613ee6dbda90effa6 HTTP/1.1" 200 130396
+INFO 2025-10-13 16:24:54,214 django.server basehttp 342441 140573692368576 "GET /static/webfonts/NotoKufiArabic-VariableFont_wght.ttf HTTP/1.1" 200 433800
+WARNING 2025-10-13 16:24:54,307 django.server basehttp 342441 140573692368576 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+INFO 2025-10-13 16:24:54,320 django.server basehttp 342441 140573709153984 "GET /static/webfonts/41.woff2 HTTP/1.1" 200 21168
+WARNING 2025-10-13 16:24:54,376 django.server basehttp 342441 140573709153984 "GET /static/js/bootstrap.bundle.min.js.map HTTP/1.1" 404 1904
+WARNING 2025-10-13 16:24:54,399 django.server basehttp 342441 140573742724800 "GET /static/js/tom-select.complete.min.js.map HTTP/1.1" 404 1913
+INFO 2025-10-13 16:24:54,999 django.server basehttp 342441 140573734332096 "GET /static/img/favicon.ico HTTP/1.1" 200 41001
+INFO 2025-10-13 16:26:50,801 django.server basehttp 342441 140573734332096 "GET /batch/1/ HTTP/1.1" 200 33558
+WARNING 2025-10-13 16:26:50,864 django.request log 342441 140573734332096 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-13 16:26:50,871 django.server basehttp 342441 140573734332096 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 37188
+INFO 2025-10-13 16:26:50,932 django.server basehttp 342441 140573734332096 "GET /static/layout/js/create_batch_logic.js HTTP/1.1" 304 0
+INFO 2025-10-13 16:26:50,933 django.server basehttp 342441 140573717546688 "GET /static/layout/js/batch_view_logic.js HTTP/1.1" 200 8116
+WARNING 2025-10-13 16:26:51,227 django.server basehttp 342441 140573717546688 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+WARNING 2025-10-13 16:26:51,245 django.server basehttp 342441 140573734332096 "GET /static/js/bootstrap.bundle.min.js.map HTTP/1.1" 404 1904
+WARNING 2025-10-13 16:26:51,362 django.server basehttp 342441 140573700761280 "GET /static/js/tom-select.complete.min.js.map HTTP/1.1" 404 1913
+INFO 2025-10-13 16:26:58,387 django.server basehttp 342441 140573700761280 "GET /batch/1/ HTTP/1.1" 200 33558
+WARNING 2025-10-13 16:26:58,437 django.request log 342441 140573700761280 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+INFO 2025-10-13 16:26:58,439 django.server basehttp 342441 140573734332096 "GET /static/layout/js/batch_view_logic.js HTTP/1.1" 304 0
+WARNING 2025-10-13 16:26:58,441 django.server basehttp 342441 140573700761280 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 37188
+INFO 2025-10-13 16:26:58,443 django.server basehttp 342441 140573700761280 - Broken pipe from ('127.0.0.1', 54102)
+WARNING 2025-10-13 16:26:58,742 django.server basehttp 342441 140573734332096 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+WARNING 2025-10-13 16:26:58,756 django.server basehttp 342441 140573734332096 "GET /static/js/bootstrap.bundle.min.js.map HTTP/1.1" 404 1904
+WARNING 2025-10-13 16:26:58,760 django.server basehttp 342441 140573700761280 "GET /static/js/tom-select.complete.min.js.map HTTP/1.1" 404 1913
+INFO 2025-10-13 16:27:08,455 django.server basehttp 342441 140573700761280 "GET /api/available_stock/1/ HTTP/1.1" 200 362
+INFO 2025-10-13 16:28:35,066 django.server basehttp 342441 140573700761280 "GET /batch/1/ HTTP/1.1" 200 33558
+WARNING 2025-10-13 16:28:35,151 django.request log 342441 140573700761280 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-13 16:28:35,153 django.server basehttp 342441 140573700761280 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 37188
+INFO 2025-10-13 16:28:35,156 django.server basehttp 342441 140573700761280 - Broken pipe from ('127.0.0.1', 50858)
+INFO 2025-10-13 16:28:35,165 django.server basehttp 342441 140573700761280 "GET /static/layout/js/create_batch_logic.js HTTP/1.1" 304 0
+INFO 2025-10-13 16:28:35,183 django.server basehttp 342441 140573734332096 "GET /static/layout/js/batch_view_logic.js HTTP/1.1" 200 8687
+WARNING 2025-10-13 16:28:35,506 django.server basehttp 342441 140573734332096 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+WARNING 2025-10-13 16:28:35,561 django.server basehttp 342441 140573700761280 "GET /static/js/bootstrap.bundle.min.js.map HTTP/1.1" 404 1904
+WARNING 2025-10-13 16:28:35,567 django.server basehttp 342441 140573734332096 "GET /static/js/tom-select.complete.min.js.map HTTP/1.1" 404 1913
+INFO 2025-10-13 16:28:38,755 django.server basehttp 342441 140573734332096 "GET /api/available_stock/1/ HTTP/1.1" 200 362
+INFO 2025-10-13 16:28:49,279 inventory.services.costing_service costing_service 342441 140573734332096 Starting cost recalculation for 'Saline Solution' from 2025-09-10...
+INFO 2025-10-13 16:28:49,310 inventory.services.costing_service costing_service 342441 140573734332096 Updated cost_at_consumption for 1 batch items of 'Saline Solution'.
+INFO 2025-10-13 16:28:49,311 inventory.services.costing_service costing_service 342441 140573734332096 Finished recalculating cost history for 'Saline Solution'. New MAC: 10.500
+INFO 2025-10-13 16:28:49,329 inventory.services.accounting.production_transactions production_transactions 342441 140573734332096 Successfully created Journal Entry JE-17 for Batch ID 1.
+INFO 2025-10-13 16:28:49,333 inventory.services.batch_service batch_service 342441 140573734332096 Added item 4 to Batch 1 and recreated JE.
+INFO 2025-10-13 16:28:49,334 django.server basehttp 342441 140573734332096 "POST /batch/item/add/1/ HTTP/1.1" 302 0
+INFO 2025-10-13 16:28:49,370 django.server basehttp 342441 140573734332096 "GET /batch/1/ HTTP/1.1" 200 36487
+WARNING 2025-10-13 16:28:49,416 django.request log 342441 140573734332096 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-13 16:28:49,419 django.server basehttp 342441 140573734332096 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 37188
+INFO 2025-10-13 16:28:49,420 django.server basehttp 342441 140573700761280 "GET /static/layout/js/batch_view_logic.js HTTP/1.1" 304 0
+WARNING 2025-10-13 16:28:49,746 django.server basehttp 342441 140573700761280 "GET /static/css/tom-select.bootstrap5.min.css.map HTTP/1.1" 404 1925
+WARNING 2025-10-13 16:28:49,757 django.server basehttp 342441 140573734332096 "GET /static/js/bootstrap.bundle.min.js.map HTTP/1.1" 404 1904
+WARNING 2025-10-13 16:28:49,762 django.server basehttp 342441 140573700761280 "GET /static/js/tom-select.complete.min.js.map HTTP/1.1" 404 1913
+INFO 2025-10-13 16:51:17,164 django.server basehttp 342441 140573700761280 "GET /batch/1/ HTTP/1.1" 200 35957
+INFO 2025-10-13 16:51:17,211 django.server basehttp 342441 140573700761280 "GET /static/layout/js/create_batch_logic.js HTTP/1.1" 304 0
+INFO 2025-10-13 16:51:17,212 django.server basehttp 342441 140573734332096 "GET /static/layout/js/batch_view_logic.js HTTP/1.1" 304 0
+INFO 2025-10-13 16:51:17,214 django.server basehttp 342441 140573717546688 "GET /static/layout/js/dynamic_content_loader.js HTTP/1.1" 304 0
+INFO 2025-10-13 16:51:26,218 django.server basehttp 342441 140573717546688 "GET /batches/ HTTP/1.1" 200 7399
+INFO 2025-10-13 16:51:27,711 django.server basehttp 342441 140573717546688 "GET /batches/create/ HTTP/1.1" 200 11263
+INFO 2025-10-13 16:52:01,929 django.server basehttp 342441 140573717546688 "GET /batches/ HTTP/1.1" 200 7399
+INFO 2025-10-13 16:52:07,999 django.server basehttp 342441 140573717546688 "GET /batch/1/ HTTP/1.1" 200 16579
+INFO 2025-10-13 16:52:15,417 inventory.services.costing_service costing_service 342441 140573717546688 Starting cost recalculation for 'Saline Solution' from 2025-09-10...
+INFO 2025-10-13 16:52:15,434 inventory.services.costing_service costing_service 342441 140573717546688 Finished recalculating cost history for 'Saline Solution'. New MAC: 10.500
+INFO 2025-10-13 16:52:15,449 inventory.services.accounting.production_transactions production_transactions 342441 140573717546688 Successfully created Journal Entry JE-18 for Batch ID 1.
+INFO 2025-10-13 16:52:15,454 inventory.services.batch_service batch_service 342441 140573717546688 Deleted item None from Batch 1 and recreated JE.
+INFO 2025-10-13 16:52:15,456 django.server basehttp 342441 140573717546688 "POST /batch/item/delete/4/ HTTP/1.1" 302 0
+INFO 2025-10-13 16:52:15,484 django.server basehttp 342441 140573717546688 "GET /batch/1/ HTTP/1.1" 200 34078
