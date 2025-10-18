@@ -24,7 +24,8 @@ from .accounting.production_transactions import (
     create_je_for_production_return
 )
 from .accounting.sales_transactions import (
-    create_je_for_sales_dispatch
+    create_je_for_sales_dispatch,
+    create_je_for_credit_memo
 )
 from .accounting.payment_transactions import (
     create_je_for_supplier_payment,
@@ -76,6 +77,7 @@ __all__ = [
 
     # Sales
     'create_je_for_sales_dispatch',
+    'create_je_for_credit_memo',
 
     # Payments
     'create_je_for_supplier_payment',

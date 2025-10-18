@@ -7,6 +7,8 @@ from django.conf import settings
 
 from .operational import Product, InventoryLog
 from .inventory_management import FinishedProductReceipt
+from .accounting_sub_ledger import SalesReturnItem
+
 
 # ==============================================================================
 #  NEW INVENTORY COUNT & ADJUSTMENT MODELS
@@ -79,11 +81,12 @@ class InventoryAdjustment(models.Model):
     An auditable record of a single, granular inventory adjustment against a specific stock source.
     """
     class ReasonCode(models.TextChoices):
-        SHRINKAGE = 'shrinkage', _('Shrinkage/Loss')
-        DAMAGE = 'damage', _('Damaged Goods')
-        DATA_ENTRY_ERROR = 'data_entry_error', _('Data Entry Correction')
-        OVERAGE_FOUND = 'overage_found', _('Overage Found During Count')
-        OTHER = 'other', _('Other')
+        SHRINKAGE = 'shrinkage', _('نقص/خسارة')
+        DAMAGE = 'damage', _('بضاعة تالفة')
+        DATA_ENTRY_ERROR = 'data_entry_error', _('تصحيح خطأ إدخال بيانات')
+        OVERAGE_FOUND = 'overage_found', _('زيادة وجدت أثناء الجرد')
+        SALES_RETURN_STOCK = 'sales_return_stock', _('إرجاع إلى المخزون من المبيعات')
+        OTHER = 'other', _('أخرى')
 
     product = models.ForeignKey(
         Product, on_delete=models.PROTECT,
@@ -111,6 +114,14 @@ class InventoryAdjustment(models.Model):
         FinishedProductReceipt, on_delete=models.PROTECT, null=True, blank=True,
         related_name='adjustments', verbose_name=_("Source Finished Product Receipt")
     )
+    source_sales_return_item = models.OneToOneField(
+        'inventory.SalesReturnItem',
+        on_delete=models.CASCADE,
+        related_name='inventory_adjustment',
+        verbose_name=_("Source Sales Return Item"),
+        null=True,
+        blank=True
+    )
     
     # --- Context ---
     inventory_count = models.ForeignKey(
@@ -129,10 +140,17 @@ class InventoryAdjustment(models.Model):
         verbose_name_plural = _("Inventory Adjustments")
 
     def clean(self):
-        if self.source_log and self.source_finished_product:
-            raise ValidationError(_("An adjustment can only be linked to one source (either an Inventory Log or a Finished Product Receipt)."))
-        if not self.source_log and not self.source_finished_product:
-            raise ValidationError(_("An adjustment must be linked to a source."))
+        sources = [
+            self.source_log,
+            self.source_finished_product,
+            self.source_sales_return_item
+        ]
+        if sum(s is not None for s in sources) > 1:
+            raise ValidationError(_("An adjustment can only be linked to one source (Inventory Log, Finished Product Receipt, or Sales Return Item)."))
+        if all(s is None for s in sources):
+            # Allow adjustments outside of a formal count, but require a source
+            if not self.inventory_count:
+                 raise ValidationError(_("An adjustment must be linked to a source if not part of a formal inventory count."))
 
     def __str__(self):
         direction = _("Shortage") if self.adjustment_quantity < 0 else _("Overage")

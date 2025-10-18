@@ -7,4 +7,4 @@
 - `JournalEntry`: Represents a single journal entry, containing multiple lines that must balance.
 - `JournalEntryLine`: Represents a single line within a journal entry, either a debit or a credit to a specific account.
 - `ProductTypeAccountingSettings`: Configures default GL accounts for different product types.
-- `GeneralAccountingSettings`: A singleton model to hold system-wide accounting configuration, preventing hardcoded account codes.
+- `GeneralAccountingSettings`: A singleton model to hold system-wide accounting configuration, preventing hardcoded account codes. Now includes a `sales_returns_clearing_account` to be used as a temporary holding account during the multi-step sales return process.

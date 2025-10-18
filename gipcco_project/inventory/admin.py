@@ -19,7 +19,8 @@ from .models import (
     # --- NEW MODEL IMPORTS ---
     SupplierInvoice, SupplierInvoiceItem, PaymentApplication,
     CustomerInvoice, CustomerInvoiceItem, CustomerPaymentApplication,
-    BankTransfer, DepreciationLog,
+    BankTransfer, DepreciationLog, AccrualLog, AccruedExpense, ExpenseRequest,
+    CostPool, EmployeeAdvance,
     # --- ADDED FOR FIX ---
   BankReconciliation, BankStatementLine, FiscalYear, TransactionCorrection,
     OpeningBalanceEntry, OpeningBalanceEntryLine, OpeningBalanceSubLedgerDetail
@@ -628,6 +629,53 @@ class TransactionCorrectionAdmin(admin.ModelAdmin):
             url = reverse('admin:inventory_journalentry_change', args=[obj.adjusting_journal_entry.pk])
             return format_html('<a href="{}">JE-{}</a>', url, obj.adjusting_journal_entry.pk)
         return "-"
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+@admin.register(CostPool)
+class CostPoolAdmin(admin.ModelAdmin):
+    list_display = ('code', 'name', 'parent', 'gl_account')
+    search_fields = ('code', 'name')
+    autocomplete_fields = ('parent', 'gl_account')
+
+@admin.register(EmployeeAdvance)
+class EmployeeAdvanceAdmin(admin.ModelAdmin):
+    list_display = ('employee', 'advance_date', 'amount', 'status', 'source_payment')
+    list_filter = ('status', 'advance_date')
+    search_fields = ('employee__first_name', 'employee__last_name', 'notes')
+    autocomplete_fields = ('employee', 'source_payment')
+
+@admin.register(ExpenseRequest)
+class ExpenseRequestAdmin(admin.ModelAdmin):
+    list_display = ('request_date', 'description', 'request_type', 'status', 'requested_by', 'amount')
+    list_filter = ('status', 'request_type', 'request_date')
+    search_fields = ('description', 'requested_by__username')
+    autocomplete_fields = (
+        'requested_by', 'processed_by', 'product', 'cost_pool', 'fixed_asset',
+        'source_invoice', 'asset_account', 'expense_account', 'supplier', 'bank_account'
+    )
+
+@admin.register(AccruedExpense)
+class AccruedExpenseAdmin(admin.ModelAdmin):
+    list_display = ('description', 'status', 'accrual_start_date', 'accrual_end_date', 'total_estimated_amount')
+    list_filter = ('status',)
+    search_fields = ('description',)
+    autocomplete_fields = ('source_request', 'target_expense_account', 'target_liability_account')
+
+@admin.register(AccrualLog)
+class AccrualLogAdmin(admin.ModelAdmin):
+    list_display = ('accrued_expense', 'financial_period', 'amount', 'journal_entry')
+    list_filter = ('financial_period',)
+    search_fields = ('accrued_expense__description',)
+    autocomplete_fields = ('accrued_expense', 'financial_period', 'journal_entry', 'settling_invoice', 'true_up_journal_entry')
+    readonly_fields = ('journal_entry',)
 
     def has_add_permission(self, request):
         return False

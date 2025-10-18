@@ -418,133 +418,117 @@ class SalesReturnServiceTestCase(AccountingServiceBaseTestCase):
         # This dispatch creates a JE (COGS Dr, FG Cr)
         JournalEntry.objects.all().delete() # Clear JEs for clean test
 
-    def test_process_return_item_return_to_stock(self):
+    def test_full_sales_return_workflow(self):
         """
-        Test processing a returned item that is in good condition and returned to stock.
+        Tests the complete, multi-step sales return workflow:
+        1. A SalesReturn is created.
+        2. The return is "inspected" and dispositions are set.
+        3. The inspected return is processed via the service.
+        4. A credit memo is created from the return.
+        5. All resulting journal entries are validated.
         """
-        # 1. Arrange
+        # 1. Arrange: Create a SalesReturn with two items, one to be stocked, one to be scrapped.
         sales_return = SalesReturn.objects.create(
-            customer=self.customer, return_date="2025-09-20"
+            customer=self.customer,
+            return_date="2025-09-20",
+            sales_order=self.sales_order,
+            status=SalesReturn.Status.PENDING_INSPECTION
         )
-        return_item = SalesReturnItem.objects.create(
+        SalesReturnItem.objects.create(
             sales_return=sales_return,
             original_dispatch=self.dispatch_to_return,
-            quantity_returned=8.0,
+            quantity_returned=6.0, # 6 units good
             disposition=SalesReturnItem.Disposition.RETURN_TO_STOCK
         )
-
-        # 2. Act
-        sales_return_service.process_return_item(return_item)
-
-        # 3. Assert
-        # a) Verify the COGS Reversal Journal Entry
-        self.assertEqual(JournalEntry.objects.count(), 1)
-        je = JournalEntry.objects.first()
-        self.assertIsNotNone(je)
-        self.assertEqual(return_item.reversing_journal_entry, je)
-
-        debit_line = je.lines.get(entry_type='debit')
-        credit_line = je.lines.get(entry_type='credit')
-
-        # Debit: Finished Goods Inventory (value comes back)
-        self.assertEqual(debit_line.account, self.general_settings.finished_goods_inventory)
-        self.assertEqual(debit_line.amount, self.dispatch_to_return.cost_at_dispatch)
-
-        # Credit: COGS (expense is reversed)
-        cogs_account = ProductTypeAccountingSettings.objects.get(product_type=Product.ProductType.FINAL_PRODUCT).cogs_or_expense_account
-        self.assertEqual(credit_line.account, cogs_account)
-        self.assertEqual(credit_line.amount, self.dispatch_to_return.cost_at_dispatch)
-
-        # b) Verify no inventory adjustment was created
-        self.assertFalse(InventoryAdjustment.objects.exists())
-
-    def test_process_return_item_scrap(self):
-        """
-        Test processing a returned item that is damaged and must be scrapped.
-        """
-        # 1. Arrange
-        sales_return = SalesReturn.objects.create(
-            customer=self.customer, return_date="2025-09-21"
-        )
-        return_item = SalesReturnItem.objects.create(
+        SalesReturnItem.objects.create(
             sales_return=sales_return,
             original_dispatch=self.dispatch_to_return,
-            quantity_returned=8.0,
+            quantity_returned=2.0, # 2 units scrap
             disposition=SalesReturnItem.Disposition.SCRAP
         )
+        sales_return.status = SalesReturn.Status.PENDING_PROCESSING
+        sales_return.save()
 
-        # 2. Act
-        sales_return_service.process_return_item(return_item)
+        # 2. Act I: Process the inspected return (handles inventory/COGS side)
+        sales_return_service.process_inspected_return(sales_return)
 
-        # 3. Assert
-        # a) Verify the COGS Reversal JE (same as above)
-        # --- FIX: Query by content_type and object_id, not directly on the GFK ---
-        return_item_ct = ContentType.objects.get_for_model(return_item)
-        self.assertEqual(
-            JournalEntry.objects.filter(content_type=return_item_ct, object_id=return_item.id).count(), 1
-        )
-        cogs_reversal_je = JournalEntry.objects.get(content_type=return_item_ct, object_id=return_item.id)
-        self.assertIsNotNone(cogs_reversal_je)
+        # 3. Assert I: Verify the inventory-side transactions
+        sales_return.refresh_from_db()
+        self.assertEqual(sales_return.status, SalesReturn.Status.COMPLETED)
 
-        # b) Verify the Inventory Adjustment and its JE
-        self.assertEqual(InventoryAdjustment.objects.count(), 1)
-        adjustment = InventoryAdjustment.objects.first()
-        self.assertEqual(adjustment.adjustment_quantity, -8.0)
-        self.assertEqual(adjustment.reason_code, InventoryAdjustment.ReasonCode.DAMAGE)
+        # a) Verify the consolidated COGS Reversal Journal Entry
+        self.assertIsNotNone(sales_return.cogs_reversal_journal_entry)
+        cogs_je = sales_return.cogs_reversal_journal_entry
+        self.assertEqual(cogs_je.lines.count(), 2)
         
-        # --- FIX: Query by content_type and object_id for the adjustment's JE ---
-        adjustment_ct = ContentType.objects.get_for_model(adjustment)
-        self.assertEqual(
-            JournalEntry.objects.filter(content_type=adjustment_ct, object_id=adjustment.id).count(), 1
-        )
-        scrap_je = JournalEntry.objects.get(content_type=adjustment_ct, object_id=adjustment.id)
-        self.assertIsNotNone(scrap_je)
+        # DEBIT: Sales Returns Clearing Account (for the total cost of 8 units)
+        debit_line = cogs_je.lines.get(entry_type='debit')
+        self.assertEqual(debit_line.account, self.general_settings.sales_returns_clearing_account)
+        self.assertEqual(debit_line.amount, Decimal("80.000")) # 8 units @ cost 10
 
-        debit_line = scrap_je.lines.get(entry_type='debit')
-        credit_line = scrap_je.lines.get(entry_type='credit')
+        # CREDIT: COGS Account
+        credit_line = cogs_je.lines.get(entry_type='credit')
+        cogs_account = self.get_product_type_setting(Product.ProductType.FINAL_PRODUCT).cogs_or_expense_account
+        self.assertEqual(credit_line.account, cogs_account)
+        self.assertEqual(credit_line.amount, Decimal("80.000"))
 
-        # Debit: Damaged Goods Expense
-        self.assertEqual(debit_line.account, self.general_settings.damaged_goods_expense_account)
-        self.assertEqual(debit_line.amount, self.dispatch_to_return.cost_at_dispatch)
-
-        # Credit: Finished Goods Inventory (writing off the value)
-        self.assertEqual(credit_line.account, self.general_settings.finished_goods_inventory)
-        self.assertEqual(credit_line.amount, self.dispatch_to_return.cost_at_dispatch)
-
-    def test_create_and_apply_credit_memo(self):
-        """
-        Test creating a credit memo and applying it to an invoice.
-        """
-        # 1. Arrange: Create a credit memo
-        credit_memo = CustomerCreditMemo.objects.create(
-            customer=self.customer,
-            memo_number="CM-001",
-            memo_date="2025-09-22",
-            total_amount=Decimal("50.000")
-        )
-        # An invoice with a balance due
-        invoice = CustomerInvoice.objects.create(
-            customer=self.customer, invoice_number="INV-FOR-CREDIT", invoice_date="2025-09-22",
-            due_date="2025-10-22", total_amount=Decimal("100.000")
-        )
-
-        # 2. Act
-        ar_service.apply_customer_credit(invoice, credit_memo, Decimal("30.000"))
-
-        # 3. Assert
-        # a) Verify the application JE
-        self.assertEqual(JournalEntry.objects.count(), 1)
-        je = JournalEntry.objects.first()
+        # b) Verify the Inventory Adjustments and their JEs
+        self.assertEqual(InventoryAdjustment.objects.count(), 2)
         
-        debit_line = je.lines.get(entry_type='debit')
-        credit_line = je.lines.get(entry_type='credit')
+        # Adjustment for the 6 good items returned to stock
+        adj_good = InventoryAdjustment.objects.get(adjustment_quantity__gt=0)
+        self.assertEqual(adj_good.adjustment_quantity, 6.0)
+        self.assertEqual(adj_good.reason_code, InventoryAdjustment.ReasonCode.SALES_RETURN_STOCK)
+        
+        adj_good_je = JournalEntry.objects.get(object_id=adj_good.id, content_type=ContentType.objects.get_for_model(adj_good))
+        # DEBIT: Finished Goods Inventory (value comes back)
+        # CREDIT: Sales Returns Clearing Account
+        self.assertEqual(adj_good_je.lines.get(entry_type='debit').account, self.general_settings.finished_goods_inventory)
+        self.assertEqual(adj_good_je.lines.get(entry_type='debit').amount, Decimal("60.000"))
+        self.assertEqual(adj_good_je.lines.get(entry_type='credit').account, self.general_settings.sales_returns_clearing_account)
+        self.assertEqual(adj_good_je.lines.get(entry_type='credit').amount, Decimal("60.000"))
 
-        # Debit: Sales Returns & Allowances
-        self.assertEqual(debit_line.account, self.general_settings.sales_returns_account)
-        self.assertEqual(debit_line.amount, Decimal("30.000"))
+        # Adjustment for the 2 scrapped items
+        adj_scrap = InventoryAdjustment.objects.get(adjustment_quantity__lt=0)
+        self.assertEqual(adj_scrap.adjustment_quantity, -2.0)
+        self.assertEqual(adj_scrap.reason_code, InventoryAdjustment.ReasonCode.DAMAGE)
 
-        # Credit: Accounts Receivable
-        self.assertEqual(credit_line.account, self.general_settings.accounts_receivable)
-        self.assertEqual(credit_line.amount, Decimal("30.000"))
+        adj_scrap_je = JournalEntry.objects.get(object_id=adj_scrap.id, content_type=ContentType.objects.get_for_model(adj_scrap))
+        # DEBIT: Damaged Goods Expense
+        # CREDIT: Sales Returns Clearing Account
+        self.assertEqual(adj_scrap_je.lines.get(entry_type='debit').account, self.general_settings.damaged_goods_expense_account)
+        self.assertEqual(adj_scrap_je.lines.get(entry_type='debit').amount, Decimal("20.000"))
+        self.assertEqual(adj_scrap_je.lines.get(entry_type='credit').account, self.general_settings.sales_returns_clearing_account)
+        self.assertEqual(adj_scrap_je.lines.get(entry_type='credit').amount, Decimal("20.000"))
+
+
+        # 4. Act II: Create the credit memo (handles financial/AR side)
+        credit_memo = sales_return_service.create_credit_memo_from_return(
+            sales_return=sales_return,
+            memo_number="CM-TEST-001",
+            memo_date="2025-09-21"
+        )
+
+        # 5. Assert II: Verify the financial-side transactions
+        self.assertIsNotNone(credit_memo)
+        self.assertEqual(CustomerCreditMemo.objects.count(), 1)
+        
+        # The post_save signal on CustomerCreditMemo creates the JE
+        cm_je = JournalEntry.objects.get(object_id=credit_memo.id, content_type=ContentType.objects.get_for_model(credit_memo))
+        self.assertIsNotNone(cm_je)
+        self.assertEqual(cm_je.lines.count(), 3)
+
+        # Total returned value: 8 units * 100 base price = 800
+        # Total VAT: 800 * 0.14 = 112
+        # Total Credit: 912
+        self.assertEqual(credit_memo.total_amount, Decimal("912.000"))
+
+        # DEBIT: Sales Returns & Allowances (contra-revenue)
+        self.assertEqual(cm_je.lines.get(account=self.general_settings.sales_returns_account).amount, Decimal("800.000"))
+        # DEBIT: VAT Payable (reversing liability)
+        self.assertEqual(cm_je.lines.get(account=self.general_settings.vat_payable).amount, Decimal("112.000"))
+        # CREDIT: Accounts Receivable (reducing customer balance)
+        self.assertEqual(cm_je.lines.get(account=self.general_settings.accounts_receivable).amount, Decimal("912.000"))
+
 
 

@@ -13,8 +13,13 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 from django.core.exceptions import ValidationError
+from django.contrib.contenttypes.models import ContentType
 
-from ..models import Customer, SalesOrder, SalesOrderItem, FinishedProductReceipt, FinishedProductDispatch, Product
+from ..models import (
+    Customer, SalesOrder, SalesOrderItem, FinishedProductReceipt,
+    FinishedProductDispatch, Product, SalesReturn, SalesReturnItem, CustomerCreditMemo
+)
+from ..services import sales_service, sales_return_service
 
 
 # --- Customer CRUD Views ---
@@ -375,52 +380,47 @@ def delete_dispatch(request: HttpRequest, pk: int) -> HttpResponse:
 @require_POST
 def dispatch_from_sales_order(request: HttpRequest, so_pk: int) -> HttpResponse:
     """
-    Handles the creation of FinishedProductDispatch records from the sales order view.
+    Handles the creation of FinishedProductDispatch records by calling the sales service.
     """
     sales_order = get_object_or_404(SalesOrder, pk=so_pk)
-    
+    dispatch_date_str = request.POST.get('dispatch_date')
+
+    if not dispatch_date_str:
+        messages.error(request, "الرجاء تحديد تاريخ الصرف.")
+        return redirect('inventory:view_sales_order', pk=so_pk)
+
     try:
-        with transaction.atomic():
-            items_dispatched = 0
-            for key, quantity_str in request.POST.items():
-                if key.startswith('quantity_'):
-                    if not quantity_str or float(quantity_str) <= 0:
-                        continue
-                    
-                    so_item_id = key.split('_')[1]
-                    quantity_to_dispatch = float(quantity_str)
-                    
-                    so_item = get_object_or_404(SalesOrderItem.objects.select_related('finished_product'), pk=so_item_id)
+        dispatch_date = timezone.make_aware(datetime.strptime(dispatch_date_str, '%Y-%m-%d'))
+        
+        dispatches_to_create = []
+        for key, quantity_str in request.POST.items():
+            if key.startswith('quantity_') and quantity_str and float(quantity_str) > 0:
+                so_item_id = key.split('_')[1]
+                quantity_to_dispatch = float(quantity_str)
+                
+                dispatches_to_create.append({
+                    'sales_order_item_id': int(so_item_id),
+                    'quantity': quantity_to_dispatch
+                })
 
-                    # Validation
-                    dispatched_qty = so_item.dispatches.aggregate(total=Sum('quantity'))['total'] or 0
-                    remaining_to_dispatch = so_item.quantity_ordered - dispatched_qty
-                    if quantity_to_dispatch > remaining_to_dispatch:
-                        raise ValidationError(f"Cannot dispatch {quantity_to_dispatch} for {so_item.finished_product}. Only {remaining_to_dispatch} remaining on order.")
+        if not dispatches_to_create:
+            messages.warning(request, "No quantities were entered to dispatch.")
+            return redirect('inventory:view_sales_order', pk=so_pk)
 
-                    available_stock = so_item.finished_product.quantity_available
-                    if quantity_to_dispatch > available_stock:
-                         raise ValidationError(f"Cannot dispatch {quantity_to_dispatch} for {so_item.finished_product}. Only {available_stock} available in stock.")
-
-                    # Create Dispatch
-                    cost_per_unit = so_item.finished_product.unit_cost
-                    FinishedProductDispatch.objects.create(
-                        sales_order_item=so_item,
-                        quantity=quantity_to_dispatch,
-                        dispatch_date=timezone.now(),
-                        cost_at_dispatch=cost_per_unit * Decimal(str(quantity_to_dispatch))
-                    )
-                    items_dispatched += 1
-            
-            if items_dispatched > 0:
-                messages.success(request, f"Successfully created {items_dispatched} dispatch(es).")
-                # Update SO status after dispatching
-                sales_order.update_status()
-            else:
-                messages.warning(request, "No quantities were entered to dispatch.")
+        # Call the service to handle the logic
+        sales_service.dispatch_from_sales_order(
+            sales_order_id=so_pk,
+            dispatch_date=dispatch_date,
+            dispatches=dispatches_to_create
+        )
+        
+        messages.success(request, f"Successfully created {len(dispatches_to_create)} dispatch(es).")
 
     except ValidationError as e:
+        # The service layer raises ValidationError for business rule violations
         messages.error(request, f"Validation Error: {e.message}")
+    except (ValueError, TypeError) as e:
+        messages.error(request, f"Invalid data provided: {e}")
     except Exception as e:
         messages.error(request, f"An unexpected error occurred: {e}")
 
@@ -430,3 +430,199 @@ def dispatch_from_sales_order(request: HttpRequest, so_pk: int) -> HttpResponse:
 # --- Sales API Views (REMOVED REDUNDANT FUNCTION) ---
 
 # This function is now defined only in api.py to avoid duplication.
+
+# --- NEW: Sales Return Views ---
+
+def create_sales_return(request: HttpRequest, so_pk: int) -> HttpResponse:
+    """
+    Handles the creation of a new Sales Return for a specific Sales Order.
+    """
+    sales_order = get_object_or_404(SalesOrder.objects.select_related('customer'), pk=so_pk)
+
+    if request.method == 'POST':
+        return_date_str = request.POST.get('return_date')
+        if not return_date_str:
+            messages.error(request, "الرجاء تحديد تاريخ الإرجاع.")
+            return redirect('inventory:create_sales_return', so_pk=so_pk)
+
+        try:
+            with transaction.atomic():
+                sales_return = SalesReturn.objects.create(
+                    customer=sales_order.customer,
+                    return_date=return_date_str,
+                    sales_order=sales_order,
+                    status=SalesReturn.Status.PENDING_INSPECTION
+                )
+                
+                items_returned = 0
+                for key, quantity_str in request.POST.items():
+                    if key.startswith('quantity_') and quantity_str and float(quantity_str) > 0:
+                        dispatch_id = key.split('_')[1]
+                        quantity_returned = float(quantity_str)
+                        
+                        dispatch = get_object_or_404(FinishedProductDispatch, pk=dispatch_id)
+                        
+                        # --- NEW: Correct validation for multiple returns ---
+                        already_returned_qty = dispatch.return_items.aggregate(
+                            total=Coalesce(Sum('quantity_returned'), 0.0)
+                        )['total']
+                        remaining_to_return = dispatch.quantity - already_returned_qty
+
+                        if quantity_returned > remaining_to_return:
+                            raise ValidationError(f"لا يمكن إرجاع كمية {quantity_returned}. المتاح للإرجاع من هذه الشحنة هو {remaining_to_return} فقط.")
+
+                        SalesReturnItem.objects.create(
+                            sales_return=sales_return,
+                            original_dispatch=dispatch,
+                            quantity_returned=quantity_returned
+                        )
+                        items_returned += 1
+                
+                if items_returned == 0:
+                    raise ValidationError("يجب إرجاع بند واحد على الأقل.")
+
+            messages.success(request, "تم تسجيل مرتجع المبيعات بنجاح.")
+            return redirect('inventory:view_sales_return', pk=sales_return.pk)
+        except ValidationError as e:
+            messages.error(request, e.message)
+        except Exception as e:
+            messages.error(request, f"حدث خطأ غير متوقع: {e}")
+        
+        return redirect('inventory:create_sales_return', so_pk=so_pk)
+
+    # GET request: Prepare data for the form
+    dispatched_items = FinishedProductDispatch.objects.filter(
+        sales_order_item__sales_order=sales_order
+    ).select_related(
+        'sales_order_item__finished_product__batch__template__final_product'
+    ).annotate(
+        total_returned=Coalesce(Sum('return_items__quantity_returned'), 0.0)
+    )
+
+    context = {
+        'active_page': 'sales',
+        'sales_order': sales_order,
+        'dispatched_items': dispatched_items,
+        'today_date': timezone.now().strftime('%Y-%m-%d'),
+    }
+    if 'X-Partial-Request' in request.headers:
+        return render(request, 'inventory/partials/sales_return_create_content.html', context)
+    return render(request, 'inventory/sales_return_create.html', context)
+
+
+def sales_returns_list(request: HttpRequest) -> HttpResponse:
+    """Displays a list of all sales returns."""
+    returns = SalesReturn.objects.select_related('customer', 'sales_order').all()
+    context = {
+        'active_page': 'sales',
+        'returns': returns,
+    }
+    if 'X-Partial-Request' in request.headers:
+        return render(request, 'inventory/partials/sales_returns_list_content.html', context)
+    return render(request, 'inventory/sales_returns_list.html', context)
+
+
+def view_sales_return(request: HttpRequest, pk: int) -> HttpResponse:
+    """
+    Displays the details of a single sales return and handles the setting of
+    dispositions for each item.
+    """
+    sales_return = get_object_or_404(
+        SalesReturn.objects.select_related('customer', 'sales_order'), pk=pk
+    )
+
+    if request.method == 'POST':
+        # This part handles setting the dispositions for the items
+        try:
+            with transaction.atomic():
+                all_items_have_disposition = True
+                for item in sales_return.items.all():
+                    disposition = request.POST.get(f'disposition_{item.pk}')
+                    if disposition:
+                        item.disposition = disposition
+                        item.save(update_fields=['disposition'])
+                    else:
+                        all_items_have_disposition = False
+                
+                # If all items now have a disposition, update the return status
+                if all_items_have_disposition:
+                    if sales_return.status == SalesReturn.Status.PENDING_INSPECTION:
+                        sales_return.status = SalesReturn.Status.PENDING_PROCESSING
+                        sales_return.save(update_fields=['status'])
+                        messages.success(request, "تم تحديد قرار الفحص لجميع البنود. المرتجع جاهز للمعالجة.")
+                else:
+                    messages.warning(request, "يرجى تحديد قرار الفحص لجميع البنود.")
+
+        except Exception as e:
+            messages.error(request, f"حدث خطأ أثناء حفظ القرارات: {e}")
+        
+        return redirect('inventory:view_sales_return', pk=pk)
+
+
+    return_items = sales_return.items.select_related(
+        'original_dispatch__sales_order_item__finished_product__batch__template__final_product',
+        'inventory_adjustment' # Eager load the related adjustment
+    ).all()
+
+    # Check if a credit memo has already been created for this return
+    credit_memo = CustomerCreditMemo.objects.filter(
+        content_type=ContentType.objects.get_for_model(SalesReturn),
+        object_id=sales_return.id
+    ).first()
+
+    context = {
+        'active_page': 'sales',
+        'sales_return': sales_return,
+        'return_items': return_items,
+        'credit_memo': credit_memo,
+        'disposition_choices': SalesReturnItem.Disposition.choices,
+        'today_date': timezone.now().strftime('%Y-%m-%d'),
+    }
+    if 'X-Partial-Request' in request.headers:
+        return render(request, 'inventory/partials/sales_return_view_content.html', context)
+    return render(request, 'inventory/sales_return_view.html', context)
+
+
+@require_POST
+def process_inspected_return_view(request: HttpRequest, return_pk: int) -> HttpResponse:
+    """
+    View function to trigger the processing of an inspected sales return.
+    """
+    sales_return = get_object_or_404(SalesReturn, pk=return_pk)
+    try:
+        sales_return_service.process_inspected_return(sales_return)
+        messages.success(request, "تمت معالجة المرتجع بنجاح. تم إنشاء قيود التسوية اللازمة.")
+    except ValidationError as e:
+        messages.error(request, f"خطأ في المعالجة: {e.message}")
+    except Exception as e:
+        messages.error(request, f"حدث خطأ غير متوقع: {e}")
+    
+    return redirect('inventory:view_sales_return', pk=return_pk)
+
+
+@require_POST
+def create_credit_memo_from_return_view(request: HttpRequest, return_pk: int) -> HttpResponse:
+    """Handles the form submission to create a credit memo from a sales return."""
+    sales_return = get_object_or_404(SalesReturn, pk=return_pk)
+    memo_number = request.POST.get('memo_number')
+    memo_date = request.POST.get('memo_date')
+
+    if not memo_number or not memo_date:
+        messages.error(request, "الرجاء إدخال رقم وتاريخ إشعار الدائن.")
+        return redirect('inventory:view_sales_return', pk=return_pk)
+
+    try:
+        with transaction.atomic():
+            # The service function handles all logic, including validation
+            sales_return_service.create_credit_memo_from_return(
+                sales_return=sales_return,
+                memo_number=memo_number,
+                memo_date=memo_date
+            )
+            messages.success(request, f"تم إنشاء إشعار الدائن '{memo_number}' بنجاح.")
+    except ValidationError as e:
+        messages.error(request, f"خطأ في التحقق: {e.message}")
+    except Exception as e:
+        messages.error(request, f"حدث خطأ غير متوقع: {e}")
+
+    return redirect('inventory:view_sales_return', pk=return_pk)

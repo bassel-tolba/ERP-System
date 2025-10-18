@@ -373,6 +373,11 @@ class GeneralAccountingSettings(models.Model):
         Account, on_delete=models.PROTECT, related_name='+', null=True, blank=True,
         verbose_name=_("Sales Returns & Allowances Account")
     )
+    sales_returns_clearing_account = models.ForeignKey(
+        Account, on_delete=models.PROTECT, related_name='+', null=True, blank=True,
+        verbose_name=_("Sales Returns Clearing Account"),
+        help_text=_("A temporary account to balance COGS reversal and final disposition of returns.")
+    )
     prepaid_expenses_account = models.ForeignKey(
         Account, on_delete=models.PROTECT, related_name='+', null=True, blank=True,
         verbose_name=_("Prepaid Expenses Account")

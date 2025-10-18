@@ -1,0 +1,147 @@
+<!-- gipcco_project/inventory/templates/inventory/partials/sales_return_view_content.html -->
+{% load inventory_extras %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0">تفاصيل مرتجع المبيعات رقم: #{{ sales_return.id }}</h1>
+    <a href="{% url 'inventory:sales_returns_list' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-right me-2"></i>العودة لقائمة المرتجعات
+    </a>
+</div>
+
+<div class="row">
+    <!-- Left Column: Return Details -->
+    <div class="col-lg-8">
+        <form id="dispositionForm" method="POST" action="{% url 'inventory:view_sales_return' sales_return.pk %}">
+            {% csrf_token %}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-list-ul me-2"></i>البنود المرتجعة</h5>
+                    <span class="badge bg-secondary fs-6">{{ sales_return.get_status_display }}</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover mb-0">
+                            <thead class="table">
+                                <tr>
+                                    <th class="ps-3">المنتج</th>
+                                    <th>تشغيلة رقم</th>
+                                    <th class="text-center">الكمية المرتجعة</th>
+                                    <th>قرار الفحص</th>
+                                    <th class="text-center">تسوية المخزون</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in return_items %}
+                                <tr>
+                                    <td class="ps-3">{{ item.original_dispatch.sales_order_item.finished_product.batch.template.final_product.name }}</td>
+                                    <td>{{ item.original_dispatch.sales_order_item.finished_product.individual_batch_number }}</td>
+                                    <td class="text-center">{{ item.quantity_returned|floatformat:0 }}</td>
+                                    <td>
+                                        {% if sales_return.status == 'pending_inspection' %}
+                                            <select name="disposition_{{ item.pk }}" class="form-select form-select-sm" required>
+                                                <option value="">اختر...</option>
+                                                {% for value, display in disposition_choices %}
+                                                <option value="{{ value }}" {% if item.disposition == value %}selected{% endif %}>{{ display }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        {% else %}
+                                            {{ item.get_disposition_display|default:"-" }}
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        {% if item.inventory_adjustment %}
+                                            <span class="badge bg-success">تمت</span>
+                                        {% else %}
+                                            <span class="badge bg-warning text-dark">قيد الانتظار</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% if sales_return.status == 'pending_inspection' %}
+                <div class="card-footer text-end">
+                    <button type="submit" class="btn btn-info">
+                        <i class="bi bi-save me-2"></i>حفظ قرارات الفحص
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Right Column: Info & Actions -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm mb-4">
+             <div class="card-body">
+                <h5 class="card-title">بيانات أساسية</h5>
+                <ul class="list-unstyled">
+                    <li><strong>العميل:</strong> {{ sales_return.customer.name }}</li>
+                    <li><strong>تاريخ الإرجاع:</strong> {{ sales_return.return_date|date:"Y-m-d" }}</li>
+                    {% if sales_return.sales_order %}
+                    <li><strong>أمر البيع الأصلي:</strong> <a href="{% url 'inventory:view_sales_order' sales_return.sales_order.id %}">{{ sales_return.sales_order.so_number }}</a></li>
+                    {% endif %}
+                    {% if sales_return.cogs_reversal_journal_entry %}
+                    <li><strong>قيد عكس التكلفة:</strong> JE-{{ sales_return.cogs_reversal_journal_entry.id }}</li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Step 2: Process Return -->
+        {% if sales_return.status == 'pending_processing' %}
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-gear-fill me-2"></i>معالجة المرتجع</h5>
+            </div>
+            <div class="card-body">
+                <p>المرتجع جاهز للمعالجة. سيؤدي هذا الإجراء إلى إنشاء قيود محاسبة التسوية اللازمة للمخزون.</p>
+                <form method="POST" action="{% url 'inventory:process_inspected_return' return_pk=sales_return.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="bi bi-check-circle-fill me-2"></i>تنفيذ معالجة المرتجع
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Step 3: Create Credit Memo -->
+        {% if sales_return.status == 'completed' %}
+            {% if credit_memo %}
+                <div class="alert alert-success text-center">
+                    <i class="bi bi-check-circle-fill fs-3"></i>
+                    <h5 class="mt-2">تم إنشاء إشعار دائن</h5>
+                    <p class="mb-0">رقم: <strong>{{ credit_memo.memo_number }}</strong></p>
+                    <p>بتاريخ: {{ credit_memo.memo_date|date:"Y-m-d" }}</p>
+                </div>
+            {% else %}
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-file-earmark-plus-fill me-2"></i>إنشاء إشعار دائن</h5>
+                    </div>
+                    <form method="POST" action="{% url 'inventory:create_credit_memo_from_return' return_pk=sales_return.pk %}">
+                        {% csrf_token %}
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="memo_number" class="form-label">رقم الإشعار</label>
+                                <input type="text" name="memo_number" id="memo_number" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="memo_date" class="form-label">تاريخ الإشعار</label>
+                                <input type="text" name="memo_date" id="memo_date" class="form-control datepicker" value="{{ today_date }}" required>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-check-circle-fill me-2"></i>إصدار الإشعار
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>

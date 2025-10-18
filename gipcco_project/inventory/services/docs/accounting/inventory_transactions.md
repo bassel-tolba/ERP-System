@@ -4,14 +4,16 @@
 ### Functions:
 
 - `create_je_for_inventory_adjustment(adjustment: InventoryAdjustment)`:
-  - **Description:** Creates a journal entry to reflect the financial impact of an inventory adjustment.
-  - **Accounting Logic:**
-    - **Shortage (Negative Quantity):** Debits an "Inventory Adjustment Loss" account and credits the specific "Inventory" account.
-    - **Overage (Positive Quantity):** Debits the specific "Inventory" account and credits an "Inventory Adjustment Gain" account.
+  - **Description:** Creates a journal entry to reflect the financial impact of an inventory adjustment. It contains distinct logic for standard adjustments versus those originating from a sales return.
+  - **Accounting Logic (Standard):**
+    - **Shortage:** Debits a "Loss/Expense" account and credits the "Inventory" account.
+    - **Overage:** Debits the "Inventory" account and credits a "Gain" account.
+  - **Accounting Logic (from Sales Return):**
+    - **Return to Stock (Overage):** Debits the "Inventory" account and credits the "Sales Returns Clearing" account.
+    - **Scrap (Shortage):** Debits the "Damaged Goods Expense" account and credits the "Sales Returns Clearing" account.
   - **Key Features:**
     - Prevents duplicate journal entry creation.
     - Verifies that the adjustment date falls within an open financial period.
-    - Uses the appropriate loss account for damaged goods vs. other reasons.
   - **Calls:** `_check_period_is_open()`, `_get_product_inventory_account()` from `_helpers.py`.
 
 - `create_je_for_inventory_receipt(inventory_log: InventoryLog)`:

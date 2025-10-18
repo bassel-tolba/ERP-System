@@ -6,6 +6,9 @@
     <a href="{% url 'inventory:sales_orders' %}" class="btn btn-outline-secondary">
         <i class="bi bi-arrow-right me-2"></i>العودة لقائمة الأوامر
     </a>
+    <a href="{% url 'inventory:create_sales_return' so_pk=so.pk %}" class="btn btn-outline-warning">
+        <i class="bi bi-arrow-counterclockwise me-2"></i>إنشاء مرتجع مبيعات
+    </a>
 </div>
 
 <div class="row">
@@ -65,7 +68,7 @@
             <div class="card-header">
                 <h5 class="mb-0"><i class="bi bi-box-arrow-up me-2"></i>صرف البضاعة</h5>
             </div>
-            <form method="POST" action="{% url 'inventory:dispatch_from_sales_order' pk=so.pk %}">
+            <form method="POST" action="{% url 'inventory:dispatch_from_sales_order' so_pk=so.pk %}">
                 {% csrf_token %}
                 <div class="card-body">
                     <div class="mb-3">
@@ -80,8 +83,7 @@
                             <label class="form-label small">
                                 {{ item.finished_product.batch.template.final_product.name }} (تشغيلة {{ item.finished_product.individual_batch_number }})
                             </label>
-                            <input type="hidden" name="item_id" value="{{ item.id }}">
-                            <input type="number" name="dispatch_quantity" class="form-control" step="any" min="0" max="{{ item.quantity_remaining }}" placeholder="المتبقي: {{ item.quantity_remaining|floatformat:0 }}">
+                            <input type="number" name="quantity_{{ item.id }}" class="form-control" step="any" min="0" max="{{ item.quantity_remaining }}" placeholder="المتبقي: {{ item.quantity_remaining|floatformat:0 }}">
                         </div>
                         {% endif %}
                     {% endfor %}

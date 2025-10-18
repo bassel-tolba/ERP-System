@@ -229,6 +229,14 @@ class CustomerCreditMemo(models.Model):
     customer = models.ForeignKey('Customer', on_delete=models.PROTECT, related_name='credit_memos')
     memo_number = models.CharField(max_length=100, unique=True)
     memo_date = models.DateField()
+    base_amount = models.DecimalField(
+        max_digits=14, decimal_places=3, default=Decimal('0.000'),
+        verbose_name=_("Base Amount (before VAT)")
+    )
+    vat_amount = models.DecimalField(
+        max_digits=14, decimal_places=3, default=Decimal('0.000'),
+        verbose_name=_("VAT Amount")
+    )
     total_amount = models.DecimalField(max_digits=14, decimal_places=3)
     unapplied_amount = models.DecimalField(max_digits=14, decimal_places=3)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.OPEN)
@@ -239,6 +247,8 @@ class CustomerCreditMemo(models.Model):
     source_object = GenericForeignKey('content_type', 'object_id')
 
     def save(self, *args, **kwargs):
+        # --- NEW: Calculate total_amount from base and VAT ---
+        self.total_amount = (self.base_amount + self.vat_amount).quantize(Decimal('0.001'))
         if not self.pk: # On creation
             self.unapplied_amount = self.total_amount
         super().save(*args, **kwargs)
@@ -246,7 +256,8 @@ class CustomerCreditMemo(models.Model):
 
 class SalesReturn(models.Model):
     class Status(models.TextChoices):
-        PENDING_INSPECTION = 'pending', _('Pending Inspection')
+        PENDING_INSPECTION = 'pending_inspection', _('Pending Inspection')
+        PENDING_PROCESSING = 'pending_processing', _('Pending Processing')
         COMPLETED = 'completed', _('Completed')
 
     customer = models.ForeignKey('Customer', on_delete=models.PROTECT, related_name='sales_returns')
@@ -254,19 +265,27 @@ class SalesReturn(models.Model):
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING_INSPECTION)
     # Optional link to original SO for traceability
     sales_order = models.ForeignKey('SalesOrder', on_delete=models.SET_NULL, null=True, blank=True)
+    # --- NEW: Link to the JE that reverses COGS ---
+    cogs_reversal_journal_entry = models.ForeignKey(
+        'JournalEntry', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='+',
+        verbose_name=_("COGS Reversal Journal Entry")
+    )
 
 class SalesReturnItem(models.Model):
     class Disposition(models.TextChoices):
-        RETURN_TO_STOCK = 'stock', _('Return to Stock')
+        RETURN_TO_STOCK = 'return_to_stock', _('Return to Stock')
         SCRAP = 'scrap', _('Scrap')
 
     sales_return = models.ForeignKey(SalesReturn, on_delete=models.CASCADE, related_name='items')
     # Link to the original dispatch to get cost and product info
-    original_dispatch = models.OneToOneField('FinishedProductDispatch', on_delete=models.PROTECT)
+    original_dispatch = models.ForeignKey(
+        'FinishedProductDispatch',
+        on_delete=models.PROTECT,
+        related_name='return_items'
+    )
     quantity_returned = models.FloatField()
     disposition = models.CharField(max_length=20, choices=Disposition.choices, null=True, blank=True)
-    # The JE that reverses the COGS for this item
-    reversing_journal_entry = models.ForeignKey('JournalEntry', on_delete=models.SET_NULL, null=True, blank=True)
 
 
 

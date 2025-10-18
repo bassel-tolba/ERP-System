@@ -48,6 +48,12 @@
 
 - `handle_dispatch_delete(sender, instance: FinishedProductDispatch, **kwargs)`: Deletes the associated journal entry when a sales dispatch is deleted.
 
+- `handle_credit_memo_save(sender, instance: CustomerCreditMemo, created, **kwargs)`: Creates or updates the journal entry for a `CustomerCreditMemo`.
+  - If the record is updated, it first deletes the old journal entry.
+  - **Calls:** `create_je_for_credit_memo()` from `services/accounting/sales_transactions.py`.
+
+- `handle_credit_memo_delete(sender, instance: CustomerCreditMemo, **kwargs)`: Deletes the associated journal entry when a `CustomerCreditMemo` is deleted.
+
 - `handle_payment_delete(sender, instance: Payment, **kwargs)`: Deletes the associated journal entry when a `Payment` is deleted.
 
 - `handle_payment_save(sender, instance: Payment, created, **kwargs)`: Creates or updates a journal entry for a payment, routing based on its type.
@@ -94,4 +100,4 @@
 
 - `handle_advance_settlement_save(sender, instance: EmployeeAdvanceSettlement, created, **kwargs)`: Updates the status of the parent `EmployeeAdvance` when a new settlement is created.
 
-- `create_period_close_checklist(sender, instance, created, **kwargs)`: Automatically creates a `PeriodCloseChecklist` when a new `FinancialPeriod` is created.
+- `create_period_close_checklist(sender, instance, created, **kwargs)`: Automatically creates a `PeriodCloseChecklist` when a new `FinancialPeriod` is created`.

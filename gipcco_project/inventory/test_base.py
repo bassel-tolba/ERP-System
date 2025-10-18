@@ -55,7 +55,8 @@ def create_chart_of_accounts():
     create_account('10204', 'أرصدة مدينة أخرى', Account.AccountType.ASSET, '102')
     create_account('1020404', 'ضريبة القيمة المضافة (المدخلات)', Account.AccountType.ASSET, '10204')
     create_account('1020405', 'سلف الموظفين', Account.AccountType.ASSET, '10204')
-    create_account('10205', 'مصروفات مدفوعة مقدماً', Account.AccountType.ASSET, '10204') # Prepaid Expenses
+    create_account('1020406', 'تسوية مرتجعات المبيعات', Account.AccountType.ASSET, '10204') # Clearing Account
+    create_account('10205', 'مصروفات مدفوعة مقدماً', Account.AccountType.ASSET, '102') # Prepaid Expenses
     create_account('101', 'الأصول الثابتة', Account.AccountType.ASSET, '100')
     create_account('10101', 'آلات ومعدات', Account.AccountType.ASSET, '101')
     create_account('10102', 'أثاث وتركيبات', Account.AccountType.ASSET, '101')
@@ -186,6 +187,7 @@ class AccountingServiceBaseTestCase(TestCase):
         )
         cls.general_settings.customer_deposits_account = cls.accounts['20203']
         cls.general_settings.sales_returns_account = cls.accounts['40102']
+        cls.general_settings.sales_returns_clearing_account = cls.accounts['1020406']
         cls.general_settings.prepaid_expenses_account = cls.accounts['10205']
         cls.general_settings.accrued_expenses_account = cls.accounts['20204']
         cls.general_settings.damaged_goods_expense_account = cls.accounts['50206']

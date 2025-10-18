@@ -18,3 +18,11 @@
     - Ensures the sale is recorded in an open financial period.
     - Links the customer and final product as sub-ledgers for detailed reporting.
   - **Calls:** `_check_period_is_open()`, `_get_product_expense_account()`, `_get_product_revenue_account()` from `_helpers.py`.
+
+- `create_je_for_credit_memo(memo: CustomerCreditMemo)`:
+  - **Description:** Creates a journal entry for a customer credit memo, reversing the financial impact of a sale.
+  - **Accounting Logic:**
+    - **Debit:** Sales Returns & Allowances (contra-revenue).
+    - **Debit:** VAT Payable (reversing the tax liability).
+    - **Credit:** Accounts Receivable (reducing the customer's balance).
+  - **Calls:** `_check_period_is_open()` from `_helpers.py`.

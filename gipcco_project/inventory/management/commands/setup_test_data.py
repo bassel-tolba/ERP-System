@@ -23,9 +23,10 @@ from inventory.models import (
     CustomerInvoice, CustomerInvoiceItem, CustomerPaymentApplication,
     BankTransfer, FixedAsset, DepreciationLog, InventoryConsumption,
     InventoryCount, InventoryAdjustment, TemplateItem, ExpenseRequest, EmployeeAdvance,
-    AccruedExpense, AccrualLog
+    AccruedExpense, AccrualLog, SalesReturn, SalesReturnItem, CustomerCreditMemo
 )
 from inventory.services.adjusting_entries_service import run_monthly_accruals
+from inventory.services.sales_return_service import process_inspected_return, create_credit_memo_from_return
 
 # A dictionary to hold created objects for easy reference
 # This avoids querying the DB repeatedly
@@ -62,6 +63,7 @@ def create_chart_of_accounts():
     create_account('10204', 'أرصدة مدينة أخرى', Account.AccountType.ASSET, '102')
     create_account('1020404', 'ضريبة القيمة المضافة (المدخلات)', Account.AccountType.ASSET, '10204')
     create_account('1020405', 'سلف الموظفين', Account.AccountType.ASSET, '10204')
+    create_account('1020406', 'تسوية مرتجعات المبيعات', Account.AccountType.ASSET, '10204') # Clearing Account
     create_account('10205', 'مصروفات مدفوعة مقدماً', Account.AccountType.ASSET, '102')
     create_account('101', 'الأصول الثابتة', Account.AccountType.ASSET, '100')
     create_account('10101', 'آلات ومعدات', Account.AccountType.ASSET, '101')
@@ -83,6 +85,7 @@ def create_chart_of_accounts():
     create_account('400', 'الإيرادات', Account.AccountType.REVENUE)
     create_account('401', 'إيرادات النشاط', Account.AccountType.REVENUE, '400')
     create_account('40101', 'مبيعات منتجات نهائية', Account.AccountType.REVENUE, '401')
+    create_account('40102', 'مرتجعات ومسموحات المبيعات', Account.AccountType.REVENUE, '401') # Contra-Revenue
     create_account('402', 'إيرادات أخرى', Account.AccountType.REVENUE, '400')
     create_account('40201', 'عوائد بيع خردة', Account.AccountType.REVENUE, '402')
     create_account('40202', 'مكاسب فروق المخزون', Account.AccountType.REVENUE, '402')
@@ -184,7 +187,9 @@ class Command(BaseCommand):
             inventory_adjustment_gain_account=accounts['40202'],
             employee_advances_receivable=accounts['1020405'],
             prepaid_expenses_account=accounts['10205'],
-            accrued_expenses_account=accounts['2020203']
+            accrued_expenses_account=accounts['2020203'],
+            sales_returns_account=accounts['40102'],
+            sales_returns_clearing_account=accounts['1020406']
         )
         ProductTypeAccountingSettings.objects.create(
             product_type=Product.ProductType.RAW_MATERIAL,
@@ -405,13 +410,50 @@ class Command(BaseCommand):
                 'vat_rate': Decimal("0.14")
             }
         )
-        FinishedProductDispatch.objects.create(
+        dispatch = FinishedProductDispatch.objects.create(
             sales_order_item=so_item,
             quantity=50.0,
             dispatch_date=timezone.make_aware(timezone.datetime(2025, 9, 16, 14, 0, 0)),
             cost_at_dispatch=Decimal("288.750") # 866.250 / 150 * 50
         )
         self.stdout.write("   - Created a sales order and dispatched 50 IV Bags.")
+
+        # Sales Return Workflow
+        self.stdout.write("   - Starting Sales Return Workflow...")
+        sales_return = SalesReturn.objects.create(
+            customer=CONTEXT['customers']['pharmacy'],
+            return_date=date(2025, 9, 18),
+            sales_order=so,
+            status=SalesReturn.Status.PENDING_INSPECTION
+        )
+        # Return 10 items, 8 to stock and 2 to be scrapped
+        return_item_good = SalesReturnItem.objects.create(
+            sales_return=sales_return,
+            original_dispatch=dispatch,
+            quantity_returned=8.0,
+            disposition=SalesReturnItem.Disposition.RETURN_TO_STOCK
+        )
+        return_item_scrap = SalesReturnItem.objects.create(
+            sales_return=sales_return,
+            original_dispatch=dispatch,
+            quantity_returned=2.0,
+            disposition=SalesReturnItem.Disposition.SCRAP
+        )
+        sales_return.status = SalesReturn.Status.PENDING_PROCESSING
+        sales_return.save()
+        self.stdout.write("     - Created Sales Return with 8 items for stock, 2 for scrap.")
+
+        # Process the inspected return
+        process_inspected_return(sales_return)
+        self.stdout.write("     - Processed the inspected return, creating inventory adjustments.")
+
+        # Create the credit memo
+        create_credit_memo_from_return(
+            sales_return=sales_return,
+            memo_number="CM-DEMO-001",
+            memo_date=date(2025, 9, 19)
+        )
+        self.stdout.write("     - Created the final credit memo for the customer.")
 
         # Invoicing and Payments
         sup_inv, _ = SupplierInvoice.objects.get_or_create(

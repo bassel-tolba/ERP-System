@@ -20,8 +20,11 @@ from ..models import (
     SalesOrderItem,
     FinishedProductDispatch,
     CustomerInvoiceItem,
+    InventoryAdjustment,
 )
 from ..services.costing_service import get_inventory_state_at_datetime
+from django.db.models import Subquery, OuterRef, Sum, FloatField, F
+from django.db.models.functions import Coalesce
 
 logger = logging.getLogger(__name__)
 
@@ -151,10 +154,49 @@ def dispatch_from_sales_order(
             raise ValidationError(_("Sales Order with ID %(id)s not found.") % {'id': sales_order_id})
 
         item_ids = [d['sales_order_item_id'] for d in dispatches]
-        so_items = so.items.in_bulk(item_ids)
+        so_items = {item.id: item for item in so.items.select_related('finished_product').filter(id__in=item_ids)}
 
         if len(so_items) != len(set(item_ids)):
             raise ValidationError(_("One or more sales order items could not be found on this order."))
+
+        # --- NEW: Efficiently check stock for all items at once ---
+        receipt_ids = [item.finished_product_id for item in so_items.values()]
+        
+        dispatched_subquery = FinishedProductDispatch.objects.filter(
+            sales_order_item__finished_product_id=OuterRef('pk')
+        ).values('sales_order_item__finished_product_id').annotate(total=Sum('quantity')).values('total')
+
+        adjusted_subquery = InventoryAdjustment.objects.filter(
+            source_finished_product_id=OuterRef('pk')
+        ).values('source_finished_product_id').annotate(total=Sum('adjustment_quantity')).values('total')
+
+        receipts_with_stock = FinishedProductReceipt.objects.filter(id__in=receipt_ids).annotate(
+            total_dispatched=Coalesce(Subquery(dispatched_subquery, output_field=FloatField()), 0.0),
+            total_adjusted=Coalesce(Subquery(adjusted_subquery, output_field=FloatField()), 0.0)
+        ).annotate(
+            quantity_available=F('total_quantity_produced') - F('total_dispatched') + F('total_adjusted')
+        )
+        
+        stock_map = {receipt.id: receipt.quantity_available for receipt in receipts_with_stock}
+
+        # --- Validate quantities before creating any dispatches ---
+        for dispatch_data in dispatches:
+            item = so_items.get(dispatch_data['sales_order_item_id'])
+            if not item:
+                 raise ValidationError(_("Sales Order Item with ID %(id)s not found.") % {'id': dispatch_data['sales_order_item_id']})
+
+            quantity_to_dispatch = dispatch_data['quantity']
+            available_stock = stock_map.get(item.finished_product_id, 0)
+            
+            if quantity_to_dispatch > available_stock:
+                raise ValidationError(
+                    _("Insufficient stock for '%(product)s'. Requested: %(requested)s, Available: %(available)s.")
+                    % {
+                        'product': item.finished_product,
+                        'requested': quantity_to_dispatch,
+                        'available': available_stock
+                    }
+                )
 
         created_dispatches = []
         for dispatch_data in dispatches:
@@ -203,8 +245,8 @@ def dispatch_from_sales_order(
             logger.info(f"    All items for SO ID {sales_order_id} are now fulfilled. Status updated to COMPLETED.")
         elif has_any_dispatch:
             # If there's at least one dispatch but not all items are fulfilled, it's partially fulfilled
-            so.status = SalesOrder.Status.PARTIALLY_FULFILLED
-            logger.info(f"    Some items for SO ID {sales_order_id} have been dispatched. Status updated to PARTIALLY_FULFILLED.")
+            so.status = SalesOrder.Status.PARTIALLY_SHIPPED
+            logger.info(f"    Some items for SO ID {sales_order_id} have been dispatched. Status updated to PARTIALLY_SHIPPED.")
         
         # Only save if the status has changed from its original state before this dispatch operation
         so.save(update_fields=['status'])

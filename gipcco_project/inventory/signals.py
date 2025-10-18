@@ -15,7 +15,8 @@ from .models import (
     DepreciationLog, InventoryAdjustment, EmployeeAdvance, EmployeeAdvanceSettlement,
     FinancialPeriod, PeriodCloseChecklist, GeneralAccountingSettings,
     # --- NEW IMPORTS ---
-    PrepaidExpense, ExpenseLog, AmortizationLog, AccrualLog, ExpenseRequest
+    PrepaidExpense, ExpenseLog, AmortizationLog, AccrualLog, ExpenseRequest,
+    CustomerCreditMemo
 )
 from .services.accounting_service import (
     _check_period_is_open,
@@ -25,6 +26,7 @@ from .services.accounting_service import (
     create_je_for_finished_goods_receipt,
     create_je_for_production_return,
     create_je_for_sales_dispatch,
+    create_je_for_credit_memo,
     create_je_for_supplier_payment,
     create_je_for_customer_payment,
     create_je_for_bank_transfer,
@@ -48,21 +50,44 @@ logger = logging.getLogger(__name__)
 # A dictionary mapping transactional models to their date fields.
 # This allows us to create generic signal handlers.
 TRANSACTIONAL_MODELS = {
-    InventoryLog: 'release_timestamp',
-    Batch: 'creation_date',
-    InventoryConsumption: 'consumption_date',
-    FinishedProductReceipt: 'receipt_date',
-    ProductionReturn: 'return_date',
-    FinishedProductDispatch: 'dispatch_date',
-    Payment: 'payment_date',
-    BankTransfer: 'transfer_date',
-    DepreciationLog: 'period_date',
-    InventoryAdjustment: 'adjustment_date',
-    EmployeeAdvance: 'advance_date',
+    'InventoryLog': 'timestamp',
+    'Batch': 'creation_date',
+    'InventoryConsumption': 'consumption_date',
+    'FinishedProductReceipt': 'receipt_date',
+    'ProductionReturn': 'return_date',
+    'FinishedProductDispatch': 'dispatch_date',
+    'Payment': 'payment_date',
+    'BankTransfer': 'transfer_date',
+    'DepreciationLog': 'period_date',
+    'AmortizationLog': 'period_date',
+    'AccrualLog': 'period_date',
+    'ExpenseLog': 'expense_date',
+    'InventoryAdjustment': 'adjustment_date',
+    'EmployeeAdvance': 'advance_date',
+    'CustomerCreditMemo': 'memo_date',
 }
 
+
+@receiver(pre_save, sender=InventoryLog)
+@receiver(pre_save, sender=Batch)
+@receiver(pre_save, sender=InventoryConsumption)
+@receiver(pre_save, sender=FinishedProductReceipt)
+@receiver(pre_save, sender=ProductionReturn)
+@receiver(pre_save, sender=FinishedProductDispatch)
+@receiver(pre_save, sender=Payment)
+@receiver(pre_save, sender=BankTransfer)
+@receiver(pre_save, sender=DepreciationLog)
+@receiver(pre_save, sender=AmortizationLog)
+@receiver(pre_save, sender=AccrualLog)
+@receiver(pre_save, sender=ExpenseLog)
+@receiver(pre_save, sender=InventoryAdjustment)
+@receiver(pre_save, sender=EmployeeAdvance)
+@receiver(pre_save, sender=CustomerCreditMemo)
 def pre_save_period_check(sender, instance, **kwargs):
-    """Generic pre-save signal to check the financial period status."""
+    """
+    A generic pre-save signal that connects to multiple models to ensure
+    the financial period is open for the given date.
+    """
     date_field_name = TRANSACTIONAL_MODELS.get(sender)
     if date_field_name:
         date_to_check = getattr(instance, date_field_name)
@@ -71,6 +96,21 @@ def pre_save_period_check(sender, instance, **kwargs):
             if instance.pk is None or getattr(sender.objects.get(pk=instance.pk), date_field_name) != date_to_check:
                  _check_period_is_open(date_to_check)
 
+@receiver(pre_delete, sender=InventoryLog)
+@receiver(pre_delete, sender=Batch)
+@receiver(pre_delete, sender=InventoryConsumption)
+@receiver(pre_delete, sender=FinishedProductReceipt)
+@receiver(pre_delete, sender=ProductionReturn)
+@receiver(pre_delete, sender=FinishedProductDispatch)
+@receiver(pre_delete, sender=Payment)
+@receiver(pre_delete, sender=BankTransfer)
+@receiver(pre_delete, sender=DepreciationLog)
+@receiver(pre_delete, sender=AmortizationLog)
+@receiver(pre_delete, sender=AccrualLog)
+@receiver(pre_delete, sender=ExpenseLog)
+@receiver(pre_delete, sender=InventoryAdjustment)
+@receiver(pre_delete, sender=EmployeeAdvance)
+@receiver(pre_delete, sender=CustomerCreditMemo)
 def pre_delete_period_check(sender, instance, **kwargs):
     """Generic pre-delete signal to check the financial period status."""
     date_field_name = TRANSACTIONAL_MODELS.get(sender)
@@ -80,9 +120,10 @@ def pre_delete_period_check(sender, instance, **kwargs):
             _check_period_is_open(date_to_check)
 
 # Connect the signals dynamically
-for model, date_field in TRANSACTIONAL_MODELS.items():
-    pre_save.connect(pre_save_period_check, sender=model, weak=False)
-    pre_delete.connect(pre_delete_period_check, sender=model, weak=False)
+for model_name, date_field in TRANSACTIONAL_MODELS.items():
+    model_ref = f'inventory.{model_name}'
+    pre_save.connect(pre_save_period_check, sender=model_ref, weak=False)
+    pre_delete.connect(pre_delete_period_check, sender=model_ref, weak=False)
 
 
 # ==============================================================================
@@ -427,6 +468,30 @@ def handle_inventory_adjustment_delete(sender, instance: InventoryAdjustment, **
         JournalEntry.objects.filter(content_type=content_type, object_id=instance.id).delete()
     except Exception as e:
         logger.error(f"Error deleting Journal Entry for InventoryAdjustment ID {instance.id}: {e}")
+
+
+@receiver(post_save, sender=CustomerCreditMemo)
+def handle_credit_memo_save(sender, instance: CustomerCreditMemo, created, **kwargs):
+    """Creates/updates the JE for a customer credit memo."""
+    logger.info(f"-> Signal 'handle_credit_memo_save' triggered for CustomerCreditMemo ID {instance.id}. Created: {created}.")
+    if not created:
+        content_type = ContentType.objects.get_for_model(instance)
+        JournalEntry.objects.filter(content_type=content_type, object_id=instance.id).delete()
+        logger.info(f"   Deleted existing JE for updated CustomerCreditMemo ID {instance.id} to allow regeneration.")
+    
+    logger.info(f"   Calling 'create_je_for_credit_memo' for memo ID {instance.id}...")
+    create_je_for_credit_memo(memo=instance)
+    logger.info(f"<- Finished 'handle_credit_memo_save' for memo ID {instance.id}.")
+
+
+@receiver(post_delete, sender=CustomerCreditMemo)
+def handle_credit_memo_delete(sender, instance: CustomerCreditMemo, **kwargs):
+    """Deletes the associated JE when a CustomerCreditMemo is deleted."""
+    try:
+        content_type = ContentType.objects.get_for_model(instance)
+        JournalEntry.objects.filter(content_type=content_type, object_id=instance.id).delete()
+    except Exception as e:
+        logger.error(f"Error deleting Journal Entry for CustomerCreditMemo ID {instance.id}: {e}")
 
 
 @receiver(post_save, sender=EmployeeAdvance)

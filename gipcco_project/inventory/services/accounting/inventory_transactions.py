@@ -22,15 +22,16 @@ logger = logging.getLogger(__name__)
 
 def create_je_for_inventory_adjustment(adjustment: InventoryAdjustment) -> Optional[JournalEntry]:
     """
-    Creates a journal entry for an inventory adjustment.
+    Creates a journal entry for an inventory adjustment, handling different logic
+    for standard adjustments vs. adjustments originating from a sales return.
 
-    Accounting Logic for Shortage (negative quantity):
-    - DEBIT: Inventory Adjustment Loss Account
-    - CREDIT: Inventory Account
+    Standard Adjustment Logic:
+    - Shortage: DEBIT Loss/Expense Account, CREDIT Inventory Account
+    - Overage:  DEBIT Inventory Account, CREDIT Gain Account
 
-    Accounting Logic for Overage (positive quantity):
-    - DEBIT: Inventory Account
-    - CREDIT: Inventory Adjustment Gain Account
+    Sales Return Adjustment Logic:
+    - Return to Stock (Overage): DEBIT Inventory Account, CREDIT Sales Returns Clearing Account
+    - Scrap (Shortage):         DEBIT Damaged Goods Expense, CREDIT Sales Returns Clearing Account
     """
     logger.info(f"--> Entered 'create_je_for_inventory_adjustment' for Adjustment ID {adjustment.id}.")
     
@@ -53,27 +54,12 @@ def create_je_for_inventory_adjustment(adjustment: InventoryAdjustment) -> Optio
 
     settings = GeneralAccountingSettings.load()
     inventory_account = _get_product_inventory_account(adjustment.product)
-
-    # Determine the correct loss/expense account based on the reason
-    if adjustment.reason_code == InventoryAdjustment.ReasonCode.DAMAGE:
-        loss_account = settings.damaged_goods_expense_account
-    else: # Default to the general shrinkage/loss account for other reasons
-        loss_account = settings.inventory_adjustment_loss_account
-    gain_account = settings.inventory_adjustment_gain_account
-    
-    logger.info(f"    Accounts determined: Inventory='{inventory_account}', Loss='{loss_account}', Gain='{gain_account}'.")
-
-    if not all([inventory_account, loss_account, gain_account]):
-        logger.error(f"    [CHECK FAILED] Failed to create JE for adjustment {adjustment.id}: Critical accounts are not configured in GeneralAccountingSettings.")
-        raise ValueError(_("Inventory, Loss, or Gain account for adjustments is not configured in General Settings."))
-    logger.info("    [CHECK PASSED] All required accounting settings are configured.")
-
     adjustment_value = abs(Decimal(str(adjustment.adjustment_quantity)) * adjustment.cost_at_adjustment)
     logger.info(f"    Calculated adjustment value: {adjustment_value} (Qty: {adjustment.adjustment_quantity}, Cost: {adjustment.cost_at_adjustment})")
     
     with transaction.atomic():
         description = _(
-            "Inventory adjustment for '%(product)s' due to %(reason)s"
+            "تسوية مخزون للمنتج '%(product)s' بسبب %(reason)s"
         ) % {
             'product': adjustment.product.name,
             'reason': adjustment.get_reason_code_display()
@@ -86,24 +72,64 @@ def create_je_for_inventory_adjustment(adjustment: InventoryAdjustment) -> Optio
             status=JournalEntry.Status.POSTED
         )
 
-        if adjustment.adjustment_quantity < 0: # Shortage
-            logger.info(f"    Processing shortage: DEBIT '{loss_account.name}', CREDIT '{inventory_account.name}' with {adjustment_value}.")
-            JournalEntryLine.objects.create(
-                journal_entry=je, account=loss_account, amount=adjustment_value, entry_type=JournalEntryLine.EntryType.DEBIT
-            )
-            JournalEntryLine.objects.create(
-                journal_entry=je, account=inventory_account, amount=adjustment_value, entry_type=JournalEntryLine.EntryType.CREDIT,
-                sub_ledger_object=adjustment.product
-            )
-        else: # Overage
-            logger.info(f"    Processing overage: DEBIT '{inventory_account.name}', CREDIT '{gain_account.name}' with {adjustment_value}.")
-            JournalEntryLine.objects.create(
-                journal_entry=je, account=inventory_account, amount=adjustment_value, entry_type=JournalEntryLine.EntryType.DEBIT,
-                sub_ledger_object=adjustment.product
-            )
-            JournalEntryLine.objects.create(
-                journal_entry=je, account=gain_account, amount=adjustment_value, entry_type=JournalEntryLine.EntryType.CREDIT
-            )
+        if adjustment.source_sales_return_item:
+            # --- Sales Return Adjustment Logic ---
+            clearing_account = settings.sales_returns_clearing_account
+            if not clearing_account:
+                raise ValueError(_("Sales Returns Clearing Account is not configured."))
+
+            if adjustment.adjustment_quantity < 0:  # Scrapped item
+                expense_account = settings.damaged_goods_expense_account
+                if not expense_account:
+                    raise ValueError(_("Damaged Goods Expense Account is not configured."))
+                
+                logger.info(f"    Processing sales return scrap: DEBIT '{expense_account.name}', CREDIT '{clearing_account.name}' with {adjustment_value}.")
+                JournalEntryLine.objects.create(
+                    journal_entry=je, account=expense_account, amount=adjustment_value, entry_type=JournalEntryLine.EntryType.DEBIT
+                )
+                JournalEntryLine.objects.create(
+                    journal_entry=je, account=clearing_account, amount=adjustment_value, entry_type=JournalEntryLine.EntryType.CREDIT
+                )
+            else:  # Return to stock
+                logger.info(f"    Processing return to stock: DEBIT '{inventory_account.name}', CREDIT '{clearing_account.name}' with {adjustment_value}.")
+                JournalEntryLine.objects.create(
+                    journal_entry=je, account=inventory_account, amount=adjustment_value, entry_type=JournalEntryLine.EntryType.DEBIT,
+                    sub_ledger_object=adjustment.product
+                )
+                JournalEntryLine.objects.create(
+                    journal_entry=je, account=clearing_account, amount=adjustment_value, entry_type=JournalEntryLine.EntryType.CREDIT
+                )
+        else:
+            # --- Standard Inventory Adjustment Logic ---
+            if adjustment.adjustment_quantity < 0:  # Shortage
+                if adjustment.reason_code == InventoryAdjustment.ReasonCode.DAMAGE:
+                    loss_account = settings.damaged_goods_expense_account
+                else:
+                    loss_account = settings.inventory_adjustment_loss_account
+                if not loss_account:
+                    raise ValueError(_("Loss account for inventory adjustments is not configured."))
+
+                logger.info(f"    Processing shortage: DEBIT '{loss_account.name}', CREDIT '{inventory_account.name}' with {adjustment_value}.")
+                JournalEntryLine.objects.create(
+                    journal_entry=je, account=loss_account, amount=adjustment_value, entry_type=JournalEntryLine.EntryType.DEBIT
+                )
+                JournalEntryLine.objects.create(
+                    journal_entry=je, account=inventory_account, amount=adjustment_value, entry_type=JournalEntryLine.EntryType.CREDIT,
+                    sub_ledger_object=adjustment.product
+                )
+            else:  # Overage
+                gain_account = settings.inventory_adjustment_gain_account
+                if not gain_account:
+                    raise ValueError(_("Gain account for inventory adjustments is not configured."))
+
+                logger.info(f"    Processing overage: DEBIT '{inventory_account.name}', CREDIT '{gain_account.name}' with {adjustment_value}.")
+                JournalEntryLine.objects.create(
+                    journal_entry=je, account=inventory_account, amount=adjustment_value, entry_type=JournalEntryLine.EntryType.DEBIT,
+                    sub_ledger_object=adjustment.product
+                )
+                JournalEntryLine.objects.create(
+                    journal_entry=je, account=gain_account, amount=adjustment_value, entry_type=JournalEntryLine.EntryType.CREDIT
+                )
         
         je.validate_balance()
         logger.info(f"    Successfully created JE-{je.id} for InventoryAdjustment ID {adjustment.id}.")
@@ -160,7 +186,7 @@ def create_je_for_inventory_receipt(inventory_log: InventoryLog) -> Optional[Jou
     # 4. --- Create Journal Entry and Lines within a Transaction ---
     with transaction.atomic():
         description = _(
-            "Purchase receipt for %(quantity)s %(unit)s of '%(product)s' from %(supplier)s (QC: %(qc)s)"
+            "استلام بضاعة بعدد %(quantity)s %(unit)s من '%(product)s' من المورد %(supplier)s (رقم فحص الجودة: %(qc)s)"
         ) % {
             'quantity': inventory_log.quantity,
             'unit': inventory_log.product.unit,

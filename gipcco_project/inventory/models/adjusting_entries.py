@@ -154,7 +154,7 @@ class AccruedExpense(models.Model):
         verbose_name_plural = _("Accrued Expenses")
 
     def __str__(self):
-        return f"Accrual: {self.description} (~{self.estimated_monthly_amount}/month)"
+        return f"Accrual: {self.description} ({self.total_estimated_amount})"
 
 
 class AccrualLog(models.Model):

@@ -23,7 +23,9 @@ from .views import api
 from .views.sales import (
     customers, edit_customer, delete_customer, sales_orders, create_sales_order, 
     view_sales_order, delete_sales_order, edit_sales_order_item, delete_sales_order_item,
-    create_dispatch, edit_dispatch, delete_dispatch, dispatch_from_sales_order
+    create_dispatch, edit_dispatch, delete_dispatch, dispatch_from_sales_order,
+    sales_returns_list, create_sales_return, view_sales_return,
+    process_inspected_return_view, create_credit_memo_from_return_view
 )
 from .views import expense_requests
 # --- MODIFIED: Corrected financial report views import ---
@@ -120,7 +122,14 @@ urlpatterns = [
     path('dispatch/create/<int:so_item_pk>/', create_dispatch, name='create_dispatch'),
     path('dispatch/edit/<int:pk>/', edit_dispatch, name='edit_dispatch'),
     path('dispatch/delete/<int:pk>/', delete_dispatch, name='delete_dispatch'),
-    path('sales_order/<int:pk>/dispatch/', dispatch_from_sales_order, name='dispatch_from_sales_order'),
+    path('sales_order/<int:so_pk>/dispatch/', dispatch_from_sales_order, name='dispatch_from_sales_order'),
+
+    # Sales Return Routes
+    path('sales_returns/', sales_returns_list, name='sales_returns_list'),
+    path('sales_order/<int:so_pk>/return/create/', create_sales_return, name='create_sales_return'),
+    path('sales_return/<int:pk>/', view_sales_return, name='view_sales_return'),
+    path('sales_return/<int:return_pk>/process/', process_inspected_return_view, name='process_inspected_return'),
+    path('sales_return/<int:return_pk>/credit_memo/create/', create_credit_memo_from_return_view, name='create_credit_memo_from_return'),
 
     # Employee Financials
     path('employees/financials/', employees.employee_financials_dashboard, name='employee_financials_dashboard'),
