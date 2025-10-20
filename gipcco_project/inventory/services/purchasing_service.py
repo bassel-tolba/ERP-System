@@ -61,31 +61,34 @@ def post_supplier_invoice(invoice: SupplierInvoice) -> JournalEntry:
         raise ValueError(_("GRNI, A/P, PPV, or VAT accounts are not configured in General Accounting Settings."))
 
     # --- 3. Calculate Amounts ---
-    receipt_total_value = Decimal('0.0')
+    # --- 3. Calculate Amounts ---
+    receipt_base_value = Decimal('0.0')
+    receipt_vat_value = Decimal('0.0')
     receipt_total_wht = Decimal('0.0')
+
     for item in invoice.items.select_related('receipt').all():
         receipt = item.receipt
         if receipt:
-            receipt_total_value += (receipt.base_unit_price * Decimal(str(receipt.quantity))) + receipt.vat_amount
+            receipt_base_value += receipt.base_unit_price * Decimal(str(receipt.quantity))
+            receipt_vat_value += receipt.vat_amount
             receipt_total_wht += receipt.withholding_tax_amount
 
+    # The value in GRNI that needs to be cleared. This is the amount the original receipt
+    # credited to the GRNI account.
+    grni_clearing_value = (receipt_base_value + receipt_vat_value - receipt_total_wht).quantize(Decimal('0.001'))
+
+    # The final A/P liability is the actual invoice total minus the WHT we pay on the supplier's behalf.
+    final_ap_liability = (invoice.actual_subtotal + invoice.actual_vat - receipt_total_wht).quantize(Decimal('0.001'))
+
+    # PPV is the difference between the invoice subtotal and the receipt (PO) subtotal.
+    purchase_price_variance = (invoice.actual_subtotal - receipt_base_value).quantize(Decimal('0.001'))
+
+    # The VAT variance is the difference between the actual invoice VAT and the VAT booked at receipt.
+    vat_variance = (invoice.actual_vat - receipt_vat_value).quantize(Decimal('0.001'))
+
     actual_invoice_total = (invoice.actual_subtotal + invoice.actual_vat).quantize(Decimal('0.001'))
-    
-    # The value to clear from GRNI is the receipt total minus WHT, as WHT is handled separately.
-    grni_clearing_value = (receipt_total_value - receipt_total_wht).quantize(Decimal('0.001'))
-    
-    # The final A/P liability is the actual invoice total minus WHT.
-    final_ap_liability = (actual_invoice_total - receipt_total_wht).quantize(Decimal('0.001'))
 
-    # PPV is the difference between the net amounts (excluding VAT and WHT).
-    # --- MODIFIED: Account for landed costs in PPV calculation ---
-    total_landed_cost = invoice.landed_costs.aggregate(total=Sum('amount'))['total'] or Decimal('0.0')
-    net_goods_value_from_invoice = invoice.actual_subtotal - total_landed_cost
-    net_goods_value_from_receipts = receipt_total_value - invoice.actual_vat # Assuming actual_vat is for goods only
-    
-    purchase_price_variance = (net_goods_value_from_invoice - net_goods_value_from_receipts).quantize(Decimal('0.001'))
-
-    logger.info(f"    Calculations complete: GRNI Clearing={grni_clearing_value}, Final A/P={final_ap_liability}, PPV={purchase_price_variance}, Landed Cost={total_landed_cost}")
+    logger.info(f"    Calculations complete: GRNI Clearing={grni_clearing_value}, Final A/P={final_ap_liability}, PPV={purchase_price_variance}, VAT Variance={vat_variance}")
 
     # --- 4. Create Journal Entry and Lines ---
     with transaction.atomic():
@@ -101,46 +104,41 @@ def post_supplier_invoice(invoice: SupplierInvoice) -> JournalEntry:
             status=JournalEntry.Status.POSTED
         )
 
-        # Line 1: Debit GRNI to clear the accrual
+        # DEBIT: Clear the GRNI account for the value of the receipts
         JournalEntryLine.objects.create(
-            journal_entry=je, account=grni_account, amount=grni_clearing_value,
-            entry_type=JournalEntryLine.EntryType.DEBIT, sub_ledger_object=invoice.supplier
+            journal_entry=je,
+            account=grni_account,
+            amount=grni_clearing_value,
+            entry_type=JournalEntryLine.EntryType.DEBIT,
+            sub_ledger_object=invoice.supplier
         )
 
-        # Line 2: Debit VAT Receivable for the actual VAT amount
-        if invoice.actual_vat > 0:
-            JournalEntryLine.objects.create(
-                journal_entry=je, account=vat_account, amount=invoice.actual_vat,
-                entry_type=JournalEntryLine.EntryType.DEBIT
-            )
-
-        # Line 3: Handle Purchase Price Variance
+        # DEBIT/CREDIT: Purchase Price Variance
         if purchase_price_variance != 0:
-            if purchase_price_variance > 0: # Invoice is higher than PO (unfavorable)
-                entry_type = JournalEntryLine.EntryType.DEBIT
-            else: # Invoice is lower than PO (favorable)
-                entry_type = JournalEntryLine.EntryType.CREDIT
-            
             JournalEntryLine.objects.create(
-                journal_entry=je, account=ppv_account, amount=abs(purchase_price_variance),
-                entry_type=entry_type
+                journal_entry=je,
+                account=ppv_account,
+                amount=abs(purchase_price_variance),
+                entry_type=JournalEntryLine.EntryType.DEBIT if purchase_price_variance > 0 else JournalEntryLine.EntryType.CREDIT,
+                sub_ledger_object=invoice.supplier
             )
 
-        # --- NEW Line: Debit Inventory for the Landed Costs ---
-        if total_landed_cost > 0:
-            # In a simple case, we debit the inventory account of the first item.
-            # A more complex implementation could split this across multiple inventory accounts
-            # if the receipts are for different product types.
-            first_item_inventory_account = _get_product_inventory_account(invoice.items.first().receipt.product)
+        # DEBIT/CREDIT: VAT Variance
+        if vat_variance != 0:
             JournalEntryLine.objects.create(
-                journal_entry=je, account=first_item_inventory_account, amount=total_landed_cost,
-                entry_type=JournalEntryLine.EntryType.DEBIT
+                journal_entry=je,
+                account=vat_account,
+                amount=abs(vat_variance),
+                entry_type=JournalEntryLine.EntryType.DEBIT if vat_variance > 0 else JournalEntryLine.EntryType.CREDIT
             )
 
-        # Line 4: Credit Accounts Payable for the final liability
+        # CREDIT: Accounts Payable for the final liability
         JournalEntryLine.objects.create(
-            journal_entry=je, account=ap_account, amount=final_ap_liability,
-            entry_type=JournalEntryLine.EntryType.CREDIT, sub_ledger_object=invoice.supplier
+            journal_entry=je,
+            account=ap_account,
+            amount=final_ap_liability,
+            entry_type=JournalEntryLine.EntryType.CREDIT,
+            sub_ledger_object=invoice.supplier
         )
 
         je.validate_balance()
@@ -234,7 +232,22 @@ def create_purchase_return(user, return_data: dict, items_data: list) -> Purchas
             receipt = InventoryLog.objects.get(pk=item_data['original_receipt_id'])
             quantity_to_return = float(item_data['quantity_returned'])
             
-            # TODO: Add validation for available quantity
+            if quantity_to_return <= 0:
+                raise ValidationError(_("Return quantity must be a positive number."))
+
+            # Get quantity already returned against this receipt
+            already_returned = receipt.purchase_return_items.aggregate(
+                total=Sum('quantity_returned')
+            )['total'] or 0.0
+            
+            available_to_return = receipt.quantity - already_returned
+
+            if quantity_to_return > available_to_return:
+                raise ValidationError(
+                    _("Cannot return %(qty)s. Only %(avail)s is available to be returned from receipt %(receipt)s.") % {
+                        'qty': quantity_to_return, 'avail': available_to_return, 'receipt': receipt.pk
+                    }
+                )
             
             items_to_create.append(
                 PurchaseReturnItem(
@@ -310,8 +323,37 @@ def create_debit_memo_from_return(user, purchase_return: PurchaseReturn, memo_da
             purchase_return=purchase_return,
             status=SupplierDebitMemo.Status.OPEN
         )
-        # The JE is created by the InventoryAdjustment signal, so we don't create one here.
-        # A more advanced implementation could link the JEs here.
+        
+        # --- NEW: Create the Journal Entry for the Debit Memo ---
+        settings = GeneralAccountingSettings.load()
+        ap_account = settings.accounts_payable
+        clearing_account = settings.purchase_returns_clearing_account
+
+        if not ap_account or not clearing_account:
+            raise ValueError(_("A/P or Purchase Returns Clearing accounts are not configured."))
+
+        je_desc = _("Debit Memo %(memo_num)s for return to %(supplier)s") % {
+            'memo_num': debit_memo.memo_number, 'supplier': debit_memo.supplier.name
+        }
+        je = JournalEntry.objects.create(
+            date=debit_memo.memo_date,
+            description=je_desc,
+            source_object=debit_memo,
+            status=JournalEntry.Status.POSTED
+        )
+        # Debit A/P to reduce liability
+        JournalEntryLine.objects.create(
+            journal_entry=je, account=ap_account, amount=debit_memo.total_amount,
+            entry_type=JournalEntryLine.EntryType.DEBIT, sub_ledger_object=debit_memo.supplier
+        )
+        # Credit the clearing account to offset the inventory adjustment
+        JournalEntryLine.objects.create(
+            journal_entry=je, account=clearing_account, amount=debit_memo.total_amount,
+            entry_type=JournalEntryLine.EntryType.CREDIT
+        )
+        je.validate_balance()
+        debit_memo.journal_entry = je
+        debit_memo.save(update_fields=['journal_entry'])
 
     logger.info(f"User {user} created Debit Memo {debit_memo.memo_number} for Purchase Return {purchase_return.id}.")
     return debit_memo
@@ -539,76 +581,98 @@ def allocate_landed_costs_from_invoice(
 ) -> None:
     """
     Allocates costs from one or more LandedCostInvoices to one or more
-    InventoryLogs (receipts) proportionally by value.
+    InventoryLog receipts, creating the necessary journal entries.
     """
-    from ..models import LandedCostInvoice, InventoryLog, LandedCostAllocation, LandedCostInvoiceItem
+    from ..models import LandedCostInvoice, InventoryLog, LandedCostAllocation
     from .costing_service import recalculate_cost_history_for_product
 
+    if not landed_cost_invoice_ids or not receipt_log_ids:
+        raise ValidationError(_("You must provide both invoices and receipts to allocate."))
+
     with transaction.atomic():
-        invoices = LandedCostInvoice.objects.filter(pk__in=landed_cost_invoice_ids, status=LandedCostInvoice.Status.AWAITING_ALLOCATION)
+        invoices = LandedCostInvoice.objects.filter(pk__in=landed_cost_invoice_ids)
         receipts = InventoryLog.objects.filter(pk__in=receipt_log_ids)
 
         total_cost_to_allocate = invoices.aggregate(total=Sum('total_amount'))['total'] or Decimal('0.0')
-        total_receipt_value = sum((r.base_unit_price * Decimal(str(r.quantity))) for r in receipts)
+        total_receipt_value = sum(
+            (log.base_unit_price * Decimal(str(log.quantity))) for log in receipts
+        )
 
-        if total_cost_to_allocate <= 0 or total_receipt_value <= 0:
-            raise ValueError(_("Total cost and total receipt value must be positive."))
+        if total_cost_to_allocate <= 0:
+            raise ValidationError(_("Selected invoices have no cost to allocate."))
+        if total_receipt_value <= 0:
+            raise ValidationError(_("Selected receipts have a total value of zero, cannot allocate costs."))
 
         settings = GeneralAccountingSettings.load()
         clearing_account = settings.landed_costs_clearing_account
         if not clearing_account:
-            raise ValueError(_("Landed Costs Clearing account is not configured."))
+            raise ValueError(_("Landed Cost Clearing Account is not configured."))
+
+        # --- Create a single, consolidated Journal Entry for the allocation ---
+        allocation_date = timezone.now()
+        description = _(
+            "تخصيص تكاليف إضافية من %(invoice_count)d فاتورة إلى %(receipt_count)d إيصال استلام"
+        ) % {'invoice_count': len(invoices), 'receipt_count': len(receipts)}
+
+        je = JournalEntry.objects.create(
+            date=allocation_date,
+            description=description,
+            notes=f"Allocation performed by {user.username}",
+            status=JournalEntry.Status.POSTED
+        )
+        
+        # CREDIT the clearing account for the total amount being moved out
+        JournalEntryLine.objects.create(
+            journal_entry=je,
+            account=clearing_account,
+            amount=total_cost_to_allocate,
+            entry_type=JournalEntryLine.EntryType.CREDIT
+        )
 
         products_to_recalculate = set()
-        earliest_receipt_date = None
-
-        for receipt in receipts:
-            receipt_value = receipt.base_unit_price * Decimal(str(receipt.quantity))
+        for log in receipts:
+            receipt_value = log.base_unit_price * Decimal(str(log.quantity))
             proportion = receipt_value / total_receipt_value
-            total_allocated_to_receipt = (total_cost_to_allocate * proportion).quantize(Decimal('0.001'))
+            cost_to_add = (total_cost_to_allocate * proportion).quantize(Decimal('0.001'))
             
-            cost_per_unit = (total_allocated_to_receipt / Decimal(str(receipt.quantity))).quantize(Decimal('0.001'))
+            cost_per_unit_to_add = cost_to_add / Decimal(str(log.quantity))
+            log.landed_cost_component += cost_per_unit_to_add
+            log.costing_unit_price += cost_per_unit_to_add
+            log.save(update_fields=['landed_cost_component', 'costing_unit_price'])
+            
+            products_to_recalculate.add(log.product_id)
 
-            receipt.landed_cost_component += cost_per_unit
-            receipt.costing_unit_price += cost_per_unit
-            receipt.save(update_fields=['landed_cost_component', 'costing_unit_price'])
-
-            # Create the allocation JE for this specific receipt
-            je = JournalEntry.objects.create(
-                date=timezone.now(),
-                description=_("Allocate landed costs to Receipt QC# %(qc)s") % {'qc': receipt.qc_no},
-                status=JournalEntry.Status.POSTED
-            )
-            inv_account = _get_product_inventory_account(receipt.product)
+            # DEBIT the specific inventory account for this receipt's share of the cost
+            inventory_account = _get_product_inventory_account(log.product)
             JournalEntryLine.objects.create(
-                journal_entry=je, account=inv_account, amount=total_allocated_to_receipt,
-                entry_type=JournalEntryLine.EntryType.DEBIT
+                journal_entry=je,
+                account=inventory_account,
+                amount=cost_to_add,
+                entry_type=JournalEntryLine.EntryType.DEBIT,
+                sub_ledger_object=log.product
             )
-            JournalEntryLine.objects.create(
-                journal_entry=je, account=clearing_account, amount=total_allocated_to_receipt,
-                entry_type=JournalEntryLine.EntryType.CREDIT
-            )
-            je.validate_balance()
+            
+            # Create an audit record for this specific allocation
+            # This links all invoices to this one receipt log
+            for inv in invoices:
+                item = inv.items.first()
+                if item:
+                    LandedCostAllocation.objects.create(
+                        landed_cost_item=item,
+                        receipt_log=log,
+                        allocated_amount=cost_to_add / len(invoices), # Approximate for audit
+                        journal_entry=je
+                    )
 
-            # Create the allocation records for traceability
-            # This is a simplified approach; a real one would trace back to the specific cost item
-            first_item = invoices.first().items.first()
-            LandedCostAllocation.objects.create(
-                landed_cost_item=first_item,
-                receipt_log=receipt,
-                allocated_amount=total_allocated_to_receipt,
-                journal_entry=je
-            )
+        je.validate_balance()
 
-            products_to_recalculate.add(receipt.product_id)
-            if earliest_receipt_date is None or receipt.release_timestamp.date() < earliest_receipt_date:
-                earliest_receipt_date = receipt.release_timestamp.date()
+        # Update invoice statuses
+        invoices.update(status=LandedCostInvoice.Status.FULLY_ALLOCATED)
 
-        for invoice in invoices:
-            invoice.status = LandedCostInvoice.Status.FULLY_ALLOCATED
-            invoice.save(update_fields=['status'])
+    # --- Trigger cost recalculation outside the transaction ---
+    for product_id in products_to_recalculate:
+        earliest_receipt_date = receipts.filter(product_id=product_id).earliest('release_timestamp').release_timestamp
+        recalculate_cost_history_for_product(product_id, earliest_receipt_date)
 
-        for product_id in products_to_recalculate:
-            recalculate_cost_history_for_product(product_id, start_datetime=earliest_receipt_date)
+    logger.info(f"User {user.username} allocated {total_cost_to_allocate} from {len(invoices)} invoices to {len(receipts)} receipts.")
 
-    logger.info(f"User {user} successfully allocated {total_cost_to_allocate} to {len(receipts)} receipts.")

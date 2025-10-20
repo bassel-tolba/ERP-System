@@ -24,32 +24,6 @@ class LandedCostType(models.Model):
     def __str__(self):
         return self.name
 
-class SupplierInvoiceLandedCost(models.Model):
-    """
-    Links a specific landed cost amount to a supplier invoice.
-    This allows for multiple landed costs (e.g., freight and customs) to be
-    associated with a single shipment/invoice.
-    """
-    invoice = models.ForeignKey(
-        'SupplierInvoice', on_delete=models.CASCADE, related_name='landed_costs',
-        verbose_name=_("Supplier Invoice")
-    )
-    cost_type = models.ForeignKey(
-        LandedCostType, on_delete=models.PROTECT,
-        verbose_name=_("Cost Type")
-    )
-    amount = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Amount"))
-
-    class Meta:
-        db_table = 'supplier_invoice_landed_costs'
-        verbose_name = _("Supplier Invoice Landed Cost")
-        verbose_name_plural = _("Supplier Invoice Landed Costs")
-        unique_together = ('invoice', 'cost_type')
-
-    def __str__(self):
-        return f"{self.cost_type.name} for Invoice {self.invoice.invoice_number}"
-
-
 class PurchaseReturn(models.Model):
     """
     Header model for a return of goods to a supplier.

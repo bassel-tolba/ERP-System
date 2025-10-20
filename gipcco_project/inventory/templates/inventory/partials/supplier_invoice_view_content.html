@@ -121,45 +121,6 @@
       </div>
     </div>
     
-    {% if invoice.status == 'draft' %}
-    <div class="card shadow-sm mt-4">
-        <div class="card-header"><h5 class="mb-0">إضافة تكاليف إضافية (Landed Costs)</h5></div>
-        <div class="card-body">
-            <form action="{% url 'inventory:allocate_landed_costs' invoice.pk %}" method="post">
-                {% csrf_token %}
-                <div class="mb-3">
-                    <label for="cost_type" class="form-label">نوع التكلفة</label>
-                    <select name="cost_type" id="cost_type" class="form-select" required>
-                        <option value="">اختر نوع...</option>
-                        {% for type in landed_cost_types %}
-                        <option value="{{ type.id }}">{{ type.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label for="amount" class="form-label">المبلغ</label>
-                    <input type="number" name="amount" id="amount" class="form-control" step="0.001" min="0.001" required>
-                </div>
-                <div class="d-grid">
-                    <button type="submit" class="btn btn-info"><i class="bi bi-plus-lg me-2"></i>إضافة وتخصيص التكلفة</button>
-                </div>
-            </form>
-            <hr>
-            <h6>التكاليف المضافة:</h6>
-            <ul class="list-group">
-                {% for cost in invoice.landed_costs.all %}
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    {{ cost.cost_type.name }}
-                    <span class="fw-bold">{{ cost.amount|floatformat:3 }}</span>
-                </li>
-                {% empty %}
-                <li class="list-group-item text-muted">لا توجد تكاليف إضافية.</li>
-                {% endfor %}
-            </ul>
-        </div>
-    </div>
-    {% endif %}
-
     {% if invoice.balance_due > 0 and invoice.status != 'draft' %}
     <div class="card shadow-sm mt-4">
       <div class="card-header"><h5 class="mb-0">تسجيل دفعة جديدة</h5></div>

@@ -357,6 +357,12 @@ class GeneralAccountingSettings(models.Model):
         help_text=_("The revenue/other income account for inventory overages."),
         null=True, blank=True
     )
+    purchase_returns_clearing_account = models.ForeignKey(
+        Account, on_delete=models.PROTECT, related_name='+',
+        verbose_name=_("Purchase Returns Clearing Account"),
+        help_text=_("e.g., '20207 - تسوية مرتجعات موردين'"),
+        null=True, blank=True
+    )
     # --- NEW: EMPLOYEE ADVANCES CONTROL ACCOUNT ---
     employee_advances_receivable = models.ForeignKey(
         Account, on_delete=models.PROTECT, related_name='+',
@@ -372,6 +378,17 @@ class GeneralAccountingSettings(models.Model):
     sales_returns_account = models.ForeignKey(
         Account, on_delete=models.PROTECT, related_name='+', null=True, blank=True,
         verbose_name=_("Sales Returns & Allowances Account")
+    )
+    # --- NEW: CLEARING ACCOUNTS ---
+    landed_costs_clearing_account = models.ForeignKey(
+        Account, on_delete=models.PROTECT, related_name='+', null=True, blank=True,
+        verbose_name=_("Landed Costs Clearing Account"),
+        help_text=_("A temporary account to hold landed costs before they are allocated to inventory.")
+    )
+    purchase_returns_clearing_account = models.ForeignKey(
+        Account, on_delete=models.PROTECT, related_name='+', null=True, blank=True,
+        verbose_name=_("Purchase Returns Clearing Account"),
+        help_text=_("A temporary account to hold the value of returned goods before a debit memo is issued.")
     )
     sales_returns_clearing_account = models.ForeignKey(
         Account, on_delete=models.PROTECT, related_name='+', null=True, blank=True,

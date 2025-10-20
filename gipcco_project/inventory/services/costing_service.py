@@ -177,17 +177,7 @@ def recalculate_cost_history_for_product(product_id: int, start_datetime: timezo
             product_id=product_id, release_timestamp__gte=start_datetime
         )
         
-        in_logs = in_logs_query.annotate(
-            costing_unit_price=Case(
-                When(
-                    vat_treatment=InventoryLog.VatTreatment.CAPITALIZED,
-                    quantity__gt=0,
-                    then=(F('base_unit_price') * F('quantity') + F('vat_amount')) / F('quantity')
-                ),
-                default=F('base_unit_price'),
-                output_field=DecimalField()
-            )
-        ).values('release_timestamp', 'quantity', 'costing_unit_price', 'id')
+        in_logs = in_logs_query.values('release_timestamp', 'quantity', 'costing_unit_price', 'id')
         
         # Finished Good Inflows
         fg_receipts = FinishedProductReceipt.objects.filter(

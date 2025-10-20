@@ -99,31 +99,27 @@ def create_je_for_inventory_adjustment(adjustment: InventoryAdjustment) -> Optio
                 JournalEntryLine.objects.create(
                     journal_entry=je, account=clearing_account, amount=adjustment_value, entry_type=JournalEntryLine.EntryType.CREDIT
                 )
+        elif adjustment.reason_code == InventoryAdjustment.ReasonCode.RETURN_TO_SUPPLIER:
+            # --- Purchase Return Adjustment Logic ---
+            clearing_account = settings.purchase_returns_clearing_account
+            if not clearing_account:
+                raise ValueError(_("Purchase Returns Clearing Account is not configured."))
+            
+            logger.info(f"    Processing return to supplier: DEBIT '{clearing_account.name}', CREDIT '{inventory_account.name}' with {adjustment_value}.")
+            # Debit the clearing account, which will be offset by the debit memo
+            JournalEntryLine.objects.create(
+                journal_entry=je, account=clearing_account, amount=adjustment_value,
+                entry_type=JournalEntryLine.EntryType.DEBIT
+            )
+            # Credit Inventory as the goods are leaving
+            JournalEntryLine.objects.create(
+                journal_entry=je, account=inventory_account, amount=adjustment_value,
+                entry_type=JournalEntryLine.EntryType.CREDIT, sub_ledger_object=adjustment.product
+            )
+
         else:
             # --- Standard Inventory Adjustment Logic ---
             if adjustment.adjustment_quantity < 0:  # Shortage
-                # --- NEW: Handle returns to supplier ---
-                if adjustment.reason_code == InventoryAdjustment.ReasonCode.RETURN_TO_SUPPLIER:
-                    ap_account = settings.accounts_payable
-                    if not ap_account:
-                        raise ValueError(_("Accounts Payable account is not configured."))
-                    
-                    logger.info(f"    Processing return to supplier: DEBIT '{ap_account.name}', CREDIT '{inventory_account.name}' with {adjustment_value}.")
-                    JournalEntryLine.objects.create(
-                        journal_entry=je, account=ap_account, amount=adjustment_value, entry_type=JournalEntryLine.EntryType.DEBIT,
-                        sub_ledger_object=adjustment.source_purchase_return_item.purchase_return.supplier
-                    )
-                    JournalEntryLine.objects.create(
-                        journal_entry=je, account=inventory_account, amount=adjustment_value, entry_type=JournalEntryLine.EntryType.CREDIT,
-                        sub_ledger_object=adjustment.product
-                    )
-                    # Early exit for this specific case
-                    je.validate_balance()
-                    logger.info(f"    Successfully created JE-{je.id} for InventoryAdjustment ID {adjustment.id}.")
-                    logger.info(f"<-- Exiting 'create_je_for_inventory_adjustment' for Adjustment ID {adjustment.id}.")
-                    return je
-                # --- END NEW ---
-
                 if adjustment.reason_code == InventoryAdjustment.ReasonCode.DAMAGE:
                     loss_account = settings.damaged_goods_expense_account
                 else:

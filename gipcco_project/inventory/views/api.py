@@ -13,7 +13,7 @@ from ..models import (
     Product, ProductTag, PurchaseOrder, PurchaseOrderItem, InventoryLog, Batch,
     FinishedProductReceipt, SalesOrderItem, FinishedProductDispatch, SalesOrder,
     InventoryAdjustment, Employee, ExpenseLog, BatchItem, InventoryConsumption,
-    ProductionReturn, EmployeeAdvanceSettlement, JournalEntry
+    ProductionReturn, EmployeeAdvanceSettlement, JournalEntry, LandedCostInvoice
 )
 
 
@@ -218,6 +218,53 @@ def api_get_sellable_stock(request: HttpRequest) -> JsonResponse:
     ).annotate(
         total=Sum('adjustment_quantity')
     ).values('total')
+
+
+def api_get_unallocated_landed_cost_invoices(request):
+    """
+    API endpoint to get all 'Awaiting Allocation' landed cost invoices.
+    """
+    invoices = LandedCostInvoice.objects.filter(
+        status=LandedCostInvoice.Status.AWAITING_ALLOCATION
+    ).select_related('vendor').order_by('-invoice_date')
+
+    data = [
+        {
+            'id': inv.id,
+            'invoice_number': inv.invoice_number,
+            'vendor_name': inv.vendor.name,
+            'invoice_date': inv.invoice_date.strftime('%Y-%m-%d'),
+            'total_amount': str(inv.total_amount.quantize(Decimal('0.001'))),
+        } for inv in invoices
+    ]
+    return JsonResponse({'invoices': data})
+
+
+def api_get_receipts_for_allocation(request):
+    """
+    API endpoint to get all 'Released' inventory receipts that are candidates
+    for landed cost allocation.
+    """
+    # We only want to show receipts that haven't had any third-party costs allocated yet.
+    # This prevents cluttering the UI with already-processed receipts.
+    receipts = InventoryLog.objects.filter(
+        status=InventoryLog.Status.RELEASED,
+        landed_cost_allocations__isnull=True 
+    ).select_related('product', 'company').order_by('-release_timestamp')
+
+    data = [
+        {
+            'id': r.id,
+            'release_timestamp': r.release_timestamp.strftime('%Y-%m-%d %H:%M'),
+            'qc_no': r.qc_no,
+            'product_name': r.product.name,
+            'supplier_name': r.company.name if r.company else 'N/A',
+            'quantity': r.quantity,
+            'unit': r.product.unit,
+            'total_value': str((r.costing_unit_price * Decimal(str(r.quantity))).quantize(Decimal('0.001')))
+        } for r in receipts
+    ]
+    return JsonResponse({'receipts': data})
 
     # The main query now uses the subqueries, preventing the join multiplication bug.
     sellable_receipts = FinishedProductReceipt.objects.filter(

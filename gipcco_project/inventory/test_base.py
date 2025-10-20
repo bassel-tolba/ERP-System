@@ -20,6 +20,7 @@ from .models import (
     CustomerInvoiceItem,
     BankTransfer,
     FixedAsset,
+    InventoryLog,
 )
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -102,6 +103,7 @@ def create_chart_of_accounts():
     create_account('20206', 'بضاعة مستلمة غير مفوترة (GRNI)', Account.AccountType.LIABILITY, '202')
     create_account('504', 'فروقات أسعار الشراء (PPV)', Account.AccountType.EXPENSE, '500')
     create_account('1020407', 'تسوية تكاليف شحن', Account.AccountType.ASSET, '10204') # Landed Costs Clearing
+    create_account('20207', 'تسوية مرتجعات موردين', Account.AccountType.LIABILITY, '202') # Purchase Returns Clearing
 
     # --- Configure Control Accounts ---
     from django.contrib.contenttypes.models import ContentType
@@ -198,6 +200,7 @@ class AccountingServiceBaseTestCase(TestCase):
         cls.general_settings.goods_received_not_invoiced_account = cls.accounts['20206']
         cls.general_settings.purchase_price_variance_account = cls.accounts['504']
         cls.general_settings.landed_costs_clearing_account = cls.accounts['1020407']
+        cls.general_settings.purchase_returns_clearing_account = cls.accounts['20207']
         cls.general_settings.save()
 
         # 4. Configure Product Type Accounting Settings
@@ -270,6 +273,7 @@ class AccountingServiceBaseTestCase(TestCase):
 
         # 7. Create a Test User
         cls.test_user = User.objects.create_user(username='testuser', password='password')
+        cls.user = cls.test_user
 
         # 8. Create Overhead Allocation Objects
         cls.parent_pool = CostPool.objects.create(
@@ -369,3 +373,54 @@ class AccountingServiceBaseTestCase(TestCase):
             }
         )
         return receipt
+
+    @classmethod
+    def create_company(cls, name):
+        """Helper to create a company."""
+        company, _ = Company.objects.get_or_create(name=name)
+        return company
+
+    @classmethod
+    def create_product(cls, code, name, product_type=Product.ProductType.RAW_MATERIAL):
+        """Helper to create a product."""
+        product, _ = Product.objects.get_or_create(
+            code=code,
+            defaults={'name': name, 'product_type': product_type, 'unit': 'Unit'}
+        )
+        return product
+
+    def get_je_for_object(self, obj):
+        """Helper to retrieve the JournalEntry linked to a specific object."""
+        from django.contrib.contenttypes.models import ContentType
+        from .models import JournalEntry
+        
+        content_type = ContentType.objects.get_for_model(obj.__class__)
+        return JournalEntry.objects.get(content_type=content_type, object_id=obj.id)
+
+    def create_inventory_log(self, company, product, quantity, base_unit_price, po_item=None):
+        """Helper to create a released inventory log for testing."""
+        log_time = timezone.now()
+
+        vat_amount = Decimal('0.000')
+        wht_amount = Decimal('0.000')
+        
+        if po_item:
+            base_value = Decimal(str(base_unit_price)) * Decimal(str(quantity))
+            vat_amount = base_value * po_item.vat_rate
+            wht_amount = base_value * po_item.withholding_tax_rate
+
+        log = InventoryLog.objects.create(
+            company=company,
+            product=product,
+            quantity=quantity,
+            base_unit_price=Decimal(str(base_unit_price)),
+            po_item=po_item,
+            timestamp=log_time,
+            release_timestamp=log_time,
+            status=InventoryLog.Status.RELEASED,
+            vat_amount=vat_amount,
+            withholding_tax_amount=wht_amount
+        )
+        # The pre_save signal should calculate costing_unit_price
+        log.refresh_from_db()
+        return log

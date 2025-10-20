@@ -87,7 +87,11 @@ def index(request: HttpRequest) -> HttpResponse:
                 log_entry.tags.set(tag_ids)
             
             if po_item_id:
-                purchasing_service.update_po_status_after_receipt(log_entry.id, is_final_receipt)
+                purchasing_service.update_po_status_after_receipt(
+                    inventory_log_id=log_entry.id, 
+                    is_final_receipt=is_final_receipt,
+                    old_po_item_id=None
+                )
             
             messages.success(request, 'تم تسجيل الاستلام المبدئي بنجاح. السجل الآن تحت الفحص.')
         except (ValueError, TypeError, PurchaseOrderItem.DoesNotExist) as e:
