@@ -13,28 +13,8 @@ from django.views.decorators.http import require_POST
 
 from ..models import Company, InventoryLog, Product, ProductTag, PurchaseOrder, PurchaseOrderItem, Employee
 from ..services.costing_service import recalculate_cost_history_for_product
+from ..services import purchasing_service
 
-
-def update_po_status(po_id: int):
-    """Helper to update a PO's status after a receipt."""
-    try:
-        po = PurchaseOrder.objects.prefetch_related('items__receipts').get(pk=po_id)
-        total_ordered = sum(item.quantity_ordered for item in po.items.all())
-        total_received = sum(
-            receipt.quantity 
-            for item in po.items.all() 
-            for receipt in item.receipts.all()
-        )
-        
-        if abs(total_received - total_ordered) < 0.001:
-            po.status = PurchaseOrder.Status.COMPLETED
-        elif total_received > 0:
-            po.status = PurchaseOrder.Status.PARTIALLY_RECEIVED
-        else:
-            po.status = PurchaseOrder.Status.PENDING
-        po.save(update_fields=['status'])
-    except PurchaseOrder.DoesNotExist:
-        pass
 
 
 
@@ -50,6 +30,8 @@ def index(request: HttpRequest) -> HttpResponse:
         date_str = request.POST.get('entry_date')
         po_item_id = request.POST.get('po_item_id')
         employee_id = request.POST.get('employee_id') # NEW
+        is_final_receipt = request.POST.get('is_final_receipt') == 'true'
+        excess_is_free = request.POST.get('excess_is_free') == 'true'
 
         # --- MODIFIED: Get new accounting fields ---
         base_unit_price_str = request.POST.get('base_unit_price')
@@ -69,17 +51,22 @@ def index(request: HttpRequest) -> HttpResponse:
             
             # --- MODIFIED: Logic to determine price and VAT ---
             if po_item_id:
-                po_item = get_object_or_404(PurchaseOrderItem, pk=po_item_id)
-                base_unit_price = po_item.base_price_per_unit
-                vat_amount = (po_item.base_price_per_unit * Decimal(str(quantity)) * po_item.vat_rate).quantize(Decimal('0.001'))
-                withholding_tax_amount = (po_item.base_price_per_unit * Decimal(str(quantity)) * po_item.withholding_tax_rate).quantize(Decimal('0.001'))
+                po_item = PurchaseOrderItem.objects.get(pk=po_item_id)
+                # Over-delivery and the excess is free: recalculate unit price
+                if quantity > po_item.quantity_ordered and excess_is_free:
+                    original_total_value = po_item.base_price_per_unit * Decimal(str(po_item.quantity_ordered))
+                    base_unit_price = original_total_value / Decimal(str(quantity))
+                else:
+                    base_unit_price = po_item.base_price_per_unit
+
+                vat_rate = po_item.vat_rate
+                wht_rate = po_item.withholding_tax_rate
+                vat_amount = base_unit_price * Decimal(str(quantity)) * vat_rate
+                withholding_tax_amount = base_unit_price * Decimal(str(quantity)) * wht_rate
             else:
-                if not base_unit_price_str or not vat_amount_str:
-                     messages.warning(request, 'الرجاء تعبئة سعر الوحدة ومبلغ الضريبة عند الإدخال اليدوي.')
-                     return redirect('inventory:index')
-                base_unit_price = Decimal(base_unit_price_str)
-                vat_amount = Decimal(vat_amount_str)
-                withholding_tax_amount = Decimal(withholding_tax_amount_str) if withholding_tax_amount_str else Decimal('0.000')
+                base_unit_price = Decimal(base_unit_price_str) if base_unit_price_str else Decimal('0.0')
+                vat_amount = Decimal(vat_amount_str) if vat_amount_str else Decimal('0.0')
+                withholding_tax_amount = Decimal(withholding_tax_amount_str) if withholding_tax_amount_str else Decimal('0.0')
 
             log_entry = InventoryLog.objects.create(
                 product_id=product_id,
@@ -100,7 +87,7 @@ def index(request: HttpRequest) -> HttpResponse:
                 log_entry.tags.set(tag_ids)
             
             if po_item_id:
-                update_po_status(po_item.purchase_order_id)
+                purchasing_service.update_po_status_after_receipt(log_entry.id, is_final_receipt)
             
             messages.success(request, 'تم تسجيل الاستلام المبدئي بنجاح. السجل الآن تحت الفحص.')
         except (ValueError, TypeError, PurchaseOrderItem.DoesNotExist) as e:
@@ -286,10 +273,12 @@ def edit_record(request: HttpRequest, pk: int) -> HttpResponse:
         log_entry.tags.set(tag_ids)
 
         if original_po_item != new_po_item:
-            if original_po_item: update_po_status(original_po_item.purchase_order_id)
-            if new_po_item: update_po_status(new_po_item.purchase_order_id)
+            if original_po_item:
+                purchasing_service.update_po_status_after_receipt(None, is_final_receipt=False, old_po_item_id=original_po_item.id)
+            if new_po_item:
+                purchasing_service.update_po_status_after_receipt(log_entry.id, is_final_receipt=False)
         elif new_po_item:
-            update_po_status(new_po_item.purchase_order_id)
+            purchasing_service.update_po_status_after_receipt(log_entry.id, is_final_receipt=False)
 
         if log_entry.status == InventoryLog.Status.RELEASED:
             start_recalc_time = min(original_timestamp, new_datetime, log_entry.release_timestamp)
@@ -327,7 +316,7 @@ def delete_record(request: HttpRequest, pk: int) -> HttpResponse:
             messages.info(request, 'تم حذف السجل من قائمة الفحص بنجاح.')
 
         if po_item:
-            update_po_status(po_item.purchase_order_id)
+            purchasing_service.update_po_status_after_receipt(inventory_log_id=None, is_final_receipt=False, old_po_item_id=po_item.id)
             
     except ProtectedError:
         messages.error(request, 'لا يمكن حذف هذا السجل لأنه تم استخدامه في أمر تشغيل. قم بحذف أمر التشغيل أولاً.')

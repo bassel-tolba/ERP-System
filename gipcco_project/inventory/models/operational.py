@@ -192,21 +192,18 @@ class InventoryLog(models.Model):
         verbose_name=_("Responsible Employee")
     )
 
+    # --- NEW: Stored cost fields for accurate, persistent costing ---
+    costing_unit_price = models.DecimalField(
+        max_digits=14, decimal_places=3, default=Decimal('0.000'),
+        verbose_name=_("Costing Unit Price"),
+        help_text=_("The final unit cost for inventory valuation, including capitalized VAT and landed costs.")
+    )
+    landed_cost_component = models.DecimalField(
+        max_digits=14, decimal_places=3, default=Decimal('0.000'),
+        verbose_name=_("Landed Cost Component"),
+        help_text=_("The portion of the unit price that is from allocated landed costs.")
+    )
+
     @property
     def total_cost(self):
         return (self.base_unit_price or Decimal('0.0')) * Decimal(str(self.quantity or 0.0))
-
-    @property
-    def costing_unit_price(self):
-        """Calculates the unit price used for inventory valuation (MAC)."""
-        if self.quantity == 0:
-            return Decimal('0.000')
-        
-        total_base_price = self.base_unit_price * Decimal(str(self.quantity))
-        
-        if self.vat_treatment == self.VatTreatment.CAPITALIZED:
-            total_cost = total_base_price + self.vat_amount
-        else: # Recoverable
-            total_cost = total_base_price
-            
-        return (total_cost / Decimal(str(self.quantity))).quantize(Decimal('0.001'))

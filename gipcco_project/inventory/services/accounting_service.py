@@ -58,6 +58,12 @@ from .accounting.correction_transactions import (
 from .accounting.period_end import (
     run_monthly_depreciation
 )
+from .purchasing_service import (
+    post_supplier_invoice,
+    create_purchase_order,
+    update_purchase_order,
+    update_po_status_after_receipt
+)
 
 __all__ = [
     # Helpers (Internal)
@@ -69,6 +75,16 @@ __all__ = [
     # Inventory
     'create_je_for_inventory_adjustment',
     'create_je_for_inventory_receipt',
+
+    # Purchasing
+    'post_supplier_invoice',
+    'create_purchase_order',
+    'update_purchase_order',
+    'update_po_status_after_receipt',
+    'allocate_landed_costs',
+    'create_purchase_return',
+    'process_inventory_return',
+    'create_debit_memo_from_return',
 
     # Production
     'create_je_for_production_consumption',

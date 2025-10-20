@@ -247,6 +247,11 @@ class PurchaseOrderItem(models.Model):
     withholding_tax_rate = models.DecimalField(
         max_digits=5, decimal_places=2, default=Decimal('0.00'), verbose_name=_("Withholding Tax Rate (e.g., 0.01 for 1%)")
     )
+    is_closed = models.BooleanField(
+        default=False,
+        verbose_name=_("Is Closed"),
+        help_text=_("Indicates that no further receipts are expected for this line item, even if under-delivered.")
+    )
 
     class Meta:
         db_table = 'purchase_order_items'

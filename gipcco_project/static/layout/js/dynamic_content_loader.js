@@ -45,7 +45,9 @@ window.initializePluginsInContent = function (container = document) {
 		"#journalEntryForm": initJournalEntryCreateLogic,
 		"#reconciliationWorkspace": initReconciliationManageLogic,
 		"#createSalesOrderForm": initSalesOrderCreateLogic,
-		"#createPurchaseOrderForm": initPurchaseOrderCreateLogic,
+		"#createPurchaseOrderForm": initPurchaseOrderFormLogic, // MODIFIED
+		"#editPurchaseOrderForm": initPurchaseOrderFormLogic,   // NEW
+		"#createPurchaseReturnForm": initPurchaseReturnCreateLogic, // NEW
 		"#taxReportForm": initTaxReconciliationReportLogic,
 		"#close-period-container": initClosePeriodLogic,
 		"#fiscalYearContainer": initFiscalYearListLogic,

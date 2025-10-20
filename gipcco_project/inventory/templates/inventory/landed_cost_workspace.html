@@ -1,0 +1,73 @@
+{% extends "inventory/base.html" %}
+{% load static %}
+
+{% block title %}Landed Cost Allocation Workspace{% endblock %}
+
+{% block content %}
+<div class="container-fluid" id="landed-cost-workspace" hx-history="false">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2"><i class="bi bi-truck"></i> Landed Cost Allocation Workspace</h1>
+    </div>
+
+    <form method="post" action="{% url 'inventory:landed_cost_workspace' %}">
+        {% csrf_token %}
+        <div class="row g-4">
+            <!-- Column for Unallocated Costs -->
+            <div class="col-lg-5">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h3><i class="bi bi-file-invoice-dollar"></i> Unallocated Landed Cost Invoices</h3>
+                    </div>
+                    <div class="card-body" id="invoices-container">
+                        <!-- Invoices will be loaded here dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Column for Unallocated Receipts -->
+            <div class="col-lg-7">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h3><i class="bi bi-box-seam"></i> Inventory Receipts to Allocate To</h3>
+                    </div>
+                    <div class="card-body" id="receipts-container">
+                        <!-- Receipts will be loaded here dynamically -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4 shadow-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <div class="row">
+                            <div class="col-6">
+                                <h5>Total Selected Cost: <span id="total-invoices-selected" class="fw-bold text-danger">0.000 (0 invoices)</span></h5>
+                            </div>
+                            <div class="col-6">
+                                <h5>Total Selected Receipt Value: <span id="total-receipts-selected" class="fw-bold text-primary">0.000 (0 receipts)</span></h5>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <button type="submit" id="allocate-btn" class="btn btn-primary btn-lg" disabled>
+                            <i class="bi bi-distribute-vertical"></i> Allocate Costs
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/landed_cost_workspace.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        initLandedCostWorkspace(document.getElementById('page-content'));
+    });
+</script>
+{% endblock %}
+

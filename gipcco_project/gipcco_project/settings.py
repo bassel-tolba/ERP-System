@@ -149,6 +149,48 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# --- NEW: LOGGING CONFIGURATION ---
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+            'stream': 'ext://sys.stdout',  # Use stdout
+        },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'logs/debug.log',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'inventory': { # Your app's logger
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG', # Set to DEBUG to see all your log messages
+            'propagate': False,
+        },
+    },
+}
+
+
 # --- NEW: LOGIN/LOGOUT URLS ---
 LOGIN_REDIRECT_URL = '/' # Redirect to the root URL (dashboard) after login
 LOGOUT_REDIRECT_URL = '/accounts/login/' # Redirect to the login page after logout

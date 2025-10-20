@@ -91,12 +91,22 @@
             <input type="date" class="form-control" id="due_date" name="due_date" value="{{ today_date }}" required>
           </div>
           <hr>
+          <h5 class="mb-3">قيم الفاتورة الفعلية</h5>
+          <div class="mb-3">
+            <label for="actual_subtotal" class="form-label">الإجمالي الفرعي (قبل الضريبة)</label>
+            <input type="number" step="0.001" class="form-control" id="actual_subtotal" name="actual_subtotal" required>
+          </div>
+          <div class="mb-3">
+            <label for="actual_vat" class="form-label">إجمالي ضريبة القيمة المضافة</label>
+            <input type="number" step="0.001" class="form-control" id="actual_vat" name="actual_vat" required>
+          </div>
+          <hr>
           <div class="d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">إجمالي الفاتورة:</h5>
-            <h5 class="mb-0 fw-bold"><span id="total-amount">0.000</span> EGP</h5>
+            <h6 class="mb-0 text-muted">إجمالي الإيصالات المحددة:</h6>
+            <h6 class="mb-0 fw-bold"><span id="total-amount">0.000</span> EGP</h6>
           </div>
           <div class="d-grid mt-4">
-            <button type="submit" class="btn btn-primary btn-lg"><i class="bi bi-save-fill me-2"></i>حفظ الفاتورة</button>
+            <button type="submit" class="btn btn-primary btn-lg"><i class="bi bi-save-fill me-2"></i>حفظ كمسودة</button>
           </div>
         </div>
       </div>

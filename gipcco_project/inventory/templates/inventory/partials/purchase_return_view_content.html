@@ -1,0 +1,123 @@
+<!-- gipcco_project/inventory/templates/inventory/partials/purchase_return_view_content.html -->
+{% load humanize %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 mb-0" style="font-weight: 700;">تفاصيل مرتجع مشتريات</h1>
+        <p class="text-muted mb-0">عرض تفاصيل المرتجع رقم: <strong>#{{ return.id }}</strong></p>
+    </div>
+    <div>
+        <a href="{% url 'inventory:purchase_returns_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-right"></i> العودة إلى القائمة
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-box-arrow-left me-2"></i><strong>مرتجع #{{ return.id }}</strong></h5>
+            <span class="badge 
+                {% if return.status == 'completed' %}text-bg-success
+                {% elif return.status == 'shipped' %}text-bg-info
+                {% else %}text-bg-warning
+                {% endif %} fs-6">{{ return.get_status_display }}</span>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <p class="mb-1 text-muted">المورد</p>
+                <p class="fw-bold fs-5">{{ return.supplier.name }}</p>
+            </div>
+            <div class="col-md-4">
+                <p class="mb-1 text-muted">تاريخ الإرجاع</p>
+                <p class="fw-bold fs-5">{{ return.return_date|date:"Y-m-d" }}</p>
+            </div>
+        </div>
+        {% if return.notes %}
+        <p class="mb-1 text-muted">ملاحظات</p>
+        <p>{{ return.notes|linebreaksbr }}</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-list-check me-2"></i>البنود المرتجعة</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-3">المنتج</th>
+                        <th class="text-center">الكمية المرتجعة</th>
+                        <th>إيصال الاستلام الأصلي</th>
+                        <th class="text-end pe-3">التكلفة وقت الإرجاع</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in return.items.all %}
+                    <tr>
+                        <td class="ps-3"><strong>{{ item.original_receipt.product.name }}</strong></td>
+                        <td class="text-center fw-bold">{{ item.quantity_returned|floatformat:3 }}</td>
+                        <td><a href="#">Log #{{ item.original_receipt.id }}</a></td>
+                        <td class="text-end pe-3">{{ item.original_receipt.costing_unit_price|floatformat:3 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% if return.status == 'pending' %}
+<div class="card shadow-sm mt-4">
+    <div class="card-header">
+        <h5 class="mb-0">الإجراءات</h5>
+    </div>
+    <div class="card-body text-center">
+        <form action="{% url 'inventory:process_inventory_return' return.pk %}" method="post" onsubmit="return confirm('هل أنت متأكد من معالجة حركة المخزون لهذا المرتجع؟ سيتم إنشاء تسوية مخزون بالسالب.');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-warning"><i class="bi bi-box-arrow-down me-2"></i>معالجة حركة المخزون</button>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+{% if return.status == 'completed' and not return.debit_memo %}
+<div class="card shadow-sm mt-4">
+    <div class="card-header">
+        <h5 class="mb-0">إنشاء إشعار خصم (Debit Memo)</h5>
+    </div>
+    <div class="card-body">
+        <form action="{% url 'inventory:create_debit_memo_from_return' return.pk %}" method="post">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="memo_number" class="form-label">رقم إشعار الخصم</label>
+                    <input type="text" name="memo_number" id="memo_number" class="form-control" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="memo_date" class="form-label">تاريخ الإشعار</label>
+                    <input type="date" name="memo_date" id="memo_date" class="form-control" value="{{ today_date }}" required>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-success"><i class="bi bi-file-earmark-plus me-2"></i>إنشاء إشعار الخصم</button>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+{% if return.debit_memo %}
+<div class="card shadow-sm mt-4">
+    <div class="card-header">
+        <h5 class="mb-0">المستند المالي المرتبط</h5>
+    </div>
+    <div class="card-body">
+        <p>تم إنشاء إشعار الخصم رقم <strong>{{ return.debit_memo.memo_number }}</strong> بتاريخ {{ return.debit_memo.memo_date|date:"Y-m-d" }} بقيمة إجمالية <strong>{{ return.debit_memo.total_amount|floatformat:3 }}</strong>.</p>
+        {# <a href="#" class="btn btn-outline-primary">عرض إشعار الخصم</a> #}
+    </div>
+</div>
+{% endif %}

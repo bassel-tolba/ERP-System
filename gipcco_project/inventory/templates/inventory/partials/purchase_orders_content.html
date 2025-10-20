@@ -67,7 +67,7 @@
                                 {% if po.status == 'completed' %}text-bg-success
                                 {% elif po.status == 'partially_received' %}text-bg-info
                                 {% elif po.status == 'cancelled' %}text-bg-danger
-                                {% else %}
+                                {% else %}text-bg-warning
                                 {% endif %}">
                                 {{ po.get_status_display }}
                             </span>

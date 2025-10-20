@@ -99,6 +99,51 @@
     </div>
 </div>
 
+<!-- NEW: Related Financial Documents -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-receipt-cutoff me-2"></i>الفواتير المرتبطة</h5>
+    </div>
+    <div class="card-body p-0">
+        {% if related_invoices %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-3">رقم الفاتورة</th>
+                        <th>تاريخ الفاتورة</th>
+                        <th class="text-center">الحالة</th>
+                        <th class="text-end">المبلغ الإجمالي</th>
+                        <th class="text-end pe-3">الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invoice in related_invoices %}
+                    <tr>
+                        <td class="ps-3 font-monospace"><strong>{{ invoice.invoice_number }}</strong></td>
+                        <td>{{ invoice.invoice_date|date:"Y-m-d" }}</td>
+                        <td class="text-center">
+                            <span class="badge {% if invoice.status == 'paid' %}text-bg-success{% elif invoice.status == 'partially_paid' %}text-bg-info{% elif invoice.status == 'draft' %}text-bg-secondary{% else %}text-bg-warning{% endif %}">
+                                {{ invoice.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="text-end">{{ invoice.total_amount|floatformat:3|intcomma }}</td>
+                        <td class="text-end pe-3">
+                            <a href="{% url 'inventory:view_supplier_invoice' pk=invoice.id %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i> عرض الفاتورة</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center p-4">
+            <p class="text-muted mb-0">لا توجد فواتير مرتبطة بهذا الأمر حتى الآن.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
 
 <!-- Delete Confirmation Modal -->
 <div class="modal fade" id="deletePOModal" tabindex="-1">

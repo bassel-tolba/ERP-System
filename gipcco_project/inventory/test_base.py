@@ -98,6 +98,10 @@ def create_chart_of_accounts():
     create_account('50206', 'مصروف بضاعة تالفة', Account.AccountType.EXPENSE, '502') # Damaged Goods Expense
     create_account('50207', 'مصروف تأمين', Account.AccountType.EXPENSE, '502') # Insurance Expense
     create_account('50208', 'مصروف كهرباء ومياه', Account.AccountType.EXPENSE, '502') # Utilities Expense
+    # --- NEW PURCHASING ACCOUNTS ---
+    create_account('20206', 'بضاعة مستلمة غير مفوترة (GRNI)', Account.AccountType.LIABILITY, '202')
+    create_account('504', 'فروقات أسعار الشراء (PPV)', Account.AccountType.EXPENSE, '500')
+    create_account('1020407', 'تسوية تكاليف شحن', Account.AccountType.ASSET, '10204') # Landed Costs Clearing
 
     # --- Configure Control Accounts ---
     from django.contrib.contenttypes.models import ContentType
@@ -191,6 +195,9 @@ class AccountingServiceBaseTestCase(TestCase):
         cls.general_settings.prepaid_expenses_account = cls.accounts['10205']
         cls.general_settings.accrued_expenses_account = cls.accounts['20204']
         cls.general_settings.damaged_goods_expense_account = cls.accounts['50206']
+        cls.general_settings.goods_received_not_invoiced_account = cls.accounts['20206']
+        cls.general_settings.purchase_price_variance_account = cls.accounts['504']
+        cls.general_settings.landed_costs_clearing_account = cls.accounts['1020407']
         cls.general_settings.save()
 
         # 4. Configure Product Type Accounting Settings

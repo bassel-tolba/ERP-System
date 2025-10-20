@@ -1,0 +1,2284 @@
+diff --git a/gipcco_project/inventory/signals.py b/gipcco_project/inventory/signals.py
+index ab2d6e0..8cc5038 100644
+--- a/gipcco_project/inventory/signals.py
++++ b/gipcco_project/inventory/signals.py
+@@ -40,6 +40,7 @@ from .services.accounting_service import (
+     create_je_for_expense_log,
+     _get_product_expense_account
+ )
++from .services import purchasing_service
+ 
+ logger = logging.getLogger(__name__)
+ 
+@@ -140,6 +141,10 @@ def handle_inventory_log_release(sender, instance: InventoryLog, **kwargs):
+         logger.debug(f"Signal triggered for released InventoryLog ID {instance.id}. Attempting to create JE.")
+         # REMOVED try...except block to allow errors to propagate
+         create_je_for_inventory_receipt(inventory_log=instance)
++    
++    # --- NEW: Update PO Status ---
++    if instance.po_item_id:
++        purchasing_service.update_po_status_after_receipt(instance.id)
+ 
+ 
+ @receiver(post_delete, sender=InventoryLog)
+
+
+diff --git a/gipcco_project/inventory/urls.py b/gipcco_project/inventory/urls.py
+index a9d97b7..60b528e 100644
+--- a/gipcco_project/inventory/urls.py
++++ b/gipcco_project/inventory/urls.py
+@@ -11,6 +11,7 @@ from .views.production_returns import production_returns, delete_production_retu
+ # --- MODIFIED: Import corrected views ---
+ from .views.analysis_ledger_visuals import visuals
+ from .views.purchase_orders import purchase_orders, create_purchase_order, view_purchase_order, edit_purchase_order, delete_purchase_order
++from .views import purchasing_views
+ from .views.finished_products import finished_goods_status, receive_finished_product, view_finished_product, release_from_quarantine as release_fg_from_quarantine
+ from .views.adjustments import inventory_counts_list, create_inventory_count, manage_inventory_count, allocate_inventory_variances
+ from .views.api import (
+@@ -72,6 +73,13 @@ urlpatterns = [
+     path('purchase_order/<int:pk>/edit/', edit_purchase_order, name='edit_purchase_order'),
+     path('purchase_order/<int:pk>/delete/', delete_purchase_order, name='delete_purchase_order'),
+ 
++    # --- NEW: Purchase Return Routes ---
++    path('purchase_returns/', purchasing_views.purchase_returns_list, name='purchase_returns_list'),
++    path('purchase_returns/create/', purchasing_views.create_purchase_return, name='create_purchase_return'),
++    path('purchase_return/<int:pk>/', purchasing_views.view_purchase_return, name='view_purchase_return'),
++    path('purchase_return/<int:pk>/process/', purchasing_views.process_inventory_return_view, name='process_inventory_return'),
++    path('purchase_return/<int:pk>/create_debit_memo/', purchasing_views.create_debit_memo_from_return_view, name='create_debit_memo_from_return'),
++
+     # Template Routes
+     path('shop_order_templates/', shop_order_templates, name='shop_order_templates'),
+     path('shop_order_templates/delete/<int:pk>/', delete_shop_order_template, name='delete_shop_order_template'),
+@@ -145,6 +153,8 @@ urlpatterns = [
+     path('financials/supplier_invoices/', financials.supplier_invoices, name='supplier_invoices'),
+     path('financials/supplier_invoices/create/', financials.create_supplier_invoice, name='create_supplier_invoice'),
+     path('financials/supplier_invoice/<int:pk>/', financials.view_supplier_invoice, name='view_supplier_invoice'),
++    path('financials/supplier_invoice/<int:pk>/post/', financials.post_supplier_invoice_view, name='post_supplier_invoice'),
++    path('financials/supplier_invoice/<int:pk>/allocate_costs/', financials.allocate_landed_costs_view, name='allocate_landed_costs'),
+     path('financials/supplier_invoice/<int:pk>/delete/', financials.delete_supplier_invoice, name='delete_supplier_invoice'),
+     path('financials/supplier_invoice/<int:invoice_pk>/apply_payment/', financials.apply_payment_to_invoice, name='apply_payment_to_invoice'),
+     path('financials/customer_invoices/', financials.customer_invoices, name='customer_invoices'),
+
+
+
+diff --git a/gipcco_project/inventory/models/__init__.py b/gipcco_project/inventory/models/__init__.py
+index bb87289..3ddf40b 100644
+--- a/gipcco_project/inventory/models/__init__.py
++++ b/gipcco_project/inventory/models/__init__.py
+@@ -9,4 +9,5 @@ from .accounting_sub_ledger import *
+ from .audit_and_closing import *
+ from .bank_reconciliation import *
+ from .opening_balance import *
+-from .inventory_counts import *
+\ No newline at end of file
++from .inventory_counts import *
++from .purchasing import *
+\ No newline at end of file
+
+
+diff --git a/gipcco_project/inventory/models/accounting_core.py b/gipcco_project/inventory/models/accounting_core.py
+index d19c7b4..46bfa1c 100644
+--- a/gipcco_project/inventory/models/accounting_core.py
++++ b/gipcco_project/inventory/models/accounting_core.py
+@@ -390,6 +390,17 @@ class GeneralAccountingSettings(models.Model):
+         Account, on_delete=models.PROTECT, related_name='+', null=True, blank=True,
+         verbose_name=_("Damaged Goods / Scrap Expense Account")
+     )
++    # --- NEW: GRNI & PPV ACCOUNTS ---
++    goods_received_not_invoiced_account = models.ForeignKey(
++        Account, on_delete=models.PROTECT, related_name='+', null=True, blank=True,
++        verbose_name=_("Goods Received Not Invoiced (GRNI) Account"),
++        help_text=_("A temporary liability account for received goods before the supplier invoice is posted.")
++    )
++    purchase_price_variance_account = models.ForeignKey(
++        Account, on_delete=models.PROTECT, related_name='+', null=True, blank=True,
++        verbose_name=_("Purchase Price Variance (PPV) Account"),
++        help_text=_("An expense account to record differences between PO price and actual invoice price.")
++    )
+ 
+     class Meta:
+         db_table = 'general_accounting_settings'
+
+
+
+diff --git a/gipcco_project/inventory/models/accounting_core.py b/gipcco_project/inventory/models/accounting_core.py
+index d19c7b4..46bfa1c 100644
+--- a/gipcco_project/inventory/models/accounting_core.py
++++ b/gipcco_project/inventory/models/accounting_core.py
+@@ -390,6 +390,17 @@ class GeneralAccountingSettings(models.Model):
+         Account, on_delete=models.PROTECT, related_name='+', null=True, blank=True,
+         verbose_name=_("Damaged Goods / Scrap Expense Account")
+     )
++    # --- NEW: GRNI & PPV ACCOUNTS ---
++    goods_received_not_invoiced_account = models.ForeignKey(
++        Account, on_delete=models.PROTECT, related_name='+', null=True, blank=True,
++        verbose_name=_("Goods Received Not Invoiced (GRNI) Account"),
++        help_text=_("A temporary liability account for received goods before the supplier invoice is posted.")
++    )
++    purchase_price_variance_account = models.ForeignKey(
++        Account, on_delete=models.PROTECT, related_name='+', null=True, blank=True,
++        verbose_name=_("Purchase Price Variance (PPV) Account"),
++        help_text=_("An expense account to record differences between PO price and actual invoice price.")
++    )
+ 
+     class Meta:
+         db_table = 'general_accounting_settings'
+
+
+diff --git a/gipcco_project/inventory/models/accounting_sub_ledger.py b/gipcco_project/inventory/models/accounting_sub_ledger.py
+index b24b664..b8ac73a 100644
+--- a/gipcco_project/inventory/models/accounting_sub_ledger.py
++++ b/gipcco_project/inventory/models/accounting_sub_ledger.py
+@@ -30,6 +30,16 @@ class SupplierInvoice(models.Model):
+     invoice_date = models.DateField(verbose_name=_("Invoice Date"))
+     due_date = models.DateField(verbose_name=_("Due Date"))
+     
++    # --- MODIFIED: Fields to capture actual invoice values for 3-way match ---
++    actual_subtotal = models.DecimalField(
++        max_digits=14, decimal_places=3, null=True, blank=True, verbose_name=_("Actual Subtotal (from Invoice)")
++    )
++    actual_vat = models.DecimalField(
++        max_digits=14, decimal_places=3, null=True, blank=True, verbose_name=_("Actual VAT (from Invoice)")
++    )
++    
++    # This field will now be calculated from actual_subtotal + actual_vat upon posting.
++    # It can also be populated by summing receipts for draft invoices.
+     total_amount = models.DecimalField(
+         max_digits=14, decimal_places=3, default=Decimal('0.000'), verbose_name=_("Total Invoice Amount")
+     )
+@@ -39,11 +49,18 @@ class SupplierInvoice(models.Model):
+     status = models.CharField(
+         max_length=20,
+         choices=InvoiceStatus.choices,
+-        default=InvoiceStatus.AWAITING_PAYMENT,
++        default=InvoiceStatus.DRAFT, # --- MODIFIED: Default to Draft ---
+         verbose_name=_("Status")
+     )
+     notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
+ 
++    # --- NEW: Link to the final JE created upon posting ---
++    journal_entry = models.ForeignKey(
++        'JournalEntry', on_delete=models.SET_NULL, null=True, blank=True,
++        related_name='+',
++        verbose_name=_("Posting Journal Entry")
++    )
++
+     class Meta:
+         db_table = 'supplier_invoices'
+         verbose_name = _("Supplier Invoice")
+
+
+
+diff --git a/gipcco_project/inventory/models/operational.py b/gipcco_project/inventory/models/operational.py
+index e8c2801..0a77223 100644
+--- a/gipcco_project/inventory/models/operational.py
++++ b/gipcco_project/inventory/models/operational.py
+@@ -192,21 +192,18 @@ class InventoryLog(models.Model):
+         verbose_name=_("Responsible Employee")
+     )
+ 
++    # --- NEW: Stored cost fields for accurate, persistent costing ---
++    costing_unit_price = models.DecimalField(
++        max_digits=14, decimal_places=3, default=Decimal('0.000'),
++        verbose_name=_("Costing Unit Price"),
++        help_text=_("The final unit cost for inventory valuation, including capitalized VAT and landed costs.")
++    )
++    landed_cost_component = models.DecimalField(
++        max_digits=14, decimal_places=3, default=Decimal('0.000'),
++        verbose_name=_("Landed Cost Component"),
++        help_text=_("The portion of the unit price that is from allocated landed costs.")
++    )
++
+     @property
+     def total_cost(self):
+         return (self.base_unit_price or Decimal('0.0')) * Decimal(str(self.quantity or 0.0))
+-
+-    @property
+-    def costing_unit_price(self):
+-        """Calculates the unit price used for inventory valuation (MAC)."""
+-        if self.quantity == 0:
+-            return Decimal('0.000')
+-        
+-        total_base_price = self.base_unit_price * Decimal(str(self.quantity))
+-        
+-        if self.vat_treatment == self.VatTreatment.CAPITALIZED:
+-            total_cost = total_base_price + self.vat_amount
+-        else: # Recoverable
+-            total_cost = total_base_price
+-            
+-        return (total_cost / Decimal(str(self.quantity))).quantize(Decimal('0.001'))
+
+
+
+diff --git a/gipcco_project/inventory/models/purchasing.py b/gipcco_project/inventory/models/purchasing.py
+new file mode 100644
+index 0000000..ea508be
+--- /dev/null
++++ b/gipcco_project/inventory/models/purchasing.py
+@@ -0,0 +1,148 @@
++from decimal import Decimal
++from django.db import models
++from django.utils.translation import gettext_lazy as _
++from django.contrib.contenttypes.fields import GenericForeignKey
++from django.contrib.contenttypes.models import ContentType
++
++# ==============================================================================
++#  PURCHASING & RETURNS MODELS
++# ==============================================================================
++
++class LandedCostType(models.Model):
++    """
++    Defines a type of landed cost that can be added to a shipment,
++    e.g., 'Freight', 'Customs Duty', 'Insurance'.
++    """
++    name = models.CharField(max_length=100, unique=True, verbose_name=_("Landed Cost Name"))
++    description = models.TextField(blank=True, null=True, verbose_name=_("Description"))
++
++    class Meta:
++        db_table = 'landed_cost_types'
++        verbose_name = _("Landed Cost Type")
++        verbose_name_plural = _("Landed Cost Types")
++
++    def __str__(self):
++        return self.name
++
++class SupplierInvoiceLandedCost(models.Model):
++    """
++    Links a specific landed cost amount to a supplier invoice.
++    This allows for multiple landed costs (e.g., freight and customs) to be
++    associated with a single shipment/invoice.
++    """
++    invoice = models.ForeignKey(
++        'SupplierInvoice', on_delete=models.CASCADE, related_name='landed_costs',
++        verbose_name=_("Supplier Invoice")
++    )
++    cost_type = models.ForeignKey(
++        LandedCostType, on_delete=models.PROTECT,
++        verbose_name=_("Cost Type")
++    )
++    amount = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Amount"))
++
++    class Meta:
++        db_table = 'supplier_invoice_landed_costs'
++        verbose_name = _("Supplier Invoice Landed Cost")
++        verbose_name_plural = _("Supplier Invoice Landed Costs")
++        unique_together = ('invoice', 'cost_type')
++
++    def __str__(self):
++        return f"{self.cost_type.name} for Invoice {self.invoice.invoice_number}"
++
++
++class PurchaseReturn(models.Model):
++    """
++    Header model for a return of goods to a supplier.
++    """
++    class Status(models.TextChoices):
++        PENDING = 'pending', _('Pending')
++        SHIPPED = 'shipped', _('Shipped')
++        COMPLETED = 'completed', _('Completed')
++
++    supplier = models.ForeignKey(
++        'Company', on_delete=models.PROTECT, related_name='purchase_returns',
++        verbose_name=_("Supplier")
++    )
++    return_date = models.DateField(verbose_name=_("Return Date"))
++    status = models.CharField(
++        max_length=20, choices=Status.choices, default=Status.PENDING,
++        verbose_name=_("Status")
++    )
++    notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
++
++    class Meta:
++        db_table = 'purchase_returns'
++        verbose_name = _("Purchase Return")
++        verbose_name_plural = _("Purchase Returns")
++        ordering = ['-return_date']
++
++    def __str__(self):
++        return f"Return to {self.supplier.name} on {self.return_date}"
++
++
++class PurchaseReturnItem(models.Model):
++    """
++    Represents a single product being returned to a supplier.
++    """
++    purchase_return = models.ForeignKey(
++        PurchaseReturn, on_delete=models.CASCADE, related_name='items',
++        verbose_name=_("Purchase Return")
++    )
++    # Link to the original receipt to get cost and product info
++    original_receipt = models.ForeignKey(
++        'InventoryLog', on_delete=models.PROTECT, related_name='purchase_return_items',
++        verbose_name=_("Original Receipt Log")
++    )
++    quantity_returned = models.FloatField(verbose_name=_("Quantity Returned"))
++
++    class Meta:
++        db_table = 'purchase_return_items'
++        verbose_name = _("Purchase Return Item")
++        verbose_name_plural = _("Purchase Return Items")
++
++    def __str__(self):
++        return f"{self.quantity_returned} of {self.original_receipt.product.name}"
++
++
++class SupplierDebitMemo(models.Model):
++    """
++    Represents a debit memo issued to a supplier, typically for a purchase return.
++    This is the financial document that confirms the reduction in Accounts Payable.
++    """
++    class Status(models.TextChoices):
++        DRAFT = 'draft', _('Draft')
++        OPEN = 'open', _('Open')
++        APPLIED = 'applied', _('Applied')
++
++    supplier = models.ForeignKey(
++        'Company', on_delete=models.PROTECT, related_name='debit_memos',
++        verbose_name=_("Supplier")
++    )
++    memo_number = models.CharField(max_length=100, verbose_name=_("Debit Memo Number"))
++    memo_date = models.DateField(verbose_name=_("Memo Date"))
++    total_amount = models.DecimalField(
++        max_digits=14, decimal_places=3, verbose_name=_("Total Amount")
++    )
++    status = models.CharField(
++        max_length=20, choices=Status.choices, default=Status.OPEN,
++        verbose_name=_("Status")
++    )
++    notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
++    # Link to the source of the debit, e.g., a Purchase Return
++    purchase_return = models.OneToOneField(
++        PurchaseReturn, on_delete=models.SET_NULL, null=True, blank=True,
++        related_name='debit_memo', verbose_name=_("Source Purchase Return")
++    )
++    journal_entry = models.ForeignKey(
++        'JournalEntry', on_delete=models.SET_NULL, null=True, blank=True,
++        related_name='+', verbose_name=_("Journal Entry")
++    )
++
++    class Meta:
++        db_table = 'supplier_debit_memos'
++        verbose_name = _("Supplier Debit Memo")
++        verbose_name_plural = _("Supplier Debit Memos")
++        unique_together = ('supplier', 'memo_number')
++
++    def __str__(self):
++        return f"Debit Memo {self.memo_number} to {self.supplier.name}"
+
+
+
+
+diff --git a/gipcco_project/inventory/services/accounting_service.py b/gipcco_project/inventory/services/accounting_service.py
+index a800484..d41fbec 100644
+--- a/gipcco_project/inventory/services/accounting_service.py
++++ b/gipcco_project/inventory/services/accounting_service.py
+@@ -58,6 +58,12 @@ from .accounting.correction_transactions import (
+ from .accounting.period_end import (
+     run_monthly_depreciation
+ )
++from .purchasing_service import (
++    post_supplier_invoice,
++    create_purchase_order,
++    update_purchase_order,
++    update_po_status_after_receipt
++)
+ 
+ __all__ = [
+     # Helpers (Internal)
+@@ -70,6 +76,16 @@ __all__ = [
+     'create_je_for_inventory_adjustment',
+     'create_je_for_inventory_receipt',
+ 
++    # Purchasing
++    'post_supplier_invoice',
++    'create_purchase_order',
++    'update_purchase_order',
++    'update_po_status_after_receipt',
++    'allocate_landed_costs',
++    'create_purchase_return',
++    'process_inventory_return',
++    'create_debit_memo_from_return',
++
+     # Production
+     'create_je_for_production_consumption',
+     'create_je_for_finished_goods_receipt',
+
+
+
+diff --git a/gipcco_project/inventory/services/purchasing_service.py b/gipcco_project/inventory/services/purchasing_service.py
+new file mode 100644
+index 0000000..8be195d
+--- /dev/null
++++ b/gipcco_project/inventory/services/purchasing_service.py
+@@ -0,0 +1,440 @@
++# gipcco_project/inventory/services/purchasing_service.py
++
++import logging
++from decimal import Decimal
++from typing import Optional
++
++from django.db import transaction
++from django.db.models import Sum
++from django.utils.translation import gettext_lazy as _
++from django.contrib.contenttypes.models import ContentType
++from django.core.exceptions import ValidationError, PermissionError
++
++from ..models import (
++    SupplierInvoice, JournalEntry, JournalEntryLine, GeneralAccountingSettings,
++    InventoryAdjustment, PurchaseReturn, PurchaseOrder, PurchaseOrderItem,
++    SupplierDebitMemo
++)
++from .accounting._helpers import _check_period_is_open, _get_product_inventory_account
++
++logger = logging.getLogger(__name__)
++
++def post_supplier_invoice(invoice: SupplierInvoice) -> JournalEntry:
++    """
++    Posts a 'Draft' supplier invoice to the General Ledger.
++
++    This service performs the 3-way match by:
++    1. Calculating the total value of all linked receipts (the amount in GRNI).
++    2. Comparing this to the actual invoice total provided by the user.
++    3. Creating a single, balanced journal entry that:
++        - Clears the GRNI account for the receipt value.
++        - Books the final, correct liability to Accounts Payable.
++        - Records any difference as a Purchase Price Variance (PPV).
++    4. Updates the invoice status to 'Awaiting Payment'.
++    """
++    logger.info(f"--> Attempting to post SupplierInvoice ID {invoice.id}.")
++
++    # --- 1. Pre-checks and Guards ---
++    if invoice.status != SupplierInvoice.InvoiceStatus.DRAFT:
++        raise ValidationError(_("Only invoices in 'Draft' status can be posted."))
++    
++    if not invoice.items.exists():
++        raise ValidationError(_("Cannot post an invoice with no items."))
++
++    if invoice.journal_entry:
++        raise ValidationError(_("This invoice has already been posted and has a journal entry linked."))
++
++    if not invoice.actual_subtotal or not invoice.actual_vat:
++        raise ValidationError(_("Actual subtotal and VAT from the physical invoice must be entered before posting."))
++
++    _check_period_is_open(invoice.invoice_date)
++
++    # --- 2. Get Accounts from Configuration ---
++    settings = GeneralAccountingSettings.load()
++    grni_account = settings.goods_received_not_invoiced_account
++    ap_account = settings.accounts_payable
++    ppv_account = settings.purchase_price_variance_account
++    vat_account = settings.vat_receivable
++
++    if not all([grni_account, ap_account, ppv_account, vat_account]):
++        raise ValueError(_("GRNI, A/P, PPV, or VAT accounts are not configured in General Accounting Settings."))
++
++    # --- 3. Calculate Amounts ---
++    receipt_total_value = Decimal('0.0')
++    receipt_total_wht = Decimal('0.0')
++    for item in invoice.items.select_related('receipt').all():
++        receipt = item.receipt
++        if receipt:
++            receipt_total_value += (receipt.base_unit_price * Decimal(str(receipt.quantity))) + receipt.vat_amount
++            receipt_total_wht += receipt.withholding_tax_amount
++
++    actual_invoice_total = (invoice.actual_subtotal + invoice.actual_vat).quantize(Decimal('0.001'))
++    
++    # The value to clear from GRNI is the receipt total minus WHT, as WHT is handled separately.
++    grni_clearing_value = (receipt_total_value - receipt_total_wht).quantize(Decimal('0.001'))
++    
++    # The final A/P liability is the actual invoice total minus WHT.
++    final_ap_liability = (actual_invoice_total - receipt_total_wht).quantize(Decimal('0.001'))
++
++    # PPV is the difference between the net amounts (excluding VAT and WHT).
++    # --- MODIFIED: Account for landed costs in PPV calculation ---
++    total_landed_cost = invoice.landed_costs.aggregate(total=Sum('amount'))['total'] or Decimal('0.0')
++    net_goods_value_from_invoice = invoice.actual_subtotal - total_landed_cost
++    net_goods_value_from_receipts = receipt_total_value - invoice.actual_vat # Assuming actual_vat is for goods only
++    
++    purchase_price_variance = (net_goods_value_from_invoice - net_goods_value_from_receipts).quantize(Decimal('0.001'))
++
++    logger.info(f"    Calculations complete: GRNI Clearing={grni_clearing_value}, Final A/P={final_ap_liability}, PPV={purchase_price_variance}, Landed Cost={total_landed_cost}")
++
++    # --- 4. Create Journal Entry and Lines ---
++    with transaction.atomic():
++        description = _("Posting Supplier Invoice %(invoice_num)s for %(supplier)s") % {
++            'invoice_num': invoice.invoice_number,
++            'supplier': invoice.supplier.name
++        }
++        
++        je = JournalEntry.objects.create(
++            date=invoice.invoice_date,
++            description=description,
++            source_object=invoice,
++            status=JournalEntry.Status.POSTED
++        )
++
++        # Line 1: Debit GRNI to clear the accrual
++        JournalEntryLine.objects.create(
++            journal_entry=je, account=grni_account, amount=grni_clearing_value,
++            entry_type=JournalEntryLine.EntryType.DEBIT, sub_ledger_object=invoice.supplier
++        )
++
++        # Line 2: Debit VAT Receivable for the actual VAT amount
++        if invoice.actual_vat > 0:
++            JournalEntryLine.objects.create(
++                journal_entry=je, account=vat_account, amount=invoice.actual_vat,
++                entry_type=JournalEntryLine.EntryType.DEBIT
++            )
++
++        # Line 3: Handle Purchase Price Variance
++        if purchase_price_variance != 0:
++            if purchase_price_variance > 0: # Invoice is higher than PO (unfavorable)
++                entry_type = JournalEntryLine.EntryType.DEBIT
++            else: # Invoice is lower than PO (favorable)
++                entry_type = JournalEntryLine.EntryType.CREDIT
++            
++            JournalEntryLine.objects.create(
++                journal_entry=je, account=ppv_account, amount=abs(purchase_price_variance),
++                entry_type=entry_type
++            )
++
++        # --- NEW Line: Debit Inventory for the Landed Costs ---
++        if total_landed_cost > 0:
++            # In a simple case, we debit the inventory account of the first item.
++            # A more complex implementation could split this across multiple inventory accounts
++            # if the receipts are for different product types.
++            first_item_inventory_account = _get_product_inventory_account(invoice.items.first().receipt.product)
++            JournalEntryLine.objects.create(
++                journal_entry=je, account=first_item_inventory_account, amount=total_landed_cost,
++                entry_type=JournalEntryLine.EntryType.DEBIT
++            )
++
++        # Line 4: Credit Accounts Payable for the final liability
++        JournalEntryLine.objects.create(
++            journal_entry=je, account=ap_account, amount=final_ap_liability,
++            entry_type=JournalEntryLine.EntryType.CREDIT, sub_ledger_object=invoice.supplier
++        )
++
++        je.validate_balance()
++        logger.info(f"    Successfully created JE-{je.id} for Invoice ID {invoice.id}.")
++
++        # --- 5. Update Invoice Status ---
++        invoice.status = SupplierInvoice.InvoiceStatus.AWAITING_PAYMENT
++        invoice.journal_entry = je
++        invoice.total_amount = actual_invoice_total # Update total amount to actual
++        invoice.save(update_fields=['status', 'journal_entry', 'total_amount'])
++        logger.info(f"<-- Successfully posted SupplierInvoice ID {invoice.id}.")
++
++    return je
++
++
++def allocate_landed_costs(invoice: SupplierInvoice):
++    """
++    Allocates landed costs associated with a supplier invoice to the
++    costing_unit_price of the related inventory receipts.
++
++    This should be done BEFORE posting the invoice.
++    """
++    from ..models import InventoryLog
++    from .costing_service import recalculate_cost_history_for_product
++
++    if invoice.status != SupplierInvoice.InvoiceStatus.DRAFT:
++        raise ValidationError(_("Landed costs can only be allocated on 'Draft' invoices."))
++
++    total_landed_cost = invoice.landed_costs.aggregate(total=Sum('amount'))['total'] or Decimal('0.0')
++    if total_landed_cost <= 0:
++        raise ValueError(_("No landed costs to allocate."))
++
++    receipts = list(invoice.items.select_related('receipt').values_list('receipt', flat=True))
++    receipt_logs = InventoryLog.objects.filter(pk__in=receipts)
++    
++    total_receipt_value = sum(
++        (log.base_unit_price * Decimal(str(log.quantity))) for log in receipt_logs
++    )
++
++    if total_receipt_value <= 0:
++        raise ValueError(_("Cannot allocate landed costs to receipts with zero value."))
++
++    with transaction.atomic():
++        products_to_recalculate = set()
++        earliest_receipt_date = None
++
++        for log in receipt_logs:
++            receipt_value = log.base_unit_price * Decimal(str(log.quantity))
++            allocation_ratio = receipt_value / total_receipt_value
++            allocated_cost = (total_landed_cost * allocation_ratio).quantize(Decimal('0.001'))
++            
++            landed_cost_per_unit = (allocated_cost / Decimal(str(log.quantity))).quantize(Decimal('0.001'))
++
++            # Update the log's cost fields
++            log.landed_cost_component = landed_cost_per_unit
++            log.costing_unit_price += landed_cost_per_unit
++            log.save(update_fields=['landed_cost_component', 'costing_unit_price'])
++
++            products_to_recalculate.add(log.product_id)
++            if earliest_receipt_date is None or log.release_timestamp.date() < earliest_receipt_date:
++                earliest_receipt_date = log.release_timestamp.date()
++
++    # After allocation, trigger a cost recalculation for all affected products
++    # starting from the date of the earliest receipt in this allocation.
++    for product_id in products_to_recalculate:
++        logger.info(f"Triggering cost recalculation for Product ID {product_id} from {earliest_receipt_date}.")
++        recalculate_cost_history_for_product(product_id, start_datetime=earliest_receipt_date)
++
++    logger.info(f"Successfully allocated {total_landed_cost} to {len(receipt_logs)} receipts for Invoice ID {invoice.id}.")
++
++
++def create_purchase_return(user, return_data: dict, items_data: list) -> PurchaseReturn:
++    """
++    Creates a Purchase Return and its items, validating that the return quantity
++    does not exceed the available quantity from the original receipt.
++    """
++    from ..models import PurchaseReturn, PurchaseReturnItem, InventoryLog
++
++    if not all([return_data.get('supplier_id'), return_data.get('return_date')]):
++        raise ValidationError(_("Supplier and Return Date are required."))
++
++    with transaction.atomic():
++        pr = PurchaseReturn.objects.create(
++            supplier_id=return_data['supplier_id'],
++            return_date=return_data['return_date'],
++            notes=return_data.get('notes', '')
++        )
++
++        items_to_create = []
++        for item_data in items_data:
++            receipt = InventoryLog.objects.get(pk=item_data['original_receipt_id'])
++            quantity_to_return = float(item_data['quantity_returned'])
++            
++            # TODO: Add validation for available quantity
++            
++            items_to_create.append(
++                PurchaseReturnItem(
++                    purchase_return=pr,
++                    original_receipt=receipt,
++                    quantity_returned=quantity_to_return
++                )
++            )
++        
++        if not items_to_create:
++            raise ValidationError(_("A purchase return must have at least one item."))
++            
++        PurchaseReturnItem.objects.bulk_create(items_to_create)
++
++    logger.info(f"User {user} created Purchase Return {pr.id}.")
++    return pr
++
++
++def process_inventory_return(user, purchase_return: PurchaseReturn) -> PurchaseReturn:
++    """
++    Processes the inventory movement for a purchase return by creating
++    a negative inventory adjustment for each item.
++    """
++    if purchase_return.status != PurchaseReturn.Status.PENDING:
++        raise PermissionError(_("This return has already been processed."))
++
++    with transaction.atomic():
++        for item in purchase_return.items.all():
++            InventoryAdjustment.objects.create(
++                product=item.original_receipt.product,
++                adjustment_date=purchase_return.return_date,
++                adjustment_quantity=-item.quantity_returned,
++                reason_code=InventoryAdjustment.ReasonCode.RETURN_TO_SUPPLIER,
++                cost_at_adjustment=item.original_receipt.costing_unit_price,
++                notes=f"Return for PR #{purchase_return.id}",
++                source_purchase_return_item=item
++            )
++        
++        purchase_return.status = PurchaseReturn.Status.COMPLETED
++        purchase_return.save(update_fields=['status'])
++    
++    logger.info(f"User {user} processed inventory movements for Purchase Return {purchase_return.id}.")
++    return purchase_return
++
++
++def create_debit_memo_from_return(user, purchase_return: PurchaseReturn, memo_data: dict) -> 'SupplierDebitMemo':
++    """
++    Creates a SupplierDebitMemo from a processed Purchase Return, generating
++    the final financial document for the transaction.
++    """
++    from ..models import SupplierDebitMemo
++
++    if purchase_return.status != PurchaseReturn.Status.COMPLETED:
++        raise PermissionError(_("Inventory must be processed before a debit memo can be created."))
++    
++    if hasattr(purchase_return, 'debit_memo') and purchase_return.debit_memo:
++        raise PermissionError(_("A debit memo has already been created for this return."))
++
++    if not all([memo_data.get('memo_number'), memo_data.get('memo_date')]):
++        raise ValidationError(_("Memo Number and Memo Date are required."))
++
++    with transaction.atomic():
++        total_amount = sum(
++            (item.original_receipt.costing_unit_price * Decimal(str(item.quantity_returned)))
++            for item in purchase_return.items.all()
++        )
++
++        debit_memo = SupplierDebitMemo.objects.create(
++            supplier=purchase_return.supplier,
++            memo_number=memo_data['memo_number'],
++            memo_date=memo_data['memo_date'],
++            total_amount=total_amount.quantize(Decimal('0.001')),
++            purchase_return=purchase_return,
++            status=SupplierDebitMemo.Status.OPEN
++        )
++        # The JE is created by the InventoryAdjustment signal, so we don't create one here.
++        # A more advanced implementation could link the JEs here.
++
++    logger.info(f"User {user} created Debit Memo {debit_memo.memo_number} for Purchase Return {purchase_return.id}.")
++    return debit_memo
++
++
++
++
++def create_purchase_order(user, po_data: dict, items_data: list) -> PurchaseOrder:
++    """
++    Creates a new Purchase Order and its items from validated data.
++    """
++    if not all([po_data.get('po_number'), po_data.get('supplier_id'), po_data.get('order_date')]):
++        raise ValidationError(_("PO Number, Supplier, and Order Date are required."))
++
++    if PurchaseOrder.objects.filter(po_number=po_data['po_number']).exists():
++        raise ValidationError(_("A Purchase Order with this number already exists."))
++
++    with transaction.atomic():
++        po = PurchaseOrder.objects.create(
++            po_number=po_data['po_number'],
++            supplier_id=po_data['supplier_id'],
++            order_date=po_data['order_date']
++        )
++
++        items_to_create = []
++        for item_data in items_data:
++            if not all([item_data.get('product_id'), item_data.get('quantity'), item_data.get('base_price_per_unit')]):
++                raise ValidationError(_("Product, Quantity, and Price are required for all items."))
++            
++            items_to_create.append(
++                PurchaseOrderItem(
++                    purchase_order=po,
++                    product_id=item_data['product_id'],
++                    quantity_ordered=float(item_data['quantity']),
++                    base_price_per_unit=Decimal(item_data['base_price_per_unit']),
++                    vat_rate=Decimal(item_data.get('vat_rate', '0.14')),
++                    withholding_tax_rate=Decimal(item_data.get('withholding_tax_rate', '0.01'))
++                )
++            )
++        
++        if not items_to_create:
++            raise ValidationError(_("A Purchase Order must have at least one item."))
++            
++        PurchaseOrderItem.objects.bulk_create(items_to_create)
++
++    logger.info(f"User {user} created Purchase Order {po.po_number}.")
++    return po
++
++
++def update_purchase_order(user, po: PurchaseOrder, po_data: dict, items_data: list) -> PurchaseOrder:
++    """
++    Updates an existing Purchase Order and its items.
++    """
++    if po.items.filter(receipts__isnull=False).exists():
++        raise PermissionError(_("Cannot edit a Purchase Order that has received items."))
++
++    if PurchaseOrder.objects.filter(po_number=po_data['po_number']).exclude(pk=po.pk).exists():
++        raise ValidationError(_("Another Purchase Order with this number already exists."))
++
++    with transaction.atomic():
++        po.po_number = po_data['po_number']
++        po.supplier_id = po_data['supplier_id']
++        po.order_date = po_data['order_date']
++        po.save()
++
++        po.items.all().delete()
++
++        items_to_create = []
++        for item_data in items_data:
++            items_to_create.append(
++                PurchaseOrderItem(
++                    purchase_order=po,
++                    product_id=item_data['product_id'],
++                    quantity_ordered=float(item_data['quantity']),
++                    base_price_per_unit=Decimal(item_data['base_price_per_unit']),
++                    vat_rate=Decimal(item_data.get('vat_rate', '0.14')),
++                    withholding_tax_rate=Decimal(item_data.get('withholding_tax_rate', '0.01'))
++                )
++            )
++        
++        if not items_to_create:
++            raise ValidationError(_("A Purchase Order must have at least one item."))
++
++        PurchaseOrderItem.objects.bulk_create(items_to_create)
++
++    logger.info(f"User {user} updated Purchase Order {po.po_number}.")
++    return po
++
++
++def update_po_status_after_receipt(inventory_log_id: int):
++    """
++    Updates the status of a Purchase Order based on its received items.
++    This should be triggered after an InventoryLog is saved.
++    """
++    from ..models import InventoryLog, PurchaseOrder, PurchaseOrderItem
++    from django.db.models import Sum, F, FloatField
++    from django.db.models.functions import Coalesce
++
++    try:
++        log = InventoryLog.objects.select_related('po_item__purchase_order').get(pk=inventory_log_id)
++    except InventoryLog.DoesNotExist:
++        logger.warning(f"InventoryLog ID {inventory_log_id} not found in 'update_po_status_after_receipt'.")
++        return
++
++    if not log.po_item:
++        return
++
++    po = log.po_item.purchase_order
++
++    # Aggregate total ordered vs total received for the entire PO
++    aggregation = po.items.aggregate(
++        total_ordered=Sum('quantity_ordered'),
++        total_received=Coalesce(Sum('receipts__quantity', output_field=FloatField()), 0.0)
++    )
++
++    total_ordered = aggregation.get('total_ordered', 0.0)
++    total_received = aggregation.get('total_received', 0.0)
++
++    if total_received >= total_ordered:
++        po.status = PurchaseOrder.Status.COMPLETED
++    elif total_received > 0:
++        po.status = PurchaseOrder.Status.PARTIALLY_RECEIVED
++    else:
++        po.status = PurchaseOrder.Status.PENDING
++    
++    po.save(update_fields=['status'])
++    logger.info(f"Updated status of PO {po.po_number} to '{po.status}' based on receipt ID {inventory_log_id}.")
+
+
+
+
+diff --git a/gipcco_project/inventory/services/accounting/inventory_transactions.py b/gipcco_project/inventory/services/accounting/inventory_transactions.py
+index 23cd8e8..26ee6cb 100644
+--- a/gipcco_project/inventory/services/accounting/inventory_transactions.py
++++ b/gipcco_project/inventory/services/accounting/inventory_transactions.py
+@@ -168,20 +168,30 @@ def create_je_for_inventory_receipt(inventory_log: InventoryLog) -> Optional[Jou
+     # 2. --- Get Accounts from Configuration ---
+     settings = GeneralAccountingSettings.load()
+     inventory_account = _get_product_inventory_account(inventory_log.product)
+-    ap_account = settings.accounts_payable
++    # --- MODIFIED: Credit GRNI account instead of A/P ---
++    grni_account = settings.goods_received_not_invoiced_account
+     vat_account = settings.vat_receivable
+     wht_account = settings.withholding_tax_payable
+     
+-    if not all([inventory_account, ap_account, vat_account, wht_account]):
+-        raise ValueError(_("One or more required general accounting settings are not configured."))
++    if not all([inventory_account, grni_account, vat_account, wht_account]):
++        raise ValueError(_("One or more required general accounting settings are not configured (Inventory, GRNI, VAT, WHT)."))
+ 
+     # 3. --- Calculate Amounts ---
+     quantity = Decimal(str(inventory_log.quantity))
+     total_base_amount = inventory_log.base_unit_price * quantity
+     vat_amount = inventory_log.vat_amount
+     wht_amount = inventory_log.withholding_tax_amount
+-    total_invoice_amount = total_base_amount + vat_amount
++    
++    # --- MODIFIED: Calculate and save the initial costing_unit_price ---
++    initial_total_cost = total_base_amount
++    if inventory_log.vat_treatment == InventoryLog.VatTreatment.CAPITALIZED:
++        initial_total_cost += vat_amount
++    
++    inventory_log.costing_unit_price = (initial_total_cost / quantity).quantize(Decimal('0.001'))
++    inventory_log.save(update_fields=['costing_unit_price'])
++    
+     costing_value = inventory_log.costing_unit_price * quantity
++    total_invoice_amount = total_base_amount + vat_amount
+     
+     # 4. --- Create Journal Entry and Lines within a Transaction ---
+     with transaction.atomic():
+@@ -220,10 +230,10 @@ def create_je_for_inventory_receipt(inventory_log: InventoryLog) -> Optional[Jou
+                 entry_type=JournalEntryLine.EntryType.DEBIT
+             )
+         
+-        # Line 3: Credit Accounts Payable
++        # Line 3: Credit Goods Received, Not Invoiced (GRNI) Account
+         JournalEntryLine.objects.create(
+             journal_entry=je,
+-            account=ap_account,
++            account=grni_account,
+             amount=(total_invoice_amount - wht_amount).quantize(Decimal('0.001')),
+             entry_type=JournalEntryLine.EntryType.CREDIT,
+             sub_ledger_object=inventory_log.company
+
+
+
+
+diff --git a/gipcco_project/inventory/templates/inventory/partials/purchase_order_view_content.html b/gipcco_project/inventory/templates/inventory/partials/purchase_order_view_content.html
+index d939862..2834ba7 100644
+--- a/gipcco_project/inventory/templates/inventory/partials/purchase_order_view_content.html
++++ b/gipcco_project/inventory/templates/inventory/partials/purchase_order_view_content.html
+@@ -99,6 +99,51 @@
+     </div>
+ </div>
+ 
++<!-- NEW: Related Financial Documents -->
++<div class="card shadow-sm mb-4">
++    <div class="card-header">
++        <h5 class="mb-0"><i class="bi bi-receipt-cutoff me-2"></i>الفواتير المرتبطة</h5>
++    </div>
++    <div class="card-body p-0">
++        {% if related_invoices %}
++        <div class="table-responsive">
++            <table class="table table-hover align-middle mb-0">
++                <thead>
++                    <tr>
++                        <th class="ps-3">رقم الفاتورة</th>
++                        <th>تاريخ الفاتورة</th>
++                        <th class="text-center">الحالة</th>
++                        <th class="text-end">المبلغ الإجمالي</th>
++                        <th class="text-end pe-3">الإجراءات</th>
++                    </tr>
++                </thead>
++                <tbody>
++                    {% for invoice in related_invoices %}
++                    <tr>
++                        <td class="ps-3 font-monospace"><strong>{{ invoice.invoice_number }}</strong></td>
++                        <td>{{ invoice.invoice_date|date:"Y-m-d" }}</td>
++                        <td class="text-center">
++                            <span class="badge {% if invoice.status == 'paid' %}text-bg-success{% elif invoice.status == 'partially_paid' %}text-bg-info{% elif invoice.status == 'draft' %}text-bg-secondary{% else %}text-bg-warning{% endif %}">
++                                {{ invoice.get_status_display }}
++                            </span>
++                        </td>
++                        <td class="text-end">{{ invoice.total_amount|floatformat:3|intcomma }}</td>
++                        <td class="text-end pe-3">
++                            <a href="{% url 'inventory:view_supplier_invoice' pk=invoice.id %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i> عرض الفاتورة</a>
++                        </td>
++                    </tr>
++                    {% endfor %}
++                </tbody>
++            </table>
++        </div>
++        {% else %}
++        <div class="text-center p-4">
++            <p class="text-muted mb-0">لا توجد فواتير مرتبطة بهذا الأمر حتى الآن.</p>
++        </div>
++        {% endif %}
++    </div>
++</div>
++
+ 
+ <!-- Delete Confirmation Modal -->
+ <div class="modal fade" id="deletePOModal" tabindex="-1">
+
+
+
+diff --git a/gipcco_project/inventory/templates/inventory/partials/purchase_orders_content.html b/gipcco_project/inventory/templates/inventory/partials/purchase_orders_content.html
+index f6efa67..c450b56 100644
+--- a/gipcco_project/inventory/templates/inventory/partials/purchase_orders_content.html
++++ b/gipcco_project/inventory/templates/inventory/partials/purchase_orders_content.html
+@@ -67,7 +67,7 @@
+                                 {% if po.status == 'completed' %}text-bg-success
+                                 {% elif po.status == 'partially_received' %}text-bg-info
+                                 {% elif po.status == 'cancelled' %}text-bg-danger
+-                                {% else %}
++                                {% else %}text-bg-warning
+                                 {% endif %}">
+                                 {{ po.get_status_display }}
+                             </span>
+
+
+
+
+diff --git a/gipcco_project/inventory/templates/inventory/partials/purchase_return_create_content.html b/gipcco_project/inventory/templates/inventory/partials/purchase_return_create_content.html
+new file mode 100644
+index 0000000..84e9c34
+--- /dev/null
++++ b/gipcco_project/inventory/templates/inventory/partials/purchase_return_create_content.html
+@@ -0,0 +1,100 @@
++<!-- gipcco_project/inventory/templates/inventory/partials/purchase_return_create_content.html -->
++
++<div class="d-flex justify-content-between align-items-center mb-4">
++    <h1 class="h2 mb-0" style="font-weight: 700;">إنشاء مرتجع مشتريات جديد</h1>
++    <a href="{% url 'inventory:purchase_returns_list' %}" class="btn btn-outline-secondary">
++        <i class="bi bi-arrow-right"></i> العودة إلى القائمة
++    </a>
++</div>
++
++<form method="post" action="{% url 'inventory:create_purchase_return' %}">
++    {% csrf_token %}
++    <div class="card shadow-sm mb-4">
++        <div class="card-header">
++            <h5 class="mb-0">البيانات الأساسية</h5>
++        </div>
++        <div class="card-body">
++            <div class="row">
++                <div class="col-md-6 mb-3">
++                    <label for="supplier" class="form-label fw-bold">المورد</label>
++                    <select class="form-select searchable-select" id="supplier" name="supplier" required>
++                        <option value="">اختر مورد...</option>
++                        {% for supplier in suppliers %}
++                        <option value="{{ supplier.id }}">{{ supplier.name }}</option>
++                        {% endfor %}
++                    </select>
++                </div>
++                <div class="col-md-6 mb-3">
++                    <label for="return_date" class="form-label fw-bold">تاريخ الإرجاع</label>
++                    <input type="text" class="form-control datepicker" id="return_date" name="return_date" required value="{{ today_date }}">
++                </div>
++                <div class="col-12">
++                    <label for="notes" class="form-label">ملاحظات</label>
++                    <textarea name="notes" id="notes" rows="3" class="form-control"></textarea>
++                </div>
++            </div>
++        </div>
++    </div>
++
++    <div class="card shadow-sm">
++        <div class="card-header d-flex justify-content-between align-items-center">
++            <h5 class="mb-0">البنود المرتجعة</h5>
++            <button type="button" class="btn btn-success" id="add-item-btn"><i class="bi bi-plus-lg"></i> إضافة بند</button>
++        </div>
++        <div class="card-body p-0">
++            <div class="table-responsive">
++                <table class="table table-hover align-middle mb-0">
++                    <thead>
++                        <tr>
++                            <th class="ps-3" style="width: 50%;">إيصال الاستلام الأصلي</th>
++                            <th class="text-center">الكمية المرتجعة</th>
++                            <th class="text-center pe-3">إجراء</th>
++                        </tr>
++                    </thead>
++                    <tbody id="return-items-tbody">
++                        <!-- JS will populate this -->
++                    </tbody>
++                </table>
++            </div>
++        </div>
++    </div>
++    <div class="mt-4 text-center">
++        <button type="submit" class="btn btn-primary btn-lg"><i class="bi bi-check2-circle"></i> حفظ المرتجع</button>
++    </div>
++</form>
++
++<script>
++// Simplified JS for creating purchase returns
++// A more robust implementation would use a dedicated JS file and dynamic loading
++document.addEventListener("DOMContentLoaded", function() {
++    const addItemBtn = document.getElementById('add-item-btn');
++    const tbody = document.getElementById('return-items-tbody');
++    let rowCounter = 0;
++
++    const addItemRow = () => {
++        rowCounter++;
++        const row = document.createElement('tr');
++        row.innerHTML = `
++            <td class="ps-3">
++                <select name="receipt_id" class="form-select" data-row-id="${rowCounter}" required></select>
++            </td>
++            <td><input type="number" step="any" name="quantity_returned" class="form-control text-center" required></td>
++            <td class="text-center pe-3">
++                <button type="button" class="btn btn-sm btn-outline-danger remove-item-btn"><i class="bi bi-trash"></i></button>
++            </td>
++        `;
++        tbody.appendChild(row);
++        // Note: You would need an API endpoint to fetch receipts for the selected supplier
++        // and populate the select dropdown. This is a simplified example.
++    };
++
++    tbody.addEventListener('click', function(e) {
++        if (e.target.closest('.remove-item-btn')) {
++            e.target.closest('tr').remove();
++        }
++    });
++
++    addItemBtn.addEventListener('click', addItemRow);
++    addItemRow(); // Start with one row
++});
++</script>
+
+
+
+diff --git a/gipcco_project/inventory/templates/inventory/partials/purchase_return_view_content.html b/gipcco_project/inventory/templates/inventory/partials/purchase_return_view_content.html
+new file mode 100644
+index 0000000..35fe91a
+--- /dev/null
++++ b/gipcco_project/inventory/templates/inventory/partials/purchase_return_view_content.html
+@@ -0,0 +1,123 @@
++<!-- gipcco_project/inventory/templates/inventory/partials/purchase_return_view_content.html -->
++{% load humanize %}
++
++<div class="d-flex justify-content-between align-items-center mb-4">
++    <div>
++        <h1 class="h2 mb-0" style="font-weight: 700;">تفاصيل مرتجع مشتريات</h1>
++        <p class="text-muted mb-0">عرض تفاصيل المرتجع رقم: <strong>#{{ return.id }}</strong></p>
++    </div>
++    <div>
++        <a href="{% url 'inventory:purchase_returns_list' %}" class="btn btn-outline-secondary">
++            <i class="bi bi-arrow-right"></i> العودة إلى القائمة
++        </a>
++    </div>
++</div>
++
++<div class="card shadow-sm mb-4">
++    <div class="card-header">
++        <div class="d-flex justify-content-between align-items-center">
++            <h5 class="mb-0"><i class="bi bi-box-arrow-left me-2"></i><strong>مرتجع #{{ return.id }}</strong></h5>
++            <span class="badge 
++                {% if return.status == 'completed' %}text-bg-success
++                {% elif return.status == 'shipped' %}text-bg-info
++                {% else %}text-bg-warning
++                {% endif %} fs-6">{{ return.get_status_display }}</span>
++        </div>
++    </div>
++    <div class="card-body">
++        <div class="row">
++            <div class="col-md-4">
++                <p class="mb-1 text-muted">المورد</p>
++                <p class="fw-bold fs-5">{{ return.supplier.name }}</p>
++            </div>
++            <div class="col-md-4">
++                <p class="mb-1 text-muted">تاريخ الإرجاع</p>
++                <p class="fw-bold fs-5">{{ return.return_date|date:"Y-m-d" }}</p>
++            </div>
++        </div>
++        {% if return.notes %}
++        <p class="mb-1 text-muted">ملاحظات</p>
++        <p>{{ return.notes|linebreaksbr }}</p>
++        {% endif %}
++    </div>
++</div>
++
++<div class="card shadow-sm">
++    <div class="card-header">
++        <h5 class="mb-0"><i class="bi bi-list-check me-2"></i>البنود المرتجعة</h5>
++    </div>
++    <div class="card-body p-0">
++        <div class="table-responsive">
++            <table class="table table-hover align-middle mb-0">
++                <thead>
++                    <tr>
++                        <th class="ps-3">المنتج</th>
++                        <th class="text-center">الكمية المرتجعة</th>
++                        <th>إيصال الاستلام الأصلي</th>
++                        <th class="text-end pe-3">التكلفة وقت الإرجاع</th>
++                    </tr>
++                </thead>
++                <tbody>
++                    {% for item in return.items.all %}
++                    <tr>
++                        <td class="ps-3"><strong>{{ item.original_receipt.product.name }}</strong></td>
++                        <td class="text-center fw-bold">{{ item.quantity_returned|floatformat:3 }}</td>
++                        <td><a href="#">Log #{{ item.original_receipt.id }}</a></td>
++                        <td class="text-end pe-3">{{ item.original_receipt.costing_unit_price|floatformat:3 }}</td>
++                    </tr>
++                    {% endfor %}
++                </tbody>
++            </table>
++        </div>
++    </div>
++</div>
++
++{% if return.status == 'pending' %}
++<div class="card shadow-sm mt-4">
++    <div class="card-header">
++        <h5 class="mb-0">الإجراءات</h5>
++    </div>
++    <div class="card-body text-center">
++        <form action="{% url 'inventory:process_inventory_return' return.pk %}" method="post" onsubmit="return confirm('هل أنت متأكد من معالجة حركة المخزون لهذا المرتجع؟ سيتم إنشاء تسوية مخزون بالسالب.');">
++            {% csrf_token %}
++            <button type="submit" class="btn btn-warning"><i class="bi bi-box-arrow-down me-2"></i>معالجة حركة المخزون</button>
++        </form>
++    </div>
++</div>
++{% endif %}
++
++{% if return.status == 'completed' and not return.debit_memo %}
++<div class="card shadow-sm mt-4">
++    <div class="card-header">
++        <h5 class="mb-0">إنشاء إشعار خصم (Debit Memo)</h5>
++    </div>
++    <div class="card-body">
++        <form action="{% url 'inventory:create_debit_memo_from_return' return.pk %}" method="post">
++            {% csrf_token %}
++            <div class="row">
++                <div class="col-md-6 mb-3">
++                    <label for="memo_number" class="form-label">رقم إشعار الخصم</label>
++                    <input type="text" name="memo_number" id="memo_number" class="form-control" required>
++                </div>
++                <div class="col-md-6 mb-3">
++                    <label for="memo_date" class="form-label">تاريخ الإشعار</label>
++                    <input type="date" name="memo_date" id="memo_date" class="form-control" value="{{ today_date }}" required>
++                </div>
++            </div>
++            <button type="submit" class="btn btn-success"><i class="bi bi-file-earmark-plus me-2"></i>إنشاء إشعار الخصم</button>
++        </form>
++    </div>
++</div>
++{% endif %}
++
++{% if return.debit_memo %}
++<div class="card shadow-sm mt-4">
++    <div class="card-header">
++        <h5 class="mb-0">المستند المالي المرتبط</h5>
++    </div>
++    <div class="card-body">
++        <p>تم إنشاء إشعار الخصم رقم <strong>{{ return.debit_memo.memo_number }}</strong> بتاريخ {{ return.debit_memo.memo_date|date:"Y-m-d" }} بقيمة إجمالية <strong>{{ return.debit_memo.total_amount|floatformat:3 }}</strong>.</p>
++        {# <a href="#" class="btn btn-outline-primary">عرض إشعار الخصم</a> #}
++    </div>
++</div>
++{% endif %}
+
+
+
+diff --git a/gipcco_project/inventory/templates/inventory/partials/purchase_returns_list_content.html b/gipcco_project/inventory/templates/inventory/partials/purchase_returns_list_content.html
+new file mode 100644
+index 0000000..7eef010
+--- /dev/null
++++ b/gipcco_project/inventory/templates/inventory/partials/purchase_returns_list_content.html
+@@ -0,0 +1,57 @@
++<!-- gipcco_project/inventory/templates/inventory/partials/purchase_returns_list_content.html -->
++{% load humanize %}
++
++<div class="d-flex justify-content-between align-items-center mb-4">
++    <h1 class="h2 mb-0" style="font-weight: 700;">مرتجعات المشتريات</h1>
++    <a href="{% url 'inventory:create_purchase_return' %}" class="btn btn-primary">
++        <i class="bi bi-plus-lg"></i> إنشاء مرتجع جديد
++    </a>
++</div>
++
++<div class="card">
++    <div class="card-header">
++        <h3><i class="bi bi-list-ol"></i> المرتجعات المسجلة</h3>
++    </div>
++    <div class="card-body p-0">
++        {% if not returns %}
++        <div class="text-center p-5">
++            <p class="text-muted">لا توجد مرتجعات مشتريات مسجلة.</p>
++        </div>
++        {% else %}
++        <div class="table-responsive">
++            <table class="table table-hover align-middle mb-0">
++                <thead>
++                    <tr>
++                        <th class="ps-3">رقم المرتجع</th>
++                        <th>المورد</th>
++                        <th>تاريخ الإرجاع</th>
++                        <th class="text-center">الحالة</th>
++                        <th class="text-end pe-3">إجراءات</th>
++                    </tr>
++                </thead>
++                <tbody>
++                    {% for return in returns %}
++                    <tr>
++                        <td class="ps-3 font-monospace"><strong>#{{ return.id }}</strong></td>
++                        <td>{{ return.supplier.name }}</td>
++                        <td>{{ return.return_date|date:"Y-m-d" }}</td>
++                        <td class="text-center">
++                            <span class="badge 
++                                {% if return.status == 'completed' %}text-bg-success
++                                {% elif return.status == 'shipped' %}text-bg-info
++                                {% else %}text-bg-warning
++                                {% endif %}">
++                                {{ return.get_status_display }}
++                            </span>
++                        </td>
++                        <td class="text-end pe-3">
++                            <a href="{% url 'inventory:view_purchase_return' pk=return.id %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i> عرض التفاصيل</a>
++                        </td>
++                    </tr>
++                    {% endfor %}
++                </tbody>
++            </table>
++        </div>
++        {% endif %}
++    </div>
++</div>
+
+
+
+
+diff --git a/gipcco_project/inventory/templates/inventory/partials/supplier_invoice_create_content.html b/gipcco_project/inventory/templates/inventory/partials/supplier_invoice_create_content.html
+index cff274d..5aae781 100644
+--- a/gipcco_project/inventory/templates/inventory/partials/supplier_invoice_create_content.html
++++ b/gipcco_project/inventory/templates/inventory/partials/supplier_invoice_create_content.html
+@@ -91,12 +91,22 @@
+             <input type="date" class="form-control" id="due_date" name="due_date" value="{{ today_date }}" required>
+           </div>
+           <hr>
++          <h5 class="mb-3">قيم الفاتورة الفعلية</h5>
++          <div class="mb-3">
++            <label for="actual_subtotal" class="form-label">الإجمالي الفرعي (قبل الضريبة)</label>
++            <input type="number" step="0.001" class="form-control" id="actual_subtotal" name="actual_subtotal" required>
++          </div>
++          <div class="mb-3">
++            <label for="actual_vat" class="form-label">إجمالي ضريبة القيمة المضافة</label>
++            <input type="number" step="0.001" class="form-control" id="actual_vat" name="actual_vat" required>
++          </div>
++          <hr>
+           <div class="d-flex justify-content-between align-items-center">
+-            <h5 class="mb-0">إجمالي الفاتورة:</h5>
+-            <h5 class="mb-0 fw-bold"><span id="total-amount">0.000</span> EGP</h5>
++            <h6 class="mb-0 text-muted">إجمالي الإيصالات المحددة:</h6>
++            <h6 class="mb-0 fw-bold"><span id="total-amount">0.000</span> EGP</h6>
+           </div>
+           <div class="d-grid mt-4">
+-            <button type="submit" class="btn btn-primary btn-lg"><i class="bi bi-save-fill me-2"></i>حفظ الفاتورة</button>
++            <button type="submit" class="btn btn-primary btn-lg"><i class="bi bi-save-fill me-2"></i>حفظ كمسودة</button>
+           </div>
+         </div>
+       </div>
+
+
+
+diff --git a/gipcco_project/inventory/templates/inventory/partials/supplier_invoice_view_content.html b/gipcco_project/inventory/templates/inventory/partials/supplier_invoice_view_content.html
+index d22983f..8b2c03b 100644
+--- a/gipcco_project/inventory/templates/inventory/partials/supplier_invoice_view_content.html
++++ b/gipcco_project/inventory/templates/inventory/partials/supplier_invoice_view_content.html
+@@ -1,19 +1,23 @@
+ {% load humanize %}
+-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+-  <h1 class="h2"><i class="bi bi-receipt-cutoff me-2"></i>فاتورة المورد #{{ invoice.invoice_number }}</h1>
+-  <div class="btn-toolbar mb-2 mb-md-0">
+-     {% if invoice.status == 'paid' %}
+-        <span class="badge fs-6 bg-success-subtle border border-success-subtle text-success-emphasis rounded-pill"><i class="bi bi-check-circle-fill me-2"></i>{{ invoice.get_status_display }}</span>
+-      {% elif invoice.status == 'partially_paid' %}
+-        <span class="badge fs-6 bg-warning-subtle border border-warning-subtle text-warning-emphasis rounded-pill"><i class="bi bi-hourglass-split me-2"></i>{{ invoice.get_status_display }}</span>
+       {% elif invoice.status == 'awaiting_payment' %}
+         <span class="badge fs-6 bg-danger-subtle border border-danger-subtle text-danger-emphasis rounded-pill"><i class="bi bi-clock-history me-2"></i>{{ invoice.get_status_display }}</span>
++      {% elif invoice.status == 'draft' %}
++        <span class="badge fs-6 bg-secondary-subtle border border-secondary-subtle text-secondary-emphasis rounded-pill"><i class="bi bi-pencil-square me-2"></i>{{ invoice.get_status_display }}</span>
+       {% else %}
+         <span class="badge fs-6 bg-secondary-subtle border border-secondary-subtle text-secondary-emphasis rounded-pill">{{ invoice.get_status_display }}</span>
+       {% endif %}
+   </div>
+ </div>
+ 
++{% if invoice.status == 'draft' %}
++<div class="alert alert-warning d-flex align-items-center" role="alert">
++  <i class="bi bi-exclamation-triangle-fill me-3"></i>
++  <div>
++    هذه الفاتورة هي <strong>مسودة</strong> ولم يتم ترحيلها إلى الحسابات بعد. قم بمراجعة البيانات وإضافة التكاليف الإضافية (إن وجدت)، ثم قم بترحيلها.
++  </div>
++</div>
++{% endif %}
++
+ <div class="row g-4">
+   <div class="col-lg-8">
+     <div class="card shadow-sm">
+@@ -81,7 +85,15 @@
+ 
+   <div class="col-lg-4">
+     <div class="card shadow-sm">
+-      <div class="card-header"><h5 class="mb-0">ملخص الفاتورة</h5></div>
++      <div class="card-header d-flex justify-content-between align-items-center">
++        <h5 class="mb-0">ملخص الفاتورة</h5>
++        {% if invoice.status == 'draft' %}
++        <form action="{% url 'inventory:post_supplier_invoice' invoice.pk %}" method="post" onsubmit="return confirm('هل أنت متأكد من ترحيل هذه الفاتورة؟ لا يمكن التراجع عن هذا الإجراء.');">
++            {% csrf_token %}
++            <button type="submit" class="btn btn-success btn-sm"><i class="bi bi-check2-circle me-2"></i>ترحيل الفاتورة</button>
++        </form>
++        {% endif %}
++      </div>
+       <div class="card-body">
+         <ul class="list-group list-group-flush">
+           <li class="list-group-item d-flex justify-content-between"><strong>المورد:</strong><span>{{ invoice.supplier.name }}</span></li>
+@@ -102,7 +114,44 @@
+       </div>
+     </div>
+     
+-    {% if invoice.balance_due > 0 %}
++    {% if invoice.status == 'draft' %}
++    <div class="card shadow-sm mt-4">
++        <div class="card-header"><h5 class="mb-0">إضافة تكاليف إضافية (Landed Costs)</h5></div>
++        <div class="card-body">
++            <form action="{% url 'inventory:allocate_landed_costs' invoice.pk %}" method="post">
++                {% csrf_token %}
++                <div class="mb-3">
++                    <label for="cost_type" class="form-label">نوع التكلفة</label>
++                    <select name="cost_type" id="cost_type" class="form-select" required>
++                        <option value="">اختر نوع...</option>
++                        {# This part will need to be populated from the database in the view #}
++                    </select>
++                </div>
++                <div class="mb-3">
++                    <label for="amount" class="form-label">المبلغ</label>
++                    <input type="number" name="amount" id="amount" class="form-control" step="0.001" min="0.001" required>
++                </div>
++                <div class="d-grid">
++                    <button type="submit" class="btn btn-info"><i class="bi bi-plus-lg me-2"></i>إضافة وتخصيص التكلفة</button>
++                </div>
++            </form>
++            <hr>
++            <h6>التكاليف المضافة:</h6>
++            <ul class="list-group">
++                {% for cost in invoice.landed_costs.all %}
++                <li class="list-group-item d-flex justify-content-between align-items-center">
++                    {{ cost.cost_type.name }}
++                    <span class="fw-bold">{{ cost.amount|floatformat:3 }}</span>
++                </li>
++                {% empty %}
++                <li class="list-group-item text-muted">لا توجد تكاليف إضافية.</li>
++                {% endfor %}
++            </ul>
++        </div>
++    </div>
++    {% endif %}
++
++    {% if invoice.balance_due > 0 and invoice.status != 'draft' %}
+     <div class="card shadow-sm mt-4">
+       <div class="card-header"><h5 class="mb-0">تسجيل دفعة جديدة</h5></div>
+       <div class="card-body">
+
+
+diff --git a/gipcco_project/inventory/templates/inventory/partials/supplier_invoices_content.html b/gipcco_project/inventory/templates/inventory/partials/supplier_invoices_content.html
+index fcf2a81..3cdc99f 100644
+--- a/gipcco_project/inventory/templates/inventory/partials/supplier_invoices_content.html
++++ b/gipcco_project/inventory/templates/inventory/partials/supplier_invoices_content.html
+@@ -73,6 +73,8 @@
+                 <span class="badge bg-warning-subtle border border-warning-subtle text-warning-emphasis rounded-pill">{{ invoice.get_status_display }}</span>
+               {% elif invoice.status == 'awaiting_payment' %}
+                 <span class="badge bg-danger-subtle border border-danger-subtle text-danger-emphasis rounded-pill">{{ invoice.get_status_display }}</span>
++              {% elif invoice.status == 'draft' %}
++                <span class="badge bg-secondary-subtle border border-secondary-subtle text-secondary-emphasis rounded-pill">{{ invoice.get_status_display }}</span>
+               {% else %}
+                 <span class="badge bg-secondary-subtle border border-secondary-subtle text-secondary-emphasis rounded-pill">{{ invoice.get_status_display }}</span>
+               {% endif %}
+
+
+
+diff --git a/gipcco_project/inventory/views/financials.py b/gipcco_project/inventory/views/financials.py
+index 4ddd261..7e388e1 100644
+--- a/gipcco_project/inventory/views/financials.py
++++ b/gipcco_project/inventory/views/financials.py
+@@ -26,7 +26,7 @@ from ..models import (
+     CostPool, AllocationDriver, OverheadAllocationRun, ExpenseLog
+ )
+ from ..forms import JournalEntryForm, JournalEntryLineFormSet
+-from ..services import expense_service
++from ..services import expense_service, accounting_service
+ from ..services.overhead_service import execute_overhead_allocation_run, apply_overhead_to_finished_goods
+ from ..services.accounting_service import create_je_for_overhead_allocation, create_je_for_overhead_application
+ from ..services.period_closing_service import update_checklist_for_period
+@@ -64,7 +64,8 @@ def supplier_invoices(request: HttpRequest) -> HttpResponse:
+ 
+ def create_supplier_invoice(request: HttpRequest) -> HttpResponse:
+     """
+-    Handles the creation of a new supplier invoice from unbilled receipts OR unsettled expenses.
++    Handles the creation of a new DRAFT supplier invoice from unbilled receipts.
++    The invoice is saved in a draft state and must be posted separately to affect the GL.
+     """
+     if request.method == 'POST':
+         try:
+@@ -73,11 +74,14 @@ def create_supplier_invoice(request: HttpRequest) -> HttpResponse:
+             invoice_date_str = request.POST.get('invoice_date')
+             due_date_str = request.POST.get('due_date')
+             
+-            # Determine the source of the invoice items
+-            source_type = request.POST.get('source_type', 'receipts') # Default to receipts
++            # --- NEW: Get actual invoice amounts from user input ---
++            actual_subtotal_str = request.POST.get('actual_subtotal')
++            actual_vat_str = request.POST.get('actual_vat')
++            
++            source_type = request.POST.get('source_type', 'receipts')
+ 
+-            if not all([supplier_id, invoice_number, invoice_date_str, due_date_str]):
+-                messages.error(request, "يرجى تعبئة جميع الحقول الأساسية.")
++            if not all([supplier_id, invoice_number, invoice_date_str, due_date_str, actual_subtotal_str, actual_vat_str]):
++                messages.error(request, "يرجى تعبئة جميع الحقول الأساسية، بما في ذلك الإجمالي الفرعي والضريبة الفعلية من الفاتورة.")
+                 return redirect('inventory:create_supplier_invoice')
+ 
+             if SupplierInvoice.objects.filter(supplier_id=supplier_id, invoice_number=invoice_number).exists():
+@@ -86,54 +90,49 @@ def create_supplier_invoice(request: HttpRequest) -> HttpResponse:
+ 
+             invoice_date = datetime.strptime(invoice_date_str, '%Y-%m-%d').date()
+             due_date = datetime.strptime(due_date_str, '%Y-%m-%d').date()
++            actual_subtotal = Decimal(actual_subtotal_str)
++            actual_vat = Decimal(actual_vat_str)
+ 
++            # The expense service workflow is complex and will be adapted in a future step.
+             if source_type == 'expenses':
+-                expense_log_ids = request.POST.getlist('item_ids')
+-                if not expense_log_ids:
+-                    messages.error(request, "يرجى اختيار مصروف واحد على الأقل لإنشاء الفاتورة.")
+-                    return redirect('inventory:create_supplier_invoice')
+-                
+-                # Use the dedicated service function for this workflow
+-                invoice = expense_service.create_invoice_from_expense_logs(
+-                    user=request.user,
+-                    supplier_id=int(supplier_id),
++                messages.error(request, "إنشاء الفواتير من المصروفات قيد التطوير حاليًا.")
++                return redirect('inventory:create_supplier_invoice')
++            
++            receipt_ids = request.POST.getlist('item_ids')
++            if not receipt_ids:
++                messages.error(request, "يرجى اختيار فاتورة استلام واحدة على الأقل.")
++                return redirect('inventory:create_supplier_invoice')
++
++            with transaction.atomic():
++                # --- MODIFIED: Create a DRAFT invoice with actual values ---
++                invoice = SupplierInvoice.objects.create(
++                    supplier_id=supplier_id,
+                     invoice_number=invoice_number,
+                     invoice_date=invoice_date,
+                     due_date=due_date,
+-                    expense_log_ids=[int(pk) for pk in expense_log_ids]
++                    actual_subtotal=actual_subtotal,
++                    actual_vat=actual_vat,
++                    status=SupplierInvoice.InvoiceStatus.DRAFT
+                 )
+-            
+-            else: # Default to 'receipts' workflow
+-                receipt_ids = request.POST.getlist('item_ids')
+-                if not receipt_ids:
+-                    messages.error(request, "يرجى اختيار فاتورة استلام واحدة على الأقل.")
+-                    return redirect('inventory:create_supplier_invoice')
+-
+-                with transaction.atomic():
+-                    invoice = SupplierInvoice.objects.create(
+-                        supplier_id=supplier_id,
+-                        invoice_number=invoice_number,
+-                        invoice_date=invoice_date,
+-                        due_date=due_date,
+-                        status=SupplierInvoice.InvoiceStatus.AWAITING_PAYMENT
++                
++                receipts = InventoryLog.objects.filter(id__in=receipt_ids, company_id=supplier_id)
++                total_receipt_amount = Decimal('0.0')
++                
++                items_to_create = []
++                for receipt in receipts:
++                    receipt_total = (receipt.base_unit_price * Decimal(str(receipt.quantity))) + receipt.vat_amount
++                    items_to_create.append(
++                        SupplierInvoiceItem(invoice=invoice, receipt=receipt, amount=receipt_total)
+                     )
+-                    
+-                    receipts = InventoryLog.objects.filter(id__in=receipt_ids, company_id=supplier_id)
+-                    total_amount = Decimal('0.0')
+-                    
+-                    items_to_create = []
+-                    for receipt in receipts:
+-                        receipt_total = (receipt.base_unit_price * Decimal(str(receipt.quantity))) + receipt.vat_amount
+-                        items_to_create.append(
+-                            SupplierInvoiceItem(invoice=invoice, receipt=receipt, amount=receipt_total)
+-                        )
+-                        total_amount += receipt_total
+-                    
+-                    SupplierInvoiceItem.objects.bulk_create(items_to_create)
+-                    invoice.total_amount = total_amount
+-                    invoice.save()
++                    total_receipt_amount += receipt_total
++                
++                SupplierInvoiceItem.objects.bulk_create(items_to_create)
++                
++                # Set the total_amount to the sum of receipts for reference while in draft
++                invoice.total_amount = total_receipt_amount
++                invoice.save()
+ 
+-            messages.success(request, f"تم إنشاء فاتورة المورد رقم {invoice.invoice_number} بنجاح.")
++            messages.success(request, f"تم إنشاء مسودة فاتورة المورد رقم {invoice.invoice_number} بنجاح. يجب ترحيلها لتؤثر على الحسابات.")
+             return redirect('inventory:view_supplier_invoice', pk=invoice.pk)
+         except ValidationError as e:
+             messages.error(request, f"خطأ في البيانات: {e}")
+@@ -173,6 +172,54 @@ def view_supplier_invoice(request: HttpRequest, pk: int) -> HttpResponse:
+     return render(request, 'inventory/supplier_invoice_view.html', context)
+ 
+ 
++@require_POST
++@permission_required('inventory.change_supplierinvoice', raise_exception=True)
++def post_supplier_invoice_view(request: HttpRequest, pk: int) -> HttpResponse:
++    """
++    View to handle the action of posting a single draft supplier invoice.
++    """
++    invoice = get_object_or_404(SupplierInvoice, pk=pk)
++    try:
++        # The service function contains all the business logic
++        accounting_service.post_supplier_invoice(invoice)
++        messages.success(request, f"تم ترحيل فاتورة المورد رقم {invoice.invoice_number} إلى الحسابات بنجاح.")
++    except Exception as e:
++        logger.exception(f"Error posting supplier invoice ID {pk}")
++        messages.error(request, f"حدث خطأ أثناء ترحيل الفاتورة: {e}")
++    
++    return redirect('inventory:view_supplier_invoice', pk=pk)
++
++
++@require_POST
++@permission_required('inventory.change_supplierinvoice', raise_exception=True)
++def allocate_landed_costs_view(request: HttpRequest, pk: int) -> HttpResponse:
++    """
++    View to handle adding a landed cost item and then triggering the allocation service.
++    """
++    invoice = get_object_or_404(SupplierInvoice, pk=pk)
++    try:
++        cost_type_id = request.POST.get('cost_type')
++        amount_str = request.POST.get('amount')
++
++        if not all([cost_type_id, amount_str]):
++            raise ValueError(_("Cost Type and Amount are required."))
++
++        # 1. Create the Landed Cost object
++        amount = Decimal(amount_str)
++        invoice.landed_costs.create(cost_type_id=cost_type_id, amount=amount)
++        messages.success(request, f"Landed cost item added successfully. Allocating costs...")
++
++        # 2. Trigger the allocation service
++        accounting_service.allocate_landed_costs(invoice)
++        messages.success(request, "Landed costs allocated to receipt items successfully.")
++
++    except Exception as e:
++        logger.exception(f"Error allocating landed costs for invoice ID {pk}")
++        messages.error(request, f"An error occurred: {e}")
++    
++    return redirect('inventory:view_supplier_invoice', pk=pk)
++
++
+ @require_POST
+ def delete_supplier_invoice(request: HttpRequest, pk: int) -> HttpResponse:
+     """Deletes a supplier invoice, but only if no payments are applied."""
+
+
+
+diff --git a/gipcco_project/inventory/views/purchase_orders.py b/gipcco_project/inventory/views/purchase_orders.py
+index 0c7df4d..9fcf44d 100644
+--- a/gipcco_project/inventory/views/purchase_orders.py
++++ b/gipcco_project/inventory/views/purchase_orders.py
+@@ -9,9 +9,10 @@ from django.db.models import Q
+ from django.http import HttpRequest, HttpResponse
+ from django.shortcuts import get_object_or_404, redirect, render
+ from django.views.decorators.http import require_POST
+-
++from django.core.exceptions import ValidationError, PermissionDenied
+ 
+ from ..models import Company, Product, PurchaseOrder, PurchaseOrderItem
++from ..services import purchasing_service
+ 
+ 
+ def purchase_orders(request: HttpRequest) -> HttpResponse:
+@@ -40,56 +41,45 @@ def purchase_orders(request: HttpRequest) -> HttpResponse:
+ 
+ def create_purchase_order(request: HttpRequest) -> HttpResponse:
+     """
+-    Handles the creation of a new Purchase Order.
++    Handles the creation of a new Purchase Order by calling the purchasing service.
+     """
+     if request.method == 'POST':
+-        po_number = request.POST.get('po_number')
+-        supplier_id = request.POST.get('supplier_id')
+-        order_date_str = request.POST.get('order_date')
+-        
+-        # --- MODIFIED: Use new field names ---
+-        product_ids = request.POST.getlist('product_id')
+-        quantities = request.POST.getlist('quantity')
+-        base_prices = request.POST.getlist('base_price_per_unit')
+-        vat_rates = request.POST.getlist('vat_rate')
+-        wht_rates = request.POST.getlist('withholding_tax_rate')
+-
+-        if not all([po_number, supplier_id, order_date_str, product_ids, quantities, base_prices, vat_rates]):
+-            messages.warning(request, "الرجاء تعبئة جميع الحقول لإنشاء أمر الشراء.")
+-            return redirect('inventory:create_purchase_order')
+-        
+-        if PurchaseOrder.objects.filter(po_number=po_number).exists():
+-            messages.error(request, f"رقم أمر الشراء '{po_number}' موجود بالفعل.")
+-            return redirect('inventory:create_purchase_order')
+-
+         try:
+-            with transaction.atomic():
+-                order_date = datetime.strptime(order_date_str, '%Y-%m-%d').date()
+-                po = PurchaseOrder.objects.create(
+-                    po_number=po_number,
+-                    supplier_id=supplier_id,
+-                    order_date=order_date
+-                )
+-                
+-                items_to_create = []
+-                # --- MODIFIED: Loop through new form fields ---
+-                for pid, qty, price, vat, wht in zip(product_ids, quantities, base_prices, vat_rates, wht_rates):
+-                    if pid and qty and price and vat is not None:
+-                        items_to_create.append(
+-                            PurchaseOrderItem(
+-                                purchase_order=po,
+-                                product_id=pid,
+-                                quantity_ordered=float(qty),
+-                                base_price_per_unit=Decimal(price),
+-                                vat_rate=Decimal(vat) / 100, # Convert from percentage
+-                                withholding_tax_rate=Decimal(wht or 0) / 100 # Convert from percentage
+-                            )
+-                        )
+-                PurchaseOrderItem.objects.bulk_create(items_to_create)
+-            messages.success(request, "تم إنشاء أمر الشراء بنجاح.")
++            po_data = {
++                'po_number': request.POST.get('po_number'),
++                'supplier_id': request.POST.get('supplier_id'),
++                'order_date': request.POST.get('order_date'),
++            }
++            
++            items_data = []
++            product_ids = request.POST.getlist('product_id')
++            quantities = request.POST.getlist('quantity')
++            base_prices = request.POST.getlist('base_price_per_unit')
++            vat_rates = request.POST.getlist('vat_rate')
++            wht_rates = request.POST.getlist('withholding_tax_rate')
++
++            for i in range(len(product_ids)):
++                if product_ids[i]:
++                    items_data.append({
++                        'product_id': product_ids[i],
++                        'quantity': quantities[i],
++                        'base_price_per_unit': base_prices[i],
++                        'vat_rate': vat_rates[i],
++                        'withholding_tax_rate': wht_rates[i],
++                    })
++
++            po = purchasing_service.create_purchase_order(
++                user=request.user,
++                po_data=po_data,
++                items_data=items_data
++            )
++            messages.success(request, f"تم إنشاء أمر الشراء {po.po_number} بنجاح.")
+             return redirect('inventory:purchase_orders')
++        except (ValidationError, ValueError) as e:
++            messages.error(request, f"حدث خطأ في البيانات: {e}")
++            # Fall through to render the form again with errors
+         except Exception as e:
+-            messages.error(request, f"حدث خطأ أثناء إنشاء أمر الشراء: {e}")
++            messages.error(request, f"حدث خطأ غير متوقع: {e}")
+             return redirect('inventory:create_purchase_order')
+ 
+     primitive_products_qs = Product.objects.filter(~Q(product_type=Product.ProductType.FINAL_PRODUCT))
+@@ -106,38 +96,35 @@ def create_purchase_order(request: HttpRequest) -> HttpResponse:
+ 
+ def view_purchase_order(request: HttpRequest, pk: int) -> HttpResponse:
+     """
+-    Displays the details of a single purchase order.
++    Displays the details of a single purchase order, including related receipts and invoices.
+     """
+     po = get_object_or_404(
+         PurchaseOrder.objects.select_related('supplier')
+-        .prefetch_related('items__product', 'items__receipts'),
++        .prefetch_related(
++            'items__product', 
++            'items__receipts__supplierinvoiceitem_set__invoice' # Prefetch through to invoices
++        ),
+         pk=pk
+     )
+     
+-    has_any_receipts = False
++    # This logic is for display and doesn't need to be in a service
++    related_invoices = set()
+     for item in po.items.all():
+         item.total_received = sum(r.quantity for r in item.receipts.all())
+-        if item.total_received > 0:
+-            has_any_receipts = True
+         item.is_completed = item.total_received >= item.quantity_ordered
+         item.quantity_remaining = item.quantity_ordered - item.total_received
+ 
+-        # Perform calculations in the view for clarity in the template
+-        quantity = Decimal(str(item.quantity_ordered))
+-        base_price = item.base_price_per_unit
+-        vat_rate = item.vat_rate
+-        wht_rate = item.withholding_tax_rate
+-
+-        item.total_price_per_unit_incl_vat = base_price * (Decimal('1') + vat_rate)
+-        item.total_price_incl_vat = item.total_price_per_unit_incl_vat * quantity
+-        
+-        withholding_tax_amount = (quantity * base_price) * wht_rate
+-        item.net_payable = item.total_price_incl_vat - withholding_tax_amount
++        # Gather related invoices
++        for receipt in item.receipts.all():
++            if hasattr(receipt, 'supplierinvoiceitem_set'):
++                for inv_item in receipt.supplierinvoiceitem_set.all():
++                    related_invoices.add(inv_item.invoice)
+ 
+     context = {
+         'active_page': 'purchasing',
+         'po': po,
+-        'has_any_receipts': has_any_receipts,
++        'has_any_receipts': any(item.total_received > 0 for item in po.items.all()),
++        'related_invoices': sorted(list(related_invoices), key=lambda x: x.invoice_date, reverse=True),
+     }
+     if 'X-Partial-Request' in request.headers:
+         return render(request, 'inventory/partials/purchase_order_view_content.html', context)
+@@ -146,68 +133,54 @@ def view_purchase_order(request: HttpRequest, pk: int) -> HttpResponse:
+ 
+ def edit_purchase_order(request: HttpRequest, pk: int) -> HttpResponse:
+     """
+-    Handles editing an existing Purchase Order.
+-    Editing is blocked if any item has been received.
++    Handles editing an existing Purchase Order by calling the purchasing service.
+     """
+     po = get_object_or_404(PurchaseOrder.objects.prefetch_related('items__product'), pk=pk)
+ 
+-    if PurchaseOrderItem.objects.filter(purchase_order=po, receipts__isnull=False).exists():
+-        messages.error(request, "لا يمكن تعديل أمر الشراء هذا لأنه تم استلام بعض البنود بالفعل.")
+-        return redirect('inventory:view_purchase_order', pk=pk)
+-
+     if request.method == 'POST':
+-        po_number = request.POST.get('po_number')
+-        supplier_id = request.POST.get('supplier_id')
+-        order_date_str = request.POST.get('order_date')
+-        
+-        # --- MODIFIED: Use new field names ---
+-        product_ids = request.POST.getlist('product_id')
+-        quantities = request.POST.getlist('quantity')
+-        base_prices = request.POST.getlist('base_price_per_unit')
+-        vat_rates = request.POST.getlist('vat_rate')
+-        wht_rates = request.POST.getlist('withholding_tax_rate')
+-
+-        if not all([po_number, supplier_id, order_date_str, product_ids, quantities, base_prices, vat_rates]):
+-            messages.warning(request, "الرجاء تعبئة جميع الحقول لتعديل أمر الشراء.")
+-            return redirect('inventory:edit_purchase_order', pk=pk)
+-        
+-        if PurchaseOrder.objects.filter(po_number=po_number).exclude(pk=pk).exists():
+-            messages.error(request, f"رقم أمر الشراء '{po_number}' موجود بالفعل.")
+-            return redirect('inventory:edit_purchase_order', pk=pk)
+-
+         try:
+-            with transaction.atomic():
+-                po.po_number = po_number
+-                po.supplier_id = supplier_id
+-                po.order_date = datetime.strptime(order_date_str, '%Y-%m-%d').date()
+-                po.save()
+-                
+-                po.items.all().delete()
+-                
+-                items_to_create = []
+-                # --- MODIFIED: Loop through new form fields ---
+-                for pid, qty, price, vat, wht in zip(product_ids, quantities, base_prices, vat_rates, wht_rates):
+-                    if pid and qty and price and vat is not None:
+-                        items_to_create.append(
+-                            PurchaseOrderItem(
+-                                purchase_order=po,
+-                                product_id=pid,
+-                                quantity_ordered=float(qty),
+-                                base_price_per_unit=Decimal(price),
+-                                vat_rate=Decimal(vat) / 100,
+-                                withholding_tax_rate=Decimal(wht or 0) / 100
+-                            )
+-                        )
+-                PurchaseOrderItem.objects.bulk_create(items_to_create)
++            po_data = {
++                'po_number': request.POST.get('po_number'),
++                'supplier_id': request.POST.get('supplier_id'),
++                'order_date': request.POST.get('order_date'),
++            }
++            
++            items_data = []
++            product_ids = request.POST.getlist('product_id')
++            quantities = request.POST.getlist('quantity')
++            base_prices = request.POST.getlist('base_price_per_unit')
++            vat_rates = request.POST.getlist('vat_rate')
++            wht_rates = request.POST.getlist('withholding_tax_rate')
++
++            for i in range(len(product_ids)):
++                if product_ids[i]:
++                    items_data.append({
++                        'product_id': product_ids[i],
++                        'quantity': quantities[i],
++                        'base_price_per_unit': base_prices[i],
++                        'vat_rate': vat_rates[i],
++                        'withholding_tax_rate': wht_rates[i],
++                    })
++
++            purchasing_service.update_purchase_order(
++                user=request.user,
++                po=po,
++                po_data=po_data,
++                items_data=items_data
++            )
+             messages.success(request, "تم تعديل أمر الشراء بنجاح.")
+             return redirect('inventory:view_purchase_order', pk=po.id)
++        except (ValidationError, ValueError) as e:
++            messages.error(request, f"حدث خطأ في البيانات: {e}")
++        except PermissionError as e:
++            messages.error(request, str(e))
++            return redirect('inventory:view_purchase_order', pk=pk)
+         except Exception as e:
+-            messages.error(request, f"حدث خطأ أثناء تعديل أمر الشراء: {e}")
++            messages.error(request, f"حدث خطأ غير متوقع: {e}")
+             return redirect('inventory:edit_purchase_order', pk=pk)
+ 
+     primitive_products_qs = Product.objects.filter(~Q(product_type=Product.ProductType.FINAL_PRODUCT))
+     
+-    # --- MODIFIED: Prepare items data with new fields for JavaScript ---
+     po_items_data = [
+         {
+             'product_id': item.product_id,
+
+
+
+
+diff --git a/gipcco_project/inventory/views/purchasing_views.py b/gipcco_project/inventory/views/purchasing_views.py
+new file mode 100644
+index 0000000..fee8ac9
+--- /dev/null
++++ b/gipcco_project/inventory/views/purchasing_views.py
+@@ -0,0 +1,138 @@
++# gipcco_project/inventory/views/purchasing_views.py
++
++import logging
++from decimal import Decimal
++from datetime import datetime
++
++from django.shortcuts import render, redirect, get_object_or_404
++from django.http import HttpRequest, HttpResponse
++from django.contrib import messages
++from django.core.exceptions import ValidationError, PermissionDenied
++from django.contrib.auth.decorators import permission_required
++from django.views.decorators.http import require_POST
++
++from ..models import PurchaseReturn, Company, InventoryLog
++from ..services import purchasing_service
++
++logger = logging.getLogger(__name__)
++
++
++@permission_required('inventory.view_purchasereturn')
++def purchase_returns_list(request: HttpRequest) -> HttpResponse:
++    """Displays a list of all purchase returns."""
++    returns = PurchaseReturn.objects.select_related('supplier').all()
++    context = {
++        'active_page': 'purchasing',
++        'sub_page': 'purchase_returns',
++        'returns': returns,
++    }
++    if 'X-Partial-Request' in request.headers:
++        return render(request, 'inventory/partials/purchase_returns_list_content.html', context)
++    return render(request, 'inventory/purchase_returns_list.html', context)
++
++
++@permission_required('inventory.add_purchasereturn')
++def create_purchase_return(request: HttpRequest) -> HttpResponse:
++    """Handles the creation of a new Purchase Return."""
++    if request.method == 'POST':
++        try:
++            return_data = {
++                'supplier_id': request.POST.get('supplier'),
++                'return_date': request.POST.get('return_date'),
++                'notes': request.POST.get('notes'),
++            }
++            
++            items_data = []
++            receipt_ids = request.POST.getlist('receipt_id')
++            quantities = request.POST.getlist('quantity_returned')
++
++            for i in range(len(receipt_ids)):
++                if receipt_ids[i] and quantities[i]:
++                    items_data.append({
++                        'original_receipt_id': receipt_ids[i],
++                        'quantity_returned': quantities[i],
++                    })
++            
++            purchase_return = purchasing_service.create_purchase_return(
++                user=request.user,
++                return_data=return_data,
++                items_data=items_data
++            )
++            messages.success(request, "تم إنشاء مرتجع المشتريات بنجاح.")
++            return redirect('inventory:view_purchase_return', pk=purchase_return.pk)
++        except (ValidationError, ValueError) as e:
++            messages.error(request, f"خطأ في البيانات: {e}")
++        except Exception as e:
++            logger.exception("Error creating purchase return")
++            messages.error(request, f"حدث خطأ غير متوقع: {e}")
++            return redirect('inventory:create_purchase_return')
++
++    context = {
++        'active_page': 'purchasing',
++        'sub_page': 'purchase_returns',
++        'suppliers': Company.objects.all(),
++        'today_date': datetime.now().strftime('%Y-m-%d'),
++    }
++    if 'X-Partial-Request' in request.headers:
++        return render(request, 'inventory/partials/purchase_return_create_content.html', context)
++    return render(request, 'inventory/purchase_return_create.html', context)
++
++
++@permission_required('inventory.view_purchasereturn')
++def view_purchase_return(request: HttpRequest, pk: int) -> HttpResponse:
++    """Displays the details of a single purchase return."""
++    purchase_return = get_object_or_404(
++        PurchaseReturn.objects.select_related('supplier', 'debit_memo'), 
++        pk=pk
++    )
++    context = {
++        'active_page': 'purchasing',
++        'sub_page': 'purchase_returns',
++        'return': purchase_return,
++    }
++    if 'X-Partial-Request' in request.headers:
++        return render(request, 'inventory/partials/purchase_return_view_content.html', context)
++    return render(request, 'inventory/purchase_return_view.html', context)
++
++
++@require_POST
++@permission_required('inventory.change_purchasereturn')
++def process_inventory_return_view(request: HttpRequest, pk: int) -> HttpResponse:
++    """Processes the inventory side of a purchase return."""
++    purchase_return = get_object_or_404(PurchaseReturn, pk=pk)
++    try:
++        purchasing_service.process_inventory_return(user=request.user, purchase_return=purchase_return)
++        messages.success(request, "تمت معالجة حركة المخزون للمرتجع بنجاح.")
++    except (ValidationError, PermissionError) as e:
++        messages.error(request, str(e))
++    except Exception as e:
++        logger.exception(f"Error processing inventory for purchase return ID {pk}")
++        messages.error(request, f"حدث خطأ غير متوقع: {e}")
++    
++    return redirect('inventory:view_purchase_return', pk=pk)
++
++
++@require_POST
++@permission_required('inventory.add_supplierdebitmemo')
++def create_debit_memo_from_return_view(request: HttpRequest, pk: int) -> HttpResponse:
++    """Creates a Supplier Debit Memo from a processed Purchase Return."""
++    purchase_return = get_object_or_404(PurchaseReturn, pk=pk)
++    try:
++        memo_data = {
++            'memo_number': request.POST.get('memo_number'),
++            'memo_date': request.POST.get('memo_date'),
++        }
++        debit_memo = purchasing_service.create_debit_memo_from_return(
++            user=request.user,
++            purchase_return=purchase_return,
++            memo_data=memo_data
++        )
++        messages.success(request, f"تم إنشاء إشعار الخصم رقم {debit_memo.memo_number} بنجاح.")
++    except (ValidationError, PermissionError) as e:
++        messages.error(request, str(e))
++    except Exception as e:
++        logger.exception(f"Error creating debit memo for purchase return ID {pk}")
++        messages.error(request, f"حدث خطأ غير متوقع: {e}")
++
++    return redirect('inventory:view_purchase_return', pk=pk)
++
+
+
+
+
+diff --git a/gipcco_project/static/layout/js/dynamic_content_loader.js b/gipcco_project/static/layout/js/dynamic_content_loader.js
+index b2aa929..817c741 100644
+--- a/gipcco_project/static/layout/js/dynamic_content_loader.js
++++ b/gipcco_project/static/layout/js/dynamic_content_loader.js
+@@ -45,7 +45,9 @@ window.initializePluginsInContent = function (container = document) {
+ 		"#journalEntryForm": initJournalEntryCreateLogic,
+ 		"#reconciliationWorkspace": initReconciliationManageLogic,
+ 		"#createSalesOrderForm": initSalesOrderCreateLogic,
+-		"#createPurchaseOrderForm": initPurchaseOrderCreateLogic,
++		"#createPurchaseOrderForm": initPurchaseOrderFormLogic, // MODIFIED
++		"#editPurchaseOrderForm": initPurchaseOrderFormLogic,   // NEW
++		"#createPurchaseReturnForm": initPurchaseReturnCreateLogic, // NEW
+ 		"#taxReportForm": initTaxReconciliationReportLogic,
+ 		"#close-period-container": initClosePeriodLogic,
+ 		"#fiscalYearContainer": initFiscalYearListLogic,
+
+
+
+diff --git a/gipcco_project/static/layout/js/purchasing_logic.js b/gipcco_project/static/layout/js/purchasing_logic.js
+new file mode 100644
+index 0000000..ad94cc0
+--- /dev/null
++++ b/gipcco_project/static/layout/js/purchasing_logic.js
+@@ -0,0 +1,181 @@
++// static/layout/js/purchasing_logic.js
++
++/**
++ * Initializes the logic for both Create and Edit Purchase Order forms.
++ * It handles dynamic row addition, deletion, and line total calculations.
++ * @param {HTMLElement} container The parent container of the form.
++ */
++function initPurchaseOrderFormLogic(container) {
++    const form = container.querySelector('#createPurchaseOrderForm, #editPurchaseOrderForm');
++    if (!form) return;
++
++    // Re-initialization guard
++    if (form.dataset.poLogicInitialized) return;
++    form.dataset.poLogicInitialized = 'true';
++
++    console.log('%c[PurchaseOrderForm] Initializing logic...', 'color: #8e44ad; font-weight: bold;');
++
++    const tbody = form.querySelector('#po-items-tbody');
++    const addItemBtn = form.querySelector("#add-item-btn");
++    const productsData = window.getDataFromIsland('products-data', container);
++    const initialItemsData = window.getDataFromIsland('po-items-data', container);
++
++    if (!tbody || !addItemBtn || !productsData) {
++        console.error('[PurchaseOrderForm] CRITICAL: Missing required elements (#po-items-tbody, #add-item-btn, or #products-data). Halting.');
++        return;
++    }
++
++    let rowCounter = 0;
++
++    const calculateTotal = (row) => {
++        const qty = parseFloat(row.querySelector('input[name="quantity"]').value) || 0;
++        const basePrice = parseFloat(row.querySelector('input[name="base_price_per_unit"]').value) || 0;
++        const vatRate = parseFloat(row.querySelector('input[name="vat_rate"]').value) || 0;
++        const whtRate = parseFloat(row.querySelector('input[name="withholding_tax_rate"]').value) || 0;
++
++        const total = qty * (basePrice * (1 + vatRate / 100));
++        const whtAmount = (qty * basePrice) * (whtRate / 100);
++        const netPayable = total - whtAmount;
++
++        row.querySelector('.line-total').textContent = total.toFixed(3);
++        row.querySelector('.net-payable').textContent = netPayable.toFixed(3);
++    };
++
++    const addItemRow = (item = {}) => {
++        rowCounter++;
++        const row = document.createElement('tr');
++        row.innerHTML = `
++            <td class="ps-3">
++                <select name="product_id" class="form-select" data-row-id="${rowCounter}" required></select>
++            </td>
++            <td><input type="number" step="any" name="quantity" class="form-control text-center" value="${item.quantity || ''}" required></td>
++            <td><input type="number" step="0.001" name="base_price_per_unit" class="form-control text-center" value="${item.base_price_per_unit || ''}" required></td>
++            <td><input type="number" step="any" name="vat_rate" class="form-control text-center" value="${item.vat_rate || '14.00'}" required></td>
++            <td><input type="number" step="any" name="withholding_tax_rate" class="form-control text-center" value="${item.withholding_tax_rate || '1.00'}"></td>
++            <td class="text-center fw-bold line-total">0.000</td>
++            <td class="text-center fw-bold text-primary net-payable">0.000</td>
++            <td class="text-center pe-3">
++                <button type="button" class="btn btn-sm btn-outline-danger remove-item-btn"><i class="bi bi-trash"></i></button>
++            </td>
++        `;
++        tbody.appendChild(row);
++        
++        const newSelect = row.querySelector(`select[data-row-id="${rowCounter}"]`);
++        const tomselect = new TomSelect(newSelect, {
++            options: productsData.map(p => ({ value: p.id, text: `${p.name} (${p.code})` })),
++            placeholder: 'ابحث عن منتج...',
++            create: false,
++            rtl: true,
++            dropdownParent: 'body'
++        });
++
++        if (item.product_id) {
++            tomselect.setValue(item.product_id);
++        }
++        
++        row.addEventListener('input', () => calculateTotal(row));
++        calculateTotal(row);
++    };
++
++    tbody.addEventListener('click', function(e) {
++        if (e.target.closest('.remove-item-btn')) {
++            e.target.closest('tr').remove();
++        }
++    });
++
++    addItemBtn.addEventListener('click', () => addItemRow());
++
++    // Pre-populate with existing items on edit forms, or add one empty row for create forms
++    if (initialItemsData && initialItemsData.length > 0) {
++        initialItemsData.forEach(item => addItemRow(item));
++    } else {
++        addItemRow();
++    }
++}
++
++
++/**
++ * Initializes the logic for the Create Purchase Return page.
++ * It handles fetching available receipts for a supplier and adding item rows.
++ * @param {HTMLElement} container The parent container of the form.
++ */
++function initPurchaseReturnCreateLogic(container) {
++    const form = container.querySelector('#createPurchaseReturnForm');
++    if (!form) return;
++
++    if (form.dataset.prLogicInitialized) return;
++    form.dataset.prLogicInitialized = 'true';
++    
++    console.log('%c[PurchaseReturnCreate] Initializing logic...', 'color: #27ae60; font-weight: bold;');
++
++    const supplierSelect = form.querySelector('#supplier');
++    const addItemBtn = form.querySelector('#add-item-btn');
++    const tbody = form.querySelector('#return-items-tbody');
++    let rowCounter = 0;
++    let receiptOptions = []; // Cache for fetched receipts
++
++    const fetchReceipts = async () => {
++        const supplierId = supplierSelect.value;
++        if (!supplierId) {
++            receiptOptions = [];
++            return;
++        }
++        try {
++            const url = window.appUrls.apiSupplierReceipts.replace('0', supplierId);
++            const response = await fetch(url);
++            if (!response.ok) throw new Error('Failed to fetch receipts');
++            const data = await response.json();
++            receiptOptions = data.receipts.map(r => ({
++                value: r.id,
++                text: `[${r.release_date}] ${r.product_name} (رقم فحص: ${r.qc_no}) - متاح: ${r.quantity_available}`
++            }));
++        } catch (error) {
++            console.error("Error fetching receipts:", error);
++            receiptOptions = [];
++        }
++    };
++
++    const addItemRow = () => {
++        rowCounter++;
++        const row = document.createElement('tr');
++        row.innerHTML = `
++            <td class="ps-3">
++                <select name="receipt_id" class="form-select" data-row-id="${rowCounter}" required></select>
++            </td>
++            <td><input type="number" step="any" name="quantity_returned" class="form-control text-center" required></td>
++            <td class="text-center pe-3">
++                <button type="button" class="btn btn-sm btn-outline-danger remove-item-btn"><i class="bi bi-trash"></i></button>
++            </td>
++        `;
++        tbody.appendChild(row);
++        
++        const newSelect = row.querySelector(`select[data-row-id="${rowCounter}"]`);
++        new TomSelect(newSelect, {
++            options: receiptOptions,
++            placeholder: 'ابحث عن إيصال استلام...',
++            create: false,
++            rtl: true,
++            dropdownParent: 'body'
++        });
++    };
++
++    supplierSelect.addEventListener('change', async () => {
++        await fetchReceipts();
++        // Clear table and add a new row with updated options
++        tbody.innerHTML = '';
++        addItemRow();
++    });
++
++    tbody.addEventListener('click', function(e) {
++        if (e.target.closest('.remove-item-btn')) {
++            e.target.closest('tr').remove();
++        }
++    });
++
++    addItemBtn.addEventListener('click', addItemRow);
++
++    // Initial setup
++    if (tbody.rows.length === 0) {
++        addItemRow();
++    }
++}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -100,7 +100,7 @@ function initDashboardLogic(container) {
 
         if (supplierId) {
           // Use the URL from the global object
-          const apiUrl = window.appUrls.apiSupplierOpenPos.replace('<supplierId>', supplierId);
+          const apiUrl = window.appUrls.apiSupplierOpenPos.replace('99999', supplierId);
           fetch(apiUrl)
             .then(res => res.json())
             .then(data => {
@@ -121,7 +121,7 @@ function initDashboardLogic(container) {
 
         if (poId) {
           // Use the URL from the global object
-          const apiUrl = window.appUrls.apiPoItems.replace('<poId>', poId);
+          const apiUrl = window.appUrls.apiPoItems.replace('99999', poId);
           fetch(apiUrl)
             .then(res => res.json())
             .then(data => {
@@ -149,11 +149,27 @@ function initDashboardLogic(container) {
       poItemSelect.on('change', function(itemId) {
         console.log(`[DEBUG] EVENT: PO Item changed! New ID: ${itemId}`);
         const selectedOption = this.options[itemId];
+        const orderedQuantityContainer = container.querySelector('#ordered-quantity-container');
+        const quantityContainer = container.querySelector('#quantity-container');
+        const orderedQuantityInput = container.querySelector('#ordered_quantity');
+        const finalReceiptCheck = container.querySelector('#is_final_receipt');
+        const excessFreeCheck = container.querySelector('#excess_is_free');
+
         if (itemId && selectedOption) {
           const productId = selectedOption['data-product-id'];
           mainProductSelect.setValue(productId, true);
           mainCompanySelect.setValue(poSupplierSelect.getValue(), true);
-          quantityInput.value = selectedOption['data-quantity'];
+          
+          // NEW: Populate both ordered and received fields
+          const remainingQty = selectedOption['data-quantity'];
+          orderedQuantityInput.value = remainingQty;
+          quantityInput.value = remainingQty; 
+          
+          // NEW: Show ordered quantity and adjust layout
+          orderedQuantityContainer.style.display = 'block';
+          quantityContainer.classList.remove('col-12');
+          quantityContainer.classList.add('col-md-6');
+
           // Set VAT and WHT display fields (rates are fractions, display as %)
           const vatRateEl = container.querySelector('#po_vat_rate');
           const whtRateEl = container.querySelector('#po_wht_rate');
@@ -172,14 +188,39 @@ function initDashboardLogic(container) {
           mainProductSelect.clear();
           mainCompanySelect.clear();
           quantityInput.value = '';
+          orderedQuantityInput.value = '';
+          
+          // NEW: Hide ordered quantity and reset layout
+          orderedQuantityContainer.style.display = 'none';
+          quantityContainer.classList.remove('col-md-6');
+          quantityContainer.classList.add('col-12');
+
           const vatRateEl = container.querySelector('#po_vat_rate');
           const whtRateEl = container.querySelector('#po_wht_rate');
           if (vatRateEl) vatRateEl.value = '';
           if (whtRateEl) whtRateEl.value = '';
         }
+        // NEW: Always reset variance checkboxes on change
+        if(finalReceiptCheck) finalReceiptCheck.checked = false;
+        if(excessFreeCheck) excessFreeCheck.checked = false;
+        container.querySelector('#excess-quantity-container').style.display = 'none';
       });
 
       console.log('[DEBUG] 4. Event listeners attached successfully.');
+
+      // --- NEW: QUANTITY CHANGE EVENT for variance handling ---
+      const orderedQuantityInput = container.querySelector('#ordered_quantity');
+      const excessContainer = container.querySelector('#excess-quantity-container');
+      quantityInput.addEventListener('input', function() {
+          const receivedQty = parseFloat(this.value) || 0;
+          const orderedQty = parseFloat(orderedQuantityInput.value) || 0;
+          
+          if (poCheck.checked && receivedQty > orderedQty) {
+              excessContainer.style.display = 'block';
+          } else {
+              excessContainer.style.display = 'none';
+          }
+      });
 
     } catch (error) {
       console.error('[DEBUG] A critical error occurred inside the PO workflow block:', error);

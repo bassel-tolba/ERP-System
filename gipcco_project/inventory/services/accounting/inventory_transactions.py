@@ -102,6 +102,28 @@ def create_je_for_inventory_adjustment(adjustment: InventoryAdjustment) -> Optio
         else:
             # --- Standard Inventory Adjustment Logic ---
             if adjustment.adjustment_quantity < 0:  # Shortage
+                # --- NEW: Handle returns to supplier ---
+                if adjustment.reason_code == InventoryAdjustment.ReasonCode.RETURN_TO_SUPPLIER:
+                    ap_account = settings.accounts_payable
+                    if not ap_account:
+                        raise ValueError(_("Accounts Payable account is not configured."))
+                    
+                    logger.info(f"    Processing return to supplier: DEBIT '{ap_account.name}', CREDIT '{inventory_account.name}' with {adjustment_value}.")
+                    JournalEntryLine.objects.create(
+                        journal_entry=je, account=ap_account, amount=adjustment_value, entry_type=JournalEntryLine.EntryType.DEBIT,
+                        sub_ledger_object=adjustment.source_purchase_return_item.purchase_return.supplier
+                    )
+                    JournalEntryLine.objects.create(
+                        journal_entry=je, account=inventory_account, amount=adjustment_value, entry_type=JournalEntryLine.EntryType.CREDIT,
+                        sub_ledger_object=adjustment.product
+                    )
+                    # Early exit for this specific case
+                    je.validate_balance()
+                    logger.info(f"    Successfully created JE-{je.id} for InventoryAdjustment ID {adjustment.id}.")
+                    logger.info(f"<-- Exiting 'create_je_for_inventory_adjustment' for Adjustment ID {adjustment.id}.")
+                    return je
+                # --- END NEW ---
+
                 if adjustment.reason_code == InventoryAdjustment.ReasonCode.DAMAGE:
                     loss_account = settings.damaged_goods_expense_account
                 else:
@@ -168,20 +190,23 @@ def create_je_for_inventory_receipt(inventory_log: InventoryLog) -> Optional[Jou
     # 2. --- Get Accounts from Configuration ---
     settings = GeneralAccountingSettings.load()
     inventory_account = _get_product_inventory_account(inventory_log.product)
-    ap_account = settings.accounts_payable
+    # --- MODIFIED: Credit GRNI account instead of A/P ---
+    grni_account = settings.goods_received_not_invoiced_account
     vat_account = settings.vat_receivable
     wht_account = settings.withholding_tax_payable
     
-    if not all([inventory_account, ap_account, vat_account, wht_account]):
-        raise ValueError(_("One or more required general accounting settings are not configured."))
+    if not all([inventory_account, grni_account, vat_account, wht_account]):
+        raise ValueError(_("One or more required general accounting settings are not configured (Inventory, GRNI, VAT, WHT)."))
 
     # 3. --- Calculate Amounts ---
     quantity = Decimal(str(inventory_log.quantity))
     total_base_amount = inventory_log.base_unit_price * quantity
     vat_amount = inventory_log.vat_amount
     wht_amount = inventory_log.withholding_tax_amount
-    total_invoice_amount = total_base_amount + vat_amount
+    
+    # The costing_unit_price is now calculated in a pre_save signal.
     costing_value = inventory_log.costing_unit_price * quantity
+    total_invoice_amount = total_base_amount + vat_amount
     
     # 4. --- Create Journal Entry and Lines within a Transaction ---
     with transaction.atomic():
@@ -220,10 +245,10 @@ def create_je_for_inventory_receipt(inventory_log: InventoryLog) -> Optional[Jou
                 entry_type=JournalEntryLine.EntryType.DEBIT
             )
         
-        # Line 3: Credit Accounts Payable
+        # Line 3: Credit Goods Received, Not Invoiced (GRNI) Account
         JournalEntryLine.objects.create(
             journal_entry=je,
-            account=ap_account,
+            account=grni_account,
             amount=(total_invoice_amount - wht_amount).quantize(Decimal('0.001')),
             entry_type=JournalEntryLine.EntryType.CREDIT,
             sub_ledger_object=inventory_log.company

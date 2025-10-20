@@ -1,6 +1,7 @@
 # gipcco_project/inventory/signals.py
 
 import logging
+from decimal import Decimal
 
 from django.db.models.signals import post_save, post_delete, pre_save, pre_delete
 from django.dispatch import receiver
@@ -40,12 +41,31 @@ from .services.accounting_service import (
     create_je_for_expense_log,
     _get_product_expense_account
 )
+from .services import purchasing_service
 
 logger = logging.getLogger(__name__)
 
 # ==============================================================================
 # PRE-SAVE AND PRE-DELETE HOOKS FOR DATA INTEGRITY
 # ==============================================================================
+
+@receiver(pre_save, sender=InventoryLog)
+def calculate_initial_costing_price(sender, instance: InventoryLog, **kwargs):
+    """
+    On first save, calculate the initial costing_unit_price. This prevents
+    a recursion loop that would happen if we calculated and saved this in
+    the post_save signal handler.
+    """
+    if instance.pk is None:  # Only on creation
+        if instance.quantity > 0:
+            quantity = Decimal(str(instance.quantity))
+            total_base_amount = instance.base_unit_price * quantity
+            initial_total_cost = total_base_amount
+            if instance.vat_treatment == InventoryLog.VatTreatment.CAPITALIZED:
+                initial_total_cost += instance.vat_amount
+            
+            instance.costing_unit_price = (initial_total_cost / quantity).quantize(Decimal('0.001'))
+
 
 # A dictionary mapping transactional models to their date fields.
 # This allows us to create generic signal handlers.
@@ -140,6 +160,12 @@ def handle_inventory_log_release(sender, instance: InventoryLog, **kwargs):
         logger.debug(f"Signal triggered for released InventoryLog ID {instance.id}. Attempting to create JE.")
         # REMOVED try...except block to allow errors to propagate
         create_je_for_inventory_receipt(inventory_log=instance)
+    
+    # --- NEW: Update PO Status ---
+    if instance.po_item_id:
+        # When a log is saved, we assume it's not a "final" receipt unless specified via UI.
+        # The signal context doesn't know about the UI checkbox.
+        purchasing_service.update_po_status_after_receipt(instance.id, is_final_receipt=False)
 
 
 @receiver(post_delete, sender=InventoryLog)

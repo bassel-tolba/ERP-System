@@ -86,6 +86,7 @@ class InventoryAdjustment(models.Model):
         DATA_ENTRY_ERROR = 'data_entry_error', _('تصحيح خطأ إدخال بيانات')
         OVERAGE_FOUND = 'overage_found', _('زيادة وجدت أثناء الجرد')
         SALES_RETURN_STOCK = 'sales_return_stock', _('إرجاع إلى المخزون من المبيعات')
+        RETURN_TO_SUPPLIER = 'return_to_supplier', _('مرتجع إلى المورد')
         OTHER = 'other', _('أخرى')
 
     product = models.ForeignKey(
@@ -122,6 +123,14 @@ class InventoryAdjustment(models.Model):
         null=True,
         blank=True
     )
+    source_purchase_return_item = models.OneToOneField(
+        'inventory.PurchaseReturnItem',
+        on_delete=models.CASCADE,
+        related_name='inventory_adjustment',
+        verbose_name=_("Source Purchase Return Item"),
+        null=True,
+        blank=True
+    )
     
     # --- Context ---
     inventory_count = models.ForeignKey(
@@ -143,10 +152,11 @@ class InventoryAdjustment(models.Model):
         sources = [
             self.source_log,
             self.source_finished_product,
-            self.source_sales_return_item
+            self.source_sales_return_item,
+            self.source_purchase_return_item
         ]
         if sum(s is not None for s in sources) > 1:
-            raise ValidationError(_("An adjustment can only be linked to one source (Inventory Log, Finished Product Receipt, or Sales Return Item)."))
+            raise ValidationError(_("An adjustment can only be linked to one source (Log, FP Receipt, Sales Return, or Purchase Return)."))
         if all(s is None for s in sources):
             # Allow adjustments outside of a formal count, but require a source
             if not self.inventory_count:

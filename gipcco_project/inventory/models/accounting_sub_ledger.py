@@ -30,6 +30,16 @@ class SupplierInvoice(models.Model):
     invoice_date = models.DateField(verbose_name=_("Invoice Date"))
     due_date = models.DateField(verbose_name=_("Due Date"))
     
+    # --- MODIFIED: Fields to capture actual invoice values for 3-way match ---
+    actual_subtotal = models.DecimalField(
+        max_digits=14, decimal_places=3, null=True, blank=True, verbose_name=_("Actual Subtotal (from Invoice)")
+    )
+    actual_vat = models.DecimalField(
+        max_digits=14, decimal_places=3, null=True, blank=True, verbose_name=_("Actual VAT (from Invoice)")
+    )
+    
+    # This field will now be calculated from actual_subtotal + actual_vat upon posting.
+    # It can also be populated by summing receipts for draft invoices.
     total_amount = models.DecimalField(
         max_digits=14, decimal_places=3, default=Decimal('0.000'), verbose_name=_("Total Invoice Amount")
     )
@@ -39,10 +49,17 @@ class SupplierInvoice(models.Model):
     status = models.CharField(
         max_length=20,
         choices=InvoiceStatus.choices,
-        default=InvoiceStatus.AWAITING_PAYMENT,
+        default=InvoiceStatus.DRAFT, # --- MODIFIED: Default to Draft ---
         verbose_name=_("Status")
     )
     notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
+
+    # --- NEW: Link to the final JE created upon posting ---
+    journal_entry = models.ForeignKey(
+        'JournalEntry', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='+',
+        verbose_name=_("Posting Journal Entry")
+    )
 
     class Meta:
         db_table = 'supplier_invoices'

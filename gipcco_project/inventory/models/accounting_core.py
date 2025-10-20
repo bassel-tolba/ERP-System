@@ -390,6 +390,22 @@ class GeneralAccountingSettings(models.Model):
         Account, on_delete=models.PROTECT, related_name='+', null=True, blank=True,
         verbose_name=_("Damaged Goods / Scrap Expense Account")
     )
+    # --- NEW: GRNI & PPV ACCOUNTS ---
+    goods_received_not_invoiced_account = models.ForeignKey(
+        Account, on_delete=models.PROTECT, related_name='+', null=True, blank=True,
+        verbose_name=_("Goods Received Not Invoiced (GRNI) Account"),
+        help_text=_("A temporary liability account for received goods before the supplier invoice is posted.")
+    )
+    purchase_price_variance_account = models.ForeignKey(
+        Account, on_delete=models.PROTECT, related_name='+', null=True, blank=True,
+        verbose_name=_("Purchase Price Variance (PPV) Account"),
+        help_text=_("An expense account to record differences between PO price and actual invoice price.")
+    )
+    landed_costs_clearing_account = models.ForeignKey(
+        Account, on_delete=models.PROTECT, related_name='+', null=True, blank=True,
+        verbose_name=_("Landed Costs Clearing Account"),
+        help_text=_("A temporary account to hold third-party landed costs before they are allocated to inventory.")
+    )
 
     class Meta:
         db_table = 'general_accounting_settings'

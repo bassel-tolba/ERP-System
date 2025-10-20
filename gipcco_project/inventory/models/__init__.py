@@ -10,3 +10,4 @@ from .audit_and_closing import *
 from .bank_reconciliation import *
 from .opening_balance import *
 from .inventory_counts import *
+from .purchasing import *

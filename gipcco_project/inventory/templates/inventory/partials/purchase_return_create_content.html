@@ -1,0 +1,100 @@
+<!-- gipcco_project/inventory/templates/inventory/partials/purchase_return_create_content.html -->
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0" style="font-weight: 700;">إنشاء مرتجع مشتريات جديد</h1>
+    <a href="{% url 'inventory:purchase_returns_list' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-right"></i> العودة إلى القائمة
+    </a>
+</div>
+
+<form method="post" action="{% url 'inventory:create_purchase_return' %}">
+    {% csrf_token %}
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">البيانات الأساسية</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="supplier" class="form-label fw-bold">المورد</label>
+                    <select class="form-select searchable-select" id="supplier" name="supplier" required>
+                        <option value="">اختر مورد...</option>
+                        {% for supplier in suppliers %}
+                        <option value="{{ supplier.id }}">{{ supplier.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="return_date" class="form-label fw-bold">تاريخ الإرجاع</label>
+                    <input type="text" class="form-control datepicker" id="return_date" name="return_date" required value="{{ today_date }}">
+                </div>
+                <div class="col-12">
+                    <label for="notes" class="form-label">ملاحظات</label>
+                    <textarea name="notes" id="notes" rows="3" class="form-control"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">البنود المرتجعة</h5>
+            <button type="button" class="btn btn-success" id="add-item-btn"><i class="bi bi-plus-lg"></i> إضافة بند</button>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-3" style="width: 50%;">إيصال الاستلام الأصلي</th>
+                            <th class="text-center">الكمية المرتجعة</th>
+                            <th class="text-center pe-3">إجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody id="return-items-tbody">
+                        <!-- JS will populate this -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="mt-4 text-center">
+        <button type="submit" class="btn btn-primary btn-lg"><i class="bi bi-check2-circle"></i> حفظ المرتجع</button>
+    </div>
+</form>
+
+<script>
+// Simplified JS for creating purchase returns
+// A more robust implementation would use a dedicated JS file and dynamic loading
+document.addEventListener("DOMContentLoaded", function() {
+    const addItemBtn = document.getElementById('add-item-btn');
+    const tbody = document.getElementById('return-items-tbody');
+    let rowCounter = 0;
+
+    const addItemRow = () => {
+        rowCounter++;
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td class="ps-3">
+                <select name="receipt_id" class="form-select" data-row-id="${rowCounter}" required></select>
+            </td>
+            <td><input type="number" step="any" name="quantity_returned" class="form-control text-center" required></td>
+            <td class="text-center pe-3">
+                <button type="button" class="btn btn-sm btn-outline-danger remove-item-btn"><i class="bi bi-trash"></i></button>
+            </td>
+        `;
+        tbody.appendChild(row);
+        // Note: You would need an API endpoint to fetch receipts for the selected supplier
+        // and populate the select dropdown. This is a simplified example.
+    };
+
+    tbody.addEventListener('click', function(e) {
+        if (e.target.closest('.remove-item-btn')) {
+            e.target.closest('tr').remove();
+        }
+    });
+
+    addItemBtn.addEventListener('click', addItemRow);
+    addItemRow(); // Start with one row
+});
+</script>

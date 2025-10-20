@@ -27,6 +27,7 @@ from inventory.models import (
 )
 from inventory.services.adjusting_entries_service import run_monthly_accruals
 from inventory.services.sales_return_service import process_inspected_return, create_credit_memo_from_return
+from inventory.services import purchasing_service
 
 # A dictionary to hold created objects for easy reference
 # This avoids querying the DB repeatedly
@@ -105,6 +106,11 @@ def create_chart_of_accounts():
     create_account('5020501', 'مصروف إهلاك - آلات ومعدات', Account.AccountType.EXPENSE, '50205')
     create_account('5020502', 'مصروف إهلاك - أثاث وتركيبات', Account.AccountType.EXPENSE, '50205')
     create_account('50208', 'رسوم استشارات', Account.AccountType.EXPENSE, '502')
+    create_account('50209', 'مصروف بضاعة تالفة', Account.AccountType.EXPENSE, '502')
+    # --- NEW PURCHASING ACCOUNTS ---
+    create_account('20206', 'بضاعة مستلمة غير مفوترة (GRNI)', Account.AccountType.LIABILITY, '202')
+    create_account('504', 'فروقات أسعار الشراء (PPV)', Account.AccountType.EXPENSE, '500')
+    create_account('1020407', 'تسوية تكاليف شحن', Account.AccountType.ASSET, '10204') # Landed Costs Clearing
 
     CONTEXT['accounts'] = accounts
     return accounts
@@ -189,7 +195,11 @@ class Command(BaseCommand):
             prepaid_expenses_account=accounts['10205'],
             accrued_expenses_account=accounts['2020203'],
             sales_returns_account=accounts['40102'],
-            sales_returns_clearing_account=accounts['1020406']
+            sales_returns_clearing_account=accounts['1020406'],
+            damaged_goods_expense_account=accounts['50209'],
+            goods_received_not_invoiced_account=accounts['20206'],
+            purchase_price_variance_account=accounts['504'],
+            landed_costs_clearing_account=accounts['1020407']
         )
         ProductTypeAccountingSettings.objects.create(
             product_type=Product.ProductType.RAW_MATERIAL,
@@ -224,7 +234,8 @@ class Command(BaseCommand):
         supplier2, _ = Company.objects.get_or_create(name="Advanced Medical Packaging Inc.")
         supplier3, _ = Company.objects.get_or_create(name="PetroChem Lubricants")
         supplier4, _ = Company.objects.get_or_create(name="Innovate Solutions Consulting")
-        CONTEXT['suppliers'] = {'pharma': supplier1, 'packaging': supplier2, 'mro': supplier3, 'consulting': supplier4}
+        supplier5, _ = Company.objects.get_or_create(name="Global Freight Forwarders")
+        CONTEXT['suppliers'] = {'pharma': supplier1, 'packaging': supplier2, 'mro': supplier3, 'consulting': supplier4, 'shipping': supplier5}
 
         customer1, _ = Customer.objects.get_or_create(name="City Central Pharmacy")
         customer2, _ = Customer.objects.get_or_create(name="County General Hospital")
@@ -639,6 +650,94 @@ class Command(BaseCommand):
             status=EmployeeAdvance.Status.OPEN
         )
         self.stdout.write("   - Created an OPEN employee advance.")
+
+        # Purchase Return Workflow
+        self.stdout.write("   - Starting Purchase Return Workflow...")
+        from inventory.models import PurchaseReturn, PurchaseReturnItem
+        # Step 1: Create the return object
+        pr = PurchaseReturn.objects.create(
+            supplier=CONTEXT['suppliers']['mro'],
+            return_date=date(2025, 9, 25),
+            status=PurchaseReturn.Status.PENDING
+        )
+        PurchaseReturnItem.objects.create(
+            purchase_return=pr,
+            original_receipt=log_mro,
+            quantity_returned=3.0
+        )
+        self.stdout.write("     - Created Purchase Return for 3 cans of lubricant.")
+
+        # Step 2: Process the inventory movement (creates negative adjustment)
+        purchasing_service.process_inventory_return(CONTEXT['user'], pr)
+        self.stdout.write("     - Processed inventory return, creating adjustment.")
+
+        # Step 3: Create the debit memo
+        purchasing_service.create_debit_memo_from_return(
+            user=CONTEXT['user'],
+            purchase_return=pr,
+            memo_data={'memo_number': 'DM-001', 'memo_date': date(2025, 9, 26)}
+        )
+        self.stdout.write("     - Created supplier debit memo.")
+
+        # Partially Received & Closed PO
+        po_partial, _ = PurchaseOrder.objects.get_or_create(
+            po_number="PO-DEMO-PARTIAL",
+            defaults={
+                'supplier': CONTEXT['suppliers']['packaging'],
+                'order_date': date(2025, 9, 11),
+                'status': PurchaseOrder.Status.PENDING
+            }
+        )
+        po_item_partial, _ = PurchaseOrderItem.objects.get_or_create(
+            purchase_order=po_partial,
+            product=CONTEXT['products']['pvc_bag'],
+            defaults={
+                'quantity_ordered': 1000.0,
+                'base_price_per_unit': Decimal("0.750"),
+                'vat_rate': Decimal("0.14"),
+                'withholding_tax_rate': Decimal("0.00")
+            }
+        )
+        log_partial = InventoryLog.objects.create(
+            po_item=po_item_partial,
+            product=CONTEXT['products']['pvc_bag'],
+            company=CONTEXT['suppliers']['packaging'],
+            quantity=950.0, # Under-delivered
+            timestamp=timezone.make_aware(timezone.datetime(2025, 9, 15, 10, 0, 0)),
+            status=InventoryLog.Status.QUARANTINED,
+            base_unit_price=Decimal("0.750")
+        )
+        # Simulate the user checking the "final receipt" box for this under-delivery
+        purchasing_service.update_po_status_after_receipt(log_partial.id, is_final_receipt=True)
+        self.stdout.write("   - Created a partially received PO and manually closed the line short.")
+
+        # Landed Cost Workflow
+        self.stdout.write("   - Starting 3rd-Party Landed Cost Workflow...")
+        from inventory.models import LandedCostInvoice, LandedCostInvoiceItem, LandedCostType
+        lc_inv = LandedCostInvoice.objects.create(
+            vendor=CONTEXT['suppliers']['shipping'],
+            invoice_number="LC-DEMO-001",
+            invoice_date=date(2025, 9, 7),
+            total_amount=Decimal("250.000")
+        )
+        freight_cost, _ = LandedCostType.objects.get_or_create(name="Freight")
+        LandedCostInvoiceItem.objects.create(landed_cost_invoice=lc_inv, cost_type=freight_cost, amount=lc_inv.total_amount)
+        purchasing_service.post_landed_cost_invoice(lc_inv)
+        self.stdout.write("     - Created and posted a landed cost invoice from a shipping vendor.")
+
+        # Allocate this cost to the first saline receipt
+        purchasing_service.allocate_landed_costs_from_invoice(
+            landed_cost_invoice_ids=[lc_inv.id],
+            receipt_log_ids=[CONTEXT['log1'].id],
+            user=CONTEXT['user']
+        )
+        self.stdout.write("     - Allocated the shipping cost to the saline inventory receipt.")
+
+
+    def create_opening_balances(self):
+        self.stdout.write("5. Creating opening balances (if any)...")
+        # This is where you would add logic to create opening balance JEs
+        pass
 
 
     def create_opening_balances(self):

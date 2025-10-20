@@ -11,12 +11,15 @@ from .views.production_returns import production_returns, delete_production_retu
 # --- MODIFIED: Import corrected views ---
 from .views.analysis_ledger_visuals import visuals
 from .views.purchase_orders import purchase_orders, create_purchase_order, view_purchase_order, edit_purchase_order, delete_purchase_order
+from .views import purchasing_views
+from .views import landed_cost_views
 from .views.finished_products import finished_goods_status, receive_finished_product, view_finished_product, release_from_quarantine as release_fg_from_quarantine
 from .views.adjustments import inventory_counts_list, create_inventory_count, manage_inventory_count, allocate_inventory_variances
 from .views.api import (
     get_used_qc_sources, api_batch_details, get_product_tags, api_get_open_pos_for_supplier, 
     api_get_po_items, api_get_full_batch_analysis, api_get_sellable_stock, 
-    api_get_available_stock, api_get_stock_sources_for_product
+    api_get_available_stock, api_get_stock_sources_for_product,
+    api_get_unallocated_landed_cost_invoices, api_get_receipts_for_allocation
 )
 from .views import api
 # --- MODIFIED: Corrected sales views import ---
@@ -72,6 +75,16 @@ urlpatterns = [
     path('purchase_order/<int:pk>/edit/', edit_purchase_order, name='edit_purchase_order'),
     path('purchase_order/<int:pk>/delete/', delete_purchase_order, name='delete_purchase_order'),
 
+    # --- NEW: Purchase Return Routes ---
+    path('purchase_returns/', purchasing_views.purchase_returns_list, name='purchase_returns_list'),
+    path('purchase_returns/create/', purchasing_views.create_purchase_return, name='create_purchase_return'),
+    path('purchase_return/<int:pk>/', purchasing_views.view_purchase_return, name='view_purchase_return'),
+    path('purchase_return/<int:pk>/process/', purchasing_views.process_inventory_return_view, name='process_inventory_return'),
+    path('purchase_return/<int:pk>/create_debit_memo/', purchasing_views.create_debit_memo_from_return_view, name='create_debit_memo_from_return'),
+
+    # --- NEW: Landed Cost Routes ---
+    path('landed_cost/workspace/', landed_cost_views.allocation_workspace, name='landed_cost_workspace'),
+
     # Template Routes
     path('shop_order_templates/', shop_order_templates, name='shop_order_templates'),
     path('shop_order_templates/delete/<int:pk>/', delete_shop_order_template, name='delete_shop_order_template'),
@@ -85,6 +98,11 @@ urlpatterns = [
     path('batch/delete/<int:pk>/', delete_batch, name='delete_batch'),
     path('batch/item/add/<int:batch_pk>/', add_batch_item, name='add_batch_item'),
     path('batch/<int:batch_pk>/update_all/', update_batch_items_bulk, name='update_batch_items_bulk'),
+
+    # --- NEW: Landed Cost APIs ---
+    path('api/landed-cost/invoices/', api.api_get_unallocated_landed_cost_invoices, name='api_get_unallocated_landed_cost_invoices'),
+    path('api/landed-cost/receipts/', api.api_get_receipts_for_allocation, name='api_get_receipts_for_allocation'),
+
     path('batch/item/delete/<int:item_pk>/', delete_batch_item, name='delete_batch_item'),
 
     # Finished Product Routes
@@ -145,6 +163,8 @@ urlpatterns = [
     path('financials/supplier_invoices/', financials.supplier_invoices, name='supplier_invoices'),
     path('financials/supplier_invoices/create/', financials.create_supplier_invoice, name='create_supplier_invoice'),
     path('financials/supplier_invoice/<int:pk>/', financials.view_supplier_invoice, name='view_supplier_invoice'),
+    path('financials/supplier_invoice/<int:pk>/post/', financials.post_supplier_invoice_view, name='post_supplier_invoice'),
+    path('financials/supplier_invoice/<int:pk>/allocate_costs/', financials.allocate_landed_costs_view, name='allocate_landed_costs'),
     path('financials/supplier_invoice/<int:pk>/delete/', financials.delete_supplier_invoice, name='delete_supplier_invoice'),
     path('financials/supplier_invoice/<int:invoice_pk>/apply_payment/', financials.apply_payment_to_invoice, name='apply_payment_to_invoice'),
     path('financials/customer_invoices/', financials.customer_invoices, name='customer_invoices'),

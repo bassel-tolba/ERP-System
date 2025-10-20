@@ -17,11 +17,11 @@
   - **Calls:** `_check_period_is_open()`, `_get_product_inventory_account()` from `_helpers.py`.
 
 - `create_je_for_inventory_receipt(inventory_log: InventoryLog)`:
-  - **Description:** Creates a comprehensive, balanced journal entry for a released inventory receipt from a supplier.
+  - **Description:** Creates a comprehensive, balanced journal entry for a released inventory receipt from a supplier, accruing the liability to a temporary account.
   - **Accounting Logic:**
     - **Debit:** Inventory account (at the item's costing value).
     - **Debit:** VAT Receivable account (if VAT is recoverable).
-    - **Credit:** Accounts Payable account (for the net amount owed to the supplier).
+    - **Credit:** Goods Received, Not Invoiced (GRNI) account (a temporary liability).
     - **Credit:** Withholding Tax Payable account (if applicable).
   - **Key Features:**
     - Only processes logs with a status of `RELEASED`.

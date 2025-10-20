@@ -25,7 +25,6 @@ from .models import (
   BankReconciliation, BankStatementLine, FiscalYear, TransactionCorrection,
     OpeningBalanceEntry, OpeningBalanceEntryLine, OpeningBalanceSubLedgerDetail
 )
-from .views.dashboard import update_po_status
 from .views.helpers import check_and_update_batch_customization
 from .services.costing_service import recalculate_cost_history_for_product
 

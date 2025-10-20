@@ -23,10 +23,10 @@ import logging
 from ..models import (
     Company, SupplierInvoice, SupplierInvoiceItem, InventoryLog,
     Payment, PaymentApplication, BankAccount, Customer, CustomerInvoice, FinishedProductDispatch, CustomerInvoiceItem, CustomerPaymentApplication, SalesOrder, BankTransfer, JournalEntry, JournalEntryLine, FixedAsset, DepreciationLog, BankReconciliation, BankStatementLine, Account, FiscalYear, FinancialPeriod, PeriodClosingAuditLog,
-    CostPool, AllocationDriver, OverheadAllocationRun, ExpenseLog
+    CostPool, AllocationDriver, OverheadAllocationRun, ExpenseLog, LandedCostType
 )
 from ..forms import JournalEntryForm, JournalEntryLineFormSet
-from ..services import expense_service
+from ..services import expense_service, accounting_service
 from ..services.overhead_service import execute_overhead_allocation_run, apply_overhead_to_finished_goods
 from ..services.accounting_service import create_je_for_overhead_allocation, create_je_for_overhead_application
 from ..services.period_closing_service import update_checklist_for_period
@@ -64,7 +64,8 @@ def supplier_invoices(request: HttpRequest) -> HttpResponse:
 
 def create_supplier_invoice(request: HttpRequest) -> HttpResponse:
     """
-    Handles the creation of a new supplier invoice from unbilled receipts OR unsettled expenses.
+    Handles the creation of a new DRAFT supplier invoice from unbilled receipts.
+    The invoice is saved in a draft state and must be posted separately to affect the GL.
     """
     if request.method == 'POST':
         try:
@@ -73,11 +74,14 @@ def create_supplier_invoice(request: HttpRequest) -> HttpResponse:
             invoice_date_str = request.POST.get('invoice_date')
             due_date_str = request.POST.get('due_date')
             
-            # Determine the source of the invoice items
-            source_type = request.POST.get('source_type', 'receipts') # Default to receipts
+            # --- NEW: Get actual invoice amounts from user input ---
+            actual_subtotal_str = request.POST.get('actual_subtotal')
+            actual_vat_str = request.POST.get('actual_vat')
+            
+            source_type = request.POST.get('source_type', 'receipts')
 
-            if not all([supplier_id, invoice_number, invoice_date_str, due_date_str]):
-                messages.error(request, "يرجى تعبئة جميع الحقول الأساسية.")
+            if not all([supplier_id, invoice_number, invoice_date_str, due_date_str, actual_subtotal_str, actual_vat_str]):
+                messages.error(request, "يرجى تعبئة جميع الحقول الأساسية، بما في ذلك الإجمالي الفرعي والضريبة الفعلية من الفاتورة.")
                 return redirect('inventory:create_supplier_invoice')
 
             if SupplierInvoice.objects.filter(supplier_id=supplier_id, invoice_number=invoice_number).exists():
@@ -86,54 +90,49 @@ def create_supplier_invoice(request: HttpRequest) -> HttpResponse:
 
             invoice_date = datetime.strptime(invoice_date_str, '%Y-%m-%d').date()
             due_date = datetime.strptime(due_date_str, '%Y-%m-%d').date()
+            actual_subtotal = Decimal(actual_subtotal_str)
+            actual_vat = Decimal(actual_vat_str)
 
+            # The expense service workflow is complex and will be adapted in a future step.
             if source_type == 'expenses':
-                expense_log_ids = request.POST.getlist('item_ids')
-                if not expense_log_ids:
-                    messages.error(request, "يرجى اختيار مصروف واحد على الأقل لإنشاء الفاتورة.")
-                    return redirect('inventory:create_supplier_invoice')
-                
-                # Use the dedicated service function for this workflow
-                invoice = expense_service.create_invoice_from_expense_logs(
-                    user=request.user,
-                    supplier_id=int(supplier_id),
+                messages.error(request, "إنشاء الفواتير من المصروفات قيد التطوير حاليًا.")
+                return redirect('inventory:create_supplier_invoice')
+            
+            receipt_ids = request.POST.getlist('item_ids')
+            if not receipt_ids:
+                messages.error(request, "يرجى اختيار فاتورة استلام واحدة على الأقل.")
+                return redirect('inventory:create_supplier_invoice')
+
+            with transaction.atomic():
+                # --- MODIFIED: Create a DRAFT invoice with actual values ---
+                invoice = SupplierInvoice.objects.create(
+                    supplier_id=supplier_id,
                     invoice_number=invoice_number,
                     invoice_date=invoice_date,
                     due_date=due_date,
-                    expense_log_ids=[int(pk) for pk in expense_log_ids]
+                    actual_subtotal=actual_subtotal,
+                    actual_vat=actual_vat,
+                    status=SupplierInvoice.InvoiceStatus.DRAFT
                 )
-            
-            else: # Default to 'receipts' workflow
-                receipt_ids = request.POST.getlist('item_ids')
-                if not receipt_ids:
-                    messages.error(request, "يرجى اختيار فاتورة استلام واحدة على الأقل.")
-                    return redirect('inventory:create_supplier_invoice')
-
-                with transaction.atomic():
-                    invoice = SupplierInvoice.objects.create(
-                        supplier_id=supplier_id,
-                        invoice_number=invoice_number,
-                        invoice_date=invoice_date,
-                        due_date=due_date,
-                        status=SupplierInvoice.InvoiceStatus.AWAITING_PAYMENT
+                
+                receipts = InventoryLog.objects.filter(id__in=receipt_ids, company_id=supplier_id)
+                total_receipt_amount = Decimal('0.0')
+                
+                items_to_create = []
+                for receipt in receipts:
+                    receipt_total = (receipt.base_unit_price * Decimal(str(receipt.quantity))) + receipt.vat_amount
+                    items_to_create.append(
+                        SupplierInvoiceItem(invoice=invoice, receipt=receipt, amount=receipt_total)
                     )
-                    
-                    receipts = InventoryLog.objects.filter(id__in=receipt_ids, company_id=supplier_id)
-                    total_amount = Decimal('0.0')
-                    
-                    items_to_create = []
-                    for receipt in receipts:
-                        receipt_total = (receipt.base_unit_price * Decimal(str(receipt.quantity))) + receipt.vat_amount
-                        items_to_create.append(
-                            SupplierInvoiceItem(invoice=invoice, receipt=receipt, amount=receipt_total)
-                        )
-                        total_amount += receipt_total
-                    
-                    SupplierInvoiceItem.objects.bulk_create(items_to_create)
-                    invoice.total_amount = total_amount
-                    invoice.save()
+                    total_receipt_amount += receipt_total
+                
+                SupplierInvoiceItem.objects.bulk_create(items_to_create)
+                
+                # Set the total_amount to the sum of receipts for reference while in draft
+                invoice.total_amount = total_receipt_amount
+                invoice.save()
 
-            messages.success(request, f"تم إنشاء فاتورة المورد رقم {invoice.invoice_number} بنجاح.")
+            messages.success(request, f"تم إنشاء مسودة فاتورة المورد رقم {invoice.invoice_number} بنجاح. يجب ترحيلها لتؤثر على الحسابات.")
             return redirect('inventory:view_supplier_invoice', pk=invoice.pk)
         except ValidationError as e:
             messages.error(request, f"خطأ في البيانات: {e}")
@@ -167,10 +166,59 @@ def view_supplier_invoice(request: HttpRequest, pk: int) -> HttpResponse:
         'applications': invoice.applications.select_related('payment__bank_account').order_by('-payment__payment_date'),
         'bank_accounts': BankAccount.objects.all(),
         'today_date': timezone.now().strftime('%Y-%m-%d'),
+        'landed_cost_types': LandedCostType.objects.all(),
     }
     if 'X-Partial-Request' in request.headers:
         return render(request, 'inventory/partials/supplier_invoice_view_content.html', context)
     return render(request, 'inventory/supplier_invoice_view.html', context)
+
+
+@require_POST
+@permission_required('inventory.change_supplierinvoice', raise_exception=True)
+def post_supplier_invoice_view(request: HttpRequest, pk: int) -> HttpResponse:
+    """
+    View to handle the action of posting a single draft supplier invoice.
+    """
+    invoice = get_object_or_404(SupplierInvoice, pk=pk)
+    try:
+        # The service function contains all the business logic
+        accounting_service.post_supplier_invoice(invoice)
+        messages.success(request, f"تم ترحيل فاتورة المورد رقم {invoice.invoice_number} إلى الحسابات بنجاح.")
+    except Exception as e:
+        logger.exception(f"Error posting supplier invoice ID {pk}")
+        messages.error(request, f"حدث خطأ أثناء ترحيل الفاتورة: {e}")
+    
+    return redirect('inventory:view_supplier_invoice', pk=pk)
+
+
+@require_POST
+@permission_required('inventory.change_supplierinvoice', raise_exception=True)
+def allocate_landed_costs_view(request: HttpRequest, pk: int) -> HttpResponse:
+    """
+    View to handle adding a landed cost item and then triggering the allocation service.
+    """
+    invoice = get_object_or_404(SupplierInvoice, pk=pk)
+    try:
+        cost_type_id = request.POST.get('cost_type')
+        amount_str = request.POST.get('amount')
+
+        if not all([cost_type_id, amount_str]):
+            raise ValueError(_("Cost Type and Amount are required."))
+
+        # 1. Create the Landed Cost object
+        amount = Decimal(amount_str)
+        invoice.landed_costs.create(cost_type_id=cost_type_id, amount=amount)
+        messages.success(request, f"Landed cost item added successfully. Allocating costs...")
+
+        # 2. Trigger the allocation service
+        accounting_service.allocate_landed_costs(invoice)
+        messages.success(request, "Landed costs allocated to receipt items successfully.")
+
+    except Exception as e:
+        logger.exception(f"Error allocating landed costs for invoice ID {pk}")
+        messages.error(request, f"An error occurred: {e}")
+    
+    return redirect('inventory:view_supplier_invoice', pk=pk)
 
 
 @require_POST

@@ -73,6 +73,8 @@
                 <span class="badge bg-warning-subtle border border-warning-subtle text-warning-emphasis rounded-pill">{{ invoice.get_status_display }}</span>
               {% elif invoice.status == 'awaiting_payment' %}
                 <span class="badge bg-danger-subtle border border-danger-subtle text-danger-emphasis rounded-pill">{{ invoice.get_status_display }}</span>
+              {% elif invoice.status == 'draft' %}
+                <span class="badge bg-secondary-subtle border border-secondary-subtle text-secondary-emphasis rounded-pill">{{ invoice.get_status_display }}</span>
               {% else %}
                 <span class="badge bg-secondary-subtle border border-secondary-subtle text-secondary-emphasis rounded-pill">{{ invoice.get_status_display }}</span>
               {% endif %}

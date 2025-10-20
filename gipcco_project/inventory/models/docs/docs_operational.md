@@ -4,4 +4,4 @@
 - `Company`: Represents a company or supplier of materials.
 - `Product`: Represents a product, which can be a raw material, packaging, or a final product.
 - `ProductTag`: A tag that can be applied to products for categorization.
-- `InventoryLog`: Represents a single inventory transaction, such as a receipt or consumption.
+- `InventoryLog`: Represents a single inventory transaction, such as a receipt or consumption. Now includes stored `costing_unit_price` and `landed_cost_component` fields for accurate, persistent costing.

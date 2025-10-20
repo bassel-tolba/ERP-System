@@ -1,7 +1,7 @@
 # File: gipcco_project/inventory/models/accounting_sub_ledger.py
 - **Purpose:** Defines models that represent sub-ledgers for accounts receivable and accounts payable.
 
-- `SupplierInvoice`: Represents an invoice received from a supplier.
+- `SupplierInvoice`: Represents an invoice received from a supplier. Now defaults to a `Draft` status and includes `actual_subtotal` and `actual_vat` fields to enable the three-way match process. It also contains a link to the final `journal_entry` created upon posting.
 - `SupplierInvoiceItem`: Links a specific inventory receipt or expense to a supplier invoice.
 - `PaymentApplication`: Applies a payment to a specific supplier invoice.
 - `CustomerInvoice`: Represents an invoice sent to a customer.
