@@ -7,11 +7,7 @@
   - Accounts for both positive and negative `InventoryAdjustment` transactions.
   - Returns a dictionary containing the final calculated `quantity` and `value`.
 
-- `recalculate_cost_history_for_product(product_id, start_datetime)`: Re-evaluates and updates the moving average cost for all historical transactions of a product from a given start date.
-  - Fetches the initial inventory state just before the `start_datetime`.
-  - Gathers all subsequent inflow, outflow, and adjustment transactions from multiple models.
-  - Sorts all transactions chronologically to create a unified event stream.
-  - Iterates through the stream, recalculating the running cost at each step and updating the cost on each outflow record (e.g., `cost_at_consumption`).
-  - Performs bulk updates on affected database records for efficiency.
-  - Saves the final calculated moving average cost to the `Product` model.
+- `recalculate_cost_history_for_product(product_id, start_datetime)`: **REDEFINED:** A non-destructive calculator that re-computes a product's current `moving_average_cost` based on its transaction history.
+  - **CRITICAL:** This function **no longer modifies historical outflow records** (like `cost_at_consumption`). Its only write operation is to update the `moving_average_cost` field on the `Product` model itself.
+  - It is used to ensure the product's cost is accurate for *future* transactions after a historical event (like a landed cost allocation) has been posted.
   - **Calls:** `get_inventory_state_at_datetime()` from the current file.

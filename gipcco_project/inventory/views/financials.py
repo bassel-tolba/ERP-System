@@ -250,13 +250,13 @@ def api_get_uninvoiced_receipts(request: HttpRequest, supplier_id: int) -> JsonR
         company_id=supplier_id,
         status=InventoryLog.Status.RELEASED,
         supplierinvoiceitem__isnull=True
-    ).order_by('-release_date')
+    ).order_by('-release_timestamp')
 
     data = {
         'receipts': [
             {
                 'id': r.id,
-                'release_date': r.release_date.strftime('%Y-%m-%d'),
+                'release_date': r.release_timestamp.strftime('%Y-%m-%d'),
                 'qc_no': r.qc_no,
                 'product_name': r.product.name,
                 'quantity': r.quantity,

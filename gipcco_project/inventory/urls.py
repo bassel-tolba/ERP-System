@@ -3,11 +3,11 @@
 from django.urls import path
 
 # --- MODIFIED: Use aliases for release_from_quarantine to avoid name collision ---
-from .views.dashboard import index, records, edit_record, delete_record, quarantine_list, release_from_quarantine as release_material_from_quarantine
+from .views.dashboard import index, records, edit_record, void_record_view, quarantine_list, release_from_quarantine as release_material_from_quarantine
 from .views.companies_products import companies, edit_company, delete_company, products, edit_product, delete_product, create_tag, edit_tag, delete_tag
 from .views.templates import shop_order_templates, delete_shop_order_template, view_shop_order_template, edit_shop_order_template
-from .views.batches import batches, create_batch, view_batch, delete_batch, add_batch_item, update_batch_items_bulk, delete_batch_item
-from .views.production_returns import production_returns, delete_production_return
+from .views.batches import batches, create_batch, view_batch, cancel_batch_view, add_batch_item, update_batch_items_bulk, delete_batch_item
+from .views.production_returns import production_returns, cancel_production_return_view
 # --- MODIFIED: Import corrected views ---
 from .views.analysis_ledger_visuals import visuals
 from .views.purchase_orders import purchase_orders, create_purchase_order, view_purchase_order, edit_purchase_order, delete_purchase_order
@@ -26,7 +26,7 @@ from .views import api
 from .views.sales import (
     customers, edit_customer, delete_customer, sales_orders, create_sales_order, 
     view_sales_order, delete_sales_order, edit_sales_order_item, delete_sales_order_item,
-    create_dispatch, edit_dispatch, delete_dispatch, dispatch_from_sales_order,
+    create_dispatch, edit_dispatch, cancel_dispatch_view, dispatch_from_sales_order,
     sales_returns_list, create_sales_return, view_sales_return,
     process_inspected_return_view, create_credit_memo_from_return_view
 )
@@ -47,7 +47,7 @@ urlpatterns = [
     path('', index, name='index'),
     path('records/', records, name='records'),
     path('records/edit/<int:pk>/', edit_record, name='edit_record'),
-    path('records/delete/<int:pk>/', delete_record, name='delete_record'),
+    path('records/void/<int:pk>/', void_record_view, name='void_record'),
     
     # Quality Control Routes
     path('quarantine/', quarantine_list, name='quarantine_list'),
@@ -95,7 +95,7 @@ urlpatterns = [
     path('batches/', batches, name='batches'),
     path('batches/create/', create_batch, name='create_batch'),
     path('batch/<int:pk>/', view_batch, name='view_batch'),
-    path('batch/delete/<int:pk>/', delete_batch, name='delete_batch'),
+    path('batch/cancel/<int:pk>/', cancel_batch_view, name='cancel_batch'),
     path('batch/item/add/<int:batch_pk>/', add_batch_item, name='add_batch_item'),
     path('batch/<int:batch_pk>/update_all/', update_batch_items_bulk, name='update_batch_items_bulk'),
 
@@ -114,7 +114,7 @@ urlpatterns = [
 
     # Production Returns Routes
     path('production_returns/', production_returns, name='production_returns'),
-    path('production_returns/delete/<int:pk>/', delete_production_return, name='delete_production_return'),
+    path('production_returns/cancel/<int:pk>/', cancel_production_return_view, name='cancel_production_return'),
 
     # Analysis & Visuals
     path('visuals/', visuals, name='visuals'),
@@ -139,7 +139,7 @@ urlpatterns = [
     path('sales_order_item/<int:pk>/delete/', delete_sales_order_item, name='delete_sales_order_item'),
     path('dispatch/create/<int:so_item_pk>/', create_dispatch, name='create_dispatch'),
     path('dispatch/edit/<int:pk>/', edit_dispatch, name='edit_dispatch'),
-    path('dispatch/delete/<int:pk>/', delete_dispatch, name='delete_dispatch'),
+    path('dispatch/cancel/<int:pk>/', cancel_dispatch_view, name='cancel_dispatch'),
     path('sales_order/<int:so_pk>/dispatch/', dispatch_from_sales_order, name='dispatch_from_sales_order'),
 
     # Sales Return Routes

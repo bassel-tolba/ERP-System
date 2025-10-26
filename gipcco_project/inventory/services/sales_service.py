@@ -363,17 +363,31 @@ def update_sales_order_item(so_item: SalesOrderItem, new_quantity: float):
     logger.info(f"Sales Order Item {so_item.id} quantity updated to {new_quantity}.")
 
 
-def cancel_dispatch(dispatch: FinishedProductDispatch):
+def cancel_dispatch(dispatch: FinishedProductDispatch, user, justification: str):
     """
-    Cancels a dispatch if it has not yet been invoiced.
-    The post_delete signal will handle the JE reversal.
+    REDEFINED: Cancels a dispatch non-destructively by changing its status
+    and creating a reversing journal entry.
     """
+    from .accounting.correction_transactions import create_reversing_je_for_correction
+
     if hasattr(dispatch, 'invoice_item'):
         raise ValidationError(_("Cannot cancel a dispatch that has already been invoiced. Please create a sales return and credit memo."))
     
-    dispatch_id = dispatch.id
-    dispatch.delete()
-    logger.info(f"Dispatch {dispatch_id} has been cancelled and its journal entry reversed via signal.")
+    if dispatch.status == FinishedProductDispatch.Status.CANCELLED:
+        raise ValidationError(_("This dispatch has already been cancelled."))
+
+    with transaction.atomic():
+        dispatch.status = FinishedProductDispatch.Status.CANCELLED
+        dispatch.save(update_fields=['status'])
+
+        create_reversing_je_for_correction(
+            original_object=dispatch,
+            justification=justification,
+            user=user,
+            correction_date=timezone.now()
+        )
+    
+    logger.info(f"Dispatch {dispatch.id} has been cancelled by user {user.username} and its journal entry reversed.")
 
 
 def apply_payment_to_invoices(payment: Payment, applications: List[Dict[str, any]]):

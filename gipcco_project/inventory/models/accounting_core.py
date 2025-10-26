@@ -177,7 +177,7 @@ class JournalEntry(models.Model):
     def get_description(self):
         """
         Provides a translated, user-friendly description of the journal entry's purpose
-        based on its source object.
+        based on its source object. This method is defensive against null relationships.
         """
         if not self.source_object:
             return self.description
@@ -185,7 +185,8 @@ class JournalEntry(models.Model):
         model_name = self.source_object._meta.model_name
         
         if model_name == 'inventorylog':
-            return f"إثبات استلام مواد خام: {self.source_object.product.name} من {self.source_object.company.name} (فحص جودة: {self.source_object.qc_no})"
+            company_name = self.source_object.company.name if self.source_object.company else _("N/A")
+            return f"إثبات استلام مواد خام: {self.source_object.product.name} من {company_name} (فحص جودة: {self.source_object.qc_no})"
         
         if model_name == 'batch':
             return f"صرف مواد خام لدفعة إنتاج: {self.source_object.template.final_product.name} (أمر تشغيل: {self.source_object.shop_order_number})"
@@ -200,16 +201,21 @@ class JournalEntry(models.Model):
             return f"مرتجع من الإنتاج: {self.source_object.quantity} {self.source_object.product.unit} من {self.source_object.product.name}"
 
         if model_name == 'finishedproductdispatch':
-            return f"إثبات بيع وتسليم منتج نهائي: {self.source_object.quantity} {self.source_object.sales_order_item.finished_product.batch.template.final_product.unit} إلى {self.source_object.sales_order_item.sales_order.customer.name}"
+            customer_name = self.source_object.sales_order_item.sales_order.customer.name if self.source_object.sales_order_item.sales_order.customer else _("N/A")
+            return f"إثبات بيع وتسليم منتج نهائي: {self.source_object.quantity} {self.source_object.sales_order_item.finished_product.batch.template.final_product.unit} إلى {customer_name}"
 
         if model_name == 'payment':
             if self.source_object.payment_type == 'out':
-                return f"سداد مورد: {self.source_object.supplier.name} بمبلغ {self.source_object.amount}"
+                supplier_name = self.source_object.supplier.name if self.source_object.supplier else _("N/A")
+                return f"سداد مورد: {supplier_name} بمبلغ {self.source_object.amount}"
             elif self.source_object.payment_type == 'in':
-                return f"تحصيل من عميل: {self.source_object.customer.name} بمبلغ {self.source_object.amount}"
+                customer_name = self.source_object.customer.name if self.source_object.customer else _("N/A")
+                return f"تحصيل من عميل: {customer_name} بمبلغ {self.source_object.amount}"
 
         if model_name == 'banktransfer':
-            return f"تحويل بنكي من {self.source_object.from_account.name} إلى {self.source_object.to_account.name}"
+            from_name = self.source_object.from_account.name if self.source_object.from_account else _("N/A")
+            to_name = self.source_object.to_account.name if self.source_object.to_account else _("N/A")
+            return f"تحويل بنكي من {from_name} إلى {to_name}"
             
         return self.description # Fallback to the original description
 
@@ -380,16 +386,6 @@ class GeneralAccountingSettings(models.Model):
         verbose_name=_("Sales Returns & Allowances Account")
     )
     # --- NEW: CLEARING ACCOUNTS ---
-    landed_costs_clearing_account = models.ForeignKey(
-        Account, on_delete=models.PROTECT, related_name='+', null=True, blank=True,
-        verbose_name=_("Landed Costs Clearing Account"),
-        help_text=_("A temporary account to hold landed costs before they are allocated to inventory.")
-    )
-    purchase_returns_clearing_account = models.ForeignKey(
-        Account, on_delete=models.PROTECT, related_name='+', null=True, blank=True,
-        verbose_name=_("Purchase Returns Clearing Account"),
-        help_text=_("A temporary account to hold the value of returned goods before a debit memo is issued.")
-    )
     sales_returns_clearing_account = models.ForeignKey(
         Account, on_delete=models.PROTECT, related_name='+', null=True, blank=True,
         verbose_name=_("Sales Returns Clearing Account"),
@@ -422,6 +418,17 @@ class GeneralAccountingSettings(models.Model):
         Account, on_delete=models.PROTECT, related_name='+', null=True, blank=True,
         verbose_name=_("Landed Costs Clearing Account"),
         help_text=_("A temporary account to hold third-party landed costs before they are allocated to inventory.")
+    )
+    # --- NEW: VARIANCE & REVALUATION ACCOUNTS ---
+    manufacturing_variance_account = models.ForeignKey(
+        Account, on_delete=models.PROTECT, related_name='+', null=True, blank=True,
+        verbose_name=_("Manufacturing Variance Account"),
+        help_text=_("An account to record differences between standard/expected cost and actual production cost.")
+    )
+    inventory_revaluation_account = models.ForeignKey(
+        Account, on_delete=models.PROTECT, related_name='+', null=True, blank=True,
+        verbose_name=_("Inventory Revaluation Account"),
+        help_text=_("An account to record upward or downward adjustments to inventory value from late costs.")
     )
 
     class Meta:

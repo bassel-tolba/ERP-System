@@ -93,6 +93,18 @@ class Batch(models.Model):
         'self', on_delete=models.SET_NULL, null=True, blank=True,
         related_name='continuation_batches', verbose_name=_("Parent Batch (for continuations)")
     )
+
+    class Status(models.TextChoices):
+        DRAFT = 'draft', _('Draft')
+        IN_PROGRESS = 'in_progress', _('In Progress')
+        COMPLETED = 'completed', _('Completed')
+        CANCELLED = 'cancelled', _('Cancelled')
+
+    status = models.CharField(
+        max_length=20, choices=Status.choices, default=Status.IN_PROGRESS,
+        verbose_name=_("Status")
+    )
+
     # --- NEW: Field for capturing allocation driver data ---
     machine_hours_consumed = models.FloatField(
         null=True, blank=True, verbose_name=_("Machine Hours Consumed"),
@@ -180,6 +192,15 @@ class ProductionReturn(models.Model):
     quantity = models.FloatField(verbose_name=_("Quantity Returned"))
     return_date = models.DateTimeField(verbose_name=_("Return Date"))
     notes = models.TextField(null=True, blank=True, verbose_name=_("Notes"))
+
+    class Status(models.TextChoices):
+        POSTED = 'posted', _('Posted')
+        CANCELLED = 'cancelled', _('Cancelled')
+
+    status = models.CharField(
+        max_length=20, choices=Status.choices, default=Status.POSTED,
+        verbose_name=_("Status")
+    )
 
     class Meta:
         db_table = 'production_returns'
@@ -469,16 +490,29 @@ class SalesOrderItem(models.Model):
 
 
 class FinishedProductDispatch(models.Model):
+    class Status(models.TextChoices):
+        COMPLETED = 'completed', _('Completed')
+        CANCELLED = 'cancelled', _('Cancelled')
+
     sales_order_item = models.ForeignKey(
         SalesOrderItem,
         on_delete=models.PROTECT,
         related_name='dispatches',
         verbose_name=_("Sales Order Item")
     )
+    finished_product = models.ForeignKey(
+        FinishedProductReceipt,
+        on_delete=models.PROTECT,
+        related_name='dispatches',
+        verbose_name=_("Finished Product Batch")
+    )
     quantity = models.FloatField(verbose_name=_("Quantity Dispatched"))
     dispatch_date = models.DateTimeField(verbose_name=_("Dispatch Date"))
     cost_at_dispatch = models.DecimalField(
         max_digits=14, decimal_places=3, verbose_name=_("Cost at Dispatch")
+    )
+    status = models.CharField(
+        max_length=20, choices=Status.choices, default=Status.COMPLETED, verbose_name=_("Status")
     )
 
     class Meta:

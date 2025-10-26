@@ -10,6 +10,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render, get_object_or_404
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+from django.core.exceptions import ValidationError, PermissionDenied
 
 from ..models import Company, InventoryLog, Product, ProductTag, PurchaseOrder, PurchaseOrderItem, Employee
 from ..services.costing_service import recalculate_cost_history_for_product
@@ -300,29 +301,25 @@ def edit_record(request: HttpRequest, pk: int) -> HttpResponse:
 
 
 @require_POST
-def delete_record(request: HttpRequest, pk: int) -> HttpResponse:
+def void_record_view(request: HttpRequest, pk: int) -> HttpResponse:
     """
-    Handles deleting an inventory log record and triggers cost recalculation if it was released.
+    Handles voiding an inventory log record non-destructively by calling the purchasing service.
     """
     log_entry = get_object_or_404(InventoryLog, pk=pk)
-    timestamp_for_recalc = log_entry.release_timestamp or log_entry.timestamp
-    product_id_for_recalc = log_entry.product_id
-    po_item = log_entry.po_item
-    was_released = log_entry.status == InventoryLog.Status.RELEASED
+    justification = request.POST.get('justification', '')
+
+    if not justification:
+        messages.error(request, "سبب الإلغاء مطلوب.")
+        return redirect('inventory:records')
 
     try:
-        log_entry.delete()
-        
-        if was_released:
-            recalculate_cost_history_for_product(product_id_for_recalc, timestamp_for_recalc)
-            messages.info(request, 'تم حذف السجل بنجاح. تم تحديث تكاليف المخزون.')
-        else:
-            messages.info(request, 'تم حذف السجل من قائمة الفحص بنجاح.')
-
-        if po_item:
-            purchasing_service.update_po_status_after_receipt(inventory_log_id=None, is_final_receipt=False, old_po_item_id=po_item.id)
-            
-    except ProtectedError:
-        messages.error(request, 'لا يمكن حذف هذا السجل لأنه تم استخدامه في أمر تشغيل. قم بحذف أمر التشغيل أولاً.')
+        purchasing_service.void_inventory_receipt(
+            log_entry=log_entry,
+            user=request.user,
+            justification=justification
+        )
+        messages.info(request, 'تم إلغاء السجل بنجاح وتحديث التكاليف.')
+    except (ValidationError, PermissionError) as e:
+        messages.error(request, f"لا يمكن إلغاء هذا السجل: {e}")
             
     return redirect('inventory:records')

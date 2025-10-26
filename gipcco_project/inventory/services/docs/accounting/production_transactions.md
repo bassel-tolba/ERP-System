@@ -30,6 +30,16 @@
     - **Debit:** The specific Raw Material Inventory account.
     - **Credit:** Work-in-Progress (WIP) Inventory account.
   - **Key Features:**
-    - Calculates the value of the returned materials based on the Moving Average Cost at the time of return.
-    - Reverses the value transfer that occurred during consumption.
+  - Calculates the value of the returned materials based on the Moving Average Cost at the time of return.
+  - Reverses the value transfer that occurred during consumption.
   - **Calls:** `_check_period_is_open()`, `_get_product_inventory_account()` from `_helpers.py`, and `get_inventory_state_at_datetime()` from `costing_service.py`.
+
+- `create_je_for_production_supplemental_issue(item: BatchItem)`:
+  - **Description:** Creates a specific, auditable journal entry for a single supplemental item added to a production batch. This is used for correcting material usage without altering the original consumption JE.
+  - **Accounting Logic:**
+    - **Debit:** Work-in-Progress (WIP) Inventory account.
+    - **Credit:** The specific Raw Material Inventory account.
+  - **Key Features:**
+    - Creates a separate JE linked directly to the `BatchItem` for clear traceability.
+    - Ensures the cost is added to WIP in the correct, open financial period.
+  - **Calls:** `_check_period_is_open()`, `_get_product_inventory_account()` from `_helpers.py`.

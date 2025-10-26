@@ -104,6 +104,7 @@ class InventoryLog(models.Model):
         RELEASED = 'released', _('مفرج عنه')
         REJECTED = 'rejected', _('مرفوض')
         SCRAPPED = 'scrapped', _('خردة') # --- NEW STATUS ---
+        VOIDED = 'voided', _('ملغي') # --- NEW STATUS ---
     
     class VatTreatment(models.TextChoices):
         RECOVERABLE = 'recoverable', _('ضريبة قابلة للخصم')
@@ -111,7 +112,7 @@ class InventoryLog(models.Model):
         
     product = models.ForeignKey(
         Product,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT, # Prevent deletion if referenced for data integrity
         related_name='inventory_logs',
         verbose_name=_("Product")
     )

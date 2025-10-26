@@ -200,7 +200,8 @@ class Command(BaseCommand):
             damaged_goods_expense_account=accounts['50209'],
             goods_received_not_invoiced_account=accounts['20206'],
             purchase_price_variance_account=accounts['504'],
-            landed_costs_clearing_account=accounts['1020407']
+            landed_costs_clearing_account=accounts['1020407'],
+            purchase_returns_clearing_account=accounts['20207']
         )
         ProductTypeAccountingSettings.objects.create(
             product_type=Product.ProductType.RAW_MATERIAL,
@@ -468,27 +469,47 @@ class Command(BaseCommand):
         self.stdout.write("     - Created the final credit memo for the customer.")
 
         # Invoicing and Payments
-        sup_inv, _ = SupplierInvoice.objects.get_or_create(
+        self.stdout.write("   - Creating, posting, and paying a supplier invoice...")
+        log = CONTEXT['log1']
+        actual_subtotal = log.base_unit_price * Decimal(str(log.quantity))
+        actual_vat = log.vat_amount
+
+        # Create the invoice in Draft status
+        sup_inv, created = SupplierInvoice.objects.get_or_create(
             invoice_number="GS-INV-001",
             defaults={
                 'supplier': CONTEXT['suppliers']['pharma'],
                 'invoice_date': date(2025, 9, 6),
                 'due_date': date(2025, 10, 6),
-                'total_amount': Decimal("2373.00") # (200 * 10.5) + 294 - 21
+                'status': SupplierInvoice.InvoiceStatus.DRAFT,
+                'actual_subtotal': actual_subtotal,
+                'actual_vat': actual_vat
             }
         )
-        SupplierInvoiceItem.objects.create(invoice=sup_inv, receipt=log, amount=log.total_cost)
         
-        payment_out = Payment.objects.create(
-            payment_date=date(2025, 9, 20),
-            amount=Decimal("2373.000"),
-            bank_account=CONTEXT['bank_account'],
-            payment_type=Payment.PaymentType.PAYMENT_OUT,
-            description="Payment for PO-DEMO-001",
-            supplier=CONTEXT['suppliers']['pharma']
-        )
-        PaymentApplication.objects.create(payment=payment_out, invoice=sup_inv, amount_applied=payment_out.amount)
-        self.stdout.write("   - Created and paid a supplier invoice.")
+        # Only proceed if the invoice was newly created to avoid re-processing
+        if created:
+            SupplierInvoiceItem.objects.create(invoice=sup_inv, receipt=log, amount=log.total_cost)
+            
+            # Post the invoice to perform the 3-way match
+            purchasing_service.post_supplier_invoice(sup_inv)
+            self.stdout.write("     - Posted invoice, clearing GRNI and creating A/P liability.")
+
+            # Now, create the payment against the posted invoice
+            # The amount to pay is the final A/P liability
+            amount_to_pay = actual_subtotal + actual_vat - log.withholding_tax_amount
+            payment_out = Payment.objects.create(
+                payment_date=date(2025, 9, 20),
+                amount=amount_to_pay,
+                bank_account=CONTEXT['bank_account'],
+                payment_type=Payment.PaymentType.PAYMENT_OUT,
+                description="Payment for PO-DEMO-001",
+                supplier=CONTEXT['suppliers']['pharma']
+            )
+            PaymentApplication.objects.create(payment=payment_out, invoice=sup_inv, amount_applied=payment_out.amount)
+            self.stdout.write("   - Created a payment to settle the supplier invoice.")
+        else:
+            self.stdout.write(self.style.WARNING("   - Supplier invoice already exists, skipping creation and payment."))
 
         # Purchase and receive MRO item (lubricant) so it's in stock
         po_mro, _ = PurchaseOrder.objects.get_or_create(

@@ -10,7 +10,190 @@
   - Creates base operational objects like suppliers, customers, products, and bank accounts.
   - Creates overhead allocation objects like cost pools and drivers.
   - Creates common finished good receipts and fixed assets for use in various tests.
+  # File: test_base.py
+- **Purpose:** Establishes a foundational Django test case with a comprehensive set of pre-configured data, including a chart of accounts, fiscal periods, settings, and various operational objects, to be used by other test suites.
+
+- `create_chart_of_accounts()`: Creates and returns a dictionary of a structured chart of `Account` model instances for testing.
+  - Contains nested helper functions `create_account` and `set_control` to streamline object creation and configuration.
+
+- `AccountingServiceBaseTestCase.setUpTestData(cls)`: Sets up a rich, non-modified data environment once per test class run for efficiency.
+  - Creates fiscal years and financial periods.
+  - Creates a full chart of accounts, product types, and general accounting settings.
+  - Creates operational objects like suppliers, customers, products, and templates.
   - **Calls:** `create_chart_of_accounts()`, `get_or_create_batch_for_template()`, `get_or_create_receipt()` from the current file.
+
+- `AccountingServiceBaseTestCase.get_product_type_setting(cls, product_type)`: A helper method to retrieve the accounting settings for a given product type.
+
+- `AccountingServiceBaseTestCase.get_or_create_batch_for_template(cls, template, shop_order_number, batch_number)`: A helper method to create or retrieve a `Batch` object, preventing duplicates in test setups.
+
+- `AccountingServiceBaseTestCase.get_or_create_receipt(cls, batch, individual_batch_number, quantity, cost, date_str)`: A helper method to create or retrieve a `FinishedProductReceipt` object, preventing duplicates in test setups.
+# File: tests_adjustments.py
+- **Purpose:** Contains test suites for inventory adjustment functionalities, covering both the automated journal entry creation from signals and the business logic within the adjustment service.
+
+- `TestAdjustmentAccounting.setUp(self)`: Prepares the environment for each test by creating a common `InventoryCount` and a source `InventoryLog`.
+
+- `TestAdjustmentAccounting.test_create_je_for_inventory_shortage_loss(self)`: Verifies that creating a negative `InventoryAdjustment` (a loss) triggers a signal that correctly generates a journal entry debiting the loss account and crediting inventory.
+
+- `TestAdjustmentAccounting.test_create_je_for_inventory_overage_gain(self)`: Verifies that creating a positive `InventoryAdjustment` (a gain) triggers a signal that correctly generates a journal entry debiting inventory and crediting the gain account.
+
+- `TestAdjustmentService.setUp(self)`: Prepares initial stock levels by creating several `InventoryLog` records for subsequent tests.
+
+- `TestAdjustmentService.test_start_inventory_count_snapshots_correct_quantity(self)`: Verifies that the service correctly calculates and saves the current system quantity of a product when a new inventory count is initiated.
+  - **Calls:** `adjustment_service.start_inventory_count()` from `adjustment_service.py`.
+
+- `TestAdjustmentService.test_create_manual_adjustments_from_form_success(self)`: Verifies that the service can successfully process a list of manual allocations to create multiple `InventoryAdjustment` records.
+  - **Calls:** `adjustment_service.start_inventory_count()`, `adjustment_service.create_adjustments_from_form()` from `adjustment_service.py`.
+
+- `TestAdjustmentService.test_auto_distribute_finished_good_shortage_fifo(self)`: Verifies that the service correctly distributes a finished good shortage proportionally across available stock receipts.
+  - **Calls:** `adjustment_service.start_inventory_count()`, `adjustment_service.auto_distribute_finished_good_shortage()` from `adjustment_service.py`.
+
+- `TestAdjustmentService.test_finalize_inventory_count_triggers_recalculation(self)`: Verifies that finalizing an inventory count correctly triggers the cost recalculation logic for the affected product, resulting in an updated moving average cost.
+  - **Calls:** `adjustment_service.start_inventory_count()`, `adjustment_service.create_adjustments_from_form()`, `adjustment_service.finalize_inventory_count()` from `adjustment_service.py`.
+
+- `TestAdjustmentService.test_auto_distribute_shortage_raises_error_if_insufficient_stock(self)`: Verifies that the service raises a `ValidationError` if an attempt is made to distribute a shortage that exceeds the available stock.
+  - **Calls:** `adjustment_service.start_inventory_count()`, `adjustment_service.auto_distribute_finished_good_shortage()` from `adjustment_service.py`.
+# File: tests_banking.py
+- **Purpose:** Contains test suites for banking-related transactions, focusing on journal entry creation for bank transfers and the functionality of the bank reconciliation module.
+
+- `TestBankingAccounting.setUp(self)`: Ensures test isolation by deleting all `JournalEntry` objects before each test run.
+
+- `TestBankingAccounting.test_create_je_for_bank_transfer_success(self)`: Verifies that creating a `BankTransfer` model instance triggers a signal that correctly generates a journal entry debiting the destination bank account and crediting the source bank account.
+
+- `TestBankReconciliation.setUp(self)`: Creates a set of incoming payments, outgoing payments, and bank transfers to serve as transactions for reconciliation tests.
+
+- `TestBankReconciliation.test_bank_reconciliation_creation_and_unmatch(self)`: Verifies that a `BankReconciliation` can be created, linked to transactions, and that its `unmatch_all_transactions` method correctly clears the reconciliation links.
+
+- `TestBankReconciliation.test_bank_statement_line_matching(self)`: Verifies that a `BankStatementLine` can be successfully linked to a corresponding `Payment` object as part of the reconciliation process.
+# File: tests_costing.py
+- **Purpose:** Provides test suites for the inventory costing service, validating its ability to accurately calculate historical inventory states and recalculate costs after corrections.
+
+- `TestCostingService.setUp(self)`: Ensures a clean slate for each test by deleting all `JournalEntry` objects.
+
+- `TestCostingService.test_get_inventory_state_at_datetime_complex_scenario(self)`: Verifies the accuracy of inventory quantity and value calculations by creating a complex chronological series of receipts, consumptions, adjustments, and returns, then asserting the state at each step.
+  - **Calls:** `costing_service.get_inventory_state_at_datetime()` from `costing_service.py`.
+
+- `TestCostingService.test_recalculate_cost_history_for_product_after_correction(self)`: Verifies that after correcting a historical inventory receipt's price, the service correctly updates the cost of all subsequent transactions and the product's final moving average cost.
+  - **Calls:** `costing_service.recalculate_cost_history_for_product()` from `costing_service.py`.
+
+- `TestCostingWithOpeningBalance.setUp(self)`: Ensures a clean slate for each test by deleting all `JournalEntry` objects.
+
+- `TestCostingWithOpeningBalance.test_operations_with_raw_material_opening_balance(self)`: Verifies that inventory consumption is costed correctly when the initial stock is established via an opening balance record, followed by a subsequent purchase.
+  - **Calls:** `costing_service.recalculate_cost_history_for_product()`, `costing_service.get_inventory_state_at_datetime()` from `costing_service.py`.
+
+- `TestCostingWithOpeningBalance.test_operations_with_finished_good_opening_balance(self)`: Verifies that selling a finished good from an opening balance correctly calculates the cost of goods sold and generates the appropriate journal entry.
+  - **Calls:** `costing_service.get_inventory_state_at_datetime()` from `costing_service.py`.
+# File: tests.py
+- **Purpose:** Serves as a primary test runner by importing other test modules and contains tests for Django views, API endpoints, model validation, and database-level protection rules.
+
+- `TestViews.setUp(self)`: Initializes a test client and logs in a pre-configured user before each view test.
+
+- `TestViews.test_dashboard_index_view_get(self)`: Verifies that the main dashboard page loads successfully with a 200 status code.
+
+- `TestViews.test_create_company_view_post(self)`: Verifies that submitting the company creation form successfully creates a new `Company` object and redirects.
+
+- `TestViews.test_create_product_view_post(self)`: Verifies that submitting the product creation form successfully creates a new `Product` object and redirects.
+
+- `TestViews.test_release_from_quarantine_view_post(self)`: Verifies that a POST request to the release view correctly updates an `InventoryLog`'s status from 'QUARANTINED' to 'RELEASED'.
+
+- `TestViews.test_api_get_sellable_stock(self)`: Verifies that the sellable stock API endpoint returns a correct JSON list of available finished goods.
+
+- `TestViews.test_create_batch_view_post(self)`: Verifies that submitting the batch creation form successfully creates a new `Batch` and its associated `BatchItem` records.
+
+- `TestViews.test_create_purchase_order_view_post(self)`: Verifies that submitting the purchase order form successfully creates a `PurchaseOrder` and its line items.
+
+- `TestViews.test_create_sales_order_view_post(self)`: Verifies that submitting the sales order form successfully creates a `SalesOrder` and its line items.
+
+- `TestViews.test_api_get_po_items(self)`: Verifies that the API for retrieving purchase order items returns the correct data, including the calculated remaining quantity.
+
+- `TestValidationAndProtection.test_consumption_of_non_mro_raises_error(self)`: Tests that the `InventoryConsumption` model's `clean()` method raises a `ValidationError` if an attempt is made to expense a product that is not of the 'MRO' type.
+
+- `TestValidationAndProtection.test_bank_transfer_to_same_account_raises_error(self)`: Tests that the `BankTransfer` model's `clean()` method raises a `ValidationError` if the source and destination accounts are the same.
+
+- `TestValidationAndProtection.test_deleting_supplier_with_po_raises_protected_error(self)`: Verifies that the database schema prevents the deletion of a `Company` if it is linked to a `PurchaseOrder`, raising a `ProtectedError`.
+# File: tests_accounting.py
+- **Purpose:** Contains a comprehensive suite of tests for core accounting logic, verifying the automatic creation of journal entries from various business transactions via model signals and service functions.
+
+- `TestAccountingService.setUp(self)`: Ensures test isolation by deleting all `JournalEntry` objects before each test run.
+
+- `TestAccountingService.test_create_je_for_inventory_receipt_success(self)`: Verifies that creating a 'RELEASED' `InventoryLog` triggers a signal to generate a correct, balanced journal entry for the receipt of goods, including VAT and withholding tax.
+
+- `TestAccountingService.test_create_je_for_inventory_receipt_not_released(self)`: Verifies that no journal entry is created when an `InventoryLog` is created with a status other than 'RELEASED'.
+  - **Calls:** `accounting_service.create_je_for_inventory_receipt()` from `accounting_service.py`.
+
+- `TestAccountingService.test_create_je_for_inventory_receipt_duplicate_prevention(self)`: Ensures that the system prevents the creation of a duplicate journal entry for an `InventoryLog` that has already been processed.
+  - **Calls:** `accounting_service.create_je_for_inventory_receipt()` from `accounting_service.py`.
+
+- `TestAccountingService.test_create_je_for_inventory_receipt_period_closed(self)`: Verifies that attempting to create an `InventoryLog` with a date in a closed financial period raises a `PermissionError`.
+
+- `TestAccountingService.test_create_je_for_production_consumption_success(self)`: Verifies that saving a `Batch` with consumed items triggers a signal to generate a journal entry that moves value from raw material inventory to WIP inventory.
+
+- `TestAccountingService.test_create_je_for_production_consumption_update(self)`: Verifies that updating a `Batch` correctly deletes the old journal entry and creates a new, updated one.
+
+- `TestAccountingService.test_create_je_for_finished_goods_receipt_success(self)`: Verifies that creating a `FinishedProductReceipt` triggers a signal to generate a journal entry that moves value from WIP inventory to finished goods inventory.
+
+- `TestAccountingService.test_create_je_for_production_return_success(self)`: Verifies that creating a `ProductionReturn` triggers a signal to generate a journal entry that moves value from WIP inventory back to raw material inventory.
+
+- `TestAccountingService.test_create_je_for_sales_dispatch_success(self)`: Verifies that creating a `FinishedProductDispatch` triggers a signal to generate a compound journal entry for both COGS and revenue recognition.
+
+- `TestAccountingService.test_create_je_for_credit_memo_success(self)`: Verifies that creating a `CustomerCreditMemo` triggers a signal to generate a journal entry that reverses a sale by debiting sales returns and VAT payable, and crediting accounts receivable.
+
+- `TestAccountingService.test_create_je_for_supplier_payment_success(self)`: Verifies that creating an outbound `Payment` triggers a signal to generate a journal entry that debits accounts payable and credits the bank account.
+
+- `TestAccountingService.test_create_je_for_customer_payment_success(self)`: Verifies that creating an inbound `Payment` triggers a signal to generate a journal entry that debits the bank account and credits accounts receivable.
+
+- `TestAccountingService.test_create_je_for_internal_consumption_expense(self)`: Verifies that creating an `InventoryConsumption` with type 'EXPENSE' triggers a signal to generate a journal entry that debits an expense account and credits inventory.
+
+- `TestAccountingService.test_create_je_for_internal_consumption_capitalize(self)`: Verifies that an `InventoryConsumption` with type 'CAPITALIZE' correctly debits the linked fixed asset's GL account.
+
+- `TestAccountingService.test_create_je_for_internal_consumption_amortize(self)`: Verifies that an `InventoryConsumption` with type 'AMORTIZE' correctly debits the master prepaid expenses account.
+
+- `TestAccountingService.test_create_je_for_amortization_success(self)`: Verifies that creating an `AmortizationLog` triggers a signal to generate a journal entry that debits a specific expense account and credits the master prepaid expenses account.
+
+- `TestAccountingService.test_create_je_for_accrual_success(self)`: Verifies that creating an `AccrualLog` triggers a signal to generate a journal entry that debits a specific expense account and credits a specific accrued liability account.
+
+- `TestAccountingService.test_create_je_for_expense_log_success(self)`: Verifies that creating an `ExpenseLog` triggers a signal to generate a journal entry that debits a cost pool's expense account and credits the master accrued expenses account.
+
+- `TestAccountingService.test_create_je_for_employee_advance_success(self)`: Verifies that creating an `EmployeeAdvance` triggers a signal to generate a journal entry that debits the employee advances receivable account and credits the bank account.
+
+- `TestAccountingService.test_create_je_for_employee_advance_settlement_expense(self)`: Verifies that settling an advance with an `ExpenseLog` correctly debits accrued expenses and credits the employee advances receivable account.
+
+- `TestAccountingService.test_create_je_for_employee_advance_settlement_receipt(self)`: Verifies that settling an advance with an `InventoryLog` correctly debits the GRNI account and credits the employee advances receivable account.
+
+- `TestAccountingService.test_create_reversing_je_for_correction_success(self)`: Verifies that the correction service can create a perfect, inverted copy of an original journal entry in a subsequent open period.
+  - **Calls:** `correction_transactions.create_reversing_je_for_correction()` from `correction_transactions.py`.
+
+- `TestAccountingService.test_correct_approved_expense_success(self)`: Verifies that the high-level expense correction service successfully finds the original transaction, creates a reversing entry, and creates an audit log.
+  - **Calls:** `correction_transactions.correct_approved_expense()` from `correction_transactions.py`.
+
+- `TestAccountingService.test_create_je_for_opening_balance_success(self)`: Verifies that the service can create a single, balanced, multi-line journal entry from a complex `OpeningBalanceEntry` record with sub-ledger details.
+  - **Calls:** `general_transactions.create_je_for_opening_balance()` from `general_transactions.py`.
+
+- `test_depreciation_log_and_je_creation(self)`: Verifies that creating a `DepreciationLog` for an asset automatically generates a corresponding, balanced journal entry to record the depreciation expense and update accumulated depreciation.
+# File: tests_purchasing.py
+- **Purpose:** Contains test suites for the purchasing and supplier returns workflow, including three-way match, debit memos, and landed cost allocation.
+
+- `PurchasingServiceTestCase`: The main test class for purchasing services.
+
+- `test_create_purchase_return_validation(self)`: Verifies that the `create_purchase_return` service correctly raises a `ValidationError` if a user attempts to return a quantity greater than what was originally received.
+  - **Calls:** `purchasing_service.create_purchase_order()`, `purchasing_service.create_purchase_return()` from `purchasing_service.py`.
+
+- `test_purchase_return_and_debit_memo_workflow(self)`: Tests the end-to-end supplier return process.
+  - **Workflow:**
+    1. Creates a `PurchaseReturn`.
+    2. Calls `process_inventory_return` to create the negative inventory adjustment.
+    3. Verifies the adjustment's journal entry (Debit Clearing, Credit Inventory).
+    4. Calls `create_debit_memo_from_return` to create the financial document.
+    5. Verifies the debit memo's journal entry (Debit A/P, Credit Clearing).
+    6. Asserts that the clearing account balance is zero after the workflow is complete.
+  - **Calls:** `purchasing_service.create_purchase_order()`, `purchasing_service.create_purchase_return()`, `purchasing_service.process_inventory_return()`, `purchasing_service.create_debit_memo_from_return()` from `purchasing_service.py`.
+
+- `test_post_supplier_invoice_with_ppv_and_taxes(self)`: Verifies the correctness of the three-way match journal entry created by `post_supplier_invoice` when there is a purchase price variance.
+  - **Logic:** It asserts that the resulting journal entry correctly books the GRNI clearing, the final A/P liability, the PPV, and any VAT variance.
+  - **Calls:** `purchasing_service.create_purchase_order()`, `purchasing_service.post_supplier_invoice()` from `purchasing_service.py`.
+
+- `test_landed_cost_workflow(self)`: Verifies the two-step process for allocating landed costs from a third-party invoice to multiple inventory receipts.
+  - **Logic:** It likely tests the posting of a `LandedCostInvoice` and the subsequent allocation of its value to `InventoryLog` records, ensuring the cost is correctly moved from a clearing account to the inventory asset account.
+
 
 - `AccountingServiceBaseTestCase.get_product_type_setting(cls, product_type)`: A helper method to retrieve the accounting settings for a given product type.
 

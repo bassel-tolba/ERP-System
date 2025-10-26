@@ -67,9 +67,13 @@ def create_adjustments_from_form(count_item_id: int, allocations: List[dict], re
     product = count_item.product
     logger.debug(f"Processing adjustments for product '{product.name}' (ID: {product.id}).")
     
-    # First, delete any existing adjustments for this count item to prevent duplicates
-    logger.warning(f"Deleting existing adjustments for count {count_item.inventory_count.id} and product {product.id} before creating new ones.")
-    InventoryAdjustment.objects.filter(inventory_count=count_item.inventory_count, product=product).delete()
+    # First, delete any existing DRAFT adjustments for this count item to prevent duplicates. POSTED adjustments are immutable.
+    logger.warning(f"Deleting existing DRAFT adjustments for count {count_item.inventory_count.id} and product {product.id} before creating new ones.")
+    InventoryAdjustment.objects.filter(
+        inventory_count=count_item.inventory_count, 
+        product=product,
+        status=InventoryAdjustment.Status.DRAFT
+    ).delete()
 
     with transaction.atomic():
         for alloc in allocations:
@@ -219,9 +223,13 @@ def auto_distribute_finished_good_shortage(count_item_id: int, reason: str, note
     # --- END: Proportional Distribution Logic ---
 
 
-    # First, delete any existing adjustments for this count item
-    logger.warning(f"Deleting existing adjustments for count {count_item.inventory_count.id} and product {product.id} before auto-distributing.")
-    InventoryAdjustment.objects.filter(inventory_count=count_item.inventory_count, product=product).delete()
+    # First, delete any existing DRAFT adjustments for this count item. POSTED adjustments are immutable.
+    logger.warning(f"Deleting existing DRAFT adjustments for count {count_item.inventory_count.id} and product {product.id} before auto-distributing.")
+    InventoryAdjustment.objects.filter(
+        inventory_count=count_item.inventory_count, 
+        product=product,
+        status=InventoryAdjustment.Status.DRAFT
+    ).delete()
 
 
     with transaction.atomic():
@@ -256,31 +264,27 @@ def auto_distribute_finished_good_shortage(count_item_id: int, reason: str, note
 
 def finalize_inventory_count(count_id: int):
     """
-    Finalizes the count, triggers cost recalculation for all affected products,
-    and marks the count as Completed.
+    REDEFINED: Finalizes the count by changing the status of all associated
+    'Draft' adjustments to 'Posted'. This action is expected to trigger signals
+    that create the financial journal entries. It no longer triggers a historical
+    cost recalculation, adhering to the immutable ledger principle.
     """
     logger.info(f"Finalizing inventory count ID {count_id}.")
     count = InventoryCount.objects.get(pk=count_id)
-    products_to_recalculate = set(
-        count.adjustments.values_list('product_id', flat=True)
-    )
-    logger.debug(f"Products to recalculate cost for: {products_to_recalculate}.")
 
-    if not products_to_recalculate:
-        logger.warning(f"No adjustments found for count {count_id}. Nothing to recalculate. Finalizing anyway.")
+    with transaction.atomic():
+        # Find all draft adjustments for this count and post them.
+        adjustments_to_post = count.adjustments.filter(status=InventoryAdjustment.Status.DRAFT)
+        
+        if not adjustments_to_post.exists():
+            logger.warning(f"No 'Draft' adjustments found for count {count_id}. Finalizing count status only.")
+        else:
+            # This update will trigger post_save signals for each adjustment, which should create the JEs.
+            updated_count = adjustments_to_post.update(status=InventoryAdjustment.Status.POSTED)
+            logger.info(f"Posted {updated_count} draft adjustments for count {count_id}.")
+
+        # Mark the count itself as completed.
         count.status = InventoryCount.CountStatus.COMPLETED
         count.save(update_fields=['status'])
-        return
-
-    # Use a date at the beginning of the day of the earliest adjustment
-    start_recalc_date = count.adjustments.earliest('adjustment_date').adjustment_date
-    start_recalc_date = start_recalc_date.replace(hour=0, minute=0, second=0, microsecond=0)
-    logger.debug(f"Cost recalculation will start from {start_recalc_date}.")
-
-    for product_id in products_to_recalculate:
-        logger.info(f"Triggering cost recalculation for product ID {product_id}.")
-        recalculate_cost_history_for_product(product_id, start_recalc_date)
     
-    count.status = InventoryCount.CountStatus.COMPLETED
-    count.save(update_fields=['status'])
-    logger.info(f"Successfully finalized Inventory Count {count.id} and triggered all cost recalculations.")
+    logger.info(f"Successfully finalized Inventory Count {count.id}.")

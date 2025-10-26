@@ -6,9 +6,6 @@
 - `LandedCostType`:
   - **Description:** A master table to define different types of landed costs that can be capitalized into inventory value (e.g., 'Freight', 'Customs Duty', 'Insurance').
 
-- `SupplierInvoiceLandedCost`:
-  - **Description:** A linking model that associates a specific `LandedCostType` with a specific `SupplierInvoice`, capturing the cost amount. This allows a single shipment to have multiple landed costs.
-
 - `PurchaseReturn`:
   - **Description:** The header model for a return of goods to a supplier. It tracks the supplier, return date, and the status of the return process (`Pending`, `Shipped`, `Completed`).
 
@@ -17,3 +14,12 @@
 
 - `SupplierDebitMemo`:
   - **Description:** Represents the financial document issued to a supplier to reduce the accounts payable balance, typically created from a `PurchaseReturn`. It records the total value of the credit being claimed and links to the final journal entry.
+
+- `LandedCostInvoice`:
+  - **Description:** Represents an invoice from a third-party (e.g., a shipping company) for landed costs that need to be applied to inventory receipts. It tracks the vendor, invoice details, total amount, and status (`Draft`, `Awaiting Allocation`, `Fully Allocated`).
+
+- `LandedCostInvoiceItem`:
+  - **Description:** A line item on a `LandedCostInvoice`, linking a specific `LandedCostType` and amount.
+
+- `LandedCostAllocation`:
+  - **Description:** An explicit link showing how much of a `LandedCostInvoiceItem` was allocated to a specific `InventoryLog` (receipt). It records the allocated amount and links to the journal entry that moves the cost into inventory.

@@ -9,6 +9,8 @@ from django.db.models import Sum, Q, F, FloatField, DecimalField, Case, When
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 
+from .accounting._helpers import _check_period_is_open
+
 from ..models import (
     Product, InventoryLog, BatchItem,
     ProductionReturn, InventoryConsumption, InventoryAdjustment, FinishedProductReceipt,
@@ -122,8 +124,9 @@ def get_inventory_state_at_datetime(
     # 3. Sales Dispatches (Outflow for Finished Goods)
     if product.product_type == Product.ProductType.FINAL_PRODUCT:
         dispatch_outflows = FinishedProductDispatch.objects.filter(
-            sales_order_item__finished_product__batch__template__final_product_id=product_id,
-            dispatch_date__lte=target_datetime
+            sales_order_item__product_id=product_id,
+            dispatch_date__lte=target_datetime,
+            status=FinishedProductDispatch.Status.COMPLETED # Exclude cancelled dispatches
         ).aggregate(
             total_qty=Coalesce(Sum('quantity'), Decimal('0.0'), output_field=DecimalField()),
             total_val=Coalesce(Sum('cost_at_dispatch'), Decimal('0.0'), output_field=DecimalField())
@@ -150,36 +153,37 @@ def get_inventory_state_at_datetime(
 
 def recalculate_cost_history_for_product(product_id: int, start_datetime: timezone.datetime):
     """
-    Recalculates the entire cost and consumption history for a product from a specific point in time.
-    This is the "master" function for ensuring data integrity after any historical change.
-    It updates the 'cost_at_consumption' for all affected BatchItems and the final 'moving_average_cost' on the Product.
+    REDEFINED: This function is now a non-destructive calculator.
+    Its SOLE purpose is to re-calculate the current moving average cost of a product
+    based on its transaction history from a specific point in time.
+
+    IT DOES NOT MODIFY HISTORICAL TRANSACTIONS. It no longer updates 'cost_at_consumption'
+    or any other fields on past records. This change is critical to enforce ledger
+    immutability. The function's only write operation is to update the
+    `moving_average_cost` field on the Product model itself.
     """
-    # This function is complex and its logic remains unchanged for now, but it will benefit from the more accurate
-    # starting state provided by the refactored get_inventory_state_at_datetime.
-    # We will call the function with its default behavior (include_quarantined=True) for costing.
+    # --- IMMUTABILITY CHECK ---
+    # We still check the period to ensure that any action triggering this recalculation
+    # is initiated from a valid, open financial period.
+    _check_period_is_open(start_datetime.date())
     
     with transaction.atomic():
         product = Product.objects.select_for_update().get(pk=product_id)
-        logger.info(f"Starting cost recalculation for '{product.name}' from {start_datetime.date()}...")
+        logger.info(f"Starting MOVING AVERAGE COST recalculation for '{product.name}' from {start_datetime.date()}...")
 
         # Get the inventory state (quantity and value) just before the recalculation start time.
-        # For costing, we should always consider all stock to get the correct value basis.
         state_time = start_datetime - timedelta(microseconds=1)
         state = get_inventory_state_at_datetime(product_id, state_time, include_quarantined=True)
         running_qty = state['quantity']
         running_value = state['value']
 
         # 1. Get all relevant transactions for the product, sorted chronologically.
-        # This now includes transactions for both raw materials and finished goods.
         
-        # Raw Material Inflows
-        in_logs_query = InventoryLog.objects.filter(
+        # Inflows
+        in_logs = InventoryLog.objects.filter(
             product_id=product_id, release_timestamp__gte=start_datetime
-        )
+        ).values('release_timestamp', 'quantity', 'costing_unit_price')
         
-        in_logs = in_logs_query.values('release_timestamp', 'quantity', 'costing_unit_price', 'id')
-        
-        # Finished Good Inflows
         fg_receipts = FinishedProductReceipt.objects.filter(
             batch__template__final_product_id=product_id,
             release_date__gte=start_datetime.date()
@@ -189,165 +193,98 @@ def recalculate_cost_history_for_product(product_id: int, start_datetime: timezo
                 default=Decimal('0.0'),
                 output_field=DecimalField()
             )
-        ).values('release_date', 'total_quantity_produced', 'unit_cost', 'id')
+        ).values('release_date', 'total_quantity_produced', 'unit_cost')
 
-        # Raw Material Outflows (Production)
-        out_batch_items = BatchItem.objects.filter(
-            primitive_product_id=product_id, batch__creation_date__gte=start_datetime
-        ).values('batch__creation_date', 'actual_quantity', 'id')
-
-        # Finished Good Outflows (Sales)
-        out_dispatches = FinishedProductDispatch.objects.filter(
-            sales_order_item__finished_product__batch__template__final_product_id=product_id,
-            dispatch_date__gte=start_datetime
-        ).values('dispatch_date', 'quantity', 'id')
-
-        # Raw Material Inflows (Returns)
         in_returns = ProductionReturn.objects.filter(
             product_id=product_id, return_date__gte=start_datetime
         ).annotate(
             costing_unit_price=F('source_log__base_unit_price') # Simplified valuation
-        ).values('return_date', 'quantity', 'costing_unit_price', 'id')
+        ).values('return_date', 'quantity', 'costing_unit_price')
 
-        # MRO/Consumable Outflows
+        # Outflows
+        out_batch_items = BatchItem.objects.filter(
+            primitive_product_id=product_id, batch__creation_date__gte=start_datetime
+        ).values('batch__creation_date', 'actual_quantity', 'cost_at_consumption')
+
+        out_dispatches = FinishedProductDispatch.objects.filter(
+            sales_order_item__product_id=product_id,
+            dispatch_date__gte=start_datetime,
+            status=FinishedProductDispatch.Status.COMPLETED
+        ).values('dispatch_date', 'quantity', 'cost_at_dispatch')
+
         out_consumptions = InventoryConsumption.objects.filter(
             product_id=product_id, consumption_date__gte=start_datetime
-        ).values('consumption_date', 'quantity_consumed', 'id')
+        ).values('consumption_date', 'quantity_consumed', 'cost_at_consumption')
 
-        # Adjustments (In or Out)
+        # Adjustments
         adjustments = InventoryAdjustment.objects.filter(
-            product_id=product_id, adjustment_date__gte=start_datetime
-        ).values('adjustment_date', 'adjustment_quantity', 'cost_at_adjustment', 'id')
+            product_id=product_id, 
+            adjustment_date__gte=start_datetime, 
+            status=InventoryAdjustment.Status.POSTED
+        ).values('adjustment_date', 'adjustment_quantity', 'cost_at_adjustment')
 
         # 2. Combine and sort all transactions
         transactions = []
         for log in in_logs:
             transactions.append({
-                'date': log['release_timestamp'],
-                'type': 'IN_LOG',
-                'qty': Decimal(str(log['quantity'])),
-                'cost': log['costing_unit_price'],
-                'obj_id': log['id']
+                'date': log['release_timestamp'], 'type': 'INFLOW',
+                'qty': Decimal(str(log['quantity'])), 'cost': log['costing_unit_price'],
             })
         for receipt in fg_receipts:
             transactions.append({
                 'date': timezone.make_aware(datetime.combine(receipt['release_date'], datetime.min.time())),
-                'type': 'FG_RECEIPT',
-                'qty': Decimal(str(receipt['total_quantity_produced'])),
-                'cost': receipt['unit_cost'],
-                'obj_id': receipt['id']
-            })
-        for item in out_batch_items:
-            transactions.append({
-                'date': item['batch__creation_date'],
-                'type': 'OUT_BATCH',
-                'qty': Decimal(str(item['actual_quantity'])),
-                'obj_id': item['id']
-            })
-        for dispatch in out_dispatches:
-            transactions.append({
-                'date': dispatch['dispatch_date'],
-                'type': 'OUT_DISPATCH',
-                'qty': Decimal(str(dispatch['quantity'])),
-                'obj_id': dispatch['id']
+                'type': 'INFLOW', 'qty': Decimal(str(receipt['total_quantity_produced'])), 'cost': receipt['unit_cost'],
             })
         for ret in in_returns:
             transactions.append({
-                'date': ret['return_date'],
-                'type': 'IN_RETURN',
-                'qty': Decimal(str(ret['quantity'])),
-                'cost': ret['costing_unit_price'],
-                'obj_id': ret['id']
+                'date': ret['return_date'], 'type': 'INFLOW',
+                'qty': Decimal(str(ret['quantity'])), 'cost': ret['costing_unit_price'],
+            })
+        for item in out_batch_items:
+            transactions.append({
+                'date': item['batch__creation_date'], 'type': 'OUTFLOW',
+                'qty': Decimal(str(item['actual_quantity'])), 'cost': item['cost_at_consumption']
+            })
+        for dispatch in out_dispatches:
+            cost_per_unit = dispatch['cost_at_dispatch'] / Decimal(str(dispatch['quantity'])) if dispatch['quantity'] else Decimal('0.0')
+            transactions.append({
+                'date': dispatch['dispatch_date'], 'type': 'OUTFLOW',
+                'qty': Decimal(str(dispatch['quantity'])), 'cost': cost_per_unit
             })
         for cons in out_consumptions:
+            cost_per_unit = cons['cost_at_consumption'] / Decimal(str(cons['quantity_consumed'])) if cons['quantity_consumed'] else Decimal('0.0')
             transactions.append({
-                'date': cons['consumption_date'],
-                'type': 'OUT_CONSUMPTION',
-                'qty': Decimal(str(cons['quantity_consumed'])),
-                'obj_id': cons['id']
+                'date': cons['consumption_date'], 'type': 'OUTFLOW',
+                'qty': Decimal(str(cons['quantity_consumed'])), 'cost': cost_per_unit
             })
         for adj in adjustments:
             transactions.append({
-                'date': adj['adjustment_date'],
-                'type': 'ADJUSTMENT',
-                'qty': Decimal(str(adj['adjustment_quantity'])),
-                'cost': adj['cost_at_adjustment'], # Cost is pre-defined for adjustments
-                'obj_id': adj['id']
+                'date': adj['adjustment_date'], 'type': 'ADJUSTMENT',
+                'qty': Decimal(str(adj['adjustment_quantity'])), 'cost': adj['cost_at_adjustment'],
             })
 
         transactions.sort(key=lambda x: x['date'])
 
-        # 3. Iterate through transactions and update costs
-        batch_items_to_update = []
-        consumptions_to_update = []
-        adjustments_to_update = []
-        dispatches_to_update = []
-
+        # 3. Iterate through transactions and calculate final state. DO NOT update historical records.
         for t in transactions:
-            if t['type'] in ['IN_LOG', 'IN_RETURN', 'FG_RECEIPT']:
-                # Inflows update the running total
+            if t['type'] == 'INFLOW':
                 running_value += t['qty'] * t['cost']
                 running_qty += t['qty']
             
-            elif t['type'] in ['OUT_BATCH', 'OUT_CONSUMPTION', 'OUT_DISPATCH']:
-                # Outflows consume at the current moving average cost
-                cost_at_consumption = running_value / running_qty if running_qty > 0 else Decimal('0.0')
-                
-                running_value -= t['qty'] * cost_at_consumption
+            elif t['type'] == 'OUTFLOW':
+                # We now use the historical cost from the record, not a recalculated one.
+                # The purpose is to find the final state, not to change the past.
+                running_value -= t['qty'] * t['cost']
                 running_qty -= t['qty']
 
-                # Mark the transaction object for update
-                if t['type'] == 'OUT_BATCH':
-                    item = BatchItem.objects.get(pk=t['obj_id'])
-                    if item.cost_at_consumption != cost_at_consumption:
-                        item.cost_at_consumption = cost_at_consumption
-                        batch_items_to_update.append(item)
-                elif t['type'] == 'OUT_CONSUMPTION':
-                    item = InventoryConsumption.objects.get(pk=t['obj_id'])
-                    if item.cost_at_consumption != (t['qty'] * cost_at_consumption):
-                        item.cost_at_consumption = t['qty'] * cost_at_consumption
-                        consumptions_to_update.append(item)
-                elif t['type'] == 'OUT_DISPATCH':
-                    item = FinishedProductDispatch.objects.get(pk=t['obj_id'])
-                    total_cost = t['qty'] * cost_at_consumption
-                    if item.cost_at_dispatch != total_cost:
-                        item.cost_at_dispatch = total_cost
-                        dispatches_to_update.append(item)
-
             elif t['type'] == 'ADJUSTMENT':
-                # For adjustments, the cost is pre-determined. We just update the running totals.
-                # --- MODIFICATION ---
-                # For shortages, we MUST recalculate the cost based on the current MAC.
-                # For overages, we use the cost stored on the adjustment itself.
-                is_shortage = t['qty'] < 0
-                if is_shortage:
-                    cost_at_adjustment = running_value / running_qty if running_qty > 0 else Decimal('0.0')
-                    item = InventoryAdjustment.objects.get(pk=t['obj_id'])
-                    if item.cost_at_adjustment != cost_at_adjustment:
-                        item.cost_at_adjustment = cost_at_adjustment
-                        adjustments_to_update.append(item)
-                    
-                    running_value += t['qty'] * cost_at_adjustment # qty is negative
-                else: # Overage
-                    running_value += t['qty'] * t['cost']
-                
+                # Adjustments change quantity and value based on their recorded cost.
+                running_value += t['qty'] * t['cost']
                 running_qty += t['qty']
 
-        # 4. Perform bulk updates for efficiency
-        with transaction.atomic():
-            if batch_items_to_update:
-                BatchItem.objects.bulk_update(batch_items_to_update, ['cost_at_consumption'])
-                logger.info(f"Updated cost_at_consumption for {len(batch_items_to_update)} batch items of '{product.name}'.")
-            if consumptions_to_update:
-                InventoryConsumption.objects.bulk_update(consumptions_to_update, ['cost_at_consumption'])
-            if adjustments_to_update:
-                InventoryAdjustment.objects.bulk_update(adjustments_to_update, ['cost_at_adjustment'])
-            if dispatches_to_update:
-                FinishedProductDispatch.objects.bulk_update(dispatches_to_update, ['cost_at_dispatch'])
-
-        # 5. Update the final moving average cost on the product itself
+        # 4. Update the final moving average cost on the product itself. This is the only write operation.
         final_mac = running_value / running_qty if running_qty > 0 else Decimal('0.0')
         product.moving_average_cost = final_mac.quantize(Decimal('0.001'), rounding=ROUND_HALF_UP)
         product.save(update_fields=['moving_average_cost'])
         
-        logger.info(f"Finished recalculating cost history for '{product.name}'. New MAC: {product.moving_average_cost}")
+        logger.info(f"Finished recalculating MOVING AVERAGE COST for '{product.name}'. New MAC: {product.moving_average_cost}")

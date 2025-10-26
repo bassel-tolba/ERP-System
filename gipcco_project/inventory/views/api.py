@@ -219,6 +219,32 @@ def api_get_sellable_stock(request: HttpRequest) -> JsonResponse:
         total=Sum('adjustment_quantity')
     ).values('total')
 
+    # Main query to get sellable stock
+    sellable_stock = FinishedProductReceipt.objects.filter(
+        status=FinishedProductReceipt.Status.RELEASED
+    ).annotate(
+        total_dispatched=Coalesce(Subquery(dispatched_subquery), 0.0, output_field=DecimalField()),
+        total_adjusted=Coalesce(Subquery(adjusted_subquery), 0.0, output_field=DecimalField())
+    ).annotate(
+        available_quantity=F('total_quantity_produced') - F('total_dispatched') - F('total_adjusted')
+    ).filter(
+        available_quantity__gt=0.001
+    ).select_related('batch__template__final_product', 'batch')
+
+    result = [
+        {
+            'id': stock.id,
+            'product_name': stock.batch.template.final_product.name,
+            'product_code': stock.batch.template.final_product.code,
+            'batch_number': stock.batch.batch_number,
+            'available_quantity': stock.available_quantity,
+            'unit': stock.batch.template.final_product.unit,
+            'unit_cost': stock.unit_cost
+        } for stock in sellable_stock
+    ]
+    
+    return JsonResponse(result, safe=False)
+
 
 def api_get_unallocated_landed_cost_invoices(request):
     """

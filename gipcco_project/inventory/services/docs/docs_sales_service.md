@@ -23,7 +23,10 @@
 
 - `update_sales_order_item(so_item: SalesOrderItem, new_quantity: float)`: Updates the quantity of a sales order item, validating that the new quantity is not less than what has already been dispatched.
 
-- `cancel_dispatch(dispatch: FinishedProductDispatch)`: Deletes a dispatch record, but only if it has not yet been included in an invoice.
+- `cancel_dispatch(dispatch: FinishedProductDispatch, user, justification: str)`: **REDEFINED:** Cancels a dispatch non-destructively.
+  - Instead of deleting the record, it updates the dispatch's `status` to `CANCELLED`.
+  - It creates a formal reversing journal entry via the correction service to ensure the financial impact is perfectly mirrored and the audit trail is complete.
+  - **Calls:** `create_reversing_je_for_correction()` from `correction_transactions.py`.
 
 - `apply_payment_to_invoices(payment: Payment, applications: List[Dict[str, any]])`: Applies a single customer payment to one or more outstanding invoices within a database transaction.
   - Validates that the total application amount does not exceed the payment's unapplied balance.

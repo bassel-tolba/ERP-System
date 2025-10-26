@@ -9,9 +9,10 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 from django.db.models import Q
+from django.core.exceptions import ValidationError, PermissionDenied
 
 from ..models import BatchItem, Product, ProductionReturn
-from ..services.costing_service import recalculate_cost_history_for_product
+from ..services import production_service
 
 
 # --- Production Returns Views ---
@@ -51,9 +52,7 @@ def production_returns(request: HttpRequest) -> HttpResponse:
                         return_date=return_datetime,
                         notes=notes
                     )
-                    # --- COSTING TRIGGER ---
-                    recalculate_cost_history_for_product(pr_return.product_id, pr_return.return_date)
-                    messages.success(request, "تم تسجيل المرتجع وتحديث التكاليف بنجاح.")
+                    messages.success(request, "تم تسجيل المرتجع بنجاح.")
         except Exception as e:
             messages.error(request, f"حدث خطأ أثناء الحفظ: {e}")
         
@@ -68,23 +67,29 @@ def production_returns(request: HttpRequest) -> HttpResponse:
     }
     if 'X-Partial-Request' in request.headers:
         return render(request, 'inventory/partials/production_returns_content.html', context)
-    return render(request, 'inventory/production_returns.html', context)
+from ..services import production_service
 
 
 @require_POST
-def delete_production_return(request: HttpRequest, pk: int) -> HttpResponse:
+def cancel_production_return_view(request: HttpRequest, pk: int) -> HttpResponse:
     """
-    Deletes a production return record.
+    Handles cancelling a production return non-destructively by calling the production service.
     """
     pr_return = get_object_or_404(ProductionReturn, pk=pk)
-    
-    # --- COSTING TRIGGER ---
-    product_id_to_recalc = pr_return.product_id
-    recalc_start_date = pr_return.return_date
-    
-    pr_return.delete()
-    
-    recalculate_cost_history_for_product(product_id_to_recalc, recalc_start_date)
+    justification = request.POST.get('justification', '')
 
-    messages.info(request, 'تم حذف سجل الإرجاع وتحديث التكاليف بنجاح.')
+    if not justification:
+        messages.error(request, "سبب الإلغاء مطلوب.")
+        return redirect('inventory:production_returns')
+
+    try:
+        production_service.cancel_production_return(
+            prod_return=pr_return,
+            user=request.user,
+            justification=justification
+        )
+        messages.info(request, 'تم إلغاء سجل الإرجاع وتحديث التكاليف بنجاح.')
+    except (ValidationError, PermissionError) as e:
+        messages.error(request, f"خطأ في الإلغاء: {e}")
+
     return redirect('inventory:production_returns')

@@ -354,26 +354,48 @@ def edit_dispatch(request: HttpRequest, pk: int) -> HttpResponse:
 
 
 @require_POST
-def delete_dispatch(request: HttpRequest, pk: int) -> HttpResponse:
-    """Handles deleting a dispatch."""
+def cancel_dispatch_view(request: HttpRequest, pk: int) -> HttpResponse:
+    """
+    Handles cancelling a dispatch non-destructively by calling the sales service.
+    """
     dispatch = get_object_or_404(FinishedProductDispatch.objects.select_related('sales_order_item__sales_order'), pk=pk)
     so = dispatch.sales_order_item.sales_order
+    justification = request.POST.get('justification', '')
 
-    with transaction.atomic():
-        dispatch.delete()
-        # Update SO status
-        total_ordered = sum(i.quantity_ordered for i in so.items.all())
-        total_dispatched_after = sum(d.quantity for d in FinishedProductDispatch.objects.filter(sales_order_item__sales_order=so))
-        
-        if abs(total_dispatched_after - total_ordered) < 0.001:
-            so.status = SalesOrder.Status.COMPLETED
-        elif total_dispatched_after > 0:
-            so.status = SalesOrder.Status.PARTIALLY_SHIPPED
-        else:
-            so.status = SalesOrder.Status.PENDING
-        so.save(update_fields=['status'])
+    if not justification:
+        messages.error(request, "سبب الإلغاء مطلوب.")
+        return redirect('inventory:view_sales_order', pk=so.pk)
 
-    messages.success(request, "تم حذف الصرف بنجاح.")
+    try:
+        with transaction.atomic():
+            # Call the service to cancel the dispatch and reverse its JE
+            sales_service.cancel_dispatch(
+                dispatch=dispatch,
+                user=request.user,
+                justification=justification
+            )
+
+            # Update SO status after cancellation
+            total_ordered = sum(i.quantity_ordered for i in so.items.all())
+            # IMPORTANT: Exclude cancelled dispatches from the sum
+            total_dispatched_after = sum(
+                d.quantity for d in FinishedProductDispatch.objects.filter(
+                    sales_order_item__sales_order=so
+                ).exclude(status='CANCELLED')
+            )
+            
+            if abs(total_dispatched_after - total_ordered) < 0.001:
+                so.status = SalesOrder.Status.COMPLETED
+            elif total_dispatched_after > 0:
+                so.status = SalesOrder.Status.PARTIALLY_SHIPPED
+            else:
+                so.status = SalesOrder.Status.PENDING
+            so.save(update_fields=['status'])
+
+        messages.success(request, "تم إلغاء الصرف بنجاح.")
+    except (ValidationError, PermissionError) as e:
+        messages.error(request, f"خطأ في إلغاء الصرف: {e}")
+
     return redirect('inventory:view_sales_order', pk=so.pk)
 
 

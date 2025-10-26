@@ -6,59 +6,68 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from decimal import Decimal
 from django.db.models import Sum, F, Value, FloatField
 from django.db.models.functions import Coalesce
-from typing import Optional
+from typing import Optional, List, Dict
 from datetime import date
+
 
 from .. import models as inventory_models
 from . import costing_service, accounting_service
 
 logger = logging.getLogger(__name__)
 
-def _get_fifo_source_log(product: inventory_models.Product, quantity_needed: Decimal) -> inventory_models.InventoryLog:
+def _get_fifo_source_logs_for_consumption(product: inventory_models.Product, quantity_needed: Decimal) -> List[Dict]:
     """
-    Finds the oldest available InventoryLog for a product that can satisfy the quantity needed.
-    This implements a FIFO (First-In, First-Out) consumption strategy.
+    REDEFINED: Finds the oldest available InventoryLogs to satisfy the quantity needed,
+    drawing from multiple logs if necessary (FIFO).
+
+    Returns a list of dictionaries: [{'log': InventoryLog, 'quantity': Decimal}, ...]
     """
-    # Annotate each log with the sum of quantities that have been drawn from it
     logs_with_outflows = inventory_models.InventoryLog.objects.filter(
         product=product,
         status=inventory_models.InventoryLog.Status.RELEASED
     ).annotate(
         total_consumed=Coalesce(Sum('consumptions__quantity_consumed'), 0.0, output_field=FloatField()),
         total_used_in_batch=Coalesce(Sum('batch_items__actual_quantity'), 0.0, output_field=FloatField()),
-        total_adjusted=Coalesce(Sum('adjustments__adjustment_quantity'), 0.0, output_field=FloatField()) # Note: adjustments can be +/-
+        total_adjusted=Coalesce(Sum('adjustments__adjustment_quantity'), 0.0, output_field=FloatField())
     ).annotate(
-        # Calculate the net remaining quantity
         quantity_remaining=F('quantity') - F('total_consumed') - F('total_used_in_batch') + F('total_adjusted')
-    )
+    ).filter(
+        quantity_remaining__gt=0
+    ).order_by('timestamp')
 
-    # Filter for logs that have enough quantity and get the oldest one
-    available_log = logs_with_outflows.filter(
-        quantity_remaining__gte=float(quantity_needed)
-    ).order_by('timestamp').first()
+    total_available = logs_with_outflows.aggregate(total=Sum('quantity_remaining'))['total'] or 0.0
+    if Decimal(str(total_available)) < quantity_needed:
+        raise ValidationError(f"Insufficient total inventory for product '{product.name}'. Needed: {quantity_needed}, Available: {total_available:.3f}.")
 
-    if not available_log:
-        # You might want to handle this more gracefully, e.g., by allowing partial consumption
-        # from multiple logs, but for now, we raise an error.
-        raise ValidationError(f"Insufficient inventory for product '{product.name}'. Needed: {quantity_needed}, but no single batch has enough.")
+    consumptions = []
+    remaining_to_fulfill = quantity_needed
 
-    return available_log
+    for log in logs_with_outflows:
+        if remaining_to_fulfill <= 0:
+            break
+        
+        quantity_to_take = min(remaining_to_fulfill, Decimal(str(log.quantity_remaining)))
+        
+        consumptions.append({
+            'log': log,
+            'quantity': quantity_to_take
+        })
+        remaining_to_fulfill -= quantity_to_take
+
+    return consumptions
 
 
-def _create_inventory_consumption_from_request(request: inventory_models.ExpenseRequest) -> inventory_models.InventoryConsumption:
+def _create_inventory_consumption_from_request(request: inventory_models.ExpenseRequest) -> List[inventory_models.InventoryConsumption]:
     """
-    Creates an InventoryConsumption record from an approved request.
+    REDEFINED: Creates one or more InventoryConsumption records from an approved request,
+    drawing from multiple source logs if necessary (FIFO).
     """
     product = request.product
     
-    # --- NEW: Find a source log using FIFO before proceeding ---
-    source_log = _get_fifo_source_log(product, request.quantity)
+    source_allocations = _get_fifo_source_logs_for_consumption(product, request.quantity)
 
-    # Use the cost from the selected source log for accuracy, or fall back to MAC if needed.
-    # The cost_at_consumption should reflect the value of the specific item being consumed.
-    cost_per_unit = source_log.costing_unit_price
-    total_cost = (request.quantity * cost_per_unit)
-
+    consumptions_created = []
+    
     consumption_type = inventory_models.InventoryConsumption.ConsumptionType.EXPENSE
     if request.request_type == inventory_models.ExpenseRequest.RequestType.INVENTORY_CAPITALIZE:
         consumption_type = inventory_models.InventoryConsumption.ConsumptionType.CAPITALIZE
@@ -66,27 +75,34 @@ def _create_inventory_consumption_from_request(request: inventory_models.Expense
         consumption_type = inventory_models.InventoryConsumption.ConsumptionType.AMORTIZE
 
     cost_pool = request.cost_pool
-    # An inventory expense must be allocated to a cost pool.
-    # Capitalization and Prepaid requests do not have cost pools as they affect asset accounts.
     if consumption_type == inventory_models.InventoryConsumption.ConsumptionType.EXPENSE and not cost_pool:
         raise ValidationError("A Cost Pool is required for an inventory expense request.")
 
-    # For inventory expenses like MRO, 'PRODUCTION' is a safe default for the legacy 'department' field.
     department_value = inventory_models.InventoryConsumption.Department.PRODUCTION
 
-    return inventory_models.InventoryConsumption.objects.create(
-        product=product,
-        source_log=source_log,
-        quantity_consumed=request.quantity,
-        consumption_date=timezone.now(),
-        department=department_value,
-        cost_at_consumption=total_cost,
-        notes=request.description,
-        consumption_type=consumption_type,
-        fixed_asset=request.fixed_asset if request.request_type == inventory_models.ExpenseRequest.RequestType.INVENTORY_CAPITALIZE else None,
-        cost_pool=cost_pool,
-        source_request=request
-    )
+    for allocation in source_allocations:
+        source_log = allocation['log']
+        quantity_to_consume = allocation['quantity']
+        
+        cost_per_unit = source_log.costing_unit_price
+        total_cost = (quantity_to_consume * cost_per_unit)
+
+        consumption = inventory_models.InventoryConsumption.objects.create(
+            product=product,
+            source_log=source_log,
+            quantity_consumed=quantity_to_consume,
+            consumption_date=timezone.now(),
+            department=department_value,
+            cost_at_consumption=total_cost,
+            notes=request.description,
+            consumption_type=consumption_type,
+            fixed_asset=request.fixed_asset if request.request_type == inventory_models.ExpenseRequest.RequestType.INVENTORY_CAPITALIZE else None,
+            cost_pool=cost_pool,
+            source_request=request
+        )
+        consumptions_created.append(consumption)
+
+    return consumptions_created
 
 def _execute_approval(request: inventory_models.ExpenseRequest) -> models.Model:
     """

@@ -106,6 +106,19 @@ class InventoryAdjustment(models.Model):
     )
     notes = models.TextField(blank=True, null=True, verbose_name=_("Notes"))
     
+    # --- NEW: Status for Draft/Posted workflow ---
+    class Status(models.TextChoices):
+        DRAFT = 'draft', _('Draft')
+        POSTED = 'posted', _('Posted')
+
+    status = models.CharField(
+        max_length=10, choices=Status.choices, default=Status.DRAFT, verbose_name=_("Status")
+    )
+    journal_entry = models.ForeignKey(
+        'JournalEntry', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='+', verbose_name=_("Journal Entry")
+    )
+    
     # --- Source Linking ---
     source_log = models.ForeignKey(
         InventoryLog, on_delete=models.PROTECT, null=True, blank=True,

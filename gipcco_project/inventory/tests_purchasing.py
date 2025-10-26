@@ -200,8 +200,11 @@ class PurchasingServiceTestCase(AccountingServiceBaseTestCase):
         )
 
         # Step 3: Post the invoice
-        je = purchasing_service.post_supplier_invoice(invoice)
+        purchasing_service.post_supplier_invoice(invoice)
         invoice.refresh_from_db()
+
+        # --- FIX: Re-fetch the JournalEntry from the database to get the freshest object ---
+        je = JournalEntry.objects.get(pk=invoice.journal_entry.id)
 
         self.assertEqual(invoice.status, SupplierInvoice.InvoiceStatus.AWAITING_PAYMENT)
         self.assertIsNotNone(je)
@@ -221,11 +224,11 @@ class PurchasingServiceTestCase(AccountingServiceBaseTestCase):
         ppv_value = actual_subtotal - receipt_base_value
         vat_variance = actual_vat - receipt_vat_value
 
-        # Assertions
         # Helper to get total amount for an account and entry type in the JE
         def get_total_for_account(account, entry_type):
             return je.lines.filter(account=account, entry_type=entry_type).aggregate(total=Sum('amount'))['total'] or Decimal('0.000')
 
+        # Assertions
         self.assertEqual(get_total_for_account(self.general_settings.goods_received_not_invoiced_account, 'DEBIT'), grni_value)
         self.assertEqual(get_total_for_account(self.general_settings.accounts_payable, 'CREDIT'), ap_value)
         

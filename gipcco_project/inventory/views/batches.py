@@ -296,13 +296,25 @@ def delete_batch_item(request: HttpRequest, item_pk: int) -> HttpResponse:
 
 # --- REFACTORED: Delete Batch View ---
 @require_POST
-def delete_batch(request: HttpRequest, pk: int) -> HttpResponse:
-    batch = get_object_or_404(Batch.objects.prefetch_related('items'), pk=pk)
+def cancel_batch_view(request: HttpRequest, pk: int) -> HttpResponse:
+    """
+    Handles cancelling a batch non-destructively by calling the batch service.
+    """
+    batch = get_object_or_404(Batch, pk=pk)
+    justification = request.POST.get('justification', '')
+
+    if not justification:
+        messages.error(request, "سبب الإلغاء مطلوب.")
+        return redirect('inventory:view_batch', pk=pk)
+
     try:
-        # Service handles cascade deletion and MAC recalculation internally
-        info = batch_service.delete_batch(batch=batch)
-        messages.info(request, 'تم حذف أمر التشغيل وتحديث التكاليف بنجاح.')
-    except Exception as e:
-        logger.error(f"Error deleting batch {pk}: {e}", exc_info=True)
-        messages.error(request, f"حدث خطأ أثناء الحذف: {e}")
-    return redirect('inventory:batches')
+        batch_service.cancel_batch(
+            batch=batch,
+            user=request.user,
+            justification=justification
+        )
+        messages.info(request, 'تم إلغاء أمر التشغيل وتحديث التكاليف بنجاح.')
+        return redirect('inventory:batches')
+    except (ValidationError, PermissionError) as e:
+        messages.error(request, f"لا يمكن إلغاء أمر التشغيل: {e}")
+        return redirect('inventory:view_batch', pk=pk)

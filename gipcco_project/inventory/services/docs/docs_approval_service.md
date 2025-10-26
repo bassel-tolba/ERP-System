@@ -1,9 +1,10 @@
 # File: inventory/services/approval_service.py
 - **Purpose:** Provides services to approve or reject expense requests, which triggers the creation of the corresponding financial transactions like expense logs, inventory consumptions, or accruals.
 
-- `_get_fifo_source_log(product: inventory_models.Product, quantity_needed: Decimal)`: Finds the oldest available `InventoryLog` that can satisfy a required quantity, implementing a FIFO strategy.
-  - Calculates the remaining quantity for each log by aggregating consumptions, batch usage, and adjustments.
-  - Raises a `ValidationError` if no single log has sufficient quantity.
+- `_get_fifo_source_logs_for_consumption(product: inventory_models.Product, quantity_needed: Decimal)`: **ENHANCED:** Finds the oldest available `InventoryLog` records to satisfy a required quantity, implementing a true FIFO strategy that can draw from multiple source logs.
+  - Calculates the remaining quantity for all available logs.
+  - Returns a list of source logs and the specific quantity to consume from each to fulfill the total request.
+  - Raises a `ValidationError` only if the *total* available inventory is insufficient.
 
 - `_create_inventory_consumption_from_request(request: inventory_models.ExpenseRequest)`: Creates an `InventoryConsumption` record based on an approved expense request.
   - Determines the consumption type (Expense, Capitalize, or Amortize) from the request.
