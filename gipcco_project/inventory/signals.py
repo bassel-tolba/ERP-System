@@ -181,22 +181,6 @@ def handle_inventory_log_deletion(sender, instance: InventoryLog, **kwargs):
         logger.error(f"Error deleting Journal Entry for InventoryLog ID {instance.id}: {e}")
 
 
-# @receiver(post_save, sender=Batch)  <-- COMMENTED OUT THIS DECORATOR
-# def handle_batch_save(sender, instance: Batch, created, **kwargs):
-#     """
-#     DEPRECATED: This logic has been moved to the batch_service to ensure correct
-#     transactional order. The service now explicitly creates the journal entry
-#     after creating the batch and its items.
-#     """
-#     # If the record was updated, not created, first delete the old JE to allow recreation.
-#     if not created:
-#         content_type = ContentType.objects.get_for_model(instance)
-#         JournalEntry.objects.filter(content_type=content_type, object_id=instance.id).delete()
-#         logger.info(f"Deleted existing JE for updated Batch ID {instance.id} to allow regeneration.")
-
-#     create_je_for_production_consumption(batch=instance)
-
-
 @receiver(pre_save, sender=InventoryConsumption)
 def set_consumption_type_for_amortizable(sender, instance: InventoryConsumption, **kwargs):
     """

@@ -173,7 +173,7 @@ class TestAccountingService(AccountingServiceBaseTestCase):
 
     def test_create_je_for_production_consumption_success(self):
         """
-        Verify that creating a Batch correctly creates a JE to move value
+        Verify that starting a Batch correctly creates a JE to move value
         from Raw Material Inventory to WIP Inventory.
         """
         # 1. Arrange: Create a batch with items to consume
@@ -182,27 +182,33 @@ class TestAccountingService(AccountingServiceBaseTestCase):
             shop_order_number="SO-TEST-001",
             batch_number="B-TEST-001",
             creation_date=timezone.make_aware(timezone.datetime(2025, 9, 16, 9, 0, 0)),
+            status=Batch.Status.APPROVED # Set to approved to allow starting
         )
-        # Create two items to consume from the same material but with different costs
         BatchItem.objects.create(
             batch=batch,
             primitive_product=self.raw_material,
-            theoretical_quantity=20.0, # --- FIX: Added missing field ---
+            theoretical_quantity=20.0,
             actual_quantity=20.0,
-            cost_at_consumption=Decimal("10.000") # From the first receipt
+            cost_at_consumption=None # Cost is not known at draft stage
         )
         BatchItem.objects.create(
             batch=batch,
             primitive_product=self.raw_material,
-            theoretical_quantity=5.0, # --- FIX: Added missing field ---
+            theoretical_quantity=5.0,
             actual_quantity=5.0,
-            cost_at_consumption=Decimal("12.000") # A second, more expensive receipt
+            cost_at_consumption=None
         )
+        # Manually set costs as the costing service would in start_batch_production
+        # In a real scenario, start_batch_production would calculate this.
+        # For this test, we set it to test the JE creation part.
+        batch.items.filter(primitive_product=self.raw_material).first().cost_at_consumption = Decimal("10.000")
+        batch.items.filter(primitive_product=self.raw_material).last().cost_at_consumption = Decimal("12.000")
+        batch.items.first().save()
+        batch.items.last().save()
 
-        # 2. Act: The initial save triggers the signal, but with no items.
-        # We must save the batch *again* after adding items to trigger the signal
-        # with the complete data, simulating an update.
-        batch.save()
+
+        # 2. Act: Call the service function that creates the JE
+        create_je_for_production_consumption(batch)
         
         # 3. Assert: Verify the journal entry
         self.assertEqual(JournalEntry.objects.count(), 1)

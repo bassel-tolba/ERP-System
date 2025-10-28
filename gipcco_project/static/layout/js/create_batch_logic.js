@@ -228,14 +228,7 @@ function initCreateBatchLogic(container) {
 
 			materialsCard.style.display = "block";
 			items.forEach((item) => {
-				const newRow = createMaterialRow(item);
-				const stockForThisItem = availableStockData[item.primitive_product_id] || [];
-				if (stockForThisItem.length > 0) {
-					const firstValidOption = stockForThisItem.find((s) => s.timestamp <= creationDateInput.value);
-					newRow.querySelector(".qc-select").value = firstValidOption ? firstValidOption.id : stockForThisItem[0].id;
-					validateRowQuantity(newRow);
-					validateRowDate(newRow);
-				}
+				createMaterialRow(item);
 			});
 			recalculateQuantities();
 		};

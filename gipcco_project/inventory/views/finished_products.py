@@ -26,7 +26,7 @@ def finished_goods_status(request):
     #  FIX: Filter out continuation batches from this list.
     #  Only parent batches can have finished goods received against them.
     # ==========================================================================
-    all_plans = Batch.objects.filter(is_continuation=False).annotate(
+    all_plans = Batch.objects.filter(is_continuation=False, status=Batch.Status.IN_PROGRESS).annotate(
         received_count=Count('receipts')
     ).select_related(
         'template__final_product'
@@ -99,6 +99,10 @@ def receive_finished_product(request, batch_pk, individual_batch_number):
         # Redirect to the correct parent batch for a better user experience
         redirect_pk = production_plan.parent_batch.pk if production_plan.parent_batch else production_plan.pk
         return redirect('inventory:view_batch', pk=redirect_pk)
+
+    if production_plan.status != Batch.Status.IN_PROGRESS:
+        messages.error(request, f"خطأ: لا يمكن استلام منتج نهائي إلا لأمر تشغيل بحالة 'تحت التنفيذ'. الحالة الحالية هي '{production_plan.get_status_display()}'.")
+        return redirect('inventory:view_batch', pk=production_plan.pk)
     # ==========================================================================
 
 
@@ -136,10 +140,6 @@ def receive_finished_product(request, batch_pk, individual_batch_number):
         market_type = request.POST.get('market_type')
         notes = request.POST.get('notes', '')
         
-        # --- NEW: Get overhead allocation fields ---
-        number_of_bottles_str = request.POST.get('number_of_bottles')
-        # --- REMOVED: bottle_size_ml_str is now derived from the template ---
-
         sub_batch_ids = request.POST.getlist('sub_batch_id')
         sub_batch_qtys = request.POST.getlist('sub_batch_qty')
 
@@ -153,11 +153,6 @@ def receive_finished_product(request, batch_pk, individual_batch_number):
                 
                 total_quantity_produced = sum(float(qty) for qty in sub_batch_qtys if qty)
 
-                # --- NEW: Prepare overhead fields for saving ---
-                number_of_bottles = int(number_of_bottles_str) if number_of_bottles_str else None
-                # --- CHANGED: Get bottle size from the template ---
-                bottle_size_ml = production_plan.template.bottle_size_ml
-
                 # Create the main receipt record
                 receipt = FinishedProductReceipt.objects.create(
                     batch=production_plan,
@@ -167,10 +162,7 @@ def receive_finished_product(request, batch_pk, individual_batch_number):
                     notes=notes,
                     total_cost=proportional_cost.quantize(Decimal('0.001')),
                     total_quantity_produced=total_quantity_produced,
-                    status=FinishedProductReceipt.Status.QUARANTINED,
-                    # --- NEW: Save overhead fields ---
-                    number_of_bottles=number_of_bottles,
-                    bottle_size_ml=bottle_size_ml
+                    status=FinishedProductReceipt.Status.QUARANTINED
                 )
 
                 # Create all the sub-batch records
@@ -190,6 +182,13 @@ def receive_finished_product(request, batch_pk, individual_batch_number):
 
                 ReceiptSubBatch.objects.bulk_create(sub_batches_to_create)
 
+                # --- NEW: Check if all batches in the plan have been received ---
+                # We refresh the count from the DB to ensure accuracy within the transaction
+                if production_plan.receipts.count() >= production_plan.number_of_batches_in_plan:
+                    production_plan.status = Batch.Status.COMPLETED
+                    production_plan.save(update_fields=['status'])
+                    messages.info(request, f"اكتمل استلام جميع التشغيلات لأمر التشغيل '{production_plan.shop_order_number}'. تم تغيير الحالة إلى 'مكتمل'.")
+
             messages.success(request, f"تم استلام التشغيلة رقم '{individual_batch_number}' بنجاح ووضعها تحت الفحص.")
             return redirect('inventory:view_batch', pk=production_plan.pk)
         except (ValueError, TypeError) as e:
@@ -205,7 +204,6 @@ def receive_finished_product(request, batch_pk, individual_batch_number):
         'total_plan_cost': total_plan_cost,
         'market_type_choices': FinishedProductReceipt.MarketType.choices,
         'today_date': timezone.now().strftime('%Y-%m-%d'),
-        'bottle_size_from_template': production_plan.template.bottle_size_ml, # NEW
     }
 
     if 'X-Partial-Request' in request.headers:

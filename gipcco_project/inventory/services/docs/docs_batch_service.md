@@ -1,43 +1,43 @@
 # File: gipcco_project/inventory/services/batch_service.py
+- **Purpose:** Manages the lifecycle and business logic for production batches (shop orders).
 
-- **Purpose:** Manages the complete lifecycle of production batches (shop orders), including creation, updates, and modifications.
+- `create_batch`:
+  - **NEW**: Creates a `Batch` in `DRAFT` status.
+  - No longer creates journal entries or calculates costs. This is deferred until production starts.
+  - Still performs stock validation to ensure the draft is feasible.
 
-## Functions
+- `update_batch`:
+  - **NEW**: Can only be called on batches in `DRAFT` status.
+  - Performs a direct update of batch data and items, as no financial transactions have occurred yet.
 
-- `create_batch(...)`:
-  - **Description:** Creates a new `Batch` and its associated `BatchItem` records.
-  - **Workflow:**
-    1. Validates that there is sufficient stock for all raw materials.
-    2. Creates the `Batch` and `BatchItem` records.
-    3. **Calls `recalculate_cost_history_for_product` to calculate the cost snapshot used for new `BatchItem.cost_at_consumption`.** Note: the current `recalculate_cost_history_for_product` implementation is non-destructive — it computes the appropriate MAC and updates the `Product.moving_average_cost`; cost snapshots used for a batch are calculated from historical state as needed.
-    4. Calls `create_je_for_production_consumption` to create a single, consolidated journal entry for the entire consumption. If the total consumption cost is zero the JE is not created.
-  - **Calls:** `validate_stock_availability()` from `batch_helpers.py`, `recalculate_cost_history_for_product()` from `costing_service.py`, `create_je_for_production_consumption()` from `accounting_service.py`.
+- `submit_batch_for_approval`:
+  - **NEW**: Moves a batch from `DRAFT` to `PENDING_APPROVAL`.
+  - Records the user who submitted the batch.
 
-- `update_batch(...)`:
-  - **Description:** Updates an existing `Batch` and its items.
-  - **Workflow:**
-    1. Deletes the original journal entry associated with the batch.
-    2. Updates the batch header and item details.
-    3. Recalculates and updates the `cost_at_consumption` for all items (using `recalculate_cost_history_for_product` anchored at the batch creation timestamp).
-    4. Re-creates the journal entry with the new, updated values.
-  - **Calls:** `validate_stock_availability()` from `batch_helpers.py`, `recalculate_cost_history_for_product()` from `costing_service.py`, `create_je_for_production_consumption()` from `accounting_service.py`.
+- `approve_batch`:
+  - **NEW**: Moves a batch from `PENDING_APPROVAL` to `APPROVED`.
+  - Records the user who approved the batch.
 
-- `add_item_to_batch(...)`:
-  - **Description:** **REDEFINED:** Adds a single supplemental item to an existing batch in an auditable, non-destructive way.
-  - **Workflow:**
-    1. Validates stock for the new item.
-    2. Creates the new `BatchItem` record.
-    3. Calls `recalculate_cost_history_for_product` to set the cost snapshot on the new item.
-    4. **Calls `create_je_for_production_supplemental_issue` to create a separate, dedicated journal entry for just this addition.** This preserves the integrity of the original consumption JE — the supplemental JE is auditable and linked to the new `BatchItem`.
-  - **Calls:** `validate_stock_availability()` from `batch_helpers.py`, `recalculate_cost_history_for_product()` from `costing_service.py`, `create_je_for_production_supplemental_issue()` from `accounting_service.py`.
+- `reject_batch`:
+  - **NEW**: Moves a batch from `PENDING_APPROVAL` back to `DRAFT`.
+  - Allows for corrections before resubmission.
 
-- `delete_item_from_batch(...)`:
-  - **Description:** Deletes an item from a batch and recreates the journal entry to reflect the reduced consumption value.
+- `start_batch_production`:
+  - **NEW**: This is the critical financial step.
+  - Can only be called on an `APPROVED` batch.
+  - Snapshots the `cost_at_consumption` for all batch items.
+  - Creates the main production consumption journal entry.
+  - Triggers the final recalculation of the moving average cost for consumed products.
+  - Moves the batch status to `IN_PROGRESS`.
 
-- `delete_batch(...)`:
-  - **Description:** Deletes an entire batch and triggers a cost recalculation to reverse the financial impact of the consumption.
-  - **Description:** Deletes an entire batch and triggers a cost recalculation to reflect the deletion's effect on product MACs (non-destructive to historical records).
+- `add_item_to_batch`:
+  - If the batch is a `DRAFT`, it simply adds the new item.
+  - If the batch is `IN_PROGRESS`, it adds the item, snapshots its cost, and creates a separate, auditable supplemental journal entry.
 
-Other notes:
-- After batch creation/update the service calls `check_and_update_batch_customization` to handle product-specific customization hooks.
-- Stock validation uses `validate_stock_availability` which can exclude the current batch during updates to avoid false positives.
+- `return_item_from_batch`:
+  - Creates a `ProductionReturn` record to move a component from a batch back to inventory.
+  - The post-save signal on `ProductionReturn` handles the JE creation and cost recalculation.
+
+- `cancel_batch`:
+  - If the batch was `IN_PROGRESS`, it creates a reversing journal entry and triggers cost recalculation.
+  - If the batch was in a pre-production state (`DRAFT`, `PENDING_APPROVAL`, `APPROVED`), it simply marks it as `CANCELLED` with no financial impact.

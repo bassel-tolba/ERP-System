@@ -110,8 +110,15 @@ class BatchesViewsTest(AccountingServiceBaseTestCase):
         self.assertTrue(Batch.objects.filter(shop_order_number='SO-NEW-001').exists())
         new_batch = Batch.objects.get(shop_order_number='SO-NEW-001')
         self.assertEqual(new_batch.items.count(), 2)
+        # NEW: Assert status is Draft and no JE exists
+        self.assertEqual(new_batch.status, Batch.Status.DRAFT)
+        self.assertFalse(JournalEntry.objects.filter(
+            content_type=ContentType.objects.get_for_model(Batch),
+            object_id=new_batch.id
+        ).exists())
         self.assertRedirects(response, reverse('inventory:view_batch', kwargs={'pk': new_batch.pk}))
-        self.assertContains(response, "تم إنشاء أمر التشغيل &#x27;SO-NEW-001&#x27; وتحديث التكاليف بنجاح.")
+        # NEW: Assert the updated success message for draft creation
+        self.assertContains(response, "تم إنشاء مسودة أمر التشغيل &#x27;SO-NEW-001&#x27; بنجاح.")
 
     def test_create_batch_view_post_insufficient_stock(self):
         """
@@ -153,30 +160,96 @@ class BatchesViewsTest(AccountingServiceBaseTestCase):
         self.assertContains(response, "SO-VIEW-001")
         self.assertEqual(response.context['batch'], batch)
 
-    def test_cancel_batch_view_success(self):
+    def test_batch_workflow_views(self):
         """
-        Test the non-destructive cancellation of a batch.
+        Test the full batch workflow from Draft -> Submitted -> Approved -> In Progress -> Cancelled.
         """
+        # 1. Create a draft batch first
         batch = batch_service.create_batch(
             template_id=self.test_template.id,
-            shop_order_number='SO-CANCEL-001',
+            shop_order_number='SO-WORKFLOW-001',
             batch_number_from='301',
             creation_date=date.today(),
             items_data=[
                 {'product_id': self.raw_material.id, 'theoretical_quantity': 10.0, 'actual_quantity': 10.0, 'source_log_id': self.log1.id}
             ]
         )
-        
-        url = reverse('inventory:cancel_batch', kwargs={'pk': batch.pk})
-        post_data = {'justification': 'Test cancellation'}
-        
-        response = self.client.post(url, post_data, follow=True)
+        self.assertEqual(batch.status, Batch.Status.DRAFT)
 
+        # 2. Submit for Approval
+        submit_url = reverse('inventory:submit_batch', kwargs={'pk': batch.pk})
+        response = self.client.post(submit_url, follow=True)
+        self.assertRedirects(response, reverse('inventory:view_batch', kwargs={'pk': batch.pk}))
+        self.assertContains(response, "تم إرسال أمر التشغيل للموافقة.")
+        batch.refresh_from_db()
+        self.assertEqual(batch.status, Batch.Status.PENDING_APPROVAL)
+        self.assertEqual(batch.submitted_by, self.test_user)
+
+        # 3. Approve
+        approve_url = reverse('inventory:approve_batch', kwargs={'pk': batch.pk})
+        response = self.client.post(approve_url, follow=True)
+        self.assertRedirects(response, reverse('inventory:view_batch', kwargs={'pk': batch.pk}))
+        self.assertContains(response, "تمت الموافقة على أمر التشغيل.")
+        batch.refresh_from_db()
+        self.assertEqual(batch.status, Batch.Status.APPROVED)
+        self.assertEqual(batch.approved_by, self.test_user)
+
+        # 4. Start Production
+        start_url = reverse('inventory:start_production', kwargs={'pk': batch.pk})
+        response = self.client.post(start_url, follow=True)
+        self.assertRedirects(response, reverse('inventory:view_batch', kwargs={'pk': batch.pk}))
+        self.assertContains(response, "تم بدء الإنتاج لأمر التشغيل.")
+        batch.refresh_from_db()
+        self.assertEqual(batch.status, Batch.Status.IN_PROGRESS)
+        # Assert that the JE was created at this stage
+        self.assertTrue(self.get_je_for_object(batch))
+
+        # 5. Cancel the In-Progress Batch
+        cancel_url = reverse('inventory:cancel_batch', kwargs={'pk': batch.pk})
+        post_data = {'justification': 'Test cancellation'}
+        response = self.client.post(cancel_url, post_data, follow=True)
         self.assertRedirects(response, reverse('inventory:batches'))
         self.assertContains(response, "تم إلغاء أمر التشغيل وتحديث التكاليف بنجاح.")
-        
         batch.refresh_from_db()
         self.assertEqual(batch.status, Batch.Status.CANCELLED)
+        # Assert that a reversing JE was created (now 2 JEs total for this object's lifecycle)
+        self.assertEqual(JournalEntry.objects.filter(
+            content_type=ContentType.objects.get_for_model(Batch),
+            object_id=batch.id
+        ).count(), 2)
+
+    def test_reject_batch_workflow(self):
+        """
+        Test that a batch can be rejected and returned to Draft status.
+        """
+        # 1. Create a draft batch
+        batch = batch_service.create_batch(
+            template_id=self.test_template.id,
+            shop_order_number='SO-REJECT-001',
+            batch_number_from='302',
+            creation_date=date.today(),
+            items_data=[
+                {'product_id': self.raw_material.id, 'theoretical_quantity': 5.0, 'actual_quantity': 5.0, 'source_log_id': self.log1.id}
+            ]
+        )
+        self.assertEqual(batch.status, Batch.Status.DRAFT)
+
+        # 2. Submit for Approval
+        batch = batch_service.submit_batch_for_approval(batch, self.test_user)
+        self.assertEqual(batch.status, Batch.Status.PENDING_APPROVAL)
+
+        # 3. Reject the batch
+        reject_url = reverse('inventory:reject_batch', kwargs={'pk': batch.pk})
+        post_data = {'justification': 'Test rejection'}
+        response = self.client.post(reject_url, post_data, follow=True)
+        self.assertRedirects(response, reverse('inventory:view_batch', kwargs={'pk': batch.pk}))
+        self.assertContains(response, "تم إرجاع أمر التشغيل إلى مسودة.")
+        
+        batch.refresh_from_db()
+        self.assertEqual(batch.status, Batch.Status.DRAFT)
+        self.assertIsNone(batch.submitted_by)
+        self.assertIsNone(batch.submitted_at)
+        self.assertFalse(self.get_je_for_object(batch, expect_one=False), "A JE was created for a rejected batch.")
 
     def test_cancel_batch_view_fail_if_receipts_exist(self):
         """
@@ -211,20 +284,21 @@ class BatchesViewsTest(AccountingServiceBaseTestCase):
     def test_return_batch_item_view(self):
         """
         Test returning a portion of a consumed item from a batch back to inventory.
+        The batch must be IN_PROGRESS for this to be a valid action.
         """
-        batch = Batch.objects.create(
-            template=self.test_template,
-            shop_order_number="SO-RETURN-ITEM",
-            batch_number="B-RETURN-ITEM",
-            creation_date=timezone.now()
+        # Create and move batch to IN_PROGRESS
+        batch = batch_service.create_batch(
+            template_id=self.test_template.id, shop_order_number="SO-RETURN-ITEM",
+            batch_number_from="B-RETURN-ITEM", creation_date=timezone.now().date(),
+            items_data=[
+                {'product_id': self.raw_material.id, 'theoretical_quantity': 20.0, 'actual_quantity': 15.0, 'source_log_id': self.log1.id}
+            ]
         )
-        item = BatchItem.objects.create(
-            batch=batch,
-            primitive_product=self.raw_material,
-            theoretical_quantity=20.0,
-            actual_quantity=15.0,
-            source_log=self.log1
-        )
+        batch = batch_service.submit_batch_for_approval(batch, self.test_user)
+        batch = batch_service.approve_batch(batch, self.test_user)
+        batch = batch_service.start_batch_production(batch)
+        
+        item = batch.items.first()
 
         url = reverse('inventory:return_batch_item', kwargs={'item_pk': item.pk})
         post_data = {
@@ -247,6 +321,7 @@ class BatchServiceTests(AccountingServiceBaseTestCase):
     def setUp(self):
         super().setUp()
         # Clean up batch data before each test
+        FinishedProductReceipt.objects.all().delete()
         BatchItem.objects.all().delete()
         Batch.objects.all().delete()
         
@@ -264,7 +339,7 @@ class BatchServiceTests(AccountingServiceBaseTestCase):
             product=self.packaging_material,
             quantity=200.0,
             status=InventoryLog.Status.RELEASED,
-            base_unit_price=Decimal("1.500"),
+            base_unit_price=Decimal("5.500"),
             timestamp=now,
             release_timestamp=now
         )
@@ -277,9 +352,9 @@ class BatchServiceTests(AccountingServiceBaseTestCase):
             release_timestamp=now
         )
 
-    def test_create_batch_zero_cost_no_je(self):
+    def test_start_production_zero_cost_no_je(self):
         """
-        Verify that creating a batch with a total consumption cost of zero
+        Verify that starting production on a batch with a total consumption cost of zero
         does NOT create a journal entry.
         """
         batch = batch_service.create_batch(
@@ -291,6 +366,11 @@ class BatchServiceTests(AccountingServiceBaseTestCase):
                 {'product_id': self.mro_product.id, 'theoretical_quantity': 10.0, 'actual_quantity': 10.0, 'source_log_id': self.zero_cost_log.id}
             ]
         )
+        batch = batch_service.submit_batch_for_approval(batch, self.test_user)
+        batch = batch_service.approve_batch(batch, self.test_user)
+        
+        # Act: Start production
+        batch_service.start_batch_production(batch)
 
         # Assert that no Journal Entry was created for this batch
         je_exists = JournalEntry.objects.filter(
@@ -299,51 +379,47 @@ class BatchServiceTests(AccountingServiceBaseTestCase):
         ).exists()
         self.assertFalse(je_exists, "A journal entry was created for a zero-cost batch, but none was expected.")
 
-    def test_cancel_batch_zero_cost_success(self):
+    def test_cancel_batch_of_draft_succeeds(self):
         """
-        Verify that cancelling a zero-cost batch (which has no JE) succeeds
-        without raising an error. This confirms the recent fix.
+        Verify that cancelling a DRAFT batch succeeds without creating a reversing JE.
         """
         batch = batch_service.create_batch(
-            template_id=self.test_template.id, shop_order_number='SO-CANCEL-ZERO',
+            template_id=self.test_template.id, shop_order_number='SO-CANCEL-DRAFT',
             batch_number_from='402', creation_date=date.today(),
             items_data=[
-                {'product_id': self.mro_product.id, 'theoretical_quantity': 10.0, 'actual_quantity': 10.0, 'source_log_id': self.zero_cost_log.id}
+                {'product_id': self.raw_material.id, 'theoretical_quantity': 10.0, 'actual_quantity': 10.0, 'source_log_id': self.log1.id}
             ]
         )
-        # Pre-condition: Assert that no JE was created
+        self.assertEqual(batch.status, Batch.Status.DRAFT)
+        
+        # Act: Cancel the batch
+        cancelled_batch = batch_service.cancel_batch(batch, self.test_user, "Test draft cancel")
+
+        # Assert
+        self.assertEqual(cancelled_batch.status, Batch.Status.CANCELLED)
         je_exists = JournalEntry.objects.filter(
             content_type=ContentType.objects.get_for_model(Batch),
             object_id=batch.id
         ).exists()
-        self.assertFalse(je_exists, "Pre-condition failed: JE should not exist for zero-cost batch.")
+        self.assertFalse(je_exists, "A journal entry was created when cancelling a draft batch.")
 
-        # Act: Cancel the batch
-        cancelled_batch = batch_service.cancel_batch(batch, self.test_user, "Test zero cost cancel")
-
-        # Assert
-        self.assertEqual(cancelled_batch.status, Batch.Status.CANCELLED)
-        # The absence of an exception is the main success criteria.
-
-    def test_update_batch_deletes_and_recreates_je(self):
+    def test_update_draft_batch_success(self):
         """
-        Verify that the update_batch service correctly deletes the old JE
-        and creates a new one reflecting the updated values.
+        Verify that the update_batch service correctly modifies a DRAFT batch.
         """
         batch = batch_service.create_batch(
-            template_id=self.test_template.id, shop_order_number='SO-UPDATE-TEST',
+            template_id=self.test_template.id, shop_order_number='SO-UPDATE-DRAFT',
             batch_number_from='501', creation_date=date.today(),
             items_data=[
                 {'product_id': self.raw_material.id, 'theoretical_quantity': 10.0, 'actual_quantity': 10.0, 'source_log_id': self.log1.id}
             ]
         )
-        original_je = self.get_je_for_object(batch)
-        self.assertAlmostEqual(original_je.total_debit, Decimal("100.000"))
+        self.assertEqual(batch.items.first().actual_quantity, 10.0)
 
         # Act: Update the batch with a different quantity
         batch_service.update_batch(
             batch=batch,
-            shop_order_number='SO-UPDATE-TEST', batch_number_from='501',
+            shop_order_number='SO-UPDATE-DRAFT', batch_number_from='501',
             creation_date=date.today(),
             items_data=[
                 {'item_id': batch.items.first().id, 'product_id': self.raw_material.id, 'theoretical_quantity': 20.0, 'actual_quantity': 20.0, 'source_log_id': self.log1.id}
@@ -351,16 +427,38 @@ class BatchServiceTests(AccountingServiceBaseTestCase):
         )
 
         # Assert
-        self.assertFalse(JournalEntry.objects.filter(pk=original_je.pk).exists(), "Old journal entry was not deleted.")
-        new_je = self.get_je_for_object(batch)
-        self.assertNotEqual(original_je.pk, new_je.pk, "A new journal entry was not created.")
-        self.assertAlmostEqual(new_je.total_debit, Decimal("200.000"), "New JE does not reflect the updated value.")
+        batch.refresh_from_db()
+        self.assertEqual(batch.items.first().actual_quantity, 20.0)
+        je_exists = JournalEntry.objects.filter(
+            content_type=ContentType.objects.get_for_model(Batch),
+            object_id=batch.id
+        ).exists()
+        self.assertFalse(je_exists, "A journal entry was created when updating a draft batch.")
 
-    def test_add_item_to_batch_creates_separate_je(self):
+    def test_update_in_progress_batch_fails(self):
         """
-        Verify that add_item_to_batch creates its own separate, auditable
-        journal entry linked to the BatchItem, not the parent Batch.
+        Verify that updating a batch that is not in DRAFT status fails.
         """
+        batch = batch_service.create_batch(
+            template_id=self.test_template.id, shop_order_number='SO-UPDATE-FAIL',
+            batch_number_from='502', creation_date=date.today(),
+            items_data=[{'product_id': self.raw_material.id, 'theoretical_quantity': 10.0, 'actual_quantity': 10.0, 'source_log_id': self.log1.id}]
+        )
+        batch.status = Batch.Status.IN_PROGRESS
+        batch.save()
+
+        with self.assertRaises(ValidationError):
+            batch_service.update_batch(
+                batch=batch, shop_order_number='SO-UPDATE-FAIL', batch_number_from='502',
+                creation_date=date.today(), items_data=[]
+            )
+
+    def test_add_item_to_in_progress_batch_creates_separate_je(self):
+        """
+        Verify that add_item_to_batch on an IN_PROGRESS batch creates its own
+        separate, auditable journal entry linked to the BatchItem.
+        """
+        # Create, approve, and start a batch
         batch = batch_service.create_batch(
             template_id=self.test_template.id, shop_order_number='SO-ADD-ITEM',
             batch_number_from='601', creation_date=date.today(),
@@ -368,6 +466,10 @@ class BatchServiceTests(AccountingServiceBaseTestCase):
                 {'product_id': self.raw_material.id, 'theoretical_quantity': 10.0, 'actual_quantity': 10.0, 'source_log_id': self.log1.id}
             ]
         )
+        batch = batch_service.submit_batch_for_approval(batch, self.test_user)
+        batch = batch_service.approve_batch(batch, self.test_user)
+        batch = batch_service.start_batch_production(batch)
+        
         self.assertEqual(JournalEntry.objects.count(), 1)
         original_je = self.get_je_for_object(batch)
 
@@ -386,4 +488,5 @@ class BatchServiceTests(AccountingServiceBaseTestCase):
         
         supplemental_je = self.get_je_for_object(new_item)
         self.assertNotEqual(original_je.pk, supplemental_je.pk)
-        self.assertAlmostEqual(supplemental_je.total_debit, Decimal("7.500"), "Supplemental JE has incorrect value.")
+        self.assertAlmostEqual(supplemental_je.total_debit, Decimal("27.500"), "Supplemental JE has incorrect value (5 * 5.5).")
+

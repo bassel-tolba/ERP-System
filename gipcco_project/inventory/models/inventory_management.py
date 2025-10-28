@@ -96,13 +96,35 @@ class Batch(models.Model):
 
     class Status(models.TextChoices):
         DRAFT = 'draft', _('Draft')
+        PENDING_APPROVAL = 'pending_approval', _('Pending Approval')
+        APPROVED = 'approved', _('Approved')
         IN_PROGRESS = 'in_progress', _('In Progress')
         COMPLETED = 'completed', _('Completed')
         CANCELLED = 'cancelled', _('Cancelled')
 
     status = models.CharField(
-        max_length=20, choices=Status.choices, default=Status.IN_PROGRESS,
+        max_length=20, choices=Status.choices, default=Status.DRAFT,
         verbose_name=_("Status")
+    )
+
+    # --- NEW: Approval workflow fields ---
+    submitted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='submitted_batches',
+        verbose_name=_("Submitted By")
+    )
+    submitted_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("Submitted At")
+    )
+    approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='approved_batches',
+        verbose_name=_("Approved By")
+    )
+    approved_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("Approved At")
     )
 
     # --- NEW: Field for capturing allocation driver data ---

@@ -24,6 +24,8 @@ Key model changes and implementation notes (current):
 
 - `Batch` and continuation semantics:
   - Fields: `template` (FK), `shop_order_number`, `batch_number`, `creation_date`, `is_customized`, `is_continuation`, `parent_batch` (FK to self), `notes`.
+  - **NEW**: `status` field now includes `DRAFT`, `PENDING_APPROVAL`, `APPROVED`, `IN_PROGRESS`, `COMPLETED`, `CANCELLED`. Default is `DRAFT`.
+  - **NEW**: Approval workflow fields: `submitted_by` (FK to User), `submitted_at`, `approved_by` (FK to User), `approved_at`.
   - Business rules (service layer enforces):
     - If `is_continuation` is True the `parent_batch` must reference the original batch; continuation batches share the same `shop_order_number`.
     - Finished goods receipts must be created only against the original (parent) batch.

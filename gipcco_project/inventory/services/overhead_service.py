@@ -47,7 +47,8 @@ def calculate_driver_units_total(driver: AllocationDriver, period: FinancialPeri
     # Base query for receipts within the period for consistency
     receipts_in_period = FinishedProductReceipt.objects.filter(
         receipt_date__gte=period.start_date,
-        receipt_date__lte=period.end_date
+        receipt_date__lte=period.end_date,
+        batch__status__in=[Batch.Status.IN_PROGRESS, Batch.Status.COMPLETED]
     )
     
     if driver.name == AllocationDriver.DriverChoices.MACHINE_HOURS:

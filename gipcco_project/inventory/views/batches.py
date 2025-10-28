@@ -94,7 +94,7 @@ def create_batch(request: HttpRequest) -> HttpResponse:
             # 3. Trigger side effects (Costing is now handled internally by service for atomicity. 
             # We remove the external recalculation call here.)
             
-            messages.success(request, f"تم إنشاء أمر التشغيل '{batch.shop_order_number}' وتحديث التكاليف بنجاح.")
+            messages.success(request, f"تم إنشاء مسودة أمر التشغيل '{batch.shop_order_number}' بنجاح.")
             return redirect('inventory:view_batch', pk=batch.pk)
 
         except (ValidationError, ValueError, TypeError) as e:
@@ -166,13 +166,20 @@ def view_batch(request: HttpRequest, pk: int) -> HttpResponse:
     # This presentation logic is complex but specific to this view, so it remains here.
     # It could be moved to a helper if reused elsewhere.
     individual_batch_numbers_in_plan = []
+    batch_from = ''
+    batch_to = ''
     if batch_info.batch_number:
         parts = str(batch_info.batch_number).split('-')
+        if parts:
+            batch_from = ''.join(filter(str.isdigit, parts[0]))
+        if len(parts) > 1:
+            batch_to = ''.join(filter(str.isdigit, parts[1]))
+        
         try:
-            start_num = int(''.join(filter(str.isdigit, parts[0])))
-            prefix = parts[0].replace(str(start_num), '')
-            if len(parts) > 1 and parts[1]:
-                end_num = int(''.join(filter(str.isdigit, parts[1])))
+            start_num = int(batch_from) if batch_from else 0
+            prefix = parts[0].replace(str(start_num), '') if batch_from else parts[0]
+            if batch_to:
+                end_num = int(batch_to)
                 if end_num >= start_num:
                     individual_batch_numbers_in_plan = [f"{prefix}{i}" for i in range(start_num, end_num + 1)]
             else:
@@ -210,6 +217,8 @@ def view_batch(request: HttpRequest, pk: int) -> HttpResponse:
         'related_returns': related_returns,
         'is_partial_request': 'X-Partial-Request' in request.headers,
         'today_date': timezone.now().strftime('%Y-%m-%d'),
+        'batch_from': batch_from,
+        'batch_to': batch_to,
     }
     template = 'inventory/partials/batch_view_content.html' if 'X-Partial-Request' in request.headers else 'inventory/batch_view.html'
     return render(request, template, context)
@@ -293,6 +302,68 @@ def add_batch_item(request: HttpRequest, batch_pk: int) -> HttpResponse:
         logger.error(f"Error adding item to batch {batch_pk}: {e}", exc_info=True)
         messages.error(request, f"حدث خطأ أثناء إضافة المادة: {e}")
     return redirect('inventory:view_batch', pk=batch_pk)
+
+
+# --- BATCH WORKFLOW ACTIONS ---
+
+@require_POST
+def submit_batch_view(request: HttpRequest, pk: int) -> HttpResponse:
+    """
+    Handles submitting a batch for approval.
+    """
+    batch = get_object_or_404(Batch, pk=pk)
+    try:
+        batch_service.submit_batch_for_approval(batch, request.user)
+        messages.success(request, "تم إرسال أمر التشغيل للموافقة.")
+    except (ValidationError, PermissionError) as e:
+        messages.error(request, f"لا يمكن إرسال أمر التشغيل: {e}")
+    return redirect('inventory:view_batch', pk=pk)
+
+
+@require_POST
+def approve_batch_view(request: HttpRequest, pk: int) -> HttpResponse:
+    """
+    Handles approving a batch.
+    """
+    batch = get_object_or_404(Batch, pk=pk)
+    try:
+        batch_service.approve_batch(batch, request.user)
+        messages.success(request, "تمت الموافقة على أمر التشغيل.")
+    except (ValidationError, PermissionError) as e:
+        messages.error(request, f"لا يمكن الموافقة على أمر التشغيل: {e}")
+    return redirect('inventory:view_batch', pk=pk)
+
+
+@require_POST
+def reject_batch_view(request: HttpRequest, pk: int) -> HttpResponse:
+    """
+    Handles rejecting a batch and returning it to Draft status.
+    """
+    batch = get_object_or_404(Batch, pk=pk)
+    justification = request.POST.get('justification', '')
+    if not justification:
+        messages.error(request, "سبب الإرجاع مطلوب.")
+        return redirect('inventory:view_batch', pk=pk)
+    try:
+        batch_service.reject_batch(batch, request.user, justification)
+        messages.info(request, "تم إرجاع أمر التشغيل إلى مسودة.")
+    except (ValidationError, PermissionError) as e:
+        messages.error(request, f"لا يمكن إرجاع أمر التشغيل: {e}")
+    return redirect('inventory:view_batch', pk=pk)
+
+
+@require_POST
+def start_production_view(request: HttpRequest, pk: int) -> HttpResponse:
+    """
+    Handles starting production for an approved batch.
+    """
+    batch = get_object_or_404(Batch, pk=pk)
+    try:
+        batch_service.start_batch_production(batch)
+        messages.success(request, "تم بدء الإنتاج لأمر التشغيل.")
+    except (ValidationError, PermissionError) as e:
+        messages.error(request, f"لا يمكن بدء الإنتاج: {e}")
+    return redirect('inventory:view_batch', pk=pk)
 
 
 # --- REFACTORED: Delete Batch Item View ---

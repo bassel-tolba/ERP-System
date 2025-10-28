@@ -4,6 +4,14 @@ function initBatchViewLogic(container) {
 	if (batchViewForm) {
 		console.log("Initializing FULL batch_view.html dynamic logic...");
 
+		const batchStatus = container.querySelector("#batch-status-badge")?.dataset.status;
+		if (batchStatus && batchStatus !== 'draft') {
+			const fieldset = batchViewForm.querySelector("fieldset");
+			if (fieldset) {
+				fieldset.disabled = true;
+			}
+		}
+
 		const continuationCheckEdit = container.querySelector("#isContinuationSwitch");
 		const parentBatchContainerEdit = container.querySelector("#parent_batch_container_edit");
 		const parentBatchSelectEl = container.querySelector("#parent_batch_edit");

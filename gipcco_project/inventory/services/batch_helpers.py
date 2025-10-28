@@ -40,7 +40,7 @@ def get_batch_form_context() -> Dict[str, Any]:
         stock_list = []
         # Correctly calculate remaining quantity for each released log
         inventory_logs = prod.inventory_logs.filter(status=InventoryLog.Status.RELEASED).annotate(
-            total_used=Coalesce(Sum('batch_items__actual_quantity'), 0.0, output_field=FloatField()),
+            total_used=Coalesce(Sum('batch_items__actual_quantity', filter=~Q(batch_items__batch__status=Batch.Status.CANCELLED)), 0.0, output_field=FloatField()),
             total_returned=Coalesce(Sum('production_returns__quantity'), 0.0, output_field=FloatField()),
             total_consumed=Coalesce(Sum('consumptions__quantity_consumed'), 0.0, output_field=FloatField()),
             total_adjusted=Coalesce(Sum('adjustments__adjustment_quantity'), 0.0, output_field=FloatField())
@@ -90,7 +90,7 @@ def validate_stock_availability(
     source_log_ids: List[int], 
     batch_creation_date: datetime.date, 
     batch_id_to_exclude: int = None
-) -> (bool, str):
+) -> tuple[bool, str]:
     """
     Validates stock availability by first aggregating all requests from the same source.
     Ensures that stock is 'RELEASED' and that its release date is not after the consumption date.
@@ -127,7 +127,10 @@ def validate_stock_availability(
             return False, f"عدم تطابق المنتج. تم طلب '{product.name}' من مصدر QC '{log_entry.qc_no}' الذي يخص منتج '{log_entry.product.name}'."
 
         # --- Calculate Available Stock ---
-        used_items_qs = BatchItem.objects.filter(source_log_id=source_id).exclude(batch__status=Batch.Status.CANCELLED)
+        used_items_qs = BatchItem.objects.filter(
+            source_log_id=source_id, 
+            batch__status__in=[Batch.Status.IN_PROGRESS, Batch.Status.COMPLETED, Batch.Status.APPROVED, Batch.Status.PENDING_APPROVAL]
+        )
         if batch_id_to_exclude:
             used_items_qs = used_items_qs.exclude(batch_id=batch_id_to_exclude)
 

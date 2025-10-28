@@ -181,7 +181,7 @@ def api_get_full_batch_analysis(request: HttpRequest, batch_pk: int) -> JsonResp
     batch = get_object_or_404(
         Batch.objects.select_related('template__final_product').prefetch_related(
             'items__primitive_product', 'receipts'
-        ).exclude(status=Batch.Status.CANCELLED), 
+        ).filter(status__in=[Batch.Status.IN_PROGRESS, Batch.Status.COMPLETED]), 
         pk=batch_pk
     )
 
@@ -420,7 +420,7 @@ def api_get_available_stock(request: HttpRequest, product_pk: int) -> JsonRespon
     product = get_object_or_404(Product, pk=product_pk)
     
     # --- ROBUST SUBQUERY APPROACH FOR RAW MATERIALS ---
-    consumed_prod_subquery = BatchItem.objects.filter(source_log_id=OuterRef('pk')).values('source_log_id').annotate(total=Sum('actual_quantity')).values('total')
+    consumed_prod_subquery = BatchItem.objects.filter(source_log_id=OuterRef('pk'), batch__status__in=[Batch.Status.IN_PROGRESS, Batch.Status.COMPLETED]).values('source_log_id').annotate(total=Sum('actual_quantity')).values('total')
     consumed_internal_subquery = InventoryConsumption.objects.filter(source_log_id=OuterRef('pk')).values('source_log_id').annotate(total=Sum('quantity_consumed')).values('total')
     returned_subquery = ProductionReturn.objects.filter(source_log_id=OuterRef('pk')).values('source_log_id').annotate(total=Sum('quantity')).values('total')
     adjusted_subquery = InventoryAdjustment.objects.filter(source_log_id=OuterRef('pk')).values('source_log_id').annotate(total=Sum('adjustment_quantity')).values('total')
@@ -463,7 +463,7 @@ def api_get_stock_sources_for_product(request: HttpRequest, product_id: int) -> 
     # 1. Get Raw Material / MRO sources from InventoryLog
     if product.product_type != Product.ProductType.FINAL_PRODUCT:
         # --- ROBUST SUBQUERY APPROACH FOR RAW MATERIALS ---
-        consumed_prod_subquery = BatchItem.objects.filter(source_log_id=OuterRef('pk')).values('source_log_id').annotate(total=Sum('actual_quantity')).values('total')
+        consumed_prod_subquery = BatchItem.objects.filter(source_log_id=OuterRef('pk'), batch__status__in=[Batch.Status.IN_PROGRESS, Batch.Status.COMPLETED]).values('source_log_id').annotate(total=Sum('actual_quantity')).values('total')
         consumed_internal_subquery = InventoryConsumption.objects.filter(source_log_id=OuterRef('pk')).values('source_log_id').annotate(total=Sum('quantity_consumed')).values('total')
         returned_subquery = ProductionReturn.objects.filter(source_log_id=OuterRef('pk')).values('source_log_id').annotate(total=Sum('quantity')).values('total')
         adjusted_subquery = InventoryAdjustment.objects.filter(source_log_id=OuterRef('pk')).values('source_log_id').annotate(total=Sum('adjustment_quantity')).values('total')

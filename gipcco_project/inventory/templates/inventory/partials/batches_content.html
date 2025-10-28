@@ -73,21 +73,31 @@
                 </thead>
                 <tbody>
                     {% for b in batches %}
-                    <tr class="{% if b.status == 'CANCELLED' %}table-danger{% endif %}">
+                    <tr class="{% if b.status == 'cancelled' %}table-danger{% endif %}">
                         <td class="ps-3 font-monospace"><strong>{{ b.shop_order_number }}</strong></td>
                         <td class="font-monospace">{{ b.batch_number }}</td>
                         <td>{{ b.template.final_product.name }}</td>
                         <td>{{ b.creation_date|date:"Y-m-d" }}</td>
                         <td>
-                            {% if b.status == 'CANCELLED' %}
-                                <span class="badge text-bg-danger">ملغاة</span>
+                            {% if b.status == 'draft' %}
+                                <span class="badge text-bg-secondary">{{ b.get_status_display }}</span>
+                            {% elif b.status == 'pending_approval' %}
+                                <span class="badge text-bg-warning">{{ b.get_status_display }}</span>
+                            {% elif b.status == 'approved' %}
+                                <span class="badge text-bg-info">{{ b.get_status_display }}</span>
+                            {% elif b.status == 'in_progress' %}
+                                <span class="badge text-bg-primary">{{ b.get_status_display }}</span>
+                            {% elif b.status == 'completed' %}
+                                <span class="badge text-bg-success">{{ b.get_status_display }}</span>
+                            {% elif b.status == 'cancelled' %}
+                                <span class="badge text-bg-danger">{{ b.get_status_display }}</span>
                             {% else %}
-                                <span class="badge bg-success">{{ b.get_status_display }}</span>
+                                <span class="badge text-bg-dark">{{ b.get_status_display }}</span>
                             {% endif %}
                         </td>
                         <td class="text-end pe-3">
                             <a href="{% url 'inventory:view_batch' pk=b.id %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil-square"></i> عرض وتعديل</a>
-                            {% if b.status != 'CANCELLED' %}
+                            {% if b.status != 'cancelled' and b.status != 'completed' %}
                             <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#cancelBatchModal-{{ b.id }}">
                                 <i class="bi bi-x-circle"></i> إلغاء
                             </button>

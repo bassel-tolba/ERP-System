@@ -27,7 +27,7 @@ from inventory.models import (
 )
 from inventory.services.adjusting_entries_service import run_monthly_accruals
 from inventory.services.sales_return_service import process_inspected_return, create_credit_memo_from_return
-from inventory.services import purchasing_service, production_returns_service
+from inventory.services import batch_service, purchasing_service, production_returns_service
 
 # A dictionary to hold created objects for easy reference
 # This avoids querying the DB repeatedly
@@ -378,7 +378,7 @@ class Command(BaseCommand):
         self.stdout.write("   - Created Purchase Order and received 200L of Saline Solution.")
 
         # Production
-        batch, _ = Batch.objects.get_or_create(
+        batch, created = Batch.objects.get_or_create(
             shop_order_number="SO-DEMO-001",
             defaults={
                 'template': CONTEXT['template1'],
@@ -386,15 +386,21 @@ class Command(BaseCommand):
                 'creation_date': timezone.make_aware(timezone.datetime(2025, 9, 10, 9, 0, 0)),
             }
         )
-        BatchItem.objects.create(
-            batch=batch,
-            primitive_product=CONTEXT['products']['saline'],
-            theoretical_quantity=80.0,
-            actual_quantity=82.5,
-            source_log=log,
-            cost_at_consumption=Decimal("10.500")
-        )
-        batch.save() # Trigger signal
+        
+        # If the batch is new (or still a draft), create items and run workflow
+        if created:
+             BatchItem.objects.create(
+                batch=batch,
+                primitive_product=CONTEXT['products']['saline'],
+                theoretical_quantity=80.0,
+                actual_quantity=82.5,
+                source_log=log
+            )
+
+        if batch.status == Batch.Status.DRAFT:
+            batch = batch_service.submit_batch_for_approval(batch, CONTEXT['user'])
+            batch = batch_service.approve_batch(batch, CONTEXT['user'])
+            batch = batch_service.start_batch_production(batch)
         
         receipt, _ = FinishedProductReceipt.objects.get_or_create(
             individual_batch_number="FPB-DEMO-001",
@@ -911,11 +917,12 @@ class Command(BaseCommand):
             shop_order_number="WIP-SO-001",
             defaults={
                 'template': mig_template_saline, 'batch_number': "MIG-WIP-1",
-                'creation_date': "2024-12-31" # Before migration
+                'creation_date': "2024-12-31", # Before migration
+                'status': Batch.Status.IN_PROGRESS
             }
         )
-        wip_item1 = BatchItem.objects.create(batch=wip_batch, primitive_product=CONTEXT['products']['saline'], theoretical_quantity=50.0, actual_quantity=50.0, cost_at_consumption=Decimal("10.500"))
-        wip_item2 = BatchItem.objects.create(batch=wip_batch, primitive_product=CONTEXT['products']['pvc_bag'], theoretical_quantity=100.0, actual_quantity=100.0, cost_at_consumption=Decimal("1.200"))
+        wip_item1, _ = BatchItem.objects.get_or_create(batch=wip_batch, primitive_product=CONTEXT['products']['saline'], defaults={'theoretical_quantity': 50.0, 'actual_quantity': 50.0, 'cost_at_consumption': Decimal("10.500")})
+        wip_item2, _ = BatchItem.objects.get_or_create(batch=wip_batch, primitive_product=CONTEXT['products']['pvc_bag'], defaults={'theoretical_quantity': 100.0, 'actual_quantity': 100.0, 'cost_at_consumption': Decimal("1.200")})
         wip_total_cost = (Decimal(str(wip_item1.actual_quantity)) * wip_item1.cost_at_consumption) + \
                          (Decimal(str(wip_item2.actual_quantity)) * wip_item2.cost_at_consumption)
 

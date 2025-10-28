@@ -6,7 +6,7 @@ from django.urls import path
 from .views.receipts import index, records, edit_record, void_record_view, quarantine_list, release_from_quarantine as release_material_from_quarantine
 from .views.companies_products import companies, edit_company, delete_company, products, edit_product, delete_product, create_tag, edit_tag, delete_tag
 from .views.templates import shop_order_templates, delete_shop_order_template, view_shop_order_template, edit_shop_order_template
-from .views.batches import batches, create_batch, view_batch, cancel_batch_view, add_batch_item, update_batch_items_bulk, return_batch_item_view
+from .views.batches import batches, create_batch, view_batch, cancel_batch_view, add_batch_item, update_batch_items_bulk, return_batch_item_view, submit_batch_view, approve_batch_view, start_production_view, reject_batch_view
 from .views.production_returns import production_returns, cancel_production_return_view
 # --- MODIFIED: Import corrected views ---
 from .views.analysis_ledger_visuals import visuals
@@ -99,6 +99,12 @@ urlpatterns = [
     path('batch/item/add/<int:batch_pk>/', add_batch_item, name='add_batch_item'),
     path('batch/<int:batch_pk>/update_all/', update_batch_items_bulk, name='update_batch_items_bulk'),
     path('batch/item/return/<int:item_pk>/', return_batch_item_view, name='return_batch_item'),
+
+    # --- NEW: Batch Workflow URLs ---
+    path('batch/<int:pk>/submit/', submit_batch_view, name='submit_batch'),
+    path('batch/<int:pk>/approve/', approve_batch_view, name='approve_batch'),
+    path('batch/<int:pk>/start/', start_production_view, name='start_production'),
+    path('batch/<int:pk>/reject/', reject_batch_view, name='reject_batch'),
 
     # --- NEW: Landed Cost APIs ---
     path('api/landed-cost/invoices/', api.api_get_unallocated_landed_cost_invoices, name='api_get_unallocated_landed_cost_invoices'),
