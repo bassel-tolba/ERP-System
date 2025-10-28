@@ -7,6 +7,7 @@ function initProductionReturnsLogic(container) {
       productSelectForReturns.dataset.returnsInitialized = 'true';
 
       const sourceSelect = container.querySelector('#source_log_id');
+      const batchSelect = container.querySelector('#batch_id');
       const quantityInput = container.querySelector('#quantity');
       const maxHelpText = container.querySelector('#maxReturnableHelp');
 
@@ -14,6 +15,8 @@ function initProductionReturnsLogic(container) {
         const productId = this.value;
         sourceSelect.innerHTML = '<option>جاري التحميل...</option>';
         sourceSelect.disabled = true;
+        batchSelect.innerHTML = '<option value="" selected>-- عام (بدون تحديد أمر تشغيل) --</option>';
+        batchSelect.disabled = true;
         maxHelpText.textContent = '';
         quantityInput.removeAttribute('max');
 
@@ -24,7 +27,7 @@ function initProductionReturnsLogic(container) {
 
         try {
           // Use the URL from the global object
-          const response = await fetch(window.appUrls.apiGetUsedQcSources.replace('<productId>', productId));
+          const response = await fetch(window.appUrls.apiGetUsedQcSources.replace('0', productId));
           if (!response.ok) throw new Error('Network response was not ok');
 
           const sources = await response.json();
@@ -49,7 +52,7 @@ function initProductionReturnsLogic(container) {
         }
       });
 
-      sourceSelect.addEventListener('change', function() {
+      sourceSelect.addEventListener('change', async function() {
         const selectedOption = this.options[this.selectedIndex];
         const maxReturnable = selectedOption.dataset.maxReturnable;
         if (maxReturnable) {
@@ -59,6 +62,39 @@ function initProductionReturnsLogic(container) {
         } else {
           quantityInput.removeAttribute('max');
           maxHelpText.textContent = '';
+        }
+
+        // --- NEW LOGIC TO FETCH BATCHES ---
+        const sourceLogId = this.value;
+        batchSelect.innerHTML = '<option>جاري التحميل...</option>';
+        batchSelect.disabled = true;
+
+        if (!sourceLogId) {
+            batchSelect.innerHTML = '<option value="" selected>-- عام (بدون تحديد أمر تشغيل) --</option>';
+            return;
+        }
+
+        try {
+            const url = window.appUrls.apiGetBatchesForSourceLog.replace('0', sourceLogId);
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Network response was not ok');
+            const batches = await response.json();
+
+            batchSelect.innerHTML = '<option value="" selected>-- عام (بدون تحديد أمر تشغيل) --</option>';
+            if (batches.length > 0) {
+                batches.forEach(batch => {
+                    const option = document.createElement('option');
+                    option.value = batch.id;
+                    option.textContent = batch.display_text;
+                    batchSelect.appendChild(option);
+                });
+                batchSelect.disabled = false;
+            } else {
+                // Keep it disabled, the default option is fine
+            }
+        } catch (error) {
+            console.error('Failed to fetch batches for source log:', error);
+            batchSelect.innerHTML = '<option value="" selected>-- خطأ في تحميل أوامر التشغيل --</option>';
         }
       });
     }

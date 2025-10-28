@@ -9,9 +9,9 @@ from django.contrib.contenttypes.models import ContentType
 from decimal import Decimal
 from django.utils.translation import gettext_lazy as _
 
-from ..models import Batch, BatchItem, Product, JournalEntry, InventoryLog
+from ..models import Batch, BatchItem, Product, JournalEntry, InventoryLog, ProductionReturn
 from .accounting_service import create_je_for_production_consumption
-from .costing_service import recalculate_cost_history_for_product
+from .costing_service import recalculate_cost_history_for_product, get_inventory_state_at_datetime
 from .batch_helpers import validate_stock_availability, check_and_update_batch_customization
 
 logger = logging.getLogger(__name__)
@@ -59,7 +59,7 @@ def create_batch(
             shop_order_number=shop_order_number,
             batch_number=final_batch_number,
             creation_date=creation_datetime,
-            is_customized=True,
+            is_customized=True, # Will be re-evaluated later
             is_continuation=is_continuation,
             parent_batch_id=parent_batch_id if is_continuation and parent_batch_id else None,
             notes=notes,
@@ -67,26 +67,33 @@ def create_batch(
             labor_hours_consumed=labor_hours_consumed
         )
 
-        items_to_create = [
-            BatchItem(
-                batch=batch,
-                primitive_product_id=item['product_id'],
-                theoretical_quantity=item['theoretical_quantity'],
-                actual_quantity=item['actual_quantity'],
-                source_log_id=item['source_log_id']
-            ) for item in items_data
-        ]
+        # --- CRITICAL STEP 1: Create items and snapshot the cost ---
+        items_to_create = []
+        for item_data in items_data:
+            state = get_inventory_state_at_datetime(item_data['product_id'], batch.creation_date)
+            mac_at_consumption = (state['value'] / state['quantity']) if state['quantity'] > 0 else Decimal('0.0')
+            
+            items_to_create.append(
+                BatchItem(
+                    batch=batch,
+                    primitive_product_id=item_data['product_id'],
+                    theoretical_quantity=item_data['theoretical_quantity'],
+                    actual_quantity=item_data['actual_quantity'],
+                    source_log_id=item_data['source_log_id'],
+                    cost_at_consumption=mac_at_consumption.quantize(Decimal('0.001'))
+                )
+            )
         BatchItem.objects.bulk_create(items_to_create)
 
-        # --- CRITICAL STEP 1: CALCULATE & SET COST SNAPSHOT ---
-        # This ensures BatchItem.cost_at_consumption is set before the JE reads it.
-        product_ids_to_recalc = {item['product_id'] for item in items_data}
-        for pid in product_ids_to_recalc:
-            recalculate_cost_history_for_product(pid, batch.creation_date)
-
-        # --- CRITICAL STEP 2: Explicitly call the accounting service ---
+        # --- CRITICAL STEP 2: Create the Journal Entry ---
         create_je_for_production_consumption(batch)
 
+    # --- CRITICAL STEP 3: Update the final moving average cost on the products ---
+    product_ids_to_recalc = {item['product_id'] for item in items_data}
+    for pid in product_ids_to_recalc:
+        recalculate_cost_history_for_product(pid, batch.creation_date)
+
+    check_and_update_batch_customization(batch.id)
     logger.info(f"Successfully created Batch {batch.id} with {len(items_to_create)} items and its Journal Entry.")
     return batch
 
@@ -153,14 +160,20 @@ def update_batch(
                 item.theoretical_quantity = item_data['theoretical_quantity']
                 item.actual_quantity = item_data['actual_quantity']
                 item.source_log_id = item_data['source_log_id'] or None
+                
+                # Re-snapshot the cost
+                state = get_inventory_state_at_datetime(item_data['product_id'], batch_to_update.creation_date)
+                mac_at_consumption = (state['value'] / state['quantity']) if state['quantity'] > 0 else Decimal('0.0')
+                item.cost_at_consumption = mac_at_consumption.quantize(Decimal('0.001'))
+                
                 item.save()
 
-        # --- CRITICAL STEP 1: CALCULATE & SET COST SNAPSHOT ---
-        for pid in product_ids_to_recalc:
-            recalculate_cost_history_for_product(pid, batch_to_update.creation_date)
-
-        # --- CRITICAL STEP 2: Recreate the Journal Entry with the updated data ---
+        # --- Recreate the Journal Entry with the updated data ---
         create_je_for_production_consumption(batch_to_update)
+
+    # --- Update final MACs ---
+    for pid in product_ids_to_recalc:
+        recalculate_cost_history_for_product(pid, batch_to_update.creation_date)
 
     check_and_update_batch_customization(batch.pk)
     logger.info(f"Successfully updated Batch {batch.id} and recreated its Journal Entry.")
@@ -197,83 +210,62 @@ def add_item_to_batch(
         raise ValidationError(error_msg)
 
     with transaction.atomic():
-        product = Product.objects.get(pk=product_id)
-        source_log = InventoryLog.objects.get(pk=source_log_id)
-        
+        # --- CRITICAL STEP 1: Snapshot the cost ---
+        state = get_inventory_state_at_datetime(product_id, batch.creation_date)
+        mac_at_consumption = (state['value'] / state['quantity']) if state['quantity'] > 0 else Decimal('0.0')
+
         new_item = BatchItem.objects.create(
             batch=batch,
-            primitive_product=product,
+            primitive_product_id=product_id,
             theoretical_quantity=theoretical_quantity,
             actual_quantity=actual_quantity,
-            source_log=source_log
+            source_log_id=source_log_id,
+            cost_at_consumption=mac_at_consumption.quantize(Decimal('0.001'))
         )
-        
-        # CRITICAL STEP 1: Update product cost to ensure the new item gets the correct snapshot value.
-        recalculate_cost_history_for_product(product_id, batch.creation_date)
-        
-        # CRITICAL STEP 2: Refresh the item from DB to get the cost_at_consumption set by the recalc.
-        new_item.refresh_from_db()
 
-        # CRITICAL STEP 3: Create a specific, auditable JE for this supplemental issue.
+        # --- CRITICAL STEP 2: Create a specific, auditable JE for this supplemental issue ---
         create_je_for_production_supplemental_issue(new_item)
 
         check_and_update_batch_customization(batch.id)
+
+    # --- CRITICAL STEP 3: Update the final MAC on the product ---
+    recalculate_cost_history_for_product(product_id, batch.creation_date)
 
     logger.info(f"Added supplemental item {new_item.id} to Batch {batch.id} and created a dedicated JE.")
     return new_item
 
 
-def delete_item_from_batch(*, item: BatchItem) -> Dict[str, Any]:
-    """Deletes an item from a batch, recreates the JE, and returns info for side effects."""
+def return_item_from_batch(*, item: BatchItem, quantity: float, return_date: datetime.date, notes: str) -> 'ProductionReturn':
+    """
+    Creates a ProductionReturn to move a specified quantity of a component
+    from a batch back into inventory. This is the non-destructive way to 'remove' an item.
+    """
+    from ..models import ProductionReturn
+    
     batch = item.batch
-    info = {
-        'batch_id': batch.id,
-        'product_id': item.primitive_product_id,
-        'recalc_start_date': batch.creation_date
-    }
-    
-    with transaction.atomic():
-        # Recreate JE logic
-        content_type = ContentType.objects.get_for_model(Batch)
-        JournalEntry.objects.filter(content_type=content_type, object_id=batch.id).delete()
+    if quantity <= 0:
+        raise ValidationError(_("Return quantity must be positive."))
 
-        item.delete()
-        
-        # --- CRITICAL STEP 1: CALCULATE & SET COST SNAPSHOT ---
-        # Recalculate cost history to ensure the remaining inventory state is correct
-        recalculate_cost_history_for_product(info['product_id'], info['recalc_start_date'])
-
-        check_and_update_batch_customization(info['batch_id'])
-
-        # Recreate JE after item is deleted (reflecting the lower total cost)
-        create_je_for_production_consumption(batch)
-
-    logger.info(f"Deleted item {item.id} from Batch {info['batch_id']} and recreated JE.")
-    return info
-
-
-def delete_batch(*, batch: Batch) -> Dict[str, Any]:
-    """Deletes a batch and returns info needed for side effects."""
-    
-    # We must collect the products and date *before* deletion
-    product_ids_to_recalc = {item.primitive_product_id for item in batch.items.all()}
-    recalc_start_date = batch.creation_date
-    batch_id = batch.id
+    # You might add more validation here, e.g., ensuring return quantity
+    # doesn't exceed the original actual_quantity for the item.
 
     with transaction.atomic():
-        # The JE will be cascade deleted with the batch, but we must update the MAC ledger.
-        batch.delete()
-        
-        # Trigger MAC recalculation to reverse the consumption effect
-        for pid in product_ids_to_recalc:
-            recalculate_cost_history_for_product(pid, recalc_start_date)
+        # Create the compensating transaction
+        prod_return = ProductionReturn.objects.create(
+            product=item.primitive_product,
+            source_log=item.source_log,
+            batch=batch,
+            quantity=quantity,
+            return_date=timezone.make_aware(datetime.combine(return_date, time.min)),
+            notes=notes
+        )
+        # The post_save signal on ProductionReturn will create the JE and trigger cost recalculation.
+    
+    logger.info(f"Created ProductionReturn {prod_return.id} to return {quantity} of {item.primitive_product.name} from Batch {batch.id}.")
+    return prod_return
 
-    info = {
-        'product_ids_to_recalc': product_ids_to_recalc,
-        'recalc_start_date': recalc_start_date
-    }
-    logger.info(f"Deleted Batch {batch_id}.")
-    return info
+
+
 
 
 def cancel_batch(batch: Batch, user, justification: str) -> Batch:
@@ -282,6 +274,8 @@ def cancel_batch(batch: Batch, user, justification: str) -> Batch:
     """
     from .accounting.correction_transactions import create_reversing_je_for_correction
     from .costing_service import recalculate_cost_history_for_product
+    from django.contrib.contenttypes.models import ContentType
+    from ..models import JournalEntry
 
     logger.info(f"--> User '{user.username}' attempting to cancel Batch ID {batch.id}.")
 
@@ -289,29 +283,37 @@ def cancel_batch(batch: Batch, user, justification: str) -> Batch:
     if batch.status in [Batch.Status.CANCELLED, Batch.Status.COMPLETED]:
         raise ValidationError(_(f"Cannot cancel a batch with status '{batch.get_status_display()}'. Only In-Progress batches can be cancelled."))
 
-    if batch.finished_goods_receipts.exists():
+    if batch.receipts.exists():
         raise ValidationError(_("Cannot cancel this batch as finished goods have already been received against it."))
 
     with transaction.atomic():
-        # Reverse the original consumption JE
-        create_reversing_je_for_correction(
-            original_object=batch,
-            justification=justification,
-            user=user,
-            correction_date=timezone.now()
-        )
-        logger.info(f"    Created reversing JE for Batch ID {batch.id}.")
+        # Reverse the original consumption JE, if it exists.
+        content_type = ContentType.objects.get_for_model(Batch)
+        original_je = JournalEntry.objects.filter(
+            content_type=content_type, object_id=batch.pk
+        ).first()
+
+        if original_je:
+            create_reversing_je_for_correction(
+                original_object=batch,
+                justification=justification,
+                user=user,
+                correction_date=timezone.now()
+            )
+            logger.info(f"    Created reversing JE for Batch ID {batch.id}.")
+        else:
+            logger.warning(f"    No original JE found for Batch ID {batch.id}. Skipping reversal as it may have been a zero-cost batch.")
 
         # Update the status to CANCELLED
         batch.status = Batch.Status.CANCELLED
         batch.save(update_fields=['status'])
         logger.info(f"    Set status to CANCELLED for Batch ID {batch.id}.")
 
-        # Trigger cost recalculation for all components
-        products_to_recalc = {item.primitive_product_id for item in batch.items.all()}
-        for product_id in products_to_recalc:
-            recalculate_cost_history_for_product(product_id, batch.creation_date)
-            logger.info(f"    Triggered cost recalculation for Product ID {product_id}.")
+    # Trigger cost recalculation for all components outside the main transaction
+    products_to_recalc = {item.primitive_product_id for item in batch.items.all()}
+    for product_id in products_to_recalc:
+        recalculate_cost_history_for_product(product_id, batch.creation_date)
+        logger.info(f"    Triggered cost recalculation for Product ID {product_id}.")
 
     logger.info(f"<-- Successfully cancelled Batch ID {batch.id}.")
     return batch

@@ -12,7 +12,7 @@ from django.utils import timezone
 from .accounting._helpers import _check_period_is_open
 
 from ..models import (
-    Product, InventoryLog, BatchItem,
+    Product, InventoryLog, BatchItem, Batch,
     ProductionReturn, InventoryConsumption, InventoryAdjustment, FinishedProductReceipt,
     FinishedProductDispatch
 )
@@ -51,7 +51,11 @@ def get_inventory_state_at_datetime(
     if not include_quarantined:
         logs_query = logs_query.filter(status=InventoryLog.Status.RELEASED)
     else:
-        logs_query = logs_query.exclude(status__in=[InventoryLog.Status.REJECTED, InventoryLog.Status.SCRAPPED])
+        logs_query = logs_query.exclude(status__in=[
+            InventoryLog.Status.REJECTED, 
+            InventoryLog.Status.SCRAPPED,
+            InventoryLog.Status.VOIDED
+        ])
     
     log_total_val_expression = Sum(
         Case(
@@ -92,7 +96,7 @@ def get_inventory_state_at_datetime(
     if product.product_type != Product.ProductType.FINAL_PRODUCT:
         return_inflows = ProductionReturn.objects.filter(
             product_id=product_id, return_date__lte=target_datetime
-        ).aggregate(
+        ).exclude(status=ProductionReturn.Status.CANCELLED).aggregate(
             total_qty=Coalesce(Sum('quantity'), Decimal('0.0'), output_field=DecimalField()),
             total_val=Coalesce(Sum(F('quantity') * F('source_log__base_unit_price')), Decimal('0.0'), output_field=DecimalField()) # Simplified valuation
         )
@@ -104,7 +108,7 @@ def get_inventory_state_at_datetime(
     # 1. Production Consumption (Outflow for Raw Materials)
     consumption_outflows = BatchItem.objects.filter(
         primitive_product_id=product_id, batch__creation_date__lte=target_datetime
-    ).aggregate(
+    ).exclude(batch__status=Batch.Status.CANCELLED).aggregate(
         total_qty=Coalesce(Sum('actual_quantity'), Decimal('0.0'), output_field=DecimalField()),
         total_val=Coalesce(Sum(F('actual_quantity') * F('cost_at_consumption')), Decimal('0.0'), output_field=DecimalField())
     )
@@ -124,7 +128,7 @@ def get_inventory_state_at_datetime(
     # 3. Sales Dispatches (Outflow for Finished Goods)
     if product.product_type == Product.ProductType.FINAL_PRODUCT:
         dispatch_outflows = FinishedProductDispatch.objects.filter(
-            sales_order_item__product_id=product_id,
+            sales_order_item__finished_product__batch__template__final_product_id=product_id,
             dispatch_date__lte=target_datetime,
             status=FinishedProductDispatch.Status.COMPLETED # Exclude cancelled dispatches
         ).aggregate(
@@ -204,10 +208,10 @@ def recalculate_cost_history_for_product(product_id: int, start_datetime: timezo
         # Outflows
         out_batch_items = BatchItem.objects.filter(
             primitive_product_id=product_id, batch__creation_date__gte=start_datetime
-        ).values('batch__creation_date', 'actual_quantity', 'cost_at_consumption')
+        ).exclude(batch__status=Batch.Status.CANCELLED).values('batch__creation_date', 'actual_quantity', 'cost_at_consumption')
 
         out_dispatches = FinishedProductDispatch.objects.filter(
-            sales_order_item__product_id=product_id,
+            sales_order_item__finished_product__batch__template__final_product_id=product_id,
             dispatch_date__gte=start_datetime,
             status=FinishedProductDispatch.Status.COMPLETED
         ).values('dispatch_date', 'quantity', 'cost_at_dispatch')
@@ -274,7 +278,8 @@ def recalculate_cost_history_for_product(product_id: int, start_datetime: timezo
             elif t['type'] == 'OUTFLOW':
                 # We now use the historical cost from the record, not a recalculated one.
                 # The purpose is to find the final state, not to change the past.
-                running_value -= t['qty'] * t['cost']
+                cost = t['cost'] or Decimal('0.0') # Safeguard against None
+                running_value -= t['qty'] * cost
                 running_qty -= t['qty']
 
             elif t['type'] == 'ADJUSTMENT':

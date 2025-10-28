@@ -24,6 +24,7 @@ from .tests_costing import *
 from .tests_fixed_assets import *
 from .tests_hr import *
 from .tests_period_closing import *
+from .tests_batches import *
 
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -152,44 +153,6 @@ class TestViews(AccountingServiceBaseTestCase):
         self.assertIsNotNone(new_item)
         self.assertEqual(new_item['product_name'], self.final_product.name)
         self.assertEqual(new_item['available_qty'], 100.0)
-
-    def test_create_batch_view_post(self):
-        """
-        Verify that creating a new batch via POST request works correctly.
-        """
-        # Arrange: Ensure there is stock for the raw material in the template
-        log = InventoryLog.objects.create(
-            product=self.raw_material,
-            company=self.supplier,
-            quantity=100.0,
-            timestamp=timezone.now(),
-            release_timestamp=timezone.now(),
-            status=InventoryLog.Status.RELEASED,
-            base_unit_price=Decimal("10.000")
-        )
-
-        batch_data = {
-            'template_id': self.test_template.id,
-            'shop_order_number': 'SO-VIEW-TEST-01',
-            'batch_number_from': 'B-VIEW-TEST-01',
-            'batch_number_to': '',
-            'creation_date': timezone.now().strftime('%Y-%m-%d'),
-            'primitive_product_id': [self.raw_material.id],
-            'theoretical_quantity': [10.0],
-            'actual_quantity': [10.0],
-            'source_log_id': [log.id]
-        }
-        
-        # Act
-        response = self.client.post(reverse('inventory:create_batch'), batch_data)
-        
-        # Assert
-        self.assertEqual(response.status_code, 302) # Should redirect to view_batch
-        self.assertTrue(Batch.objects.filter(shop_order_number='SO-VIEW-TEST-01').exists())
-        new_batch = Batch.objects.get(shop_order_number='SO-VIEW-TEST-01')
-        self.assertRedirects(response, reverse('inventory:view_batch', kwargs={'pk': new_batch.pk}))
-        self.assertEqual(new_batch.items.count(), 1)
-        self.assertEqual(new_batch.items.first().actual_quantity, 10.0)
 
     def test_create_purchase_order_view_post(self):
         """

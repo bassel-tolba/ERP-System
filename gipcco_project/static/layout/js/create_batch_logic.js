@@ -283,6 +283,49 @@ function initCreateBatchLogic(container) {
 				removeBtn.closest("tr").remove();
 				updateQuantitySummaries();
 			}
+
+            const splitBtn = e.target.closest(".split-quantity-btn");
+            if (splitBtn) {
+                const currentRow = splitBtn.closest("tr");
+                const actualQtyInput = currentRow.querySelector(".actual-qty");
+                const qcSelect = currentRow.querySelector(".qc-select");
+                const selectedOption = qcSelect.options[qcSelect.selectedIndex];
+
+                if (!selectedOption || !selectedOption.value) return;
+
+                const availableQty = parseFloat(selectedOption.dataset.available);
+                const actualQty = parseFloat(actualQtyInput.value);
+                const productId = currentRow.querySelector('[name="primitive_product_id"]').value;
+                const productInfo = allPrimitiveProducts.find(p => p.id == productId);
+
+                if (isNaN(availableQty) || isNaN(actualQty) || actualQty <= availableQty) return;
+
+                const remainingNeeded = actualQty - availableQty;
+                actualQtyInput.value = availableQty.toFixed(3);
+
+                const newRow = createMaterialRow({
+                    name: productInfo.name,
+                    unit: productInfo.unit,
+                    primitive_product_id: productId,
+                    theoretical_quantity: 0 // Theoretical is not relevant for the split part
+                });
+
+                newRow.querySelector('.theoretical-qty').value = remainingNeeded.toFixed(3);
+                newRow.querySelector('.actual-qty').value = remainingNeeded.toFixed(3);
+
+                // Find and select the next available source
+                const stockForProduct = availableStockData[productId] || [];
+                const currentIndex = stockForProduct.findIndex(s => s.id == selectedOption.value);
+                const nextSource = stockForProduct[currentIndex + 1];
+
+                if (nextSource) {
+                    newRow.querySelector('.qc-select').value = nextSource.id;
+                }
+                
+                validateRowQuantity(currentRow);
+                validateRowQuantity(newRow);
+                updateQuantitySummaries();
+            }
 		});
 
 		materialsTbody.addEventListener("change", function (e) {

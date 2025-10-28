@@ -100,10 +100,10 @@
                                 <small class="text-muted font-monospace d-block">{{ item.primitive_product.code }}</small>
                             </td>
                             <td>
-                                <input type="number" step="any" class="form-control text-center theoretical-qty" name="theoretical_quantity_{{ item.id }}" value="{{ item.theoretical_quantity|floatformat:3 }}" data-base-theoretical-quantity="{{ item.base_theoretical_quantity }}" required>
+                                <input type="number" step="any" class="form-control text-center theoretical-qty" name="theoretical_quantity_{{ item.id }}" value="{{ item.theoretical_quantity|floatformat:"-3u" }}" data-base-theoretical-quantity="{{ item.base_theoretical_quantity }}" required>
                             </td>
                             <td>
-                                <input type="number" step="any" class="form-control text-center actual-qty" name="actual_quantity_{{ item.id }}" value="{{ item.actual_quantity|floatformat:3|default:'0.000' }}" data-base-actual-quantity="{{ item.base_actual_quantity }}" required>
+                                <input type="number" step="any" class="form-control text-center actual-qty" name="actual_quantity_{{ item.id }}" value="{{ item.actual_quantity|floatformat:"-3u"|default:'0.000' }}" data-base-actual-quantity="{{ item.base_actual_quantity }}" required>
                             </td>
                             <td>
                                 <select class="form-select searchable-select" name="source_log_id_{{ item.id }}">
@@ -121,8 +121,8 @@
                             <td class="text-center font-monospace">{{ item.cost_at_consumption|floatformat:3|default:"-" }}</td>
                             <td class="text-center fw-bold">{{ item.line_total|floatformat:3|default:"-" }}</td>
                             <td class="text-center pe-3">
-                                <button type="button" class="btn btn-sm btn-outline-danger delete-item-btn" data-form-action="{% url 'inventory:delete_batch_item' item_pk=item.id %}">
-                                    <i class="bi bi-trash"></i>
+                                <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#returnItemModal-{{ item.id }}" title="إرجاع كمية للمخزن">
+                                    <i class="bi bi-arrow-return-left"></i>
                                 </button>
                             </td>
                         </tr>
@@ -149,6 +149,53 @@
         </div>
     </div>
 </form>
+
+<!-- Production Returns Card -->
+<div class="card mt-4 shadow-sm">
+    <div class="card-header">
+        <h3 class="mb-0"><i class="bi bi-arrow-return-left me-2"></i> مرتجعات من أمر التشغيل</h3>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">تاريخ الإرجاع</th>
+                        <th>المادة</th>
+                        <th class="text-center">الكمية المرتجعة</th>
+                        <th>مصدر QC الأصلي</th>
+                        <th>الحالة</th>
+                        <th class="pe-3">ملاحظات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for return_item in related_returns %}
+                    <tr class="{% if return_item.status == 'CANCELLED' %}text-muted text-decoration-line-through{% endif %}">
+                        <td class="ps-3">{{ return_item.return_date|date:"Y-m-d" }}</td>
+                        <td>{{ return_item.product.name }}</td>
+                        <td class="text-center">{{ return_item.quantity|floatformat:3 }} {{ return_item.product.unit }}</td>
+                        <td>{{ return_item.source_log.qc_no|default:"N/A" }}</td>
+                        <td>
+                            {% if return_item.status == 'CANCELLED' %}
+                                <span class="badge bg-info">ملغي</span>
+                            {% else %}
+                                <span class="badge bg-success">مسجل</span>
+                            {% endif %}
+                        </td>
+                        <td class="pe-3">{{ return_item.notes|default:"--" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center p-4">
+                            <p class="mb-0 text-muted">لا توجد مرتجعات مسجلة لهذا الأمر.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
 {% if not batch.is_continuation %}
 <div class="card mt-4">
@@ -208,10 +255,41 @@
 </div>
 {% endif %}
 
-<!-- Hidden form for deleting batch items -->
-<form method="post" id="deleteItemForm" class="d-none">
-    {% csrf_token %}
-</form>
+{% for item in items %}
+<!-- Return Item Modal for item {{ item.id }} -->
+<div class="modal fade" id="returnItemModal-{{ item.id }}" tabindex="-1" aria-labelledby="returnItemModalLabel-{{ item.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="{% url 'inventory:return_batch_item' item_pk=item.id %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="returnItemModalLabel-{{ item.id }}">إرجاع مادة: {{ item.primitive_product.name }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>أدخل الكمية المراد إرجاعها من أمر التشغيل إلى المخزن. الكمية المستهلكة حالياً: <strong>{{ item.actual_quantity|floatformat:3 }}</strong></p>
+                    <div class="mb-3">
+                        <label for="quantity-{{ item.id }}" class="form-label">الكمية المرتجعة</label>
+                        <input type="number" step="any" class="form-control" id="quantity-{{ item.id }}" name="quantity" max="{{ item.actual_quantity|floatformat:"-3u" }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="return_date-{{ item.id }}" class="form-label">تاريخ الإرجاع</label>
+                        <input type="text" class="form-control datepicker" id="return_date-{{ item.id }}" name="return_date" value="{{ today_date }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="notes-{{ item.id }}" class="form-label">ملاحظات</label>
+                        <textarea class="form-control" id="notes-{{ item.id }}" name="notes" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                    <button type="submit" class="btn btn-warning">تأكيد الإرجاع</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
 
 <!-- Add Batch Item Modal -->
 <div class="modal fade" id="addBatchItemModal" tabindex="-1">

@@ -27,7 +27,7 @@ from inventory.models import (
 )
 from inventory.services.adjusting_entries_service import run_monthly_accruals
 from inventory.services.sales_return_service import process_inspected_return, create_credit_memo_from_return
-from inventory.services import purchasing_service
+from inventory.services import purchasing_service, production_returns_service
 
 # A dictionary to hold created objects for easy reference
 # This avoids querying the DB repeatedly
@@ -110,6 +110,8 @@ def create_chart_of_accounts():
     # --- NEW PURCHASING ACCOUNTS ---
     create_account('20206', 'بضاعة مستلمة غير مفوترة (GRNI)', Account.AccountType.LIABILITY, '202')
     create_account('504', 'فروقات أسعار الشراء (PPV)', Account.AccountType.EXPENSE, '500')
+    create_account('505', 'فروقات التصنيع', Account.AccountType.EXPENSE, '500') # Manufacturing Variance
+    create_account('506', 'إعادة تقييم المخزون', Account.AccountType.EXPENSE, '500') # Inventory Revaluation
     create_account('1020407', 'تسوية تكاليف شحن', Account.AccountType.ASSET, '10204') # Landed Costs Clearing
     create_account('20207', 'تسوية مرتجعات موردين', Account.AccountType.LIABILITY, '202') # Purchase Returns Clearing
 
@@ -201,7 +203,9 @@ class Command(BaseCommand):
             goods_received_not_invoiced_account=accounts['20206'],
             purchase_price_variance_account=accounts['504'],
             landed_costs_clearing_account=accounts['1020407'],
-            purchase_returns_clearing_account=accounts['20207']
+            purchase_returns_clearing_account=accounts['20207'],
+            manufacturing_variance_account=accounts['505'],
+            inventory_revaluation_account=accounts['506']
         )
         ProductTypeAccountingSettings.objects.create(
             product_type=Product.ProductType.RAW_MATERIAL,
@@ -406,6 +410,32 @@ class Command(BaseCommand):
         CONTEXT['receipt'] = receipt
         self.stdout.write("   - Created a production batch, consuming 82.5L to produce 150 IV Bags.")
 
+        # Production Return Workflow
+        self.stdout.write("   - Creating a production return...")
+        production_returns_service.create_production_return(
+            product_id=CONTEXT['products']['saline'].id,
+            source_log_id=log.id,
+            quantity=2.5,
+            return_date=timezone.make_aware(timezone.datetime(2025, 9, 11, 10, 0, 0)),
+            notes="Excess material returned from batch SO-DEMO-001"
+        )
+        self.stdout.write("     - Returned 2.5L of Saline Solution from the batch.")
+
+        self.stdout.write("   - Creating and cancelling a production return...")
+        return_to_cancel = production_returns_service.create_production_return(
+            product_id=CONTEXT['products']['saline'].id,
+            source_log_id=log.id,
+            quantity=1.0,
+            return_date=timezone.make_aware(timezone.datetime(2025, 9, 11, 11, 0, 0)),
+            notes="To be cancelled"
+        )
+        production_returns_service.cancel_production_return(
+            prod_return=return_to_cancel,
+            user=CONTEXT['user'],
+            justification="Entered in error."
+        )
+        self.stdout.write("     - Created and then cancelled a production return for 1.0L of Saline.")
+
         # Sales
         so, _ = SalesOrder.objects.get_or_create(
             so_number="SALE-DEMO-001",
@@ -425,6 +455,7 @@ class Command(BaseCommand):
         )
         dispatch = FinishedProductDispatch.objects.create(
             sales_order_item=so_item,
+            finished_product=receipt, # <-- FIX: Added the required foreign key
             quantity=50.0,
             dispatch_date=timezone.make_aware(timezone.datetime(2025, 9, 16, 14, 0, 0)),
             cost_at_dispatch=Decimal("288.750") # 866.250 / 150 * 50

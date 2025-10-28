@@ -189,6 +189,13 @@ class ProductionReturn(models.Model):
         related_name='production_returns',
         verbose_name=_("Original Source Log")
     )
+    batch = models.ForeignKey(
+        'Batch',
+        on_delete=models.CASCADE,
+        related_name='production_returns',
+        verbose_name=_("Source Batch"),
+        null=True, blank=True # Allow null for returns not from a specific batch
+    )
     quantity = models.FloatField(verbose_name=_("Quantity Returned"))
     return_date = models.DateTimeField(verbose_name=_("Return Date"))
     notes = models.TextField(null=True, blank=True, verbose_name=_("Notes"))

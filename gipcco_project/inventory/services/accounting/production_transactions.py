@@ -3,6 +3,8 @@
 import logging
 from decimal import Decimal
 from typing import Optional
+from datetime import datetime
+from django.utils import timezone
 
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _
@@ -82,7 +84,7 @@ def create_je_for_production_consumption(batch: Batch) -> Optional[JournalEntry]
         }
 
         je = JournalEntry.objects.create(
-            date=batch.creation_date,
+            date=timezone.make_aware(datetime.combine(batch.creation_date.date(), datetime.min.time())) if hasattr(batch.creation_date, 'date') else batch.creation_date,
             description=description,
             source_object=batch,
             status=JournalEntry.Status.POSTED
@@ -274,7 +276,7 @@ def create_je_for_production_supplemental_issue(item: 'BatchItem') -> Optional[J
         }
 
         je = JournalEntry.objects.create(
-            date=item.batch.creation_date,
+            date=timezone.make_aware(datetime.combine(item.batch.creation_date.date(), datetime.min.time())) if hasattr(item.batch.creation_date, 'date') else item.batch.creation_date,
             description=description,
             source_object=item,
             status=JournalEntry.Status.POSTED

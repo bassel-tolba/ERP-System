@@ -7,16 +7,23 @@
     </a>
 </div>
 
-<!-- Search Form -->
+<!-- Search and Filter Form -->
 <div class="card mb-4">
     <div class="card-body">
-        <form method="GET" action="{% url 'inventory:batches' %}">
+        <form method="GET" action="{% url 'inventory:batches' %}" class="d-flex gap-2">
             <div class="input-group">
-                <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-search"></i> بحث</button>
-                 {% if search_query %}
-                    <a href="{% url 'inventory:batches' %}" class="btn btn-outline-danger" title="إلغاء البحث"><i class="bi bi-x-lg"></i></a>
+                <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-search"></i></button>
+                {% if search_query or status_filter == 'all' %}
+                    <a href="{% url 'inventory:batches' %}" class="btn btn-outline-danger" title="إلغاء البحث والتصفية"><i class="bi bi-x-lg"></i></a>
                 {% endif %}
-                <input type="text" class="form-control" name="q" placeholder="ابحث باسم المنتج، رقم أمر التشغيل، أو رقم التشغيلة..." value="{{ search_query|default:'' }}">
+                <input type="text" class="form-control" name="q" placeholder="ابحث باسم المنتج، رقم أمر التشغيل..." value="{{ search_query|default:'' }}">
+            </div>
+            <div class="btn-group">
+                <input type="radio" class="btn-check" name="status" id="status_active" value="active" {% if status_filter == 'active' %}checked{% endif %} onchange="this.form.submit()">
+                <label class="btn btn-outline-primary" for="status_active">الفعالة</label>
+                
+                <input type="radio" class="btn-check" name="status" id="status_all" value="all" {% if status_filter == 'all' %}checked{% endif %} onchange="this.form.submit()">
+                <label class="btn btn-outline-primary" for="status_all">الكل</label>
             </div>
         </form>
     </div>
@@ -25,7 +32,13 @@
 
 <div class="card">
     <div class="card-header">
-        <h3><i class="bi bi-list-ol"></i> أوامر التشغيل المسجلة</h3>
+        <h3><i class="bi bi-list-ol"></i> 
+            {% if status_filter == 'active' %}
+                أوامر التشغيل الفعالة
+            {% else %}
+                كل أوامر التشغيل
+            {% endif %}
+        </h3>
     </div>
     <div class="card-body p-0">
         {% if not batches %}
@@ -60,28 +73,51 @@
                 </thead>
                 <tbody>
                     {% for b in batches %}
-                    <tr>
+                    <tr class="{% if b.status == 'CANCELLED' %}table-danger{% endif %}">
                         <td class="ps-3 font-monospace"><strong>{{ b.shop_order_number }}</strong></td>
                         <td class="font-monospace">{{ b.batch_number }}</td>
                         <td>{{ b.template.final_product.name }}</td>
                         <td>{{ b.creation_date|date:"Y-m-d" }}</td>
                         <td>
-                            {% if b.is_customized %}
-                            <span class="badge text-bg-warning">مُخصصة</span>
+                            {% if b.status == 'CANCELLED' %}
+                                <span class="badge text-bg-danger">ملغاة</span>
                             {% else %}
-                            <span class="badge text-bg-secondary">قياسية</span>
-                            {% endif %}
-                            
-                            {% if b.is_continuation %}
-                            <span class="badge text-bg-info ms-1">تكملة</span>
+                                <span class="badge bg-success">{{ b.get_status_display }}</span>
                             {% endif %}
                         </td>
                         <td class="text-end pe-3">
                             <a href="{% url 'inventory:view_batch' pk=b.id %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil-square"></i> عرض وتعديل</a>
-                            <form method="post" action="{% url 'inventory:delete_batch' pk=b.id %}" class="d-inline" onsubmit="return confirm('هل أنت متأكد من حذف أمر التشغيل هذا؟ لا يمكن التراجع عن هذا الإجراء.');">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> حذف</button>
-                            </form>
+                            {% if b.status != 'CANCELLED' %}
+                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#cancelBatchModal-{{ b.id }}">
+                                <i class="bi bi-x-circle"></i> إلغاء
+                            </button>
+                            {% endif %}
+
+                            <!-- Cancellation Modal -->
+                            <div class="modal fade" id="cancelBatchModal-{{ b.id }}" tabindex="-1" aria-labelledby="cancelBatchModalLabel-{{ b.id }}" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="cancelBatchModalLabel-{{ b.id }}">إلغاء أمر التشغيل: {{ b.shop_order_number }}</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <form method="post" action="{% url 'inventory:cancel_batch' pk=b.id %}">
+                                            {% csrf_token %}
+                                            <div class="modal-body">
+                                                <p>سيؤدي هذا الإجراء إلى إلغاء أمر التشغيل وإرجاع أي مواد مستهلكة إلى المخزون. سيتم إنشاء قيد يومية عكسي للمعاملات المالية.</p>
+                                                <div class="mb-3">
+                                                    <label for="justification-{{ b.id }}" class="form-label">سبب الإلغاء (مطلوب):</label>
+                                                    <textarea class="form-control" id="justification-{{ b.id }}" name="justification" rows="3" required></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                                                <button type="submit" class="btn btn-danger">تأكيد الإلغاء</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}

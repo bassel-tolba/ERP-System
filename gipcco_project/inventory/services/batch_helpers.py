@@ -127,7 +127,7 @@ def validate_stock_availability(
             return False, f"عدم تطابق المنتج. تم طلب '{product.name}' من مصدر QC '{log_entry.qc_no}' الذي يخص منتج '{log_entry.product.name}'."
 
         # --- Calculate Available Stock ---
-        used_items_qs = BatchItem.objects.filter(source_log_id=source_id)
+        used_items_qs = BatchItem.objects.filter(source_log_id=source_id).exclude(batch__status=Batch.Status.CANCELLED)
         if batch_id_to_exclude:
             used_items_qs = used_items_qs.exclude(batch_id=batch_id_to_exclude)
 

@@ -571,54 +571,70 @@ class TestMiscAccountingTransactions(AccountingServiceBaseTestCase):
 
     def test_create_je_for_production_return_success(self):
         """
-        Verify that returning unused raw material from production correctly
-        debits Raw Material Inventory and credits WIP Inventory.
+        Verify that returning a raw material from production back to inventory
+        creates a correct journal entry.
         """
         # 1. Arrange
         # a) Create stock for the raw material. This creates JE #1.
         rm_log = InventoryLog.objects.create(
             product=self.raw_material,
             company=self.supplier,
-            quantity=100.0,
-            timestamp=timezone.now(), # FIX: Added missing required field
-            release_timestamp=timezone.make_aware(timezone.datetime(2025, 9, 5, 10, 0, 0)),
+            quantity=50.0,
+            timestamp=timezone.now(),
+            release_timestamp=timezone.make_aware(timezone.datetime(2025, 9, 10, 10, 0, 0)),
             status=InventoryLog.Status.RELEASED,
-            base_unit_price=Decimal("10.000")
+            base_unit_price=Decimal("10.000") # Cost is 10
         )
 
-        # b) Create the production return record. This triggers the signal for JE #2.
-        # The costing service will calculate the value of this return.
+        # b) Create a batch that consumes some of it. This creates JE #2.
+        batch = Batch.objects.create(
+            template=self.test_template,
+            shop_order_number="SO-RETURN-TEST",
+            batch_number="B-RETURN-TEST",
+            creation_date=timezone.make_aware(timezone.datetime(2025, 9, 11, 9, 0, 0)),
+        )
+        BatchItem.objects.create(
+            batch=batch,
+            primitive_product=self.raw_material,
+            actual_quantity=20.0,
+            source_log=rm_log,
+            cost_at_consumption=Decimal("10.000")
+        )
+        batch.save() # Trigger consumption JE
+
+        # c) Create the production return record. This triggers the signal for JE #3.
         prod_return = ProductionReturn.objects.create(
             product=self.raw_material,
             source_log=rm_log,
-            quantity=15.0,
-            return_date=timezone.make_aware(timezone.datetime(2025, 9, 29, 16, 0, 0)),
-            notes="Excess material from Batch B-TEST-001"
+            batch=batch,
+            quantity=5.0,
+            return_date=timezone.make_aware(timezone.datetime(2025, 9, 12, 10, 0, 0)),
+            notes="Excess material returned"
         )
 
         # 2. Act: The post_save signal on ProductionReturn has already fired.
 
         # 3. Assert
-        self.assertEqual(JournalEntry.objects.count(), 2) # 1 for receipt, 1 for return
+        self.assertEqual(JournalEntry.objects.count(), 3) # 1 for receipt, 1 for consumption, 1 for return
         je = JournalEntry.objects.latest('date')
         self.assertIsNotNone(je)
         self.assertEqual(je.source_object, prod_return)
         self.assertEqual(je.lines.count(), 2)
 
-        expected_value = Decimal("150.000") # 15 units * 10.000/unit cost from source log
+        # The value of the return is based on the Moving Average Cost at the time of return.
+        # Since there's only one receipt, the MAC is 10. Return value = 5 * 10 = 50.
+        expected_return_value = Decimal("50.000")
 
-        # Verify the debit to Raw Material Inventory
+        # Verify the debit to the Raw Material Inventory Account
         debit_line = je.lines.get(entry_type='debit')
         self.assertEqual(debit_line.account, self.accounts['1020201']) # RM Inventory
-        self.assertEqual(debit_line.amount, expected_value)
+        self.assertEqual(debit_line.amount, expected_return_value)
+        self.assertEqual(debit_line.sub_ledger_object, self.raw_material)
 
-        # Verify the credit to WIP Inventory
+        # Verify the credit to the WIP Inventory Account
         credit_line = je.lines.get(entry_type='credit')
         self.assertEqual(credit_line.account, self.accounts['1020205']) # WIP Inventory
-        self.assertEqual(credit_line.amount, expected_value)
-
-        # --- NEW: Verify Sub-Ledger Links ---
-        self.assertEqual(debit_line.sub_ledger_object, self.raw_material)
+        self.assertEqual(credit_line.amount, expected_return_value)
         self.assertEqual(credit_line.sub_ledger_object, self.raw_material)
 
 

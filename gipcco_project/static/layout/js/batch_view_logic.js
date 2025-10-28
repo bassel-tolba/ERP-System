@@ -93,21 +93,6 @@ function initBatchViewLogic(container) {
 
 		if (batchItemsTable && !batchItemsTable.dataset.deleteInitialized) {
 			batchItemsTable.dataset.deleteInitialized = "true";
-			batchItemsTable.addEventListener("click", function (event) {
-				const deleteButton = event.target.closest(".delete-item-btn");
-				if (deleteButton) {
-					event.preventDefault();
-					if (confirm("هل أنت متأكد من حذف هذه المادة؟ لا يمكن التراجع عن هذا الإجراء وسيتم تحديث التكاليف.")) {
-						const form = document.getElementById("deleteItemForm");
-						if (form) {
-							// The form.action needs to be set dynamically from data-form-action
-							// Make sure your Django template for batch_view.html provides this attribute correctly.
-							form.action = deleteButton.dataset.formAction;
-							form.submit();
-						}
-					}
-				}
-			});
 		}
 
 		// --- START: REFACTORED DYNAMIC QC SOURCE LOADING FOR MODAL ---

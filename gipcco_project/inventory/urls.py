@@ -3,10 +3,10 @@
 from django.urls import path
 
 # --- MODIFIED: Use aliases for release_from_quarantine to avoid name collision ---
-from .views.dashboard import index, records, edit_record, void_record_view, quarantine_list, release_from_quarantine as release_material_from_quarantine
+from .views.receipts import index, records, edit_record, void_record_view, quarantine_list, release_from_quarantine as release_material_from_quarantine
 from .views.companies_products import companies, edit_company, delete_company, products, edit_product, delete_product, create_tag, edit_tag, delete_tag
 from .views.templates import shop_order_templates, delete_shop_order_template, view_shop_order_template, edit_shop_order_template
-from .views.batches import batches, create_batch, view_batch, cancel_batch_view, add_batch_item, update_batch_items_bulk, delete_batch_item
+from .views.batches import batches, create_batch, view_batch, cancel_batch_view, add_batch_item, update_batch_items_bulk, return_batch_item_view
 from .views.production_returns import production_returns, cancel_production_return_view
 # --- MODIFIED: Import corrected views ---
 from .views.analysis_ledger_visuals import visuals
@@ -44,7 +44,7 @@ app_name = 'inventory'
 
 urlpatterns = [
     # Dashboard & Records
-    path('', index, name='index'),
+    path('', index, name='receipts'),
     path('records/', records, name='records'),
     path('records/edit/<int:pk>/', edit_record, name='edit_record'),
     path('records/void/<int:pk>/', void_record_view, name='void_record'),
@@ -98,12 +98,11 @@ urlpatterns = [
     path('batch/cancel/<int:pk>/', cancel_batch_view, name='cancel_batch'),
     path('batch/item/add/<int:batch_pk>/', add_batch_item, name='add_batch_item'),
     path('batch/<int:batch_pk>/update_all/', update_batch_items_bulk, name='update_batch_items_bulk'),
+    path('batch/item/return/<int:item_pk>/', return_batch_item_view, name='return_batch_item'),
 
     # --- NEW: Landed Cost APIs ---
     path('api/landed-cost/invoices/', api.api_get_unallocated_landed_cost_invoices, name='api_get_unallocated_landed_cost_invoices'),
     path('api/landed-cost/receipts/', api.api_get_receipts_for_allocation, name='api_get_receipts_for_allocation'),
-
-    path('batch/item/delete/<int:item_pk>/', delete_batch_item, name='delete_batch_item'),
 
     # Finished Product Routes
     path('finished_products/', finished_goods_status, name='finished_products_list'),
@@ -215,6 +214,7 @@ urlpatterns = [
     path('reports/stock_valuation/', stock_valuation_report, name='stock_valuation'),
 
     # API Routes
+    path('api/inventory_log/<int:log_pk>/history/', api.api_get_inventory_log_history, name='api_get_inventory_log_history'),
     path('api/batch_details/<int:batch_pk>/', api_batch_details, name='api_batch_details'),
     path('api/batch_analysis/<int:batch_pk>/', api_get_full_batch_analysis, name='api_get_full_batch_analysis'),
     path('api/product_tags/<int:product_id>/', get_product_tags, name='api_product_tags'),
@@ -222,6 +222,7 @@ urlpatterns = [
     path('api/po/<int:po_id>/items/', api_get_po_items, name='api_get_po_items'),
     path('api/sellable_stock/', api_get_sellable_stock, name='api_get_sell_stock'),
     path('api/get_used_qc_sources/<int:product_pk>/', get_used_qc_sources, name='get_used_qc_sources'),
+    path('api/source_log/<int:log_pk>/batches/', api.api_get_batches_for_source_log, name='api_get_batches_for_source_log'),
     path('api/available_stock/<int:product_pk>/', api_get_available_stock, name='api_get_available_stock'),
     path('api/supplier/<int:supplier_id>/uninvoiced_receipts/', financials.api_get_uninvoiced_receipts, name='api_get_uninvoiced_receipts'),
     path('api/supplier/<int:supplier_id>/unsettled_expenses/', financials.api_get_unsettled_expenses, name='api_get_unsettled_expenses'),

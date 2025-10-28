@@ -2,64 +2,86 @@
 
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">إرجاع من الإنتاج</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#addReturnFormCollapse" aria-expanded="false" aria-controls="addReturnFormCollapse">
+            <i class="bi bi-plus-circle me-1"></i>
+            تسجيل إرجاع جديد
+        </button>
+    </div>
 </div>
 
-<!-- Form to Add New Return -->
-<div class="card mb-4">
-    <div class="card-header">
-        <i class="bi bi-plus-circle me-1"></i>
-        تسجيل إرجاع جديد
-    </div>
-    <div class="card-body">
-        <form action="{% url 'inventory:production_returns' %}" method="post" id="returnForm">
-            {% csrf_token %}
-            <div class="row g-3">
-                <div class="col-md-4">
-                    <label for="product_id" class="form-label">المادة الخام</label>
-                    <select class="form-select searchable-select" id="product_id" name="product_id" required>
-                        <option value="" selected disabled>-- اختر المادة --</option>
-                        {% for product in products %}
-                        <option value="{{ product.id }}">{{ product.name }} ({{ product.code }})</option>
-                        {% endfor %}
-                    </select>
-                </div>
+<!-- Form to Add New Return (Collapsible) -->
+<div class="collapse" id="addReturnFormCollapse">
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="bi bi-plus-circle me-1"></i>
+            تسجيل إرجاع جديد
+        </div>
+        <div class="card-body">
+            <form action="{% url 'inventory:production_returns' %}" method="post" id="returnForm">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label for="product_id" class="form-label">المادة الخام</label>
+                        <select class="form-select searchable-select" id="product_id" name="product_id" required>
+                            <option value="" selected disabled>-- اختر المادة --</option>
+                            {% for product in products %}
+                            <option value="{{ product.id }}">{{ product.name }} ({{ product.code }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
 
-                <div class="col-md-4">
-                    <label for="source_log_id" class="form-label">مصدر QC الأصلي</label>
-                    <select class="form-select" id="source_log_id" name="source_log_id" required disabled>
-                        <option value="" selected disabled>-- اختر المادة أولاً --</option>
-                    </select>
-                </div>
+                    <div class="col-md-4">
+                        <label for="source_log_id" class="form-label">مصدر QC الأصلي</label>
+                        <select class="form-select" id="source_log_id" name="source_log_id" required disabled>
+                            <option value="" selected disabled>-- اختر المادة أولاً --</option>
+                        </select>
+                    </div>
 
-                <div class="col-md-4">
-                    <label for="quantity" class="form-label">الكمية المرتجعة</label>
-                    <input type="number" class="form-control" id="quantity" name="quantity" step="0.001" min="0" required>
-                    <div id="maxReturnableHelp" class="form-text"></div>
-                </div>
+                    <div class="col-md-4">
+                        <label for="batch_id" class="form-label">أمر التشغيل المصدر (اختياري)</label>
+                        <select class="form-select" id="batch_id" name="batch_id" disabled>
+                            <option value="" selected>-- عام (بدون تحديد أمر تشغيل) --</option>
+                        </select>
+                    </div>
 
-                <div class="col-md-4">
-                    <label for="return_date" class="form-label">تاريخ الإرجاع</label>
-                    <input type="text" class="form-control datepicker" id="return_date" name="return_date" value="{{ today_date }}" required>
-                </div>
+                    <div class="col-md-4">
+                        <label for="quantity" class="form-label">الكمية المرتجعة</label>
+                        <input type="number" class="form-control" id="quantity" name="quantity" step="0.001" min="0" required>
+                        <div id="maxReturnableHelp" class="form-text"></div>
+                    </div>
 
-                <div class="col-md-8">
-                    <label for="notes" class="form-label">ملاحظات (اختياري)</label>
-                    <input type="text" class="form-control" id="notes" name="notes">
+                    <div class="col-md-4">
+                        <label for="return_date" class="form-label">تاريخ الإرجاع</label>
+                        <input type="text" class="form-control datepicker" id="return_date" name="return_date" value="{{ today_date }}" required>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="notes" class="form-label">ملاحظات (اختياري)</label>
+                        <input type="text" class="form-control" id="notes" name="notes">
+                    </div>
                 </div>
-            </div>
-            <button type="submit" class="btn btn-primary mt-3">
-                <i class="bi bi-save me-1"></i>
-                حفظ الإرجاع
-            </button>
-        </form>
+                <button type="submit" class="btn btn-primary mt-3">
+                    <i class="bi bi-save me-1"></i>
+                    حفظ الإرجاع
+                </button>
+            </form>
+        </div>
     </div>
 </div>
 
 <!-- Table of Existing Returns -->
 <div class="card">
-    <div class="card-header">
-        <i class="bi bi-clock-history me-1"></i>
-        سجل المرتجعات
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>
+            <i class="bi bi-clock-history me-1"></i>
+            سجل المرتجعات
+        </span>
+        <div class="btn-group btn-group-sm" role="group" id="productionReturnStatusFilter">
+            <a href="{% url 'inventory:production_returns' %}?status=all" class="btn btn btn-outline-info {% if not active_filter or active_filter == 'all' %}active{% endif %}">الكل</a>
+            <a href="{% url 'inventory:production_returns' %}?status=posted" class="btn btn btn-outline-info {% if active_filter == 'posted' %}active{% endif %}">مسجل</a>
+            <a href="{% url 'inventory:production_returns' %}?status=cancelled" class="btn btn btn-outline-info {% if active_filter == 'cancelled' %}active{% endif %}">ملغي</a>
+        </div>
     </div>
     <div class="card-body">
         <div class="table-responsive">
@@ -69,33 +91,51 @@
                         <th>التاريخ</th>
                         <th>المادة</th>
                         <th>الكمية</th>
-                        <th>الوحدة</th>
                         <th>مصدر QC الأصلي</th>
+                        <th>أمر التشغيل</th>
+                        <th>الحالة</th>
                         <th>ملاحظات</th>
                         <th>إجراء</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for item in returns %}
-                    <tr>
+                    <tr class="{% if item.status == 'cancelled' %}table text-decoration-line-through{% endif %}">
                         <td>{{ item.return_date|date:"Y-m-d" }}</td>
                         <td>{{ item.product.name }}</td>
-                        <td>{{ item.quantity|floatformat:3 }}</td>
-                        <td>{{ item.product.unit }}</td>
-                        <td>{{ item.source_log.qc_no|default:"N/A" }}</td>
+                        <td data-value="{{ item.quantity }}">{{ item.quantity|stringformat:".3f" }}</td>
+                        <td>
+                            {{ item.source_log.qc_no|default:"N/A" }}
+                            {% if item.source_log.timestamp %}
+                                <br><small class="text-muted">{{ item.source_log.timestamp|date:"Y-m-d" }}</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if item.batch %}
+                                <a href="{% url 'inventory:view_batch' item.batch.id %}">{{ item.batch.shop_order_number }}</a>
+                            {% else %}
+                                <span class="text-muted">--</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if item.status == 'cancelled' %}
+                                <span class="badge bg-info">ملغي</span>
+                            {% else %}
+                                <span class="badge bg-success">مسجل</span>
+                            {% endif %}
+                        </td>
                         <td>{{ item.notes }}</td>
                         <td>
-                            <form action="{% url 'inventory:delete_production_return' pk=item.id %}" method="post" onsubmit="return confirm('هل أنت متأكد من حذف هذا السجل؟');">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-sm btn-outline-danger" title="حذف السجل">
-                                    <i class="bi bi-trash"></i>
+                            {% if item.status != 'cancelled' %}
+                                <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#cancelReturnModal-{{ item.id }}" title="إلغاء السجل">
+                                    <i class="bi bi-x-circle"></i>
                                 </button>
-                            </form>
+                            {% endif %}
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="7" class="text-center">لا توجد سجلات مرتجعات.</td>
+                        <td colspan="8" class="text-center">لا توجد سجلات مرتجعات.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -103,3 +143,31 @@
         </div>
     </div>
 </div>
+
+<!-- Cancellation Modals -->
+{% for item in returns %}
+<div class="modal fade" id="cancelReturnModal-{{ item.id }}" tabindex="-1" aria-labelledby="cancelReturnModalLabel-{{ item.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{% url 'inventory:cancel_production_return' pk=item.id %}" method="post">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cancelReturnModalLabel-{{ item.id }}">إلغاء سجل إرجاع</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>هل أنت متأكد من إلغاء هذا السجل؟ لا يمكن التراجع عن هذا الإجراء.</p>
+                    <div class="mb-3">
+                        <label for="justification-{{ item.id }}" class="form-label">سبب الإلغاء (مطلوب)</label>
+                        <textarea class="form-control" id="justification-{{ item.id }}" name="justification" rows="3" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                    <button type="submit" class="btn btn-danger">تأكيد الإلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}

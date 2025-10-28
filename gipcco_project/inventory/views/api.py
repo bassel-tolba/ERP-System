@@ -19,6 +19,77 @@ from ..models import (
 
 # --- API Views ---
 
+def api_get_inventory_log_history(request: HttpRequest, log_pk: int) -> JsonResponse:
+    """
+    API endpoint to get the detailed transaction history for a single InventoryLog.
+    """
+    log = get_object_or_404(InventoryLog.objects.select_related('product'), pk=log_pk)
+    history = []
+
+    # 1. Internal Consumptions
+    for consumption in log.consumptions.all():
+        history.append({
+            'type': 'استهلاك',
+            'date': consumption.consumption_date.isoformat(),
+            'quantity': -consumption.quantity_consumed,
+            'description': f"استهلاك داخلي لغرض {consumption.get_consumption_type_display()}",
+            'reference': f"رقم مستند الاستهلاك: {consumption.id}"
+        })
+
+    # 2. Batch Items (Production Issues)
+    for item in log.batch_items.select_related('batch').all():
+        description = "صرف للإنتاج"
+        reference = f"باتش: {item.batch.batch_number} (أمر تشغيل: {item.batch.shop_order_number})"
+        status = "نشط"
+        if item.batch.status == Batch.Status.CANCELLED:
+            status = "مرتجع عند الإلغاء"
+            description += " - ملغي"
+
+        history.append({
+            'type': 'إنتاج',
+            'date': item.batch.creation_date.isoformat(),
+            'quantity': -(item.actual_quantity or 0.0),
+            'description': description,
+            'reference': reference,
+            'status': status
+        })
+
+    # 3. Inventory Adjustments
+    for adj in log.adjustments.all():
+        history.append({
+            'type': 'تسوية',
+            'date': adj.adjustment_date.isoformat(),
+            'quantity': adj.adjustment_quantity,
+            'description': f"تسوية: {adj.get_reason_code_display()}",
+            'reference': f"رقم التسوية: {adj.id}"
+        })
+    
+    # 4. Production Returns (adds quantity back)
+    for ret in log.production_returns.select_related('batch').all():
+        description = ret.notes or "مرتجع من الإنتاج"
+        reference = f"رقم المرتجع: {ret.id}"
+        if ret.batch:
+            reference += f" (من باتش: {ret.batch.batch_number})"
+
+        history.append({
+            'type': 'مرتجع',
+            'date': ret.return_date.isoformat(),
+            'quantity': ret.quantity,
+            'description': description,
+            'reference': reference
+        })
+
+    history.sort(key=lambda x: x['date'], reverse=True)
+
+    return JsonResponse({
+        'log_id': log.id,
+        'product_name': log.product.name,
+        'qc_no': log.qc_no,
+        'initial_quantity': log.quantity,
+        'history': history
+    })
+
+
 def get_used_qc_sources(request: HttpRequest, product_pk: int) -> JsonResponse:
     """
     API endpoint to get inventory sources that have been consumed for a product.
@@ -45,6 +116,26 @@ def get_used_qc_sources(request: HttpRequest, product_pk: int) -> JsonResponse:
     return JsonResponse(result, safe=False)
 
 
+def api_get_batches_for_source_log(request: HttpRequest, log_pk: int) -> JsonResponse:
+    """
+    API endpoint to get all batches that have consumed items from a specific InventoryLog.
+    """
+    log = get_object_or_404(InventoryLog, pk=log_pk)
+    
+    # Find all distinct batches linked to this log via BatchItem
+    batches = Batch.objects.filter(
+        items__source_log=log
+    ).distinct().order_by('-creation_date')
+
+    result = [
+        {
+            'id': batch.id,
+            'display_text': f"SO: {batch.shop_order_number} | Batch: {batch.batch_number}",
+        } for batch in batches
+    ]
+    return JsonResponse(result, safe=False)
+
+
 def api_batch_details(request: HttpRequest, batch_pk: int) -> JsonResponse:
     """
     API endpoint to get full, detailed information for a single batch.
@@ -63,6 +154,7 @@ def api_batch_details(request: HttpRequest, batch_pk: int) -> JsonResponse:
         'is_customized': batch.is_customized,
         'is_continuation': batch.is_continuation,
         'notes': batch.notes,
+        'template_id': batch.template.id,
         'template_name': batch.template.name,
         'final_product_name': batch.template.final_product.name,
         'final_product_code': batch.template.final_product.code,
@@ -89,7 +181,8 @@ def api_get_full_batch_analysis(request: HttpRequest, batch_pk: int) -> JsonResp
     batch = get_object_or_404(
         Batch.objects.select_related('template__final_product').prefetch_related(
             'items__primitive_product', 'receipts'
-        ), pk=batch_pk
+        ).exclude(status=Batch.Status.CANCELLED), 
+        pk=batch_pk
     )
 
     total_actual_cost = sum(

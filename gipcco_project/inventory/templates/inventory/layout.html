@@ -28,7 +28,7 @@
            ========================================================================== -->
         <div class="offcanvas offcanvas-end" tabindex="-1" id="sidebarOffcanvas" aria-labelledby="sidebarOffcanvasLabel">
             <div class="offcanvas-header">
-                <a class="sidebar-header" href="{% url 'inventory:index' %}" id="sidebarOffcanvasLabel">
+                <a class="sidebar-header" href="{% url 'inventory:receipts' %}" id="sidebarOffcanvasLabel">
                     <i class="bi bi-buildings-fill brand-icon"></i>
                     <span class="brand-text">GIPCCO Warehouse</span>
                 </a>
@@ -38,7 +38,7 @@
                 <nav class="sidebar-nav">
                     <ul class="navbar-nav">
                         <li class="nav-item">
-                            <a class="nav-link {% if active_page == 'index' %}active{% endif %}" href="{% url 'inventory:index' %}">
+                            <a class="nav-link {% if active_page == 'receipts' %}active{% endif %}" href="{% url 'inventory:receipts' %}">
                                 <i class="bi bi-grid-1x2-fill nav-icon"></i>
                                 <span>لوحة التحكم</span>
                             </a>
@@ -257,8 +257,11 @@
             apiGetSellableStock: "{% url 'inventory:api_get_sell_stock' %}",
             apiGetAvailableStock: "{% url 'inventory:api_get_available_stock' 0 %}",
             apiGetUsedQcSources: "{% url 'inventory:get_used_qc_sources' 0 %}",
+            apiGetBatchesForSourceLog: "{% url 'inventory:api_get_batches_for_source_log' 0 %}",
             apiGetUndispatchedSoItems: "{% url 'inventory:api_get_undispatched_so_items' 0 %}",
             recordsEdit: "{% url 'inventory:edit_record' 0 %}",
+            voidRecord: "{% url 'inventory:void_record' 0 %}",
+            apiGetInventoryLogHistory: "{% url 'inventory:api_get_inventory_log_history' 0 %}",
             createBatch: "{% url 'inventory:create_batch' %}",
         };
     </script>

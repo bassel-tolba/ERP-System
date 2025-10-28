@@ -28,19 +28,30 @@ logger = logging.getLogger(__name__)
 # --- Batch List View (No changes needed) ---
 def batches(request: HttpRequest) -> HttpResponse:
     search_query = request.GET.get('q', '').strip()
-    batch_list = Batch.objects.select_related('template__final_product').all()
+    status_filter = request.GET.get('status', 'active')
+
+    base_queryset = Batch.objects.select_related('template__final_product')
+
+    if status_filter == 'active':
+        batch_list = base_queryset.exclude(status=Batch.Status.CANCELLED)
+    else: # 'all'
+        batch_list = base_queryset.all()
+
     if search_query:
         batch_list = batch_list.filter(
             Q(template__final_product__name__icontains=search_query) |
             Q(shop_order_number__icontains=search_query) |
             Q(batch_number__icontains=search_query)
         )
-    paginator = Paginator(batch_list, ITEMS_PER_PAGE)
+    
+    paginator = Paginator(batch_list.order_by('-creation_date'), ITEMS_PER_PAGE)
     page_obj = paginator.get_page(request.GET.get('page'))
+    
     context = {
         'active_page': 'shop_orders',
         'batches': page_obj,
         'search_query': search_query,
+        'status_filter': status_filter,
         'is_partial_request': 'X-Partial-Request' in request.headers
     }
     template = 'inventory/partials/batches_content.html' if 'X-Partial-Request' in request.headers else 'inventory/batches.html'
@@ -185,6 +196,9 @@ def view_batch(request: HttpRequest, pk: int) -> HttpResponse:
     ).order_by('name')
     # --- END: MODIFICATION ---
 
+    # Fetch related production returns
+    related_returns = batch_info.production_returns.select_related('product', 'source_log').all()
+
     context = {
         'active_page': 'shop_orders',
         'batch': batch_info,
@@ -193,7 +207,9 @@ def view_batch(request: HttpRequest, pk: int) -> HttpResponse:
         'plan_status_list': plan_status_list,
         'available_parent_batches': Batch.objects.select_related('template__final_product').exclude(pk=pk).order_by('-creation_date'),
         'primitive_products': primitive_products, # Add this for the modal
-        'is_partial_request': 'X-Partial-Request' in request.headers
+        'related_returns': related_returns,
+        'is_partial_request': 'X-Partial-Request' in request.headers,
+        'today_date': timezone.now().strftime('%Y-%m-%d'),
     }
     template = 'inventory/partials/batch_view_content.html' if 'X-Partial-Request' in request.headers else 'inventory/batch_view.html'
     return render(request, template, context)
@@ -281,16 +297,34 @@ def add_batch_item(request: HttpRequest, batch_pk: int) -> HttpResponse:
 
 # --- REFACTORED: Delete Batch Item View ---
 @require_POST
-def delete_batch_item(request: HttpRequest, item_pk: int) -> HttpResponse:
+def return_batch_item_view(request: HttpRequest, item_pk: int) -> HttpResponse:
+    """
+    Handles returning a component from a batch back to inventory via the batch service.
+    """
     item = get_object_or_404(BatchItem, pk=item_pk)
     batch_id = item.batch.id
     try:
-        # Service handles JE recreation and MAC recalculation internally
-        info = batch_service.delete_item_from_batch(item=item)
-        messages.info(request, "تم حذف المادة وتحديث التكاليف.")
+        quantity = float(request.POST.get('quantity', 0))
+        return_date_str = request.POST.get('return_date')
+        notes = request.POST.get('notes', '')
+
+        if not return_date_str or quantity <= 0:
+            raise ValidationError("Return date and a positive quantity are required.")
+
+        return_date = datetime.strptime(return_date_str, '%Y-%m-%d').date()
+
+        batch_service.return_item_from_batch(
+            item=item,
+            quantity=quantity,
+            return_date=return_date,
+            notes=notes
+        )
+        messages.info(request, "تم إرجاع المادة من أمر التشغيل بنجاح.")
+    except (ValidationError, ValueError) as e:
+        messages.error(request, f"حدث خطأ أثناء الإرجاع: {e}")
     except Exception as e:
-        logger.error(f"Error deleting batch item {item_pk}: {e}", exc_info=True)
-        messages.error(request, f"حدث خطأ أثناء الحذف: {e}")
+        logger.error(f"Error returning batch item {item_pk}: {e}", exc_info=True)
+        messages.error(request, f"حدث خطأ غير متوقع أثناء الإرجاع: {e}")
     return redirect('inventory:view_batch', pk=batch_id)
 
 
