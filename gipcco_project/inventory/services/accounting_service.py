@@ -21,7 +21,8 @@ from .accounting.inventory_transactions import (
 from .accounting.production_transactions import (
     create_je_for_production_consumption,
     create_je_for_finished_goods_receipt,
-    create_je_for_production_return
+    create_je_for_production_return,
+    create_je_for_production_supplemental_issue
 )
 from .accounting.sales_transactions import (
     create_je_for_sales_dispatch,
@@ -89,6 +90,7 @@ __all__ = [
     'create_je_for_production_consumption',
     'create_je_for_finished_goods_receipt',
     'create_je_for_production_return',
+    'create_je_for_production_supplemental_issue',
 
     # Sales
     'create_je_for_sales_dispatch',

@@ -153,11 +153,31 @@ def start_batch_production(batch: Batch) -> Batch:
             item.cost_at_consumption = mac_at_consumption.quantize(Decimal('0.001'))
             items_to_update.append(item)
             product_ids_to_recalc.add(item.primitive_product_id)
+            
+            # --- NEW: Defensive logging to debug zero-cost issues ---
+            logger.debug(
+                f"    Item {item.id}: Product {item.primitive_product.name}, "
+                f"State at {batch.creation_date}: qty={state['quantity']}, value={state['value']}, "
+                f"Calculated MAC={mac_at_consumption}"
+            )
         
         BatchItem.objects.bulk_update(items_to_update, ['cost_at_consumption'])
         logger.info(f"Snapshotted costs for {len(items_to_update)} items in Batch {batch.id}.")
 
         # --- CRITICAL STEP 2: Create the Journal Entry ---
+        # Reload the batch with explicit prefetch to ensure fresh item data
+        batch = Batch.objects.prefetch_related('items__primitive_product').get(pk=batch.pk)
+        
+        # --- NEW: Validate that costs were actually set ---
+        fresh_items = list(batch.items.all())
+        zero_cost_items = [item for item in fresh_items if not item.cost_at_consumption or item.cost_at_consumption == 0]
+        if zero_cost_items:
+            logger.warning(
+                f"Batch {batch.id} has {len(zero_cost_items)} items with zero cost. "
+                f"Products: {[item.primitive_product.name for item in zero_cost_items]}. "
+                f"This may indicate missing inventory data at the batch creation date."
+            )
+        
         create_je_for_production_consumption(batch)
 
         # --- CRITICAL STEP 3: Update batch status ---
@@ -168,7 +188,7 @@ def start_batch_production(batch: Batch) -> Batch:
     for pid in product_ids_to_recalc:
         recalculate_cost_history_for_product(pid, batch.creation_date)
 
-    logger.info(f"Successfully started production for Batch {batch.id} and created its Journal Entry.")
+    logger.info(f"Successfully started production for Batch {batch.id}.")
     return batch
 
 
@@ -224,15 +244,45 @@ def update_batch(
         batch_to_update.save()
 
         items_in_db = {item.id: item for item in batch_to_update.items.all()}
+        item_ids_from_form = {int(item_data['item_id']) for item_data in items_data if 'item_id' in item_data and item_data['item_id']}
+
+        # 1. Delete items that are no longer in the form
+        ids_to_delete = set(items_in_db.keys()) - item_ids_from_form
+        if ids_to_delete:
+            BatchItem.objects.filter(id__in=ids_to_delete).delete()
+
+        items_to_create = []
+        items_to_update = []
         
+        # 2. Update existing items and identify new items to create
         for item_data in items_data:
-            item = items_in_db.get(item_data['item_id'])
-            if item:
-                item.theoretical_quantity = item_data['theoretical_quantity']
-                item.actual_quantity = item_data['actual_quantity']
-                item.source_log_id = item_data['source_log_id'] or None
-                item.cost_at_consumption = None # Ensure cost is null as it's a draft
-                item.save()
+            item_id = item_data.get('item_id')
+            if item_id:
+                item = items_in_db.get(int(item_id))
+                if item:
+                    item.theoretical_quantity = item_data['theoretical_quantity']
+                    item.actual_quantity = item_data['actual_quantity']
+                    item.source_log_id = item_data['source_log_id'] or None
+                    item.cost_at_consumption = None # Ensure cost is null as it's a draft
+                    items_to_update.append(item)
+            else:
+                # This is a new item, not in the DB yet
+                items_to_create.append(
+                    BatchItem(
+                        batch=batch_to_update,
+                        primitive_product_id=item_data['product_id'],
+                        theoretical_quantity=item_data['theoretical_quantity'],
+                        actual_quantity=item_data['actual_quantity'],
+                        source_log_id=item_data['source_log_id'],
+                    )
+                )
+        
+        # 3. Perform bulk operations for efficiency
+        if items_to_update:
+            BatchItem.objects.bulk_update(items_to_update, ['theoretical_quantity', 'actual_quantity', 'source_log_id', 'cost_at_consumption'])
+        
+        if items_to_create:
+            BatchItem.objects.bulk_create(items_to_create)
 
     check_and_update_batch_customization(batch.pk)
     logger.info(f"Successfully updated Draft Batch {batch.id}.")

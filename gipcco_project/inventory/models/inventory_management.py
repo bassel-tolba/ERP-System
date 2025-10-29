@@ -366,6 +366,7 @@ class FinishedProductReceipt(models.Model):
         QUARANTINED = 'quarantined', _('تحت الفحص')
         RELEASED = 'released', _('مفرج عنه')
         REJECTED = 'rejected', _('مرفوض')
+        CANCELLED = 'cancelled', _('ملغي')
 
     batch = models.ForeignKey(
         Batch,

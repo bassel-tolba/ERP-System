@@ -62,7 +62,8 @@
                         <dd class="col-sm-7">
                             {% if receipt.status == 'QUARANTINED' %}<span class="badge bg-warning text-dark">{{ receipt.get_status_display }}</span>
                             {% elif receipt.status == 'RELEASED' %}<span class="badge bg-success">{{ receipt.get_status_display }}</span>
-                            {% else %}<span class="badge bg-danger">{{ receipt.get_status_display }}</span>
+                            {% elif receipt.status == 'CANCELLED' %}<span class="badge bg-danger">{{ receipt.get_status_display }}</span>
+                            {% else %}<span class="badge bg-secondary">{{ receipt.get_status_display }}</span>
                             {% endif %}
                         </dd>
                         
@@ -75,6 +76,13 @@
                         {% endif %}
                     </dl>
                 </div>
+                {% if receipt.status != 'CANCELLED' and not receipt.dispatches.exists and not receipt.adjustments.exists %}
+                <div class="card-footer text-end">
+                    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#cancelReceiptModal">
+                        <i class="bi bi-x-circle"></i> إلغاء الاستلام
+                    </button>
+                </div>
+                {% endif %}
             </div>
 
             <!-- NEW: Cost Breakdown Card -->
@@ -129,4 +137,31 @@
 
         </div>
     </div>
+</div>
+
+<!-- Cancel Receipt Modal -->
+<div class="modal fade" id="cancelReceiptModal" tabindex="-1" aria-labelledby="cancelReceiptModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form action="{% url 'inventory:cancel_finished_product_receipt' receipt.pk %}" method="post">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" id="cancelReceiptModalLabel">تأكيد إلغاء الاستلام</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>هل أنت متأكد أنك تريد إلغاء استلام التشغيلة <strong>{{ receipt.individual_batch_number }}</strong>؟</p>
+          <p class="text-danger">سيؤدي هذا الإجراء إلى عكس القيد المحاسبي المرتبط وإعادة الكمية إلى الإنتاج. لا يمكن التراجع عن هذا الإجراء.</p>
+          <div class="mb-3">
+            <label for="justification" class="form-label">سبب الإلغاء (مطلوب)</label>
+            <textarea class="form-control" id="justification" name="justification" rows="3" required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+          <button type="submit" class="btn btn-danger">تأكيد الإلغاء</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>

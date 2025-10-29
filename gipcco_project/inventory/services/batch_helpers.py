@@ -128,9 +128,8 @@ def validate_stock_availability(
 
         # --- Calculate Available Stock ---
         used_items_qs = BatchItem.objects.filter(
-            source_log_id=source_id, 
-            batch__status__in=[Batch.Status.IN_PROGRESS, Batch.Status.COMPLETED, Batch.Status.APPROVED, Batch.Status.PENDING_APPROVAL]
-        )
+            source_log_id=source_id
+        ).exclude(batch__status=Batch.Status.CANCELLED)
         if batch_id_to_exclude:
             used_items_qs = used_items_qs.exclude(batch_id=batch_id_to_exclude)
 

@@ -13,7 +13,7 @@ from .views.analysis_ledger_visuals import visuals
 from .views.purchase_orders import purchase_orders, create_purchase_order, view_purchase_order, edit_purchase_order, delete_purchase_order
 from .views import purchasing_views
 from .views import landed_cost_views
-from .views.finished_products import finished_goods_status, receive_finished_product, view_finished_product, release_from_quarantine as release_fg_from_quarantine
+from .views.finished_products import finished_goods_status, receive_finished_product, view_finished_product, release_from_quarantine as release_fg_from_quarantine, cancel_finished_product_receipt_view
 from .views.adjustments import inventory_counts_list, create_inventory_count, manage_inventory_count, allocate_inventory_variances
 from .views.api import (
     get_used_qc_sources, api_batch_details, get_product_tags, api_get_open_pos_for_supplier, 
@@ -115,6 +115,7 @@ urlpatterns = [
     path('finished_goods_status/', finished_goods_status, name='finished_goods_status'),
     path('batch/<int:batch_pk>/receive/<path:individual_batch_number>/', receive_finished_product, name='receive_finished_product'),
     path('finished_product/<int:pk>/', view_finished_product, name='view_finished_product'),
+    path('finished_product/<int:pk>/cancel/', cancel_finished_product_receipt_view, name='cancel_finished_product_receipt'),
     path('finished_product/<int:pk>/release/', release_fg_from_quarantine, name='release_fg_from_quarantine'),
 
     # Production Returns Routes

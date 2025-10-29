@@ -295,3 +295,69 @@ def create_je_for_production_supplemental_issue(item: 'BatchItem') -> Optional[J
         logger.info(f"Successfully created supplemental Journal Entry JE-{je.id} for BatchItem ID {item.id}.")
     
     return je
+
+
+def create_je_for_production_supplemental_issue(item: 'BatchItem') -> Optional[JournalEntry]:
+    """
+    Creates a journal entry for a single supplemental item added to a production batch.
+    This is a more granular version of production consumption for auditable corrections.
+
+    Accounting Logic:
+    - DEBIT: Work-in-Progress (WIP) Inventory Account
+    - CREDIT: Raw Material Inventory Account
+    """
+    from ...models import BatchItem
+
+    if JournalEntry.objects.filter(
+        content_type=ContentType.objects.get_for_model(BatchItem),
+        object_id=item.id
+    ).exists():
+        logger.warning(f"Journal entry for supplemental BatchItem ID {item.id} already exists. Aborting.")
+        return None
+
+    _check_period_is_open(item.batch.creation_date)
+
+    settings = GeneralAccountingSettings.load()
+    wip_account = settings.wip_inventory
+    if not wip_account:
+        raise ValueError(_("Work-in-Progress (WIP) account is not configured in General Accounting Settings."))
+
+    if not item.cost_at_consumption or item.cost_at_consumption <= 0:
+        logger.error(f"Cannot create supplemental JE for BatchItem {item.id} because its cost is not set.")
+        raise ValueError(f"Cost for supplemental item {item.primitive_product.name} has not been calculated and set.")
+
+    line_cost = (Decimal(str(item.actual_quantity)) * item.cost_at_consumption).quantize(Decimal('0.001'))
+    if line_cost <= 0:
+        return None
+
+    inventory_account = _get_product_inventory_account(item.primitive_product)
+
+    with transaction.atomic():
+        description = _(
+            "Supplemental issue of '%(product)s' to SO: %(so)s / Batch: %(batch)s"
+        ) % {
+            'product': item.primitive_product.name,
+            'so': item.batch.shop_order_number,
+            'batch': item.batch.batch_number,
+        }
+
+        je = JournalEntry.objects.create(
+            date=timezone.make_aware(datetime.combine(item.batch.creation_date.date(), datetime.min.time())) if hasattr(item.batch.creation_date, 'date') else item.batch.creation_date,
+            description=description,
+            source_object=item,
+            status=JournalEntry.Status.POSTED
+        )
+
+        JournalEntryLine.objects.create(
+            journal_entry=je, account=wip_account, amount=line_cost,
+            entry_type=JournalEntryLine.EntryType.DEBIT, sub_ledger_object=item.batch.template.final_product
+        )
+        JournalEntryLine.objects.create(
+            journal_entry=je, account=inventory_account, amount=line_cost,
+            entry_type=JournalEntryLine.EntryType.CREDIT, sub_ledger_object=item.primitive_product
+        )
+        
+        je.validate_balance()
+        logger.info(f"Successfully created supplemental Journal Entry JE-{je.id} for BatchItem ID {item.id}.")
+    
+    return je

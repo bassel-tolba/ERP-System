@@ -389,17 +389,25 @@ class AccountingServiceBaseTestCase(TestCase):
         )
         return product
 
-    def get_je_for_object(self, obj):
-        """Helper to retrieve the JournalEntry linked to a specific object."""
+    def get_je_for_object(self, obj, expect_one=True):
+        """
+        Helper to retrieve JournalEntry/Entries linked to a specific object.
+        - If expect_one is True (default), it uses .get() and expects a single JE.
+        - If expect_one is False, it returns a queryset.
+        """
         from django.contrib.contenttypes.models import ContentType
         from .models import JournalEntry
         
         content_type = ContentType.objects.get_for_model(obj.__class__)
-        return JournalEntry.objects.get(content_type=content_type, object_id=obj.id)
+        qs = JournalEntry.objects.filter(content_type=content_type, object_id=obj.id)
+        if expect_one:
+            return qs.get()
+        return qs
 
-    def create_inventory_log(self, company, product, quantity, base_unit_price, po_item=None):
+    @classmethod
+    def create_inventory_log(cls, company, product, quantity, base_unit_price, po_item=None, log_date=None):
         """Helper to create a released inventory log for testing."""
-        log_time = timezone.now()
+        log_time = log_date if log_date else timezone.now()
 
         vat_amount = Decimal('0.000')
         wht_amount = Decimal('0.000')
