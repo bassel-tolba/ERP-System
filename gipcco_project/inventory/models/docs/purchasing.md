@@ -16,10 +16,11 @@
   - **Description:** Represents the financial document issued to a supplier to reduce the accounts payable balance, typically created from a `PurchaseReturn`. It records the total value of the credit being claimed and links to the final journal entry.
 
 - `LandedCostInvoice`:
-  - **Description:** Represents an invoice from a third-party (e.g., a shipping company) for landed costs that need to be applied to inventory receipts. It tracks the vendor, invoice details, total amount, and status (`Draft`, `Awaiting Allocation`, `Fully Allocated`).
+  - **Description:** Represents an invoice from a third-party (e.g., a shipping company) for landed costs that need to be applied to inventory receipts. It tracks the vendor, invoice details, total amount, and status (`Draft`, `Awaiting Payment`, `Paid`).
+  - **NEW**: `purchase_order` (FK) to link to the related Purchase Order for variance calculation.
 
 - `LandedCostInvoiceItem`:
   - **Description:** A line item on a `LandedCostInvoice`, linking a specific `LandedCostType` and amount.
 
-- `LandedCostAllocation`:
-  - **Description:** An explicit link showing how much of a `LandedCostInvoiceItem` was allocated to a specific `InventoryLog` (receipt). It records the allocated amount and links to the journal entry that moves the cost into inventory.
+- `PurchaseOrderLandedCost`:
+  - **Description:** Stores an estimated landed cost for an entire Purchase Order. This is the core of the NetSuite-style estimation-first approach.

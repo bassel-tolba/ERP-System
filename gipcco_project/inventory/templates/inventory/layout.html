@@ -114,10 +114,12 @@
                                     <li><h6 class="dropdown-header">الحسابات الدائنة (A/P)</h6></li>
                                     <li><a class="dropdown-item {% if sub_page == 'supplier_invoices' %}active{% endif %}" href="{% url 'inventory:supplier_invoices' %}">فواتير الموردين</a></li>
                                     <li><a class="dropdown-item" href="{% url 'inventory:create_supplier_invoice' %}">إنشاء فاتورة مورد</a></li>
+                                    <li><a class="dropdown-item {% if sub_page == 'landed_cost_invoices' %}active{% endif %}" href="{% url 'inventory:landed_cost_invoices' %}">فواتير تكاليف الشحن</a></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li><h6 class="dropdown-header">الحسابات المدينة (A/R)</h6></li>
-                                    <li><a class="dropdown-item {% if sub_page == 'customer_invoices' %}active{% endif %}" href="{% url 'inventory:customer_invoices' %}">فواتير العملاء</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'inventory:create_customer_invoice' %}">إنشاء فاتورة عميل</a></li>
+                                    <li><a class="dropdown-item {% if sub_page == 'supplier_invoices' %}active{% endif %}" href="{% url 'inventory:supplier_invoices' %}">فواتير الموردين</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'inventory:create_supplier_invoice' %}">إنشاء فاتورة مورد</a></li>
+                                    <li><a class="dropdown-item {% if sub_page == 'landed_cost_invoices' %}active{% endif %}" href="{% url 'inventory:landed_cost_invoices' %}">فواتير تكاليف الشحن</a></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li><h6 class="dropdown-header">البنوك و الخزينة</h6></li>
                                     <li><a class="dropdown-item {% if sub_page == 'banking' %}active{% endif %}" href="{% url 'inventory:bank_accounts_dashboard' %}">أرصدة وتحويلات</a></li>
@@ -259,7 +261,6 @@
             apiGetUsedQcSources: "{% url 'inventory:get_used_qc_sources' 0 %}",
             apiGetBatchesForSourceLog: "{% url 'inventory:api_get_batches_for_source_log' 0 %}",
             apiGetUndispatchedSoItems: "{% url 'inventory:api_get_undispatched_so_items' 0 %}",
-            recordsEdit: "{% url 'inventory:edit_record' 0 %}",
             voidRecord: "{% url 'inventory:void_record' 0 %}",
             apiGetInventoryLogHistory: "{% url 'inventory:api_get_inventory_log_history' 0 %}",
             createBatch: "{% url 'inventory:create_batch' %}",
@@ -312,7 +313,6 @@
     <script src="{% static 'layout/js/close_period_logic.js' %}"></script>
     <script src="{% static 'layout/js/inventory_counts_logic.js' %}"></script>
     <script src="{% static 'layout/js/employees_logic.js' %}"></script>
-    <script src="{% static 'js/landed_cost_workspace.js' %}"></script>
     <!-- Dynamic content loader (MUST BE LAST) -->
     <script src="{% static 'layout/js/dynamic_content_loader.js' %}"></script>
     

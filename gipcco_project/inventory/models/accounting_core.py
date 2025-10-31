@@ -430,6 +430,17 @@ class GeneralAccountingSettings(models.Model):
         verbose_name=_("Inventory Revaluation Account"),
         help_text=_("An account to record upward or downward adjustments to inventory value from late costs.")
     )
+    # --- NEW: ACCRUED LANDED COSTS & VARIANCE (NETSUITE METHOD) ---
+    accrued_landed_costs_account = models.ForeignKey(
+        Account, on_delete=models.PROTECT, related_name='+', null=True, blank=True,
+        verbose_name=_("Accrued Landed Costs Account"),
+        help_text=_("A liability account to accrue estimated landed costs at time of receipt.")
+    )
+    landed_cost_variance_account = models.ForeignKey(
+        Account, on_delete=models.PROTECT, related_name='+', null=True, blank=True,
+        verbose_name=_("Landed Cost Variance Account"),
+        help_text=_("An expense account to record differences between estimated and actual landed costs.")
+    )
 
     class Meta:
         db_table = 'general_accounting_settings'

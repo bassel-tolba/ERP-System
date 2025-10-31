@@ -11,7 +11,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 from django.core.exceptions import ValidationError, PermissionDenied
 
-from ..models import Company, Product, PurchaseOrder, PurchaseOrderItem
+from ..models import Company, Product, PurchaseOrder, PurchaseOrderItem, LandedCostType
 from ..services import purchasing_service
 
 
@@ -51,12 +51,25 @@ def create_purchase_order(request: HttpRequest) -> HttpResponse:
                 'order_date': request.POST.get('order_date'),
             }
             
+            # --- NEW: Process PO-level landed costs ---
+            landed_costs_data = []
+            lc_type_ids = request.POST.getlist('lc_cost_type_id')
+            lc_amounts = request.POST.getlist('lc_estimated_amount')
+            for i in range(len(lc_type_ids)):
+                if lc_type_ids[i] and lc_amounts[i]:
+                    landed_costs_data.append({
+                        'cost_type_id': lc_type_ids[i],
+                        'estimated_amount': lc_amounts[i]
+                    })
+
             items_data = []
             product_ids = request.POST.getlist('product_id')
             quantities = request.POST.getlist('quantity')
             base_prices = request.POST.getlist('base_price_per_unit')
             vat_rates = request.POST.getlist('vat_rate')
             wht_rates = request.POST.getlist('withholding_tax_rate')
+            # --- NEW: Get allocation percentages ---
+            allocation_percentages = request.POST.getlist('landed_cost_allocation_percentage')
 
             for i in range(len(product_ids)):
                 if product_ids[i]:
@@ -66,12 +79,14 @@ def create_purchase_order(request: HttpRequest) -> HttpResponse:
                         'base_price_per_unit': base_prices[i],
                         'vat_rate': vat_rates[i],
                         'withholding_tax_rate': wht_rates[i],
+                        'landed_cost_allocation_percentage': allocation_percentages[i]
                     })
 
             po = purchasing_service.create_purchase_order(
                 user=request.user,
                 po_data=po_data,
-                items_data=items_data
+                items_data=items_data,
+                landed_costs_data=landed_costs_data
             )
             messages.success(request, f"تم إنشاء أمر الشراء {po.po_number} بنجاح.")
             return redirect('inventory:purchase_orders')
@@ -88,6 +103,7 @@ def create_purchase_order(request: HttpRequest) -> HttpResponse:
         'active_page': 'purchasing',
         'suppliers': Company.objects.all(),
         'products': list(primitive_products_qs.values('id', 'name', 'code')),
+        'landed_cost_types': list(LandedCostType.objects.values('id', 'name')),
     }
     if 'X-Partial-Request' in request.headers:
         return render(request, 'inventory/partials/purchase_order_create_content.html', context)
@@ -102,7 +118,8 @@ def view_purchase_order(request: HttpRequest, pk: int) -> HttpResponse:
         PurchaseOrder.objects.select_related('supplier')
         .prefetch_related(
             'items__product', 
-            'items__receipts__supplierinvoiceitem_set__invoice' # Prefetch through to invoices
+            'items__receipts__supplierinvoiceitem_set__invoice',
+            'landed_costs__cost_type'
         ),
         pk=pk
     )
@@ -111,8 +128,20 @@ def view_purchase_order(request: HttpRequest, pk: int) -> HttpResponse:
     related_invoices = set()
     for item in po.items.all():
         item.total_received = sum(r.quantity for r in item.receipts.all())
-        item.is_completed = item.total_received >= item.quantity_ordered
+        item.is_completed = item.is_closed or (item.total_received >= item.quantity_ordered)
         item.quantity_remaining = item.quantity_ordered - item.total_received
+
+        # Perform calculations for display
+        total_base_price = Decimal(str(item.quantity_ordered)) * item.base_price_per_unit
+        total_vat = total_base_price * item.vat_rate
+        item.total_price_incl_vat = total_base_price + total_vat
+        item.wht_amount = total_base_price * item.withholding_tax_rate
+        item.net_payable = item.total_price_incl_vat - item.wht_amount
+        
+        # --- MODIFIED: Calculate allocated landed cost for display ---
+        total_po_landed_costs = sum(lc.estimated_amount for lc in po.landed_costs.all())
+        item.allocated_landed_cost = total_po_landed_costs * (item.landed_cost_allocation_percentage / Decimal('100.0'))
+        item.total_estimated_cost = item.total_price_incl_vat + item.allocated_landed_cost
 
         # Gather related invoices
         for receipt in item.receipts.all():
@@ -135,7 +164,7 @@ def edit_purchase_order(request: HttpRequest, pk: int) -> HttpResponse:
     """
     Handles editing an existing Purchase Order by calling the purchasing service.
     """
-    po = get_object_or_404(PurchaseOrder.objects.prefetch_related('items__product'), pk=pk)
+    po = get_object_or_404(PurchaseOrder.objects.prefetch_related('items__product', 'landed_costs__cost_type'), pk=pk)
 
     if request.method == 'POST':
         try:
@@ -145,12 +174,24 @@ def edit_purchase_order(request: HttpRequest, pk: int) -> HttpResponse:
                 'order_date': request.POST.get('order_date'),
             }
             
+            # --- NEW: Process PO-level landed costs ---
+            landed_costs_data = []
+            lc_type_ids = request.POST.getlist('lc_cost_type_id')
+            lc_amounts = request.POST.getlist('lc_estimated_amount')
+            for i in range(len(lc_type_ids)):
+                if lc_type_ids[i] and lc_amounts[i]:
+                    landed_costs_data.append({
+                        'cost_type_id': lc_type_ids[i],
+                        'estimated_amount': lc_amounts[i]
+                    })
+
             items_data = []
             product_ids = request.POST.getlist('product_id')
             quantities = request.POST.getlist('quantity')
             base_prices = request.POST.getlist('base_price_per_unit')
             vat_rates = request.POST.getlist('vat_rate')
             wht_rates = request.POST.getlist('withholding_tax_rate')
+            allocation_percentages = request.POST.getlist('landed_cost_allocation_percentage')
 
             for i in range(len(product_ids)):
                 if product_ids[i]:
@@ -160,13 +201,15 @@ def edit_purchase_order(request: HttpRequest, pk: int) -> HttpResponse:
                         'base_price_per_unit': base_prices[i],
                         'vat_rate': vat_rates[i],
                         'withholding_tax_rate': wht_rates[i],
+                        'landed_cost_allocation_percentage': allocation_percentages[i]
                     })
 
             purchasing_service.update_purchase_order(
                 user=request.user,
                 po=po,
                 po_data=po_data,
-                items_data=items_data
+                items_data=items_data,
+                landed_costs_data=landed_costs_data
             )
             messages.success(request, "تم تعديل أمر الشراء بنجاح.")
             return redirect('inventory:view_purchase_order', pk=po.id)
@@ -181,14 +224,23 @@ def edit_purchase_order(request: HttpRequest, pk: int) -> HttpResponse:
 
     primitive_products_qs = Product.objects.filter(~Q(product_type=Product.ProductType.FINAL_PRODUCT))
     
-    po_items_data = [
-        {
+    po_items_data = []
+    for item in po.items.all():
+        po_items_data.append({
             'product_id': item.product_id,
             'quantity': item.quantity_ordered,
             'base_price_per_unit': str(item.base_price_per_unit),
             'vat_rate': str(item.vat_rate * 100),
-            'withholding_tax_rate': str(item.withholding_tax_rate * 100)
-        } for item in po.items.all()
+            'withholding_tax_rate': str(item.withholding_tax_rate * 100),
+            'landed_cost_allocation_percentage': str(item.landed_cost_allocation_percentage)
+        })
+    
+    po_landed_costs_data = [
+        {
+            'cost_type_id': lc.cost_type.id,
+            'cost_type_name': lc.cost_type.name,
+            'estimated_amount': str(lc.estimated_amount)
+        } for lc in po.landed_costs.all()
     ]
 
     context = {
@@ -197,8 +249,9 @@ def edit_purchase_order(request: HttpRequest, pk: int) -> HttpResponse:
         'suppliers': Company.objects.all(),
         'products': list(primitive_products_qs.values('id', 'name', 'code')),
         'po_items_data': po_items_data,
-    }
-    
+        'po_landed_costs_data': po_landed_costs_data,
+        'landed_cost_types': list(LandedCostType.objects.values('id', 'name')),
+    }    
     if 'X-Partial-Request' in request.headers:
         return render(request, 'inventory/partials/purchase_order_edit_content.html', context)
     return render(request, 'inventory/purchase_order_edit.html', context)

@@ -3,7 +3,7 @@
 from django.urls import path
 
 # --- MODIFIED: Use aliases for release_from_quarantine to avoid name collision ---
-from .views.receipts import index, records, edit_record, void_record_view, quarantine_list, release_from_quarantine as release_material_from_quarantine
+from .views.receipts import index, records, void_record_view, quarantine_list, release_from_quarantine as release_material_from_quarantine
 from .views.companies_products import companies, edit_company, delete_company, products, edit_product, delete_product, create_tag, edit_tag, delete_tag
 from .views.templates import shop_order_templates, delete_shop_order_template, view_shop_order_template, edit_shop_order_template
 from .views.batches import batches, create_batch, view_batch, cancel_batch_view, add_batch_item, update_batch_items_bulk, return_batch_item_view, submit_batch_view, approve_batch_view, start_production_view, reject_batch_view
@@ -12,7 +12,6 @@ from .views.production_returns import production_returns, cancel_production_retu
 from .views.analysis_ledger_visuals import visuals
 from .views.purchase_orders import purchase_orders, create_purchase_order, view_purchase_order, edit_purchase_order, delete_purchase_order
 from .views import purchasing_views
-from .views import landed_cost_views
 from .views.finished_products import finished_goods_status, receive_finished_product, view_finished_product, release_from_quarantine as release_fg_from_quarantine, cancel_finished_product_receipt_view
 from .views.adjustments import inventory_counts_list, create_inventory_count, manage_inventory_count, allocate_inventory_variances
 from .views.api import (
@@ -38,7 +37,15 @@ from .views.financial_reports import (
     balance_sheet, stock_valuation_report
 )
 from .views import employees
-from .views import financials
+from .views.financials import (
+    ap_views,
+    ar_views,
+    banking_views,
+    config_views,
+    gl_views,
+    overhead_views,
+    period_views,
+)
 
 app_name = 'inventory'
 
@@ -46,7 +53,6 @@ urlpatterns = [
     # Dashboard & Records
     path('', index, name='receipts'),
     path('records/', records, name='records'),
-    path('records/edit/<int:pk>/', edit_record, name='edit_record'),
     path('records/void/<int:pk>/', void_record_view, name='void_record'),
     
     # Quality Control Routes
@@ -81,9 +87,6 @@ urlpatterns = [
     path('purchase_return/<int:pk>/', purchasing_views.view_purchase_return, name='view_purchase_return'),
     path('purchase_return/<int:pk>/process/', purchasing_views.process_inventory_return_view, name='process_inventory_return'),
     path('purchase_return/<int:pk>/create_debit_memo/', purchasing_views.create_debit_memo_from_return_view, name='create_debit_memo_from_return'),
-
-    # --- NEW: Landed Cost Routes ---
-    path('landed_cost/workspace/', landed_cost_views.allocation_workspace, name='landed_cost_workspace'),
 
     # Template Routes
     path('shop_order_templates/', shop_order_templates, name='shop_order_templates'),
@@ -166,48 +169,53 @@ urlpatterns = [
 
 
     # Financials (A/P, A/R, Banking)
-    path('financials/supplier_invoices/', financials.supplier_invoices, name='supplier_invoices'),
-    path('financials/supplier_invoices/create/', financials.create_supplier_invoice, name='create_supplier_invoice'),
-    path('financials/supplier_invoice/<int:pk>/', financials.view_supplier_invoice, name='view_supplier_invoice'),
-    path('financials/supplier_invoice/<int:pk>/post/', financials.post_supplier_invoice_view, name='post_supplier_invoice'),
-    path('financials/supplier_invoice/<int:pk>/allocate_costs/', financials.allocate_landed_costs_view, name='allocate_landed_costs'),
-    path('financials/supplier_invoice/<int:pk>/delete/', financials.delete_supplier_invoice, name='delete_supplier_invoice'),
-    path('financials/supplier_invoice/<int:invoice_pk>/apply_payment/', financials.apply_payment_to_invoice, name='apply_payment_to_invoice'),
-    path('financials/customer_invoices/', financials.customer_invoices, name='customer_invoices'),
-    path('financials/customer_invoices/create/', financials.create_customer_invoice, name='create_customer_invoice'),
-    path('financials/customer_invoice/<int:pk>/', financials.view_customer_invoice, name='view_customer_invoice'),
-    path('financials/customer_invoice/<int:pk>/delete/', financials.delete_customer_invoice, name='delete_customer_invoice'),
-    path('financials/customer_invoice/<int:invoice_pk>/receive_payment/', financials.receive_payment_for_invoice, name='receive_payment_for_invoice'),
-    path('financials/banking/', financials.bank_accounts_dashboard, name='bank_accounts_dashboard'),
-    path('financials/journal/', financials.journal_entries, name='journal_entries'),
-    path('financials/journal/create/', financials.create_journal_entry, name='create_journal_entry'),
-    path('financials/journal/<int:pk>/', financials.view_journal_entry, name='view_journal_entry'),
-    path('financials/journal/<int:pk>/post/', financials.post_journal_entry, name='post_journal_entry'),
-    path('financials/fixed_assets/', financials.fixed_assets_dashboard, name='fixed_assets_dashboard'),
+    path('financials/supplier_invoices/', ap_views.supplier_invoices, name='supplier_invoices'),
+    path('financials/supplier_invoices/create/', ap_views.create_supplier_invoice, name='create_supplier_invoice'),
+    path('financials/supplier_invoice/<int:pk>/', ap_views.view_supplier_invoice, name='view_supplier_invoice'),
+    path('financials/supplier_invoice/<int:pk>/post/', ap_views.post_supplier_invoice_view, name='post_supplier_invoice'),
+    path('financials/landed_cost_invoices/', ap_views.landed_cost_invoices, name='landed_cost_invoices'),
+    path('financials/landed_cost_invoices/create/', ap_views.create_landed_cost_invoice, name='create_landed_cost_invoice'),
+    path('financials/landed_cost_invoice/<int:pk>/', ap_views.view_landed_cost_invoice, name='view_landed_cost_invoice'),
+    path('financials/landed_cost_invoice/<int:pk>/add_item/', ap_views.add_landed_cost_invoice_item, name='add_landed_cost_invoice_item'),
+    path('financials/landed_cost_invoice/<int:pk>/post/', ap_views.post_landed_cost_invoice_view, name='post_landed_cost_invoice'),
+    path('financials/supplier_invoice/<int:pk>/allocate_costs/', ap_views.allocate_landed_costs_view, name='allocate_landed_costs'),
+    path('financials/supplier_invoice/<int:pk>/delete/', ap_views.delete_supplier_invoice, name='delete_supplier_invoice'),
+    path('financials/supplier_invoice/<int:invoice_pk>/apply_payment/', ap_views.apply_payment_to_invoice, name='apply_payment_to_invoice'),
+    path('financials/customer_invoices/', ar_views.customer_invoices, name='customer_invoices'),
+    path('financials/customer_invoices/create/', ar_views.create_customer_invoice, name='create_customer_invoice'),
+    path('financials/customer_invoice/<int:pk>/', ar_views.view_customer_invoice, name='view_customer_invoice'),
+    path('financials/customer_invoice/<int:pk>/delete/', ar_views.delete_customer_invoice, name='delete_customer_invoice'),
+    path('financials/customer_invoice/<int:invoice_pk>/receive_payment/', ar_views.receive_payment_for_invoice, name='receive_payment_for_invoice'),
+    path('financials/banking/', banking_views.bank_accounts_dashboard, name='bank_accounts_dashboard'),
+    path('financials/journal/', gl_views.journal_entries, name='journal_entries'),
+    path('financials/journal/create/', gl_views.create_journal_entry, name='create_journal_entry'),
+    path('financials/journal/<int:pk>/', gl_views.view_journal_entry, name='view_journal_entry'),
+    path('financials/journal/<int:pk>/post/', gl_views.post_journal_entry, name='post_journal_entry'),
+    path('financials/fixed_assets/', gl_views.fixed_assets_dashboard, name='fixed_assets_dashboard'),
     
     # Overhead Allocation & Configuration
-    path('financials/cost_pools/', financials.cost_pools_list, name='cost_pools_list'),
-    path('financials/allocation_drivers/', financials.allocation_drivers_list, name='allocation_drivers_list'),
-    path('financials/overhead_allocation/', financials.overhead_allocation_workspace, name='overhead_allocation_workspace'),
+    path('financials/cost_pools/', config_views.cost_pools_list, name='cost_pools_list'),
+    path('financials/allocation_drivers/', config_views.allocation_drivers_list, name='allocation_drivers_list'),
+    path('financials/overhead_allocation/', overhead_views.overhead_allocation_workspace, name='overhead_allocation_workspace'),
 
     # Bank Reconciliation
-    path('financials/reconciliation/', financials.bank_reconciliations_list, name='bank_reconciliations_list'),
-    path('financials/reconciliation/create/', financials.create_bank_reconciliation, name='create_bank_reconciliation'),
-    path('financials/reconciliation/<int:pk>/manage/', financials.manage_bank_reconciliation, name='manage_bank_reconciliation'),
-    path('financials/reconciliation/<int:pk>/delete/', financials.delete_bank_reconciliation, name='delete_bank_reconciliation'),
-    path('financials/reconciliation/<int:pk>/finalize/', financials.finalize_reconciliation, name='finalize_reconciliation'),
+    path('financials/reconciliation/', banking_views.bank_reconciliations_list, name='bank_reconciliations_list'),
+    path('financials/reconciliation/create/', banking_views.create_bank_reconciliation, name='create_bank_reconciliation'),
+    path('financials/reconciliation/<int:pk>/manage/', banking_views.manage_bank_reconciliation, name='manage_bank_reconciliation'),
+    path('financials/reconciliation/<int:pk>/delete/', banking_views.delete_bank_reconciliation, name='delete_bank_reconciliation'),
+    path('financials/reconciliation/<int:pk>/finalize/', banking_views.finalize_reconciliation, name='finalize_reconciliation'),
 
     # Financial Period Management
-    path('financials/periods/', financials.fiscal_year_list, name='fiscal_year_list'),
-    path('financials/periods/create/', financials.create_fiscal_year, name='create_fiscal_year'),
-    path('financials/periods/edit/<int:pk>/', financials.edit_fiscal_year, name='edit_fiscal_year'),
-    path('financials/periods/delete/<int:pk>/', financials.delete_fiscal_year, name='delete_fiscal_year'),
-    path('financials/periods/generate/<int:year_id>/', financials.generate_monthly_periods, name='generate_monthly_periods'),
-    path('financials/periods/create_period/<int:year_id>/', financials.create_financial_period, name='create_financial_period'),
-    path('financials/periods/change_status/<int:period_id>/', financials.change_period_status, name='change_period_status'),
-    path('financials/periods/close_cockpit/<int:period_id>/', financials.close_period_cockpit, name='close_period_cockpit'),
-    path('financials/periods/close_action/<int:period_id>/', financials.close_period_action, name='close_period_action'),
-    path('financials/periods/audit_log/<int:period_id>/', financials.view_period_audit_log, name='view_period_audit_log'),
+    path('financials/periods/', period_views.fiscal_year_list, name='fiscal_year_list'),
+    path('financials/periods/create/', period_views.create_fiscal_year, name='create_fiscal_year'),
+    path('financials/periods/edit/<int:pk>/', period_views.edit_fiscal_year, name='edit_fiscal_year'),
+    path('financials/periods/delete/<int:pk>/', period_views.delete_fiscal_year, name='delete_fiscal_year'),
+    path('financials/periods/generate/<int:year_id>/', period_views.generate_monthly_periods, name='generate_monthly_periods'),
+    path('financials/periods/create_period/<int:year_id>/', period_views.create_financial_period, name='create_financial_period'),
+    path('financials/periods/change_status/<int:period_id>/', period_views.change_period_status, name='change_period_status'),
+    path('financials/periods/close_cockpit/<int:period_id>/', period_views.close_period_cockpit, name='close_period_cockpit'),
+    path('financials/periods/close_action/<int:period_id>/', period_views.close_period_action, name='close_period_action'),
+    path('financials/periods/audit_log/<int:period_id>/', period_views.view_period_audit_log, name='view_period_audit_log'),
 
     # Reports
     path('reports/trial_balance/', trial_balance, name='trial_balance'),
@@ -231,10 +239,10 @@ urlpatterns = [
     path('api/get_used_qc_sources/<int:product_pk>/', get_used_qc_sources, name='get_used_qc_sources'),
     path('api/source_log/<int:log_pk>/batches/', api.api_get_batches_for_source_log, name='api_get_batches_for_source_log'),
     path('api/available_stock/<int:product_pk>/', api_get_available_stock, name='api_get_available_stock'),
-    path('api/supplier/<int:supplier_id>/uninvoiced_receipts/', financials.api_get_uninvoiced_receipts, name='api_get_uninvoiced_receipts'),
-    path('api/supplier/<int:supplier_id>/unsettled_expenses/', financials.api_get_unsettled_expenses, name='api_get_unsettled_expenses'),
+    path('api/supplier/<int:supplier_id>/uninvoiced_receipts/', ap_views.api_get_uninvoiced_receipts, name='api_get_uninvoiced_receipts'),
+    path('api/supplier/<int:supplier_id>/unsettled_expenses/', ap_views.api_get_unsettled_expenses, name='api_get_unsettled_expenses'),
     path('api/sales_order/<int:so_id>/undispatched_items/', api.api_get_undispatched_so_items, name='api_get_undispatched_so_items'),
     path('api/product/<int:product_id>/sources/', api_get_stock_sources_for_product, name='api_get_stock_sources_for_product'),
-    path('api/sales_order/<int:so_id>/uninvoiced_dispatches/', financials.api_get_uninvoiced_dispatches, name='api_get_uninvoiced_dispatches'),
-    path('api/period_checklist/<int:period_id>/', financials.api_period_checklist_status, name='api_period_checklist_status'),
+    path('api/sales_order/<int:so_id>/uninvoiced_dispatches/', ar_views.api_get_uninvoiced_dispatches, name='api_get_uninvoiced_dispatches'),
+    path('api/period_checklist/<int:period_id>/', period_views.api_period_checklist_status, name='api_period_checklist_status'),
 ]

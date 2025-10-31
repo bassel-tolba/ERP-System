@@ -1,0 +1,147 @@
+<!-- gipcco_project/inventory/templates/inventory/partials/landed_cost_invoice_view_content.html -->
+{% load humanize %}
+{% load inventory_filters %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 mb-0" style="font-weight: 700;">فاتورة تكاليف شحن</h1>
+        <p class="text-muted mb-0">عرض تفاصيل الفاتورة رقم: <strong>{{ invoice.invoice_number }}</strong></p>
+    </div>
+    <div>
+        <a href="{% url 'inventory:landed_cost_invoices' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-right"></i> العودة إلى القائمة
+        </a>
+        {% if invoice.status == 'draft' %}
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#postInvoiceModal">
+            <i class="bi bi-check2-circle"></i> ترحيل الفاتورة
+        </button>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Invoice Items -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-list-check me-2"></i>بنود الفاتورة</h5>
+                {% if invoice.status == 'draft' %}
+                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addItemModal">
+                    <i class="bi bi-plus-lg"></i> إضافة بند
+                </button>
+                {% endif %}
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table">
+                            <tr>
+                                <th class="ps-3">نوع التكلفة</th>
+                                <th class="text-end pe-3">المبلغ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items %}
+                            <tr>
+                                <td class="ps-3">{{ item.cost_type.name }}</td>
+                                <td class="text-end pe-3 fw-bold">{{ item.amount|floatformat:3|intcomma }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="2" class="text-center p-4">لم يتم إضافة بنود بعد.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot class="table-light">
+                            <tr>
+                                <th class="ps-3 text-end">الإجمالي</th>
+                                <th class="text-end pe-3 fs-5">{{ invoice.total_amount|floatformat:3|intcomma }}</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <!-- Invoice Details -->
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-file-earmark-text me-2"></i><strong>{{ invoice.invoice_number }}</strong></h5>
+                    <span class="badge {% if invoice.status == 'paid' %}text-bg-success{% elif invoice.status == 'awaiting_payment' %}text-bg-warning{% else %}text-bg-secondary{% endif %} fs-6">
+                        {{ invoice.get_status_display }}
+                    </span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="mb-1 text-muted">المورد</p>
+                <p class="fw-bold fs-5">{{ invoice.vendor.name }}</p>
+                <hr>
+                <p class="mb-1 text-muted">تاريخ الفاتورة</p>
+                <p class="fw-bold">{{ invoice.invoice_date|date:"Y-m-d" }}</p>
+                <hr>
+                <p class="mb-1 text-muted">أمر الشراء المرتبط</p>
+                {% if invoice.purchase_order %}
+                <a href="{% url 'inventory:view_purchase_order' pk=invoice.purchase_order.id %}" class="fw-bold">{{ invoice.purchase_order.po_number }}</a>
+                {% else %}
+                <p class="text-muted">غير مرتبط</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Item Modal -->
+<div class="modal fade" id="addItemModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="{% url 'inventory:add_landed_cost_invoice_item' pk=invoice.id %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">إضافة بند فاتورة</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="cost_type_id" class="form-label">نوع التكلفة</label>
+                        <select name="cost_type_id" id="cost_type_id" class="form-select" required>
+                            {% for ct in cost_types %}<option value="{{ ct.id }}">{{ ct.name }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="amount" class="form-label">المبلغ</label>
+                        <input type="number" step="0.001" name="amount" id="amount" class="form-control" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-primary">إضافة</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Post Confirmation Modal -->
+<div class="modal fade" id="postInvoiceModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">تأكيد الترحيل</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>هل أنت متأكد من ترحيل الفاتورة رقم <strong>{{ invoice.invoice_number }}</strong> إلى الحسابات العامة؟</p>
+                <p class="text-danger">لا يمكن التراجع عن هذا الإجراء.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <form method="post" action="{% url 'inventory:post_landed_cost_invoice' pk=invoice.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success">نعم، قم بالترحيل</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

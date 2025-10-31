@@ -297,6 +297,12 @@ class PurchaseOrderItem(models.Model):
     withholding_tax_rate = models.DecimalField(
         max_digits=5, decimal_places=2, default=Decimal('0.00'), verbose_name=_("Withholding Tax Rate (e.g., 0.01 for 1%)")
     )
+    # --- NEW: For percentage-based allocation of PO-level landed costs ---
+    landed_cost_allocation_percentage = models.DecimalField(
+        max_digits=7, decimal_places=4, default=Decimal('0.0000'),
+        verbose_name=_("Landed Cost Allocation %"),
+        help_text=_("The percentage of the PO's total landed costs to allocate to this line item.")
+    )
     is_closed = models.BooleanField(
         default=False,
         verbose_name=_("Is Closed"),

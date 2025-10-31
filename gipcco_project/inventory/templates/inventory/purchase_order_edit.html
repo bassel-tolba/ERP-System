@@ -6,5 +6,7 @@
   {% include "inventory/partials/purchase_order_edit_content.html" %}
 
   {{ products|json_script:"products-data" }}
+  {{ landed_cost_types|json_script:"landed-cost-types-data" }}
   {{ po_items_data|json_script:"po-items-data" }}
+  {{ po_landed_costs_data|json_script:"po-landed-costs-data" }}
 {% endblock content %}

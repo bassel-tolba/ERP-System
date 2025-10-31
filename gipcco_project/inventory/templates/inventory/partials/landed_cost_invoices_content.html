@@ -1,0 +1,80 @@
+<!-- gipcco_project/inventory/templates/inventory/partials/landed_cost_invoices_content.html -->
+{% load inventory_filters %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0" style="font-weight: 700;">فواتير تكاليف الشحن</h1>
+    <a href="{% url 'inventory:create_landed_cost_invoice' %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> إنشاء فاتورة تكاليف شحن
+    </a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header">
+        <h5 class="mb-0">تصفية الفواتير</h5>
+    </div>
+    <div class="card-body">
+        <form method="get" action="{% url 'inventory:landed_cost_invoices' %}">
+            <div class="row">
+                <div class="col-md-4">
+                    <label for="vendor" class="form-label">المورد</label>
+                    <select name="vendor" id="vendor" class="form-select searchable-select">
+                        <option value="">كل الموردين</option>
+                        {% for vendor in vendors %}
+                        <option value="{{ vendor.id }}" {% if vendor.id == selected_vendor %}selected{% endif %}>{{ vendor.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="status" class="form-label">الحالة</label>
+                    <select name="status" id="status" class="form-select">
+                        <option value="">كل الحالات</option>
+                        {% for value, display in statuses %}
+                        <option value="{{ value }}" {% if value == selected_status %}selected{% endif %}>{{ display }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-secondary w-100">تطبيق التصفية</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table">
+                    <tr>
+                        <th class="ps-3">رقم الفاتورة</th>
+                        <th>المورد</th>
+                        <th>تاريخ الفاتورة</th>
+                        <th class="text-center">الحالة</th>
+                        <th class="text-end">المبلغ الإجمالي</th>
+                        <th class="text-center pe-3">الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invoice in invoices %}
+                    <tr>
+                        <td class="ps-3 font-monospace"><strong>{{ invoice.invoice_number }}</strong></td>
+                        <td>{{ invoice.vendor.name }}</td>
+                        <td>{{ invoice.invoice_date|date:"Y-m-d" }}</td>
+                        <td class="text-center">
+                            <span class="badge {% if invoice.status == 'paid' %}text-bg-success{% elif invoice.status == 'awaiting_payment' %}text-bg-warning{% else %}text-bg-secondary{% endif %}">
+                                {{ invoice.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="text-end">{{ invoice.total_amount|floatformat:3 }}</td>
+                        <td class="text-center pe-3">
+                            <a href="{% url 'inventory:view_landed_cost_invoice' pk=invoice.id %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i> عرض</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center p-4">لا توجد فواتير تطابق معايير البحث.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

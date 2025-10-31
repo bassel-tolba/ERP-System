@@ -76,28 +76,32 @@
                         <td class="text-end pe-3">
                             <button 
                                 type="button" 
-                                class="btn btn-sm btn-outline-secondary edit-record-btn" 
+                                class="btn btn-sm btn-outline-secondary view-record-btn" 
                                 data-bs-toggle="modal" 
-                                data-bs-target="#editRecordModal"
+                                data-bs-target="#viewRecordModal"
                                 data-log-id="{{ log.id }}"
-                                data-product-id="{{ log.product.id }}"
-                                data-company-id="{{ log.company.id }}"
+                                data-product-name="{{ log.product.name }}"
+                                data-product-code="{{ log.product.code }}"
+                                data-company-name="{{ log.company.name|default:'N/A' }}"
                                 data-quantity="{{ log.quantity|floatformat:3 }}"
-                                data-entry-date="{{ log.timestamp|date:'Y-m-d' }}"
+                                data-unit="{{ log.product.unit }}"
+                                data-entry-date="{{ log.timestamp|date:'Y-m-d H:i' }}"
+                                data-release-date="{{ log.release_timestamp|date:'Y-m-d H:i'|default:'N/A' }}"
+                                data-status-display="{{ log.get_status_display }}"
+                                data-qc-no="{{ log.qc_no|default:'N/A' }}"
                                 data-base-unit-price="{{ log.base_unit_price|floatformat:3 }}"
                                 data-vat-amount="{{ log.vat_amount|floatformat:3 }}"
-                                data-vat-treatment="{{ log.vat_treatment }}"
-                                data-tag-ids="{% for tag in log.tags.all %}{{ tag.id }},{% endfor %}"
-                                data-po-item-id="{{ log.po_item.id|default:'' }}"
-                                data-po-id="{{ log.po_item.purchase_order.id|default:'' }}"
-                                data-supplier-id="{{ log.po_item.purchase_order.supplier.id|default:'' }}"
+                                data-wht-amount="{{ log.withholding_tax_amount|floatformat:3 }}"
+                                data-vat-treatment-display="{{ log.get_vat_treatment_display }}"
+                                data-po-number="{{ log.po_item.purchase_order.po_number|default:'N/A' }}"
+                                data-tags="{% for tag in log.tags.all %}{{ tag.name }},{% endfor %}"
                             >
-                                <i class="bi bi-pencil-square"></i> تعديل
+                                <i class="bi bi-eye"></i> عرض
                             </button>
                             <button type="button" class="btn btn-sm btn-outline-info history-btn" data-log-id="{{ log.id }}">
                                 <i class="bi bi-clock-history"></i> سجل
                             </button>
-                            <button type="button" class="btn btn-sm btn-outline-danger void-btn" data-log-id="{{ log.id }}" data-log-info="{{ log.product.name }} (QC: {{ log.qc_no|default:'N/A' }})">
+                            <button type="button" class="btn btn-sm btn-outline-danger void-btn" data-bs-toggle="modal" data-bs-target="#voidRecordModal" data-log-id="{{ log.id }}" data-log-info="{{ log.product.name }} (QC: {{ log.qc_no|default:'N/A' }})">
                                 <i class="bi bi-trash"></i> إلغاء
                             </button>
                         </td>
@@ -173,98 +177,72 @@
     </div>
 </div>
 
-<!-- SINGLE Edit Modal -->
-<div class="modal fade" id="editRecordModal" tabindex="-1">
+<!-- NEW View Record Modal -->
+<div class="modal fade" id="viewRecordModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">تعديل بيانات الاستلام المبدئي</h5>
+                <h5 class="modal-title">عرض تفاصيل السجل</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form method="post" action="" id="editRecordForm">
-                {% csrf_token %}
-                <div class="modal-body">
-                    <div class="alert alert-info"><strong>ملاحظة:</strong> هذا النموذج لتعديل بيانات الاستلام الأساسية (كمية، سعر، مورد). للإفراج عن المواد من الفحص، يرجى استخدام صفحة <a href="{% url 'inventory:quarantine_list' %}">إدارة المواد تحت الفحص</a>.</div>
-                    <div class="form-check form-switch mb-3">
-                        <input class="form-check-input" type="checkbox" role="switch" id="editLinkToPoCheck">
-                        <label class="form-check-label" for="editLinkToPoCheck">ربط بسجل أمر شراء؟</label>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <dl class="row">
+                            <dt class="col-sm-4">المنتج</dt>
+                            <dd class="col-sm-8" id="view-product-name"></dd>
+
+                            <dt class="col-sm-4">كود المنتج</dt>
+                            <dd class="col-sm-8 font-monospace" id="view-product-code"></dd>
+
+                            <dt class="col-sm-4">المورد</dt>
+                            <dd class="col-sm-8" id="view-company-name"></dd>
+                            
+                            <dt class="col-sm-4">أمر الشراء</dt>
+                            <dd class="col-sm-8" id="view-po-number"></dd>
+
+                            <dt class="col-sm-4">الكمية المستلمة</dt>
+                            <dd class="col-sm-8" id="view-quantity"></dd>
+                            
+                            <dt class="col-sm-4">الوسوم</dt>
+                            <dd class="col-sm-8" id="view-tags"></dd>
+                        </dl>
                     </div>
-                    <div id="edit-po-fields-container" class="border p-3 rounded mb-3 bg-light-subtle" style="display: none;">
-                         <div class="mb-3">
-                            <label for="edit_po_supplier_id" class="form-label fw-bold">1. اختر المورد</label>
-                            <select id="edit_po_supplier_id">
-                                <option value="">-- اختر مورد --</option>
-                                {% for c in all_companies %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
-                            </select>
-                        </div>
-                         <div class="mb-3">
-                            <label for="edit_purchase_order_id" class="form-label fw-bold">2. اختر أمر الشراء</label>
-                            <select id="edit_purchase_order_id" disabled>
-                                <option value="">-- اختر مورد أولاً --</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="edit_po_item_id" class="form-label fw-bold">3. اختر المادة</label>
-                            <select id="edit_po_item_id" name="po_item_id" disabled>
-                                <option value="">-- اختر أمر شراء أولاً --</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">المنتج</label>
-                        <select name="product_id" id="editProductId" required>
-                            <option value=""></option>
-                            {% for p in all_products %}<option value="{{ p.id }}">{{ p.name }} ({{ p.code }})</option>{% endfor %}
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">الشركة</label>
-                        <select name="company_id" id="editCompanyId" required>
-                            <option value=""></option>
-                            {% for c in all_companies %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
-                        </select>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <label class="form-label fw-bold">الكمية</label>
-                            <input type="number" step="any" class="form-control" name="quantity" id="editQuantity" required>
-                        </div>
-                    </div>
-                    <div class="mb-3" id="edit-manual-price-container">
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <label for="editBaseUnitPrice" class="form-label fw-bold">سعر الوحدة (قبل الضريبة)</label>
-                                <input type="number" step="0.001" class="form-control" name="base_unit_price" id="editBaseUnitPrice" required placeholder="0.000"/>
-                            </div>
-                             <div class="col-md-4">
-                                <label for="editVatAmount" class="form-label fw-bold">إجمالي مبلغ ضريبة ق.م.</label>
-                                <input type="number" step="0.001" class="form-control" name="vat_amount" id="editVatAmount" required placeholder="0.000"/>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="editVatTreatment" class="form-label fw-bold">معالجة الضريبة</label>
-                                <select class="form-select" id="editVatTreatment" name="vat_treatment">
-                                    {% for value, display in vat_treatment_choices %}
-                                    <option value="{{ value }}">{{ display }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">الوسوم</label>
-                        <select id="editTags" name="tags" multiple disabled><option value="">اختر منتج</option></select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">تاريخ الاستلام الأصلي</label>
-                        <input type="text" class="form-control datepicker" name="entry_date" id="editEntryDate" required>
+                    <div class="col-md-4">
+                        <dl>
+                            <dt>الحالة</dt>
+                            <dd id="view-status-display"></dd>
+
+                            <dt>رقم الفحص (QC)</dt>
+                            <dd id="view-qc-no"></dd>
+                            
+                            <dt>تاريخ الاستلام</dt>
+                            <dd id="view-entry-date"></dd>
+
+                            <dt>تاريخ الإفراج</dt>
+                            <dd id="view-release-date"></dd>
+                        </dl>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
-                    <button type="submit" class="btn btn-primary"><i class="bi bi-check2-circle"></i> حفظ التغييرات</button>
-                </div>
-            </form>
+                <hr>
+                <h5>البيانات المالية</h5>
+                <dl class="row">
+                    <dt class="col-sm-4">سعر الوحدة الأساسي</dt>
+                    <dd class="col-sm-8" id="view-base-unit-price"></dd>
+
+                    <dt class="col-sm-4">مبلغ ضريبة ق.م.</dt>
+                    <dd class="col-sm-8" id="view-vat-amount"></dd>
+
+                    <dt class="col-sm-4">مبلغ ضريبة المنبع</dt>
+                    <dd class="col-sm-8" id="view-wht-amount"></dd>
+
+                    <dt class="col-sm-4">معالجة الضريبة</dt>
+                    <dd class="col-sm-8" id="view-vat-treatment-display"></dd>
+                </dl>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+            </div>
         </div>
     </div>
 </div>

@@ -3,6 +3,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from .inventory_management import PurchaseOrderItem
 
 # ==============================================================================
 #  PURCHASING & RETURNS MODELS
@@ -129,8 +130,8 @@ class LandedCostInvoice(models.Model):
     """
     class Status(models.TextChoices):
         DRAFT = 'draft', _('Draft')
-        AWAITING_ALLOCATION = 'awaiting_allocation', _('Awaiting Allocation')
-        FULLY_ALLOCATED = 'fully_allocated', _('Fully Allocated')
+        AWAITING_PAYMENT = 'awaiting_payment', _('Awaiting Payment')
+        PAID = 'paid', _('Paid')
 
     vendor = models.ForeignKey(
         'Company', on_delete=models.PROTECT, related_name='landed_cost_invoices',
@@ -146,6 +147,11 @@ class LandedCostInvoice(models.Model):
     journal_entry = models.ForeignKey(
         'JournalEntry', on_delete=models.SET_NULL, null=True, blank=True,
         related_name='+', verbose_name=_("Journal Entry")
+    )
+    # --- NEW: Optional link to PO for variance calculation ---
+    purchase_order = models.ForeignKey(
+        'PurchaseOrder', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='landed_cost_invoices', verbose_name=_("Related Purchase Order")
     )
 
     class Meta:
@@ -181,30 +187,28 @@ class LandedCostInvoiceItem(models.Model):
         return f"{self.cost_type.name}: {self.amount}"
 
 
-class LandedCostAllocation(models.Model):
+class PurchaseOrderLandedCost(models.Model):
     """
-    An explicit link showing how much of a LandedCostInvoiceItem was allocated
-    to a specific InventoryLog (receipt).
+    Stores an estimated landed cost for an entire Purchase Order.
+    This is the core of the NetSuite-style estimation-first approach.
     """
-    landed_cost_item = models.ForeignKey(
-        LandedCostInvoiceItem, on_delete=models.CASCADE, related_name='allocations',
-        verbose_name=_("Landed Cost Item")
+    purchase_order = models.ForeignKey(
+        'PurchaseOrder', on_delete=models.CASCADE, related_name='landed_costs',
+        verbose_name=_("Purchase Order")
     )
-    receipt_log = models.ForeignKey(
-        'InventoryLog', on_delete=models.CASCADE, related_name='landed_cost_allocations',
-        verbose_name=_("Inventory Receipt")
+    cost_type = models.ForeignKey(
+        LandedCostType, on_delete=models.PROTECT,
+        verbose_name=_("Landed Cost Type")
     )
-    allocated_amount = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Allocated Amount"))
-    allocation_date = models.DateTimeField(auto_now_add=True, verbose_name=_("Allocation Date"))
-    journal_entry = models.ForeignKey(
-        'JournalEntry', on_delete=models.SET_NULL, null=True, blank=True,
-        related_name='+', verbose_name=_("Allocation Journal Entry")
+    estimated_amount = models.DecimalField(
+        max_digits=14, decimal_places=3, verbose_name=_("Estimated Amount")
     )
 
     class Meta:
-        db_table = 'landed_cost_allocations'
-        verbose_name = _("Landed Cost Allocation")
-        verbose_name_plural = _("Landed Cost Allocations")
+        db_table = 'po_landed_costs'
+        verbose_name = _("PO Landed Cost Estimate")
+        verbose_name_plural = _("PO Landed Cost Estimates")
+        unique_together = ('purchase_order', 'cost_type')
 
     def __str__(self):
-        return f"Allocated {self.allocated_amount} to Receipt #{self.receipt_log.id}"
+        return f"Estimate for {self.cost_type.name}: {self.estimated_amount}"

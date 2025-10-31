@@ -272,7 +272,7 @@ def api_get_po_items(request: HttpRequest, po_id: int) -> JsonResponse:
     po_items = PurchaseOrderItem.objects.filter(
         purchase_order_id=po_id
     ).select_related('product').prefetch_related('receipts').annotate(
-        total_received=Coalesce(Sum('receipts__quantity'), 0.0, output_field=FloatField())
+        total_received=Coalesce(Sum('receipts__quantity', filter=~Q(receipts__status=InventoryLog.Status.VOIDED)), 0.0, output_field=FloatField())
     ).annotate(
         quantity_remaining=F('quantity_ordered') - F('total_received')
     ).filter(quantity_remaining__gt=0.001)

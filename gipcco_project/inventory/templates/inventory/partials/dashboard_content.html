@@ -121,28 +121,46 @@
           <div id="manual-price-container" class="mb-3">
               <div class="row g-3">
                   <div class="col-md-4">
-                      <label for="base_unit_price" class="form-label fw-bold">سعر الوحدة (قبل الضريبة)</label>
+                      <label for="base_unit_price" class="form-label fw-bold">سعر الوحدة</label>
                       <input type="number" step="0.001" class="form-control" id="base_unit_price" name="base_unit_price" placeholder="0.000" required/>
                   </div>
                   <div class="col-md-4">
-                      <label for="vat_amount" class="form-label fw-bold">إجمالي مبلغ ضريبة ق.م.</label>
-                      <input type="number" step="0.001" class="form-control" id="vat_amount" name="vat_amount" placeholder="0.000" required/>
+                      <label for="vat_rate" class="form-label fw-bold">نسبة ضريبة ق.م (%)</label>
+                      <input type="number" step="0.01" class="form-control" id="vat_rate" value="14.00" required/>
                   </div>
                   <div class="col-md-4">
-                      <label for="withholding_tax_amount" class="form-label fw-bold">مبلغ ضريبة المنبع</label>
-                      <input type="number" step="0.001" class="form-control" id="withholding_tax_amount" name="withholding_tax_amount" placeholder="0.000"/>
+                      <label for="withholding_tax_rate" class="form-label fw-bold">نسبة ضريبة المنبع (%)</label>
+                      <input type="number" step="0.01" class="form-control" id="withholding_tax_rate" value="1.00"/>
                   </div>
               </div>
-              <div class="row g-3 mt-2">
-                  <div class="col-md-12">
-                      <label for="vat_treatment" class="form-label fw-bold">معالجة الضريبة</label>
-                      <select class="form-select" id="vat_treatment" name="vat_treatment">
-                          {% for value, display in vat_treatment_choices %}
-                          <option value="{{ value }}">{{ display }}</option>
-                          {% endfor %}
-                      </select>
+              <!-- Hidden fields for calculated totals that will be submitted -->
+              <input type="hidden" id="vat_amount" name="vat_amount" value="0">
+              <input type="hidden" id="withholding_tax_amount" name="withholding_tax_amount" value="0">
+              
+              <!-- Display for calculated totals -->
+              <div class="row g-3 mt-2 pt-2 border-top">
+                  <div class="col-4">
+                      <p class="mb-1 text-muted">مبلغ الضريبة</p>
+                      <p class="fw-bold fs-5 mb-0" id="calculated-vat-display">0.000</p>
+                  </div>
+                  <div class="col-4">
+                      <p class="mb-1 text-muted">مبلغ الخصم</p>
+                      <p class="fw-bold fs-5 mb-0" id="calculated-wht-display">0.000</p>
+                  </div>
+                  <div class="col-4">
+                      <p class="mb-1 text-muted">الإجمالي للمورد</p>
+                      <p class="fw-bold fs-5 mb-0 text-primary" id="calculated-total-display">0.000</p>
                   </div>
               </div>
+          </div>
+
+          <div class="mb-3">
+              <label for="vat_treatment" class="form-label fw-bold">معالجة الضريبة</label>
+              <select class="form-select" id="vat_treatment" name="vat_treatment">
+                  {% for value, display in vat_treatment_choices %}
+                  <option value="{{ value }}">{{ display }}</option>
+                  {% endfor %}
+              </select>
           </div>
 
           <div class="mb-3">

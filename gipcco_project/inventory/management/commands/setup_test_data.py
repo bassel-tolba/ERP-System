@@ -17,7 +17,7 @@ from inventory.models import (
     GeneralAccountingSettings, ProductTypeAccountingSettings,
     ShopOrderTemplate, Batch, FinishedProductReceipt,
     BankAccount, Employee, CostPool, AllocationDriver,
-    InventoryLog, PurchaseOrder, PurchaseOrderItem, BatchItem,
+    InventoryLog, PurchaseOrder, PurchaseOrderItem, PurchaseOrderLandedCost, BatchItem,
     SalesOrder, SalesOrderItem, FinishedProductDispatch,
     SupplierInvoice, SupplierInvoiceItem, Payment, PaymentApplication,
     CustomerInvoice, CustomerInvoiceItem, CustomerPaymentApplication,
@@ -27,7 +27,7 @@ from inventory.models import (
 )
 from inventory.services.adjusting_entries_service import run_monthly_accruals
 from inventory.services.sales_return_service import process_inspected_return, create_credit_memo_from_return
-from inventory.services import batch_service, purchasing_service, production_returns_service
+from inventory.services import batch_service, purchasing_service, production_returns_service, accounting_service
 
 # A dictionary to hold created objects for easy reference
 # This avoids querying the DB repeatedly
@@ -114,6 +114,9 @@ def create_chart_of_accounts():
     create_account('506', 'إعادة تقييم المخزون', Account.AccountType.EXPENSE, '500') # Inventory Revaluation
     create_account('1020407', 'تسوية تكاليف شحن', Account.AccountType.ASSET, '10204') # Landed Costs Clearing
     create_account('20207', 'تسوية مرتجعات موردين', Account.AccountType.LIABILITY, '202') # Purchase Returns Clearing
+    # --- NEW LANDED COST (NETSUITE) ACCOUNTS ---
+    create_account('20208', 'تكاليف شحن مستحقة', Account.AccountType.LIABILITY, '202') # Accrued Landed Costs
+    create_account('507', 'فروقات تكاليف الشحن', Account.AccountType.EXPENSE, '500') # Landed Cost Variance
 
     CONTEXT['accounts'] = accounts
     return accounts
@@ -174,7 +177,7 @@ class Command(BaseCommand):
             name="October 2025",
             defaults={
                 'start_date': date(2025, 10, 1),
-                'end_date': date(2025, 10, 30),
+                'end_date': date(2025, 11, 30),
                 'status': FinancialPeriod.Status.OPEN
             }
         )
@@ -205,7 +208,9 @@ class Command(BaseCommand):
             landed_costs_clearing_account=accounts['1020407'],
             purchase_returns_clearing_account=accounts['20207'],
             manufacturing_variance_account=accounts['505'],
-            inventory_revaluation_account=accounts['506']
+            inventory_revaluation_account=accounts['506'],
+            accrued_landed_costs_account=accounts['20208'],
+            landed_cost_variance_account=accounts['507']
         )
         ProductTypeAccountingSettings.objects.create(
             product_type=Product.ProductType.RAW_MATERIAL,
@@ -770,27 +775,60 @@ class Command(BaseCommand):
         purchasing_service.update_po_status_after_receipt(log_partial.id, is_final_receipt=True)
         self.stdout.write("   - Created a partially received PO and manually closed the line short.")
 
-        # Landed Cost Workflow
-        self.stdout.write("   - Starting 3rd-Party Landed Cost Workflow...")
-        from inventory.models import LandedCostInvoice, LandedCostInvoiceItem, LandedCostType
-        lc_inv = LandedCostInvoice.objects.create(
-            vendor=CONTEXT['suppliers']['shipping'],
-            invoice_number="LC-DEMO-001",
-            invoice_date=date(2025, 9, 7),
-            total_amount=Decimal("250.000")
+        # Landed Cost Workflow (NetSuite Style)
+        self.stdout.write("   - Starting NetSuite-Style Landed Cost Workflow...")
+        from inventory.models import LandedCostType, PurchaseOrderItemLandedCost, LandedCostInvoice
+        
+        # 1. Create a PO with an estimated landed cost
+        freight_cost_type, _ = LandedCostType.objects.get_or_create(name="Freight")
+        po_lc, _ = PurchaseOrder.objects.get_or_create(
+            po_number="PO-DEMO-LC-01",
+            defaults={
+                'supplier': CONTEXT['suppliers']['packaging'],
+                'order_date': date(2025, 9, 15)
+            }
         )
-        freight_cost, _ = LandedCostType.objects.get_or_create(name="Freight")
-        LandedCostInvoiceItem.objects.create(landed_cost_invoice=lc_inv, cost_type=freight_cost, amount=lc_inv.total_amount)
-        purchasing_service.post_landed_cost_invoice(lc_inv)
-        self.stdout.write("     - Created and posted a landed cost invoice from a shipping vendor.")
+        po_item_lc, _ = PurchaseOrderItem.objects.get_or_create(
+            purchase_order=po_lc,
+            product=CONTEXT['products']['pvc_bag'],
+            defaults={
+                'quantity_ordered': 5000.0,
+                'base_price_per_unit': Decimal("1.250"),
+                'vat_rate': Decimal("0.0"), 'withholding_tax_rate': Decimal("0.0")
+            }
+        )
+        PurchaseOrderItemLandedCost.objects.get_or_create(
+            purchase_order_item=po_item_lc,
+            cost_type=freight_cost_type,
+            defaults={'estimated_amount': Decimal("500.000")} # Estimate $0.10 per unit
+        )
+        self.stdout.write("     - Created PO with estimated freight cost.")
 
-        # Allocate this cost to the first saline receipt
-        purchasing_service.allocate_landed_costs_from_invoice(
-            landed_cost_invoice_ids=[lc_inv.id],
-            receipt_log_ids=[CONTEXT['log1'].id],
-            user=CONTEXT['user']
+        # 2. Receive the goods, which will trigger capitalization of the estimate
+        log_lc, _ = InventoryLog.objects.get_or_create(
+            po_item=po_item_lc,
+            defaults={
+                'product': CONTEXT['products']['pvc_bag'],
+                'company': CONTEXT['suppliers']['packaging'],
+                'quantity': 5000.0,
+                'timestamp': timezone.make_aware(timezone.datetime(2025, 9, 20, 10, 0, 0)),
+                'release_timestamp': timezone.make_aware(timezone.datetime(2025, 9, 20, 11, 0, 0)),
+                'status': InventoryLog.Status.RELEASED,
+                'base_unit_price': Decimal("1.250")
+            }
         )
-        self.stdout.write("     - Allocated the shipping cost to the saline inventory receipt.")
+        self.stdout.write("     - Received goods, capitalizing item cost + estimated freight.")
+
+        # 3. Create and post the actual landed cost bill from the shipping vendor
+        lc_invoice = LandedCostInvoice.objects.create(
+            vendor=CONTEXT['suppliers']['shipping'],
+            invoice_number="LC-ACTUAL-001",
+            invoice_date=date(2025, 9, 22),
+            total_amount=Decimal("550.000"), # Actual cost is $50 higher than estimate
+            purchase_order=po_lc
+        )
+        purchasing_service.post_landed_cost_invoice(lc_invoice, CONTEXT['user'])
+        self.stdout.write("     - Posted actual landed cost bill, clearing accrual and booking variance.")
 
 
     def create_opening_balances(self):

@@ -7,4 +7,28 @@
 - `JournalEntry`: Represents a single journal entry, containing multiple lines that must balance.
 - `JournalEntryLine`: Represents a single line within a journal entry, either a debit or a credit to a specific account.
 - `ProductTypeAccountingSettings`: Configures default GL accounts for different product types.
-- `GeneralAccountingSettings`: A singleton model to hold system-wide accounting configuration, preventing hardcoded account codes. Now includes a `sales_returns_clearing_account`, a `goods_received_not_invoiced_account` (GRNI), and a `purchase_price_variance_account` (PPV).
+- `GeneralAccountingSettings`: A singleton model to hold system-wide accounting configuration, preventing hardcoded account codes. It includes:
+  - `accounts_payable`
+  - `accounts_receivable`
+  - `vat_receivable`
+  - `vat_payable`
+  - `wip_inventory`
+  - `withholding_tax_payable`
+  - `finished_goods_inventory`
+  - `inventory_adjustment_loss_account`
+  - `inventory_adjustment_gain_account`
+  - `purchase_returns_clearing_account`
+  - `employee_advances_receivable`
+  - `customer_deposits_account`
+  - `sales_returns_account`
+  - `sales_returns_clearing_account`
+  - `prepaid_expenses_account`
+  - `accrued_expenses_account`
+  - `damaged_goods_expense_account`
+  - `goods_received_not_invoiced_account` (GRNI)
+  - `purchase_price_variance_account` (PPV)
+  - `landed_costs_clearing_account`
+  - `manufacturing_variance_account`
+  - `inventory_revaluation_account`
+  - `accrued_landed_costs_account`
+  - `landed_cost_variance_account`

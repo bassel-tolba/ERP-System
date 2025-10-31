@@ -8,8 +8,8 @@ from django.contrib.contenttypes.models import ContentType
 
 from .models import (
     PurchaseOrder, PurchaseOrderItem, InventoryLog, PurchaseReturn,
-    PurchaseReturnItem, SupplierDebitMemo, JournalEntry, JournalEntryLine,
-    LandedCostInvoice, LandedCostType, LandedCostAllocation, Product, LandedCostInvoiceItem,
+    PurchaseReturnItem, SupplierDebitMemo, JournalEntry, JournalEntryLine,  # Add JournalEntryLine
+    LandedCostInvoice, LandedCostType, Product, LandedCostInvoiceItem,
     SupplierInvoice
 )
 from .services import purchasing_service
@@ -36,7 +36,8 @@ class PurchasingServiceTestCase(AccountingServiceBaseTestCase):
         po = purchasing_service.create_purchase_order(
             user=self.user,
             po_data={'po_number': 'PO-VALIDATE', 'supplier_id': self.supplier.id, 'order_date': '2025-09-05'},
-            items_data=[{'product_id': self.product.id, 'quantity': 100, 'base_price_per_unit': 10, 'vat_rate': 0.14, 'withholding_tax_rate': 0.01}]
+            items_data=[{'product_id': self.product.id, 'quantity': 100, 'base_price_per_unit': 10, 'vat_rate': 0.14, 'withholding_tax_rate': 0.01}],
+            landed_costs_data=[]
         )
         receipt = self.create_inventory_log(self.supplier, self.product, 100, 10, po.items.first())
 
@@ -91,7 +92,8 @@ class PurchasingServiceTestCase(AccountingServiceBaseTestCase):
         po = purchasing_service.create_purchase_order(
             user=self.user,
             po_data={'po_number': 'PO-RETURN-WF', 'supplier_id': self.supplier.id, 'order_date': '2025-09-05'},
-            items_data=[{'product_id': self.product.id, 'quantity': 50, 'base_price_per_unit': 20, 'vat_rate': 0, 'withholding_tax_rate': 0}]
+            items_data=[{'product_id': self.product.id, 'quantity': 50, 'base_price_per_unit': 20, 'vat_rate': 0, 'withholding_tax_rate': 0}],
+            landed_costs_data=[]
         )
         receipt = self.create_inventory_log(self.supplier, self.product, 50, 20, po.items.first())
         return_qty = 30
@@ -177,7 +179,8 @@ class PurchasingServiceTestCase(AccountingServiceBaseTestCase):
             items_data=[{
                 'product_id': self.product.id, 'quantity': po_qty, 'base_price_per_unit': po_price,
                 'vat_rate': vat_rate, 'withholding_tax_rate': wht_rate
-            }]
+            }],
+            landed_costs_data=[]
         )
         receipt = self.create_inventory_log(self.supplier, self.product, po_qty, po_price, po.items.first())
 
@@ -226,7 +229,11 @@ class PurchasingServiceTestCase(AccountingServiceBaseTestCase):
 
         # Helper to get total amount for an account and entry type in the JE
         def get_total_for_account(account, entry_type):
-            return je.lines.filter(account=account, entry_type=entry_type).aggregate(total=Sum('amount'))['total'] or Decimal('0.000')
+            # FIX: Use lowercase 'debit' and 'credit' to match database values
+            return je.lines.filter(
+                account=account, 
+                entry_type=entry_type.lower()  # Convert DEBIT -> debit
+            ).aggregate(total=Sum('amount'))['total'] or Decimal('0.000')
 
         # Assertions
         self.assertEqual(get_total_for_account(self.general_settings.goods_received_not_invoiced_account, 'DEBIT'), grni_value)
@@ -244,120 +251,129 @@ class PurchasingServiceTestCase(AccountingServiceBaseTestCase):
             self.assertEqual(get_total_for_account(self.general_settings.vat_receivable, 'CREDIT'), abs(vat_variance))
 
 
-    def test_landed_cost_workflow(self):
+    def test_full_landed_cost_workflow_with_proration_and_variance(self):
         """
-        Tests the full 2-step landed cost workflow, allocating a single cost
-        across TWO different receipts proportionally by value.
+        Tests the complete, refactored landed cost workflow:
+        1.  PO is created with a total estimated landed cost, allocated by percentage.
+        2.  A partial receipt correctly prorates and capitalizes its share of the cost.
+        3.  A final receipt capitalizes the remaining share.
+        4.  A Landed Cost Invoice is posted with a different actual cost.
+        5.  The variance is calculated correctly and posted to a variance account.
+        6.  The Accrued Landed Costs account is fully cleared for the transaction.
         """
-        # Step 1: Create base data - two receipts for different products
-        product2 = self.create_product("RM-PUR-02", "Second Raw Material", Product.ProductType.RAW_MATERIAL)
+        # 1. --- Setup: PO with two items and one PO-level landed cost ---
+        product1 = self.create_product("RM-LC-01", "LC Test Product 1")
+        product2 = self.create_product("RM-LC-02", "LC Test Product 2")
+        freight_cost_type = LandedCostType.objects.create(name="Ocean Freight")
+
+        po_price1 = Decimal('10.000')
+        po_qty1 = 100  # Total value = 1000
+        po_price2 = Decimal('50.000')
+        po_qty2 = 20   # Total value = 1000
+        
+        # Total PO value = 2000. We'll allocate landed costs 50/50 based on value.
+        total_estimated_freight = Decimal('200.000')
+
         po = purchasing_service.create_purchase_order(
             user=self.user,
-            po_data={'po_number': 'PO-LC-WF', 'supplier_id': self.supplier.id, 'order_date': '2025-09-05'},
+            po_data={'po_number': 'PO-LC-FULL', 'supplier_id': self.supplier.id, 'order_date': '2025-09-25'},
             items_data=[
-                {'product_id': self.product.id, 'quantity': 200, 'base_price_per_unit': 100, 'vat_rate': 0, 'withholding_tax_rate': 0},
-                {'product_id': product2.id, 'quantity': 50, 'base_price_per_unit': 300, 'vat_rate': 0, 'withholding_tax_rate': 0}
+                {
+                    'product_id': product1.id, 'quantity': po_qty1, 'base_price_per_unit': po_price1,
+                    'vat_rate': 0, 'withholding_tax_rate': 0, 'landed_cost_allocation_percentage': '50.0'
+                },
+                {
+                    'product_id': product2.id, 'quantity': po_qty2, 'base_price_per_unit': po_price2,
+                    'vat_rate': 0, 'withholding_tax_rate': 0, 'landed_cost_allocation_percentage': '50.0'
+                }
+            ],
+            landed_costs_data=[
+                {'cost_type_id': freight_cost_type.id, 'estimated_amount': total_estimated_freight}
             ]
         )
-        receipt1 = self.create_inventory_log(self.supplier, self.product, 200, 100, po.items.all()[0])
-        receipt2 = self.create_inventory_log(self.supplier, product2, 50, 300, po.items.all()[1])
-        
-        initial_cost1 = receipt1.costing_unit_price
-        initial_cost2 = receipt2.costing_unit_price
-        landed_cost_amount = Decimal('1400.000')
+        po_item1 = po.items.get(product=product1)
+        po_item2 = po.items.get(product=product2)
 
-        # Step 2: Post the Landed Cost Invoice
+        # 2. --- Partial Receipt of Item 1 ---
+        receipt1_qty = 60
+        receipt1 = self.create_inventory_log(self.supplier, product1, receipt1_qty, po_price1, po_item1)
+        
+        # Verification for Receipt 1
+        landed_cost_for_item1 = total_estimated_freight * (Decimal('50.0') / Decimal('100.0')) # 200 * 50% = 100
+        prorated_cost_for_receipt1 = landed_cost_for_item1 * (Decimal(receipt1_qty) / Decimal(po_qty1)) # 100 * (60/100) = 60
+        
+        receipt1.refresh_from_db()
+        self.assertEqual(receipt1.landed_cost_component * Decimal(receipt1_qty), prorated_cost_for_receipt1)
+        
+        receipt1_je = self.get_je_for_object(receipt1)
+        self.assertEqual(
+            receipt1_je.lines.get(account=self.general_settings.accrued_landed_costs_account).amount,
+            prorated_cost_for_receipt1
+        )
+
+        # 3. --- Final Receipt of Item 1 and Full Receipt of Item 2 ---
+        receipt2_qty = po_qty1 - receipt1_qty # 40
+        receipt2 = self.create_inventory_log(self.supplier, product1, receipt2_qty, po_price1, po_item1)
+        receipt3 = self.create_inventory_log(self.supplier, product2, po_qty2, po_price2, po_item2)
+
+        # Verification for Receipt 2
+        prorated_cost_for_receipt2 = landed_cost_for_item1 * (Decimal(receipt2_qty) / Decimal(po_qty1)) # 100 * (40/100) = 40
+        receipt2.refresh_from_db()
+        self.assertEqual(receipt2.landed_cost_component * Decimal(receipt2_qty), prorated_cost_for_receipt2)
+
+        # Verification for Receipt 3
+        landed_cost_for_item2 = total_estimated_freight * (Decimal('50.0') / Decimal('100.0')) # 200 * 50% = 100
+        prorated_cost_for_receipt3 = landed_cost_for_item2 * (Decimal(po_qty2) / Decimal(po_qty2)) # 100 * (20/20) = 100
+        receipt3.refresh_from_db()
+        self.assertEqual(receipt3.landed_cost_component * Decimal(po_qty2), prorated_cost_for_receipt3)
+
+        # Total accrued should now equal the total estimate
+        total_accrued = prorated_cost_for_receipt1 + prorated_cost_for_receipt2 + prorated_cost_for_receipt3
+        self.assertEqual(total_accrued, total_estimated_freight)
+
+        # 4. --- Post Landed Cost Invoice with Variance ---
+        actual_freight_cost = Decimal('235.000') # Unfavorable variance of 35
+        variance = actual_freight_cost - total_estimated_freight
+
         lc_invoice = LandedCostInvoice.objects.create(
             vendor=self.vendor,
-            invoice_number='LC-INV-01',
-            invoice_date='2025-09-18',
-            total_amount=landed_cost_amount
+            invoice_number='LC-INV-FULL-01',
+            invoice_date='2025-09-28',
+            total_amount=actual_freight_cost,
+            purchase_order=po
         )
-        cost_type = LandedCostType.objects.create(name="Freight")
-        LandedCostInvoiceItem.objects.create(
-            landed_cost_invoice=lc_invoice,
-            cost_type=cost_type,
-            amount=landed_cost_amount
-        )
-        purchasing_service.post_landed_cost_invoice(lc_invoice)
-        lc_invoice.refresh_from_db()
-        self.assertEqual(lc_invoice.status, LandedCostInvoice.Status.AWAITING_ALLOCATION)
+        purchasing_service.post_landed_cost_invoice(lc_invoice, self.user)
         
-        post_je = lc_invoice.journal_entry
-        self.assertTrue(post_je.is_balanced())
+        # 5. --- Verify Final Journal Entry ---
+        receipt1_je = self.get_je_for_object(receipt1)
+        receipt2_je = self.get_je_for_object(receipt2)
+        receipt3_je = self.get_je_for_object(receipt3)
+        bill_je = self.get_je_for_object(lc_invoice)
+        self.assertTrue(bill_je.is_balanced())
+        self.assertEqual(bill_je.lines.count(), 3)
+
+        # DEBIT Accrued Landed Costs (clearing the accrual)
         self.assertEqual(
-            post_je.lines.get(entry_type=JournalEntryLine.EntryType.DEBIT).account,
-            self.general_settings.landed_costs_clearing_account
+            bill_je.lines.get(account=self.general_settings.accrued_landed_costs_account).amount,
+            total_estimated_freight
         )
+        # DEBIT Landed Cost Variance (unfavorable)
         self.assertEqual(
-            post_je.lines.get(entry_type=JournalEntryLine.EntryType.CREDIT).account,
-            self.general_settings.accounts_payable
+            bill_je.lines.get(account=self.general_settings.landed_cost_variance_account).amount,
+            variance
         )
-        self.assertEqual(post_je.lines.get(entry_type=JournalEntryLine.EntryType.DEBIT).amount, landed_cost_amount)
-
-        # Step 3: Allocate the cost across both receipts
-        purchasing_service.allocate_landed_costs_from_invoice(
-            landed_cost_invoice_ids=[lc_invoice.id],
-            receipt_log_ids=[receipt1.id, receipt2.id],
-            user=self.user
-        )
-        lc_invoice.refresh_from_db()
-        self.assertEqual(lc_invoice.status, LandedCostInvoice.Status.FULLY_ALLOCATED)
-
-        # Step 4: Verify the allocation and cost updates
-        receipt1.refresh_from_db()
-        receipt2.refresh_from_db()
-
-        # Calculate expected proportional allocation
-        value1 = receipt1.base_unit_price * Decimal(str(receipt1.quantity)) # 200 * 100 = 20000
-        value2 = receipt2.base_unit_price * Decimal(str(receipt2.quantity)) # 50 * 300 = 15000
-        total_value = value1 + value2 # 35000
-        
-        expected_cost_alloc1 = (landed_cost_amount * (value1 / total_value)).quantize(Decimal('0.001')) # 1400 * (20/35) = 800
-        expected_cost_alloc2 = (landed_cost_amount * (value2 / total_value)).quantize(Decimal('0.001')) # 1400 * (15/35) = 600
-        
-        cost_increase_per_unit1 = (expected_cost_alloc1 / Decimal(str(receipt1.quantity))).quantize(Decimal('0.001')) # 800 / 200 = 4
-        cost_increase_per_unit2 = (expected_cost_alloc2 / Decimal(str(receipt2.quantity))).quantize(Decimal('0.001')) # 600 / 50 = 12
-
-        self.assertEqual(receipt1.costing_unit_price, initial_cost1 + cost_increase_per_unit1)
-        self.assertEqual(receipt2.costing_unit_price, initial_cost2 + cost_increase_per_unit2)
-        self.assertEqual(receipt1.landed_cost_component, cost_increase_per_unit1)
-        self.assertEqual(receipt2.landed_cost_component, cost_increase_per_unit2)
-
-        # Verify the single, consolidated allocation JE
-        alloc_record = LandedCostAllocation.objects.filter(receipt_log=receipt1).first()
-        alloc_je = alloc_record.journal_entry
-        self.assertTrue(alloc_je.is_balanced())
-        self.assertEqual(alloc_je.lines.count(), 3) # 1 CR to Clearing, 2 DR to Inventory accounts
-
-        # Check total credit to clearing
+        # CREDIT Accounts Payable (actual liability)
         self.assertEqual(
-            alloc_je.lines.get(entry_type=JournalEntryLine.EntryType.CREDIT).amount,
-            landed_cost_amount
+            bill_je.lines.get(account=self.general_settings.accounts_payable).amount,
+            actual_freight_cost
         )
-        product_content_type = ContentType.objects.get_for_model(Product)
-        # Check debit to first inventory account
-        debit1 = alloc_je.lines.get(
-            account=self.get_product_type_setting(self.product.product_type).inventory_account,
-            entry_type=JournalEntryLine.EntryType.DEBIT,
-            sub_ledger_content_type=product_content_type,
-            sub_ledger_object_id=self.product.id
-        ).amount
-        self.assertEqual(debit1, expected_cost_alloc1)
 
-        # Check debit to second inventory account
-        debit2 = alloc_je.lines.get(
-            account=self.get_product_type_setting(product2.product_type).inventory_account,
-            entry_type=JournalEntryLine.EntryType.DEBIT,
-            sub_ledger_content_type=product_content_type,
-            sub_ledger_object_id=product2.id
-        ).amount
-        self.assertEqual(debit2, expected_cost_alloc2)
-
-        # Final check: The clearing account should be balanced
-        clearing_balance = JournalEntryLine.objects.filter(
-            account=self.general_settings.landed_costs_clearing_account
+        # 6. --- Verify Clearing Account is Balanced ---
+        final_balance = JournalEntryLine.objects.filter(
+            account=self.general_settings.accrued_landed_costs_account,
+            journal_entry__in=[receipt1_je, receipt2_je, receipt3_je, bill_je]
         ).aggregate(
-            balance=Sum('amount', filter=Q(entry_type=JournalEntryLine.EntryType.DEBIT)) - Sum('amount', filter=Q(entry_type=JournalEntryLine.EntryType.CREDIT))
+            balance=Sum('amount', filter=Q(entry_type='credit')) - Sum('amount', filter=Q(entry_type='debit'))
         )['balance']
-        self.assertEqual(clearing_balance, Decimal('0.000'))
+        
+        self.assertEqual(final_balance, Decimal('0.000'))

@@ -34,7 +34,7 @@ window.initializePluginsInContent = function (container = document) {
 		// '#editConsumptionModal': initManageExpensesLogic,
 		"#returnForm": initProductionReturnsLogic,
 		"#add-sub-batch-btn": initReceiveFinishedProductLogic,
-		"#editRecordModal": initRecordsLogic,
+		"#viewRecordModal": initRecordsLogic, // Corrected selector
 		"#addTemplateModal": initShopOrderTemplatesLogic,
 		"#analysisForm": initVisualsLogic,
 		// --- NEW FINANCIALS INITIALIZERS ---
@@ -45,9 +45,9 @@ window.initializePluginsInContent = function (container = document) {
 		"#journalEntryForm": initJournalEntryCreateLogic,
 		"#reconciliationWorkspace": initReconciliationManageLogic,
 		"#createSalesOrderForm": initSalesOrderCreateLogic,
-		"#createPurchaseOrderForm": initPurchaseOrderFormLogic, // MODIFIED
-		"#editPurchaseOrderForm": initPurchaseOrderFormLogic,   // NEW
-		"#createPurchaseReturnForm": initPurchaseReturnCreateLogic, // NEW
+		"#createPurchaseOrderForm": initPurchaseOrderFormLogic,
+		"#editPurchaseOrderForm": initPurchaseOrderFormLogic,
+		"#createPurchaseReturnForm": initPurchaseReturnCreateLogic,
 		"#taxReportForm": initTaxReconciliationReportLogic,
 		"#close-period-container": initClosePeriodLogic,
 		"#fiscalYearContainer": initFiscalYearListLogic,

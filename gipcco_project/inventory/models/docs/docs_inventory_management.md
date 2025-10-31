@@ -21,7 +21,6 @@ Key model changes and implementation notes (current):
 - `ShopOrderTemplate`:
   - New optional field `bottle_size_ml` (PositiveIntegerField) to support overhead allocation by volume.
 
-
 - `Batch` and continuation semantics:
   - Fields: `template` (FK), `shop_order_number`, `batch_number`, `creation_date`, `is_customized`, `is_continuation`, `parent_batch` (FK to self), `notes`.
   - **NEW**: `status` field now includes `DRAFT`, `PENDING_APPROVAL`, `APPROVED`, `IN_PROGRESS`, `COMPLETED`, `CANCELLED`. Default is `DRAFT`.
@@ -32,26 +31,36 @@ Key model changes and implementation notes (current):
     - Final product cost = sum(parent batch cost + all continuation batch costs).
   - New fields for allocation drivers: `machine_hours_consumed`, `labor_hours_consumed` (FloatFields).
 
-
 - `BatchItem`:
   - Fields: `primitive_product`, `theoretical_quantity`, `actual_quantity`, `source_log` (FK), `cost_at_consumption` (Decimal, 3 d.p.).
   - `cost_at_consumption` is set by costing routines called from services (e.g., `recalculate_cost_history_for_product`).
-
 
 - `ProductionReturn`:
   - Fields: `product`, `source_log` (FK), optional `batch` (FK), `quantity`, `return_date`, `notes`, `status` (default POSTED).
   - Cancellation guard: cannot cancel if returned stock was consumed later; service checks `BatchItem` consumption after `return_date`.
 
+- `PurchaseOrder`:
+  - **NEW**: `status` field now includes `PENDING`, `PARTIALLY_RECEIVED`, `COMPLETED`, `CANCELLED`.
+- `PurchaseOrderItem`:
+  - `PurchaseOrderItem` includes `base_price_per_unit`, `vat_rate`, `withholding_tax_rate` to support landed-cost logic.
+  - **NEW**: `landed_cost_allocation_percentage` (Decimal, 4 d.p.) to allocate PO-level landed costs.
+  - **NEW**: `is_closed` (BooleanField) to indicate no further receipts are expected.
 
 - `FinishedProductReceipt` guidance:
   - Remaining quantity formula: `remaining = total_quantity_produced - total_dispatched + total_adjusted`.
   - Use Subqueries + `Coalesce` when aggregating `total_dispatched` and `total_adjusted` to avoid join-multiplication bugs.
   - Key fields: `total_cost`, `total_quantity_produced`, `allocated_overhead_cost`, `receipt_date`, `release_date`, `status`.
 
+- `FixedAsset`: Represents an individual fixed asset.
+  - **CORRECTED**: `gl_account`, `depreciation_expense_account`, and `accumulated_depreciation_account` now use string literals for `limit_choices_to` in their ForeignKey definitions.
 
-- `PurchaseOrderItem` & `InventoryConsumption`:
-  - `PurchaseOrderItem` includes `base_price_per_unit`, `vat_rate`, `withholding_tax_rate` to support landed-cost logic.
-  - `InventoryConsumption` includes a `consumption_type` enum to indicate capitalization vs. expense and keeps `cost_at_consumption`.
+- `InventoryConsumption`: Represents the internal consumption of inventory for non-production purposes.
+  - **NEW**: `consumption_type` (TextChoices) to indicate capitalization, expense, or amortization.
+  - **NEW**: `fixed_asset` (FK) to link to a target fixed asset if capitalized.
+  - **NEW**: `cost_pool` (FK) to link to a direct expense cost pool.
+  - **NEW**: `source_request` (OneToOneField) to link to the approved expense request.
+  - Includes a `consumption_type` enum to indicate capitalization vs. expense and keeps `cost_at_consumption`.
+  - **NEW**: `clean` method includes validation for `consumption_type` and related fields.
 
 Notes:
 

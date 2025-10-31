@@ -17,11 +17,12 @@
   - **Calls:** `_check_period_is_open()`, `_get_product_inventory_account()` from `_helpers.py`.
 
 - `create_je_for_inventory_receipt(inventory_log: InventoryLog)`:
-  - **Description:** Creates a comprehensive, balanced journal entry for a released inventory receipt from a supplier, accruing the liability to a temporary account.
+  - **Description:** Creates a comprehensive, balanced journal entry for a released inventory receipt from a supplier, capitalizing a prorated share of the PO's estimated landed costs and accruing the liability to a temporary account.
   - **Accounting Logic:**
-    - **Debit:** Inventory account (at the item's costing value).
+    - **Debit:** Inventory account (at the item's costing value, including prorated landed costs).
     - **Debit:** VAT Receivable account (if VAT is recoverable).
     - **Credit:** Goods Received, Not Invoiced (GRNI) account (a temporary liability).
+    - **Credit:** Accrued Landed Costs account (for the estimated third-party costs).
     - **Credit:** Withholding Tax Payable account (if applicable).
   - **Key Features:**
     - Only processes logs with a status of `RELEASED`.

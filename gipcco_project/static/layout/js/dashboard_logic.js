@@ -226,4 +226,53 @@ function initDashboardLogic(container) {
       console.error('[DEBUG] A critical error occurred inside the PO workflow block:', error);
     }
   }
+
+  // =========================================================================
+  //  **NEW** Logic for dashboard.html (Manual Price Calculation)
+  // =========================================================================
+  const manualPriceContainer = container.querySelector('#manual-price-container');
+  if (manualPriceContainer && !manualPriceContainer.dataset.calcInitialized) {
+    console.log('[DEBUG] Initializing manual price calculation logic...');
+    manualPriceContainer.dataset.calcInitialized = 'true';
+
+    const quantityInput = container.querySelector('#quantity');
+    const basePriceInput = container.querySelector('#base_unit_price');
+    const vatRateInput = container.querySelector('#vat_rate');
+    const whtRateInput = container.querySelector('#withholding_tax_rate');
+    
+    const vatAmountHiddenInput = container.querySelector('#vat_amount');
+    const whtAmountHiddenInput = container.querySelector('#withholding_tax_amount');
+
+    const vatDisplay = container.querySelector('#calculated-vat-display');
+    const whtDisplay = container.querySelector('#calculated-wht-display');
+    const totalDisplay = container.querySelector('#calculated-total-display');
+
+    const calculateManualTotals = () => {
+        const quantity = parseFloat(quantityInput.value) || 0;
+        const basePrice = parseFloat(basePriceInput.value) || 0;
+        const vatRate = parseFloat(vatRateInput.value) || 0;
+        const whtRate = parseFloat(whtRateInput.value) || 0;
+
+        const baseAmount = quantity * basePrice;
+        const vatAmount = baseAmount * (vatRate / 100);
+        const whtAmount = baseAmount * (whtRate / 100);
+        const totalAmount = baseAmount + vatAmount - whtAmount;
+
+        if (vatDisplay) vatDisplay.textContent = vatAmount.toFixed(3);
+        if (whtDisplay) whtDisplay.textContent = whtAmount.toFixed(3);
+        if (totalDisplay) totalDisplay.textContent = totalAmount.toFixed(3);
+
+        if (vatAmountHiddenInput) vatAmountHiddenInput.value = vatAmount.toFixed(3);
+        if (whtAmountHiddenInput) whtAmountHiddenInput.value = whtAmount.toFixed(3);
+    };
+
+    [quantityInput, basePriceInput, vatRateInput, whtRateInput].forEach(input => {
+        if (input) {
+            input.addEventListener('input', calculateManualTotals);
+        }
+    });
+    
+    // Initial calculation on load
+    calculateManualTotals();
+  }
 }

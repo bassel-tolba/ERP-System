@@ -104,6 +104,9 @@ def create_chart_of_accounts():
     create_account('504', 'فروقات أسعار الشراء (PPV)', Account.AccountType.EXPENSE, '500')
     create_account('1020407', 'تسوية تكاليف شحن', Account.AccountType.ASSET, '10204') # Landed Costs Clearing
     create_account('20207', 'تسوية مرتجعات موردين', Account.AccountType.LIABILITY, '202') # Purchase Returns Clearing
+    # --- NEW LANDED COST (NETSUITE) ACCOUNTS ---
+    create_account('20208', 'تكاليف شحن مستحقة', Account.AccountType.LIABILITY, '202') # Accrued Landed Costs
+    create_account('505', 'فروقات تكاليف الشحن', Account.AccountType.EXPENSE, '500') # Landed Cost Variance
 
     # --- Configure Control Accounts ---
     from django.contrib.contenttypes.models import ContentType
@@ -201,6 +204,9 @@ class AccountingServiceBaseTestCase(TestCase):
         cls.general_settings.purchase_price_variance_account = cls.accounts['504']
         cls.general_settings.landed_costs_clearing_account = cls.accounts['1020407']
         cls.general_settings.purchase_returns_clearing_account = cls.accounts['20207']
+        # --- NEW LANDED COST (NETSUITE) ACCOUNTS ---
+        cls.general_settings.accrued_landed_costs_account = cls.accounts['20208']
+        cls.general_settings.landed_cost_variance_account = cls.accounts['505']
         cls.general_settings.save()
 
         # 4. Configure Product Type Accounting Settings

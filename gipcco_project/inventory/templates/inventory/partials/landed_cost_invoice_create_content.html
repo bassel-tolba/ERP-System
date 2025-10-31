@@ -1,0 +1,50 @@
+<!-- gipcco_project/inventory/templates/inventory/partials/landed_cost_invoice_create_content.html -->
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0" style="font-weight: 700;">إنشاء فاتورة تكاليف شحن جديدة</h1>
+    <a href="{% url 'inventory:landed_cost_invoices' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-right"></i> العودة إلى القائمة
+    </a>
+</div>
+
+<form method="post" action="{% url 'inventory:create_landed_cost_invoice' %}" id="createLandedCostInvoiceForm">
+    {% csrf_token %}
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h5 class="mb-0">بيانات الفاتورة الأساسية</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="vendor_id" class="form-label fw-bold">المورد</label>
+                    <select class="form-select searchable-select" id="vendor_id" name="vendor_id" required>
+                        <option value="">اختر مورد...</option>
+                        {% for vendor in vendors %}
+                        <option value="{{ vendor.id }}">{{ vendor.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="invoice_number" class="form-label fw-bold">رقم الفاتورة</label>
+                    <input type="text" class="form-control" id="invoice_number" name="invoice_number" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="invoice_date" class="form-label fw-bold">تاريخ الفاتورة</label>
+                    <input type="text" class="form-control datepicker" id="invoice_date" name="invoice_date" required value="{{ today_date }}">
+                </div>
+                <div class="col-md-8 mb-3">
+                    <label for="purchase_order_id" class="form-label fw-bold">أمر الشراء المرتبط (اختياري)</label>
+                    <select class="form-select searchable-select" id="purchase_order_id" name="purchase_order_id">
+                        <option value="">اختر أمر شراء...</option>
+                        {% for po in purchase_orders %}
+                        <option value="{{ po.id }}">{{ po.po_number }} - {{ po.supplier.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="mt-4 text-center">
+        <button type="submit" class="btn btn-primary btn-lg"><i class="bi bi-check2-circle"></i> حفظ الفاتورة</button>
+    </div>
+</form>
