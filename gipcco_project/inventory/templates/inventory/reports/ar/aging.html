@@ -1,0 +1,24 @@
+<!-- templates/inventory/reports/ar/aging.html -->
+{% extends "inventory/reports/base_report.html" %}
+{% load i18n %}
+{% load humanize %}
+
+{% block report_title %}{% trans "تقرير أعمار الذمم المدينة" %}{% endblock %}
+
+{% block report_subtitle %}
+{% blocktrans %}حتى تاريخ: {{ as_of_date }}{% endblocktrans %}
+{% endblock %}
+
+{% block report_filters %}
+<form method="get" action="{% url 'inventory:ar_aging_report' %}" class="form-inline" id="arAgingReportForm">
+    <div class="form-group mr-2">
+        <label for="as_of_date" class="mr-2">{% trans "حتى تاريخ" %}:</label>
+        <input type="date" name="as_of_date" id="as_of_date" class="form-control" value="{{ as_of_date }}">
+    </div>
+    <button type="submit" class="btn btn-primary">{% trans "عرض التقرير" %}</button>
+</form>
+{% endblock %}
+
+{% block report_content %}
+    {% include "inventory/reports/ar/partials/aging_content.html" %}
+{% endblock %}

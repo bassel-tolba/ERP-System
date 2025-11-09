@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product Receipt Module - Architectural Documentation</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({
+startOnLoad: true,
+theme: 'base',
+themeVariables: {
+primaryColor: '#10b981',
+primaryTextColor: '#1e293b',
+primaryBorderColor: '#059669',
+lineColor: '#64748b',
+secondaryColor: '#f97316',
+tertiaryColor: '#06b6d4',
+noteBkgColor: '#fef3c7',
+noteTextColor: '#92400e',
+noteBorderColor: '#f59e0b'
+}
+});
+</script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+
+body { font-family: 'Inter', sans-serif; }
+    code, pre { font-family: 'JetBrains Mono', monospace; }
+    .gradient-header { background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%); }
+    .section-number { background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .mermaid { background: white; border-radius: 0.5rem; padding: 1rem; }
+    .sticky-toc { position: sticky; top: 2rem; max-height: calc(100vh - 4rem); overflow-y: auto; }
+    .pillar-card { transition: transform 0.2s, box-shadow 0.2s; }
+    .pillar-card:hover { transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
+    .workflow-stage { position: relative; padding-left: 2rem; border-left: 2px solid #e5e7eb; }
+    .workflow-stage::before { content: ''; position: absolute; left: -6px; top: 0.5rem; width: 10px; height: 10px; background: #10b981; border-radius: 50%; }
+    .code-inline { background: #f1f5f9; padding: 0.125rem 0.375rem; border-radius: 0.25rem; font-size: 0.875em; color: #7c3aed; }
+    .sticky-toc::-webkit-scrollbar { width: 6px; }
+    .sticky-toc::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 3px; }
+    .sticky-toc::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    .sticky-toc::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    .special-feature-highlight { background: linear-gradient(120deg, #fef3c7 0%, #fde68a 100%); border-left: 4px solid #f59e0b; }
+</style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 to-green-50 min-h-screen">
+
+
+<!-- Header -->
+<header class="gradient-header text-white shadow-2xl">
+    <div class="max-w-7xl mx-auto px-6 py-12">
+        <div class="flex items-center gap-4 mb-4">
+            <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
+            <div>
+                <h1 class="text-4xl font-bold">Product Receipt & Valuation Module</h1>
+                <p class="text-blue-100 text-lg">Architectural & Functional Excavation Report</p>
+            </div>
+        </div>
+        <div class="flex flex-wrap gap-6 text-sm mt-6 bg-white/10 backdrop-blur-sm rounded-lg p-4">
+            <div><span class="text-blue-200">Submitted By:</span><span class="font-semibold ml-2">The Django Code Archaeologist</span></div>
+            <div><span class="text-blue-200">Date:</span><span class="font-semibold ml-2">24 May 2024</span></div>
+            <div><span class="text-blue-200">Scope:</span><span class="font-semibold ml-2">Complete End-to-End Analysis (Receipt, QC, Costing, Accounting)</span></div>
+        </div>
+    </div>
+</header>
+
+<div class="max-w-7xl mx-auto px-6 py-12">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        
+        <!-- Table of Contents -->
+        <aside class="lg:col-span-1">
+            <nav class="sticky-toc bg-white rounded-xl shadow-lg p-6 border border-slate-200">
+                <h2 class="font-bold text-lg mb-4 text-slate-800 flex items-center gap-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>Contents</h2>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="#executive-summary" class="text-blue-600 hover:text-blue-800 hover:underline">Executive Summary</a></li>
+                    <li><a href="#architecture" class="text-blue-600 hover:text-blue-800 hover:underline">I. Architectural Blueprint</a></li>
+                    <li><a href="#file-manifest" class="text-blue-600 hover:text-blue-800 hover:underline">II. File & Artifact Manifest</a></li>
+                    <li><a href="#workflow" class="text-blue-600 hover:text-blue-800 hover:underline">III. End-to-End Workflow</a></li>
+                    <li><a href="#overrides" class="text-blue-600 hover:text-blue-800 hover:underline">IV. Special Feature: Account Overrides</a></li>
+                    <li><a href="#collateral" class="text-blue-600 hover:text-blue-800 hover:underline">V. Collateral Workflows</a></li>
+                    <li><a href="#diagrams" class="text-blue-600 hover:text-blue-800 hover:underline">VI. Technical Diagrams</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="lg:col-span-3 space-y-8">
+            
+            <!-- Executive Summary -->
+            <section id="executive-summary" class="bg-white rounded-xl shadow-lg p-8 border border-slate-200">
+                <h2 class="text-3xl font-bold mb-6 text-slate-800 flex items-center gap-3"><span class="section-number">📋</span>Executive Summary</h2>
+                <div class="prose prose-slate max-w-none"><p class="text-lg text-slate-700 leading-relaxed mb-6">The Product Receipt module serves as the primary gateway for all purchased inventory, meticulously engineered around three architectural pillars to ensure financial accuracy and operational integrity:</p></div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                    <div class="pillar-card bg-gradient-to-br from-emerald-50 to-emerald-100 border-2 border-emerald-200 rounded-xl p-6">
+                        <div class="text-4xl mb-4">🛡️</div>
+                        <h3 class="font-bold text-lg mb-3 text-emerald-900">The Quarantine Airlock</h3>
+                        <p class="text-sm text-slate-700">A strict state machine separates the physical receipt (<span class="code-inline">QUARANTINED</span>) from the financial recognition (<span class="code-inline">RELEASED</span>), creating a critical control point for quality checks and preventing premature valuation.</p>
+                    </div>
+                    <div class="pillar-card bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-orange-200 rounded-xl p-6">
+                        <div class="text-4xl mb-4">⚡</div>
+                        <h3 class="font-bold text-lg mb-3 text-orange-900">Signal-Driven Accounting</h3>
+                        <p class="text-sm text-slate-700">Financial events are triggered by Django signals (<span class="code-inline">post_save</span> on <span class="code-inline">InventoryLog</span>). This decouples the user interface from the complex accounting logic, making the system robust and maintainable.</p>
+                    </div>
+                    <div class="pillar-card bg-gradient-to-br from-sky-50 to-sky-100 border-2 border-sky-200 rounded-xl p-6">
+                        <div class="text-4xl mb-4">⚖️</div>
+                        <h3 class="font-bold text-lg mb-3 text-sky-900">Centralized Valuation Engine</h3>
+                        <p class="text-sm text-slate-700">All costing and valuation logic is centralized in the <span class="code-inline">costing_service</span> and <span class="code-inline">accounting_service</span>, ensuring consistent, auditable calculations for every inventory movement.</p>
+                    </div>
+                </div>
+                <div class="mt-8 bg-amber-50 border-l-4 border-amber-400 p-6 rounded-r-lg">
+                    <div class="flex gap-3">
+                        <svg class="w-6 h-6 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <div>
+                            <h4 class="font-bold text-amber-900 mb-2">Key Finding</h4>
+                            <p class="text-sm text-amber-800">The system's integrity hinges on a single, explicit user action: <strong>"Release from Quarantine."</strong> This action is the sole trigger for creating a journal entry and recognizing the inventory as a financial asset. This design provides an unambiguous audit trail, linking every valued inventory item to a specific quality control release event.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Architectural Blueprint -->
+            <section id="architecture" class="bg-white rounded-xl shadow-lg p-8 border border-slate-200">
+                <h2 class="text-3xl font-bold mb-6 text-slate-800 flex items-center gap-3"><span class="section-number">I.</span>Architectural Blueprint: The "Why" Behind the Code</h2>
+                <div class="space-y-6">
+                    <div class="border-l-4 border-emerald-500 pl-6 py-2">
+                        <h3 class="font-bold text-xl mb-3 text-slate-800">🛡️ The Quarantine Airlock: Physical vs. Financial Reality</h3>
+                        <p class="text-slate-700 leading-relaxed">An <span class="code-inline">InventoryLog</span> in a <span class="code-inline">QUARANTINED</span> state represents a physical reality: a pallet of goods is on the warehouse floor. However, it is not yet a financial reality. It cannot be consumed, sold, or valued. The transition to <span class="code-inline">RELEASED</span> is the "financial gate," a one-way action that transforms the physical item into a valued asset on the company's books.</p>
+                    </div>
+                    <div class="border-l-4 border-orange-500 pl-6 py-2">
+                        <h3 class="font-bold text-xl mb-3 text-slate-800">⚡ The Decoupled Trigger: Django Signals</h3>
+                        <p class="text-slate-700 leading-relaxed">The <span class="code-inline">release_from_quarantine</span> view is remarkably simple: it just updates a model's status and saves it. It has no knowledge of accounting. The magic happens via a <span class="code-inline">post_save</span> signal in <span class="code-inline">signals.py</span>. This signal listens for the status change and acts as a dispatcher, commanding the <span class="code-inline">accounting_service</span> to create the journal entry. This decoupling is a cornerstone of the module's robustness.</p>
+                    </div>
+                    <div class="border-l-4 border-sky-500 pl-6 py-2">
+                        <h3 class="font-bold text-xl mb-3 text-slate-800">⚖️ The Rule Engine: Flexible Account Overrides</h3>
+                        <p class="text-slate-700 leading-relaxed">The system employs a "Specific over General" rule for accounting. By default, it uses accounts defined in <span class="code-inline">ProductTypeAccountingSettings</span>. However, the three <span class="code-inline">override_*_account</span> fields on the <span class="code-inline">Product</span> model allow for surgical precision, redirecting financial entries for specific items (e.g., consignment stock, promotional goods) without altering the core logic, all managed via the <span class="code-inline">_helpers.py</span> functions.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- File Manifest -->
+            <section id="file-manifest" class="bg-white rounded-xl shadow-lg p-8 border border-slate-200">
+                <h2 class="text-3xl font-bold mb-6 text-slate-800 flex items-center gap-3"><span class="section-number">II.</span>File & Artifact Manifest</h2>
+                <div class="overflow-x-auto"><table class="w-full text-sm">
+                    <thead><tr class="bg-gradient-to-r from-slate-100 to-slate-200"><th class="px-4 py-3 text-left font-bold text-slate-700 rounded-tl-lg">File Path</th><th class="px-4 py-3 text-left font-bold text-slate-700 rounded-tr-lg">Role in Workflow</th></tr></thead>
+                    <tbody class="divide-y divide-slate-200">
+                        <tr class="hover:bg-green-50 transition-colors"><td class="px-4 py-3 font-mono text-xs text-purple-700">inventory/templates/inventory/dashboard.html</td><td class="px-4 py-3 text-slate-700"><strong>Entry Point:</strong> Renders the form for creating a new inventory receipt.</td></tr>
+                        <tr class="hover:bg-green-50 transition-colors"><td class="px-4 py-3 font-mono text-xs text-purple-700">inventory/templates/inventory/quarantine.html</td><td class="px-4 py-3 text-slate-700"><strong>Control Point:</strong> Displays quarantined items and provides the interface to trigger the financial release.</td></tr>
+                        <tr class="hover:bg-green-50 transition-colors"><td class="px-4 py-3 font-mono text-xs text-purple-700">inventory/urls.py</td><td class="px-4 py-3 text-slate-700"><strong>Router:</strong> Maps URLs like <span class="code-inline">/</span> and <span class="code-inline">/quarantine/release/&lt;pk&gt;/</span> to the correct view functions.</td></tr>
+                        <tr class="hover:bg-green-50 transition-colors"><td class="px-4 py-3 font-mono text-xs text-purple-700">inventory/views/receipts.py</td><td class="px-4 py-3 text-slate-700"><strong>HTTP Controller:</strong> Contains the <span class="code-inline">index</span> and <span class="code-inline">release_from_quarantine</span> views that handle user requests.</td></tr>
+                        <tr class="hover:bg-green-50 transition-colors"><td class="px-4 py-3 font-mono text-xs text-purple-700">inventory/signals.py</td><td class="px-4 py-3 text-slate-700"><strong>Orchestrator:</strong> The "hidden" brain. The <span class="code-inline">post_save</span> signal on <span class="code-inline">InventoryLog</span> triggers all downstream financial processes.</td></tr>
+                        <tr class="hover:bg-green-50 transition-colors"><td class="px-4 py-3 font-mono text-xs text-purple-700">inventory/services/purchasing_service.py</td><td class="px-4 py-3 text-slate-700"><strong>PO Manager:</strong> The <span class="code-inline">update_po_status_after_receipt</span> function keeps purchase orders in sync with received quantities.</td></tr>
+                        <tr class="hover:bg-green-50 transition-colors"><td class="px-4 py-3 font-mono text-xs text-purple-700">inventory/services/accounting/inventory_transactions.py</td><td class="px-4 py-3 text-slate-700"><strong>Ledger Interface:</strong> The <span class="code-inline">create_je_for_inventory_receipt</span> function creates the final, balanced journal entry.</td></tr>
+                        <tr class="hover:bg-green-50 transition-colors"><td class="px-4 py-3 font-mono text-xs text-purple-700">inventory/services/costing_service.py</td><td class="px-4 py-3 text-slate-700"><strong>Valuation Engine:</strong> The <span class="code-inline">recalculate_cost_history_for_product</span> function updates the product's moving average cost.</td></tr>
+                        <tr class="hover:bg-green-50 transition-colors"><td class="px-4 py-3 font-mono text-xs text-purple-700">inventory/services/accounting/_helpers.py</td><td class="px-4 py-3 text-slate-700"><strong>Rulebook:</strong> Contains the functions that read the account override fields, enforcing the "Specific over General" logic.</td></tr>
+                        <tr class="hover:bg-green-50 transition-colors"><td class="px-4 py-3 font-mono text-xs text-purple-700">inventory/models/operational.py</td><td class="px-4 py-3 text-slate-700"><strong>Data Schema:</strong> Defines the <span class="code-inline">InventoryLog</span> and <span class="code-inline">Product</span> models, the central artifacts of this workflow.</td></tr>
+                    </tbody>
+                </table></div>
+            </section>
+
+            <!-- End-to-End Workflow -->
+            <section id="workflow" class="bg-white rounded-xl shadow-lg p-8 border border-slate-200">
+                <h2 class="text-3xl font-bold mb-6 text-slate-800 flex items-center gap-3"><span class="section-number">III.</span>The End-to-End Workflow Trace</h2>
+                <div class="mb-8">
+                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-t-lg"><h3 class="font-bold text-lg">Stage 1: Initial Receipt (The Physical Event)</h3></div>
+                    <div class="border-2 border-blue-200 rounded-b-lg p-6 bg-blue-50/30"><div class="space-y-4">
+                        <div class="workflow-stage"><h4 class="font-semibold text-slate-800 mb-2">1. User Action</h4><p class="text-slate-700">User navigates to the dashboard (<span class="code-inline">dashboard.html</span>) and fills out the "Add New Record" form, either manually or by selecting a Purchase Order item.</p></div>
+                        <div class="workflow-stage"><h4 class="font-semibold text-slate-800 mb-2">2. Submission</h4><p class="text-slate-700">The form is <span class="code-inline">POST</span>ed to the URL named <span class="code-inline">'inventory:receipts'</span>, which is routed to the <span class="code-inline">index</span> view in <span class="code-inline">receipts.py</span>.</p></div>
+                        <div class="workflow-stage"><h4 class="font-semibold text-slate-800 mb-2">3. Backend Processing</h4><p class="text-slate-700">The <span class="code-inline">index</span> view validates the data and creates an <span class="code-inline">InventoryLog</span> record with its status set to <span class="code-inline">QUARANTINED</span>.</p></div>
+                        <div class="workflow-stage"><h4 class="font-semibold text-slate-800 mb-2">4. Side Effect (PO Update)</h4><p class="text-slate-700">The view immediately calls <span class="code-inline">purchasing_service.update_po_status_after_receipt</span> to update the linked Purchase Order's status to "Partially Received" or "Completed".</p>
+                            <div class="mt-3 bg-green-100 border border-green-300 rounded-lg p-3"><strong class="text-green-800">Outcome:</strong> <span class="text-green-700">A non-financial record of the physical receipt exists. The item is now in the system but has zero impact on the General Ledger.</span></div>
+                        </div>
+                    </div></div>
+                </div>
+                <div class="mb-8">
+                    <div class="bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-3 rounded-t-lg"><h3 class="font-bold text-lg">Stage 2: Release from Quarantine (The Financial Trigger) ⚠️</h3></div>
+                    <div class="border-2 border-red-200 rounded-b-lg p-6 bg-red-50/30"><div class="space-y-4">
+                        <div class="workflow-stage"><h4 class="font-semibold text-slate-800 mb-2">1. User Action</h4><p class="text-slate-700">A Quality Control manager views the <span class="code-inline">quarantine.html</span> page, enters a QC number, and clicks "Release".</p></div>
+                        <div class="workflow-stage"><h4 class="font-semibold text-slate-800 mb-2">2. Backend State Change</h4><p class="text-slate-700">The request is handled by the <span class="code-inline">release_from_quarantine</span> view. This view sets <span class="code-inline">log_entry.status = 'released'</span> and calls <span class="code-inline">log_entry.save()</span>.</p></div>
+                        <div class="workflow-stage"><h4 class="font-semibold text-slate-800 mb-2">3. Signal Orchestration (The Climax)</h4><p class="text-slate-700 mb-3">The <span class="code-inline">.save()</span> action triggers the <span class="code-inline">post_save</span> signal in <span class="code-inline">signals.py</span>. This is the critical event:</p>
+                            <div class="ml-4 space-y-3">
+                                <div class="bg-white border-l-4 border-yellow-400 p-3 rounded-r"><strong class="text-yellow-800">Accounting:</strong><p class="text-sm text-slate-700 mt-1">The signal handler calls <span class="code-inline">create_je_for_inventory_receipt</span>. This service calculates the total value (including landed costs) and creates an immutable Journal Entry: <strong class="text-green-600">DEBIT</strong> Inventory, <strong class="text-red-600">CREDIT</strong> Goods Received Not Invoiced (GRNI).</p></div>
+                                <div class="bg-white border-l-4 border-blue-400 p-3 rounded-r"><strong class="text-blue-800">Costing:</strong><p class="text-sm text-slate-700 mt-1">The view then calls <span class="code-inline">costing_service.recalculate_cost_history_for_product</span>. This function re-calculates and updates the <span class="code-inline">Product.moving_average_cost</span> field, ensuring all future consumptions are valued correctly.</p></div>
+                            </div>
+                        </div>
+                        <div class="mt-3 bg-green-100 border-2 border-green-400 rounded-lg p-4"><strong class="text-green-800 text-lg">🎉 Outcome:</strong> <span class="text-green-700">The physical item is now a permanent, valued, and balanced transaction in the financial ledger, and the product's official cost has been updated.</span></div>
+                    </div></div>
+                </div>
+            </section>
+
+            <!-- Account Overrides -->
+            <section id="overrides" class="special-feature-highlight rounded-xl shadow-lg p-8 border-2 border-amber-300">
+                <h2 class="text-3xl font-bold mb-6 text-slate-800 flex items-center gap-3"><span class="section-number">IV.</span>Special Feature Analysis: The Account Override System</h2>
+                <div class="bg-white rounded-lg p-6 mb-6 border-2 border-amber-200"><div class="flex gap-3 items-start">
+                    <svg class="w-8 h-8 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.24a2 2 0 00-1.806.547a2 2 0 00-.547 1.806l.477 2.387a6 6 0 00.517 3.86l.158.318a6 6 0 00.517 3.86l2.387.477a2 2 0 001.806-.547a2 2 0 00.547-1.806l-.477-2.387a6 6 0 00-.517-3.86l-.158-.318a6 6 0 00-.517-3.86l-2.387-.477a2 2 0 00-1.806.547a2 2 0 00-.547 1.806l.477 2.387a6 6 0 00.517 3.86l.158.318a6 6 0 00.517 3.86l2.387.477a2 2 0 001.806-.547a2 2 0 00.547-1.806l-.477-2.387a6 6 0 00-.517-3.86l-.158-.318a6 6 0 00-.517-3.86z"/></svg>
+                    <div><h3 class="font-bold text-xl mb-2 text-amber-900">The "Specific Over General" Rule Engine</h3><p class="text-slate-700 leading-relaxed">This system provides immense accounting flexibility. It allows specific products to bypass the default accounting rules defined for their category, enabling precise financial tracking for exceptional cases without changing any code.</p></div>
+                </div></div>
+                <div class="space-y-6">
+                    <div class="border-l-4 border-blue-500 pl-6 py-2 bg-white/60 rounded-r-lg"><h4 class="font-bold text-lg mb-2 text-slate-800">1. `override_inventory_account`</h4><p class="text-sm text-slate-700"><strong>Purpose:</strong> Specifies a unique inventory asset account. <br/><strong>Use Case:</strong> Tracking consignment stock in a separate "Consignment Inventory" account instead of the main "Raw Materials" account. <br/><strong>Triggered By:</strong> <span class="code-inline">create_je_for_inventory_receipt</span>, <span class="code-inline">create_je_for_inventory_adjustment</span>.</p></div>
+                    <div class="border-l-4 border-purple-500 pl-6 py-2 bg-white/60 rounded-r-lg"><h4 class="font-bold text-lg mb-2 text-slate-800">2. `override_cogs_expense_account`</h4><p class="text-sm text-slate-700"><strong>Purpose:</strong> Specifies a unique expense or Cost of Goods Sold (COGS) account. <br/><strong>Use Case:</strong> Expensing promotional samples to a "Marketing Expense" account instead of "Cost of Goods Sold" for clearer P&L analysis. <br/><strong>Triggered By:</strong> <span class="code-inline">create_je_for_internal_consumption</span>, <span class="code-inline">create_je_for_sales_dispatch</span>.</p></div>
+                    <div class="border-l-4 border-teal-500 pl-6 py-2 bg-white/60 rounded-r-lg"><h4 class="font-bold text-lg mb-2 text-slate-800">3. `override_sales_revenue_account`</h4><p class="text-sm text-slate-700"><strong>Purpose:</strong> Specifies a unique revenue account for sales. <br/><strong>Use Case:</strong> Recording revenue from an "Installation Service" product into a "Service Revenue" account, separate from the main "Goods Revenue" account. <br/><strong>Triggered By:</strong> <span class="code-inline">create_je_for_sales_dispatch</span>.</p></div>
+                </div>
+            </section>
+
+            <!-- Collateral Workflows -->
+            <section id="collateral" class="bg-white rounded-xl shadow-lg p-8 border border-slate-200">
+                <h2 class="text-3xl font-bold mb-6 text-slate-800 flex items-center gap-3"><span class="section-number">V.</span>Analysis of Collateral & Corrective Workflows</h2>
+                <div class="space-y-6">
+                    <div class="bg-gradient-to-r from-rose-50 to-rose-100 border-l-4 border-rose-400 p-6 rounded-r-lg">
+                        <h3 class="font-bold text-lg mb-3 text-rose-900 flex items-center gap-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>Voiding a Receipt</h3>
+                        <p class="text-sm text-slate-700">A critical corrective action. The <span class="code-inline">void_record_view</span> calls the <span class="code-inline">purchasing_service.void_inventory_receipt</span> function. This service performs strict safety checks (e.g., cannot void if consumed in production) before setting the status to <span class="code-inline">VOIDED</span> and, crucially, creating a <strong>full reversing journal entry</strong> to perfectly nullify the original financial transaction.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Technical Diagrams -->
+            <section id="diagrams" class="bg-white rounded-xl shadow-lg p-8 border border-slate-200">
+                <h2 class="text-3xl font-bold mb-8 text-slate-800 flex items-center gap-3"><span class="section-number">VI.</span>Technical Diagrams</h2>
+                <div class="mb-12"><h3 class="text-2xl font-bold mb-4 text-slate-700">Receipt State Machine</h3><div class="bg-slate-50 p-6 rounded-lg border-2 border-slate-200"><div class="mermaid">
+
+                    stateDiagram-v2
+                    [*] --> QUARANTINED: Create Receipt
+                    QUARANTINED --> RELEASED: Release from QC<br/>💰 Financial Transaction
+                    QUARANTINED --> VOIDED: Void Receipt
+                    RELEASED --> VOIDED: Void Receipt<br/>🔄 Reversal JE
+
+
+                    note right of RELEASED
+                        Point of Financial Recognition
+                        - Journal Entry Created
+                        - Inventory Debited
+                        - GRNI Credited
+                        - MAC is Recalculated
+                    end note
+                </div></div></div>
+                <div class="mb-12"><h3 class="text-2xl font-bold mb-4 text-slate-700">Release from Quarantine Sequence</h3><div class="bg-slate-50 p-6 rounded-lg border-2 border-slate-200"><div class="mermaid">
+
+                    sequenceDiagram
+                    actor User
+                    participant View as receipts.py
+                    participant Model as InventoryLog
+                    participant Signal as signals.py
+                    participant AcctSvc as inventory_transactions.py
+                    participant CostSvc as costing_service.py
+                    participant DB as Database
+
+
+                    User->>View: Click "Release"
+                    View->>Model: log.status = 'released'
+                    View->>Model: log.save()
+                    Model->>Signal: post_save signal fires
+                    Signal->>AcctSvc: create_je_for_inventory_receipt()
+                    AcctSvc->>DB: Create JournalEntry & Lines
+                    Signal-->>View: .save() completes
+
+                    View->>CostSvc: recalculate_cost_history_for_product()
+                    CostSvc->>DB: Update Product.moving_average_cost
+
+                    View-->>User: Redirect with success message
+
+                    Note over User,DB: 🎉 Financial Transaction Complete
+                </div></div></div>
+                <div class="mb-12"><h3 class="text-2xl font-bold mb-4 text-slate-700">Account Override Logic Flow</h3><div class="bg-slate-50 p-6 rounded-lg border-2 border-slate-200"><div class="mermaid">
+
+                graph TD
+                A[Transaction Service Called<br/>e.g., create_je_for_inventory_receipt] --> B{Get Inventory Account for Product};
+                B --> C{Is product.override_inventory_account set?};
+                C -- Yes --> D[Use Override Account];
+                C -- No --> E[Get Default Account from<br/>ProductTypeAccountingSettings];
+                D --> F[Create Journal Entry Line];
+                E --> F;
+                </div></div></div>
+                </section>
+
+
+<!-- Footer -->
+            <footer class="bg-gradient-to-r from-slate-100 to-slate-200 rounded-xl p-8 mt-12 border border-slate-300">
+                <div class="text-center">
+                    <div class="text-4xl mb-4">🏛️</div>
+                    <h3 class="text-2xl font-bold text-slate-800 mb-2">End of Archaeological Report</h3>
+                    <p class="text-slate-600 mb-4">This documentation represents a complete excavation of the Product Receipt module, from the initial user interface to the decoupled, signal-driven creation of immutable financial records, including the advanced accounting override system.</p>
+                    <div class="flex justify-center gap-4 text-sm text-slate-500 flex-wrap">
+                        <span>📅 May 24, 2024</span><span>•</span><span>🔍 The Django Code Archaeologist</span><span>•</span><span>📊 Complete Analysis</span>
+                    </div>
+                </div>
+            </footer>
+        </main>
+    </div>
+</div>
+</body>
+</html>

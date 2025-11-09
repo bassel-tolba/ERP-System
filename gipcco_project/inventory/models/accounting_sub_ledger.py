@@ -236,6 +236,20 @@ class CustomerPaymentApplication(models.Model):
     class Meta:
         unique_together = ('payment', 'invoice')
 
+
+class CustomerCreditMemoApplication(models.Model):
+    """Links a CustomerCreditMemo to a CustomerInvoice."""
+    credit_memo = models.ForeignKey('CustomerCreditMemo', on_delete=models.CASCADE, related_name='applications', verbose_name=_("Credit Memo"))
+    invoice = models.ForeignKey(CustomerInvoice, on_delete=models.PROTECT, related_name='credit_memo_applications', verbose_name=_("Invoice"))
+    amount_applied = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Amount Applied"))
+    application_date = models.DateField(auto_now_add=True, verbose_name=_("Application Date"))
+
+    class Meta:
+        unique_together = ('credit_memo', 'invoice')
+        verbose_name = _("Customer Credit Memo Application")
+        verbose_name_plural = _("Customer Credit Memo Applications")
+
+
 class CustomerCreditMemo(models.Model):
     class Status(models.TextChoices):
         DRAFT = 'draft', _('Draft')
@@ -269,6 +283,27 @@ class CustomerCreditMemo(models.Model):
         if not self.pk: # On creation
             self.unapplied_amount = self.total_amount
         super().save(*args, **kwargs)
+
+    @property
+    def total_applied(self):
+        """Calculates the total amount from this credit memo that has been applied."""
+        return self.applications.aggregate(total=models.Sum('amount_applied'))['total'] or Decimal('0.000')
+
+    def update_status(self, save=True):
+        """Updates the credit memo status based on the applied amount."""
+        total_applied = self.total_applied
+        self.unapplied_amount = self.total_amount - total_applied
+
+        if self.unapplied_amount <= Decimal('0.001'):
+            self.status = self.Status.APPLIED
+            self.unapplied_amount = Decimal('0.000') # Ensure it doesn't go negative
+        elif total_applied > 0:
+            self.status = self.Status.PARTIALLY_APPLIED
+        else:
+            self.status = self.Status.OPEN
+
+        if save:
+            self.save(update_fields=['status', 'unapplied_amount'])
 
 
 class SalesReturn(models.Model):

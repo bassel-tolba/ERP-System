@@ -25,12 +25,18 @@
             <div class="d-flex gap-2">
                 {% if batch.status == 'draft' %}
                     <button type="submit" form="batchEditForm" class="btn btn-primary"><i class="bi bi-check2-circle me-2"></i> حفظ التعديلات</button>
-                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#submitBatchModal"><i class="bi bi-send-check me-2"></i> إرسال للموافقة</button>
+                    {% if perms.inventory.can_submit_batch %}
+                        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#submitBatchModal"><i class="bi bi-send-check me-2"></i> إرسال للموافقة</button>
+                    {% endif %}
                 {% elif batch.status == 'pending_approval' %}
-                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#approveBatchModal"><i class="bi bi-check-all me-2"></i> موافقة</button>
-                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#rejectBatchModal"><i class="bi bi-x-octagon me-2"></i> إرجاع كمسودة</button>
+                    {% if perms.inventory.can_approve_batch %}
+                        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#approveBatchModal"><i class="bi bi-check-all me-2"></i> موافقة</button>
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#rejectBatchModal"><i class="bi bi-x-octagon me-2"></i> إرجاع كمسودة</button>
+                    {% endif %}
                 {% elif batch.status == 'approved' %}
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#startProductionModal"><i class="bi bi-play-circle me-2"></i> بدء الإنتاج</button>
+                    {% if perms.inventory.can_start_production %}
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#startProductionModal"><i class="bi bi-play-circle me-2"></i> بدء الإنتاج</button>
+                    {% endif %}
                 {% endif %}
             </div>
         </div>
@@ -108,11 +114,13 @@
              <h3 class="mb-0"><i class="bi bi-list-check me-2"></i> مواد وتكاليف التشغيلة</h3>
             {% if batch.status == 'draft' or batch.status == 'in_progress' %}
             <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#addBatchItemModal">
-                <i class="bi bi-plus-lg"></i> إضافة مادة جديدة
-            </button>
             {% endif %}
-        </div>
-        <div class="card-body p-0">
+            {# With the new stricter workflow, we only allow adding items in draft state #}
+            {% if batch.status == 'draft' %}
+                <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#addBatchItemModal">
+                    <i class="bi bi-plus-lg"></i> إضافة مادة جديدة
+                </button>
+            {% endif %}
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0" id="batchItemsTable">
                     <thead class="table-light">
@@ -187,6 +195,47 @@
 </div>
 </fieldset>
 </form>
+
+<!-- Continuation Batches Card (only shows if they exist) -->
+{% if batch.continuation_batches.exists %}
+<div class="card mt-4 shadow-sm">
+    <div class="card-header bg-info-subtle">
+        <h3 class="mb-0"><i class="bi bi-link-45deg me-2"></i> أوامر التشغيل التكميلية المرتبطة</h3>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">أمر التشغيل</th>
+                        <th>رقم التشغيلة</th>
+                        <th class="text-center">تاريخ الإنشاء</th>
+                        <th class="text-center">الحالة</th>
+                        <th class="text-center pe-3"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for continuation in batch.continuation_batches.all %}
+                    <tr>
+                        <td class="ps-3 fw-bold">{{ continuation.shop_order_number }}</td>
+                        <td>{{ continuation.batch_number }}</td>
+                        <td class="text-center">{{ continuation.creation_date|date:"Y-m-d" }}</td>
+                        <td class="text-center">
+                            <span class="badge bg-secondary">{{ continuation.get_status_display }}</span>
+                        </td>
+                        <td class="text-center pe-3">
+                            <a href="{% url 'inventory:view_batch' continuation.pk %}" class="btn btn-sm btn-outline-info">
+                                <i class="bi bi-eye"></i> عرض التفاصيل
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
 
 <!-- Workflow Modals -->
 <!-- Submit Modal -->

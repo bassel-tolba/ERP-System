@@ -12,6 +12,7 @@ from django.db.models.functions import Coalesce
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.contrib.auth.decorators import permission_required
 from django.views.decorators.http import require_POST
 
 from ..models import (
@@ -30,7 +31,7 @@ def batches(request: HttpRequest) -> HttpResponse:
     search_query = request.GET.get('q', '').strip()
     status_filter = request.GET.get('status', 'active')
 
-    base_queryset = Batch.objects.select_related('template__final_product')
+    base_queryset = Batch.objects.select_related('template__final_product', 'parent_batch')
 
     if status_filter == 'active':
         batch_list = base_queryset.exclude(status=Batch.Status.CANCELLED)
@@ -118,7 +119,11 @@ def create_batch(request: HttpRequest) -> HttpResponse:
 
 # --- REFACTORED: View Batch Details ---
 def view_batch(request: HttpRequest, pk: int) -> HttpResponse:
-    batch_info = get_object_or_404(Batch.objects.select_related('template__final_product', 'parent_batch'), pk=pk)
+    batch_info = get_object_or_404(
+        Batch.objects.select_related('template__final_product', 'parent_batch')
+        .prefetch_related('continuation_batches'),  # --- NEW: Efficiently fetch continuations ---
+        pk=pk
+    )
     
     # --- START: MODIFICATION - Fetch available stock for each item ---
     items = batch_info.items.select_related('primitive_product').order_by('primitive_product__name')
@@ -307,6 +312,7 @@ def add_batch_item(request: HttpRequest, batch_pk: int) -> HttpResponse:
 # --- BATCH WORKFLOW ACTIONS ---
 
 @require_POST
+@permission_required('inventory.can_submit_batch', raise_exception=True)
 def submit_batch_view(request: HttpRequest, pk: int) -> HttpResponse:
     """
     Handles submitting a batch for approval.
@@ -321,6 +327,7 @@ def submit_batch_view(request: HttpRequest, pk: int) -> HttpResponse:
 
 
 @require_POST
+@permission_required('inventory.can_approve_batch', raise_exception=True)
 def approve_batch_view(request: HttpRequest, pk: int) -> HttpResponse:
     """
     Handles approving a batch.
@@ -335,6 +342,7 @@ def approve_batch_view(request: HttpRequest, pk: int) -> HttpResponse:
 
 
 @require_POST
+@permission_required('inventory.can_approve_batch', raise_exception=True)
 def reject_batch_view(request: HttpRequest, pk: int) -> HttpResponse:
     """
     Handles rejecting a batch and returning it to Draft status.
@@ -353,6 +361,7 @@ def reject_batch_view(request: HttpRequest, pk: int) -> HttpResponse:
 
 
 @require_POST
+@permission_required('inventory.can_start_production', raise_exception=True)
 def start_production_view(request: HttpRequest, pk: int) -> HttpResponse:
     """
     Handles starting production for an approved batch.
@@ -401,6 +410,7 @@ def return_batch_item_view(request: HttpRequest, item_pk: int) -> HttpResponse:
 
 # --- REFACTORED: Delete Batch View ---
 @require_POST
+@permission_required('inventory.can_cancel_batch', raise_exception=True)
 def cancel_batch_view(request: HttpRequest, pk: int) -> HttpResponse:
     """
     Handles cancelling a batch non-destructively by calling the batch service.

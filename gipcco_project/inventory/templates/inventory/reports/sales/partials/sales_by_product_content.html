@@ -1,0 +1,36 @@
+<!-- templates/inventory/reports/sales/partials/sales_by_product_content.html -->
+{% load i18n %}
+{% load humanize %}
+
+<table class="table table-striped mt-3">
+    <thead>
+        <tr>
+            <th>{% trans "اسم المنتج" %}</th>
+            <th class="text-center">{% trans "الوحدة" %}</th>
+            <th class="text-center">{% trans "الكمية المباعة" %}</th>
+            <th class="text-end">{% trans "إجمالي الإيرادات" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in report_data %}
+            <tr>
+                <td>{{ item.product_name }}</td>
+                <td class="text-center">{{ item.unit }}</td>
+                <td class="text-center">{{ item.total_quantity_sold|floatformat:2|intcomma }}</td>
+                <td class="text-end">{{ item.total_revenue|intcomma }}</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="4" class="text-center">{% trans "لا توجد بيانات مبيعات للمنتجات في الفترة المحددة." %}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+    {% if report_data %}
+        <tfoot>
+            <tr class="font-weight-bold table-active">
+                <td colspan="3">{% trans "الإجمالي الكلي للإيرادات" %}</td>
+                <td class="text-end">{{ grand_total|intcomma }}</td>
+            </tr>
+        </tfoot>
+    {% endif %}
+</table>

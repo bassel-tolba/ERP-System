@@ -18,7 +18,7 @@ from .models import (
 from .services import overhead_service, accounting_service
 from .services.accounting_service import (
     create_je_for_inventory_receipt,
-    create_je_for_production_consumption,
+    # create_je_for_production_consumption,
     create_je_for_finished_goods_receipt,
     create_reversing_je_for_correction,
     _get_product_inventory_account

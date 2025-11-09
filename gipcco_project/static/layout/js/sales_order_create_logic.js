@@ -38,8 +38,8 @@ function initSalesOrderCreateLogic(container) {
               const data = await response.json();
               availableStock = data.map(item => ({
                   value: item.id,
-                  text: `${item.product_name} | تشغيلة: ${item.batch_number} | متاح: ${item.available_qty} ${item.unit}`,
-                  available_qty: item.available_qty
+                  text: `${item.product_name} | تشغيلة: ${item.batch_number} | متاح: ${item.available_quantity} ${item.unit}`,
+                  available_qty: item.available_quantity
               }));
               console.info(`%c[SalesOrderCreate] Successfully fetched ${availableStock.length} stock items.`, 'color: #2ecc71;');
           } catch (error) {

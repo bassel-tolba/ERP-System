@@ -54,6 +54,7 @@ window.initializePluginsInContent = function (container = document) {
 		"#overhead-allocation-workspace-container": initOverheadAllocationWorkspaceLogic,
 		"#variance-allocation-content": initInventoryCountsLogic,
 		"#createCostPoolModal": initCostPoolsListLogic, // <-- ADDED THIS LINE
+        "#arAgingReportForm": initArAgingReportLogic,
 		// --- NEW: Employee Financials ---
 		"#employee-advances-container": initEmployeeAdvanceDetailLogic,
 		"#manage-employees-container": initManageEmployeesLogic,

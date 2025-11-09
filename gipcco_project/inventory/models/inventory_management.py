@@ -142,9 +142,32 @@ class Batch(models.Model):
         verbose_name = _("Production Plan")
         verbose_name_plural = _("Production Plans")
         ordering = ['-creation_date', '-id']
+        permissions = [
+            ("can_submit_batch", "Can submit batch for approval"),
+            ("can_approve_batch", "Can approve or reject a batch"),
+            ("can_start_production", "Can start production for a batch"),
+            ("can_cancel_batch", "Can cancel a batch"),
+        ]
 
     def __str__(self):
         return f"Batch {self.batch_number} (SO: {self.shop_order_number})"
+
+    def clean(self):
+        """
+        Prevents circular dependencies where a batch is its own ancestor.
+        """
+        super().clean()
+        if self.parent_batch:
+            # Check for immediate self-parenting
+            if self.parent_batch.pk == self.pk:
+                raise ValidationError(_("A batch cannot be its own parent."))
+            
+            # Traverse up the hierarchy to detect deeper circular references
+            ancestor = self.parent_batch
+            while ancestor:
+                if ancestor.pk == self.pk:
+                    raise ValidationError(_("Circular dependency detected. A batch cannot be a continuation of one of its own descendants."))
+                ancestor = ancestor.parent_batch
 
     @property
     def number_of_batches_in_plan(self):
@@ -420,6 +443,19 @@ class FinishedProductReceipt(models.Model):
 
     def __str__(self):
         return f"Receipt for Batch #{self.individual_batch_number} from Plan {self.batch.shop_order_number}"
+
+    @property
+    def total_receipt_cost(self):
+        """Calculates the total cost including allocated overhead."""
+        return (self.total_cost or Decimal('0')) + (self.allocated_overhead_cost or Decimal('0'))
+
+    @property
+    def unit_cost(self):
+        """Calculates the unit cost of the finished product for this receipt."""
+        if self.total_quantity_produced and self.total_quantity_produced > 0:
+            # Convert float to Decimal for accurate division
+            return (self.total_receipt_cost / Decimal(str(self.total_quantity_produced))).quantize(Decimal('0.001'))
+        return Decimal('0.000')
 
 
 class ReceiptSubBatch(models.Model):

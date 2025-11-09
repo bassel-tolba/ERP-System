@@ -245,16 +245,20 @@ function initCreateBatchLogic(container) {
 				return;
 			}
 			try {
-				const response = await fetch(window.appUrls.apiBatchDetails.replace("<batchId>", parentBatchId));
+				// --- CORRECTED URL CONSTRUCTION ---
+				const apiUrl = window.appUrls.apiBatchDetails.replace("0", parentBatchId);
+				const response = await fetch(apiUrl);
+				// --- END CORRECTION ---
 				if (!response.ok) throw new Error("Batch not found");
 				const data = await response.json();
 
 				// --- CORRECTED LOGIC ---
 				shopOrderInput.value = data.shop_order_number; // Auto-fill SO Number
-				batchFromInput.value = ""; // Clear the batch number for the new continuation
-				batchToInput.value = ""; // Clear the batch number for the new continuation
+				batchFromInput.value = data.batch_number_from; // Auto-fill Batch Number From
+				batchToInput.value = data.batch_number_to; // Auto-fill Batch Number To
 				templateSelect.setValue(data.template_id); // Auto-select template
 				loadTemplate(); // Manually load items for the selected template
+				recalculateQuantities(); // Recalculate quantities based on the auto-filled batch numbers
 				// --- END CORRECTION ---
 			} catch (error) {
 				console.error("Failed to fetch parent batch details:", error);

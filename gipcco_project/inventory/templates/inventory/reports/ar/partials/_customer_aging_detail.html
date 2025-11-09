@@ -1,0 +1,90 @@
+<!-- templates/inventory/reports/ar/partials/_customer_aging_detail.html -->
+{% load humanize %}
+{% load i18n %}
+
+<div class="p-3 bg-light border-top border-bottom">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0">تفاصيل حساب: {{ details.customer.name }}</h5>
+        <a href="{% url 'inventory:ar_customer_detail_api' customer_id %}?as_of_date={{ as_of_date }}&export_pdf=1"
+           class="btn btn-sm btn-outline-danger"
+           target="_blank"
+           title="تصدير التفاصيل إلى PDF">
+            <i class="fas fa-file-pdf"></i> تصدير PDF
+        </a>
+    </div>
+    {% for bucket_name, invoices in details.invoices_by_bucket.items %}
+        <h6 class="text-primary mt-2">{% trans "فواتير" %} {% trans bucket_name|title %}</h6>
+        <table class="table table-sm table-bordered mb-3">
+            <thead class="table-secondary">
+                <tr>
+                    <th>{% trans "رقم الفاتورة" %}</th>
+                    <th>{% trans "تاريخ الفاتورة" %}</th>
+                    <th>{% trans "تاريخ الاستحقاق" %}</th>
+                    <th class="text-end">{% trans "المبلغ الإجمالي" %}</th>
+                    <th class="text-end">{% trans "المدفوع حتى تاريخه" %}</th>
+                    <th class="text-end">{% trans "الرصيد المستحق" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for inv in invoices %}
+                <tr>
+                    <td><a href="{% url 'inventory:view_customer_invoice' inv.pk %}" target="_blank">#{{ inv.invoice_number }}</a></td>
+                    <td>{{ inv.invoice_date|date:"Y-m-d" }}</td>
+                    <td>{{ inv.due_date|date:"Y-m-d" }}</td>
+                    <td class="text-end">{{ inv.total_amount|intcomma }}</td>
+                    <td class="text-end">{{ inv.paid_to_date|intcomma }}</td>
+                    <td class="text-end fw-bold">{{ inv.calculated_balance_due|intcomma }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endfor %}
+
+    {% if details.unapplied_payments or details.unapplied_memos %}
+        <h6 class="text-success mt-3">{% trans "أرصدة دائنة غير مطبقة" %}</h6>
+        {% if details.unapplied_payments %}
+        <table class="table table-sm table-bordered">
+            <thead class="table-secondary">
+                <tr>
+                    <th>{% trans "تاريخ الدفع" %}</th>
+                    <th>{% trans "الوصف" %}</th>
+                    <th class="text-end">{% trans "المبلغ الأصلي" %}</th>
+                    <th class="text-end">{% trans "المبلغ غير المطبق" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for payment in details.unapplied_payments %}
+                <tr>
+                    <td>{{ payment.payment_date|date:"Y-m-d" }}</td>
+                    <td>{{ payment.description }}</td>
+                    <td class="text-end">{{ payment.amount|intcomma }}</td>
+                    <td class="text-end fw-bold">({{ payment.unapplied_amount|intcomma }})</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+        {% if details.unapplied_memos %}
+        <table class="table table-sm table-bordered mt-2">
+            <thead class="table-secondary">
+                <tr>
+                    <th>{% trans "تاريخ إشعار الدائن" %}</th>
+                    <th>{% trans "رقم الإشعار" %}</th>
+                    <th class="text-end">{% trans "المبلغ الأصلي" %}</th>
+                    <th class="text-end">{% trans "المبلغ غير المطبق" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for memo in details.unapplied_memos %}
+                <tr>
+                    <td>{{ memo.memo_date|date:"Y-m-d" }}</td>
+                    <td>{{ memo.memo_number }}</td>
+                    <td class="text-end">{{ memo.total_amount|intcomma }}</td>
+                    <td class="text-end fw-bold">({{ memo.unapplied_amount|intcomma }})</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+    {% endif %}
+</div>

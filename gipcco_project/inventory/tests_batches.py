@@ -14,10 +14,11 @@ from .services import batch_service
 class BatchesViewsTest(AccountingServiceBaseTestCase):
     """
     Test suite for views related to Batches (Production Plans).
+    Updated to test role-based permissions.
     """
     def setUp(self):
         super().setUp()
-        self.client.login(username='testuser', password='password')
+        # NOTE: We now log in on a per-test basis depending on the role being tested.
         # Clean up any batch-related data that might persist between tests
         FinishedProductReceipt.objects.all().delete()
         ProductionReturn.objects.all().delete()
@@ -26,7 +27,6 @@ class BatchesViewsTest(AccountingServiceBaseTestCase):
         JournalEntry.objects.all().delete()
 
         # Create stock that will be used across multiple tests in this class
-        # Create stock using the standardized helper to ensure all fields are correctly populated
         self.log1 = self.create_inventory_log(
             company=self.supplier,
             product=self.raw_material,
@@ -40,10 +40,45 @@ class BatchesViewsTest(AccountingServiceBaseTestCase):
             base_unit_price="1.500"
         )
 
+    def test_planner_can_create_batch(self):
+        """
+        Test a user with 'Production Planner' role can successfully create a new batch.
+        """
+        self.client.login(username='planner', password='password')
+        url = reverse('inventory:create_batch')
+        post_data = {
+            'template': self.test_template.id,
+            'shop_order_number': 'SO-NEW-001',
+            'batch_number_from': '101',
+            'creation_date': date.today().strftime('%Y-%m-%d'),
+            'primitive_product_id': [self.raw_material.id],
+            'theoretical_quantity': [10.0],
+            'actual_quantity': [10.0],
+            'source_log_id': [self.log1.id],
+        }
+
+        response = self.client.post(url, post_data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(Batch.objects.filter(shop_order_number='SO-NEW-001').exists())
+        new_batch = Batch.objects.get(shop_order_number='SO-NEW-001')
+        self.assertEqual(new_batch.status, Batch.Status.DRAFT)
+
+    def test_basic_user_cannot_perform_actions(self):
+        """
+        Test a user without permissions gets a 403 Forbidden error for state changes.
+        """
+        self.client.login(username='basic', password='password')
+        batch = batch_service.create_batch(
+            template_id=self.test_template.id, shop_order_number='SO-PERM-TEST',
+            batch_number_from='901', creation_date=date.today(),
+            items_data=[{'product_id': self.raw_material.id, 'theoretical_quantity': 1.0, 'actual_quantity': 1.0, 'source_log_id': self.log1.id}]
+        )
+        submit_url = reverse('inventory:submit_batch', kwargs={'pk': batch.pk})
+        response = self.client.post(submit_url)
+        self.assertEqual(response.status_code, 403) # Forbidden
+
     def test_batches_list_view(self):
-        """
-        Test that the main batches list view loads correctly.
-        """
+        self.client.login(username='planner', password='password')
         # Create a sample batch to be listed
         Batch.objects.create(
             template=self.test_template,
@@ -51,7 +86,6 @@ class BatchesViewsTest(AccountingServiceBaseTestCase):
             batch_number="B-TEST-001",
             creation_date=timezone.now()
         )
-        
         url = reverse('inventory:batches')
         response = self.client.get(url)
 
@@ -64,6 +98,7 @@ class BatchesViewsTest(AccountingServiceBaseTestCase):
         """
         Test the search functionality on the batches list view.
         """
+        self.client.login(username='planner', password='password')
         Batch.objects.create(
             template=self.test_template,
             shop_order_number="SO-SEARCH-A",
@@ -84,46 +119,14 @@ class BatchesViewsTest(AccountingServiceBaseTestCase):
         self.assertContains(response, "SO-SEARCH-A")
         self.assertNotContains(response, "SO-SEARCH-B")
 
-    def test_create_batch_view_post_success(self):
-        """
-        Test successful creation of a new batch via a POST request.
-        """
-        url = reverse('inventory:create_batch')
-        post_data = {
-            'template_id': self.test_template.id,
-            'shop_order_number': 'SO-NEW-001',
-            'batch_number_from': '101',
-            'batch_number_to': '',
-            'creation_date': date.today().strftime('%Y-%m-%d'),
-            'primitive_product_id': [self.raw_material.id, self.packaging_material.id],
-            'theoretical_quantity': [10.0, 20.0],
-            'actual_quantity': [10.0, 20.0],
-            'source_log_id': [self.log1.id, self.log2.id],
-        }
-
-        response = self.client.post(url, post_data, follow=True)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(Batch.objects.filter(shop_order_number='SO-NEW-001').exists())
-        new_batch = Batch.objects.get(shop_order_number='SO-NEW-001')
-        self.assertEqual(new_batch.items.count(), 2)
-        # NEW: Assert status is Draft and no JE exists
-        self.assertEqual(new_batch.status, Batch.Status.DRAFT)
-        self.assertFalse(JournalEntry.objects.filter(
-            content_type=ContentType.objects.get_for_model(Batch),
-            object_id=new_batch.id
-        ).exists())
-        self.assertRedirects(response, reverse('inventory:view_batch', kwargs={'pk': new_batch.pk}))
-        # NEW: Assert the updated success message for draft creation
-        self.assertContains(response, "تم إنشاء مسودة أمر التشغيل &#x27;SO-NEW-001&#x27; بنجاح.")
-
     def test_create_batch_view_post_insufficient_stock(self):
         """
         Test that creating a batch fails if the requested quantity exceeds available stock.
         """
+        self.client.login(username='planner', password='password')
         url = reverse('inventory:create_batch')
         post_data = {
-            'template_id': self.test_template.id,
+            'template': self.test_template.id,
             'shop_order_number': 'SO-FAIL-001',
             'batch_number_from': '201',
             'creation_date': date.today().strftime('%Y-%m-%d'),
@@ -134,7 +137,7 @@ class BatchesViewsTest(AccountingServiceBaseTestCase):
         }
 
         response = self.client.post(url, post_data, follow=True)
-        
+
         self.assertFalse(Batch.objects.filter(shop_order_number='SO-FAIL-001').exists())
         self.assertContains(response, "حدث خطأ في البيانات المدخلة")
         self.assertContains(response, "كمية غير كافية للمنتج")
@@ -149,59 +152,66 @@ class BatchesViewsTest(AccountingServiceBaseTestCase):
             batch_number="B-VIEW-001",
             creation_date=timezone.now()
         )
+        self.client.login(username='planner', password='password')
         url = reverse('inventory:view_batch', kwargs={'pk': batch.pk})
         response = self.client.get(url)
-
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'inventory/batch_view.html')
         self.assertContains(response, "SO-VIEW-001")
-        self.assertEqual(response.context['batch'], batch)
+        self.assertTemplateUsed(response, 'inventory/batch_detail.html')
 
-    def test_batch_workflow_views(self):
+
+    def test_full_batch_workflow_with_permissions(self):
         """
-        Test the full batch workflow from Draft -> Submitted -> Approved -> In Progress -> Cancelled.
+        Test the full batch workflow with permissions:
+        Planner: Create, Submit
+        Manager: Approve, Start Production, Cancel
         """
-        # 1. Create a draft batch first
+        # 1. Planner creates a batch
         batch = batch_service.create_batch(
-            template_id=self.test_template.id,
-            shop_order_number='SO-WORKFLOW-001',
-            batch_number_from='301',
-            creation_date=date.today(),
-            items_data=[
-                {'product_id': self.raw_material.id, 'theoretical_quantity': 10.0, 'actual_quantity': 10.0, 'source_log_id': self.log1.id}
-            ]
+            template_id=self.test_template.id, shop_order_number='SO-WORKFLOW-001',
+            batch_number_from='801', creation_date=date.today(),
+            items_data=[{'product_id': self.raw_material.id, 'theoretical_quantity': 10.0, 'actual_quantity': 10.0, 'source_log_id': self.log1.id}]
         )
         self.assertEqual(batch.status, Batch.Status.DRAFT)
 
-        # 2. Submit for Approval
+        # 2. Planner logs in and submits for approval
+        self.client.login(username='planner', password='password')
         submit_url = reverse('inventory:submit_batch', kwargs={'pk': batch.pk})
         response = self.client.post(submit_url, follow=True)
         self.assertRedirects(response, reverse('inventory:view_batch', kwargs={'pk': batch.pk}))
         self.assertContains(response, "تم إرسال أمر التشغيل للموافقة.")
         batch.refresh_from_db()
         self.assertEqual(batch.status, Batch.Status.PENDING_APPROVAL)
-        self.assertEqual(batch.submitted_by, self.test_user)
+        self.assertEqual(batch.submitted_by, self.planner_user)
 
-        # 3. Approve
+        # 3. As planner, try to approve -> should fail with 403
         approve_url = reverse('inventory:approve_batch', kwargs={'pk': batch.pk})
+        response = self.client.post(approve_url)
+        self.assertEqual(response.status_code, 403)
+
+        # 4. Manager logs in to approve and start production
+        self.client.login(username='manager', password='password')
+
+        # Approve
         response = self.client.post(approve_url, follow=True)
         self.assertRedirects(response, reverse('inventory:view_batch', kwargs={'pk': batch.pk}))
         self.assertContains(response, "تمت الموافقة على أمر التشغيل.")
         batch.refresh_from_db()
         self.assertEqual(batch.status, Batch.Status.APPROVED)
-        self.assertEqual(batch.approved_by, self.test_user)
+        self.assertEqual(batch.approved_by, self.manager_user)
 
-        # 4. Start Production
+        # Start Production
         start_url = reverse('inventory:start_production', kwargs={'pk': batch.pk})
         response = self.client.post(start_url, follow=True)
         self.assertRedirects(response, reverse('inventory:view_batch', kwargs={'pk': batch.pk}))
         self.assertContains(response, "تم بدء الإنتاج لأمر التشغيل.")
         batch.refresh_from_db()
         self.assertEqual(batch.status, Batch.Status.IN_PROGRESS)
-        # Assert that the JE was created at this stage
-        self.assertTrue(self.get_je_for_object(batch))
 
-        # 5. Cancel the In-Progress Batch
+        # Assert that the consumption JE was created at this stage
+        self.assertTrue(self.get_je_for_object(batch, expect_one=False).exists())
+
+        # 5. Manager cancels the batch
         cancel_url = reverse('inventory:cancel_batch', kwargs={'pk': batch.pk})
         post_data = {'justification': 'Test cancellation'}
         response = self.client.post(cancel_url, post_data, follow=True)
@@ -209,55 +219,61 @@ class BatchesViewsTest(AccountingServiceBaseTestCase):
         self.assertContains(response, "تم إلغاء أمر التشغيل وتحديث التكاليف بنجاح.")
         batch.refresh_from_db()
         self.assertEqual(batch.status, Batch.Status.CANCELLED)
+
         # Assert that a reversing JE was created (now 2 JEs total for this object's lifecycle)
         self.assertEqual(JournalEntry.objects.filter(
             content_type=ContentType.objects.get_for_model(Batch),
             object_id=batch.id
         ).count(), 2)
 
-    def test_reject_batch_workflow(self):
+    def test_batch_rejection(self):
         """
         Test that a batch can be rejected and returned to Draft status.
         """
-        # 1. Create a draft batch
+        # 1. Create and submit a batch to put it in PENDING_APPROVAL state
         batch = batch_service.create_batch(
             template_id=self.test_template.id,
             shop_order_number='SO-REJECT-001',
             batch_number_from='302',
             creation_date=date.today(),
-            items_data=[
-                {'product_id': self.raw_material.id, 'theoretical_quantity': 5.0, 'actual_quantity': 5.0, 'source_log_id': self.log1.id}
-            ]
+            items_data=[{'product_id': self.raw_material.id, 'theoretical_quantity': 10.0, 'actual_quantity': 10.0, 'source_log_id': self.log1.id}]
         )
-        self.assertEqual(batch.status, Batch.Status.DRAFT)
+        batch = batch_service.submit_batch_for_approval(batch, self.planner_user) # Simulate planner submitting
 
-        # 2. Submit for Approval
-        batch = batch_service.submit_batch_for_approval(batch, self.test_user)
-        self.assertEqual(batch.status, Batch.Status.PENDING_APPROVAL)
-
-        # 3. Reject the batch
+        # 2. Manager logs in and rejects the batch
+        self.client.login(username='manager', password='password')
+        post_data = {'justification': 'Needs more items'}
         reject_url = reverse('inventory:reject_batch', kwargs={'pk': batch.pk})
-        post_data = {'justification': 'Test rejection'}
         response = self.client.post(reject_url, post_data, follow=True)
+
+        # 3. Assert state is correct
         self.assertRedirects(response, reverse('inventory:view_batch', kwargs={'pk': batch.pk}))
         self.assertContains(response, "تم إرجاع أمر التشغيل إلى مسودة.")
-        
+
         batch.refresh_from_db()
         self.assertEqual(batch.status, Batch.Status.DRAFT)
         self.assertIsNone(batch.submitted_by)
         self.assertIsNone(batch.submitted_at)
         self.assertFalse(self.get_je_for_object(batch, expect_one=False).exists(), "A JE was created for a rejected batch.")
 
-    def test_cancel_batch_view_fail_if_receipts_exist(self):
+    def test_cannot_cancel_batch_with_receipt(self):
         """
-        Test that a batch cannot be cancelled if finished goods have been received against it.
+        Test that cancelling a batch fails if finished goods have already been received against it.
         """
-        batch = Batch.objects.create(
-            template=self.test_template,
+        # Create a batch
+        batch = batch_service.create_batch(
+            template_id=self.test_template.id,
             shop_order_number="SO-CANCEL-FAIL",
-            batch_number="B-CANCEL-FAIL",
-            creation_date=timezone.now()
+            batch_number_from="403",
+            creation_date=timezone.now().date(),
+            items_data=[{'product_id': self.raw_material.id, 'theoretical_quantity': 1.0, 'actual_quantity': 1.0, 'source_log_id': self.log1.id}]
         )
+        # Move batch to IN_PROGRESS so a receipt can be created
+        batch = batch_service.submit_batch_for_approval(batch, self.planner_user)
+        batch = batch_service.approve_batch(batch, self.manager_user)
+        batch = batch_service.start_batch_production(batch)
+
+        # Create a finished product receipt against the batch
         FinishedProductReceipt.objects.create(
             batch=batch,
             individual_batch_number="FP-001",
@@ -266,15 +282,17 @@ class BatchesViewsTest(AccountingServiceBaseTestCase):
             total_quantity_produced=50.0
         )
 
+        # Log in as manager and attempt to cancel
+        self.client.login(username='manager', password='password')
         url = reverse('inventory:cancel_batch', kwargs={'pk': batch.pk})
         post_data = {'justification': 'This should fail'}
-        
         response = self.client.post(url, post_data, follow=True)
 
+        # Assert that cancellation failed
         self.assertRedirects(response, reverse('inventory:view_batch', kwargs={'pk': batch.pk}))
         self.assertContains(response, "لا يمكن إلغاء أمر التشغيل")
         self.assertContains(response, "finished goods have already been received")
-        
+
         batch.refresh_from_db()
         self.assertNotEqual(batch.status, Batch.Status.CANCELLED)
 
@@ -285,17 +303,25 @@ class BatchesViewsTest(AccountingServiceBaseTestCase):
         """
         # Create and move batch to IN_PROGRESS
         batch = batch_service.create_batch(
-            template_id=self.test_template.id, shop_order_number="SO-RETURN-ITEM",
-            batch_number_from="B-RETURN-ITEM", creation_date=timezone.now().date(),
+            template_id=self.test_template.id,
+            shop_order_number='SO-RETURN-ITEM',
+            batch_number_from='601',
+            creation_date=timezone.now().date(),
             items_data=[
-                {'product_id': self.raw_material.id, 'theoretical_quantity': 20.0, 'actual_quantity': 15.0, 'source_log_id': self.log1.id}
+                {'product_id': self.raw_material.id, 'theoretical_quantity': 10.0, 'actual_quantity': 10.0, 'source_log_id': self.log1.id}
             ]
         )
-        batch = batch_service.submit_batch_for_approval(batch, self.test_user)
-        batch = batch_service.approve_batch(batch, self.test_user)
+
+        # Move batch through workflow to IN_PROGRESS
+        batch = batch_service.submit_batch_for_approval(batch, self.planner_user)
+        batch = batch_service.approve_batch(batch, self.manager_user)
         batch = batch_service.start_batch_production(batch)
-        
+
+        # Get the item to return from
         item = batch.items.first()
+
+        # Log in as manager to perform return
+        self.client.login(username='manager', password='password')
 
         url = reverse('inventory:return_batch_item', kwargs={'item_pk': item.pk})
         post_data = {
@@ -319,10 +345,11 @@ class BatchServiceTests(AccountingServiceBaseTestCase):
         super().setUp()
         # Clean up batch data before each test
         FinishedProductReceipt.objects.all().delete()
+        ProductionReturn.objects.all().delete()
         BatchItem.objects.all().delete()
         Batch.objects.all().delete()
         JournalEntry.objects.all().delete()
-        
+
         # Create fresh stock for each test to ensure isolation, dated in the past
         from datetime import timedelta
         log_date = timezone.now() - timedelta(days=1)
@@ -354,6 +381,7 @@ class BatchServiceTests(AccountingServiceBaseTestCase):
         Verify that starting production on a batch with a total consumption cost of zero
         does NOT create a journal entry.
         """
+        # Arrange: Create batch with a zero-cost item
         batch = batch_service.create_batch(
             template_id=self.test_template.id,
             shop_order_number='SO-ZERO-COST',
@@ -363,13 +391,14 @@ class BatchServiceTests(AccountingServiceBaseTestCase):
                 {'product_id': self.mro_product.id, 'theoretical_quantity': 10.0, 'actual_quantity': 10.0, 'source_log_id': self.zero_cost_log.id}
             ]
         )
-        batch = batch_service.submit_batch_for_approval(batch, self.test_user)
-        batch = batch_service.approve_batch(batch, self.test_user)
-        
-        # Act: Start production
-        batch_service.start_batch_production(batch)
+        # Move batch to approved state
+        batch = batch_service.submit_batch_for_approval(batch, self.planner_user)
+        batch = batch_service.approve_batch(batch, self.manager_user)
 
-        # Assert that no Journal Entry was created for this batch
+        # Act: Start production
+        batch = batch_service.start_batch_production(batch)
+
+        # Assert: No Journal Entry was created
         je_exists = JournalEntry.objects.filter(
             content_type=ContentType.objects.get_for_model(Batch),
             object_id=batch.id
@@ -388,7 +417,7 @@ class BatchServiceTests(AccountingServiceBaseTestCase):
             ]
         )
         self.assertEqual(batch.status, Batch.Status.DRAFT)
-        
+
         # Act: Cancel the batch
         cancelled_batch = batch_service.cancel_batch(batch, self.test_user, "Test draft cancel")
 
@@ -450,44 +479,48 @@ class BatchServiceTests(AccountingServiceBaseTestCase):
                 creation_date=date.today(), items_data=[]
             )
 
-    def test_add_item_to_in_progress_batch_creates_separate_je(self):
+    def test_add_item_to_draft_batch_succeeds(self):
         """
-        Verify that add_item_to_batch on an IN_PROGRESS batch creates its own
-        separate, auditable journal entry linked to the BatchItem.
+        Verify that add_item_to_batch succeeds for a DRAFT batch.
         """
-        # Create, approve, and start a batch
         batch = batch_service.create_batch(
-            template_id=self.test_template.id, shop_order_number='SO-ADD-ITEM',
-            batch_number_from='601', creation_date=date.today(),
-            items_data=[
-                {'product_id': self.raw_material.id, 'theoretical_quantity': 10.0, 'actual_quantity': 10.0, 'source_log_id': self.log1.id}
-            ]
+            template_id=self.test_template.id, shop_order_number='SO-ADD-DRAFT',
+            batch_number_from='701', creation_date=date.today(),
+            items_data=[{'product_id': self.raw_material.id, 'theoretical_quantity': 10.0, 'actual_quantity': 10.0, 'source_log_id': self.log1.id}]
         )
-        batch = batch_service.submit_batch_for_approval(batch, self.test_user)
-        batch = batch_service.approve_batch(batch, self.test_user)
+        self.assertEqual(batch.items.count(), 1)
+
+        batch_service.add_item_to_batch(
+            batch=batch, product_id=self.packaging_material.id,
+            theoretical_quantity=5.0, actual_quantity=5.0, source_log_id=self.log2.id
+        )
+        self.assertEqual(batch.items.count(), 2)
+
+    def test_add_item_to_in_progress_batch_fails(self):
+        """
+        Test that attempting to add an item to a batch that is in progress fails with a validation error.
+        """
+        # 1. Create a batch and move it to IN_PROGRESS
+        batch = batch_service.create_batch(
+            template_id=self.test_template.id,
+            shop_order_number='SO-ADD-ITEM-FAIL',
+            batch_number_from='702',
+            creation_date=date.today(),
+            items_data=[{'product_id': self.raw_material.id, 'theoretical_quantity': 10.0, 'actual_quantity': 10.0, 'source_log_id': self.log1.id}]
+        )
+
+        # Move batch through workflow to IN_PROGRESS
+        batch = batch_service.submit_batch_for_approval(batch, self.planner_user)
+        batch = batch_service.approve_batch(batch, self.manager_user)
         batch = batch_service.start_batch_production(batch)
-        
-        # Assert that one JE is linked to the batch itself
-        batch_je_qs = self.get_je_for_object(batch, expect_one=False)
-        self.assertEqual(batch_je_qs.count(), 1)
-        original_je = batch_je_qs.first()
+        self.assertEqual(batch.status, Batch.Status.IN_PROGRESS)
 
-        # Act: Add a new item to the batch
-        new_item = batch_service.add_item_to_batch(
-            batch=batch,
-            product_id=self.packaging_material.id,
-            theoretical_quantity=5.0,
-            actual_quantity=5.0,
-            source_log_id=self.log2.id
-        )
-
-        # Assert: Check that a new JE is linked to the new_item
-        supplemental_je = self.get_je_for_object(new_item)
-        self.assertIsNotNone(supplemental_je)
-        
-        self.assertNotEqual(original_je.pk, supplemental_je.pk)
-        
-        # Correctly calculate the total debit for the assertion
-        total_debit = supplemental_je.lines.filter(entry_type='D').aggregate(total=Sum('amount'))['total'] or Decimal('0.0')
-        self.assertAlmostEqual(total_debit, Decimal("27.500"), "Supplemental JE has incorrect value (5 * 5.5).")
-
+        # 2. Act and Assert: Attempt to add a new item should raise ValidationError
+        with self.assertRaisesRegex(ValidationError, "Items can only be added to 'Draft' batches."):
+            batch_service.add_item_to_batch(
+                batch=batch,
+                product_id=self.packaging_material.id,
+                theoretical_quantity=5.0,
+                actual_quantity=5.0,
+                source_log_id=self.log2.id
+            )

@@ -43,12 +43,15 @@ function initBatchViewLogic(container) {
 				parentBatchSelect.on("change", async function (parentBatchId) {
 					if (!parentBatchId) return; // Do nothing if selection is cleared
 					try {
-						const apiUrl = window.appUrls.apiBatchDetails.replace("<batchId>", parentBatchId);
+						// --- CORRECTED URL CONSTRUCTION ---
+						const apiUrl = window.appUrls.apiBatchDetails.replace("0", parentBatchId);
 						const response = await fetch(apiUrl);
 						if (!response.ok) throw new Error("Batch details not found");
 						const data = await response.json();
-						// Automatically update the Shop Order number to match the selected parent
+						// --- CORRECTED AUTO-FILL LOGIC ---
 						shopOrderInputEdit.value = data.shop_order_number;
+						batchFromInput.value = data.batch_number_from;
+						batchToInput.value = data.batch_number_to;
 					} catch (error) {
 						console.error("Failed to fetch parent batch details for editing:", error);
 						alert("خطأ في تحميل بيانات الأمر الأصلي.");

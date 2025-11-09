@@ -28,12 +28,23 @@
                         <td>{{ plan.template.final_product.name }}</td>
                         <td class="text-center">{{ plan.creation_date|date:"Y-m-d" }}</td>
                         <td class="text-center">
-                            <span class="badge rounded-pill text-bg-secondary">{{ plan.received_count }} / {{ plan.number_of_batches_in_plan }}</span>
+                            <span class="badge rounded-pill text-bg-secondary me-1">{{ plan.received_count }} / {{ plan.number_of_batches_in_plan }}</span>
+                            {% if plan.pending_continuations %}
+                                <i class="bi bi-exclamation-triangle-fill text-warning" data-bs-toggle="tooltip" title="لا يمكن الاستلام لوجود أوامر تكميلية لم تبدأ بعد"></i>
+                            {% endif %}
                         </td>
                         <td class="text-center pe-3">
-                            <a href="{% url 'inventory:view_batch' plan.pk %}" class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-box-arrow-in-right"></i> استلام البقية
-                            </a>
+                            {% if plan.pending_continuations %}
+                                <span class="d-inline-block" tabindex="0" data-bs-toggle="tooltip" title="لا يمكن الاستلام لوجود أوامر تكميلية لم تبدأ بعد">
+                                    <a href="#" class="btn btn-sm btn-outline-primary disabled" aria-disabled="true" role="button">
+                                        <i class="bi bi-box-arrow-in-right"></i> استلام البقية
+                                    </a>
+                                </span>
+                            {% else %}
+                                <a href="{% url 'inventory:view_batch' plan.pk %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-box-arrow-in-right"></i> استلام البقية
+                                </a>
+                            {% endif %}
                         </td>
                     </tr>
                     {% empty %}

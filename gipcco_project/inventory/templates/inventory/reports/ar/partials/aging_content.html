@@ -1,0 +1,81 @@
+<!-- templates/inventory/reports/ar/partials/aging_content.html -->
+{% load i18n %}
+{% load humanize %}
+
+<table class="table table-sm table-bordered table-hover">
+    <thead class="thead-light">
+        <tr>
+            <th>{% trans "العميل" %}</th>
+            <th class="text-right">{% trans "الحالي" %}</th>
+            <th class="text-right">{% trans "1-30 يوم" %}</th>
+            <th class="text-right">{% trans "31-60 يوم" %}</th>
+            <th class="text-right">{% trans "61-90 يوم" %}</th>
+            <th class="text-right">{% trans "91-120 يوم" %}</th>
+            <th class="text-right">{% trans "أكثر من 120 يوم" %}</th>
+            <th class="text-right bg-secondary text-white">{% trans "إجمالي المستحق" %}</th>
+            <th class="text-right">{% trans "أرصدة دائنة غير مطبقة" %}</th>
+            <th class="text-right bg-dark text-white">{% trans "صافي الرصيد" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in report_data %}
+        <tr class="customer-row" data-customer-id="{{ item.customer.id }}" style="cursor: pointer;" title="اضغط لعرض التفاصيل">
+            <td>{{ item.customer.name }} <i class="bi bi-chevron-down float-end"></i></td>
+            <td class="text-right">{{ item.current|intcomma }}</td>
+            <td class="text-right">{{ item.1_30|intcomma }}</td>
+            <td class="text-right">{{ item.31_60|intcomma }}</td>
+            <td class="text-right">{{ item.61_90|intcomma }}</td>
+            <td class="text-right">{{ item.91_120|intcomma }}</td>
+            <td class="text-right">{{ item.over_120|intcomma }}</td>
+            <td class="text-right bg-light font-weight-bold">{{ item.total_due|intcomma }}</td>
+            <td class="text-right text-success">({{ item.unapplied_credits|intcomma }})</td>
+            <td class="text-right bg-light font-weight-bold">{{ item.net_balance|intcomma }}</td>
+        </tr>
+        <tr class="detail-row d-none" id="details-for-{{ item.customer.id }}">
+            <td colspan="10" class="p-0"></td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="10" class="text-center">{% trans "لا توجد بيانات للتاريخ المحدد." %}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    <tfoot>
+        {% if report_data %}
+        <tr class="font-weight-bold bg-light">
+            <td>{% trans "الإجمالي" %}</td>
+            <td class="text-right">{{ totals.current|intcomma }}</td>
+            <td class="text-right">{{ totals.1_30|intcomma }}</td>
+            <td class="text-right">{{ totals.31_60|intcomma }}</td>
+            <td class="text-right">{{ totals.61_90|intcomma }}</td>
+            <td class="text-right">{{ totals.91_120|intcomma }}</td>
+            <td class="text-right">{{ totals.over_120|intcomma }}</td>
+            <td class="text-right bg-secondary text-white">{{ totals.total_due|intcomma }}</td>
+            <td class="text-right text-success">({{ totals.unapplied_credits|intcomma }})</td>
+            <td class="text-right bg-dark text-white">{{ totals.net_balance|intcomma }}</td>
+        </tr>
+        {% endif %}
+    </tfoot>
+</table>
+
+{% comment %}
+Custom template filter to sum values from a list of dictionaries.
+You'll need to create a `templatetags` directory in your app and add this filter.
+Example: `inventory/templatetags/sum_tag.py`
+```python
+from django import template
+from decimal import Decimal
+
+register = template.Library()
+
+@register.filter(name='sum')
+def sum_list(value, arg):
+    return sum(getattr(i, arg, Decimal('0')) for i in value)
+```
+Make sure to load the tag in your template: `{% load sum_tag %}`
+For now, I will implement a version that works without a custom tag for simplicity,
+but the custom tag is the cleaner, recommended approach.
+Let's adjust the footer to calculate totals within the template if possible, or
+we can pre-calculate in the view. For now, let's assume the view will provide totals.
+I will adjust the view and service to provide totals.
+{% endcomment %}

@@ -2,7 +2,7 @@
 
 from decimal import Decimal
 from django.test import TestCase
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group, Permission
 from django.utils import timezone
 from datetime import date
 
@@ -166,6 +166,13 @@ class AccountingServiceBaseTestCase(TestCase):
             name="October 2025",
             start_date=date(2025, 10, 1),
             end_date=date(2025, 10, 31),
+            status=FinancialPeriod.Status.OPEN
+        )
+        FinancialPeriod.objects.create(
+            fiscal_year=cls.fiscal_year,
+            name="November 2025",
+            start_date=date(2025, 11, 1),
+            end_date=date(2025, 11, 30),
             status=FinancialPeriod.Status.OPEN
         )
         FinancialPeriod.objects.create(
@@ -344,6 +351,43 @@ class AccountingServiceBaseTestCase(TestCase):
             useful_life_years=5,
             salvage_value=Decimal("0.000")
         )
+
+        # --- NEW: Create Users, Groups, and Permissions for testing ---
+        # 1. Create Groups
+        cls.planner_group, _ = Group.objects.get_or_create(name="Production Planner")
+        cls.manager_group, _ = Group.objects.get_or_create(name="Production Manager")
+
+        # 2. Get all relevant permissions
+        batch_permissions = Permission.objects.filter(content_type__app_label='inventory', content_type__model='batch')
+        return_permissions = Permission.objects.filter(content_type__app_label='inventory', content_type__model='productionreturn')
+
+        # 3. Assign permissions to groups
+        planner_perms_codenames = [
+            'add_batch', 'change_batch', 'view_batch', 'can_submit_batch', 'add_productionreturn'
+        ]
+        manager_perms_codenames = [
+            'add_batch', 'change_batch', 'view_batch', 'delete_batch',
+            'can_approve_batch', 'can_start_production', 'can_cancel_batch', 'add_productionreturn'
+        ]
+        
+        planner_perms = batch_permissions.filter(codename__in=planner_perms_codenames)
+        cls.planner_group.permissions.set(planner_perms)
+        cls.planner_group.permissions.add(*return_permissions.filter(codename__in=planner_perms_codenames))
+
+        manager_perms = batch_permissions.filter(codename__in=manager_perms_codenames)
+        cls.manager_group.permissions.set(manager_perms)
+        cls.manager_group.permissions.add(*return_permissions.filter(codename__in=manager_perms_codenames))
+
+        # 4. Create users and assign to groups
+        cls.planner_user = User.objects.create_user(username='planner', password='password')
+        cls.planner_user.groups.add(cls.planner_group)
+
+        cls.manager_user = User.objects.create_user(username='manager', password='password')
+        cls.manager_user.groups.add(cls.manager_group)
+
+        # A user with no special permissions
+        cls.basic_user = User.objects.create_user(username='basic', password='password')
+
 
     @classmethod
     def get_product_type_setting(cls, product_type):

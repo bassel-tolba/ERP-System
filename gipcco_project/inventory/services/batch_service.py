@@ -144,6 +144,9 @@ def start_batch_production(batch: Batch) -> Batch:
         raise ValidationError(_("Only 'Approved' batches can be started."))
 
     with transaction.atomic():
+        # Add a pessimistic lock to prevent race conditions from double-clicks.
+        batch = Batch.objects.select_for_update().get(pk=batch.pk)
+
         # --- CRITICAL STEP 1: Snapshot costs and update items ---
         items_to_update = []
         product_ids_to_recalc = set()
@@ -224,6 +227,18 @@ def update_batch(
     )
     if not is_valid:
         raise ValidationError(error_msg)
+
+    # --- NEW: Add circular dependency check within the service ---
+    if parent_batch_id:
+        if parent_batch_id == batch.pk:
+            raise ValidationError(_("A batch cannot be its own parent."))
+        
+        # Traverse up the hierarchy to detect deeper circular references
+        ancestor = Batch.objects.get(pk=parent_batch_id)
+        while ancestor:
+            if ancestor.pk == batch.pk:
+                raise ValidationError(_("Circular dependency detected. A batch cannot be a continuation of one of its own descendants."))
+            ancestor = ancestor.parent_batch
 
     with transaction.atomic():
         batch_to_update = Batch.objects.select_for_update().get(pk=batch.pk)
@@ -308,8 +323,10 @@ def add_item_to_batch(
     if not all([product_id, actual_quantity, source_log_id]) or theoretical_quantity <= 0 or actual_quantity <= 0:
         raise ValidationError("A valid product, theoretical quantity, actual quantity, and source log must be provided.")
 
-    if batch.status not in [Batch.Status.DRAFT, Batch.Status.IN_PROGRESS]:
-        raise ValidationError(_("Items can only be added to 'Draft' or 'In Progress' batches."))
+    # MODIFICATION: Enforce stricter workflow. Items can ONLY be added to Draft batches.
+    # For batches in progress, a Continuation Batch must be created.
+    if batch.status != Batch.Status.DRAFT:
+        raise ValidationError(_("Items can only be added to 'Draft' batches. For running batches, please create a Continuation Batch."))
 
     # 1. Validate stock for the new item.
     is_valid, error_msg = validate_stock_availability(
@@ -323,33 +340,17 @@ def add_item_to_batch(
         raise ValidationError(error_msg)
 
     with transaction.atomic():
-        mac_at_consumption = None
-        # If batch is in progress, we need to snapshot cost and create a JE.
-        if batch.status == Batch.Status.IN_PROGRESS:
-            state = get_inventory_state_at_datetime(product_id, batch.creation_date)
-            mac_at_consumption = (state['value'] / state['quantity']) if state['quantity'] > 0 else Decimal('0.0')
-
         new_item = BatchItem.objects.create(
             batch=batch,
             primitive_product_id=product_id,
             theoretical_quantity=theoretical_quantity,
             actual_quantity=actual_quantity,
             source_log_id=source_log_id,
-            cost_at_consumption=mac_at_consumption.quantize(Decimal('0.001')) if mac_at_consumption else None
+            cost_at_consumption=None # Cost is always null for draft items.
         )
 
-        # If in progress, create the specific JE for this supplemental issue.
-        if batch.status == Batch.Status.IN_PROGRESS:
-            create_je_for_production_supplemental_issue(new_item)
-            logger.info(f"Added supplemental item {new_item.id} to Batch {batch.id} and created a dedicated JE.")
-        else:
-            logger.info(f"Added item {new_item.id} to Draft Batch {batch.id}.")
-
+        logger.info(f"Added item {new_item.id} to Draft Batch {batch.id}.")
         check_and_update_batch_customization(batch.id)
-
-    # If in progress, update the final MAC on the product.
-    if batch.status == Batch.Status.IN_PROGRESS:
-        recalculate_cost_history_for_product(product_id, batch.creation_date)
 
     return new_item
 
@@ -393,10 +394,12 @@ def cancel_batch(batch: Batch, user, justification: str) -> Batch:
     - If batch was 'In Progress', it creates a reversing journal entry and recalculates costs.
     - If batch was in a pre-production state, it simply marks it as cancelled.
     """
-    from .accounting.correction_transactions import create_reversing_je_for_correction
+    # MODIFIED: Import necessary models and helpers for consolidated reversal
+    from django.db.models import Q
+    from ..models import BatchItem, JournalEntry, JournalEntryLine, TransactionCorrection
+    from .accounting._helpers import _check_period_is_open
     from .costing_service import recalculate_cost_history_for_product
     from django.contrib.contenttypes.models import ContentType
-    from ..models import JournalEntry
 
     logger.info(f"--> User '{user.username}' attempting to cancel Batch ID {batch.id}.")
 
@@ -413,22 +416,66 @@ def cancel_batch(batch: Batch, user, justification: str) -> Batch:
     
     with transaction.atomic():
         # Only reverse financial transactions if the batch was actually in production
+        # MODIFICATION START: Find and reverse ALL related journal entries, not just the one on the Batch.
         if original_status == Batch.Status.IN_PROGRESS:
-            content_type = ContentType.objects.get_for_model(Batch)
-            original_je = JournalEntry.objects.filter(
-                content_type=content_type, object_id=batch.pk
-            ).first()
+            batch_content_type = ContentType.objects.get_for_model(Batch)
+            batch_item_content_type = ContentType.objects.get_for_model(BatchItem)
+            item_ids = batch.items.values_list('id', flat=True)
 
-            if original_je:
-                create_reversing_je_for_correction(
-                    original_object=batch,
-                    justification=justification,
-                    user=user,
-                    correction_date=timezone.now()
+            journal_entries_to_reverse = JournalEntry.objects.filter(
+                Q(content_type=batch_content_type, object_id=batch.pk) |
+                Q(content_type=batch_item_content_type, object_id__in=list(item_ids))
+            ).distinct().prefetch_related('lines')
+
+            if journal_entries_to_reverse.exists():
+                correction_date = timezone.now()
+                _check_period_is_open(correction_date.date())
+
+                # Aggregate all lines to create a single consolidated reversal
+                total_debits_by_account = {}
+                total_credits_by_account = {}
+
+                for je in journal_entries_to_reverse:
+                    for line in je.lines.all():
+                        account_id = line.account_id
+                        if line.entry_type == JournalEntryLine.EntryType.DEBIT:
+                            total_debits_by_account[account_id] = total_debits_by_account.get(account_id, Decimal('0.0')) + line.amount
+                        elif line.entry_type == JournalEntryLine.EntryType.CREDIT:
+                            total_credits_by_account[account_id] = total_credits_by_account.get(account_id, Decimal('0.0')) + line.amount
+
+                description = _(
+                    "Reversal for cancelled Batch SO: %(so)s. Justification: %(justification)s"
+                ) % {'so': batch.shop_order_number, 'justification': justification}
+
+                reversing_je = JournalEntry.objects.create(
+                    date=correction_date,
+                    description=description,
+                    source_object=batch,
+                    status=JournalEntry.Status.POSTED
                 )
-                logger.info(f"    Created reversing JE for Batch ID {batch.id}.")
+
+                lines_to_create = []
+                for account_id, amount in total_credits_by_account.items():
+                    lines_to_create.append(JournalEntryLine(journal_entry=reversing_je, account_id=account_id, amount=amount, entry_type=JournalEntryLine.EntryType.DEBIT))
+                for account_id, amount in total_debits_by_account.items():
+                    lines_to_create.append(JournalEntryLine(journal_entry=reversing_je, account_id=account_id, amount=amount, entry_type=JournalEntryLine.EntryType.CREDIT))
+                
+                JournalEntryLine.objects.bulk_create(lines_to_create)
+                reversing_je.validate_balance()
+
+                # Link the reversal to all original JEs for audit trail
+                corrections_to_create = [
+                    TransactionCorrection(
+                        original_journal_entry=original_je,
+                        reversing_journal_entry=reversing_je,
+                        justification=justification, corrected_by=user, correction_date=correction_date
+                    ) for original_je in journal_entries_to_reverse
+                ]
+                TransactionCorrection.objects.bulk_create(corrections_to_create)
+                logger.info(f"    Created consolidated reversing JE-{reversing_je.id} for Batch ID {batch.id}, reversing {journal_entries_to_reverse.count()} original JEs.")
             else:
-                logger.warning(f"    No original JE found for In-Progress Batch ID {batch.id}. Skipping reversal.")
+                logger.warning(f"    No original JEs found for In-Progress Batch ID {batch.id}. Skipping reversal.")
+        # MODIFICATION END
 
         # Update the status to CANCELLED
         batch.status = Batch.Status.CANCELLED

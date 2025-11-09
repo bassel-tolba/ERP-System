@@ -12,11 +12,11 @@
         </div>
         <div class="card-body">
             <div class="mb-3">
-              <label for="sales_order" class="form-label">اختر أمر البيع لعرض عمليات الصرف</label>
-              <select name="sales_order" id="sales_order" class="form-select searchable-select" required>
-                <option value="">--- اختر أمر بيع ---</option>
-                {% for so in sales_orders %}
-                  <option value="{{ so.id }}">#{{ so.so_number }} - {{ so.customer.name }}</option>
+              <label for="customer" class="form-label">اختر العميل لعرض عمليات الصرف</label>
+              <select name="customer" id="customer" class="form-select searchable-select" required>
+                <option value="">--- اختر عميل ---</option>
+                {% for customer in customers %}
+                  <option value="{{ customer.id }}">{{ customer.name }}</option>
                 {% endfor %}
               </select>
             </div>
@@ -26,7 +26,7 @@
                   <tr>
                     <th style="width: 5%;"><input class="form-check-input" type="checkbox" id="select-all-dispatches" title="تحديد الكل"></th>
                     <th>تاريخ الصرف</th>
-                    <th>المنتج المصروف</th>
+                    <th>المنتج (أمر البيع)</th>
                     <th>الكمية</th>
                     <th class="text-end">القيمة</th>
                   </tr>
@@ -36,7 +36,7 @@
                 </tbody>
                 <tfoot>
                   <tr id="no-dispatches-row">
-                    <td colspan="5" class="text-center py-3 text-muted">يرجى اختيار أمر بيع لعرض عمليات الصرف المتاحة.</td>
+                    <td colspan="5" class="text-center py-3 text-muted">يرجى اختيار عميل لعرض عمليات الصرف المتاحة.</td>
                   </tr>
                   <tr id="dispatches-loading" class="d-none">
                     <td colspan="5" class="text-center py-3">

@@ -7,7 +7,7 @@ from django.db import transaction
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
-from django.db.models import Count, Sum, F, ExpressionWrapper, DecimalField
+from django.db.models import Count, Sum, F, ExpressionWrapper, DecimalField, Prefetch
 from django.db.models.functions import Coalesce
 
 from ..models import FinishedProductReceipt, Batch, ReceiptSubBatch
@@ -22,10 +22,20 @@ def get_finished_goods_status_data() -> dict:
     Fetches the data for the finished goods status page.
     """
     # 1. In Production
-    all_plans = Batch.objects.filter(is_continuation=False, status=Batch.Status.IN_PROGRESS).annotate(
+    all_plans = Batch.objects.filter(
+        is_continuation=False, status=Batch.Status.IN_PROGRESS
+    ).annotate(
         received_count=Count('receipts')
     ).select_related(
         'template__final_product'
+    ).prefetch_related(
+        # Prefetch only the continuation batches that are in a pending state
+        # to efficiently check for blockers on the frontend.
+        Prefetch(
+            'continuation_batches',
+            queryset=Batch.objects.filter(status__in=[Batch.Status.DRAFT, Batch.Status.PENDING_APPROVAL]),
+            to_attr='pending_continuations'
+        )
     ).order_by('-creation_date')
 
     in_production_plans = [plan for plan in all_plans if plan.received_count < plan.number_of_batches_in_plan]
@@ -111,6 +121,14 @@ def create_finished_product_receipt(
         raise ValidationError(_("Cannot receive a finished product against a continuation batch. Please use the original plan."))
     if production_plan.status != Batch.Status.IN_PROGRESS:
         raise ValidationError(_("Finished products can only be received for 'In Progress' production plans."))
+
+    # --- NEW: CRITICAL VALIDATION - PREVENT RECEIPT IF CONTINUATIONS ARE NOT READY ---
+    pending_continuations = production_plan.continuation_batches.filter(
+        status__in=[Batch.Status.DRAFT, Batch.Status.PENDING_APPROVAL]
+    )
+    if pending_continuations.exists():
+        raise ValidationError(_("Cannot receive finished product. There are pending continuation batches that have not been started."))
+
 
     if not sub_batches_data:
         raise ValueError(_("At least one sub-batch must be provided."))

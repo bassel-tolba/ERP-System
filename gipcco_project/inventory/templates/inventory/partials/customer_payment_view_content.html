@@ -1,0 +1,77 @@
+<!-- gipcco_project/inventory/templates/inventory/partials/customer_payment_view_content.html -->
+{% load i18n humanize %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0">{% trans "تفاصيل تحصيل العميل" %} #{{ payment.pk }}</h1>
+    <div>
+        <a href="{% url 'inventory:customer_payments_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-right me-2"></i>{% trans "العودة للقائمة" %}
+        </a>
+        <a href="{% url 'inventory:view_customer_payment_pdf' payment.pk %}" target="_blank" class="btn btn-danger">
+            <i class="bi bi-file-earmark-pdf-fill me-2"></i>{% trans "طباعة سند القبض" %}
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header"><h5 class="mb-0">{% trans "البيانات الأساسية" %}</h5></div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-5">{% trans "العميل" %}</dt>
+                    <dd class="col-sm-7">{{ payment.customer.name }}</dd>
+
+                    <dt class="col-sm-5">{% trans "تاريخ الدفع" %}</dt>
+                    <dd class="col-sm-7">{{ payment.payment_date|date:"Y-m-d" }}</dd>
+
+                    <dt class="col-sm-5">{% trans "الحساب" %}</dt>
+                    <dd class="col-sm-7">{{ payment.bank_account.name }}</dd>
+
+                    <dt class="col-sm-5">{% trans "الوصف" %}</dt>
+                    <dd class="col-sm-7">{{ payment.description }}</dd>
+
+                    <hr class="my-3">
+
+                    <dt class="col-sm-5 fs-5">{% trans "إجمالي المبلغ" %}</dt>
+                    <dd class="col-sm-7 fs-5 fw-bold">{{ payment.amount|intcomma }}</dd>
+
+                    <dt class="col-sm-5">{% trans "المبلغ المطبق" %}</dt>
+                    <dd class="col-sm-7 text-success">{{ payment.total_received_applied|intcomma }}</dd>
+
+                    <dt class="col-sm-5">{% trans "المبلغ غير المطبق" %}</dt>
+                    <dd class="col-sm-7 text-danger">{{ payment.unapplied_amount|intcomma }}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header"><h5 class="mb-0">{% trans "الفواتير المطبقة" %}</h5></div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th class="ps-3">{% trans "رقم الفاتورة" %}</th>
+                                <th>{% trans "تاريخ الفاتورة" %}</th>
+                                <th class="text-end pe-3">{% trans "المبلغ المطبق" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for app in applications %}
+                            <tr>
+                                <td class="ps-3"><a href="{% url 'inventory:view_customer_invoice' app.invoice.pk %}">{{ app.invoice.invoice_number }}</a></td>
+                                <td>{{ app.invoice.invoice_date|date:"Y-m-d" }}</td>
+                                <td class="text-end pe-3">{{ app.amount_applied|intcomma }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="3" class="text-center py-3">{% trans "لم يتم تطبيق هذا المبلغ على أي فواتير بعد." %}</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

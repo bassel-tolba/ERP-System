@@ -1,0 +1,119 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+    <meta charset="utf-8">
+    <title>سند قبض - {{ payment.pk }}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        body {
+            font-family: 'Cairo', sans-serif;
+            direction: rtl;
+            font-size: 12pt;
+            color: #333;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 40px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #048A81;
+        }
+        .header .logo-container { text-align: right; }
+        .header .logo-container img { height: 80px; }
+        .header .doc-info { text-align: left; }
+        .header .doc-info h1 { margin: 0; font-size: 28pt; color: #2E4057; }
+        .header .doc-info p { margin: 2px 0; font-size: 11pt; }
+
+        .details-grid {
+            margin-bottom: 30px;
+            border: 1px solid #ccc;
+            padding: 15px;
+            line-height: 2;
+        }
+        .details-grid strong {
+            display: inline-block;
+            width: 150px;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .table th, .table td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: right;
+        }
+        .table thead th {
+            background-color: #f2f2f2;
+            font-weight: 700;
+        }
+        .text-left { text-align: left; }
+
+        .signatures {
+            margin-top: 80px;
+            display: flex;
+            justify-content: space-around;
+            font-size: 11pt;
+        }
+        .signatures div {
+            text-align: center;
+            width: 200px;
+        }
+        .signatures .line {
+            border-bottom: 1px solid #333;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo-container"><img src="{% static 'img/gipcco_logo.png' %}" alt="شعار الشركة"></div>
+        <div class="doc-info">
+            <h1>سند قبض</h1>
+            <p><strong>رقم السند:</strong> PAY-{{ payment.pk }}</p>
+            <p><strong>التاريخ:</strong> {{ payment.payment_date|date:"Y-m-d" }}</p>
+        </div>
+    </div>
+
+    <div class="details-grid">
+        <div><strong>استلمنا من السيد/السادة:</strong> {{ payment.customer.name }}</div>
+        <div><strong>مبلغ وقدره:</strong> {{ payment.amount|intcomma }} جنيه مصري</div>
+        <div><strong>وذلك عن:</strong> {{ payment.description }}</div>
+        <div><strong>طريقة الدفع:</strong> {{ payment.bank_account.name }}</div>
+    </div>
+
+    {% if applications %}
+        <h4>تفاصيل تطبيق الدفعة:</h4>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>رقم الفاتورة</th>
+                    <th class="text-left">المبلغ المطبق</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for app in applications %}
+                <tr>
+                    <td>{{ app.invoice.invoice_number }}</td>
+                    <td class="text-left">{{ app.amount_applied|intcomma }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    <div class="signatures">
+        <div><strong>المستلم</strong><div class="line"></div></div>
+        <div><strong>المدير المالي</strong><div class="line"></div></div>
+    </div>
+</body>
+</html>

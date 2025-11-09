@@ -1,0 +1,61 @@
+{% extends "inventory/layout.html" %}
+{% load static %} {# We still need this for the button's link logic #}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="card-title mb-0">{% block report_title %}"تقرير"{% endblock %}</h4>
+                    <p class="card-subtitle text-muted">{% block report_subtitle %}{% endblock %}</p>
+                </div>
+                <div>
+                    {% block report_actions %}
+                    {% if '?' in request.get_full_path %}
+                        {% with pdf_url=request.get_full_path|add:"&export_pdf=1" %}
+                        <a href="{{ pdf_url }}" class="btn btn-sm btn-danger" target="_blank">
+                            <i class="fas fa-file-pdf"></i> تصدير إلى PDF
+                        </a>
+                        {% endwith %}
+                    {% else %}
+                        {% with pdf_url=request.get_full_path|add:"?export_pdf=1" %}
+                        <a href="{{ pdf_url }}" class="btn btn-sm btn-danger" target="_blank">
+                            <i class="fas fa-file-pdf"></i> تصدير إلى PDF
+                        </a>
+                        {% endwith %}
+                    {% endif %}
+                    <button class="btn btn-sm btn-outline-secondary" onclick="window.print();">
+                        <i class="fas fa-print"></i> طباعه
+                    </button>
+                    {% if '?' in request.get_full_path %}
+                        {% with excel_url=request.get_full_path|add:"&export_excel=1" %}
+                        <a href="{{ excel_url }}" class="btn btn-sm btn-outline-success" target="_blank">
+                            <i class="fas fa-file-excel"></i> تصدير إلى Excel
+                        </a>
+                        {% endwith %}
+                    {% else %}
+                        {% with excel_url=request.get_full_path|add:"?export_excel=1" %}
+                        <a href="{{ excel_url }}" class="btn btn-sm btn-outline-success" target="_blank">
+                            <i class="fas fa-file-excel"></i> تصدير إلى Excel
+                        </a>
+                        {% endwith %}
+                    {% endif %}
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            {% block report_filters %}
+            <!-- Filter section will go here -->
+            {% endblock %}
+            
+            <div class="table-responsive mt-3" id="report-content">
+                {% block report_content %}
+                <!-- Main report content will be injected here -->
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

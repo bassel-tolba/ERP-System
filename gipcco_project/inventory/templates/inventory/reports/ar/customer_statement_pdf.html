@@ -1,0 +1,141 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+    <meta charset="utf-8">
+    <title>كشف حساب عميل</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
+        @page {
+            size: A4;
+            margin: 1.5cm;
+            @bottom-right {
+                content: "صفحة " counter(page);
+                font-size: 10pt;
+                color: #555;
+                font-family: 'Cairo', sans-serif;
+            }
+        }
+        body {
+            font-family: 'Cairo', sans-serif;
+            direction: rtl;
+            font-size: 10pt;
+            color: #333;
+        }
+        .report-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #048A81;
+        }
+        .report-header img { height: 60px; }
+        .report-header h1 { margin: 0; font-size: 20pt; color: #2E4057; }
+        .report-header p { margin: 2px 0; font-size: 11pt; color: #555; }
+
+        .customer-info {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+        }
+        .customer-info h2 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 14pt;
+            color: #048A81;
+        }
+        .customer-info p { margin: 0; font-size: 11pt; }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+        .table th, .table td {
+            border: 1px solid #ccc;
+            padding: 6px 8px;
+            text-align: right;
+        }
+        .table thead th {
+            background-color: #048A81;
+            color: white;
+            font-weight: 700;
+        }
+        .table tbody tr:nth-child(even) { background-color: #f8f9fa; }
+        .table tfoot th {
+            background-color: #e9ecef;
+            font-weight: 700;
+            border-top: 2px solid #048A81;
+        }
+        .text-left { text-align: left; }
+        .font-weight-bold { font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div class="report-header">
+        <img src="{% static 'img/gipcco_logo.png' %}" alt="شعار الشركة">
+        <h1>شركة جيبكو</h1>
+        <p>كشف حساب عميل</p>
+        <p><strong>عن الفترة من:</strong> {{ start_date|date:"Y-m-d" }} <strong>إلى:</strong> {{ end_date|date:"Y-m-d" }}</p>
+    </div>
+
+    <div class="customer-info">
+        <h2>{{ customer.name }}</h2>
+    </div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>التاريخ</th>
+                <th>البيان</th>
+                <th>رقم المستند</th>
+                <th class="text-left">مدين (فاتورة)</th>
+                <th class="text-left">دائن (سداد)</th>
+                <th class="text-left">الرصيد</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="font-weight-bold">
+                <td colspan="5">رصيد افتتاحي</td>
+                <td class="text-left">{{ opening_balance|intcomma }}</td>
+            </tr>
+            {% for t in transactions %}
+                <tr>
+                    <td>{{ t.date|date:"Y-m-d" }}</td>
+                    <td>
+                        {% if t.type == 'invoice' %}
+                            فاتورة مبيعات
+                        {% elif t.type == 'payment' %}
+                            سند قبض
+                        {% elif t.type == 'credit_memo' %}
+                            إشعار دائن
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if t.type == 'invoice' %}
+                            #{{ t.obj.invoice_number }}
+                        {% elif t.type == 'payment' %}
+                            {{ t.obj.description }}
+                        {% elif t.type == 'credit_memo' and t.obj.source_object %}
+                            #{{ t.obj.memo_number }} (مرتبط بمرتجع رقم: {{ t.obj.source_object.pk }})
+                        {% elif t.type == 'credit_memo' %}
+                            #{{ t.obj.memo_number }}
+                        {% endif %}
+                    </td>
+                    <td class="text-left">{% if t.debit > 0 %}{{ t.debit|intcomma }}{% endif %}</td>
+                    <td class="text-left">{% if t.credit > 0 %}({{ t.credit|intcomma }}){% endif %}</td>
+                    <td class="text-left font-weight-bold">{{ t.balance|intcomma }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr class="font-weight-bold">
+                <th colspan="5">رصيد ختامي</th>
+                <th class="text-left">{{ closing_balance|intcomma }}</th>
+            </tr>
+        </tfoot>
+    </table>
+</body>
+</html>

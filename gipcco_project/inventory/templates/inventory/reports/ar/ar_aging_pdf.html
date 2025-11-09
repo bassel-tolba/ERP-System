@@ -1,0 +1,149 @@
+{% load static %} {# We still need this for the logo #}
+{% load humanize %}
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+    <meta charset="utf-8">
+    <title>تقرير كشوفات الحسابات العمرية</title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 1cm;
+            @bottom-right {
+                content: "صفحة " counter(page);
+                font-size: 10pt;
+                color: #555;
+                font-family: 'Cairo', sans-serif;
+            }
+        }
+        body {
+            font-family: 'Cairo', sans-serif;
+            direction: rtl;
+            font-size: 10pt;
+            color: #333;
+            line-height: 1.4;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
+
+        .report-header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #048A81;
+        }
+        .report-header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+        .report-header img {
+            height: 100px;
+        }
+        .report-header h1 {
+            margin: 0;
+            font-size: 22pt;
+            color: #2E4057;
+            font-weight: 700;
+        }
+        .report-header p {
+            margin: 5px 0 0 0;
+            font-size: 12pt;
+            color: #555;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .table th, .table td {
+            border: 1px solid #ccc;
+            padding: 6px 8px;
+            text-align: right;
+            vertical-align: top;
+        }
+        .table thead th {
+            background-color: #048A81;
+            color: white;
+            font-weight: 700;
+            font-size: 11pt;
+        }
+        .table tbody tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        .table tfoot th {
+            background-color: #e9ecef;
+            font-weight: 700;
+            border-top: 2px solid #048A81;
+        }
+        .text-right { text-align: right; }
+        .font-weight-bold { font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div class="report-header">
+        <div class="report-header-content">
+            <img src="{% static 'img/gipcco_logo.png' %}" alt="شعار الشركة">
+            <div>
+                <h1>شركة جيبكو</h1>
+                <p>تقرير كشوفات الحسابات العمرية</p>
+                <p><strong>بتاريخ: {{ as_of_date }}</strong></p>
+            </div>
+        </div>
+    </div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>اسم العميل</th>
+                <th class="text-right">الحالي</th>
+                <th class="text-right">1-30 يوم</th>
+                <th class="text-right">31-60 يوم</th>
+                <th class="text-right">61-90 يوم</th>
+                <th class="text-right">91-120 يوم</th>
+                <th class="text-right">أكثر من 120 يوم</th>
+                <th class="text-right">إجمالي المستحق</th>
+                <th class="text-right">أرصدة دائنة غير مطبقة</th>
+                <th class="text-right">صافي الرصيد</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in report_data %}
+            <tr>
+                <td>{{ item.customer.name }}</td>
+                <td class="text-right">{{ item.current|intcomma }}</td>
+                <td class="text-right">{{ item.1_30|intcomma }}</td>
+                <td class="text-right">{{ item.31_60|intcomma }}</td>
+                <td class="text-right">{{ item.61_90|intcomma }}</td>
+                <td class="text-right">{{ item.91_120|intcomma }}</td>
+                <td class="text-right">{{ item.over_120|intcomma }}</td>
+                <td class="text-right font-weight-bold">{{ item.total_due|intcomma }}</td>
+                <td class="text-right">({{ item.unapplied_credits|intcomma }})</td>
+                <td class="text-right font-weight-bold">{{ item.net_balance|intcomma }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="10" class="text-center">لا توجد بيانات للتاريخ المحدد.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            {% if report_data %}
+            <tr class="font-weight-bold">
+                <td>الإجمالي</td>
+                <td class="text-right">{{ totals.current|intcomma }}</td>
+                <td class="text-right">{{ totals.1_30|intcomma }}</td>
+                <td class="text-right">{{ totals.31_60|intcomma }}</td>
+                <td class="text-right">{{ totals.61_90|intcomma }}</td>
+                <td class="text-right">{{ totals.91_120|intcomma }}</td>
+                <td class="text-right">{{ totals.over_120|intcomma }}</td>
+                <td class="text-right">{{ totals.total_due|intcomma }}</td>
+                <td class="text-right">({{ totals.unapplied_credits|intcomma }})</td>
+                <td class="text-right">{{ totals.net_balance|intcomma }}</td>
+            </tr>
+            {% endif %}
+        </tfoot>
+    </table>
+</body>
+</html>

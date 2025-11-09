@@ -1,5 +1,3 @@
-# gipcco_project/inventory/views/dashboard.py
-
 import json
 from datetime import datetime
 from decimal import Decimal

@@ -14,6 +14,9 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.models import ContentType
+from django.template.loader import render_to_string
+from weasyprint import HTML
+
 
 from ..models import (
     Customer, SalesOrder, SalesOrderItem, FinishedProductReceipt,
@@ -277,6 +280,7 @@ def create_dispatch(request: HttpRequest, so_item_pk: int) -> HttpResponse:
         with transaction.atomic():
             FinishedProductDispatch.objects.create(
                 sales_order_item=so_item,
+                finished_product=so_item.finished_product,
                 quantity=quantity,
                 dispatch_date=dispatch_date,
                 cost_at_dispatch=cost_at_dispatch
@@ -648,3 +652,50 @@ def create_credit_memo_from_return_view(request: HttpRequest, return_pk: int) ->
         messages.error(request, f"حدث خطأ غير متوقع: {e}")
 
     return redirect('inventory:view_sales_return', pk=return_pk)
+
+
+def view_credit_memo_pdf(request: HttpRequest, memo_pk: int) -> HttpResponse:
+    """
+    Generates a PDF document for a specific CustomerCreditMemo.
+    """
+    credit_memo = get_object_or_404(
+        CustomerCreditMemo.objects.select_related('customer'), pk=memo_pk
+    )
+    sales_return = credit_memo.source_object
+    items_data = []
+
+    if sales_return and isinstance(sales_return, SalesReturn):
+        return_items = sales_return.items.select_related(
+            'original_dispatch__sales_order_item__finished_product__batch__template__final_product'
+        ).all()
+
+        for item in return_items:
+            so_item = item.original_dispatch.sales_order_item
+            quantity_returned = Decimal(str(item.quantity_returned))
+            base_price = so_item.base_price_per_unit
+            
+            items_data.append({
+                'product_name': so_item.finished_product.batch.template.final_product.name,
+                'quantity': quantity_returned,
+                'unit_price': base_price,
+                'total_price': (quantity_returned * base_price).quantize(Decimal('0.001'))
+            })
+
+    context = {
+        'credit_memo': credit_memo,
+        'customer': credit_memo.customer,
+        'sales_return': sales_return,
+        'items_data': items_data,
+    }
+
+    html_string = render_to_string('inventory/pdfs/credit_memo_pdf.html', context)
+    
+    html = HTML(string=html_string, base_url=request.build_absolute_uri())
+    pdf = html.write_pdf()
+
+    response = HttpResponse(pdf, content_type='application/pdf')
+    customer_name = credit_memo.customer.name.replace(" ", "_")
+    filename = f"Credit_Memo_{credit_memo.memo_number}_{customer_name}.pdf"
+    response['Content-Disposition'] = f'inline; filename="{filename}"'
+    
+    return response

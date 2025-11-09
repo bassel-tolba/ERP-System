@@ -2,7 +2,7 @@
 
 import os
 import shutil
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from decimal import Decimal
 
 from django.core.management import call_command
@@ -23,7 +23,8 @@ from inventory.models import (
     CustomerInvoice, CustomerInvoiceItem, CustomerPaymentApplication,
     BankTransfer, FixedAsset, DepreciationLog, InventoryConsumption,
     InventoryCount, InventoryAdjustment, TemplateItem, ExpenseRequest, EmployeeAdvance,
-    AccruedExpense, AccrualLog, SalesReturn, SalesReturnItem, CustomerCreditMemo
+    AccruedExpense, AccrualLog, SalesReturn, SalesReturnItem, CustomerCreditMemo,
+    LandedCostType, LandedCostInvoice, LandedCostInvoiceItem
 )
 from inventory.services.adjusting_entries_service import run_monthly_accruals
 from inventory.services.sales_return_service import process_inspected_return, create_credit_memo_from_return
@@ -78,6 +79,7 @@ def create_chart_of_accounts():
     create_account('2020201', 'ضريبة القيمة المضافة (المخرجات)', Account.AccountType.LIABILITY, '20202')
     create_account('2020202', 'ضريبة الخصم من المنبع', Account.AccountType.LIABILITY, '20202')
     create_account('2020203', 'مصروفات مستحقة', Account.AccountType.LIABILITY, '20202')
+    create_account('2020204', 'دفعات عملاء مقدمة', Account.AccountType.LIABILITY, '20202') # Customer Deposits
     create_account('20205', 'مجمعات الإهلاك', Account.AccountType.LIABILITY, '202')
     create_account('2020501', 'مجمع إهلاك - آلات ومعدات', Account.AccountType.LIABILITY, '20205')
     create_account('2020502', 'مجمع إهلاك - أثاث وتركيبات', Account.AccountType.LIABILITY, '20205')
@@ -203,6 +205,7 @@ class Command(BaseCommand):
             sales_returns_account=accounts['40102'],
             sales_returns_clearing_account=accounts['1020406'],
             damaged_goods_expense_account=accounts['50209'],
+            customer_deposits_account=accounts['2020204'],
             goods_received_not_invoiced_account=accounts['20206'],
             purchase_price_variance_account=accounts['504'],
             landed_costs_clearing_account=accounts['1020407'],
@@ -775,60 +778,159 @@ class Command(BaseCommand):
         purchasing_service.update_po_status_after_receipt(log_partial.id, is_final_receipt=True)
         self.stdout.write("   - Created a partially received PO and manually closed the line short.")
 
-        # Landed Cost Workflow (NetSuite Style)
         self.stdout.write("   - Starting NetSuite-Style Landed Cost Workflow...")
-        from inventory.models import LandedCostType, PurchaseOrderItemLandedCost, LandedCostInvoice
         
-        # 1. Create a PO with an estimated landed cost
-        freight_cost_type, _ = LandedCostType.objects.get_or_create(name="Freight")
-        po_lc, _ = PurchaseOrder.objects.get_or_create(
-            po_number="PO-DEMO-LC-01",
-            defaults={
-                'supplier': CONTEXT['suppliers']['packaging'],
-                'order_date': date(2025, 9, 15)
-            }
-        )
-        po_item_lc, _ = PurchaseOrderItem.objects.get_or_create(
-            purchase_order=po_lc,
-            product=CONTEXT['products']['pvc_bag'],
-            defaults={
-                'quantity_ordered': 5000.0,
-                'base_price_per_unit': Decimal("1.250"),
-                'vat_rate': Decimal("0.0"), 'withholding_tax_rate': Decimal("0.0")
-            }
-        )
-        PurchaseOrderItemLandedCost.objects.get_or_create(
-            purchase_order_item=po_item_lc,
-            cost_type=freight_cost_type,
-            defaults={'estimated_amount': Decimal("500.000")} # Estimate $0.10 per unit
-        )
-        self.stdout.write("     - Created PO with estimated freight cost.")
+        # 1. Setup: Create a new PO with estimated landed costs
+        freight_cost_type, _ = LandedCostType.objects.get_or_create(name="Ocean Freight")
+        product1 = CONTEXT['products']['glucose']
+        product2 = CONTEXT['products']['pvc_bag']
+        supplier = CONTEXT['suppliers']['pharma']
+        shipping_vendor = CONTEXT['suppliers']['shipping']
 
-        # 2. Receive the goods, which will trigger capitalization of the estimate
-        log_lc, _ = InventoryLog.objects.get_or_create(
-            po_item=po_item_lc,
-            defaults={
-                'product': CONTEXT['products']['pvc_bag'],
-                'company': CONTEXT['suppliers']['packaging'],
-                'quantity': 5000.0,
-                'timestamp': timezone.make_aware(timezone.datetime(2025, 9, 20, 10, 0, 0)),
-                'release_timestamp': timezone.make_aware(timezone.datetime(2025, 9, 20, 11, 0, 0)),
-                'status': InventoryLog.Status.RELEASED,
-                'base_unit_price': Decimal("1.250")
-            }
-        )
-        self.stdout.write("     - Received goods, capitalizing item cost + estimated freight.")
+        po_price1 = Decimal('25.000')
+        po_qty1 = 500  # Value = 12500
+        po_price2 = Decimal('2.000')
+        po_qty2 = 2500 # Value = 5000
+        # Total value = 17500. Allocation: 12500/17500 = ~71.43%, 5000/17500 = ~28.57%
+        
+        total_estimated_freight = Decimal('1500.000')
 
-        # 3. Create and post the actual landed cost bill from the shipping vendor
+        po_lc = purchasing_service.create_purchase_order(
+            user=CONTEXT['user'],
+            po_data={'po_number': 'PO-LC-DEMO', 'supplier_id': supplier.id, 'order_date': date(2025, 9, 28)},
+            items_data=[
+                {
+                    'product_id': product1.id, 'quantity': po_qty1, 'base_price_per_unit': po_price1,
+                    'vat_rate': '0.0', 'withholding_tax_rate': '0.0', 'landed_cost_allocation_percentage': '71.43'
+                },
+                {
+                    'product_id': product2.id, 'quantity': po_qty2, 'base_price_per_unit': po_price2,
+                    'vat_rate': '0.0', 'withholding_tax_rate': '0.0', 'landed_cost_allocation_percentage': '28.57'
+                }
+            ],
+            landed_costs_data=[
+                {'cost_type_id': freight_cost_type.id, 'estimated_amount': total_estimated_freight}
+            ]
+        )
+        self.stdout.write(f"     - Created PO {po_lc.po_number} with estimated landed costs.")
+
+        # 2. Receive goods for the PO. Signals will handle JE creation and cost capitalization.
+        po_item1 = po_lc.items.get(product=product1)
+        po_item2 = po_lc.items.get(product=product2)
+
+        InventoryLog.objects.create(
+            product=product1,
+            company=supplier,
+            quantity=po_qty1,
+            timestamp=timezone.make_aware(datetime(2025, 10, 2, 9, 0)),
+            release_timestamp=timezone.make_aware(datetime(2025, 10, 2, 10, 0)),
+            status=InventoryLog.Status.RELEASED,
+            qc_no="QC-LC-001",
+            po_item=po_item1,
+            base_unit_price=po_price1,
+            costing_unit_price=po_price1 # Initial, will be updated by signal
+        )
+        self.stdout.write(f"     - Received {po_qty1} KG of {product1.name}.")
+
+        InventoryLog.objects.create(
+            product=product2,
+            company=supplier,
+            quantity=po_qty2,
+            timestamp=timezone.make_aware(datetime(2025, 10, 2, 9, 30)),
+            release_timestamp=timezone.make_aware(datetime(2025, 10, 2, 10, 30)),
+            status=InventoryLog.Status.RELEASED,
+            qc_no="QC-LC-002",
+            po_item=po_item2,
+            base_unit_price=po_price2,
+            costing_unit_price=po_price2 # Initial, will be updated by signal
+        )
+        self.stdout.write(f"     - Received {po_qty2} units of {product2.name}.")
+
+        # 3. Create and post the actual landed cost invoice with a variance.
+        actual_freight_cost = Decimal('1625.000') # Unfavorable variance of 125
         lc_invoice = LandedCostInvoice.objects.create(
-            vendor=CONTEXT['suppliers']['shipping'],
-            invoice_number="LC-ACTUAL-001",
-            invoice_date=date(2025, 9, 22),
-            total_amount=Decimal("550.000"), # Actual cost is $50 higher than estimate
-            purchase_order=po_lc
+            vendor=shipping_vendor,
+            invoice_number='LC-INV-DEMO-01',
+            invoice_date=date(2025, 10, 5),
+            total_amount=actual_freight_cost,
+            purchase_order=po_lc,
+            status=LandedCostInvoice.Status.DRAFT
         )
+        LandedCostInvoiceItem.objects.create(
+            landed_cost_invoice=lc_invoice,
+            cost_type=freight_cost_type,
+            amount=actual_freight_cost
+        )
+
         purchasing_service.post_landed_cost_invoice(lc_invoice, CONTEXT['user'])
-        self.stdout.write("     - Posted actual landed cost bill, clearing accrual and booking variance.")
+        self.stdout.write(f"     - Posted Landed Cost Invoice {lc_invoice.invoice_number} with a variance.")
+
+        self.stdout.write("   - Setting up A/R Workbench test scenarios...")
+        # Scenario 1: Open Invoice and Credit Memo for "City Central Pharmacy"
+        # Create an invoice for the dispatch made earlier
+        invoice_amount = so_item.base_price_per_unit * Decimal(str(dispatch.quantity)) * (Decimal('1') + so_item.vat_rate)
+        cust_inv_1, _ = CustomerInvoice.objects.get_or_create(
+            invoice_number="INV-PHARM-001",
+            defaults={
+                'customer': CONTEXT['customers']['pharmacy'],
+                'invoice_date': date(2025, 9, 17),
+                'due_date': date(2025, 10, 17),
+                'total_amount': invoice_amount,
+                'sales_order': so
+            }
+        )
+        CustomerInvoiceItem.objects.get_or_create(invoice=cust_inv_1, dispatch=dispatch, defaults={'amount': invoice_amount})
+        self.stdout.write("     - Created open invoice for City Central Pharmacy.")
+
+        # Scenario 2: Open Invoice and Unapplied Payment for "County General Hospital"
+        # a) Create a new SO, dispatch, and invoice
+        so_hosp, _ = SalesOrder.objects.get_or_create(
+            so_number="SALE-DEMO-HOSP-001",
+            defaults={
+                'customer': CONTEXT['customers']['hospital'],
+                'order_date': date(2025, 9, 20)
+            }
+        )
+        so_item_hosp, _ = SalesOrderItem.objects.get_or_create(
+            sales_order=so_hosp,
+            finished_product=receipt,
+            defaults={
+                'quantity_ordered': 20.0,
+                'base_price_per_unit': Decimal("26.000"),
+                'vat_rate': Decimal("0.14")
+            }
+        )
+        dispatch_hosp = FinishedProductDispatch.objects.create(
+            sales_order_item=so_item_hosp,
+            finished_product=receipt,
+            quantity=20.0,
+            dispatch_date=timezone.make_aware(timezone.datetime(2025, 9, 21, 10, 0, 0)),
+            cost_at_dispatch=receipt.unit_cost * 20
+        )
+        invoice_amount_hosp = so_item_hosp.base_price_per_unit * Decimal(str(dispatch_hosp.quantity)) * (Decimal('1') + so_item_hosp.vat_rate)
+        cust_inv_2, _ = CustomerInvoice.objects.get_or_create(
+            invoice_number="INV-HOSP-001",
+            defaults={
+                'customer': CONTEXT['customers']['hospital'],
+                'invoice_date': date(2025, 9, 22),
+                'due_date': date(2025, 10, 22),
+                'total_amount': invoice_amount_hosp,
+                'sales_order': so_hosp
+            }
+        )
+        CustomerInvoiceItem.objects.get_or_create(invoice=cust_inv_2, dispatch=dispatch_hosp, defaults={'amount': invoice_amount_hosp})
+        self.stdout.write("     - Created open invoice for County General Hospital.")
+
+        # b) Create an unapplied payment for the same customer
+        Payment.objects.create(
+            payment_date=date(2025, 9, 25),
+            amount=Decimal("300.000"),
+            bank_account=CONTEXT['bank_account'],
+            payment_type=Payment.PaymentType.PAYMENT_IN,
+            description="On-account payment from County General Hospital",
+            customer=CONTEXT['customers']['hospital']
+        )
+        self.stdout.write("     - Created unapplied on-account payment for County General Hospital.")
 
 
     def create_opening_balances(self):

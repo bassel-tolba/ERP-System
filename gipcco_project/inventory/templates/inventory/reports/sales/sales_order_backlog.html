@@ -1,0 +1,17 @@
+<!-- templates/inventory/reports/sales/sales_order_backlog.html -->
+{% extends "inventory/reports/base_report.html" %}
+{% load i18n %}
+
+{% block report_title %}{% trans "تقرير أوامر البيع المتأخرة" %}{% endblock %}
+
+{% block report_subtitle %}
+    {% trans "قائمة بجميع أوامر البيع المفتوحة التي لم يتم شحنها بالكامل." %}
+{% endblock %}
+
+{% block report_filters %}
+<!-- No filters needed for this report, but the block is here for consistency -->
+{% endblock %}
+
+{% block report_content %}
+    {% include "inventory/reports/sales/partials/sales_order_backlog_content.html" %}
+{% endblock %}

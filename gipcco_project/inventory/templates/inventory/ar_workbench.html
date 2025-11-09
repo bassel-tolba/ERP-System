@@ -1,0 +1,12 @@
+{% extends "inventory/layout.html" %}
+{% load static %}
+
+{% block content %}
+<div id="arWorkbenchContent">
+    {% include "inventory/partials/ar_workbench_content.html" %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{% static 'layout/js/ar_workbench_logic.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,94 @@
+<!-- templates/inventory/reports/ar/customer_statement.html -->
+{% extends "inventory/reports/base_report.html" %}
+{% load i18n %}
+{% load humanize %}
+
+{% block report_title %}{% trans "كشف حساب عميل" %}{% endblock %}
+
+{% block report_subtitle %}
+    {% if customer %}
+        {% blocktrans %}كشف حساب للعميل: {{ customer.name }} عن الفترة من {{ start_date }} إلى {{ end_date }}{% endblocktrans %}
+    {% else %}
+        {% trans "اختر عميل وفترة زمنية لعرض كشف الحساب." %}
+    {% endif %}
+{% endblock %}
+
+{% block report_filters %}
+<form method="get" action="{% url 'inventory:customer_statement_report' %}" class="form-inline">
+    <div class="form-group mr-2">
+        <label for="customer" class="mr-2">{% trans "العميل" %}:</label>
+        <select name="customer" id="customer" class="form-control" required>
+            <option value="">{% trans "اختر عميل" %}</option>
+            {% for c in customers %}
+                <option value="{{ c.pk }}" {% if c.pk|stringformat:"s" == request.GET.customer %}selected{% endif %}>{{ c.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="form-group mr-2">
+        <label for="start_date" class="mr-2">{% trans "من تاريخ" %}:</label>
+        <input type="date" name="start_date" id="start_date" class="form-control" value="{{ start_date }}">
+    </div>
+    <div class="form-group mr-2">
+        <label for="end_date" class="mr-2">{% trans "إلى تاريخ" %}:</label>
+        <input type="date" name="end_date" id="end_date" class="form-control" value="{{ end_date }}">
+    </div>
+    <button type="submit" class="btn btn-primary">{% trans "عرض كشف الحساب" %}</button>
+</form>
+{% endblock %}
+
+{% block report_content %}
+    {% if customer %}
+        <table class="table table-striped mt-3">
+            <thead>
+                <tr>
+                    <th>{% trans "التاريخ" %}</th>
+                    <th>{% trans "البيان" %}</th>
+                    <th>{% trans "رقم المستند" %}</th>
+                    <th class="text-end">{% trans "مدين (فاتورة)" %}</th>
+                    <th class="text-end">{% trans "دائن (سداد)" %}</th>
+                    <th class="text-end">{% trans "الرصيد" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="font-weight-bold">
+                    <td colspan="5">{% trans "رصيد افتتاحي" %}</td>
+                    <td class="text-end">{{ opening_balance|intcomma }}</td>
+                </tr>
+                {% for t in transactions %}
+                    <tr>
+                        <td>{{ t.date|date:"Y-m-d" }}</td>
+                        <td>
+                            {% if t.type == 'invoice' %}
+                                {% trans "فاتورة مبيعات" %}
+                            {% elif t.type == 'payment' %}
+                                {% trans "سند قبض" %}
+                            {% elif t.type == 'credit_memo' %}
+                                {% trans "إشعار دائن" %}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if t.type == 'invoice' %}
+                                <a href="{% url 'inventory:view_customer_invoice' t.obj.pk %}" target="_blank">#{{ t.obj.invoice_number }}</a>
+                            {% elif t.type == 'payment' %}
+                                {{ t.obj.description }}
+                            {% elif t.type == 'credit_memo' and t.obj.source_object %}
+                                <a href="{% url 'inventory:view_sales_return' t.obj.source_object.pk %}" target="_blank">#{{ t.obj.memo_number }}</a>
+                            {% elif t.type == 'credit_memo' %}
+                                #{{ t.obj.memo_number }}
+                            {% endif %}
+                        </td>
+                        <td class="text-end">{{ t.debit|intcomma }}</td>
+                        <td class="text-end text-success">{% if t.credit > 0 %}({{ t.credit|intcomma }}){% endif %}</td>
+                        <td class="text-end font-weight-bold">{{ t.balance|intcomma }}</td>
+                    </tr>
+                {% endfor %}
+                <tr class="font-weight-bold table-active">
+                    <td colspan="5">{% trans "رصيد ختامي" %}</td>
+                    <td class="text-end">{{ closing_balance|intcomma }}</td>
+                </tr>
+            </tbody>
+        </table>
+    {% else %}
+        <div class="alert alert-info mt-3">{% trans "الرجاء اختيار عميل لعرض كشف الحساب." %}</div>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,36 @@
+<!-- templates/inventory/reports/sales/partials/sales_order_backlog_content.html -->
+{% load i18n %}
+{% load humanize %}
+
+<table class="table table-striped mt-3">
+    <thead>
+        <tr>
+            <th>{% trans "رقم أمر البيع" %}</th>
+            <th>{% trans "تاريخ الأمر" %}</th>
+            <th>{% trans "اسم العميل" %}</th>
+            <th>{% trans "المنتج" %}</th>
+            <th class="text-center">{% trans "الكمية المطلوبة" %}</th>
+            <th class="text-center">{% trans "الكمية المشحونة" %}</th>
+            <th class="text-center">{% trans "الكمية المتبقية" %}</th>
+            <th>{% trans "الوحدة" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in report_data %}
+            <tr>
+                <td>{{ item.so_number }}</td>
+                <td>{{ item.order_date|date:"Y-m-d" }}</td>
+                <td>{{ item.customer_name }}</td>
+                <td>{{ item.product_name }}</td>
+                <td class="text-center">{{ item.quantity_ordered|floatformat:2|intcomma }}</td>
+                <td class="text-center">{{ item.quantity_shipped|floatformat:2|intcomma }}</td>
+                <td class="text-center fw-bold">{{ item.quantity_backlog|floatformat:2|intcomma }}</td>
+                <td>{{ item.unit }}</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="8" class="text-center">{% trans "لا توجد أوامر بيع متأخرة حاليًا." %}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

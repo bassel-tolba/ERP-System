@@ -1,0 +1,27 @@
+<!-- templates/inventory/reports/sales/sales_by_customer.html -->
+{% extends "inventory/reports/base_report.html" %}
+{% load i18n %}
+
+{% block report_title %}{% trans "تقرير المبيعات حسب العميل" %}{% endblock %}
+
+{% block report_subtitle %}
+    {% blocktrans %}عن الفترة من {{ start_date }} إلى {{ end_date }}{% endblocktrans %}
+{% endblock %}
+
+{% block report_filters %}
+<form method="get" action="{% url 'inventory:sales_by_customer_report' %}" class="form-inline">
+    <div class="form-group mr-2">
+        <label for="start_date" class="mr-2">{% trans "من تاريخ" %}:</label>
+        <input type="date" name="start_date" id="start_date" class="form-control" value="{{ start_date }}">
+    </div>
+    <div class="form-group mr-2">
+        <label for="end_date" class="mr-2">{% trans "إلى تاريخ" %}:</label>
+        <input type="date" name="end_date" id="end_date" class="form-control" value="{{ end_date }}">
+    </div>
+    <button type="submit" class="btn btn-primary">{% trans "عرض التقرير" %}</button>
+</form>
+{% endblock %}
+
+{% block report_content %}
+    {% include "inventory/reports/sales/partials/sales_by_customer_content.html" %}
+{% endblock %}

@@ -77,6 +77,16 @@ def receive_finished_product(request, batch_pk, individual_batch_number):
     if production_plan.status != Batch.Status.IN_PROGRESS:
         messages.error(request, f"خطأ: لا يمكن استلام منتج نهائي إلا لأمر تشغيل بحالة 'تحت التنفيذ'. الحالة الحالية هي '{production_plan.get_status_display()}'.")
         return redirect('inventory:view_batch', pk=production_plan.pk)
+
+    # --- NEW: CRITICAL VALIDATION - PREVENT RECEIPT IF CONTINUATIONS ARE NOT READY ---
+    pending_continuations = production_plan.continuation_batches.filter(
+        status__in=[Batch.Status.DRAFT, Batch.Status.PENDING_APPROVAL]
+    )
+    if pending_continuations.exists():
+        pending_numbers = ", ".join([b.shop_order_number for b in pending_continuations])
+        messages.error(request, f"خطأ: لا يمكن استلام المنتج النهائي. هناك أوامر تشغيل تكميلية ({pending_numbers}) لم تبدأ بعد. يجب أن تكون جميع الأوامر التكميلية بحالة 'تحت التنفيذ' على الأقل.")
+        return redirect('inventory:view_batch', pk=production_plan.pk)
+
     # ==========================================================================
 
     cost_data = finished_product_service.get_proportional_cost_for_receipt(production_plan)

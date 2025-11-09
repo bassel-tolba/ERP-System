@@ -1,0 +1,152 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+    <meta charset="utf-8">
+    <title>إشعار دائن - {{ credit_memo.memo_number }}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
+        @page {
+            size: A4;
+            margin: 1.5cm;
+            @bottom-right {
+                content: "صفحة " counter(page);
+                font-size: 10pt;
+                color: #555;
+                font-family: 'Cairo', sans-serif;
+            }
+        }
+        body {
+            font-family: 'Cairo', sans-serif;
+            direction: rtl;
+            font-size: 11pt;
+            color: #333;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #048A81;
+        }
+        .header .logo-container { text-align: right; }
+        .header .logo-container img { height: 70px; }
+        .header .logo-container h1 { margin: 5px 0 0; font-size: 18pt; color: #2E4057; }
+
+        .header .doc-info { text-align: left; }
+        .header .doc-info h2 { margin: 0; font-size: 24pt; color: #D9534F; }
+        .header .doc-info p { margin: 2px 0; font-size: 10pt; }
+
+        .customer-info {
+            margin-bottom: 30px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .table th, .table td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: right;
+        }
+        .table thead th {
+            background-color: #048A81;
+            color: white;
+            font-weight: 700;
+        }
+        .table tbody tr:nth-child(even) { background-color: #f8f9fa; }
+        .text-center { text-align: center; }
+        .text-left { text-align: left; }
+
+        .totals-table {
+            width: 40%;
+            margin-right: auto;
+            border-collapse: collapse;
+        }
+        .totals-table td {
+            padding: 8px;
+            border: 1px solid #ccc;
+        }
+        .totals-table .label { font-weight: bold; background-color: #f2f2f2; }
+        .totals-table .grand-total { font-weight: bold; font-size: 14pt; background-color: #e9ecef; }
+
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 9pt;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo-container">
+            <img src="{% static 'img/gipcco_logo.png' %}" alt="شعار الشركة">
+            <h1>شركة جيبكو</h1>
+        </div>
+        <div class="doc-info">
+            <h2>إشعار دائن</h2>
+            <p><strong>رقم الإشعار:</strong> {{ credit_memo.memo_number }}</p>
+            <p><strong>تاريخ الإشعار:</strong> {{ credit_memo.memo_date|date:"Y-m-d" }}</p>
+            {% if sales_return %}
+            <p><strong>مرتبط بمرتجع رقم:</strong> #{{ sales_return.id }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="customer-info">
+        <strong>إلى السيد/السادة:</strong> {{ customer.name }}<br>
+        <strong>العنوان:</strong> {{ customer.address|default:"-" }}
+    </div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th class="text-center" style="width: 5%;">#</th>
+                <th>البيان</th>
+                <th class="text-center" style="width: 10%;">الكمية</th>
+                <th class="text-left" style="width: 15%;">سعر الوحدة</th>
+                <th class="text-left" style="width: 20%;">الإجمالي</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items_data %}
+            <tr>
+                <td class="text-center">{{ forloop.counter }}</td>
+                <td>{{ item.product_name }}</td>
+                <td class="text-center">{{ item.quantity|floatformat:2 }}</td>
+                <td class="text-left">{{ item.unit_price|intcomma }}</td>
+                <td class="text-left">{{ item.total_price|intcomma }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <table class="totals-table">
+        <tr>
+            <td class="label">الإجمالي الفرعي</td>
+            <td class="text-left">{{ credit_memo.base_amount|intcomma }}</td>
+        </tr>
+        <tr>
+            <td class="label">ضريبة القيمة المضافة</td>
+            <td class="text-left">{{ credit_memo.vat_amount|intcomma }}</td>
+        </tr>
+        <tr>
+            <td class="label grand-total">الإجمالي الكلي</td>
+            <td class="text-left grand-total">{{ credit_memo.total_amount|intcomma }}</td>
+        </tr>
+    </table>
+
+    <div class="footer">
+        <p>هذا إشعار رسمي بتسوية حسابكم بالمبلغ المذكور أعلاه.</p>
+    </div>
+</body>
+</html>
+

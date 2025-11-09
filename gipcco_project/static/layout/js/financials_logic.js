@@ -154,13 +154,13 @@ function initCreateSupplierInvoiceLogic(container) {
 }
 
 function initCreateCustomerInvoiceLogic(container) {
-  const soSelect = container.querySelector("#sales_order");
+  const customerSelect = container.querySelector("#customer");
   const dispatchesTableBody = container.querySelector("#dispatches-table-body");
   const totalAmountSpan = container.querySelector("#total-amount");
   const noDispatchesRow = container.querySelector("#no-dispatches-row");
   const loadingSpinner = container.querySelector("#dispatches-loading");
 
-  if (!soSelect || !dispatchesTableBody) return;
+  if (!customerSelect || !dispatchesTableBody) return;
   
   const updateTotal = () => {
     let total = 0;
@@ -176,21 +176,21 @@ function initCreateCustomerInvoiceLogic(container) {
     }
   });
   
-  soSelect.addEventListener("change", async event => {
-    const soId = event.target.value;
+  customerSelect.addEventListener("change", async event => {
+    const customerId = event.target.value;
     dispatchesTableBody.innerHTML = "";
     totalAmountSpan.textContent = "0.000";
     noDispatchesRow.classList.add("d-none");
     loadingSpinner.classList.remove("d-none");
 
-    if (!soId) {
+    if (!customerId) {
       loadingSpinner.classList.add("d-none");
       noDispatchesRow.classList.remove("d-none");
       return;
     }
     
     try {
-      const url = window.appUrls.apiUninvoicedDispatches.replace("<soId>", soId);
+      const url = window.appUrls.apiUninvoicedDispatches.replace('0', customerId);
       const response = await fetch(url);
       if (!response.ok) throw new Error("Network response was not ok");
       const data = await response.json();

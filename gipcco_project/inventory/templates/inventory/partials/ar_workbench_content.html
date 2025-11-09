@@ -1,0 +1,120 @@
+{% load i18n humanize %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+  <h1 class="h2"><i class="bi bi-check2-square me-2"></i>{% trans "تسوية حساب عميل (تطبيق الدفعات)" %}</h1>
+</div>
+
+<form method="post" id="arWorkbenchForm">
+    {% csrf_token %}
+    <input type="hidden" name="customer_id" id="customer_id_hidden">
+    <input type="hidden" name="applications_json" id="applications_json_hidden">
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    <label for="customer_select" class="form-label">{% trans "اختر العميل" %}</label>
+                    <select id="customer_select" class="form-select searchable-select">
+                        <option value="">--- {% trans "اختر عميل لعرض بياناته" %} ---</option>
+                        {% for customer in customers %}
+                        <option value="{{ customer.id }}">{{ customer.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="application_date" class="form-label">{% trans "تاريخ التطبيق" %}</label>
+                    <input type="date" class="form-control datepicker" id="application_date" name="application_date" value="{{ today_date }}" required>
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary w-100" id="apply_button" disabled>
+                        <i class="bi bi-save-fill me-2"></i>{% trans "حفظ وتنفيذ التسوية" %}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="workbench_area" class="d-none">
+        <div class="row g-4">
+            <!-- Available Credits Panel -->
+            <div class="col-lg-6">
+                <div class="card shadow-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">{% trans "الأرصدة المتاحة للتطبيق" %}</h5>
+                        <div class="fw-bold">{% trans "الإجمالي" %}: <span id="total_credits_available">0.000</span></div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive" style="max-height: 400px;">
+                            <table class="table table-sm table-striped mb-0">
+                                <thead>
+                                    <tr>
+                                        <th class="ps-3">{% trans "النوع" %}</th>
+                                        <th>{% trans "التاريخ" %}</th>
+                                        <th>{% trans "المرجع" %}</th>
+                                        <th class="text-end pe-3">{% trans "المبلغ المتاح" %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="credits_table_body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Open Invoices Panel -->
+            <div class="col-lg-6">
+                <div class="card shadow-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">{% trans "الفواتير المفتوحة" %}</h5>
+                        <div class="fw-bold">{% trans "الإجمالي المستحق" %}: <span id="total_invoices_due">0.000</span></div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive" style="max-height: 400px;">
+                            <table class="table table-sm table-striped mb-0">
+                                <thead>
+                                    <tr>
+                                        <th class="ps-3">{% trans "رقم الفاتورة" %}</th>
+                                        <th>{% trans "تاريخ الاستحقاق" %}</th>
+                                        <th class="text-end">{% trans "الرصيد المستحق" %}</th>
+                                        <th class="text-end pe-3" style="width: 150px;">{% trans "المبلغ المطبق" %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="invoices_table_body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Panel -->
+        <div class="card shadow-sm mt-4">
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <h6 class="text-muted">{% trans "إجمالي الأرصدة المتاحة" %}</h6>
+                        <h4 class="fw-bold" id="summary_total_credits">0.000</h4>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-muted">{% trans "إجمالي المبلغ المطبق" %}</h6>
+                        <h4 class="fw-bold text-success" id="summary_total_applied">0.000</h4>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-muted">{% trans "إجمالي الرصيد المتبقي" %}</h6>
+                        <h4 class="fw-bold text-danger" id="summary_remaining_balance">0.000</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="no_customer_selected" class="text-center py-5">
+        <i class="bi bi-person-bounding-box display-4 text-muted"></i>
+        <p class="mt-3 fs-5">{% trans "يرجى اختيار عميل لبدء عملية التسوية." %}</p>
+    </div>
+    <div id="loading_spinner" class="text-center py-5 d-none">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-3">{% trans "جاري تحميل بيانات العميل..." %}</p>
+    </div>
+</form>

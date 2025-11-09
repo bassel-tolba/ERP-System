@@ -370,9 +370,11 @@ def cancel_dispatch(dispatch: FinishedProductDispatch, user, justification: str)
     """
     from .accounting.correction_transactions import create_reversing_je_for_correction
 
-    if hasattr(dispatch, 'invoice_item'):
-        raise ValidationError(_("Cannot cancel a dispatch that has already been invoiced. Please create a sales return and credit memo."))
-    
+    # Use a more reliable check for the related invoice item
+    is_invoiced = CustomerInvoiceItem.objects.filter(dispatch=dispatch).exists()
+    if is_invoiced:
+        raise ValidationError(_("Cannot cancel a dispatch that has already been invoiced. Please create a sales return for this item instead to generate a credit memo."))
+
     if dispatch.status == FinishedProductDispatch.Status.CANCELLED:
         raise ValidationError(_("This dispatch has already been cancelled."))
 

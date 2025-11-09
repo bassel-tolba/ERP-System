@@ -1,5 +1,6 @@
+/* gipcco_project/static/css/style.css */
 /* ==========================================================================
-   MODERN ERP THEME - GIPCCO WAREHOUSE SYSTEM (REFACTORED)
+   MODERN ERP THEME - GIPCCO WAREHOUSE SYSTEM (PROFESSIONAL GRAY)
    ========================================================================== */
 
 /* ==========================================================================
@@ -18,52 +19,62 @@
   font-style: normal;
 }
 
-
-   :root {
-  /* Brand Colors */
-  --color-primary: #3b82f6;
-  --color-primary-rgb: 59, 130, 246;
-  --color-primary-light: #eff6ff;
-  --color-primary-hover: #2563eb;
-  --color-primary-subtle: rgba(59, 130, 246, 0.1);
+:root {
+  /* Brand Colors (Professional Gray Palette) */
+  --seasalt: #f8f9faff;
+  --antiflash-white: #e9ecefff;
+  --platinum: #dee2e6ff;
+  --french-gray: #ced4daff;
+  --french-gray-2: #adb5bdff;
+  --slate-gray: #6c757dff;
+  --outer-space: #495057ff;
+  --onyx: #343a40ff;
+  --eerie-black: #212529ff;
+  
+  /* Primary Colors */
+  --color-primary: var(--outer-space);
+  --color-primary-rgb: 73, 80, 87;
+  --color-primary-light: var(--antiflash-white);
+  --color-primary-hover: var(--onyx);
+  --color-primary-subtle: rgba(73, 80, 87, 0.08);
 
   /* Semantic Colors */
-  --color-secondary: #64748b;
-  --color-success: #10b981;
-  --color-danger: #ef4444;
-  --color-warning: #f59e0b;
-  --color-info: #06b6d4;
+  --color-secondary: var(--slate-gray);
+  --color-success: #198754;
+  --color-danger: #dc3545;
+  --color-warning: #fd7e14;
+  --color-info: #0dcaf0;
 
   /* Typography */
-  --text-primary: #111827;
-  --text-secondary: #4b5563;
-  --text-muted: #6b7280;
-  --text-inverse: #ffffff;
+  --text-primary: var(--eerie-black);
+  --text-secondary: var(--outer-space);
+  --text-muted: var(--french-gray-2);
+  --text-inverse: var(--seasalt);
 
   /* Surfaces */
-  --surface-primary: #ffffff;
-  --surface-secondary: #f9fafb;
-  --surface-tertiary: #f3f4f6;
+  --surface-primary: var(--seasalt);
+  --surface-secondary: var(--antiflash-white);
+  --surface-tertiary: var(--platinum);
   --surface-overlay: rgba(0, 0, 0, 0.5);
 
   /* Borders */
-  --border-color: #e5e7eb;
-  --border-color-subtle: #f3f4f6;
+  --border-color: var(--platinum);
+  --border-color-subtle: var(--antiflash-white);
   --border-width: 1px;
   --border-radius-sm: 0.25rem;
-  --border-radius: 0.5rem;
+  --border-radius: 0.375rem;
   --border-radius-lg: 0.75rem;
   --border-radius-xl: 1rem;
 
   /* Shadows */
   --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.06), 0 1px 3px 0 rgb(0 0 0 / 0.1);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
   --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
 
   /* Typography Scale */
-  --font-family-sans:   noto-kufi, dubai-regular , "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-family-sans: noto-kufi, dubai-regular, "Helvetica Neue", "Segoe UI", Roboto, Arial, sans-serif;
   --font-family-mono: "JetBrains Mono", "Fira Code", Consolas, "Liberation Mono", Menlo, monospace;
   --font-weight-normal: 400;
   --font-weight-medium: 500;
@@ -75,7 +86,7 @@
   --space-sm: 0.5rem;
   --space-md: 1rem;
   --space-lg: 1.5rem;
-  --space-xl: 2rem;
+  --space-xl: 1.75rem;
   --space-2xl: 3rem;
 
   /* Transitions */
@@ -97,15 +108,8 @@
   /* Layout Variables */
   --sidebar-width: 300px;
   --header-height: 65px;
-
-
-  /* ======================================================================== */
-  /* NEW: BOOTSTRAP VARIABLE MAPPING                                          */
-  /* This section maps your design tokens to Bootstrap's core CSS variables.  */
-  /* This automatically themes Bootstrap components without manual overrides. */
-  /* ======================================================================== */
   
-  /* Core Colors & Body */
+  /* BOOTSTRAP VARIABLE MAPPING */
   --bs-primary: var(--color-primary);
   --bs-primary-rgb: var(--color-primary-rgb);
   --bs-secondary: var(--color-secondary);
@@ -117,37 +121,28 @@
   --bs-body-bg: var(--surface-secondary);
   --bs-secondary-color: var(--text-muted);
   --bs-tertiary-bg: var(--surface-primary);
-  
-  /* Borders */
   --bs-border-color: var(--border-color);
   --bs-border-width: var(--border-width);
   --bs-border-radius: var(--border-radius);
   --bs-border-radius-sm: var(--border-radius-sm);
   --bs-border-radius-lg: var(--border-radius-lg);
   --bs-border-radius-xl: var(--border-radius-xl);
-
-  /* Typography */
   --bs-font-sans-serif: var(--font-family-sans);
   --bs-font-monospace: var(--font-family-mono);
   --bs-body-font-weight: var(--font-weight-normal);
-
-  /* Components */
   --bs-card-bg: var(--surface-primary);
   --bs-card-border-color: var(--border-color);
   --bs-card-border-radius: var(--border-radius-lg);
   --bs-card-cap-bg: var(--surface-secondary);
-  
   --bs-btn-font-weight: var(--font-weight-medium);
   --bs-btn-border-radius: var(--border-radius);
   --bs-btn-focus-box-shadow: 0 0 0 3px var(--color-primary-subtle);
-
   --bs-form-control-bg: var(--surface-primary);
   --bs-form-control-color: var(--text-primary);
   --bs-form-control-placeholder-color: var(--text-muted);
   --bs-form-control-border-color: var(--border-color);
   --bs-form-focus-border-color: var(--color-primary);
   --bs-form-focus-box-shadow: 0 0 0 3px var(--color-primary-subtle);
-  
   --bs-dropdown-bg: var(--surface-primary);
   --bs-dropdown-border-color: var(--border-color);
   --bs-dropdown-link-hover-bg: var(--color-primary-subtle);
@@ -156,33 +151,26 @@
 
 /* Dark Theme Overrides */
 [data-bs-theme="dark"] {
-  --color-primary: #60a5fa;
-  --color-primary-rgb: 96, 165, 250;
-  --color-primary-light: rgba(96, 165, 250, 0.15);
-  --color-primary-hover: #93c5fd;
-  --color-primary-subtle: rgba(96, 165, 250, 0.1);
-
-  --color-secondary: #94a3b8;
-  
-  --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --text-muted: #94a3b8;
-  --text-inverse: #020617;
-
-  --surface-primary: #1e293b;
-  --surface-secondary: #0f172a;
-  --surface-tertiary: #020617;
-  
-  --border-color: #334155;
-  --border-color-subtle: #1e293b;
-
+  --color-primary: var(--french-gray);
+  --color-primary-rgb: 206, 212, 218;
+  --color-primary-light: rgba(206, 212, 218, 0.15);
+  --color-primary-hover: var(--french-gray-2);
+  --color-primary-subtle: rgba(206, 212, 218, 0.08);
+  --color-secondary: var(--french-gray-2);
+  --text-primary: var(--seasalt);
+  --text-secondary: var(--antiflash-white);
+  --text-muted: var(--french-gray);
+  --text-inverse: var(--eerie-black);
+  --surface-primary: var(--onyx);
+  --surface-secondary: var(--eerie-black);
+  --surface-tertiary: var(--outer-space);
+  --border-color: var(--outer-space);
+  --border-color-subtle: var(--onyx);
   --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
   --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 2px -1px rgba(0, 0, 0, 0.2);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
-  
-  /* NEW: Bootstrap Dark Mode Variable Mapping */
   --bs-body-color: var(--text-primary);
   --bs-body-bg: var(--surface-secondary);
   --bs-border-color: var(--border-color);
@@ -190,7 +178,7 @@
   --bs-tertiary-bg: var(--surface-primary);
   --bs-card-bg: var(--surface-primary);
   --bs-card-border-color: var(--border-color);
-  --bs-card-cap-bg: var(--surface-tertiary); /* Slightly darker header */
+  --bs-card-cap-bg: var(--surface-tertiary);
   --bs-form-control-bg: var(--surface-primary);
   --bs-form-control-color: var(--text-primary);
 }
@@ -198,42 +186,27 @@
 /* ==========================================================================
    2. GLOBAL STYLES & BASE ELEMENTS
    ========================================================================== */
-*, *::before, *::after {
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
 body {
-  /* REFACTORED: background-color and color are now set by Bootstrap vars */
   font-family: var(--font-family-sans);
-  line-height: 1.6;
+  line-height: 1.7;
   font-weight: var(--font-weight-normal);
   transition: background-color var(--transition-base), color var(--transition-base);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-
 h1, h2, h3, h4, h5, h6 {
   font-weight: var(--font-weight-semibold);
   color: var(--text-primary);
   line-height: 1.3;
 }
-
-.mono {
-  font-family: var(--font-family-mono);
-}
+.mono { font-family: var(--font-family-mono); }
 
 /* ==========================================================================
    3. LAYOUT & NAVIGATION
    ========================================================================== */
-.layout-wrapper {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
+.layout-wrapper { display: flex; flex-direction: column; min-height: 100vh; }
 
 /* --- Offcanvas Sidebar --- */
 .offcanvas-end {
@@ -241,14 +214,8 @@ h1, h2, h3, h4, h5, h6 {
   background-color: var(--surface-primary);
   border-left: var(--border-width) solid var(--border-color);
 }
-.offcanvas-header {
-  padding: 0;
-  border-bottom: var(--border-width) solid var(--border-color);
-}
-.offcanvas-header .btn-close {
-  margin: var(--space-md);
-}
-
+.offcanvas-header { padding: 0; border-bottom: var(--border-width) solid var(--border-color); }
+.offcanvas-header .btn-close { margin: var(--space-md); }
 .sidebar-header {
   display: flex;
   align-items: center;
@@ -258,10 +225,7 @@ h1, h2, h3, h4, h5, h6 {
   text-decoration: none;
   flex-grow: 1;
 }
-.sidebar-header .brand-icon {
-  color: var(--color-primary);
-  font-size: 2rem;
-}
+.sidebar-header .brand-icon { color: var(--color-primary); font-size: 2rem; }
 .sidebar-header .brand-text {
   color: var(--text-primary);
   font-size: 1.1rem;
@@ -269,14 +233,9 @@ h1, h2, h3, h4, h5, h6 {
   margin-right: var(--space-sm);
   white-space: nowrap;
 }
+.sidebar-nav { padding: var(--space-md); }
 
-.sidebar-nav {
-  padding: var(--space-md);
-}
-.navbar-nav {
-  padding: 0;
-}
-
+/* --- Sidebar Navigation Links --- */
 .nav-item .nav-link,
 .nav-item .dropdown-toggle {
   display: flex;
@@ -288,60 +247,71 @@ h1, h2, h3, h4, h5, h6 {
   transition: color var(--transition-fast), background-color var(--transition-fast);
   white-space: nowrap;
   margin-bottom: var(--space-xs);
+  cursor: pointer;
 }
+.nav-item .dropdown-toggle .dropdown-indicator {
+  font-size: 0.8rem;
+  margin-right: auto;
+  transition: transform var(--transition-base);
+}
+.nav-item .dropdown-toggle[aria-expanded="true"] .dropdown-indicator { transform: rotate(-180deg); }
 .nav-item .nav-link .nav-icon,
 .nav-item .dropdown-toggle .nav-icon {
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   min-width: 24px;
   margin-left: var(--space-md);
   transition: color var(--transition-fast);
 }
 .nav-item .nav-link:hover,
 .nav-item .dropdown-toggle:hover {
-  background-color: var(--color-primary-subtle);
+  background-color: var(--surface-tertiary);
   color: var(--color-primary);
 }
 .nav-item .nav-link.active,
 .nav-item .dropdown-toggle.active {
-  background-color: var(--color-primary);
-  color: var(--text-inverse);
-  box-shadow: var(--shadow-sm);
-}
-.nav-item .nav-link.active .nav-icon,
-.nav-item .dropdown-toggle.active .nav-icon {
-  color: var(--text-inverse);
-}
-
-/* REFACTORED: Style general dropdowns first, then specialize */
-.dropdown-menu {
-  box-shadow: var(--shadow-lg) !important;
-  margin-top: var(--space-xs) !important;
-}
-
-/* Specific dropdown menu style for sidebar navigation */
-.sidebar-nav .dropdown-menu {
-  background-color: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-  margin: 0 !important;
-}
-.sidebar-nav .dropdown-menu .dropdown-item {
-  color: var(--text-secondary);
-  padding: 0.5rem 1rem 0.5rem 3.5rem !important; /* Indent child items */
-  border-radius: var(--border-radius);
-  font-size: 0.95rem;
-  transition: all var(--transition-fast);
-}
-.sidebar-nav .dropdown-menu .dropdown-item:hover {
-  background-color: var(--color-primary-subtle);
-  color: var(--color-primary);
-}
-.sidebar-nav .dropdown-menu .dropdown-item.active {
   background-color: var(--color-primary-subtle);
   color: var(--color-primary);
   font-weight: var(--font-weight-semibold);
 }
+
+/* --- Sidebar Navigation Submenus --- */
+.nav-submenu {
+    list-style: none;
+    padding: 0;
+    margin: var(--space-xs) var(--space-sm) var(--space-sm) 0;
+    padding-right: calc(var(--space-md) + 24px); /* Align with text, accounts for icon width + margin */
+}
+.nav-submenu-item {
+    color: var(--text-secondary);
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    font-size: 0.95rem;
+    transition: all var(--transition-fast);
+    display: block;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.nav-submenu-item:hover, .nav-submenu-item:focus {
+    background-color: var(--color-primary-subtle);
+    color: var(--color-primary);
+}
+.nav-submenu-item.active {
+    background-color: var(--color-primary-subtle);
+    color: var(--color-primary);
+    font-weight: var(--font-weight-semibold);
+}
+.nav-submenu-header {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-weight: var(--font-weight-semibold);
+    padding: var(--space-sm) var(--space-md) var(--space-xs);
+    text-transform: uppercase;
+}
+.nav-submenu-divider {
+    border-top: 1px solid var(--border-color);
+    margin: var(--space-sm) 0;
+}
+
 
 /* --- Main Content Area --- */
 .main-content {
@@ -351,12 +321,9 @@ h1, h2, h3, h4, h5, h6 {
   min-height: 100vh;
   width: 100%;
 }
-
-/* --- Top Header --- */
 .header {
   height: var(--header-height);
   background-color: var(--surface-primary);
-  border-bottom: var(--border-width) solid var(--border-color);
   padding: 0 var(--space-lg);
   display: flex;
   align-items: center;
@@ -364,8 +331,8 @@ h1, h2, h3, h4, h5, h6 {
   position: sticky;
   top: 0;
   z-index: var(--z-header);
+  border-bottom: 1px solid var(--border-color);
 }
-
 .sidebar-toggle {
   background: none;
   border: none;
@@ -374,23 +341,9 @@ h1, h2, h3, h4, h5, h6 {
   padding: var(--space-sm);
   border-radius: var(--border-radius);
 }
-.sidebar-toggle:hover {
-  background-color: var(--surface-tertiary);
-  color: var(--text-primary);
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
-}
-
-/* --- Main Content & Footer --- */
-.content-wrapper {
-  padding: var(--space-xl);
-  flex-grow: 1;
-}
-
+.sidebar-toggle:hover { background-color: var(--surface-tertiary); color: var(--text-primary); }
+.header-actions { display: flex; align-items: center; gap: var(--space-md); }
+.content-wrapper { padding: var(--space-lg) var(--space-xl); flex-grow: 1; }
 .footer {
   background-color: var(--surface-primary);
   border-top: var(--border-width) solid var(--border-color);
@@ -401,58 +354,21 @@ h1, h2, h3, h4, h5, h6 {
 /* ==========================================================================
    4. COMPONENT STYLES
    ========================================================================== */
-
 /* --- Cards --- */
-/* REFACTORED: Most card styles are now handled by Bootstrap variables.
-   We only need to keep custom additions like the hover effect. */
-.card {
-  box-shadow: none;
-  transition: box-shadow var(--transition-base);
-}
-.card:hover {
-  box-shadow: var(--shadow-sm);
-}
-.card-header {
-  padding: var(--space-md) var(--space-lg);
-  font-weight: var(--font-weight-medium);
-}
-.card-body { 
-  padding: var(--space-lg); 
-}
+.card { box-shadow: none; transition: box-shadow var(--transition-base); }
+.card:hover { box-shadow: var(--shadow-sm); }
+.card-header { padding: var(--space-md) var(--space-lg); font-weight: var(--font-weight-medium); }
+.card-body { padding: var(--space-lg); }
 
 /* --- Buttons --- */
-/* REFACTORED: Removed .btn-primary overrides. These are now handled by 
-   --bs-primary, --bs-btn-font-weight, etc. The framework does the work! */
-.btn {
-  transition: all var(--transition-fast) !important;
-}
-.btn {
-  color: var(--text-primary) !important;
-}
-.badge {
-  color: var(--text-secondary) !important;
-}
-.btn:focus-visible {
-  outline: 3px solid var(--color-primary-subtle) !important;
-  outline-offset: 1px;
-}
-/* REFACTORED: Removed .btn-outline-primary which was styled like a solid button.
-   Bootstrap's default outline button will now correctly use your theme colors. */
-
-.badge {
-  color: var(--text-primary) !important;
-  border-color: var(--text-primary) !important;
-}
+.btn { transition: all var(--transition-fast); }
+.btn:focus-visible { outline: 3px solid var(--color-primary-subtle) !important; outline-offset: 1px; }
 
 /* --- Forms --- */
-/* REFACTORED: Removed most form styles as they are now handled by Bootstrap
-   variables like --bs-form-control-bg and --bs-form-focus-box-shadow. */
 .form-control, .form-select, .ts-control {
   padding: 0.5rem 1rem !important;
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
-
-/* Tom Select Dropdown (specific 3rd party library) */
 .ts-dropdown {
   z-index: var(--z-select-dropdown) !important;
   background-color: var(--surface-primary) !important;
@@ -468,11 +384,9 @@ h1, h2, h3, h4, h5, h6 {
   background-color: var(--color-primary-subtle) !important;
   color: var(--color-primary) !important;
 }
-.ts-control input {
-  text-align: center !important;
-}
+.ts-control input { text-align: center !important; }
 
-/* --- Theme Switch (Custom Component) --- */
+/* --- Theme Switch --- */
 .theme-switch .form-check-label {
   background-color: var(--surface-tertiary);
   border: 1px solid var(--border-color);
@@ -496,9 +410,7 @@ h1, h2, h3, h4, h5, h6 {
   transition: transform var(--transition-base);
 }
 .theme-switch .form-check-input { display: none; }
-.theme-switch .form-check-input:checked + .form-check-label::before {
-  transform: translateX(22px);
-}
+.theme-switch .form-check-input:checked + .form-check-label::before { transform: translateX(22px); }
 .theme-switch .form-check-label i {
   position: absolute;
   top: 50%;
@@ -509,8 +421,7 @@ h1, h2, h3, h4, h5, h6 {
 .theme-switch .bi-sun-fill { right: 7px; }
 .theme-switch .bi-moon-stars-fill { left: 7px; }
 
-
-/* --- Sticky Form Footer (Custom Component) --- */
+/* --- Sticky Form Footer --- */
 .sticky-form-footer {
   position: sticky;
   bottom: 0;
@@ -519,11 +430,35 @@ h1, h2, h3, h4, h5, h6 {
   padding: var(--space-md) var(--space-xl);
   z-index: var(--z-sticky);
   box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-  margin: 0 calc(var(--space-xl) * -1) calc(var(--space-xl) * -1); /* Break out of container padding */
+  margin: 0 calc(var(--space-xl) * -1) calc(var(--space-xl) * -1);
 }
-[data-bs-theme="dark"] .sticky-form-footer {
-  box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+[data-bs-theme="dark"] .sticky-form-footer { box-shadow: 0 -2px 10px rgba(0,0,0,0.2); }
+
+/* --- Django Messages as Toasts --- */
+.messages-container {
+    position: fixed;
+    top: calc(var(--header-height) + var(--space-md));
+    right: var(--space-md);
+    z-index: var(--z-modal);
+    width: 100%;
+    max-width: 400px;
 }
+
+/* --- Alerts (Modernized) --- */
+.alert {
+  border: var(--border-width) solid var(--border-color);
+  border-right-width: 4px;
+  box-shadow: none;
+  background-color: var(--surface-primary) !important;
+  color: var(--text-primary) !important;
+}
+.alert-heading { color: inherit; }
+.alert-success { border-right-color: var(--color-success); }
+.alert-danger { border-right-color: var(--color-danger); }
+.alert-warning { border-right-color: var(--color-warning); }
+.alert-info { border-right-color: var(--color-info); }
+.alert .btn-close { filter: none; }
+[data-bs-theme="dark"] .alert .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
 
 /* ==========================================================================
    5. UTILITY & 3RD PARTY STYLES
@@ -531,7 +466,7 @@ h1, h2, h3, h4, h5, h6 {
 /* Custom Scrollbar */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: var(--surface-secondary); }
-::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: var(--color-primary); border-radius: 4px; opacity: 0.6; }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-secondary); }
 
 /* Flatpickr */
@@ -545,19 +480,16 @@ h1, h2, h3, h4, h5, h6 {
 .flatpickr-weekday { color: var(--text-secondary); font-weight: var(--font-weight-semibold); }
 .flatpickr-day { color: var(--text-primary); }
 .flatpickr-day:hover, .flatpickr-day:focus { background: var(--color-primary-subtle); border-color: transparent; }
-.flatpickr-day.today { border-color: var(--color-primary); color: var(--color-primary); }
+.flatpickr-day.today { border-color: var(--color-primary); color: var(--color-primary); background: rgba(73, 80, 87, 0.1); }
 .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange {
   background: var(--color-primary);
   color: var(--text-inverse);
   border-color: var(--color-primary);
 }
 
-/* --- Bank Reconciliation Styles (Custom Component) --- */
+/* --- Bank Reconciliation Styles --- */
 .table-hover .statement-line,
-.table-hover .internal-transaction {
-  cursor: pointer;
-}
-
+.table-hover .internal-transaction { cursor: pointer; }
 .table-hover .statement-line.selected,
 .table-hover .internal-transaction.selected {
   background-color: var(--color-primary-subtle) !important;
@@ -568,11 +500,15 @@ h1, h2, h3, h4, h5, h6 {
    6. RESPONSIVE DESIGN
    ========================================================================== */
 @media (max-width: 991.98px) {
-  :root {
-    --sidebar-width: 280px; /* Slightly smaller for mobile */
-  }
+  :root { --sidebar-width: 280px; }
 }
-
+@media (max-width: 576px) {
+    .messages-container {
+        right: var(--space-sm);
+        left: var(--space-sm);
+        max-width: none;
+    }
+}
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

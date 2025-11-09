@@ -140,16 +140,32 @@ def api_batch_details(request: HttpRequest, batch_pk: int) -> JsonResponse:
     """
     API endpoint to get full, detailed information for a single batch.
     """
+    # --- NEW: Defensive check for invalid PK ---
+    if not batch_pk or int(batch_pk) == 0:
+        return JsonResponse({'error': 'Invalid batch ID provided.'}, status=400)
+
     batch = get_object_or_404(
         Batch.objects.select_related('template__final_product')
         .prefetch_related('items__primitive_product', 'items__source_log'),
         pk=batch_pk
     )
+
+    # --- NEW: Parse batch number into from/to for UI convenience ---
+    batch_from = ''
+    batch_to = ''
+    if batch.batch_number:
+        parts = str(batch.batch_number).split('-')
+        if parts:
+            batch_from = parts[0]
+        if len(parts) > 1:
+            batch_to = parts[1]
     
     batch_details = {
         'id': batch.id,
         'shop_order_number': batch.shop_order_number,
         'batch_number': batch.batch_number,
+        'batch_number_from': batch_from,
+        'batch_number_to': batch_to,
         'creation_date': batch.creation_date.isoformat(),
         'is_customized': batch.is_customized,
         'is_continuation': batch.is_continuation,
@@ -316,8 +332,8 @@ def api_get_sellable_stock(request: HttpRequest) -> JsonResponse:
     sellable_stock = FinishedProductReceipt.objects.filter(
         status=FinishedProductReceipt.Status.RELEASED
     ).annotate(
-        total_dispatched=Coalesce(Subquery(dispatched_subquery), 0.0, output_field=DecimalField()),
-        total_adjusted=Coalesce(Subquery(adjusted_subquery), 0.0, output_field=DecimalField())
+        total_dispatched=Coalesce(Subquery(dispatched_subquery), 0.0, output_field=FloatField()),
+        total_adjusted=Coalesce(Subquery(adjusted_subquery), 0.0, output_field=FloatField())
     ).annotate(
         available_quantity=F('total_quantity_produced') - F('total_dispatched') - F('total_adjusted')
     ).filter(
@@ -331,8 +347,7 @@ def api_get_sellable_stock(request: HttpRequest) -> JsonResponse:
             'product_code': stock.batch.template.final_product.code,
             'batch_number': stock.batch.batch_number,
             'available_quantity': stock.available_quantity,
-            'unit': stock.batch.template.final_product.unit,
-            'unit_cost': stock.unit_cost
+            'unit': stock.batch.template.final_product.unit
         } for stock in sellable_stock
     ]
     
@@ -384,31 +399,6 @@ def api_get_receipts_for_allocation(request):
         } for r in receipts
     ]
     return JsonResponse({'receipts': data})
-
-    # The main query now uses the subqueries, preventing the join multiplication bug.
-    sellable_receipts = FinishedProductReceipt.objects.filter(
-        status=FinishedProductReceipt.Status.RELEASED
-    ).select_related(
-        'batch__template__final_product'
-    ).annotate(
-        total_dispatched=Coalesce(Subquery(dispatched_subquery, output_field=FloatField()), 0.0),
-        total_adjusted=Coalesce(Subquery(adjusted_subquery, output_field=FloatField()), 0.0)
-    ).annotate(
-        quantity_available=F('total_quantity_produced') - F('total_dispatched') + F('total_adjusted')
-    ).filter(
-        quantity_available__gt=0.001
-    )
-
-    data = [
-        {
-            'id': receipt.id,
-            'product_name': receipt.batch.template.final_product.name,
-            'batch_number': receipt.individual_batch_number,
-            'available_qty': receipt.quantity_available,
-            'unit': receipt.batch.template.final_product.unit
-        } for receipt in sellable_receipts
-    ]
-    return JsonResponse(data, safe=False)
 
 
 # --- CORRECTED API ENDPOINT ---

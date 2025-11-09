@@ -26,7 +26,7 @@ from .views.sales import (
     customers, edit_customer, delete_customer, sales_orders, create_sales_order, 
     view_sales_order, delete_sales_order, edit_sales_order_item, delete_sales_order_item,
     create_dispatch, edit_dispatch, cancel_dispatch_view, dispatch_from_sales_order,
-    sales_returns_list, create_sales_return, view_sales_return,
+    sales_returns_list, create_sales_return, view_sales_return, view_credit_memo_pdf,
     process_inspected_return_view, create_credit_memo_from_return_view
 )
 from .views import expense_requests
@@ -46,8 +46,31 @@ from .views.financials import (
     overhead_views,
     period_views,
 )
+from .views.reports import ar as ar_report_views, sales as sales_report_views
 
 app_name = 'inventory'
+
+urlpatterns = [
+    # ... (existing URL patterns)
+
+    # Financial Reports
+    path('reports/trial-balance/', trial_balance, name='trial_balance'),
+    path('reports/profit-loss/', profit_and_loss_statement, name='profit_and_loss'),
+    path('reports/balance-sheet/', balance_sheet, name='balance_sheet'),
+    path('reports/product-ledger/', product_ledger, name='product_ledger'),
+    path('reports/general-ledger/', general_ledger, name='general_ledger'),
+    path('reports/stock-valuation/', stock_valuation_report, name='stock_valuation_report'),
+    path('reports/tax-reconciliation/', tax_reconciliation_report, name='tax_reconciliation_report'),
+    path('reports/reconciliation/', reconciliation_report, name='reconciliation_report'),
+    path('reports/batch-variance/', batch_production_variance_report, name='batch_production_variance_report'),
+    
+    # --- NEW: Refactored AR Report URLs ---
+    path('reports/ar/aging/', ar_report_views.ar_aging_report, name='ar_aging_report'),
+    path('reports/ar/aging/customer_detail/<int:customer_id>/', ar_report_views.ar_customer_detail_api, name='ar_customer_detail_api'),
+    path('reports/ar/customer-statement/', ar_report_views.customer_statement_report, name='customer_statement_report'),
+    
+    # ... (rest of the existing URL patterns)
+]
 
 urlpatterns = [
     # Dashboard & Records
@@ -157,6 +180,7 @@ urlpatterns = [
     path('sales_return/<int:pk>/', view_sales_return, name='view_sales_return'),
     path('sales_return/<int:return_pk>/process/', process_inspected_return_view, name='process_inspected_return'),
     path('sales_return/<int:return_pk>/credit_memo/create/', create_credit_memo_from_return_view, name='create_credit_memo_from_return'),
+    path('credit_memo/<int:memo_pk>/pdf/', view_credit_memo_pdf, name='view_credit_memo_pdf'),
 
     # Employee Financials
     path('employees/financials/', employees.employee_financials_dashboard, name='employee_financials_dashboard'),
@@ -186,6 +210,10 @@ urlpatterns = [
     path('financials/customer_invoice/<int:pk>/', ar_views.view_customer_invoice, name='view_customer_invoice'),
     path('financials/customer_invoice/<int:pk>/delete/', ar_views.delete_customer_invoice, name='delete_customer_invoice'),
     path('financials/customer_invoice/<int:invoice_pk>/receive_payment/', ar_views.receive_payment_for_invoice, name='receive_payment_for_invoice'),
+    path('financials/customer_payments/', ar_views.customer_payments_list, name='customer_payments_list'),
+    path('financials/customer_payment/<int:pk>/', ar_views.view_customer_payment, name='view_customer_payment'),
+    path('financials/ar/workbench/', ar_views.ar_cash_application_workbench, name='ar_cash_application_workbench'),
+    path('financials/customer_payment/<int:pk>/pdf/', ar_views.view_customer_payment_pdf, name='view_customer_payment_pdf'),
     path('financials/banking/', banking_views.bank_accounts_dashboard, name='bank_accounts_dashboard'),
     path('financials/journal/', gl_views.journal_entries, name='journal_entries'),
     path('financials/journal/create/', gl_views.create_journal_entry, name='create_journal_entry'),
@@ -228,6 +256,16 @@ urlpatterns = [
     path('reports/product_ledger/', product_ledger, name='product_ledger'),
     path('reports/stock_valuation/', stock_valuation_report, name='stock_valuation'),
 
+    # --- NEW: Refactored AR Report URLs ---
+    path('reports/ar/aging/', ar_report_views.ar_aging_report, name='ar_aging_report'),
+    path('reports/ar/aging/customer_detail/<int:customer_id>/', ar_report_views.ar_customer_detail_api, name='ar_customer_detail_api'),
+    path('reports/ar/customer-statement/', ar_report_views.customer_statement_report, name='customer_statement_report'),
+    
+    # --- NEW: Sales Report URLs ---
+    path('reports/sales/by-customer/', sales_report_views.sales_by_customer_report, name='sales_by_customer_report'),
+    path('reports/sales/by-product/', sales_report_views.sales_by_product_report, name='sales_by_product_report'),
+    path('reports/sales/backlog/', sales_report_views.sales_order_backlog_report, name='sales_order_backlog_report'),
+
     # API Routes
     path('api/inventory_log/<int:log_pk>/history/', api.api_get_inventory_log_history, name='api_get_inventory_log_history'),
     path('api/batch_details/<int:batch_pk>/', api_batch_details, name='api_batch_details'),
@@ -241,8 +279,8 @@ urlpatterns = [
     path('api/available_stock/<int:product_pk>/', api_get_available_stock, name='api_get_available_stock'),
     path('api/supplier/<int:supplier_id>/uninvoiced_receipts/', ap_views.api_get_uninvoiced_receipts, name='api_get_uninvoiced_receipts'),
     path('api/supplier/<int:supplier_id>/unsettled_expenses/', ap_views.api_get_unsettled_expenses, name='api_get_unsettled_expenses'),
-    path('api/sales_order/<int:so_id>/undispatched_items/', api.api_get_undispatched_so_items, name='api_get_undispatched_so_items'),
+    path('api/customer/<int:customer_id>/open_items/', ar_views.api_get_customer_open_items, name='api_get_customer_open_items'),
+    path('api/customer/<int:customer_id>/uninvoiced_dispatches/', ar_views.api_get_uninvoiced_dispatches, name='api_get_uninvoiced_dispatches'),
     path('api/product/<int:product_id>/sources/', api_get_stock_sources_for_product, name='api_get_stock_sources_for_product'),
-    path('api/sales_order/<int:so_id>/uninvoiced_dispatches/', ar_views.api_get_uninvoiced_dispatches, name='api_get_uninvoiced_dispatches'),
     path('api/period_checklist/<int:period_id>/', period_views.api_period_checklist_status, name='api_period_checklist_status'),
 ]

@@ -1,0 +1,73 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+    <meta charset="utf-8">
+    <title>تقرير المبيعات حسب المنتج</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
+        @page {
+            size: A4;
+            margin: 1.5cm;
+            @bottom-right {
+                content: "صفحة " counter(page);
+                font-size: 10pt;
+                color: #555;
+                font-family: 'Cairo', sans-serif;
+            }
+        }
+        body {
+            font-family: 'Cairo', sans-serif;
+            direction: rtl;
+            font-size: 10pt;
+            color: #333;
+        }
+        .report-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #048A81;
+        }
+        .report-header img { height: 60px; }
+        .report-header h1 { margin: 0; font-size: 20pt; color: #2E4057; }
+        .report-header p { margin: 2px 0; font-size: 11pt; color: #555; }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+        .table th, .table td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: right;
+        }
+        .table thead th {
+            background-color: #048A81;
+            color: white;
+            font-weight: 700;
+        }
+        .table tbody tr:nth-child(even) { background-color: #f8f9fa; }
+        .table tfoot th {
+            background-color: #e9ecef;
+            font-weight: 700;
+            border-top: 2px solid #048A81;
+        }
+        .text-center { text-align: center; }
+        .text-end { text-align: left; } /* In RTL, end is left */
+        .font-weight-bold { font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div class="report-header">
+        <img src="{% static 'img/gipcco_logo.png' %}" alt="شعار الشركة">
+        <h1>شركة جيبكو</h1>
+        <p>تقرير المبيعات حسب المنتج</p>
+        <p><strong>عن الفترة من:</strong> {{ start_date }} <strong>إلى:</strong> {{ end_date }}</p>
+    </div>
+
+    {% include "inventory/reports/sales/partials/sales_by_product_content.html" %}
+
+</body>
+</html>

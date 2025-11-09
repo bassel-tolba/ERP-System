@@ -51,7 +51,10 @@ INSTALLED_APPS = [
     'inventory.apps.InventoryConfig',
      # Add this line
     'django.contrib.humanize', # For using filters like intcomma
+    'django_weasyprint',
 ]
+# WeasyPrint configuration
+WEASYPRINT_URLFETCHER = 'django_weasyprint.utils.django_urlfetcher'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

@@ -1,0 +1,38 @@
+<!-- gipcco_project/inventory/templates/inventory/partials/customer_payments_list_content.html -->
+{% load i18n humanize %}
+
+<div class="card-body p-0">
+    <div class="table-responsive">
+        <table class="table table-striped table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-3">{% trans "تاريخ الدفع" %}</th>
+                    <th>{% trans "رقم السند" %}</th>
+                    <th>{% trans "العميل" %}</th>
+                    <th>{% trans "الحساب البنكي" %}</th>
+                    <th class="text-end">{% trans "المبلغ" %}</th>
+                    <th class="text-end">{% trans "المبلغ غير المطبق" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for payment in payments %}
+                <tr>
+                    <td class="ps-3">{{ payment.payment_date|date:"Y-m-d" }}</td>
+                    <td><a href="{% url 'inventory:view_customer_payment' payment.pk %}">PAY-{{ payment.pk }}</a></td>
+                    <td>{{ payment.customer.name }}</td>
+                    <td>{{ payment.bank_account.name }}</td>
+                    <td class="text-end">{{ payment.amount|intcomma }}</td>
+                    <td class="text-end text-danger">{{ payment.unapplied_amount|intcomma }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-4">
+                        <i class="bi bi-info-circle fs-3 text-muted"></i>
+                        <p class="mt-2 mb-0">{% trans "لا توجد تحصيلات تطابق معايير البحث." %}</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

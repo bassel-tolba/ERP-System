@@ -2,9 +2,11 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h2 mb-0" style="font-weight: 700;">عرض أوامر التشغيل</h1>
+    {% if perms.inventory.add_batch %}
     <a href="{% url 'inventory:create_batch' %}" class="btn btn-primary">
         <i class="bi bi-plus-lg"></i> إنشاء أمر تشغيل جديد
     </a>
+    {% endif %}
 </div>
 
 <!-- Search and Filter Form -->
@@ -74,7 +76,15 @@
                 <tbody>
                     {% for b in batches %}
                     <tr class="{% if b.status == 'cancelled' %}table-danger{% endif %}">
-                        <td class="ps-3 font-monospace"><strong>{{ b.shop_order_number }}</strong></td>
+                        <td class="ps-3 font-monospace">
+                            <strong>{{ b.shop_order_number }}</strong>
+                            {% if b.is_continuation %}
+                                <span class="ms-2" data-bs-toggle="tooltip" title="أمر تشغيل تكميلي">
+                                    <i class="bi bi-link-45deg text-info"></i>
+                                    <a href="{% url 'inventory:view_batch' pk=b.parent_batch.id %}" class="text-decoration-none small">(للأمر الأصلي)</a>
+                                </span>
+                            {% endif %}
+                        </td>
                         <td class="font-monospace">{{ b.batch_number }}</td>
                         <td>{{ b.template.final_product.name }}</td>
                         <td>{{ b.creation_date|date:"Y-m-d" }}</td>
@@ -97,7 +107,7 @@
                         </td>
                         <td class="text-end pe-3">
                             <a href="{% url 'inventory:view_batch' pk=b.id %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil-square"></i> عرض وتعديل</a>
-                            {% if b.status != 'cancelled' and b.status != 'completed' %}
+                            {% if perms.inventory.can_cancel_batch and b.status != 'cancelled' and b.status != 'completed' %}
                             <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#cancelBatchModal-{{ b.id }}">
                                 <i class="bi bi-x-circle"></i> إلغاء
                             </button>
