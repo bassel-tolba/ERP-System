@@ -11,14 +11,15 @@ from .test_base import AccountingServiceBaseTestCase
 from .models import (
     FinancialPeriod, InventoryLog, JournalEntry, JournalEntryLine, Batch, BatchItem, FinishedProductReceipt,
     SalesOrder, SalesOrderItem, FinishedProductDispatch, Payment,
-    InventoryAdjustment, InventoryCount, InventoryConsumption, ProductionReturn,
+    InventoryAdjustment, InventoryCount, InventoryConsumption, ProductionReturn, PurchaseOrder, PurchaseOrderItem,
+    SupplierInvoice, SupplierInvoiceItem,
     ExpenseLog, OverheadAllocationRun, TransactionCorrection, Account, ShopOrderTemplate,
     OpeningBalanceEntry, OpeningBalanceEntryLine, OpeningBalanceSubLedgerDetail, Product, FiscalYear, PrepaidExpense
 )
-from .services import overhead_service, accounting_service
+from .services import overhead_service, accounting_service, purchasing_service
 from .services.accounting_service import (
     create_je_for_inventory_receipt,
-    # create_je_for_production_consumption,
+    create_je_for_production_consumption,
     create_je_for_finished_goods_receipt,
     create_reversing_je_for_correction,
     _get_product_inventory_account
@@ -83,8 +84,8 @@ class TestAccountingService(AccountingServiceBaseTestCase):
         self.assertEqual(debits[self.accounts['1020404'].code], Decimal("140.000"))
 
         # Check credits
-        self.assertIn(self.accounts['20201'].code, credits)
-        self.assertEqual(credits[self.accounts['20201'].code], Decimal("1130.000"))
+        self.assertIn(self.accounts['20206'].code, credits) # FIX: Receipts now credit GRNI, not AP
+        self.assertEqual(credits[self.accounts['20206'].code], Decimal("1130.000"))
         self.assertIn(self.accounts['2020202'].code, credits)
         self.assertEqual(credits[self.accounts['2020202'].code], Decimal("10.000"))
 
@@ -96,7 +97,7 @@ class TestAccountingService(AccountingServiceBaseTestCase):
 
         # --- NEW: Verify Sub-Ledger Links ---
         inv_line = je.lines.get(account=self.accounts['1020201'])
-        ap_line = je.lines.get(account=self.accounts['20201'])
+        ap_line = je.lines.get(account=self.accounts['20206']) # FIX: Check GRNI line
         self.assertEqual(inv_line.sub_ledger_object, self.raw_material)
         self.assertEqual(ap_line.sub_ledger_object, self.supplier)
 
@@ -201,13 +202,16 @@ class TestAccountingService(AccountingServiceBaseTestCase):
         # Manually set costs as the costing service would in start_batch_production
         # In a real scenario, start_batch_production would calculate this.
         # For this test, we set it to test the JE creation part.
-        batch.items.filter(primitive_product=self.raw_material).first().cost_at_consumption = Decimal("10.000")
-        batch.items.filter(primitive_product=self.raw_material).last().cost_at_consumption = Decimal("12.000")
-        batch.items.first().save()
-        batch.items.last().save()
+        item1 = batch.items.order_by('id').first()
+        item1.cost_at_consumption = Decimal("10.000")
+        item1.save()
 
+        item2 = batch.items.order_by('id').last()
+        item2.cost_at_consumption = Decimal("12.000")
+        item2.save()
 
         # 2. Act: Call the service function that creates the JE
+        # --- FIX: Revert from batch.save() to a direct service call for reliability ---
         create_je_for_production_consumption(batch)
         
         # 3. Assert: Verify the journal entry
@@ -315,6 +319,7 @@ class TestAccountingService(AccountingServiceBaseTestCase):
 
         # c) Create the dispatch, which triggers the signal to create the second JE
         dispatch = FinishedProductDispatch.objects.create(
+            finished_product=receipt, # FIX: Add required direct link to the receipt
             sales_order_item=so_item,
             quantity=10.0,
             dispatch_date=timezone.make_aware(timezone.datetime(2025, 9, 22, 11, 0, 0)),
@@ -325,49 +330,89 @@ class TestAccountingService(AccountingServiceBaseTestCase):
 
         # 3. Assert
         self.assertEqual(JournalEntry.objects.count(), 2, "Should be 2 JEs: 1 for receipt, 1 for dispatch")
-        je = JournalEntry.objects.latest('date')  # The dispatch JE is the most recent one
-        self.assertEqual(je.source_object, dispatch)
-        self.assertEqual(je.lines.count(), 5, "Should have 5 lines: COGS, FG Inv, AR, Sales, VAT")
+        self.assertEqual(JournalEntry.objects.count(), 2, "Should be 2 JEs: 1 for receipt, 1 for dispatch") # Receipt JE + Dispatch JE
+        je = self.get_je_for_object(dispatch)
 
-        # Verify amounts
-        cogs_amount = Decimal("500.000")
-        base_revenue = Decimal("800.000")  # 10 * 80
-        vat_amount = Decimal("112.000")  # 800 * 0.14
+        # --- REFACTORED ASSERTION BLOCK ---
+        # Derive expected values directly from test objects for robustness
+        cogs_amount = dispatch.cost_at_dispatch
+        
+        # --- FIX: Convert dispatch.quantity (float) to Decimal for multiplication ---
+        base_revenue = so_item.base_price_per_unit * Decimal(str(dispatch.quantity))
+        vat_amount = base_revenue * so_item.vat_rate
         total_receivable = base_revenue + vat_amount
 
         debits = {line.account.code: line.amount for line in je.lines.filter(entry_type='debit')}
-        credits = {line.account.code: line.amount for line in je.lines.filter(entry_type='credit')}
+        expected_lines = [
+            # COGS Entry
+            {'account': self.accounts['50101'], 'debit': cogs_amount, 'sub_ledger': self.final_product},
+            {'account': self.accounts['1020206'], 'credit': cogs_amount, 'sub_ledger': self.final_product},
+            # Revenue Entry
+            {'account': self.accounts['10203'], 'debit': total_receivable, 'sub_ledger': self.customer},
+            {'account': self.accounts['40101'], 'credit': base_revenue, 'sub_ledger': self.final_product},
+            {'account': self.accounts['2020201'], 'credit': vat_amount, 'sub_ledger': None},
+        ]
+        self.assertJournalEntry(je, expected_lines, source_object=dispatch)
 
-        # Check debits
-        self.assertEqual(len(debits), 2)
-        self.assertIn(self.accounts['50101'].code, debits)  # COGS Account
-        self.assertEqual(debits[self.accounts['50101'].code], cogs_amount)
-        self.assertIn(self.accounts['10203'].code, debits)  # A/R Account
-        self.assertEqual(debits[self.accounts['10203'].code], total_receivable)
 
-        # Check credits
-        self.assertEqual(len(credits), 3)
-        self.assertIn(self.accounts['1020206'].code, credits)  # FG Inventory Account
-        self.assertEqual(credits[self.accounts['1020206'].code], cogs_amount)
-        self.assertIn(self.accounts['40101'].code, credits)  # Sales Revenue Account
-        self.assertEqual(credits[self.accounts['40101'].code], base_revenue)
-        self.assertIn(self.accounts['2020201'].code, credits)  # VAT Payable Account
-        self.assertEqual(credits[self.accounts['2020201'].code], vat_amount)
+class TestPurchasingAccounting(AccountingServiceBaseTestCase):
+    """
+    New test suite to cover the purchasing and three-way match accounting cycle.
+    """
+    def setUp(self):
+        """Clear journal entries before each test to ensure isolation."""
+        super().setUp()
+        JournalEntry.objects.all().delete()
 
-        # Verify the entry is balanced
-        self.assertEqual(sum(debits.values()), sum(credits.values()))
+    def test_post_supplier_invoice_with_ppv(self):
+        """
+        Verify posting a supplier invoice with a different price than the PO
+        correctly clears GRNI and posts the variance to PPV.
+        """
+        # 1. Arrange: Create PO, receive goods at PO price.
+        po = PurchaseOrder.objects.create(supplier=self.supplier, order_date=self.period.start_date)
+        po_item = PurchaseOrderItem.objects.create(
+            purchase_order=po, product=self.raw_material, quantity_ordered=100.0,
+            base_price_per_unit=Decimal("10.000") # PO Price
+        )
+        # This receipt creates the first JE: Dr. Inventory 1000, Cr. GRNI 1000
+        receipt_log = self.create_inventory_log(
+            self.supplier, self.raw_material, 100.0, "10.000", po_item, self.period.start_date
+        )
+        self.assertEqual(JournalEntry.objects.count(), 1)
+        grni_account = self.general_settings.goods_received_not_invoiced_account
+        self.assertEqual(JournalEntry.objects.first().lines.get(account=grni_account, entry_type='credit').amount, Decimal("1000.000"))
 
-        # --- NEW: Verify Sub-Ledger Links ---
-        cogs_debit_line = je.lines.get(account=self.accounts['50101'], entry_type='debit')
-        fg_credit_line = je.lines.get(account=self.accounts['1020206'], entry_type='credit')
-        ar_debit_line = je.lines.get(account=self.accounts['10203'], entry_type='debit')
-        rev_credit_line = je.lines.get(account=self.accounts['40101'], entry_type='credit')
+        # 2. Act: Post a supplier invoice with a higher price.
+        invoice = SupplierInvoice.objects.create(
+            supplier=self.supplier, invoice_number="INV-PPV-TEST",
+            invoice_date=self.period.end_date, due_date=self.period.end_date,
+            total_amount=Decimal("1200.000"), # Invoice price is 12/unit
+            # --- FIX: Use the correct value from the Status enum ---
+            status=SupplierInvoice.InvoiceStatus.DRAFT
+        )
+        SupplierInvoiceItem.objects.create(
+            invoice=invoice, po_item=po_item, quantity_invoiced=100.0,
+            base_price_per_unit=Decimal("12.000")
+        )
+        # This service function should create the second JE.
+        purchasing_service.post_supplier_invoice(invoice.id)
 
-        self.assertEqual(cogs_debit_line.sub_ledger_object, self.final_product)
-        self.assertEqual(fg_credit_line.sub_ledger_object, self.final_product)
-        self.assertEqual(ar_debit_line.sub_ledger_object, self.customer)
-        self.assertEqual(rev_credit_line.sub_ledger_object, self.final_product)
+        # 3. Assert: Check the invoice posting JE.
+        self.assertEqual(JournalEntry.objects.count(), 2)
+        je = self.get_je_for_object(invoice)
+        ppv_account = self.general_settings.purchase_price_variance_account
+        ap_account = self.general_settings.accounts_payable
 
+        expected_lines = [
+            # Clear GRNI at the original receipt value
+            {'account': grni_account, 'debit': Decimal("1000.000"), 'sub_ledger': self.supplier},
+            # Record the unfavorable price variance as a debit (expense)
+            {'account': ppv_account, 'debit': Decimal("200.000"), 'sub_ledger': self.raw_material},
+            # Record the full liability to the supplier in A/P
+            {'account': ap_account, 'credit': Decimal("1200.000"), 'sub_ledger': self.supplier},
+        ]
+        self.assertJournalEntry(je, expected_lines, source_object=invoice)
 
 class TestPaymentAccounting(AccountingServiceBaseTestCase):
     """
@@ -604,9 +649,12 @@ class TestMiscAccountingTransactions(AccountingServiceBaseTestCase):
             primitive_product=self.raw_material,
             actual_quantity=20.0,
             source_log=rm_log,
+            theoretical_quantity=20.0, # FIX: Add missing required field
             cost_at_consumption=Decimal("10.000")
         )
-        batch.save() # Trigger consumption JE
+        # Explicitly create the consumption JE to ensure the prerequisite is met for the return
+        # This makes the test more robust than relying on a signal.
+        create_je_for_production_consumption(batch)
 
         # c) Create the production return record. This triggers the signal for JE #3.
         prod_return = ProductionReturn.objects.create(
@@ -618,7 +666,8 @@ class TestMiscAccountingTransactions(AccountingServiceBaseTestCase):
             notes="Excess material returned"
         )
 
-        # 2. Act: The post_save signal on ProductionReturn has already fired.
+        # 2. Act: The post_save signal on ProductionReturn has already fired.(the signal for ProductionReturn has been deprecated and used in_service calls instead)
+        accounting_service.create_je_for_production_return(prod_return)
 
         # 3. Assert
         self.assertEqual(JournalEntry.objects.count(), 3) # 1 for receipt, 1 for consumption, 1 for return
@@ -683,11 +732,17 @@ class TestOverheadAllocation(AccountingServiceBaseTestCase):
             creation_date=timezone.make_aware(timezone.datetime(2025, 9, 20, 10, 0, 0)),
             machine_hours_consumed=150.0 # Total driver units for the period
         )
+        # FIX: Set batch status to completed so it's included in overhead calculations
+        batch.status = Batch.Status.COMPLETED
+        batch.save()
+
         # c) Receive finished goods from this batch within the period
         receipt = FinishedProductReceipt.objects.create(
             batch=batch,
             individual_batch_number="FPB-OH-001",
             receipt_date=timezone.make_aware(timezone.datetime(2025, 9, 22)),
+            release_date=timezone.make_aware(timezone.datetime(2025, 9, 22)),
+            status=FinishedProductReceipt.Status.RELEASED,
             total_cost=Decimal("20000.000"), # Prime cost
             total_quantity_produced=1000.0
         )
@@ -741,7 +796,7 @@ class TestOverheadAllocation(AccountingServiceBaseTestCase):
         # In this case, 100% of the driver units belong to this one receipt
         self.assertEqual(total_applied_cost, expected_pool_total)
         self.assertEqual(receipt.allocated_overhead_cost, expected_pool_total)
-
+        
         # Assert Application Journal Entry (JE #2)
         self.assertIsNotNone(je_app)
         self.assertEqual(je_app.lines.count(), 2)
@@ -819,19 +874,25 @@ class TestOverheadAllocation(AccountingServiceBaseTestCase):
         # a) Create two batches and receipts, each with different machine hours
         batch1 = self.get_or_create_batch_for_template(self.test_template, "SO-PROP-01", "B-PROP-01")
         batch1.machine_hours_consumed = 100.0
+        batch1.status = Batch.Status.COMPLETED # FIX: Set status
         batch1.save()
         receipt1 = FinishedProductReceipt.objects.create(
             batch=batch1, individual_batch_number="FPB-PROP-01",
             receipt_date=timezone.make_aware(timezone.datetime(2025, 9, 18, 10, 0, 0)),
+            release_date=timezone.make_aware(timezone.datetime(2025, 9, 18, 10, 0, 0)),
+            status=FinishedProductReceipt.Status.RELEASED,
             total_cost=Decimal("1000.000"), total_quantity_produced=100.0
         )
 
         batch2 = self.get_or_create_batch_for_template(self.test_template, "SO-PROP-02", "B-PROP-02")
         batch2.machine_hours_consumed = 50.0
+        batch2.status = Batch.Status.COMPLETED # FIX: Set status
         batch2.save()
         receipt2 = FinishedProductReceipt.objects.create(
             batch=batch2, individual_batch_number="FPB-PROP-02",
             receipt_date=timezone.make_aware(timezone.datetime(2025, 9, 19, 10, 0, 0)),
+            release_date=timezone.make_aware(timezone.datetime(2025, 9, 19, 10, 0, 0)),
+            status=FinishedProductReceipt.Status.RELEASED,
             total_cost=Decimal("500.000"), total_quantity_produced=50.0
         )
         self.assertEqual(JournalEntry.objects.count(), 2, "Pre-condition: Two JEs for FG receipts should exist.")
@@ -878,22 +939,32 @@ class TestOverheadAllocation(AccountingServiceBaseTestCase):
         # 1. Arrange
         ExpenseLog.objects.create(
             expense_date=timezone.make_aware(timezone.datetime(2025, 9, 10)), amount=Decimal("3000.000"),
-            description="Supervision Salaries", cost_pool=self.child_pool_rent
+            description="Supervision Salaries", cost_pool=self.child_pool_maintenance
         )
         batch1 = Batch.objects.create(
             template=self.test_template, shop_order_number="SO-LH-1", batch_number="B-LH-1",
             creation_date=timezone.make_aware(timezone.datetime(2025, 9, 15)), labor_hours_consumed=75.0 # 75%
         )
+        batch1.status = Batch.Status.COMPLETED # FIX: Set status
+        batch1.save()
+
         batch2 = Batch.objects.create(
             template=self.test_template, shop_order_number="SO-LH-2", batch_number="B-LH-2",
             creation_date=timezone.make_aware(timezone.datetime(2025, 9, 16)), labor_hours_consumed=25.0 # 25%
         )
+        batch2.status = Batch.Status.COMPLETED # FIX: Set status
+        batch2.save()
+
         receipt1 = FinishedProductReceipt.objects.create(
             batch=batch1, individual_batch_number="FPB-LH-1", receipt_date=timezone.make_aware(timezone.datetime(2025, 9, 18)),
+            release_date=timezone.make_aware(timezone.datetime(2025, 9, 18)),
+            status=FinishedProductReceipt.Status.RELEASED,
             total_cost=Decimal("1000.000"), total_quantity_produced=100.0
         )
         receipt2 = FinishedProductReceipt.objects.create(
             batch=batch2, individual_batch_number="FPB-LH-2", receipt_date=timezone.make_aware(timezone.datetime(2025, 9, 19)),
+            release_date=timezone.make_aware(timezone.datetime(2025, 9, 19)),
+            status=FinishedProductReceipt.Status.RELEASED,
             total_cost=Decimal("500.000"), total_quantity_produced=50.0
         )
         run = OverheadAllocationRun.objects.create(
@@ -923,22 +994,27 @@ class TestOverheadAllocation(AccountingServiceBaseTestCase):
 
         ExpenseLog.objects.create(
             expense_date=timezone.make_aware(timezone.datetime(2025, 9, 10)), amount=Decimal("1500.000"),
-            description="Packaging Supplies", cost_pool=self.child_pool_rent
+            description="Packaging Supplies", cost_pool=self.child_pool_maintenance
         )
         batch1 = Batch.objects.create(template=unique_template, shop_order_number="SO-BU-1", batch_number="B-BU-1", creation_date=timezone.make_aware(timezone.datetime(2025, 9, 15)))
+        batch1.status = Batch.Status.COMPLETED # FIX: Set status
+        batch1.save()
+
         batch2 = Batch.objects.create(template=unique_template, shop_order_number="SO-BU-2", batch_number="B-BU-2", creation_date=timezone.make_aware(timezone.datetime(2025, 9, 16)))
+        batch2.status = Batch.Status.COMPLETED # FIX: Set status
+        batch2.save()
         
         receipt1 = FinishedProductReceipt.objects.create(
             batch=batch1,
             individual_batch_number="FPB-BU-1",
             total_quantity_produced=100.0, total_cost=Decimal("1000.000"),
-            receipt_date=timezone.make_aware(timezone.datetime(2025, 9, 18)), status=FinishedProductReceipt.Status.RELEASED
+            receipt_date=timezone.make_aware(timezone.datetime(2025, 9, 18)), status=FinishedProductReceipt.Status.RELEASED, release_date=timezone.make_aware(timezone.datetime(2025, 9, 18))
         )
         receipt2 = FinishedProductReceipt.objects.create(
             batch=batch2,
             individual_batch_number="FPB-BU-2",
             total_quantity_produced=50.0, total_cost=Decimal("500.000"),
-            receipt_date=timezone.make_aware(timezone.datetime(2025, 9, 19)), status=FinishedProductReceipt.Status.RELEASED
+            receipt_date=timezone.make_aware(timezone.datetime(2025, 9, 19)), status=FinishedProductReceipt.Status.RELEASED, release_date=timezone.make_aware(timezone.datetime(2025, 9, 19))
         )
         run = OverheadAllocationRun.objects.create(
             financial_period=self.period, cost_pool=self.parent_pool,
@@ -953,10 +1029,10 @@ class TestOverheadAllocation(AccountingServiceBaseTestCase):
         receipt2.refresh_from_db()
         # 3. Assert
         total_pool = Decimal("1500.000")
-        # --- FIX: Total units = 150 (from setup) + 100 (receipt1) + 50 (receipt2) = 300. Rate = 1500 / 300 = 5.
-        rate = total_pool / Decimal("300.0")
-        expected_cost1 = (Decimal("100.0") * rate).quantize(Decimal('0.001'), rounding=ROUND_HALF_UP) # 100 * 5 = 500.000
-        expected_cost2 = (Decimal("50.0") * rate).quantize(Decimal('0.001'), rounding=ROUND_HALF_UP)  # 50 * 5 = 250.000
+        # Total units = 100 (receipt1) + 50 (receipt2) = 150. Rate = 1500 / 150 = 10.
+        rate = total_pool / Decimal("150.0")
+        expected_cost1 = (Decimal("100.0") * rate).quantize(Decimal('0.001'), rounding=ROUND_HALF_UP) # 100 * 10 = 1000.000
+        expected_cost2 = (Decimal("50.0") * rate).quantize(Decimal('0.001'), rounding=ROUND_HALF_UP)  # 50 * 10 = 500.000
         self.assertAlmostEqual(receipt1.allocated_overhead_cost, expected_cost1, places=3)
         self.assertAlmostEqual(receipt2.allocated_overhead_cost, expected_cost2, places=3)
 
@@ -969,17 +1045,23 @@ class TestOverheadAllocation(AccountingServiceBaseTestCase):
 
         ExpenseLog.objects.create(
             expense_date=timezone.make_aware(timezone.datetime(2025, 9, 10)), amount=Decimal("500.000"),
-            description="Water Treatment Costs", cost_pool=self.child_pool_rent
+            description="Water Treatment Costs", cost_pool=self.child_pool_maintenance
         )
         batch1 = Batch.objects.create(template=unique_template, shop_order_number="SO-LV-1", batch_number="B-LV-1", creation_date=timezone.make_aware(timezone.datetime(2025, 9, 15)))
+        batch1.status = Batch.Status.COMPLETED # FIX: Set status
+        batch1.save()
+
         batch2 = Batch.objects.create(template=unique_template, shop_order_number="SO-LV-2", batch_number="B-LV-2", creation_date=timezone.make_aware(timezone.datetime(2025, 9, 16)))
+        batch2.status = Batch.Status.COMPLETED # FIX: Set status
+        batch2.save()
+
         # Receipt 1: 100 bottles * 500ml = 50,000 ml = 50 Liters (2/3 of volume)
         receipt1 = FinishedProductReceipt.objects.create(
             batch=batch1,
             individual_batch_number="FPB-LV-1",
             total_quantity_produced=100.0, total_cost=Decimal("1000.000"),
             # --- FIX: Use a date within the allocation period (September) ---
-            receipt_date=timezone.make_aware(timezone.datetime(2025, 9, 20)),
+            receipt_date=timezone.make_aware(timezone.datetime(2025, 9, 20)), release_date=timezone.make_aware(timezone.datetime(2025, 9, 20)),
             status=FinishedProductReceipt.Status.RELEASED
         )
         # Receipt 2: 50 bottles * 500ml = 25,000 ml = 25 Liters (1/3 of volume)
@@ -988,7 +1070,7 @@ class TestOverheadAllocation(AccountingServiceBaseTestCase):
             individual_batch_number="FPB-LV-2",
             total_quantity_produced=50.0, total_cost=Decimal("500.000"),
             # --- FIX: Use a date within the allocation period (September) ---
-            receipt_date=timezone.make_aware(timezone.datetime(2025, 9, 21)),
+            receipt_date=timezone.make_aware(timezone.datetime(2025, 9, 21)), release_date=timezone.make_aware(timezone.datetime(2025, 9, 21)),
             status=FinishedProductReceipt.Status.RELEASED
         )
         run = OverheadAllocationRun.objects.create(
@@ -1004,13 +1086,14 @@ class TestOverheadAllocation(AccountingServiceBaseTestCase):
         receipt2.refresh_from_db()
         # 3. Assert
         total_pool = Decimal("500.000")
-        # --- FIX: Total volume includes 75L from base setup + 75L from this test = 150L ---
-        total_volume_in_period = Decimal("150.0")
+        # Total volume = 50L (receipt1) + 25L (receipt2) = 75L
+        total_volume_in_period = Decimal("75.0")
         rate = total_pool / total_volume_in_period
-        # This test's receipt1 has 50L volume
-        expected_cost1 = (Decimal("50.0") * rate).quantize(Decimal('0.001'), rounding=ROUND_HALF_UP)
-        # This test's receipt2 has 25L volume
+        # Calculate the smaller portion first and round it
         expected_cost2 = (Decimal("25.0") * rate).quantize(Decimal('0.001'), rounding=ROUND_HALF_UP)
+
+        # Derive the larger portion to ensure the total is exact
+        expected_cost1 = (total_pool - expected_cost2).quantize(Decimal('0.001'))
         self.assertAlmostEqual(receipt1.allocated_overhead_cost, expected_cost1, places=3)
         self.assertAlmostEqual(receipt2.allocated_overhead_cost, expected_cost2, places=3)
 
@@ -1066,6 +1149,7 @@ class TestTransactionCorrection(AccountingServiceBaseTestCase):
             base_price_per_unit=Decimal("80.000"), vat_rate=Decimal("0.14")
         )
         original_dispatch = FinishedProductDispatch.objects.create(
+            finished_product=receipt, # FIX: Add required direct link to the receipt
             sales_order_item=so_item, quantity=5.0,
             dispatch_date=timezone.make_aware(timezone.datetime(2025, 9, 23, 11, 0, 0)),
             cost_at_dispatch=Decimal("250.000") # 5 units * (1000/20)

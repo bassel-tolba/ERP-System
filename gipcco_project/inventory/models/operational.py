@@ -124,7 +124,7 @@ class InventoryLog(models.Model):
         related_name='inventory_logs',
         verbose_name=_("Company")
     )
-    quantity = models.FloatField(verbose_name=_("Quantity"))
+    quantity = models.DecimalField(max_digits=14, decimal_places=4, verbose_name=_("Quantity"))
     timestamp = models.DateTimeField(verbose_name=_("Timestamp"))
     qc_no = models.CharField(
         max_length=100,

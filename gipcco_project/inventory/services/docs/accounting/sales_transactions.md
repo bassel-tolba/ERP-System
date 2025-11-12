@@ -1,5 +1,6 @@
+<!-- gipcco_project/inventory/services/docs/accounting/sales_transactions.md -->
 # File: gipcco_project/inventory/services/accounting/sales_transactions.py
-- **Purpose:** Handles the creation of journal entries related to customer sales and dispatches.
+- **Purpose:** Handles the creation of journal entries related to customer sales and returns, using the `JournalEntryBuilder`.
 
 ### Functions:
 
@@ -14,10 +15,9 @@
       - **Credit:** Sales Revenue account.
       - **Credit:** VAT Payable account (if applicable).
   - **Key Features:**
-    - Combines two logical transactions into one balanced journal entry for efficiency.
-    - Ensures the sale is recorded in an open financial period.
+    - The `JournalEntryBuilder` combines two logical transactions into one balanced journal entry for efficiency.
     - Links the customer and final product as sub-ledgers for detailed reporting.
-  - **Calls:** `_check_period_is_open()`, `_get_product_expense_account()`, `_get_product_revenue_account()` from `_helpers.py`.
+  - **Calls:** `_get_product_expense_account()`, `_get_product_revenue_account()` from `_helpers.py`.
 
 - `create_je_for_credit_memo(memo: CustomerCreditMemo)`:
   - **Description:** Creates a journal entry for a customer credit memo, reversing the financial impact of a sale.
@@ -25,4 +25,5 @@
     - **Debit:** Sales Returns & Allowances (contra-revenue).
     - **Debit:** VAT Payable (reversing the tax liability).
     - **Credit:** Accounts Receivable (reducing the customer's balance).
-  - **Calls:** `_check_period_is_open()` from `_helpers.py`.
+  - **Key Features:**
+    - Uses the `JournalEntryBuilder` to ensure the transaction is correctly posted to an open period.

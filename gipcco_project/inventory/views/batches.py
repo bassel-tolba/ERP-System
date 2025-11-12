@@ -5,9 +5,9 @@ from decimal import Decimal
 from typing import List, Dict, Any
 
 from django.contrib import messages
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError 
 from django.core.paginator import Paginator
-from django.db.models import Q, Sum, F, Subquery, OuterRef, FloatField
+from django.db.models import Q, Sum, F, Subquery, OuterRef, FloatField, DecimalField
 from django.db.models.functions import Coalesce
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -72,8 +72,8 @@ def create_batch(request: HttpRequest) -> HttpResponse:
                 if product_ids[i]:
                     items_data.append({
                         'product_id': int(product_ids[i]),
-                        'theoretical_quantity': float(request.POST.getlist('theoretical_quantity')[i]),
-                        'actual_quantity': float(request.POST.getlist('actual_quantity')[i]),
+                        'theoretical_quantity': Decimal(request.POST.getlist('theoretical_quantity')[i]),
+                        'actual_quantity': Decimal(request.POST.getlist('actual_quantity')[i]),
                         'source_log_id': int(request.POST.getlist('source_log_id')[i])
                     })
 
@@ -88,8 +88,8 @@ def create_batch(request: HttpRequest) -> HttpResponse:
                 is_continuation='is_continuation' in request.POST,
                 parent_batch_id=int(request.POST.get('parent_batch')) if request.POST.get('parent_batch') else None,
                 notes=request.POST.get('notes', ''),
-                machine_hours_consumed=float(request.POST.get('machine_hours_consumed')) if request.POST.get('machine_hours_consumed') else None,
-                labor_hours_consumed=float(request.POST.get('labor_hours_consumed')) if request.POST.get('labor_hours_consumed') else None
+                machine_hours_consumed=Decimal(request.POST.get('machine_hours_consumed')) if request.POST.get('machine_hours_consumed') else None,
+                labor_hours_consumed=Decimal(request.POST.get('labor_hours_consumed')) if request.POST.get('labor_hours_consumed') else None
             )
 
             # 3. Trigger side effects (Costing is now handled internally by service for atomicity. 
@@ -128,7 +128,7 @@ def view_batch(request: HttpRequest, pk: int) -> HttpResponse:
     # --- START: MODIFICATION - Fetch available stock for each item ---
     items = batch_info.items.select_related('primitive_product').order_by('primitive_product__name')
     
-    # Subqueries for robust stock calculation
+    # Subqueries for robust stock calculation - using DecimalField
     consumed_prod_subquery = BatchItem.objects.filter(source_log_id=OuterRef('pk')).values('source_log_id').annotate(total=Sum('actual_quantity')).values('total')
     consumed_internal_subquery = InventoryConsumption.objects.filter(source_log_id=OuterRef('pk')).values('source_log_id').annotate(total=Sum('quantity_consumed')).values('total')
     returned_subquery = ProductionReturn.objects.filter(source_log_id=OuterRef('pk')).values('source_log_id').annotate(total=Sum('quantity')).values('total')
@@ -140,10 +140,10 @@ def view_batch(request: HttpRequest, pk: int) -> HttpResponse:
             product=item.primitive_product,
             status=InventoryLog.Status.RELEASED
         ).annotate(
-            total_used_in_prod=Coalesce(Subquery(consumed_prod_subquery, output_field=FloatField()), 0.0),
-            total_used_in_consumption=Coalesce(Subquery(consumed_internal_subquery, output_field=FloatField()), 0.0),
-            total_returned=Coalesce(Subquery(returned_subquery, output_field=FloatField()), 0.0),
-            total_adjusted=Coalesce(Subquery(adjusted_subquery, output_field=FloatField()), 0.0)
+            total_used_in_prod=Coalesce(Subquery(consumed_prod_subquery, output_field=DecimalField()), Decimal('0.0')),
+            total_used_in_consumption=Coalesce(Subquery(consumed_internal_subquery, output_field=DecimalField()), Decimal('0.0')),
+            total_returned=Coalesce(Subquery(returned_subquery, output_field=DecimalField()), Decimal('0.0')),
+            total_adjusted=Coalesce(Subquery(adjusted_subquery, output_field=DecimalField()), Decimal('0.0'))
         ).annotate(
             remaining_quantity=F('quantity') - F('total_used_in_prod') - F('total_used_in_consumption') + F('total_returned') + F('total_adjusted')
         ).order_by('release_timestamp')
@@ -155,7 +155,7 @@ def view_batch(request: HttpRequest, pk: int) -> HttpResponse:
                 'qc_no': log.qc_no,
                 'remaining_quantity': log.remaining_quantity,
                 'timestamp': log.release_timestamp or log.timestamp
-            } for log in released_logs if log.remaining_quantity > 0.001 or log.id == item.source_log_id
+            } for log in released_logs if log.remaining_quantity > Decimal('0.0001') or log.id == item.source_log_id
         ]
         
         # Ensure the currently selected source is in the list, even if its stock is now zero
@@ -246,8 +246,8 @@ def update_batch_items_bulk(request: HttpRequest, batch_pk: int) -> HttpResponse
             items_data.append({
                 'item_id': item_id,
                 'product_id': all_products_in_batch.get(item_id),
-                'theoretical_quantity': float(request.POST.get(f'theoretical_quantity_{item_id}')),
-                'actual_quantity': float(request.POST.get(f'actual_quantity_{item_id}')),
+                'theoretical_quantity': Decimal(request.POST.get(f'theoretical_quantity_{item_id}')),
+                'actual_quantity': Decimal(request.POST.get(f'actual_quantity_{item_id}')),
                 'source_log_id': int(request.POST.get(f'source_log_id_{item_id}')) if request.POST.get(f'source_log_id_{item_id}') else None
             })
 
@@ -262,8 +262,8 @@ def update_batch_items_bulk(request: HttpRequest, batch_pk: int) -> HttpResponse
             is_continuation='is_continuation' in request.POST,
             parent_batch_id=int(request.POST.get('parent_batch')) if request.POST.get('parent_batch') else None,
             notes=request.POST.get('notes', ''),
-            machine_hours_consumed=float(request.POST.get('machine_hours_consumed')) if request.POST.get('machine_hours_consumed') else None,
-            labor_hours_consumed=float(request.POST.get('labor_hours_consumed')) if request.POST.get('labor_hours_consumed') else None
+            machine_hours_consumed=Decimal(request.POST.get('machine_hours_consumed')) if request.POST.get('machine_hours_consumed') else None,
+            labor_hours_consumed=Decimal(request.POST.get('labor_hours_consumed')) if request.POST.get('labor_hours_consumed') else None
         )
 
         # 3. Trigger side effects (Costing handled internally, removed external call)
@@ -286,8 +286,8 @@ def add_batch_item(request: HttpRequest, batch_pk: int) -> HttpResponse:
     batch = get_object_or_404(Batch, pk=batch_pk)
     try:
         product_id = int(request.POST.get('primitive_product_id'))
-        theoretical_quantity = float(request.POST.get('theoretical_quantity', 0))
-        actual_quantity = float(request.POST.get('actual_quantity', 0))
+        theoretical_quantity = Decimal(request.POST.get('theoretical_quantity', '0'))
+        actual_quantity = Decimal(request.POST.get('actual_quantity', '0'))
         source_log_id = int(request.POST.get('source_log_id')) if request.POST.get('source_log_id') else None
         
         new_item = batch_service.add_item_to_batch(
@@ -384,7 +384,7 @@ def return_batch_item_view(request: HttpRequest, item_pk: int) -> HttpResponse:
     item = get_object_or_404(BatchItem, pk=item_pk)
     batch_id = item.batch.id
     try:
-        quantity = float(request.POST.get('quantity', 0))
+        quantity = Decimal(request.POST.get('quantity', '0'))
         return_date_str = request.POST.get('return_date')
         notes = request.POST.get('notes', '')
 

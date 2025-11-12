@@ -183,7 +183,10 @@ function initCreateBatchLogic(container) {
 
 		const createMaterialRow = (item, isManualAdd = false) => {
 			const row = document.createElement("tr");
-			const theoreticalQty = isManualAdd ? 0 : item.theoretical_quantity;
+			// When loading from a template, item.theoretical_quantity is a string from JSON.
+			// We must parse it to a number before calling .toFixed().
+			// The '|| 0' handles cases where the value might be undefined or null.
+			const theoreticalQty = isManualAdd ? 0 : parseFloat(item.theoretical_quantity) || 0;
 
 			let materialCellHTML;
 			if (isManualAdd) {

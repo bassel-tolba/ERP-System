@@ -449,11 +449,11 @@ def handle_expense_log_save(sender, instance: ExpenseLog, created, **kwargs):
         create_je_for_expense_log(instance)
 
 
-@receiver(post_delete, sender=ExpenseLog)
-def handle_expense_log_delete(sender, instance: ExpenseLog, **kwargs):
-    """Deletes the associated journal entry when an ExpenseLog is deleted."""
-    if hasattr(instance, 'journal_entry') and instance.journal_entry:
-        instance.journal_entry.delete()
+# @receiver(post_delete, sender=ExpenseLog)
+# def handle_expense_log_delete(sender, instance: ExpenseLog, **kwargs):
+#     """Deletes the associated journal entry when an ExpenseLog is deleted."""
+#     if hasattr(instance, 'journal_entry') and instance.journal_entry:
+#         instance.journal_entry.delete()
 
 
 @receiver(post_save, sender=InventoryAdjustment)

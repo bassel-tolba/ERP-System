@@ -46,22 +46,22 @@ def index(request: HttpRequest) -> HttpResponse:
         try:
             entry_date = datetime.strptime(date_str, '%Y-%m-%d').date()
             entry_datetime = timezone.make_aware(datetime.combine(entry_date, timezone.now().time()))
-            quantity = float(quantity_str)
+            quantity = Decimal(quantity_str)
             
             # --- MODIFIED: Logic to determine price and VAT ---
             if po_item_id:
                 po_item = PurchaseOrderItem.objects.get(pk=po_item_id)
                 # Over-delivery and the excess is free: recalculate unit price
                 if quantity > po_item.quantity_ordered and excess_is_free:
-                    original_total_value = po_item.base_price_per_unit * Decimal(str(po_item.quantity_ordered))
-                    base_unit_price = original_total_value / Decimal(str(quantity))
+                    original_total_value = po_item.base_price_per_unit * po_item.quantity_ordered
+                    base_unit_price = original_total_value / quantity
                 else:
                     base_unit_price = po_item.base_price_per_unit
 
                 vat_rate = po_item.vat_rate
                 wht_rate = po_item.withholding_tax_rate
-                vat_amount = base_unit_price * Decimal(str(quantity)) * vat_rate
-                withholding_tax_amount = base_unit_price * Decimal(str(quantity)) * wht_rate
+                vat_amount = base_unit_price * quantity * vat_rate
+                withholding_tax_amount = base_unit_price * quantity * wht_rate
             else:
                 base_unit_price = Decimal(base_unit_price_str) if base_unit_price_str else Decimal('0.0')
                 vat_amount = Decimal(vat_amount_str) if vat_amount_str else Decimal('0.0')

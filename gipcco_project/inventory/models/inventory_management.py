@@ -44,7 +44,7 @@ class TemplateItem(models.Model):
         related_name='template_items',
         verbose_name=_("Primitive Product")
     )
-    theoretical_quantity = models.FloatField(verbose_name=_("Theoretical Quantity"))
+    theoretical_quantity = models.DecimalField(max_digits=14, decimal_places=4, verbose_name=_("Theoretical Quantity"))
 
     class Meta:
         db_table = 'template_items'
@@ -198,8 +198,8 @@ class BatchItem(models.Model):
         related_name='batch_items',
         verbose_name=_("Primitive Product")
     )
-    theoretical_quantity = models.FloatField(verbose_name=_("Theoretical Quantity"))
-    actual_quantity = models.FloatField(null=True, blank=True, verbose_name=_("Actual Quantity"))
+    theoretical_quantity = models.DecimalField(max_digits=14, decimal_places=4, verbose_name=_("Theoretical Quantity"))
+    actual_quantity = models.DecimalField(max_digits=14, decimal_places=4, null=True, blank=True, verbose_name=_("Actual Quantity"))
     source_log = models.ForeignKey(
         'InventoryLog',
         on_delete=models.PROTECT,
@@ -309,7 +309,7 @@ class PurchaseOrderItem(models.Model):
         related_name='po_items',
         verbose_name=_("Product")
     )
-    quantity_ordered = models.FloatField(verbose_name=_("Quantity Ordered"))
+    quantity_ordered = models.DecimalField(max_digits=14, decimal_places=4, verbose_name=_("Quantity Ordered"))
     
     base_price_per_unit = models.DecimalField(
         max_digits=14, decimal_places=3, verbose_name=_("Base Price Per Unit")
@@ -410,7 +410,8 @@ class FinishedProductReceipt(models.Model):
     total_cost = models.DecimalField(
         max_digits=14, decimal_places=3, verbose_name=_("Total Cost of Batch")
     )
-    total_quantity_produced = models.FloatField(
+    total_quantity_produced = models.DecimalField(
+        max_digits=14, decimal_places=4,
         verbose_name=_("Total Quantity Produced")
     )
     allocated_overhead_cost = models.DecimalField(
@@ -466,8 +467,8 @@ class ReceiptSubBatch(models.Model):
         verbose_name=_("Parent Receipt")
     )
     sub_batch_identifier = models.CharField(
-        max_length=100, verbose_name=_("Sub-Batch Identifier")
-    )
+        max_length=100, verbose_name=_("Sub-Batch Identifier"))
+    quantity = models.DecimalField(max_digits=14, decimal_places=4, verbose_name=_("Quantity in Sub-Batch"))
     quantity = models.FloatField(verbose_name=_("Quantity in Sub-Batch"))
 
     class Meta:
@@ -539,8 +540,8 @@ class SalesOrderItem(models.Model):
         FinishedProductReceipt,
         on_delete=models.PROTECT,
         related_name='sales_items',
-        verbose_name=_("Finished Product Batch")
-    )
+        verbose_name=_("Finished Product Batch"))
+    quantity_ordered = models.DecimalField(max_digits=14, decimal_places=4, verbose_name=_("Quantity Ordered"))
     quantity_ordered = models.FloatField(verbose_name=_("Quantity Ordered"))
     
     base_price_per_unit = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Base Price Per Unit"))
@@ -576,8 +577,8 @@ class FinishedProductDispatch(models.Model):
         FinishedProductReceipt,
         on_delete=models.PROTECT,
         related_name='dispatches',
-        verbose_name=_("Finished Product Batch")
-    )
+        verbose_name=_("Finished Product Batch"))
+    quantity = models.DecimalField(max_digits=14, decimal_places=4, verbose_name=_("Quantity Dispatched"))
     quantity = models.FloatField(verbose_name=_("Quantity Dispatched"))
     dispatch_date = models.DateTimeField(verbose_name=_("Dispatch Date"))
     cost_at_dispatch = models.DecimalField(
@@ -699,8 +700,8 @@ class InventoryConsumption(models.Model):
         'InventoryLog',
         on_delete=models.PROTECT,
         related_name='consumptions',
-        verbose_name=_("Source Inventory Log")
-    )
+        verbose_name=_("Source Inventory Log"))
+    quantity_consumed = models.DecimalField(max_digits=14, decimal_places=4, verbose_name=_("Quantity Consumed"))
     quantity_consumed = models.FloatField(verbose_name=_("Quantity Consumed"))
     consumption_date = models.DateTimeField(verbose_name=_("Consumption Date"))
     department = models.CharField(

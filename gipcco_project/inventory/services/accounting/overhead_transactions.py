@@ -9,10 +9,10 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from ...models import (
-    JournalEntry, JournalEntryLine, GeneralAccountingSettings,
+    JournalEntry, GeneralAccountingSettings,
     OverheadAllocationRun, CostPool, ExpenseLog
 )
-from ._helpers import _check_period_is_open
+from ._builder import JournalEntryBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -30,8 +30,6 @@ def create_je_for_overhead_allocation(run: OverheadAllocationRun) -> Optional[Jo
         return None
 
     period = run.financial_period
-    _check_period_is_open(period.end_date)
-
     settings = GeneralAccountingSettings.load()
     wip_account = settings.wip_inventory
     if not wip_account:
@@ -56,60 +54,43 @@ def create_je_for_overhead_allocation(run: OverheadAllocationRun) -> Optional[Jo
             credits_by_account[account_to_credit] = credits_by_account.get(account_to_credit, Decimal('0.0')) + expense.amount
         else:
             raise ValueError(
-                _("Accounting configuration error: The cost pool '%(pool_name)s' has expenses logged against it but is not mapped to a GL account. Please configure it in the Cost Pool Management page.")
+                _("Accounting configuration error: The cost pool '%(pool_name)s' has expenses logged against it but is not mapped to a GL account.")
                 % {'pool_name': expense.cost_pool.name}
             )
 
     total_allocated_amount = run.total_pool_amount
     if total_allocated_amount <= 0:
         logger.info(f"Total allocated amount for run {run.id} is zero. No JE will be created.")
-        run.status = OverheadAllocationRun.Status.POSTED
-        run.save()
+        with transaction.atomic():
+            run.status = OverheadAllocationRun.Status.POSTED
+            run.save()
         return None
 
-    with transaction.atomic():
-        description = _(
-            "Allocation of %(pool_name)s overhead for period %(period_name)s"
-        ) % {
-            'pool_name': run.cost_pool.name,
-            'period_name': period.name
-        }
-        je = JournalEntry.objects.create(
-            date=period.end_date,
-            description=description,
-            source_object=run,
-            status=JournalEntry.Status.POSTED
-        )
+    description = _("Allocation of %(pool_name)s overhead for period %(period_name)s") % {
+        'pool_name': run.cost_pool.name,
+        'period_name': period.name
+    }
 
-        JournalEntryLine.objects.create(
-            journal_entry=je,
-            account=wip_account,
-            amount=total_allocated_amount,
-            entry_type=JournalEntryLine.EntryType.DEBIT
-        )
+    builder = JournalEntryBuilder(source_object=run)
+    builder.set_description(description)
+    builder.debit(total_allocated_amount, wip_account)
+    for account, credit_amount in credits_by_account.items():
+        builder.credit(credit_amount, account)
+    
+    # The builder will link the JE to run.journal_entry by default.
+    je = builder.post()
+    if je:
+        with transaction.atomic():
+            run.status = OverheadAllocationRun.Status.POSTED
+            run.posted_at = timezone.now()
+            run.save(update_fields=['status', 'posted_at'])
 
-        for account, credit_amount in credits_by_account.items():
-            if credit_amount > 0:
-                JournalEntryLine.objects.create(
-                    journal_entry=je,
-                    account=account,
-                    amount=credit_amount,
-                    entry_type=JournalEntryLine.EntryType.CREDIT
-                )
-        
-        je.validate_balance()
-        run.journal_entry = je
-        run.status = OverheadAllocationRun.Status.POSTED
-        run.posted_at = timezone.now()
-        run.save()
-
-        logger.info(f"Successfully created JE-{je.id} for Overhead Allocation Run ID {run.id}.")
     return je
 
 
 def create_je_for_overhead_application(run: OverheadAllocationRun, total_applied_cost: Decimal) -> Optional[JournalEntry]:
     """
-    Creates the second journal entry in the overhead process.
+    Creates the second journal entry in the overhead process (application to FG).
     """
     if run.status != OverheadAllocationRun.Status.POSTED:
         raise ValueError("Cannot create application JE for a run that is not in 'Posted' status.")
@@ -118,13 +99,12 @@ def create_je_for_overhead_application(run: OverheadAllocationRun, total_applied
         return None
     if total_applied_cost <= 0:
         logger.info(f"Total applied overhead for run {run.id} is zero. No application JE will be created.")
-        run.status = OverheadAllocationRun.Status.APPLIED
-        run.save()
+        with transaction.atomic():
+            run.status = OverheadAllocationRun.Status.APPLIED
+            run.save()
         return None
 
     period = run.financial_period
-    _check_period_is_open(period.end_date)
-
     settings = GeneralAccountingSettings.load()
     wip_account = settings.wip_inventory
     fg_account = settings.finished_goods_inventory
@@ -132,31 +112,22 @@ def create_je_for_overhead_application(run: OverheadAllocationRun, total_applied
     if not all([wip_account, fg_account]):
         raise ValueError("WIP or Finished Goods inventory account is not configured in General Settings.")
 
-    with transaction.atomic():
-        description = _(
-            "Application of %(pool_name)s overhead to Finished Goods for period %(period_name)s"
-        ) % {
-            'pool_name': run.cost_pool.name,
-            'period_name': period.name
-        }
-        je = JournalEntry.objects.create(
-            date=period.end_date,
-            description=description,
-            source_object=run,
-            status=JournalEntry.Status.POSTED
-        )
+    description = _("Application of %(pool_name)s overhead to Finished Goods for period %(period_name)s") % {
+        'pool_name': run.cost_pool.name,
+        'period_name': period.name
+    }
 
-        JournalEntryLine.objects.create(
-            journal_entry=je, account=fg_account, amount=total_applied_cost, entry_type=JournalEntryLine.EntryType.DEBIT
-        )
-        JournalEntryLine.objects.create(
-            journal_entry=je, account=wip_account, amount=total_applied_cost, entry_type=JournalEntryLine.EntryType.CREDIT
-        )
+    builder = JournalEntryBuilder(source_object=run)
+    builder.set_description(description)
+    builder.debit(total_applied_cost, fg_account)
+    builder.credit(total_applied_cost, wip_account)
+    
+    # FIX: Tell the builder NOT to auto-link, so we can manually link to the correct field.
+    je = builder.post(link_to_source_field=None)
+    if je:
+        with transaction.atomic():
+            run.application_journal_entry = je
+            run.status = OverheadAllocationRun.Status.APPLIED
+            run.save(update_fields=['application_journal_entry', 'status'])
 
-        je.validate_balance()
-        run.application_journal_entry = je
-        run.status = OverheadAllocationRun.Status.APPLIED
-        run.save()
-
-        logger.info(f"Successfully created Application JE-{je.id} for Overhead Allocation Run ID {run.id}.")
     return je

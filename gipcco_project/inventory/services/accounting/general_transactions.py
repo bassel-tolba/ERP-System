@@ -16,9 +16,10 @@ from ...models import (
     OpeningBalanceEntry, OpeningBalanceEntryLine, InventoryConsumption
 )
 from ._helpers import (
-    _check_period_is_open, _get_product_inventory_account,
+    _get_product_inventory_account,
     _get_product_expense_account
 )
+from ._builder import JournalEntryBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -27,22 +28,12 @@ def create_je_for_internal_consumption(consumption: InventoryConsumption) -> Opt
     """
     Creates a journal entry for the internal consumption of an MRO or Consumable item.
     """
-    if JournalEntry.objects.filter(
-        content_type=ContentType.objects.get_for_model(consumption),
-        object_id=consumption.id
-    ).exists():
-        logger.debug(f"Journal entry for InventoryConsumption ID {consumption.id} already exists. Aborting.")
-        return None
-        
-    _check_period_is_open(consumption.consumption_date)
-
     total_cost = consumption.cost_at_consumption
-    if total_cost <= 0:
-        logger.info(f"Total consumption cost for InventoryConsumption ID {consumption.id} is zero. No JE created.")
-        return None
-        
     inventory_account = _get_product_inventory_account(consumption.product)
     
+    debit_account = None
+    debit_sub_ledger = None
+
     if consumption.consumption_type == InventoryConsumption.ConsumptionType.CAPITALIZE:
         if not consumption.fixed_asset:
             raise ValueError(_("Cannot create capitalization JE for consumption without a linked Fixed Asset."))
@@ -53,95 +44,44 @@ def create_je_for_internal_consumption(consumption: InventoryConsumption) -> Opt
         if not settings.prepaid_expenses_account:
             raise ValueError(_("The master Prepaid Expenses account is not configured in General Accounting Settings."))
         debit_account = settings.prepaid_expenses_account
-        debit_sub_ledger = None
     else: # Default to EXPENSE
         debit_account = _get_product_expense_account(consumption.product)
-        debit_sub_ledger = None
 
-    with transaction.atomic():
-        description = _(
-            "Internal consumption of %(quantity)s %(unit)s of '%(product)s' by %(dept)s"
-        ) % {
-            'quantity': consumption.quantity_consumed,
-            'unit': consumption.product.unit,
-            'product': consumption.product.name,
-            'dept': consumption.get_department_display()
-        }
-        
-        je = JournalEntry.objects.create(
-            date=consumption.consumption_date,
-            description=description,
-            source_object=consumption,
-            status=JournalEntry.Status.POSTED
-        )
-        
-        JournalEntryLine.objects.create(
-            journal_entry=je,
-            account=debit_account,
-            amount=total_cost.quantize(Decimal('0.001')),
-            entry_type=JournalEntryLine.EntryType.DEBIT,
-            sub_ledger_object=debit_sub_ledger
-        )
-        
-        JournalEntryLine.objects.create(
-            journal_entry=je,
-            account=inventory_account,
-            amount=total_cost.quantize(Decimal('0.001')),
-            entry_type=JournalEntryLine.EntryType.CREDIT,
-            sub_ledger_object=consumption.product
-        )
-        
-        je.validate_balance()
-        logger.info(f"Successfully created Journal Entry JE-{je.id} for InventoryConsumption ID {consumption.id}.")
-        
-    return je
+    description = _("Internal consumption of %(quantity)s %(unit)s of '%(product)s' by %(dept)s") % {
+        'quantity': consumption.quantity_consumed,
+        'unit': consumption.product.unit,
+        'product': consumption.product.name,
+        'dept': consumption.get_department_display()
+    }
+    
+    builder = JournalEntryBuilder(source_object=consumption)
+    builder.set_description(description)
+    builder.debit(total_cost.quantize(Decimal('0.001')), debit_account, sub_ledger_object=debit_sub_ledger)
+    builder.credit(total_cost.quantize(Decimal('0.001')), inventory_account, sub_ledger_object=consumption.product)
+    return builder.post()
 
 
 def create_je_for_bank_transfer(transfer: BankTransfer) -> Optional[JournalEntry]:
     """
     Creates a journal entry for an internal bank transfer.
     """
-    if JournalEntry.objects.filter(
-        content_type=ContentType.objects.get_for_model(transfer), object_id=transfer.id
-    ).exists():
-        logger.debug(f"Journal entry for BankTransfer ID {transfer.id} already exists. Aborting.")
-        return None
-
-    _check_period_is_open(transfer.transfer_date)
-    
     source_gl = transfer.source_account.gl_account
     dest_gl = transfer.destination_account.gl_account
 
     if not all([source_gl, dest_gl]):
         raise ValueError(_("One of the bank accounts in the transfer is missing its GL account link."))
 
-    with transaction.atomic():
-        je = JournalEntry.objects.create(
-            date=transfer.transfer_date,
-            description=transfer.description,
-            source_object=transfer,
-            status=JournalEntry.Status.POSTED
-        )
-
-        JournalEntryLine.objects.create(
-            journal_entry=je, account=dest_gl, amount=transfer.amount,
-            entry_type=JournalEntryLine.EntryType.DEBIT
-        )
-        JournalEntryLine.objects.create(
-            journal_entry=je, account=source_gl, amount=transfer.amount,
-            entry_type=JournalEntryLine.EntryType.CREDIT
-        )
-        je.validate_balance()
-        logger.info(f"Successfully created JE-{je.id} for BankTransfer ID {transfer.id}.")
-    return je
+    builder = JournalEntryBuilder(source_object=transfer)
+    builder.set_description(transfer.description)
+    builder.debit(transfer.amount, dest_gl)
+    builder.credit(transfer.amount, source_gl)
+    return builder.post()
 
 
 def create_je_for_expense_log(expense_log: 'ExpenseLog'):
     """
     Creates a journal entry for a direct expense that is being accrued.
     """
-    _check_period_is_open(expense_log.expense_date)
-
     settings = GeneralAccountingSettings.load()
     if not expense_log.cost_pool or not expense_log.cost_pool.gl_account:
         raise ValidationError(f"ExpenseLog #{expense_log.id} is missing a cost pool with a linked GL account.")
@@ -151,26 +91,11 @@ def create_je_for_expense_log(expense_log: 'ExpenseLog'):
     debit_account = expense_log.cost_pool.gl_account
     credit_account = settings.accrued_expenses_account
 
-    je = JournalEntry.objects.create(
-        date=expense_log.expense_date,
-        description=f"Direct expense: {expense_log.description}",
-        source_object=expense_log,
-        status=JournalEntry.Status.POSTED
-    )
-
-    JournalEntryLine.objects.create(
-        journal_entry=je,
-        account=debit_account,
-        amount=expense_log.amount,
-        entry_type=JournalEntryLine.EntryType.DEBIT
-    )
-    JournalEntryLine.objects.create(
-        journal_entry=je,
-        account=credit_account,
-        amount=expense_log.amount,
-        entry_type=JournalEntryLine.EntryType.CREDIT
-    )
-    je.validate_balance()
+    builder = JournalEntryBuilder(source_object=expense_log)
+    builder.set_description(f"Direct expense: {expense_log.description}")
+    builder.debit(expense_log.amount, debit_account)
+    builder.credit(expense_log.amount, credit_account)
+    return builder.post()
 
 
 def create_transaction_for_direct_payment_expense(request: 'ExpenseRequest') -> 'ExpenseLog':
@@ -178,8 +103,6 @@ def create_transaction_for_direct_payment_expense(request: 'ExpenseRequest') -> 
     Creates an ExpenseLog and a direct payment Journal Entry for an approved
     direct expense request.
     """
-    _check_period_is_open(request.request_date)
-
     if not request.cost_pool or not request.cost_pool.gl_account:
         raise ValidationError(f"ExpenseRequest #{request.id} is missing a cost pool with a linked GL account.")
     if not request.bank_account or not request.bank_account.gl_account:
@@ -202,28 +125,13 @@ def create_transaction_for_direct_payment_expense(request: 'ExpenseRequest') -> 
         expense_log._skip_je_creation = True
         expense_log.save()
 
-        je = JournalEntry.objects.create(
-            date=request.request_date,
-            description=f"Direct expense payment: {request.description}",
-            source_object=expense_log,
-            status=JournalEntry.Status.POSTED
-        )
+        builder = JournalEntryBuilder(source_object=expense_log)
+        builder.set_description(f"Direct expense payment: {request.description}")
+        builder.debit(request.amount, debit_account)
+        builder.credit(request.amount, credit_account, sub_ledger_object=request.bank_account)
+        
+        je = builder.post()
 
-        JournalEntryLine.objects.create(
-            journal_entry=je,
-            account=debit_account,
-            amount=request.amount,
-            entry_type=JournalEntryLine.EntryType.DEBIT
-        )
-        JournalEntryLine.objects.create(
-            journal_entry=je,
-            account=credit_account,
-            amount=request.amount,
-            entry_type=JournalEntryLine.EntryType.CREDIT,
-            sub_ledger_object=request.bank_account
-        )
-
-        je.validate_balance()
         expense_log.settlement_object = je
         expense_log.save(update_fields=['settlement_content_type', 'settlement_object_id'])
 
@@ -233,12 +141,16 @@ def create_transaction_for_direct_payment_expense(request: 'ExpenseRequest') -> 
 def create_je_for_opening_balance(ob_entry: 'OpeningBalanceEntry') -> JournalEntry:
     """
     Creates a single, multi-line journal entry from an Opening Balance Entry record.
+    NOTE: This function is complex and stateful, making it a poor fit for the simple
+    builder. It will be left in its original, more explicit form.
     """
     logger.info(f"--> Starting Opening Balance JE creation for '{ob_entry.name}'.")
     
     if ob_entry.status == OpeningBalanceEntry.Status.POSTED:
         raise PermissionDenied(_("This opening balance entry has already been posted."))
     
+    # Manually call period check as this is not using the builder
+    from ._helpers import _check_period_is_open
     _check_period_is_open(ob_entry.migration_date)
 
     with transaction.atomic():

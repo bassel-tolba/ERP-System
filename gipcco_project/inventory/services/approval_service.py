@@ -3,7 +3,7 @@ import logging
 from django.db import transaction, models
 from django.utils import timezone
 from django.core.exceptions import PermissionDenied, ValidationError
-from decimal import Decimal
+from decimal import Decimal 
 from django.db.models import Sum, F, Value, FloatField
 from django.db.models.functions import Coalesce
 from typing import Optional, List, Dict
@@ -26,17 +26,17 @@ def _get_fifo_source_logs_for_consumption(product: inventory_models.Product, qua
         product=product,
         status=inventory_models.InventoryLog.Status.RELEASED
     ).annotate(
-        total_consumed=Coalesce(Sum('consumptions__quantity_consumed'), 0.0, output_field=FloatField()),
-        total_used_in_batch=Coalesce(Sum('batch_items__actual_quantity'), 0.0, output_field=FloatField()),
-        total_adjusted=Coalesce(Sum('adjustments__adjustment_quantity'), 0.0, output_field=FloatField())
+        total_consumed=Coalesce(Sum('consumptions__quantity_consumed'), Decimal('0.0'), output_field=models.DecimalField()),
+        total_used_in_batch=Coalesce(Sum('batch_items__actual_quantity'), Decimal('0.0'), output_field=models.DecimalField()),
+        total_adjusted=Coalesce(Sum('adjustments__adjustment_quantity'), Decimal('0.0'), output_field=models.DecimalField())
     ).annotate(
         quantity_remaining=F('quantity') - F('total_consumed') - F('total_used_in_batch') + F('total_adjusted')
     ).filter(
         quantity_remaining__gt=0
     ).order_by('timestamp')
 
-    total_available = logs_with_outflows.aggregate(total=Sum('quantity_remaining'))['total'] or 0.0
-    if Decimal(str(total_available)) < quantity_needed:
+    total_available = logs_with_outflows.aggregate(total=Sum('quantity_remaining'))['total'] or Decimal('0.0')
+    if total_available < quantity_needed:
         raise ValidationError(f"Insufficient total inventory for product '{product.name}'. Needed: {quantity_needed}, Available: {total_available:.3f}.")
 
     consumptions = []
@@ -46,7 +46,7 @@ def _get_fifo_source_logs_for_consumption(product: inventory_models.Product, qua
         if remaining_to_fulfill <= 0:
             break
         
-        quantity_to_take = min(remaining_to_fulfill, Decimal(str(log.quantity_remaining)))
+        quantity_to_take = min(remaining_to_fulfill, log.quantity_remaining)
         
         consumptions.append({
             'log': log,

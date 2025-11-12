@@ -28,8 +28,8 @@ def create_batch(
     is_continuation: bool = False,
     parent_batch_id: int = None,
     notes: str = '',
-    machine_hours_consumed: float = None,
-    labor_hours_consumed: float = None
+    machine_hours_consumed: Decimal = None,
+    labor_hours_consumed: Decimal = None
 ) -> Batch:
     """
     Creates a new Batch in DRAFT status, along with its items.
@@ -206,8 +206,8 @@ def update_batch(
     is_continuation: bool = False,
     parent_batch_id: int = None,
     notes: str = '',
-    machine_hours_consumed: float = None,
-    labor_hours_consumed: float = None
+    machine_hours_consumed: Decimal = None,
+    labor_hours_consumed: Decimal = None
 ) -> datetime:
     """
     Updates a Batch in 'Draft' status.
@@ -309,8 +309,8 @@ def add_item_to_batch(
     *, 
     batch: Batch, 
     product_id: int, 
-    theoretical_quantity: float,
-    actual_quantity: float,
+    theoretical_quantity: Decimal,
+    actual_quantity: Decimal,
     source_log_id: int
 ) -> BatchItem:
     """
@@ -355,7 +355,7 @@ def add_item_to_batch(
     return new_item
 
 
-def return_item_from_batch(*, item: BatchItem, quantity: float, return_date: datetime.date, notes: str) -> 'ProductionReturn':
+def return_item_from_batch(*, item: BatchItem, quantity: Decimal, return_date: datetime.date, notes: str) -> 'ProductionReturn':
     """
     Creates a ProductionReturn to move a specified quantity of a component
     from a batch back into inventory. This is the non-destructive way to 'remove' an item.

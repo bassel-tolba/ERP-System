@@ -337,13 +337,13 @@ class Command(BaseCommand):
 
         # Create templates with items (Bill of Materials)
         template1, _ = ShopOrderTemplate.objects.get_or_create(name="Standard Saline IV Drip Template", defaults={'final_product': fp1, 'bottle_size_ml': 500})
-        TemplateItem.objects.get_or_create(template=template1, primitive_product=rm1, defaults={'theoretical_quantity': 0.5}) # 0.5L Saline
-        TemplateItem.objects.get_or_create(template=template1, primitive_product=rm3, defaults={'theoretical_quantity': 1.0}) # 1 PVC Bag
+        TemplateItem.objects.get_or_create(template=template1, primitive_product=rm1, defaults={'theoretical_quantity': Decimal('0.5')}) # 0.5L Saline
+        TemplateItem.objects.get_or_create(template=template1, primitive_product=rm3, defaults={'theoretical_quantity': Decimal('1.0')}) # 1 PVC Bag
         CONTEXT['template1'] = template1
 
         template2, _ = ShopOrderTemplate.objects.get_or_create(name="Standard Glucose IV Drip Template", defaults={'final_product': fp2, 'bottle_size_ml': 250})
-        TemplateItem.objects.get_or_create(template=template2, primitive_product=rm2, defaults={'theoretical_quantity': 0.1}) # 0.1KG Glucose
-        TemplateItem.objects.get_or_create(template=template2, primitive_product=rm3, defaults={'theoretical_quantity': 1.0}) # 1 PVC Bag
+        TemplateItem.objects.get_or_create(template=template2, primitive_product=rm2, defaults={'theoretical_quantity': Decimal('0.1')}) # 0.1KG Glucose
+        TemplateItem.objects.get_or_create(template=template2, primitive_product=rm3, defaults={'theoretical_quantity': Decimal('1.0')}) # 1 PVC Bag
         CONTEXT['template2'] = template2
 
 
@@ -362,7 +362,7 @@ class Command(BaseCommand):
             purchase_order=po,
             product=CONTEXT['products']['saline'],
             defaults={
-                'quantity_ordered': 200.0,
+                'quantity_ordered': Decimal('200.0'),
                 'base_price_per_unit': Decimal("10.500"),
                 'vat_rate': Decimal("0.14"),
                 'withholding_tax_rate': Decimal("0.01")
@@ -373,7 +373,7 @@ class Command(BaseCommand):
             defaults={
                 'product': CONTEXT['products']['saline'],
                 'company': CONTEXT['suppliers']['pharma'],
-                'quantity': 200.0,
+                'quantity': Decimal('200.0'),
                 'timestamp': timezone.make_aware(timezone.datetime(2025, 9, 5, 10, 0, 0)),
                 'release_timestamp': timezone.make_aware(timezone.datetime(2025, 9, 5, 11, 0, 0)),
                 'status': InventoryLog.Status.RELEASED,
@@ -400,8 +400,8 @@ class Command(BaseCommand):
              BatchItem.objects.create(
                 batch=batch,
                 primitive_product=CONTEXT['products']['saline'],
-                theoretical_quantity=80.0,
-                actual_quantity=82.5,
+                theoretical_quantity=Decimal('80.0'),
+                actual_quantity=Decimal('82.5'),
                 source_log=log
             )
 
@@ -417,7 +417,7 @@ class Command(BaseCommand):
                 'receipt_date': date(2025, 9, 12),
                 'release_date': date(2025, 9, 12),
                 'total_cost': Decimal("866.250"), # 82.5 * 10.5
-                'total_quantity_produced': 150.0,
+                'total_quantity_produced': Decimal('150.0'),
                 'status': FinishedProductReceipt.Status.RELEASED
             }
         )
@@ -429,7 +429,7 @@ class Command(BaseCommand):
         production_returns_service.create_production_return(
             product_id=CONTEXT['products']['saline'].id,
             source_log_id=log.id,
-            quantity=2.5,
+            quantity=Decimal('2.5'),
             return_date=timezone.make_aware(timezone.datetime(2025, 9, 11, 10, 0, 0)),
             notes="Excess material returned from batch SO-DEMO-001"
         )
@@ -439,7 +439,7 @@ class Command(BaseCommand):
         return_to_cancel = production_returns_service.create_production_return(
             product_id=CONTEXT['products']['saline'].id,
             source_log_id=log.id,
-            quantity=1.0,
+            quantity=Decimal('1.0'),
             return_date=timezone.make_aware(timezone.datetime(2025, 9, 11, 11, 0, 0)),
             notes="To be cancelled"
         )
@@ -462,7 +462,7 @@ class Command(BaseCommand):
             sales_order=so,
             finished_product=receipt,
             defaults={
-                'quantity_ordered': 50.0,
+                'quantity_ordered': Decimal('50.0'),
                 'base_price_per_unit': Decimal("25.000"),
                 'vat_rate': Decimal("0.14")
             }
@@ -470,7 +470,7 @@ class Command(BaseCommand):
         dispatch = FinishedProductDispatch.objects.create(
             sales_order_item=so_item,
             finished_product=receipt, # <-- FIX: Added the required foreign key
-            quantity=50.0,
+            quantity=Decimal('50.0'),
             dispatch_date=timezone.make_aware(timezone.datetime(2025, 9, 16, 14, 0, 0)),
             cost_at_dispatch=Decimal("288.750") # 866.250 / 150 * 50
         )
@@ -488,13 +488,13 @@ class Command(BaseCommand):
         return_item_good = SalesReturnItem.objects.create(
             sales_return=sales_return,
             original_dispatch=dispatch,
-            quantity_returned=8.0,
+            quantity_returned=Decimal('8.0'),
             disposition=SalesReturnItem.Disposition.RETURN_TO_STOCK
         )
         return_item_scrap = SalesReturnItem.objects.create(
             sales_return=sales_return,
             original_dispatch=dispatch,
-            quantity_returned=2.0,
+            quantity_returned=Decimal('2.0'),
             disposition=SalesReturnItem.Disposition.SCRAP
         )
         sales_return.status = SalesReturn.Status.PENDING_PROCESSING
@@ -516,7 +516,7 @@ class Command(BaseCommand):
         # Invoicing and Payments
         self.stdout.write("   - Creating, posting, and paying a supplier invoice...")
         log = CONTEXT['log1']
-        actual_subtotal = log.base_unit_price * Decimal(str(log.quantity))
+        actual_subtotal = log.base_unit_price * log.quantity
         actual_vat = log.vat_amount
 
         # Create the invoice in Draft status
@@ -568,7 +568,7 @@ class Command(BaseCommand):
             purchase_order=po_mro,
             product=CONTEXT['products']['lubricant'],
             defaults={
-                'quantity_ordered': 10.0,
+                'quantity_ordered': Decimal('10.0'),
                 'base_price_per_unit': Decimal("50.000"),
                 'vat_rate': Decimal("0.14"),
                 'withholding_tax_rate': Decimal("0.00")
@@ -579,7 +579,7 @@ class Command(BaseCommand):
             defaults={
                 'product': CONTEXT['products']['lubricant'],
                 'company': CONTEXT['suppliers']['mro'],
-                'quantity': 10.0,
+                'quantity': Decimal('10.0'),
                 'timestamp': timezone.make_aware(timezone.datetime(2025, 9, 6, 10, 0, 0)),
                 'release_timestamp': timezone.make_aware(timezone.datetime(2025, 9, 6, 11, 0, 0)),
                 'status': InventoryLog.Status.RELEASED,
@@ -730,7 +730,7 @@ class Command(BaseCommand):
         PurchaseReturnItem.objects.create(
             purchase_return=pr,
             original_receipt=log_mro,
-            quantity_returned=3.0
+            quantity_returned=Decimal('3.0')
         )
         self.stdout.write("     - Created Purchase Return for 3 cans of lubricant.")
 
@@ -759,7 +759,7 @@ class Command(BaseCommand):
             purchase_order=po_partial,
             product=CONTEXT['products']['pvc_bag'],
             defaults={
-                'quantity_ordered': 1000.0,
+                'quantity_ordered': Decimal('1000.0'),
                 'base_price_per_unit': Decimal("0.750"),
                 'vat_rate': Decimal("0.14"),
                 'withholding_tax_rate': Decimal("0.00")
@@ -769,7 +769,7 @@ class Command(BaseCommand):
             po_item=po_item_partial,
             product=CONTEXT['products']['pvc_bag'],
             company=CONTEXT['suppliers']['packaging'],
-            quantity=950.0, # Under-delivered
+            quantity=Decimal('950.0'), # Under-delivered
             timestamp=timezone.make_aware(timezone.datetime(2025, 9, 15, 10, 0, 0)),
             status=InventoryLog.Status.QUARANTINED,
             base_unit_price=Decimal("0.750")
@@ -788,9 +788,9 @@ class Command(BaseCommand):
         shipping_vendor = CONTEXT['suppliers']['shipping']
 
         po_price1 = Decimal('25.000')
-        po_qty1 = 500  # Value = 12500
+        po_qty1 = Decimal('500')  # Value = 12500
         po_price2 = Decimal('2.000')
-        po_qty2 = 2500 # Value = 5000
+        po_qty2 = Decimal('2500') # Value = 5000
         # Total value = 17500. Allocation: 12500/17500 = ~71.43%, 5000/17500 = ~28.57%
         
         total_estimated_freight = Decimal('1500.000')
@@ -868,7 +868,7 @@ class Command(BaseCommand):
         self.stdout.write("   - Setting up A/R Workbench test scenarios...")
         # Scenario 1: Open Invoice and Credit Memo for "City Central Pharmacy"
         # Create an invoice for the dispatch made earlier
-        invoice_amount = so_item.base_price_per_unit * Decimal(str(dispatch.quantity)) * (Decimal('1') + so_item.vat_rate)
+        invoice_amount = so_item.base_price_per_unit * dispatch.quantity * (Decimal('1') + so_item.vat_rate)
         cust_inv_1, _ = CustomerInvoice.objects.get_or_create(
             invoice_number="INV-PHARM-001",
             defaults={
@@ -895,7 +895,7 @@ class Command(BaseCommand):
             sales_order=so_hosp,
             finished_product=receipt,
             defaults={
-                'quantity_ordered': 20.0,
+                'quantity_ordered': Decimal('20.0'),
                 'base_price_per_unit': Decimal("26.000"),
                 'vat_rate': Decimal("0.14")
             }
@@ -903,11 +903,11 @@ class Command(BaseCommand):
         dispatch_hosp = FinishedProductDispatch.objects.create(
             sales_order_item=so_item_hosp,
             finished_product=receipt,
-            quantity=20.0,
+            quantity=Decimal('20.0'),
             dispatch_date=timezone.make_aware(timezone.datetime(2025, 9, 21, 10, 0, 0)),
-            cost_at_dispatch=receipt.unit_cost * 20
+            cost_at_dispatch=receipt.unit_cost * Decimal('20')
         )
-        invoice_amount_hosp = so_item_hosp.base_price_per_unit * Decimal(str(dispatch_hosp.quantity)) * (Decimal('1') + so_item_hosp.vat_rate)
+        invoice_amount_hosp = so_item_hosp.base_price_per_unit * dispatch_hosp.quantity * (Decimal('1') + so_item_hosp.vat_rate)
         cust_inv_2, _ = CustomerInvoice.objects.get_or_create(
             invoice_number="INV-HOSP-001",
             defaults={
@@ -991,7 +991,7 @@ class Command(BaseCommand):
             ob_receipt1, _ = FinishedProductReceipt.objects.get_or_create(
                 individual_batch_number="OB-FP-SALINE-001",
                 defaults={
-                    'batch': mig_batch_saline, 'total_quantity_produced': 1000.0,
+                    'batch': mig_batch_saline, 'total_quantity_produced': Decimal('1000.0'),
                     'total_cost': Decimal("5750.000"), 'receipt_date': migration_date,
                     'status': FinishedProductReceipt.Status.RELEASED
                 }
@@ -1005,7 +1005,7 @@ class Command(BaseCommand):
             ob_receipt2, _ = FinishedProductReceipt.objects.get_or_create(
                 individual_batch_number="OB-FP-GLUCOSE-001",
                 defaults={
-                    'batch': mig_batch_glucose, 'total_quantity_produced': 500.0,
+                    'batch': mig_batch_glucose, 'total_quantity_produced': Decimal('500.0'),
                     'total_cost': Decimal("4200.000"), 'receipt_date': migration_date,
                     'status': FinishedProductReceipt.Status.RELEASED
                 }
@@ -1020,7 +1020,7 @@ class Command(BaseCommand):
         ob_log_saline, _ = InventoryLog.objects.get_or_create(
             qc_no="MIG-RM-SALINE",
             defaults={
-                'product': CONTEXT['products']['saline'], 'quantity': 500.0,
+                'product': CONTEXT['products']['saline'], 'quantity': Decimal('500.0'),
                 'timestamp': migration_date, 'status': InventoryLog.Status.RELEASED,
                 'base_unit_price': Decimal("10.500"), 'release_timestamp': migration_date
             }
@@ -1028,7 +1028,7 @@ class Command(BaseCommand):
         ob_log_pvc, _ = InventoryLog.objects.get_or_create(
             qc_no="MIG-RM-PVC",
             defaults={
-                'product': CONTEXT['products']['pvc_bag'], 'quantity': 2000.0,
+                'product': CONTEXT['products']['pvc_bag'], 'quantity': Decimal('2000.0'),
                 'timestamp': migration_date, 'status': InventoryLog.Status.RELEASED,
                 'base_unit_price': Decimal("1.200"), 'release_timestamp': migration_date
             }
@@ -1038,7 +1038,7 @@ class Command(BaseCommand):
         ob_log_lube, _ = InventoryLog.objects.get_or_create(
             qc_no="MIG-MRO-LUBE",
             defaults={
-                'product': CONTEXT['products']['lubricant'], 'quantity': 50.0,
+                'product': CONTEXT['products']['lubricant'], 'quantity': Decimal('50.0'),
                 'timestamp': migration_date, 'status': InventoryLog.Status.RELEASED,
                 'base_unit_price': Decimal("25.000"), 'release_timestamp': migration_date
             }
@@ -1046,7 +1046,7 @@ class Command(BaseCommand):
         ob_log_antivirus, _ = InventoryLog.objects.get_or_create(
             qc_no="MIG-CONSUM-AV",
             defaults={
-                'product': CONTEXT['products']['antivirus'], 'quantity': 10.0,
+                'product': CONTEXT['products']['antivirus'], 'quantity': Decimal('10.0'),
                 'timestamp': migration_date, 'status': InventoryLog.Status.RELEASED,
                 'base_unit_price': Decimal("1200.000"), 'release_timestamp': migration_date
             }
@@ -1061,10 +1061,9 @@ class Command(BaseCommand):
                 'status': Batch.Status.IN_PROGRESS
             }
         )
-        wip_item1, _ = BatchItem.objects.get_or_create(batch=wip_batch, primitive_product=CONTEXT['products']['saline'], defaults={'theoretical_quantity': 50.0, 'actual_quantity': 50.0, 'cost_at_consumption': Decimal("10.500")})
-        wip_item2, _ = BatchItem.objects.get_or_create(batch=wip_batch, primitive_product=CONTEXT['products']['pvc_bag'], defaults={'theoretical_quantity': 100.0, 'actual_quantity': 100.0, 'cost_at_consumption': Decimal("1.200")})
-        wip_total_cost = (Decimal(str(wip_item1.actual_quantity)) * wip_item1.cost_at_consumption) + \
-                         (Decimal(str(wip_item2.actual_quantity)) * wip_item2.cost_at_consumption)
+        wip_item1, _ = BatchItem.objects.get_or_create(batch=wip_batch, primitive_product=CONTEXT['products']['saline'], defaults={'theoretical_quantity': Decimal('50.0'), 'actual_quantity': Decimal('50.0'), 'cost_at_consumption': Decimal("10.500")})
+        wip_item2, _ = BatchItem.objects.get_or_create(batch=wip_batch, primitive_product=CONTEXT['products']['pvc_bag'], defaults={'theoretical_quantity': Decimal('100.0'), 'actual_quantity': Decimal('100.0'), 'cost_at_consumption': Decimal("1.200")})
+        wip_total_cost = (wip_item1.actual_quantity * wip_item1.cost_at_consumption) + (wip_item2.actual_quantity * wip_item2.cost_at_consumption)
 
 
         # e) Fixed Assets (already created in base_data)
@@ -1124,7 +1123,7 @@ class Command(BaseCommand):
         total_debits += fg_total
 
         # Raw Materials Inventory
-        rm_value_saline = Decimal(str(ob_log_saline.quantity)) * ob_log_saline.costing_unit_price
+        rm_value_saline = ob_log_saline.quantity * ob_log_saline.costing_unit_price
         line_rm = OpeningBalanceEntryLine.objects.create(
             opening_balance_entry=ob_entry, account=CONTEXT['accounts']['1020201'],
             entry_type='debit', total_amount=rm_value_saline
@@ -1133,7 +1132,7 @@ class Command(BaseCommand):
         total_debits += rm_value_saline
 
         # Packaging Inventory
-        rm_value_pvc = Decimal(str(ob_log_pvc.quantity)) * ob_log_pvc.costing_unit_price
+        rm_value_pvc = ob_log_pvc.quantity * ob_log_pvc.costing_unit_price
         line_pkg = OpeningBalanceEntryLine.objects.create(
             opening_balance_entry=ob_entry, account=CONTEXT['accounts']['1020202'],
             entry_type='debit', total_amount=rm_value_pvc
@@ -1142,7 +1141,7 @@ class Command(BaseCommand):
         total_debits += rm_value_pvc
 
         # MRO Inventory
-        mro_value_lube = Decimal(str(ob_log_lube.quantity)) * ob_log_lube.costing_unit_price
+        mro_value_lube = ob_log_lube.quantity * ob_log_lube.costing_unit_price
         line_mro = OpeningBalanceEntryLine.objects.create(
             opening_balance_entry=ob_entry, account=CONTEXT['accounts']['1020207'],
             entry_type='debit', total_amount=mro_value_lube
@@ -1151,7 +1150,7 @@ class Command(BaseCommand):
         total_debits += mro_value_lube
 
         # Consumables Inventory
-        consumable_value_av = Decimal(str(ob_log_antivirus.quantity)) * ob_log_antivirus.costing_unit_price
+        consumable_value_av = ob_log_antivirus.quantity * ob_log_antivirus.costing_unit_price
         line_consumable = OpeningBalanceEntryLine.objects.create(
             opening_balance_entry=ob_entry, account=CONTEXT['accounts']['1020208'],
             entry_type='debit', total_amount=consumable_value_av

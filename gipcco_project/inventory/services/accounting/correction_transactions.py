@@ -13,6 +13,7 @@ from ...models import (
     JournalEntry, JournalEntryLine, TransactionCorrection, ExpenseRequest
 )
 from ._helpers import _check_period_is_open
+from ._builder import JournalEntryBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -51,14 +52,7 @@ def correct_approved_expense(request_id: int, user, justification: str) -> Trans
             correction_date=timezone.now()
         )
 
-        correction_record, created = TransactionCorrection.objects.get_or_create(
-            adjusting_journal_entry=reversing_je,
-            defaults={
-                'source_object': original_object,
-                'justification': justification,
-                'corrected_by': user
-            }
-        )
+        correction_record = TransactionCorrection.objects.get(adjusting_journal_entry=reversing_je)
 
         request.notes = f"{request.notes or ''}\n\nCORRECTION: This request was reversed on {timezone.now().date()} by {user.username}. Justification: {justification}. See JE-{reversing_je.id}."
         request.save(update_fields=['notes'])
@@ -66,6 +60,7 @@ def correct_approved_expense(request_id: int, user, justification: str) -> Trans
         logger.info(f"User '{user.username}' corrected ExpenseRequest ID {request.id}. Reversing JE-{reversing_je.id} created.")
 
         return correction_record
+
 
 def create_reversing_je_for_correction(
     original_object,
@@ -78,7 +73,6 @@ def create_reversing_je_for_correction(
     the financial impact of an original transaction's journal entry.
     """
     content_type = ContentType.objects.get_for_model(original_object)
-
     original_je = JournalEntry.objects.filter(
         content_type=content_type, object_id=original_object.pk
     ).first()
@@ -89,25 +83,29 @@ def create_reversing_je_for_correction(
     if TransactionCorrection.objects.filter(content_type=content_type, object_id=original_object.pk).exists():
         raise PermissionError(f"This transaction ({original_object}) has already been corrected and cannot be adjusted again.")
 
-    if not correction_date:
-        correction_date = timezone.now()
+    correction_date = correction_date or timezone.now()
     _check_period_is_open(correction_date)
 
     with transaction.atomic():
-        description = _(
-            "Reversal of JE-%(original_je_id)s for: %(original_desc)s"
-        ) % {
+        # FIX: The logic is to create the JE first, then the correction record that links to it.
+        # The builder cannot be used here because its source (the correction record) doesn't exist yet.
+        # We revert to a manual, explicit creation which is clearer for this complex case.
+        
+        description = _("Reversal of JE-%(original_je_id)s for: %(original_desc)s") % {
             'original_je_id': original_je.id,
             'original_desc': original_je.description
         }
 
+        # 1. Create the JE header. The source is temporary.
         adjusting_je = JournalEntry.objects.create(
             date=correction_date,
             description=description,
             notes=justification,
-            status=JournalEntry.Status.POSTED
+            status=JournalEntry.Status.POSTED,
+            source_object=original_object # Temporary source
         )
 
+        # 2. Create the reversed lines.
         for line in original_je.lines.all():
             JournalEntryLine.objects.create(
                 journal_entry=adjusting_je,
@@ -116,9 +114,10 @@ def create_reversing_je_for_correction(
                 entry_type=JournalEntryLine.EntryType.CREDIT if line.entry_type == JournalEntryLine.EntryType.DEBIT else JournalEntryLine.EntryType.DEBIT,
                 sub_ledger_object=line.sub_ledger_object
             )
-
-        adjusting_je.validate_balance()
         
+        adjusting_je.validate_balance()
+
+        # 3. Now create the correction record, linking the JE we just made.
         correction_record = TransactionCorrection.objects.create(
             source_object=original_object,
             adjusting_journal_entry=adjusting_je,
@@ -126,6 +125,7 @@ def create_reversing_je_for_correction(
             corrected_by=user
         )
 
+        # 4. Finally, update the JE's source to point to the correction record for a clean audit trail.
         adjusting_je.source_object = correction_record
         adjusting_je.save(update_fields=['content_type', 'object_id'])
 

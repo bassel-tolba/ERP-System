@@ -2,12 +2,13 @@
 
 import logging
 from datetime import datetime
+from decimal import Decimal
 from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
-from django.db.models import Sum
 from django.db.models.functions import Coalesce
+from django.db.models import Sum, DecimalField
 
 from ..models import ProductionReturn, BatchItem, InventoryConsumption, InventoryAdjustment
 from .accounting.correction_transactions import create_reversing_je_for_correction
@@ -20,7 +21,7 @@ def create_production_return(
     *,
     product_id: int,
     source_log_id: int,
-    quantity: float,
+    quantity: Decimal,
     return_date: datetime,
     notes: str = '',
     batch_id: int = None
@@ -33,11 +34,11 @@ def create_production_return(
 
     with transaction.atomic():
         # Validation
-        total_consumed = BatchItem.objects.filter(source_log_id=source_log_id).aggregate(total=Coalesce(Sum('actual_quantity'), 0.0))['total']
-        total_returned = ProductionReturn.objects.filter(source_log_id=source_log_id).exclude(status=ProductionReturn.Status.CANCELLED).aggregate(total=Coalesce(Sum('quantity'), 0.0))['total']
+        total_consumed = BatchItem.objects.filter(source_log_id=source_log_id).aggregate(total=Coalesce(Sum('actual_quantity'), Decimal('0.0'), output_field=DecimalField()))['total']
+        total_returned = ProductionReturn.objects.filter(source_log_id=source_log_id).exclude(status=ProductionReturn.Status.CANCELLED).aggregate(total=Coalesce(Sum('quantity'), Decimal('0.0'), output_field=DecimalField()))['total']
         max_returnable = total_consumed - total_returned
 
-        if quantity > max_returnable + 0.001:
+        if quantity > max_returnable + Decimal('0.0001'):
             raise ValidationError(_(f"Return quantity ({quantity}) exceeds the maximum returnable quantity ({max_returnable:.3f}) from this source."))
 
         pr_return = ProductionReturn.objects.create(
@@ -79,7 +80,7 @@ def cancel_production_return(
     subsequent_consumption = BatchItem.objects.filter(
         source_log=source_log,
         batch__creation_date__gt=prod_return.return_date
-    ).aggregate(total=Coalesce(Sum('actual_quantity'), 0.0))['total']
+    ).aggregate(total=Coalesce(Sum('actual_quantity'), Decimal('0.0'), output_field=DecimalField()))['total']
 
     if subsequent_consumption > 0:
         raise ValidationError(

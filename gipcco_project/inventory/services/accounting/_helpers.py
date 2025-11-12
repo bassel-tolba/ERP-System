@@ -36,32 +36,60 @@ def _check_period_is_open(date_to_check):
         raise PermissionDenied(_(f"Configuration error: Overlapping financial periods exist for date {check_date}. Contact administrator."))
 
 
-def _get_product_inventory_account(product: Product) -> Product:
-    """Gets the correct inventory account for a product, checking for overrides."""
-    if product.override_inventory_account:
-        return product.override_inventory_account
-    
-    setting = ProductTypeAccountingSettings.objects.filter(product_type=product.product_type).first()
-    if not setting or not setting.inventory_account:
-        raise ValueError(_(f"No default inventory account is set for product type '{product.get_product_type_display()}'."))
-    return setting.inventory_account
+def _get_product_account(product: Product, account_type: str):
+    """
+    Generic account resolver for products. This is the single source of truth
+    for finding a product-related GL account.
 
-def _get_product_expense_account(product: Product) -> Product:
-    """Gets the correct COGS/Expense account for a product, checking for overrides."""
-    if product.override_cogs_expense_account:
-        return product.override_cogs_expense_account
-    
-    setting = ProductTypeAccountingSettings.objects.filter(product_type=product.product_type).first()
-    if not setting or not setting.cogs_or_expense_account:
-        raise ValueError(_(f"No default COGS/Expense account is set for product type '{product.get_product_type_display()}'."))
-    return setting.cogs_or_expense_account
+    It follows the logic:
+    1. Check for a specific override account on the Product instance.
+    2. If not found, fall back to the default account defined on the
+       ProductTypeAccountingSettings for the product's type.
+    3. Raise a ValueError if no account can be resolved.
+    """
+    ACCOUNT_TYPE_MAPPING = {
+        'inventory': {
+            'override_field': 'override_inventory_account',
+            'setting_field': 'inventory_account',
+            'error_name': 'inventory'
+        },
+        'cogs': {
+            'override_field': 'override_cogs_expense_account',
+            'setting_field': 'cogs_or_expense_account',
+            'error_name': 'COGS/Expense'
+        },
+        'revenue': {
+            'override_field': 'override_sales_revenue_account',
+            'setting_field': 'sales_revenue_account',
+            'error_name': 'sales revenue'
+        }
+    }
 
-def _get_product_revenue_account(product: Product) -> Product:
-    """Gets the correct Sales Revenue account for a product, checking for overrides."""
-    if product.override_sales_revenue_account:
-        return product.override_sales_revenue_account
-    
+    mapping = ACCOUNT_TYPE_MAPPING.get(account_type)
+    if not mapping:
+        raise ValueError(f"Invalid account_type '{account_type}' requested for product account resolution.")
+
+    override_account = getattr(product, mapping['override_field'], None)
+    if override_account:
+        return override_account
+
     setting = ProductTypeAccountingSettings.objects.filter(product_type=product.product_type).first()
-    if not setting or not setting.sales_revenue_account:
-        raise ValueError(_(f"No default sales revenue account is set for product type '{product.get_product_type_display()}'."))
-    return setting.sales_revenue_account
+    if setting:
+        setting_account = getattr(setting, mapping['setting_field'], None)
+        if setting_account:
+            return setting_account
+
+    raise ValueError(_(f"No default {mapping['error_name']} account is set for product type '{product.get_product_type_display()}'."))
+
+
+def _get_product_inventory_account(product: Product):
+    """Gets the correct inventory account for a product using the generic resolver."""
+    return _get_product_account(product, 'inventory')
+
+def _get_product_expense_account(product: Product):
+    """Gets the correct COGS/Expense account for a product using the generic resolver."""
+    return _get_product_account(product, 'cogs')
+
+def _get_product_revenue_account(product: Product):
+    """Gets the correct Sales Revenue account for a product using the generic resolver."""
+    return _get_product_account(product, 'revenue')

@@ -482,3 +482,61 @@ class AccountingServiceBaseTestCase(TestCase):
         # The pre_save signal should calculate costing_unit_price
         log.refresh_from_db()
         return log
+
+    def assertJournalEntry(self, je, expected_lines, source_object=None):
+        """
+        Asserts a JournalEntry has the expected lines and properties. This provides
+        clear, debuggable output if an assertion fails.
+
+        :param je: The JournalEntry instance to check.
+        :param expected_lines: A list of dicts, each representing a line.
+            e.g., [{'account': self.accounts['...'], 'debit': Decimal('100'), 'sub_ledger': obj},
+                   {'account': self.accounts['...'], 'credit': Decimal('100')}]
+        :param source_object: The expected source object for the JE.
+        """
+        from .models import JournalEntryLine
+
+        self.assertIsNotNone(je, "The Journal Entry to be checked should not be None.")
+
+        if source_object:
+            self.assertEqual(je.source_object, source_object, f"JE source object mismatch. Expected {source_object}, got {je.source_object}.")
+
+        actual_lines = list(je.lines.all())
+        self.assertEqual(
+            len(actual_lines), len(expected_lines),
+            f"Expected {len(expected_lines)} lines, but found {len(actual_lines)}."
+        )
+
+        # This check is critical for financial integrity
+        je.validate_balance()
+
+        # Match each expected line against the actual lines
+        matched_actual_lines = []
+        for expected in expected_lines:
+            found_match = False
+            for actual in actual_lines:
+                if actual in matched_actual_lines:
+                    continue
+
+                entry_type = JournalEntryLine.EntryType.DEBIT if 'debit' in expected else JournalEntryLine.EntryType.CREDIT
+                expected_amount = expected.get('debit') or expected.get('credit')
+
+                if (actual.account == expected['account'] and
+                    actual.entry_type == entry_type and
+                    actual.amount == expected_amount and
+                    actual.sub_ledger_object == expected.get('sub_ledger')):
+                    matched_actual_lines.append(actual)
+                    found_match = True
+                    break
+            
+            if not found_match:
+                expected_str = f"  - Account: {expected['account'].code}, "
+                if 'debit' in expected: expected_str += f"Debit: {expected['debit']}"
+                if 'credit' in expected: expected_str += f"Credit: {expected['credit']}"
+                if 'sub_ledger' in expected: expected_str += f", Sub-Ledger: {expected.get('sub_ledger')}"
+                
+                actuals_str = "\n".join([
+                    f"  - Account: {l.account.code}, Type: {l.entry_type}, Amount: {l.amount}, Sub-Ledger: {l.sub_ledger_object}"
+                    for l in je.lines.all()
+                ])
+                self.fail(f"Could not find matching JE line for:\n[Expected]\n{expected_str}\n\n[Actual Lines Found]\n{actuals_str}")

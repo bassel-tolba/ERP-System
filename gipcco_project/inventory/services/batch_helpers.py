@@ -1,10 +1,11 @@
 # gipcco_project/inventory/services/batch_helpers.py
 
 import logging
+from decimal import Decimal
 from datetime import datetime
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Tuple
 
-from django.db.models import Sum, Q, F, FloatField
+from django.db.models import Sum, Q, F, DecimalField
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 
@@ -40,16 +41,16 @@ def get_batch_form_context() -> Dict[str, Any]:
         stock_list = []
         # Correctly calculate remaining quantity for each released log
         inventory_logs = prod.inventory_logs.filter(status=InventoryLog.Status.RELEASED).annotate(
-            total_used=Coalesce(Sum('batch_items__actual_quantity', filter=~Q(batch_items__batch__status=Batch.Status.CANCELLED)), 0.0, output_field=FloatField()),
-            total_returned=Coalesce(Sum('production_returns__quantity'), 0.0, output_field=FloatField()),
-            total_consumed=Coalesce(Sum('consumptions__quantity_consumed'), 0.0, output_field=FloatField()),
-            total_adjusted=Coalesce(Sum('adjustments__adjustment_quantity'), 0.0, output_field=FloatField())
+            total_used=Coalesce(Sum('batch_items__actual_quantity', filter=~Q(batch_items__batch__status=Batch.Status.CANCELLED)), Decimal('0.0'), output_field=DecimalField()),
+            total_returned=Coalesce(Sum('production_returns__quantity'), Decimal('0.0'), output_field=DecimalField()),
+            total_consumed=Coalesce(Sum('consumptions__quantity_consumed'), Decimal('0.0'), output_field=DecimalField()),
+            total_adjusted=Coalesce(Sum('adjustments__adjustment_quantity'), Decimal('0.0'), output_field=DecimalField())
         ).annotate(
             remaining_quantity=F('quantity') - F('total_used') - F('total_consumed') + F('total_returned') + F('total_adjusted')
         )
         
         for log in inventory_logs:
-            if log.remaining_quantity > 0.001:
+            if log.remaining_quantity > Decimal('0.0001'):
                 stock_list.append({
                     'id': log.id, 
                     'qc_no': log.qc_no or 'N/A', 
@@ -86,11 +87,11 @@ def get_batch_form_context() -> Dict[str, Any]:
 
 def validate_stock_availability(
     product_ids: List[int], 
-    actual_quantities: List[float], 
+    actual_quantities: List[Decimal], 
     source_log_ids: List[int], 
     batch_creation_date: datetime.date, 
     batch_id_to_exclude: int = None
-) -> tuple[bool, str]:
+) -> Tuple[bool, str]:
     """
     Validates stock availability by first aggregating all requests from the same source.
     Ensures that stock is 'RELEASED' and that its release date is not after the consumption date.
@@ -101,11 +102,11 @@ def validate_stock_availability(
         if not all([source_id, product_ids[i], actual_quantities[i]]):
             continue
         
-        quantity = float(actual_quantities[i])
+        quantity = Decimal(actual_quantities[i])
         product_id = int(product_ids[i])
             
         request_key = (source_id, product_id)
-        requests[request_key] = requests.get(request_key, 0.0) + quantity
+        requests[request_key] = requests.get(request_key, Decimal('0.0')) + quantity
 
     # Step 2: Validate each aggregated request against the available stock.
     for request_key, total_requested in requests.items():
@@ -133,12 +134,12 @@ def validate_stock_availability(
         if batch_id_to_exclude:
             used_items_qs = used_items_qs.exclude(batch_id=batch_id_to_exclude)
 
-        already_used = used_items_qs.aggregate(total=Coalesce(Sum('actual_quantity'), 0.0))['total']
-        total_returned = log_entry.production_returns.aggregate(total=Coalesce(Sum('quantity'), 0.0))['total']
+        already_used = used_items_qs.aggregate(total=Coalesce(Sum('actual_quantity'), Decimal('0.0')))['total']
+        total_returned = log_entry.production_returns.aggregate(total=Coalesce(Sum('quantity'), Decimal('0.0')))['total']
         
-        available_stock = float(log_entry.quantity) - already_used + total_returned
+        available_stock = log_entry.quantity - already_used + total_returned
 
-        if total_requested > available_stock + 0.001: # Tolerance for float comparison
+        if total_requested > available_stock + Decimal('0.0001'): # Tolerance for decimal comparison
             return False, f"كمية غير كافية للمنتج '{product.name}' من المصدر QC '{log_entry.qc_no}'. مطلوب: {total_requested:.3f}, متاح: {available_stock:.3f}"
 
     return True, None
