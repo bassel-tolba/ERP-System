@@ -6,7 +6,7 @@ from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
-from ..models import Company, Product, ProductTag, Account
+from ..models import Company, Product, ProductTag, Account, ValidationError
 
 
 def companies(request: HttpRequest) -> HttpResponse:
@@ -124,9 +124,17 @@ def edit_product(request: HttpRequest, pk: int) -> HttpResponse:
             product.override_cogs_expense_account_id = override_cogs_expense_account_id if override_cogs_expense_account_id else None
             product.override_sales_revenue_account_id = override_sales_revenue_account_id if override_sales_revenue_account_id else None
 
-            product.save()
-            product.tags.set(tag_ids)
-            messages.success(request, "تم تعديل المنتج بنجاح.")
+            try:
+                product.full_clean()
+                product.save()
+                product.tags.set(tag_ids)
+                messages.success(request, "تم تعديل المنتج بنجاح.")
+            except ValidationError as e:
+                # The e.message_dict contains field-specific errors.
+                # We can flatten them for display.
+                error_messages = ". ".join([f"{field}: {' '.join(errors)}" for field, errors in e.message_dict.items()])
+                messages.error(request, f"فشل التعديل. {error_messages}")
+
     return redirect('inventory:products')
 
 

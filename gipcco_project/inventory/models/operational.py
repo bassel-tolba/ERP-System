@@ -84,6 +84,49 @@ class Product(models.Model):
     def __str__(self):
         return f"{self.name} ({self.code})"
 
+    def clean(self):
+        """
+        Prevents changes to accounting-related fields if the product has
+        already been used in financial transactions. This enforces sub-ledger integrity.
+        """
+        super().clean()
+        if self.pk is None:
+            # This is a new object, no need to check for history.
+            return
+
+        try:
+            original = Product.objects.get(pk=self.pk)
+        except Product.DoesNotExist:
+            return  # Should not happen on a save for an existing object
+
+        # Check if any of the accounting override fields have changed
+        inventory_acc_changed = self.override_inventory_account_id != original.override_inventory_account_id
+        cogs_acc_changed = self.override_cogs_expense_account_id != original.override_cogs_expense_account_id
+        revenue_acc_changed = self.override_sales_revenue_account_id != original.override_sales_revenue_account_id
+
+        if inventory_acc_changed or cogs_acc_changed or revenue_acc_changed:
+            # If an account has changed, check for any financial history.
+            # This is a proxy for checking for Journal Entries. If any of these
+            # transactional records exist, it's unsafe to change the GL mapping.
+            from .inventory_management import FinishedProductDispatch, InventoryConsumption, ProductionReturn
+
+            has_transactions = (
+                self.inventory_logs.filter(status=InventoryLog.Status.RELEASED).exists() or
+                self.batch_items.filter(actual_quantity__isnull=False).exists() or
+                FinishedProductDispatch.objects.filter(finished_product__batch__template__final_product=self).exists() or
+                self.consumptions.exists() or
+                self.production_returns.exists()
+            )
+
+            if has_transactions:
+                error_msg = _("لا يمكن تغيير الإعدادات المحاسبية لمنتج له معاملات مالية قائمة.")
+                errors = {}
+                if inventory_acc_changed: errors['override_inventory_account'] = error_msg
+                if cogs_acc_changed: errors['override_cogs_expense_account'] = error_msg
+                if revenue_acc_changed: errors['override_sales_revenue_account'] = error_msg
+                if errors:
+                    raise ValidationError(errors)
+
 
 class ProductTag(models.Model):
     name = models.CharField(max_length=100, unique=True, verbose_name=_("Tag Name"))
