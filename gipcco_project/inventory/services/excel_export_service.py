@@ -144,7 +144,6 @@ def export_ar_aging_to_excel(report_data, totals, as_of_date):
         totals['net_balance']
     ]
     return generate_excel_response(filename, f"AR Aging Report as of {as_of_date}", headers, data, totals_list)
-    return generate_excel_response(filename, title, headers, data, totals_list)
 
 def export_customer_statement_to_excel(customer, start_date, end_date, opening_balance, transactions, closing_balance):
     filename = f"Customer_Statement_{customer.name}_{start_date}_to_{end_date}"
@@ -166,7 +165,6 @@ def export_customer_statement_to_excel(customer, start_date, end_date, opening_b
     
     totals = ["Closing Balance", "", "", "", "", closing_balance]
     return generate_excel_response(filename, f"Statement for {customer.name}", headers, data, totals)
-    return generate_excel_response(filename, title, headers, data, totals)
 
 
 def export_sales_by_customer_to_excel(report_data, grand_total, start_date, end_date):
@@ -181,7 +179,6 @@ def export_sales_by_customer_to_excel(report_data, grand_total, start_date, end_
     
     totals_list = ["Grand Total", "", grand_total]
     return generate_excel_response(filename, f"Sales by Customer ({start_date} to {end_date})", headers, data, totals_list)
-    return generate_excel_response(filename, title, headers, data, totals_list)
 
 
 def export_sales_by_product_to_excel(report_data, grand_total, start_date, end_date):
@@ -196,7 +193,6 @@ def export_sales_by_product_to_excel(report_data, grand_total, start_date, end_d
     
     totals_list = ["Grand Total", "", "", grand_total]
     return generate_excel_response(filename, f"Sales by Product ({start_date} to {end_date})", headers, data, totals_list)
-    return generate_excel_response(filename, title, headers, data, totals_list)
 
 
 def export_sales_order_backlog_to_excel(report_data):
@@ -221,4 +217,3 @@ def export_sales_order_backlog_to_excel(report_data):
         for item in report_data
     ]
     return generate_excel_response(filename, f"Sales Order Backlog as of {date.today()}", headers, data)
-    return generate_excel_response(filename, title, headers, data)
