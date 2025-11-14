@@ -1,6 +1,8 @@
 # gipcco_project/inventory/views/companies_products.py
 
 from django.contrib import messages
+from django.contrib.auth.decorators import permission_required
+from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -8,12 +10,14 @@ from django.views.decorators.http import require_POST
 
 from ..models import Company, Product, ProductTag, Account, ValidationError
 
-
+@permission_required('inventory.view_company')
 def companies(request: HttpRequest) -> HttpResponse:
     """
     Manages companies. Handles both displaying the list and adding a new company.
     """
     if request.method == 'POST':
+        if not request.user.has_perm('inventory.add_company'):
+            raise PermissionDenied
         name = request.POST.get('name')
         if name:
             company, created = Company.objects.get_or_create(name=name)
@@ -33,6 +37,7 @@ def companies(request: HttpRequest) -> HttpResponse:
 
 
 @require_POST
+@permission_required('inventory.change_company')
 def edit_company(request: HttpRequest, pk: int) -> HttpResponse:
     """
     Handles editing a company's name.
@@ -50,6 +55,7 @@ def edit_company(request: HttpRequest, pk: int) -> HttpResponse:
 
 
 @require_POST
+@permission_required('inventory.delete_company')
 def delete_company(request: HttpRequest, pk: int) -> HttpResponse:
     """
     Handles deleting a company.
@@ -60,11 +66,14 @@ def delete_company(request: HttpRequest, pk: int) -> HttpResponse:
     return redirect('inventory:companies')
 
 
+@permission_required('inventory.view_product')
 def products(request: HttpRequest) -> HttpResponse:
     """
     Manages products. Handles both displaying the list and adding a new product.
     """
     if request.method == 'POST':
+        if not request.user.has_perm('inventory.add_product'):
+            raise PermissionDenied
         name = request.POST.get('name')
         code = request.POST.get('code')
         product_type = request.POST.get('product_type')
@@ -94,6 +103,7 @@ def products(request: HttpRequest) -> HttpResponse:
 
 
 @require_POST
+@permission_required('inventory.change_product')
 def edit_product(request: HttpRequest, pk: int) -> HttpResponse:
     """
     Handles editing an existing product.
@@ -139,6 +149,7 @@ def edit_product(request: HttpRequest, pk: int) -> HttpResponse:
 
 
 @require_POST
+@permission_required('inventory.delete_product')
 def delete_product(request: HttpRequest, pk: int) -> HttpResponse:
     """
     Handles deleting a product.
@@ -150,6 +161,7 @@ def delete_product(request: HttpRequest, pk: int) -> HttpResponse:
 
 
 @require_POST
+@permission_required('inventory.add_producttag')
 def create_tag(request: HttpRequest) -> HttpResponse:
     """
     Handles creating a new product tag and associating it with products.
@@ -175,6 +187,7 @@ def create_tag(request: HttpRequest) -> HttpResponse:
 
 
 @require_POST
+@permission_required('inventory.change_producttag')
 def edit_tag(request: HttpRequest, pk: int) -> HttpResponse:
     """
     Handles editing an existing product tag.
@@ -197,6 +210,7 @@ def edit_tag(request: HttpRequest, pk: int) -> HttpResponse:
 
 
 @require_POST
+@permission_required('inventory.delete_producttag')
 def delete_tag(request: HttpRequest, pk: int) -> HttpResponse:
     """
     Handles deleting a product tag.

@@ -36,7 +36,7 @@ from .views.financial_reports import (
     product_ledger, general_ledger, tax_reconciliation_report, reconciliation_report, 
     balance_sheet, stock_valuation_report
 )
-from .views import employees
+from .views import employees, users
 from .views.financials import (
     ap_views,
     ar_views,
@@ -47,11 +47,11 @@ from .views.financials import (
     period_views,
 )
 from .views.reports import ar as ar_report_views, sales as sales_report_views
-
+from .views import manage_users, edit_user, delete_user
 app_name = 'inventory'
 
 urlpatterns = [
-    # ... (existing URL patterns)
+    
 
     # Financial Reports
     path('reports/trial-balance/', trial_balance, name='trial_balance'),
@@ -73,6 +73,14 @@ urlpatterns = [
 ]
 
 urlpatterns = [
+    # User Management
+    path('users/', manage_users, name='manage_users'),
+    path('users/<int:pk>/edit/', edit_user, name='edit_user'),
+    path('users/<int:pk>/delete/', delete_user, name='delete_user'),
+    # Group & Permission Management
+    path('groups/', users.manage_groups, name='manage_groups'),
+    path('groups/<int:pk>/edit/', users.edit_group, name='edit_group'),
+    path('groups/<int:pk>/delete/', users.delete_group, name='delete_group'),
     # Dashboard & Records
     path('', index, name='receipts'),
     path('records/', records, name='records'),

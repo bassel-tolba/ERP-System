@@ -1,0 +1,196 @@
+<!-- gipcco_project/inventory/templates/inventory/partials/users/users_content.html -->
+<div id="users-management-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2 mb-0" style="font-weight: 700;">إدارة المستخدمين</h1>
+        <div>
+            {% if perms.auth.view_group %}
+            <a href="{% url 'inventory:manage_groups' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-shield-lock-fill"></i> إدارة المجموعات والصلاحيات
+            </a>
+            {% endif %}
+            {% if perms.auth.add_user %}
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                <i class="bi bi-plus-lg"></i> إضافة مستخدم جديد
+            </button>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="bi bi-people-fill"></i> المستخدمون المسجلون</h3>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">اسم المستخدم</th>
+                            <th>مجموعات الصلاحيات</th>
+                            <th>حالة الموظف</th>
+                            <th>مستخدم خارق</th>
+                            <th class="text-end pe-3">إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td class="ps-3"><strong>{{ user.username }}</strong></td>
+                            <td>
+                                {% for group in user.groups.all %}
+                                <span class="badge text-bg-info">{{ group.name }}</span>
+                                {% empty %}
+                                <span class="text-muted">لا يوجد</span>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                {% if user.is_staff %}
+                                <i class="bi bi-check-circle-fill text-success"></i> نعم
+                                {% else %}
+                                <i class="bi bi-x-circle-fill text-danger"></i> لا
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if user.is_superuser %}
+                                <i class="bi bi-check-circle-fill text-success"></i> نعم
+                                {% else %}
+                                <i class="bi bi-x-circle-fill text-danger"></i> لا
+                                {% endif %}
+                            </td>
+                            <td class="text-end pe-3">
+                                {% if perms.auth.change_user %}
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editUserModal-{{ user.id }}">
+                                    <i class="bi bi-pencil-square"></i> تعديل
+                                </button>
+                                {% endif %}
+                                {% if perms.auth.delete_user and not user.is_superuser and user.id != request.user.id %}
+                                <form method="post" action="{% url 'inventory:delete_user' pk=user.id %}" class="d-inline" onsubmit="return confirm('هل أنت متأكد من حذف هذا المستخدم؟ لا يمكن التراجع عن هذا الإجراء.');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i> حذف
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add User Modal -->
+{% if perms.auth.add_user %}
+<div class="modal fade" id="addUserModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">إضافة مستخدم جديد</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'inventory:manage_users' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">اسم المستخدم</label>
+                        <input type="text" class="form-control" name="username" required autocomplete="off">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">كلمة المرور</label>
+                            <input type="password" class="form-control" name="password" required autocomplete="new-password">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">تأكيد كلمة المرور</label>
+                            <input type="password" class="form-control" name="password_confirm" required autocomplete="new-password">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">مجموعات الصلاحيات</label>
+                        <select class="form-select user-groups-select" name="groups" multiple>
+                            {% for group in all_groups %}
+                            <option value="{{ group.id }}">{{ group.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" role="switch" id="add_is_staff" name="is_staff" checked>
+                        <label class="form-check-label" for="add_is_staff">حالة الموظف (يسمح له بالدخول للوحة التحكم)</label>
+                    </div>
+                    {% if request.user.is_superuser %}
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="add_is_superuser" name="is_superuser">
+                        <label class="form-check-label" for="add_is_superuser">مستخدم خارق (يملك كل الصلاحيات)</label>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-plus-lg"></i> إضافة</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Edit User Modals -->
+{% if perms.auth.change_user %}
+{% for user in users %}
+<div class="modal fade" id="editUserModal-{{ user.id }}" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">تعديل المستخدم: {{ user.username }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'inventory:edit_user' pk=user.id %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">اسم المستخدم</label>
+                        <input type="text" class="form-control" name="username" value="{{ user.username }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">مجموعات الصلاحيات</label>
+                        <select class="form-select user-groups-select" name="groups" multiple>
+                            {% for group in all_groups %}
+                            <option value="{{ group.id }}" {% if group in user.groups.all %}selected{% endif %}>{{ group.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" role="switch" id="edit_is_staff_{{ user.id }}" name="is_staff" {% if user.is_staff %}checked{% endif %}>
+                        <label class="form-check-label" for="edit_is_staff_{{ user.id }}">حالة الموظف</label>
+                    </div>
+                    {% if request.user.is_superuser %}
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="edit_is_superuser_{{ user.id }}" name="is_superuser" {% if user.is_superuser %}checked{% endif %}>
+                        <label class="form-check-label" for="edit_is_superuser_{{ user.id }}">مستخدم خارق</label>
+                    </div>
+                    {% endif %}
+                    <hr>
+                    <p class="text-muted">اترك حقول كلمة المرور فارغة لعدم تغييرها.</p>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">كلمة المرور الجديدة</label>
+                            <input type="password" class="form-control" name="password" autocomplete="new-password">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">تأكيد كلمة المرور الجديدة</label>
+                            <input type="password" class="form-control" name="password_confirm" autocomplete="new-password">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check2-circle"></i> حفظ التغييرات</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endif %}

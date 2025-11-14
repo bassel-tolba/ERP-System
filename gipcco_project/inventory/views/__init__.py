@@ -11,3 +11,4 @@ from .finished_products import *
 from .purchase_orders import *
 from .templates import *
 from .financial_reports import * # New import for financial reports views
+from .users import *

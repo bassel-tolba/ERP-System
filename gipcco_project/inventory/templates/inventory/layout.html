@@ -207,6 +207,12 @@
                                     <li><a class="nav-submenu-item" href="{% url 'inventory:companies' %}">إدارة الموردين</a></li>
                                     <li><a class="nav-submenu-item" href="{% url 'inventory:customers' %}">إدارة العملاء</a></li>
                                     <li><a class="nav-submenu-item" href="{% url 'inventory:manage_employees' %}">إدارة الموظفين</a></li>
+                                    {% if perms.auth.view_user %}
+                                    <li><a class="nav-submenu-item" href="{% url 'inventory:manage_users' %}">اداره المستخدمين</a></li>
+                                    {% endif %}
+                                    {% if perms.auth.view_group %}
+                                    <li><a class="nav-submenu-item" href="{% url 'inventory:manage_groups' %}">المجموعات والصلاحيات</a></li>
+                                    {% endif %}
                                 </ul>
                             </div>
                         </li>
@@ -355,6 +361,7 @@
     <script src="{% static 'layout/js/inventory_counts_logic.js' %}"></script>
     <script src="{% static 'layout/js/employees_logic.js' %}"></script>
     <script src="{% static 'layout/js/ar_aging_report_logic.js' %}"></script>
+    <script src="{% static 'layout/js/users_logic.js' %}"></script>
     <!-- Dynamic content loader (MUST BE LAST) -->
     <script src="{% static 'layout/js/dynamic_content_loader.js' %}"></script>
     

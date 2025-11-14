@@ -1,0 +1,151 @@
+<div id="groups-management-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2 mb-0" style="font-weight: 700;">إدارة المجموعات والصلاحيات</h1>
+        <div>
+            <a href="{% url 'inventory:manage_users' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-people-fill"></i> إدارة المستخدمين
+            </a>
+            {% if perms.auth.add_group %}
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addGroupModal">
+                <i class="bi bi-plus-lg"></i> إضافة مجموعة جديدة
+            </button>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="bi bi-shield-lock-fill"></i> المجموعات المسجلة</h3>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">اسم المجموعة</th>
+                            <th>عدد المستخدمين</th>
+                            <th>عدد الصلاحيات</th>
+                            <th class="text-end pe-3">إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for group in groups %}
+                        <tr>
+                            <td class="ps-3"><strong>{{ group.name }}</strong></td>
+                            <td>{{ group.user_set.count }}</td>
+                            <td>{{ group.permissions.count }}</td>
+                            <td class="text-end pe-3">
+                                {% if perms.auth.change_group %}
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editGroupModal-{{ group.id }}">
+                                    <i class="bi bi-pencil-square"></i> تعديل
+                                </button>
+                                {% endif %}
+                                {% if perms.auth.delete_group %}
+                                <form method="post" action="{% url 'inventory:delete_group' pk=group.id %}" class="d-inline" onsubmit="return confirm('هل أنت متأكد من حذف هذه المجموعة؟');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i> حذف
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Group Modal -->
+{% if perms.auth.add_group %}
+<div class="modal fade" id="addGroupModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">إضافة مجموعة جديدة</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'inventory:manage_groups' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">اسم المجموعة</label>
+                        <input type="text" class="form-control" name="name" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-plus-lg"></i> إضافة</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Edit Group Modals -->
+{% if perms.auth.change_group %}
+{% for group in groups %}
+<div class="modal fade" id="editGroupModal-{{ group.id }}" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">تعديل المجموعة: {{ group.name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'inventory:edit_group' pk=group.id %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">اسم المجموعة</label>
+                        <input type="text" class="form-control" name="name" value="{{ group.name }}" required>
+                    </div>
+                    <div class="mb-3 permissions-container">
+                        <label class="form-label">الصلاحيات</label>
+                        <div class="accordion" id="permissionsAccordion-{{ group.id }}">
+                            {% for app_name, perms in grouped_permissions.items %}
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="heading-{{ app_name|slugify }}-{{ group.id }}">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ app_name|slugify }}-{{ group.id }}">
+                                        {{ app_name }}
+                                    </button>
+                                </h2>
+                                <div id="collapse-{{ app_name|slugify }}-{{ group.id }}" class="accordion-collapse collapse" data-bs-parent="#permissionsAccordion-{{ group.id }}">
+                                    <div class="accordion-body">
+                                        <div class="d-flex justify-content-end mb-2 border-bottom pb-2">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input permission-group-toggle" type="checkbox" role="switch" id="toggle-{{ app_name|slugify }}-{{ group.id }}" data-group-target="#collapse-{{ app_name|slugify }}-{{ group.id }}">
+                                                <label class="form-check-label fw-bold" for="toggle-{{ app_name|slugify }}-{{ group.id }}">تحديد الكل في هذا القسم</label>
+                                            </div>
+                                        </div>
+                                        <div class="row pt-2" style="max-height: 300px; overflow-y: auto;">
+                                            {% for perm in perms %}
+                                            <div class="col-md-6 col-lg-4 mb-2">
+                                               <div class="form-check">
+                                                   <input class="form-check-input permission-checkbox" type="checkbox" name="permissions" value="{{ perm.id }}" id="perm-{{ perm.id }}-{{ group.id }}" {% if perm in group.permissions.all %}checked{% endif %}>
+                                                   <label class="form-check-label small" for="perm-{{ perm.id }}-{{ group.id }}">
+                                                       {{ perm.name }}
+                                                   </label>
+                                               </div>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check2-circle"></i> حفظ التغييرات</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endif %}

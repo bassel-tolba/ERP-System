@@ -123,7 +123,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
-LANGUAGE_CODE = 'ar'
+LANGUAGE_CODE = 'en'
 
 TIME_ZONE = 'UTC'
 
@@ -194,9 +194,9 @@ LOGGING = {
 }
 
 
-# --- NEW: LOGIN/LOGOUT URLS ---
-LOGIN_REDIRECT_URL = '/' # Redirect to the root URL (dashboard) after login
-LOGOUT_REDIRECT_URL = '/accounts/login/' # Redirect to the login page after logout
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'inventory:receipts' # Default page after login if 'next' is not provided
+LOGOUT_REDIRECT_URL = 'login' # Page to go to after logging out
 
 # --- NEW SETTING FOR MESSAGE TAGS ---
 # This maps Django's message levels to Bootstrap alert classes.
@@ -348,7 +348,7 @@ JAZZMIN_UI_TWEAKS = {
     "navbar": "navbar-dark",
     "navbar_variants": ["navbar-dark", "navbar-primary", "navbar-white", "navbar-light"],
     "sidebar_variants": ["sidebar-dark-primary", "sidebar-light-primary", "sidebar-dark-info"],
-    "theme": "darkly", # Example: "united", "materia", "flatly", "darkly", "cosmo", "yeti", "lumen", "litera", "simplex", "solar", "superhero", "spacelab"
+    "theme": "flatly", # Example: "united", "materia", "flatly", "darkly", "cosmo", "yeti", "lumen", "litera", "simplex", "solar", "superhero", "spacelab"
     # "no_navbar_border": False,
     # "navbar_fixed": True,
     # "layout_boxed": False,

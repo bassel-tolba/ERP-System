@@ -3,12 +3,16 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h2 mb-0" style="font-weight: 700;">إدارة المنتجات</h1>
     <div>
+        {% if perms.inventory.add_product %}
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">
             <i class="bi bi-plus-lg"></i> إضافة منتج جديد
         </button>
+        {% endif %}
+        {% if perms.inventory.view_producttag %}
         <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#manageTagsModal">
             <i class="bi bi-tags"></i> إدارة الوسوم
         </button>
+        {% endif %}
     </div>
 </div>
 <div class="card">
@@ -59,15 +63,19 @@
                         {% endfor %}
                     </td>
                     <td class="text-end pe-3">
+                        {% if perms.inventory.change_product %}
                         <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editProductModal-{{ p.id }}">
                             <i class="bi bi-pencil-square"></i> تعديل
                         </button>
+                        {% endif %}
+                        {% if perms.inventory.delete_product %}
                         <form method="post" action="{% url 'inventory:delete_product' pk=p.id %}" class="d-inline" onsubmit="return confirm('هل أنت متأكد؟');">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-sm btn-outline-danger">
                                 <i class="bi bi-trash"></i> حذف
                             </button>
                         </form>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
@@ -79,6 +87,7 @@
 </div>
 
 <!-- Add Product Modal -->
+{% if perms.inventory.add_product %}
 <div class="modal fade" id="addProductModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -123,8 +132,10 @@
         </div>
     </div>
 </div>
+{% endif %}
 
 <!-- Edit Product Modals -->
+{% if perms.inventory.change_product %}
 {% for p in products %}
 <div class="modal fade" id="editProductModal-{{ p.id }}" tabindex="-1">
     <div class="modal-dialog modal-xl">
@@ -208,6 +219,7 @@
     </div>
 </div>
 {% endfor %}
+{% endif %}
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -245,6 +257,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!-- Manage Tags Modal -->
 <div class="modal fade" id="manageTagsModal" tabindex="-1" aria-labelledby="manageTagsModalLabel" aria-hidden="true">
+{% if perms.inventory.view_producttag %}
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -253,6 +266,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
             <div class="modal-body">
                 <h6>إضافة وسم جديد</h6>
+                {% if perms.inventory.add_producttag %}
                 <form method="post" action="{% url 'inventory:create_tag' %}" class="mb-4">
                     {% csrf_token %}
                     <div class="mb-3">
@@ -273,22 +287,28 @@ document.addEventListener('DOMContentLoaded', function() {
                     </button>
                 </form>
 
+                {% endif %}
                 <h6>الوسوم الموجودة</h6>
                 {% if all_tags %}
                 <ul class="list-group">
                     {% for tag in all_tags %}
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         <span class="flex-grow-1 me-2">{{ tag.name }}</span>
-                        <form method="post" action="{% url 'inventory:edit_tag' pk=tag.id %}" class="d-inline-flex me-2">
+                        {% if perms.inventory.change_producttag %}
+                        <form method="post" action="{% url 'inventory:edit_tag' pk=tag.id %}" class="d-inline-flex me-2 flex-grow-1">
                             {% csrf_token %}
                             <input type="text" class="form-control form-control-sm me-2" name="name" value="{{ tag.name }}" required>
                             <button type="submit" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i> تعديل</button>
                         </form>
-                        <form method="post" action="{% url 'inventory:delete_tag' pk=tag.id %}" class="d-inline" onsubmit="return confirm('هل أنت متأكد من حذف هذا الوسم؟');">
+                        {% else %}
+                        <span class="flex-grow-1 me-2">{{ tag.name }}</span>
+                        {% endif %}
+                        {% if perms.inventory.delete_producttag %}
+                        <form method="post" action="{% url 'inventory:delete_tag' pk=tag.id %}" class="d-inline">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> حذف</button>
                         </form>
-                    </li>
+                        {% endif %}
                     {% endfor %}
                 </ul>
                 {% else %}
@@ -301,3 +321,4 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
     </div>
 </div>
+{% endif %}

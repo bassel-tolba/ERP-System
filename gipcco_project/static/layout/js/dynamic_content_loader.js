@@ -57,7 +57,9 @@ window.initializePluginsInContent = function (container = document) {
         "#arAgingReportForm": initArAgingReportLogic,
 		// --- NEW: Employee Financials ---
 		"#employee-advances-container": initEmployeeAdvanceDetailLogic,
-		"#manage-employees-container": initManageEmployeesLogic,
+		"#manage-employees-container": initManageEmployeesLogic, 
+		"#users-management-container": initUsersLogic, 
+		"#groups-management-container": initGroupsLogic,
 	};
 
 	for (const selector in pageInitializers) {
@@ -94,10 +96,25 @@ document.addEventListener("DOMContentLoaded", function () {
 				headers: { "X-Partial-Request": "true" },
 			});
 
+			// --- NEW: Intelligent Auth Handling ---
+			// Scenario 1: Server redirected to the login page (user is not authenticated).
+			// The `fetch` API follows the redirect, so we check the final URL.
+			if (response.redirected && response.url.includes("/accounts/login/")) {
+				// Construct the login URL with a 'next' parameter pointing to the page we originally wanted.
+				const loginUrl = new URL(response.url);
+				loginUrl.searchParams.set('next', url);
+				window.location.href = loginUrl.toString();
+				return; // Stop execution
+			}
+
+			// Scenario 2: Server returned an error (e.g., 403 Forbidden for permissions).
+			// We force a full page load to let Django render its standard error page.
 			if (!response.ok) {
 				window.location.href = url;
 				return;
 			}
+			// --- END: Intelligent Auth Handling ---
+
 			const html = await response.text();
 			contentContainer.innerHTML = html;
 			contentContainer.style.opacity = "1";
