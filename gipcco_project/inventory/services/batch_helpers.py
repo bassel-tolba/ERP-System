@@ -40,17 +40,10 @@ def get_batch_form_context() -> Dict[str, Any]:
     for prod in primitive_products:
         stock_list = []
         # Correctly calculate remaining quantity for each released log
-        inventory_logs = prod.inventory_logs.filter(status=InventoryLog.Status.RELEASED).annotate(
-            total_used=Coalesce(Sum('batch_items__actual_quantity', filter=~Q(batch_items__batch__status=Batch.Status.CANCELLED)), Decimal('0.0'), output_field=DecimalField()),
-            total_returned=Coalesce(Sum('production_returns__quantity'), Decimal('0.0'), output_field=DecimalField()),
-            total_consumed=Coalesce(Sum('consumptions__quantity_consumed'), Decimal('0.0'), output_field=DecimalField()),
-            total_adjusted=Coalesce(Sum('adjustments__adjustment_quantity'), Decimal('0.0'), output_field=DecimalField())
-        ).annotate(
-            remaining_quantity=F('quantity') - F('total_used') - F('total_consumed') + F('total_returned') + F('total_adjusted')
-        )
+        inventory_logs = prod.inventory_logs.filter(status=InventoryLog.Status.RELEASED).with_remaining_quantity()
         
         for log in inventory_logs:
-            if log.remaining_quantity > Decimal('0.0001'):
+            if log.remaining_quantity > Decimal('0.001'):
                 stock_list.append({
                     'id': log.id, 
                     'qc_no': log.qc_no or 'N/A', 

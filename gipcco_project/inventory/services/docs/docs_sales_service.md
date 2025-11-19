@@ -8,7 +8,7 @@
 
 - `dispatch_from_sales_order(sales_order_id, dispatch_date, dispatches)`: Creates dispatch records for items on a sales order, fulfilling the order.
   - Fetches and locks the `SalesOrder` to prevent race conditions.
-  - **NEW:** Performs a robust, scalable stock availability check for all requested items *before* creating any dispatches, using the correct subquery-based calculation to avoid common ORM pitfalls.
+  - **NEW:** Performs a robust, scalable stock availability check for all requested items *before* creating any dispatches by calling the authoritative `FinishedProductReceipt.objects.with_remaining_quantity()` manager method.
   - Calculates the cost for each dispatch at the time of the transaction.
   - Creates `FinishedProductDispatch` records for each item.
   - Automatically updates the parent `SalesOrder` status to `PARTIALLY_SHIPPED` or `COMPLETED`.

@@ -23,11 +23,11 @@
 </head>
 <body>
 
-    <div class="layout-wrapper">
+    <div class="layout-wrapper" data-sidebar-state="expanded">
         <!-- ==========================================================================
-           SIDEBAR NAVIGATION (Offcanvas)
+           SIDEBAR NAVIGATION (Persistent on Desktop, Offcanvas on Mobile)
            ========================================================================== -->
-        <div class="offcanvas offcanvas-end" tabindex="-1" id="sidebarOffcanvas" aria-labelledby="sidebarOffcanvasLabel">
+        <aside class="sidebar offcanvas-xl offcanvas-end" tabindex="-1" id="sidebarOffcanvas" aria-labelledby="sidebarOffcanvasLabel">
             <div class="offcanvas-header">
                 <a class="sidebar-header" href="{% url 'inventory:receipts' %}" id="sidebarOffcanvasLabel">
                     <i class="bi bi-buildings-fill brand-icon"></i>
@@ -35,6 +35,15 @@
                 </a>
                 <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
             </div>
+            
+            <!-- Search Box in Sidebar -->
+            <div class="sidebar-search">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-transparent border-0"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control border-0 bg-transparent" id="navSearchInput" placeholder="ابحث... (Ctrl+K)" autocomplete="off">
+                </div>
+            </div>
+            
             <div class="offcanvas-body">
                 <nav class="sidebar-nav">
                     <ul class="navbar-nav">
@@ -227,10 +236,26 @@
         <div class="main-content">
             <!-- Header -->
             <header class="header shadow-sm">
-                <button class="sidebar-toggle" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" aria-controls="sidebarOffcanvas" aria-label="Toggle Sidebar">
-                    <i class="bi bi-list"></i>
-                </button>
+                <div class="header-start">
+                    <button class="sidebar-toggle d-xl-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" aria-controls="sidebarOffcanvas" aria-label="Toggle Sidebar">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <button class="sidebar-collapse-toggle d-none d-xl-block" type="button" id="sidebarCollapseToggle" aria-label="Collapse Sidebar">
+                        <i class="bi bi-layout-sidebar-inset-reverse"></i>
+                    </button>
+                    
+                    <!-- Breadcrumb Navigation -->
+                    <nav aria-label="breadcrumb" class="d-none d-md-block ms-3">
+                        <ol class="breadcrumb mb-0" id="dynamicBreadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'inventory:receipts' %}"><i class="bi bi-house-door"></i></a></li>
+                        </ol>
+                    </nav>
+                </div>
+                
                 <div class="header-actions">
+                    <button class="btn btn-sm btn-outline-secondary d-none d-lg-inline-flex align-items-center gap-2" id="keyboardShortcutsBtn" type="button">
+                        <i class="bi bi-keyboard"></i><span class="d-none d-xl-inline">اختصارات</span>
+                    </button>
                     <div class="form-check form-switch theme-switch">
                         <input class="form-check-input" type="checkbox" id="darkModeSwitch">
                         <label class="form-check-label" for="darkModeSwitch">
@@ -238,6 +263,9 @@
                             <i class="bi bi-moon-stars-fill"></i>
                         </label>
                     </div>
+            
+            <!-- Top Loading Bar -->
+            <div class="top-loading-bar" id="topLoadingBar"></div>
                 </div>
             </header>
             
@@ -269,6 +297,30 @@
                 <div class="container">
                     <span>Developed by Bassel for Gipco Company &copy; 2025</span>
                 </div>
+        </div>
+    </div>
+    
+    <!-- Command Palette Modal -->
+    <div class="modal fade" id="commandPaletteModal" tabindex="-1" aria-labelledby="commandPaletteLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content command-palette">
+                <div class="modal-body p-0">
+                    <div class="command-palette-search">
+                        <i class="bi bi-search"></i>
+                        <input type="text" class="form-control border-0" id="commandPaletteInput" placeholder="ابحث عن صفحة أو أمر..." autocomplete="off">
+                    </div>
+                    <div class="command-palette-results" id="commandPaletteResults">
+                        <div class="text-muted text-center py-4 small">ابدأ الكتابة للبحث...</div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 bg-transparent py-2 px-3">
+                    <div class="d-flex gap-3 small text-muted w-100">
+                        <span><kbd>↑↓</kbd> للتنقل</span>
+                        <span><kbd>Enter</kbd> لفتح</span>
+                        <span><kbd>Esc</kbd> للإغلاق</span>
+                    </div>
+                </div>
+            </div>
             </footer>
         </div>
     </div>

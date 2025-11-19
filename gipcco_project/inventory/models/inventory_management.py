@@ -7,6 +7,8 @@ from django.core.exceptions import ValidationError
 from django.db.models import Q, Sum
 from django.conf import settings
 
+from .managers import FinishedProductReceiptQuerySet
+
 class ShopOrderTemplate(models.Model):
     name = models.CharField(max_length=255, verbose_name=_("Template Name"))
     final_product = models.ForeignKey(
@@ -435,6 +437,8 @@ class FinishedProductReceipt(models.Model):
         null=True, blank=True, verbose_name=_("Release Date")
     )
     notes = models.TextField(null=True, blank=True, verbose_name=_("Notes"))
+
+    objects = FinishedProductReceiptQuerySet.as_manager()
 
     class Meta:
         db_table = 'finished_product_receipts'

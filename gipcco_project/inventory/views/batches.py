@@ -128,25 +128,12 @@ def view_batch(request: HttpRequest, pk: int) -> HttpResponse:
     # --- START: MODIFICATION - Fetch available stock for each item ---
     items = batch_info.items.select_related('primitive_product').order_by('primitive_product__name')
     
-    # Subqueries for robust stock calculation - using DecimalField
-    consumed_prod_subquery = BatchItem.objects.filter(source_log_id=OuterRef('pk')).values('source_log_id').annotate(total=Sum('actual_quantity')).values('total')
-    consumed_internal_subquery = InventoryConsumption.objects.filter(source_log_id=OuterRef('pk')).values('source_log_id').annotate(total=Sum('quantity_consumed')).values('total')
-    returned_subquery = ProductionReturn.objects.filter(source_log_id=OuterRef('pk')).values('source_log_id').annotate(total=Sum('quantity')).values('total')
-    adjusted_subquery = InventoryAdjustment.objects.filter(source_log_id=OuterRef('pk')).values('source_log_id').annotate(total=Sum('adjustment_quantity')).values('total')
-
     for item in items:
         # Find all released logs for this product
         released_logs = InventoryLog.objects.filter(
             product=item.primitive_product,
             status=InventoryLog.Status.RELEASED
-        ).annotate(
-            total_used_in_prod=Coalesce(Subquery(consumed_prod_subquery, output_field=DecimalField()), Decimal('0.0')),
-            total_used_in_consumption=Coalesce(Subquery(consumed_internal_subquery, output_field=DecimalField()), Decimal('0.0')),
-            total_returned=Coalesce(Subquery(returned_subquery, output_field=DecimalField()), Decimal('0.0')),
-            total_adjusted=Coalesce(Subquery(adjusted_subquery, output_field=DecimalField()), Decimal('0.0'))
-        ).annotate(
-            remaining_quantity=F('quantity') - F('total_used_in_prod') - F('total_used_in_consumption') + F('total_returned') + F('total_adjusted')
-        ).order_by('release_timestamp')
+        ).with_remaining_quantity().order_by('release_timestamp')
         
         # Create a list of dicts to be compatible with the template
         item.available_stock = [

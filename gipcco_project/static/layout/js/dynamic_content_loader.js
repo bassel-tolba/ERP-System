@@ -1,3 +1,4 @@
+// gipcco_project/static/layout/js/dynamic_content_loader.js
 // This function needs to be globally accessible to initialize plugins on newly loaded content
 window.initializePluginsInContent = function (container = document) {
 	console.log("%c[DEBUG] initializePluginsInContent: Running on container:", "color: green;", container);

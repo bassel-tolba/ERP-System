@@ -8,7 +8,7 @@
   - **Description:** A data preparation function that gathers all necessary information for rendering the batch creation user interface.
   - **Logic:**
     - Fetches all `ShopOrderTemplate` records.
-    - Calculates the current available stock for all primitive products by aggregating all inflows and outflows (`BatchItem`, `InventoryConsumption`, `ProductionReturn`, `InventoryAdjustment`).
+    - Calculates the current available stock for all primitive products by calling the `InventoryLog.objects.with_remaining_quantity()` manager method, ensuring an accurate and performant stock calculation.
     - Returns a context dictionary containing templates, stock levels, and product lists, formatted for both Django templates and JSON consumption.
 
 - `validate_stock_availability(...)`:

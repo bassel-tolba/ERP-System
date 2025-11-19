@@ -161,20 +161,10 @@ def dispatch_from_sales_order(
 
         # --- NEW: Efficiently check stock for all items at once ---
         receipt_ids = [item.finished_product_id for item in so_items.values()]
-        
-        dispatched_subquery = FinishedProductDispatch.objects.filter(
-            sales_order_item__finished_product_id=OuterRef('pk')
-        ).values('sales_order_item__finished_product_id').annotate(total=Sum('quantity')).values('total')
 
-        adjusted_subquery = InventoryAdjustment.objects.filter(
-            source_finished_product_id=OuterRef('pk')
-        ).values('source_finished_product_id').annotate(total=Sum('adjustment_quantity')).values('total')
-
-        receipts_with_stock = FinishedProductReceipt.objects.filter(id__in=receipt_ids).annotate(
-            total_dispatched=Coalesce(Subquery(dispatched_subquery, output_field=FloatField()), 0.0),
-            total_adjusted=Coalesce(Subquery(adjusted_subquery, output_field=FloatField()), 0.0)
-        ).annotate(
-            quantity_available=F('total_quantity_produced') - F('total_dispatched') + F('total_adjusted')
+        # Use the centralized manager method to get available quantity
+        receipts_with_stock = FinishedProductReceipt.objects.filter(id__in=receipt_ids).with_remaining_quantity().annotate(
+            quantity_available=F('remaining_quantity')
         )
         
         stock_map = {receipt.id: receipt.quantity_available for receipt in receipts_with_stock}

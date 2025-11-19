@@ -25,9 +25,9 @@ from .models import (
   BankReconciliation, BankStatementLine, FiscalYear, TransactionCorrection,
     OpeningBalanceEntry, OpeningBalanceEntryLine, OpeningBalanceSubLedgerDetail
 )
-from .views.helpers import check_and_update_batch_customization
+from .services.batch_helpers import check_and_update_batch_customization
 from .services.costing_service import recalculate_cost_history_for_product
-
+from .services.costing_service import recalculate_cost_history_for_product
 # ==============================================================================
 #  SETUP & OPERATIONAL ADMINS
 # ==============================================================================
@@ -228,7 +228,6 @@ class FinishedProductDispatchAdmin(admin.ModelAdmin):
     autocomplete_fields = ('sales_order_item',)
     readonly_fields = ('cost_at_dispatch', 'adjustment_link')
     fields = ('sales_order_item', 'quantity', 'dispatch_date', 'cost_at_dispatch', 'adjustment_link')
-
     @admin.display(description="Correction Link")
     def adjustment_link(self, obj):
         from django.urls import reverse

@@ -25,17 +25,9 @@ def _get_fifo_source_logs_for_consumption(product: inventory_models.Product, qua
     logs_with_outflows = inventory_models.InventoryLog.objects.filter(
         product=product,
         status=inventory_models.InventoryLog.Status.RELEASED
-    ).annotate(
-        total_consumed=Coalesce(Sum('consumptions__quantity_consumed'), Decimal('0.0'), output_field=models.DecimalField()),
-        total_used_in_batch=Coalesce(Sum('batch_items__actual_quantity'), Decimal('0.0'), output_field=models.DecimalField()),
-        total_adjusted=Coalesce(Sum('adjustments__adjustment_quantity'), Decimal('0.0'), output_field=models.DecimalField())
-    ).annotate(
-        quantity_remaining=F('quantity') - F('total_consumed') - F('total_used_in_batch') + F('total_adjusted')
-    ).filter(
-        quantity_remaining__gt=0
-    ).order_by('timestamp')
+    ).with_remaining_quantity().filter(remaining_quantity__gt=Decimal('0.0')).order_by('timestamp')
 
-    total_available = logs_with_outflows.aggregate(total=Sum('quantity_remaining'))['total'] or Decimal('0.0')
+    total_available = logs_with_outflows.aggregate(total=Sum('remaining_quantity'))['total'] or Decimal('0.0')
     if total_available < quantity_needed:
         raise ValidationError(f"Insufficient total inventory for product '{product.name}'. Needed: {quantity_needed}, Available: {total_available:.3f}.")
 
@@ -46,7 +38,7 @@ def _get_fifo_source_logs_for_consumption(product: inventory_models.Product, qua
         if remaining_to_fulfill <= 0:
             break
         
-        quantity_to_take = min(remaining_to_fulfill, log.quantity_remaining)
+        quantity_to_take = min(remaining_to_fulfill, log.remaining_quantity)
         
         consumptions.append({
             'log': log,

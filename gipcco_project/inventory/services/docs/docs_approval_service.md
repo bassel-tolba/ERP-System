@@ -2,7 +2,7 @@
 - **Purpose:** Provides services to approve or reject expense requests, which triggers the creation of the corresponding financial transactions like expense logs, inventory consumptions, or accruals.
 
 - `_get_fifo_source_logs_for_consumption(product: inventory_models.Product, quantity_needed: Decimal)`: **ENHANCED:** Finds the oldest available `InventoryLog` records to satisfy a required quantity, implementing a true FIFO strategy that can draw from multiple source logs.
-  - Calculates the remaining quantity for all available logs.
+  - Calls the authoritative `InventoryLog.objects.with_remaining_quantity()` manager method to get the precise available stock for each source log.
   - Returns a list of source logs and the specific quantity to consume from each to fulfill the total request.
   - Raises a `ValidationError` only if the *total* available inventory is insufficient.
 

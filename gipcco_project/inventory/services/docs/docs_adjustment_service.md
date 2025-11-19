@@ -26,7 +26,7 @@
   - **Description:** Automatically creates `DRAFT` negative adjustments for a finished good shortage, distributing the shortage proportionally across selected receipts.
   - **Workflow:**
     1. Deletes any pre-existing `DRAFT` adjustments for the same `inventory_count` and `product` to avoid duplication.
-    2. Uses a robust subquery-based approach (two `Subquery` aggregations with `Coalesce` into `FloatField`) to compute for each `FinishedProductReceipt` the correct `remaining_quantity = total_quantity_produced - total_dispatched + total_adjusted` while preventing join multiplication and over-counting.
+    2. Calls the authoritative `FinishedProductReceipt.objects.with_remaining_quantity()` manager method to get the precise available stock for each receipt, preventing join multiplication bugs.
     3. Filters out receipts with effectively zero remaining stock (thresholded at `> 0.001`) and orders by `release_date` (oldest first) when selecting receipts; although the method name previously implied LIFO, the implementation distributes from oldest receipts (FIFO) when ordering by release_date.
     4. If the total available across selected receipts is less than the shortage quantity the function raises a `ValidationError` explaining the shortfall.
     5. The shortage is distributed proportionally across the selected receipts' remaining quantities. The code builds an `adjustments_to_make` mapping and converts computed floats to `Decimal` with quantization at 3 decimal places for safe accounting.

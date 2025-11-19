@@ -148,34 +148,18 @@ def auto_distribute_finished_good_shortage(count_item_id: int, reason: str, note
         logger.warning(f"Skipping auto-distribution for product '{product.name}': Shortage is zero or not a final product.")
         return []
 
-    # --- ROBUST SUBQUERY APPROACH TO PREVENT JOIN MULTIPLICATION ---
-    
-    # Subquery for total dispatched
-    dispatched_subquery = FinishedProductDispatch.objects.filter(
-        sales_order_item__finished_product_id=OuterRef('pk')
-    ).values('sales_order_item__finished_product_id').annotate(total=Sum('quantity')).values('total')
-
-    # Subquery for total adjusted
-    adjusted_subquery = InventoryAdjustment.objects.filter(
-        source_finished_product_id=OuterRef('pk')
-    ).values('source_finished_product_id').annotate(total=Sum('adjustment_quantity')).values('total')
-
     # Base query for receipts
     receipts_query = FinishedProductReceipt.objects.filter(
         batch__template__final_product=product
     ).exclude(status=FinishedProductReceipt.Status.REJECTED)
 
-    # If specific receipt IDs are provided, filter the query
     if receipt_ids:
         receipts_query = receipts_query.filter(id__in=receipt_ids)
     
-    # Annotate with the correct remaining quantity using subqueries
-    receipts_with_remaining_qs = receipts_query.annotate(
-        total_dispatched=Coalesce(Subquery(dispatched_subquery, output_field=FloatField()), 0.0),
-        total_adjusted=Coalesce(Subquery(adjusted_subquery, output_field=FloatField()), 0.0)
-    ).annotate(
-        remaining_quantity=F('total_quantity_produced') - F('total_dispatched') + F('total_adjusted')
-    ).filter(remaining_quantity__gt=0.001).order_by('release_date') # Oldest first (FIFO) for distribution
+    # Use the centralized manager method to get remaining quantity
+    receipts_with_remaining_qs = receipts_query.with_remaining_quantity().filter(
+        remaining_quantity__gt=Decimal('0.001')
+    ).order_by('release_date') # Oldest first (FIFO) for distribution
 
     receipts_with_remaining = [
         {

@@ -7,6 +7,8 @@ from django.core.exceptions import ValidationError
 from django.db.models import Q, Sum
 from django.conf import settings
 
+from .managers import InventoryLogQuerySet
+
 # ==============================================================================
 #  OPERATIONAL MODELS
 # ==============================================================================
@@ -136,7 +138,6 @@ class ProductTag(models.Model):
         verbose_name = _("Product Tag")
         verbose_name_plural = _("Product Tags")
         ordering = ['name']
-
     def __str__(self):
         return self.name
 
@@ -216,6 +217,8 @@ class InventoryLog(models.Model):
     withholding_tax_amount = models.DecimalField(
         max_digits=12, decimal_places=3, default=Decimal('0.000'), verbose_name=_("Withholding Tax Amount")
     )
+
+    objects = InventoryLogQuerySet.as_manager()
 
     class Meta:
         db_table = 'inventory_log'

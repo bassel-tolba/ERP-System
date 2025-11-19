@@ -309,33 +309,13 @@ def api_get_po_items(request: HttpRequest, po_id: int) -> JsonResponse:
 
 def api_get_sellable_stock(request: HttpRequest) -> JsonResponse:
     """API endpoint to get released, in-stock finished product batches."""
-    
-    # Subquery for total dispatched. This calculates the sum for each receipt in isolation.
-    dispatched_subquery = FinishedProductDispatch.objects.filter(
-        sales_order_item__finished_product_id=OuterRef('pk')
-    ).values(
-        'sales_order_item__finished_product_id'  # Group by receipt
-    ).annotate(
-        total=Sum('quantity')
-    ).values('total')
-
-    # Subquery for total adjusted. This also calculates the sum in isolation.
-    adjusted_subquery = InventoryAdjustment.objects.filter(
-        source_finished_product_id=OuterRef('pk')
-    ).values(
-        'source_finished_product_id'  # Group by receipt
-    ).annotate(
-        total=Sum('adjustment_quantity')
-    ).values('total')
 
     # Main query to get sellable stock
     sellable_stock = FinishedProductReceipt.objects.filter(
         status=FinishedProductReceipt.Status.RELEASED
-    ).annotate(
-        total_dispatched=Coalesce(Subquery(dispatched_subquery), 0.0, output_field=FloatField()),
-        total_adjusted=Coalesce(Subquery(adjusted_subquery), 0.0, output_field=FloatField())
-    ).annotate(
-        available_quantity=F('total_quantity_produced') - F('total_dispatched') - F('total_adjusted')
+    ).with_remaining_quantity().annotate(
+        # Alias remaining_quantity for consistency with old key if needed by frontend
+        available_quantity=F('remaining_quantity')
     ).filter(
         available_quantity__gt=0.001
     ).select_related('batch__template__final_product', 'batch')
@@ -409,25 +389,12 @@ def api_get_available_stock(request: HttpRequest, product_pk: int) -> JsonRespon
     """
     product = get_object_or_404(Product, pk=product_pk)
     
-    # --- ROBUST SUBQUERY APPROACH FOR RAW MATERIALS ---
-    consumed_prod_subquery = BatchItem.objects.filter(source_log_id=OuterRef('pk'), batch__status__in=[Batch.Status.IN_PROGRESS, Batch.Status.COMPLETED]).values('source_log_id').annotate(total=Sum('actual_quantity')).values('total')
-    consumed_internal_subquery = InventoryConsumption.objects.filter(source_log_id=OuterRef('pk')).values('source_log_id').annotate(total=Sum('quantity_consumed')).values('total')
-    returned_subquery = ProductionReturn.objects.filter(source_log_id=OuterRef('pk')).values('source_log_id').annotate(total=Sum('quantity')).values('total')
-    adjusted_subquery = InventoryAdjustment.objects.filter(source_log_id=OuterRef('pk')).values('source_log_id').annotate(total=Sum('adjustment_quantity')).values('total')
-
     # Find all released logs for this product and calculate remaining quantity accurately
     released_logs = InventoryLog.objects.filter(
         product=product,
         status=InventoryLog.Status.RELEASED
-    ).annotate(
-        total_used_in_prod=Coalesce(Subquery(consumed_prod_subquery, output_field=FloatField()), 0.0),
-        total_used_in_consumption=Coalesce(Subquery(consumed_internal_subquery, output_field=FloatField()), 0.0),
-        total_returned=Coalesce(Subquery(returned_subquery, output_field=FloatField()), 0.0),
-        total_adjusted=Coalesce(Subquery(adjusted_subquery, output_field=FloatField()), 0.0)
-    ).annotate(
-        remaining_quantity=F('quantity') - F('total_used_in_prod') - F('total_used_in_consumption') + F('total_returned') + F('total_adjusted')
-    ).filter(
-        remaining_quantity__gt=0.001  # Only show logs with stock left
+    ).with_remaining_quantity().filter(
+        remaining_quantity__gt=Decimal('0.001')  # Only show logs with stock left
     ).order_by('release_timestamp')
 
     data = [
@@ -452,24 +419,11 @@ def api_get_stock_sources_for_product(request: HttpRequest, product_id: int) -> 
 
     # 1. Get Raw Material / MRO sources from InventoryLog
     if product.product_type != Product.ProductType.FINAL_PRODUCT:
-        # --- ROBUST SUBQUERY APPROACH FOR RAW MATERIALS ---
-        consumed_prod_subquery = BatchItem.objects.filter(source_log_id=OuterRef('pk'), batch__status__in=[Batch.Status.IN_PROGRESS, Batch.Status.COMPLETED]).values('source_log_id').annotate(total=Sum('actual_quantity')).values('total')
-        consumed_internal_subquery = InventoryConsumption.objects.filter(source_log_id=OuterRef('pk')).values('source_log_id').annotate(total=Sum('quantity_consumed')).values('total')
-        returned_subquery = ProductionReturn.objects.filter(source_log_id=OuterRef('pk')).values('source_log_id').annotate(total=Sum('quantity')).values('total')
-        adjusted_subquery = InventoryAdjustment.objects.filter(source_log_id=OuterRef('pk')).values('source_log_id').annotate(total=Sum('adjustment_quantity')).values('total')
-
         logs = InventoryLog.objects.filter(
             product_id=product_id
         ).exclude(
             status__in=[InventoryLog.Status.REJECTED, InventoryLog.Status.SCRAPPED]
-        ).annotate(
-            total_consumed_prod=Coalesce(Subquery(consumed_prod_subquery, output_field=FloatField()), 0.0),
-            total_consumed_internal=Coalesce(Subquery(consumed_internal_subquery, output_field=FloatField()), 0.0),
-            total_returned=Coalesce(Subquery(returned_subquery, output_field=FloatField()), 0.0),
-            total_adjusted=Coalesce(Subquery(adjusted_subquery, output_field=FloatField()), 0.0)
-        ).annotate(
-            remaining_quantity=F('quantity') - F('total_consumed_prod') - F('total_consumed_internal') + F('total_returned') + F('total_adjusted')
-        ).order_by('release_timestamp')
+        ).with_remaining_quantity().order_by('release_timestamp')
 
         for log in logs:
             sources.append({
@@ -485,20 +439,11 @@ def api_get_stock_sources_for_product(request: HttpRequest, product_id: int) -> 
 
     # 2. Get Finished Product sources from FinishedProductReceipt
     else:
-        # --- ROBUST SUBQUERY APPROACH FOR FINISHED GOODS ---
-        dispatched_subquery = FinishedProductDispatch.objects.filter(sales_order_item__finished_product_id=OuterRef('pk')).values('sales_order_item__finished_product_id').annotate(total=Sum('quantity')).values('total')
-        adjusted_subquery = InventoryAdjustment.objects.filter(source_finished_product_id=OuterRef('pk')).values('source_finished_product_id').annotate(total=Sum('adjustment_quantity')).values('total')
-
         receipts = FinishedProductReceipt.objects.filter(
             batch__template__final_product_id=product_id
         ).exclude(
             status=FinishedProductReceipt.Status.REJECTED
-        ).annotate(
-            total_dispatched=Coalesce(Subquery(dispatched_subquery, output_field=FloatField()), 0.0),
-            total_adjusted=Coalesce(Subquery(adjusted_subquery, output_field=FloatField()), 0.0)
-        ).annotate(
-            remaining_quantity=F('total_quantity_produced') - F('total_dispatched') + F('total_adjusted')
-        ).order_by('release_date')
+        ).with_remaining_quantity().order_by('release_date')
 
         for receipt in receipts:
             sources.append({
