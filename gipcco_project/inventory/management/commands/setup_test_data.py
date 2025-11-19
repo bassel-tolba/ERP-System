@@ -865,6 +865,52 @@ class Command(BaseCommand):
         purchasing_service.post_landed_cost_invoice(lc_invoice, CONTEXT['user'])
         self.stdout.write(f"     - Posted Landed Cost Invoice {lc_invoice.invoice_number} with a variance.")
 
+        # 4. TEST PRORATED ALLOCATION: Consume 50% of Glucose BEFORE allocation
+        # This ensures the system splits the variance (50% Expense, 50% Capitalize)
+        self.stdout.write("     - Simulating consumption of 50% of Glucose Log BEFORE allocation...")
+        log_glucose = InventoryLog.objects.get(qc_no="QC-LC-001") # 500 Qty
+        log_pvc = InventoryLog.objects.get(qc_no="QC-LC-002")     # 2500 Qty
+
+        cons_batch = Batch.objects.create(
+            shop_order_number="SO-LC-TEST",
+            template=CONTEXT['template2'],
+            batch_number="B-LC-TEST",
+            creation_date=timezone.make_aware(datetime(2025, 10, 6, 10, 0)),
+            status=Batch.Status.IN_PROGRESS
+        )
+        BatchItem.objects.create(
+            batch=cons_batch,
+            primitive_product=product1,
+            theoretical_quantity=Decimal('250'),
+            actual_quantity=Decimal('250'), # Consuming 250 of 500 (50%)
+            source_log=log_glucose,
+            cost_at_consumption=log_glucose.costing_unit_price
+        )
+
+        # 5. Run the Allocation Service
+        # Total Variance = 125. Split by value: Glucose gets ~89.29, PVC gets ~35.71
+        allocation_data = [
+            {'receipt_log_id': log_glucose.id, 'amount': Decimal('89.290')},
+            {'receipt_log_id': log_pvc.id, 'amount': Decimal('35.710')}
+        ]
+        purchasing_service.allocate_landed_costs_from_invoice(
+            landed_cost_invoice_id=lc_invoice.id,
+            allocation_data=allocation_data,
+            user=CONTEXT['user']
+        )
+        self.stdout.write("     - Allocated Landed Costs. Glucose variance should be split between Inventory and Expense.")
+
+        # 6. Pay the Landed Cost Invoice
+        purchasing_service.apply_payment_to_landed_cost_invoice(
+            user=CONTEXT['user'],
+            invoice_id=lc_invoice.id,
+            bank_account_id=CONTEXT['bank_account'].id,
+            amount=lc_invoice.total_amount,
+            payment_date=date(2025, 10, 7),
+            description="Payment for Freight Invoice LC-INV-DEMO-01"
+        )
+        self.stdout.write(f"     - Paid Landed Cost Invoice {lc_invoice.invoice_number}.")
+
         self.stdout.write("   - Setting up A/R Workbench test scenarios...")
         # Scenario 1: Open Invoice and Credit Memo for "City Central Pharmacy"
         # Create an invoice for the dispatch made earlier
@@ -926,13 +972,8 @@ class Command(BaseCommand):
             payment_date=date(2025, 9, 25),
             amount=Decimal("300.000"),
             bank_account=CONTEXT['bank_account'],
-            payment_type=Payment.PaymentType.PAYMENT_IN,
-            description="On-account payment from County General Hospital",
-            customer=CONTEXT['customers']['hospital']
-        )
-        self.stdout.write("     - Created unapplied on-account payment for County General Hospital.")
-
-
+            payment_type=Payment.PaymentType.PAYMENT_IN,)
+        
     def create_opening_balances(self):
         self.stdout.write("5. Creating opening balances (if any)...")
         # This is where you would add logic to create opening balance JEs

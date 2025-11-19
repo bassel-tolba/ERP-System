@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from decimal import Decimal, ROUND_HALF_UP
 
 from django.db import transaction
-from django.db.models import Sum, Q, F, DecimalField, Case, When
+from django.db.models import Sum, Q, F, DecimalField, Case, When, ExpressionWrapper
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 
@@ -146,6 +146,46 @@ def get_inventory_state_at_datetime(
     }
 
 
+def calculate_batch_total_value(batch: Batch) -> dict:
+    """
+    The authoritative source for valuing a production batch.
+    Aggregates costs from the main batch and ALL continuation batches.
+    
+    Returns:
+        dict: {
+            'total_material_cost': Decimal,
+            'total_overhead_cost': Decimal (Reserved for future use),
+            'grand_total': Decimal
+        }
+    """
+    # 1. Identify all batches involved (Parent + Continuations)
+    # If this is a continuation, we must look at the parent to find siblings, 
+    # but typically this is called on the parent.
+    if batch.is_continuation:
+        parent = batch.parent_batch
+        all_batches = [parent] + list(parent.continuation_batches.all())
+    else:
+        all_batches = [batch] + list(batch.continuation_batches.all())
+
+    batch_ids = [b.id for b in all_batches]
+
+    # 2. Aggregate Material Costs from BatchItems
+    # We use the snapshotted 'cost_at_consumption' to ensure immutable history.
+    material_cost = BatchItem.objects.filter(batch_id__in=batch_ids).aggregate(
+        total=Coalesce(Sum(
+            ExpressionWrapper(
+                F('actual_quantity') * F('cost_at_consumption'),
+                output_field=DecimalField()
+            )
+        ), Decimal('0.0'))
+    )['total']
+
+    return {
+        'total_material_cost': material_cost,
+        'grand_total': material_cost  # Will include overhead here later
+    }
+
+
 def recalculate_cost_history_for_product(product_id: int, start_datetime: timezone.datetime):
     """
     REDEFINED: This function is now a non-destructive calculator.
@@ -263,8 +303,10 @@ def recalculate_cost_history_for_product(product_id: int, start_datetime: timezo
 
         # 3. Iterate through transactions and calculate final state. DO NOT update historical records.
         for t in transactions:
-            qty = t.get('qty') or Decimal('0.0')
-            cost = t.get('cost') or Decimal('0.0')
+            # Ensure inputs are Decimals (handle FloatFields in legacy models)
+            # We convert via string to avoid float precision artifacts
+            qty = Decimal(str(t.get('qty') or 0))
+            cost = Decimal(str(t.get('cost') or 0))
 
             if t['type'] == 'INFLOW':
                 running_value += qty * cost

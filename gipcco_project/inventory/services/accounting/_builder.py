@@ -116,8 +116,13 @@ class JournalEntryBuilder:
             je.validate_balance()
 
             if link_to_source_field and hasattr(self._source_object, link_to_source_field):
+                # Use update() on the queryset to bypass signals and prevent recursion loops.
+                # Calling save() here would trigger post_save, which often calls this builder again.
+                model_class = self._source_object._meta.model
+                model_class.objects.filter(pk=self._source_object.pk).update(**{link_to_source_field: je})
+                
+                # Update the in-memory instance as well
                 setattr(self._source_object, link_to_source_field, je)
-                self._source_object.save(update_fields=[link_to_source_field])
 
             logger.info(f"Successfully created JE-{je.id} for {self._source_object.__class__.__name__} ID {self._source_object.id}.")
         
@@ -240,8 +245,10 @@ class JournalEntryBuilder:
             je.validate_balance()
 
             if link_to_source_field and hasattr(self._source_object, link_to_source_field):
+                # Update the in-memory instance
                 setattr(self._source_object, link_to_source_field, je)
-                self._source_object.save(update_fields=[link_to_source_field])
+                # CRITICAL: Use update() to bypass signals and prevent recursion loops
+                self._source_object._meta.model.objects.filter(pk=self._source_object.pk).update(**{link_to_source_field: je})
 
             logger.info(f"Successfully created JE-{je.id} for {self._source_object.__class__.__name__} ID {self._source_object.id}.")
         

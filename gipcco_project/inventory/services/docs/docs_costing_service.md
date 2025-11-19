@@ -7,6 +7,16 @@
   - Accounts for both positive and negative `InventoryAdjustment` transactions.
   - Returns a dictionary containing the final calculated `quantity` and `value`.
 
+- `calculate_batch_total_value(batch)`: The authoritative source for valuing a production batch.
+  - Aggregates costs from the main batch and **all** associated continuation batches.
+  - It uses the snapshotted `cost_at_consumption` on `BatchItem` records to ensure historical immutability.
+  - Returns a dictionary containing:
+    - `total_material_cost`: Sum of all material costs.
+    - `grand_total`: The total value of the entire production plan (currently same as material cost, but will include overhead in the future).
+  - **Called by:**
+    - `finished_product_service.get_proportional_cost_for_receipt`
+    - `finished_product_service.get_finished_product_cost_breakdown`
+
 - `recalculate_cost_history_for_product(product_id, start_datetime)`: **REDEFINED:** A non-destructive calculator that re-computes a product's current `moving_average_cost` based on its transaction history.
   - **CRITICAL:** This function **no longer modifies historical outflow records** (like `cost_at_consumption`). Its only write operation is to update the `moving_average_cost` field on the `Product` model itself.
   - It is used to ensure the product's cost is accurate for *future* transactions after a historical event (like a landed cost allocation) has been posted.

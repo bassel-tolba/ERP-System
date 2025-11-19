@@ -6,7 +6,7 @@ import logging
 from django.shortcuts import get_object_or_404
 from django.http import HttpRequest, JsonResponse
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import F, Q, Sum, Subquery, OuterRef, FloatField, Value, DecimalField
+from django.db.models import F, Q, Sum, Subquery, OuterRef, FloatField, Value, DecimalField, ExpressionWrapper
 from django.db.models.functions import Coalesce
 
 from ..models import (
@@ -290,7 +290,12 @@ def api_get_po_items(request: HttpRequest, po_id: int) -> JsonResponse:
     ).select_related('product').prefetch_related('receipts').annotate(
         total_received=Coalesce(Sum('receipts__quantity', filter=~Q(receipts__status=InventoryLog.Status.VOIDED)), 0.0, output_field=FloatField())
     ).annotate(
-        quantity_remaining=F('quantity_ordered') - F('total_received')
+        # FIX: Explicitly cast the result of DecimalField - FloatField to a DecimalField
+        # to resolve the "Cannot infer type" FieldError.
+        quantity_remaining=ExpressionWrapper(
+            F('quantity_ordered') - F('total_received'),
+            output_field=DecimalField()
+        )
     ).filter(quantity_remaining__gt=0.001)
 
     data = [
@@ -600,9 +605,13 @@ def api_get_undispatched_so_items(request: HttpRequest, so_id: int) -> JsonRespo
     ).select_related(
         'finished_product__batch__template__final_product'
     ).annotate(
-        total_dispatched=Coalesce(Sum('dispatches__quantity'), 0.0, output_field=FloatField())
-    ).annotate(
-        quantity_remaining=F('quantity_ordered') - F('total_dispatched')
+        total_dispatched=Coalesce(Sum('dispatches__quantity'), 0.0, output_field=FloatField()),
+        # PROACTIVE FIX: Apply the same casting here to prevent a future FieldError
+        # that would occur once the underlying model fields are corrected to DecimalField.
+        quantity_remaining=ExpressionWrapper(
+            F('quantity_ordered') - F('total_dispatched'),
+            output_field=DecimalField()
+        ),
     ).filter(
         quantity_remaining__gt=0.001
     )

@@ -15,6 +15,15 @@
         <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#postInvoiceModal">
             <i class="bi bi-check2-circle"></i> ترحيل الفاتورة
         </button>
+        {% elif invoice.status == 'awaiting_allocation' %}
+        <a href="{% url 'inventory:allocate_landed_cost_invoice' pk=invoice.id %}" class="btn btn-primary">
+            <i class="bi bi-diagram-3"></i> تخصيص التكاليف (Allocation Wizard)
+        </a>
+        {% endif %}
+        {% if invoice.status == 'awaiting_payment' or invoice.status == 'partially_paid' or invoice.status == 'awaiting_allocation' or invoice.status == 'allocated' %}
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#paymentModal">
+            <i class="bi bi-cash-coin"></i> تسجيل دفعة
+        </button>
         {% endif %}
     </div>
 </div>
@@ -62,6 +71,35 @@
                 </div>
             </div>
         </div>
+
+        <!-- Payment History -->
+        {% if invoice.payment_applications.exists %}
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>سجل الدفعات</h5>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>التاريخ</th>
+                            <th>البنك / الخزينة</th>
+                            <th class="text-end">المبلغ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for app in invoice.payment_applications.all %}
+                        <tr>
+                            <td>{{ app.payment.payment_date|date:"Y-m-d" }}</td>
+                            <td>{{ app.payment.bank_account.name }}</td>
+                            <td class="text-end">{{ app.amount_applied|floatformat:3|intcomma }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
     </div>
     <div class="col-lg-4">
         <!-- Invoice Details -->
@@ -87,6 +125,20 @@
                 {% else %}
                 <p class="text-muted">غير مرتبط</p>
                 {% endif %}
+            </div>
+            <div class="card-footer bg-light">
+                <div class="d-flex justify-content-between mb-2">
+                    <span>الإجمالي:</span>
+                    <span class="fw-bold">{{ invoice.total_amount|floatformat:3|intcomma }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2 text-success">
+                    <span>المدفوع:</span>
+                    <span>{{ invoice.amount_paid|floatformat:3|intcomma }}</span>
+                </div>
+                <div class="d-flex justify-content-between border-top pt-2">
+                    <span class="fw-bold">المستحق:</span>
+                    <span class="fw-bold text-danger">{{ invoice.balance_due|floatformat:3|intcomma }}</span>
+                </div>
             </div>
         </div>
     </div>
@@ -127,21 +179,62 @@
 <div class="modal fade" id="postInvoiceModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">تأكيد الترحيل</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p>هل أنت متأكد من ترحيل الفاتورة رقم <strong>{{ invoice.invoice_number }}</strong> إلى الحسابات العامة؟</p>
-                <p class="text-danger">لا يمكن التراجع عن هذا الإجراء.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
-                <form method="post" action="{% url 'inventory:post_landed_cost_invoice' pk=invoice.id %}">
-                    {% csrf_token %}
+            <form method="post" action="{% url 'inventory:post_landed_cost_invoice' pk=invoice.id %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">تأكيد الترحيل</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>هل أنت متأكد من ترحيل الفاتورة رقم <strong>{{ invoice.invoice_number }}</strong> إلى الحسابات العامة؟</p>
+                    <p class="text-danger">لا يمكن التراجع عن هذا الإجراء.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
                     <button type="submit" class="btn btn-success">نعم، قم بالترحيل</button>
-                </form>
-            </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="{% url 'inventory:apply_payment_to_landed_cost_invoice' pk=invoice.id %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">تسجيل دفعة</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">حساب الدفع</label>
+                        <select name="bank_account" class="form-select" required>
+                            {% for acc in bank_accounts %}
+                            <option value="{{ acc.id }}">{{ acc.name }} ({{ acc.currency }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">تاريخ الدفع</label>
+                        <input type="date" name="payment_date" class="form-control" value="{% now 'Y-m-d' %}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">المبلغ</label>
+                        <input type="number" step="0.001" name="amount" class="form-control" value="{{ invoice.balance_due|floatformat:3 }}" max="{{ invoice.balance_due|floatformat:3 }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">ملاحظات</label>
+                        <input type="text" name="description" class="form-control" placeholder="وصف العملية">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-success">حفظ الدفعة</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

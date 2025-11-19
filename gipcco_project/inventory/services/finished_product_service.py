@@ -12,7 +12,7 @@ from django.db.models.functions import Coalesce
 
 from ..models import FinishedProductReceipt, Batch, ReceiptSubBatch
 from .accounting.correction_transactions import create_reversing_je_for_correction
-from .costing_service import recalculate_cost_history_for_product, get_inventory_state_at_datetime
+from .costing_service import recalculate_cost_history_for_product, get_inventory_state_at_datetime, calculate_batch_total_value
 
 logger = logging.getLogger(__name__)
 
@@ -76,25 +76,10 @@ def get_proportional_cost_for_receipt(production_plan: Batch) -> dict:
     Calculates the proportional cost for a single receipt within a production plan,
     including costs from all continuation batches. Returns the total and proportional cost.
     """
-    main_plan_cost = Decimal('0.0')
-    for item in production_plan.items.all():
-        cost = item.cost_at_consumption
-        if cost is None: # Fallback calculation if costing service hasn't run yet
-            state = get_inventory_state_at_datetime(item.primitive_product_id, production_plan.creation_date)
-            mac = (state['value'] / state['quantity']) if state['quantity'] > 0 else Decimal('0.0')
-            cost = mac.quantize(Decimal('0.001'))
-        main_plan_cost += cost * Decimal(str(item.actual_quantity or 0.0))
+    # DELEGATION: Ask the costing service for the total value
+    valuation = calculate_batch_total_value(production_plan)
+    total_plan_cost = valuation['grand_total']
 
-    continuation_costs = production_plan.continuation_batches.aggregate(
-        total=Sum(
-            ExpressionWrapper(
-                F('items__actual_quantity') * F('items__cost_at_consumption'),
-                output_field=DecimalField()
-            )
-        )
-    )['total'] or Decimal('0.0')
-
-    total_plan_cost = main_plan_cost + continuation_costs
     num_batches_in_plan = production_plan.number_of_batches_in_plan
     proportional_cost = (total_plan_cost / num_batches_in_plan) if num_batches_in_plan > 0 else Decimal('0.0')
     
@@ -175,19 +160,9 @@ def get_finished_product_cost_breakdown(receipt: FinishedProductReceipt) -> dict
     Calculates a detailed cost breakdown for a finished product receipt,
     aggregating costs from the parent plan and all its continuations.
     """
+    # Logic for display breakdown remains here as it's UI-specific, 
+    # but we ensure the totals match the costing service.
     production_plan = receipt.batch
-
-    # 1. Main plan cost
-    main_plan_cost = production_plan.items.aggregate(
-        total=Coalesce(Sum(
-            ExpressionWrapper(
-                F('actual_quantity') * F('cost_at_consumption'),
-                output_field=DecimalField()
-            )
-        ), Decimal('0.0'))
-    )['total']
-
-    # 2. Continuation batches with costs
     continuation_batches_with_costs = production_plan.continuation_batches.annotate(
         continuation_cost=Coalesce(Sum(
             ExpressionWrapper(
@@ -197,13 +172,16 @@ def get_finished_product_cost_breakdown(receipt: FinishedProductReceipt) -> dict
         ), Decimal('0.0'))
     ).order_by('creation_date')
 
-    # 3. Total continuation cost
     total_continuation_cost = continuation_batches_with_costs.aggregate(
         total=Sum('continuation_cost')
     )['total'] or Decimal('0.0')
 
-    # 4. Grand total
-    total_plan_cost = main_plan_cost + total_continuation_cost
+    # Use the authoritative service for the grand total to ensure consistency
+    valuation = calculate_batch_total_value(production_plan)
+    total_plan_cost = valuation['grand_total']
+    
+    # Derive main plan cost by subtraction to ensure math works out
+    main_plan_cost = total_plan_cost - total_continuation_cost
 
     return {
         'main_plan_cost': main_plan_cost,

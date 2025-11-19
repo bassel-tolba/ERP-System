@@ -28,11 +28,16 @@
 - **Description:** Represents an invoice received from a third-party vendor (e.g., a shipping company, customs broker) for landed cost services. This model captures the liability to the third-party vendor.
 - **Key Fields & Relationships:**
     - `purchase_order`: An optional link to a PO. This helps in variance analysis between estimated and actual landed costs.
+    - `amount_paid`: Tracks the cumulative amount paid against this invoice.
+    - `status`: Tracks the lifecycle including payment status (`Draft`, `Awaiting Allocation`, `Allocated`, `Awaiting Payment`, `Partially Paid`, `Paid`).
 - **Financial Impact:**
     - Posting this invoice creates a journal entry to Debit a "Landed Costs Clearing" account and Credit Accounts Payable (to the third-party vendor). The value sits in the clearing account until it is allocated to inventory.
 
 #### Class: `LandedCostInvoiceItem`
 - **Description:** A line item on a `LandedCostInvoice`, specifying the `amount` for a particular `LandedCostType`.
+
+#### Class: `LandedCostPaymentApplication`
+- **Description:** Links a generic `Payment` record to a specific `LandedCostInvoice`. This model tracks exactly how much of a specific payment was applied to a specific landed cost invoice.
 
 #### Class: `PurchaseOrderLandedCost`
 - **Description:** This model supports an estimation-first (NetSuite-style) landed cost workflow. It allows users to record an *estimated* amount for each `LandedCostType` directly on the `PurchaseOrder` *before* the goods or third-party invoices arrive.

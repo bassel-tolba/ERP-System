@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 
 from django.contrib import messages
 from django.db import transaction
-from django.db.models import Sum
+from django.db.models import Sum, F, DecimalField
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -104,6 +104,7 @@ def view_landed_cost_invoice(request: HttpRequest, pk: int) -> HttpResponse:
         'sub_page': 'landed_cost_invoices',
         'invoice': invoice,
         'items': invoice.items.select_related('cost_type').all(),
+        'bank_accounts': BankAccount.objects.all(),
         'cost_types': LandedCostType.objects.all(),
     }
     if 'X-Partial-Request' in request.headers:
@@ -152,6 +153,106 @@ def post_landed_cost_invoice_view(request: HttpRequest, pk: int) -> HttpResponse
     except Exception as e:
         logger.exception(f"Error posting landed cost invoice ID {pk}")
         messages.error(request, f"An error occurred while posting: {e}")
+    
+    return redirect('inventory:view_landed_cost_invoice', pk=pk)
+
+
+@permission_required('inventory.change_landedcostinvoice', raise_exception=True)
+def allocate_landed_cost_invoice_view(request: HttpRequest, pk: int) -> HttpResponse:
+    """
+    The "Wizard" to allocate the variance from a posted Landed Cost Invoice
+    to the original receipts.
+    """
+    invoice = get_object_or_404(LandedCostInvoice, pk=pk)
+
+    # Guard: Can only allocate if status is correct
+    if invoice.status != LandedCostInvoice.Status.AWAITING_ALLOCATION:
+        messages.error(request, _("This invoice is not awaiting allocation."))
+        return redirect('inventory:view_landed_cost_invoice', pk=pk)
+
+    if request.method == 'POST':
+        try:
+            # Parse the form data: list of {receipt_id, amount}
+            allocation_data = []
+            receipt_ids = request.POST.getlist('receipt_id')
+            amounts = request.POST.getlist('allocation_amount')
+
+            total_allocated = Decimal('0.0')
+            
+            for r_id, amt in zip(receipt_ids, amounts):
+                if amt and Decimal(amt) != 0:
+                    allocation_data.append({
+                        'receipt_log_id': int(r_id),
+                        'amount': Decimal(amt)
+                    })
+                    total_allocated += Decimal(amt)
+
+            # Call the service
+            purchasing_service.allocate_landed_costs_from_invoice(
+                landed_cost_invoice_id=invoice.pk,
+                allocation_data=allocation_data,
+                user=request.user
+            )
+            messages.success(request, _("Landed costs allocated successfully."))
+            return redirect('inventory:view_landed_cost_invoice', pk=pk)
+
+        except ValidationError as e:
+            messages.error(request, str(e))
+        except Exception as e:
+            logger.exception(f"Error allocating invoice {pk}")
+            messages.error(request, _("An unexpected error occurred."))
+
+    # --- GET: Prepare the Context for the Wizard ---
+    # Find eligible receipts (Logs linked to the PO)
+    related_receipts = InventoryLog.objects.filter(
+        po_item__purchase_order=invoice.purchase_order,
+        status=InventoryLog.Status.RELEASED
+    ).annotate(
+        total_value=F('quantity') * F('costing_unit_price')
+    )
+
+    # Calculate the balance sitting in the clearing account
+    # This is (Invoice Total - Total Originally Accrued on Receipts)
+    all_po_receipts = InventoryLog.objects.filter(po_item__purchase_order=invoice.purchase_order)
+    total_accrued = all_po_receipts.aggregate(
+        total=Sum(F('landed_cost_component') * F('quantity'), output_field=DecimalField())
+    )['total'] or Decimal('0.0')
+    
+    clearing_balance = invoice.total_amount - total_accrued
+
+    context = {
+        'invoice': invoice,
+        'receipts': related_receipts,
+        'clearing_balance': clearing_balance,
+    }
+    return render(request, 'inventory/landed_cost_allocation.html', context)
+
+
+@require_POST
+@permission_required('inventory.add_payment', raise_exception=True)
+def apply_payment_to_landed_cost_invoice_view(request: HttpRequest, pk: int) -> HttpResponse:
+    """Handles applying a payment to a landed cost invoice."""
+    try:
+        bank_account_id = request.POST.get('bank_account')
+        amount_str = request.POST.get('amount')
+        payment_date = request.POST.get('payment_date')
+        description = request.POST.get('description')
+
+        if not all([bank_account_id, amount_str, payment_date]):
+            raise ValueError(_("Bank account, amount, and date are required."))
+
+        purchasing_service.apply_payment_to_landed_cost_invoice(
+            user=request.user,
+            invoice_id=pk,
+            bank_account_id=int(bank_account_id),
+            amount=Decimal(amount_str),
+            payment_date=datetime.strptime(payment_date, '%Y-%m-%d').date(),
+            description=description
+        )
+        messages.success(request, _("Payment applied successfully."))
+    except Exception as e:
+        logger.exception(f"Error paying LC invoice {pk}")
+        messages.error(request, str(e))
     
     return redirect('inventory:view_landed_cost_invoice', pk=pk)
 

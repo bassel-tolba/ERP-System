@@ -106,11 +106,17 @@
                             {% endif %}
                         </td>
                         <td class="text-end pe-3">
-                            <a href="{% url 'inventory:view_batch' pk=b.id %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil-square"></i> عرض وتعديل</a>
-                            {% if perms.inventory.can_cancel_batch and b.status != 'cancelled' and b.status != 'completed' %}
-                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#cancelBatchModal-{{ b.id }}">
-                                <i class="bi bi-x-circle"></i> إلغاء
-                            </button>
+                            {% if perms.inventory.add_batch and b.status == 'completed' %}
+                                <a href="{% url 'inventory:view_batch' pk=b.id %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i>عرض</a>
+                            {% endif %}
+
+                            {% if b.status != 'completed' %}
+                                <a href="{% url 'inventory:view_batch' pk=b.id %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil-square"></i> عرض وتعديل</a>
+                                {% if perms.inventory.can_cancel_batch and b.status != 'cancelled' and b.status != 'completed' %}
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#cancelBatchModal-{{ b.id }}">
+                                    <i class="bi bi-x-circle"></i> إلغاء
+                                </button>
+                                {% endif %}
                             {% endif %}
 
                             <!-- Cancellation Modal -->

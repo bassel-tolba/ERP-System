@@ -16,9 +16,11 @@ from ..models import (
     SupplierInvoice, JournalEntry, JournalEntryLine, GeneralAccountingSettings,
     InventoryAdjustment, PurchaseReturn, PurchaseOrder, PurchaseOrderItem,
     SupplierDebitMemo, LandedCostInvoice, InventoryLog, PurchaseOrderLandedCost,
-    LandedCostType, PurchaseReturnItem
+    LandedCostType, PurchaseReturnItem, LandedCostAllocation, Payment,
+    LandedCostPaymentApplication
 )
 from .accounting._helpers import _check_period_is_open, _get_product_inventory_account
+from .costing_service import recalculate_cost_history_for_product
 
 logger = logging.getLogger(__name__)
 
@@ -695,13 +697,16 @@ def post_landed_cost_invoice(invoice: LandedCostInvoice, user) -> JournalEntry:
     settings = GeneralAccountingSettings.load()
     accrued_account = settings.accrued_landed_costs_account
     ap_account = settings.accounts_payable
-    variance_account = settings.landed_cost_variance_account
-
-    if not all([accrued_account, ap_account, variance_account]):
-        logger.error("CRITICAL: Accrued Landed Costs, A/P, or Variance accounts are not configured.")
-        raise ValueError(_("Accrued Landed Costs, A/P, or Landed Cost Variance accounts are not configured."))
     
-    logger.debug(f"    Accounts loaded: Accrued={accrued_account.code}, A/P={ap_account.code}, Variance={variance_account.code}")
+    # CHANGED: We post the difference to a Clearing account, not directly to Variance.
+    # The Allocation Service will later move this from Clearing -> Inventory/Variance.
+    clearing_account = settings.landed_costs_clearing_account
+
+    if not all([accrued_account, ap_account, clearing_account]):
+        logger.error("CRITICAL: Accrued LC, A/P, or LC Clearing accounts are not configured.")
+        raise ValueError(_("Accrued Landed Costs, A/P, or Landed Cost Clearing accounts are not configured."))
+    
+    logger.debug(f"    Accounts loaded: Accrued={accrued_account.code}, A/P={ap_account.code}, Clearing={clearing_account.code}")
 
     # --- Calculate Amounts ---
     actual_cost = invoice.total_amount
@@ -712,8 +717,8 @@ def post_landed_cost_invoice(invoice: LandedCostInvoice, user) -> JournalEntry:
         total=Sum(F('landed_cost_component') * F('quantity'), output_field=DecimalField())
     )['total'] or Decimal('0.0')
     
-    variance = actual_cost - total_accrued
-    logger.info(f"    Calculations complete for LC Invoice {invoice.id}: Actual={actual_cost}, Accrued={total_accrued}, Variance={variance}")
+    diff_amount = actual_cost - total_accrued
+    logger.info(f"    Calculations complete for LC Invoice {invoice.id}: Actual={actual_cost}, Accrued={total_accrued}, Difference={diff_amount}")
 
     with transaction.atomic():
         logger.debug("    Transaction started.")
@@ -737,15 +742,15 @@ def post_landed_cost_invoice(invoice: LandedCostInvoice, user) -> JournalEntry:
             entry_type=JournalEntryLine.EntryType.DEBIT
         )
         
-        # DEBIT/CREDIT: Landed Cost Variance
-        if variance != 0:
-            variance_type = JournalEntryLine.EntryType.DEBIT if variance > 0 else JournalEntryLine.EntryType.CREDIT
-            logger.debug(f"      Creating {variance_type.upper()} line to Variance Account {variance_account.code} for {abs(variance)}.")
+        # DEBIT/CREDIT: Landed Cost Clearing (The difference to be allocated)
+        if diff_amount != 0:
+            clearing_type = JournalEntryLine.EntryType.DEBIT if diff_amount > 0 else JournalEntryLine.EntryType.CREDIT
+            logger.debug(f"      Creating {clearing_type.upper()} line to Clearing Account {clearing_account.code} for {abs(diff_amount)}.")
             JournalEntryLine.objects.create(
                 journal_entry=je,
-                account=variance_account,
-                amount=abs(variance),
-                entry_type=variance_type
+                account=clearing_account,
+                amount=abs(diff_amount),
+                entry_type=clearing_type
             )
 
         # CREDIT: Accounts Payable
@@ -761,13 +766,142 @@ def post_landed_cost_invoice(invoice: LandedCostInvoice, user) -> JournalEntry:
         logger.debug(f"    Validating balance for JE-{je.id}.")
         je.validate_balance()
 
-        invoice.status = LandedCostInvoice.Status.AWAITING_PAYMENT
+        # CHANGED: Status must be AWAITING_ALLOCATION so the user can run the allocation wizard.
+        invoice.status = LandedCostInvoice.Status.AWAITING_ALLOCATION
         invoice.journal_entry = je
         invoice.save(update_fields=['status', 'journal_entry'])
-        logger.debug(f"    Updated LC Invoice {invoice.id} status to AWAITING_PAYMENT and linked JE-{je.id}.")
+        logger.debug(f"    Updated LC Invoice {invoice.id} status to AWAITING_ALLOCATION and linked JE-{je.id}.")
         logger.info(f"<-- Successfully posted LandedCostInvoice ID {invoice.id}.")
 
     return je
+
+
+def allocate_landed_costs_from_invoice(landed_cost_invoice_id: int, allocation_data: List[dict], user):
+    """
+    Allocates costs from a Landed Cost Invoice to specific Inventory Logs.
+    
+    CRITICAL PRODUCTION LOGIC (PRORATED APPROACH):
+    Instead of forcing the FULL cost into the remaining items (which inflates unit cost)
+    or updating historical COGS (which requires a massive engine), we split the cost.
+    
+    1. Calculate % of stock remaining.
+    2. Apply that % of the Landed Cost to Inventory (Capitalize).
+    3. Apply the rest to Variance (Expense).
+    
+    This keeps unit costs accurate for future sales while expensing the cost of goods already sold.
+    """
+    invoice = LandedCostInvoice.objects.get(pk=landed_cost_invoice_id)
+    
+    if invoice.status != LandedCostInvoice.Status.AWAITING_ALLOCATION:
+        raise ValidationError(_("Invoice is not awaiting allocation."))
+        
+    _check_period_is_open(invoice.invoice_date)
+
+    settings = GeneralAccountingSettings.load()
+    accrued_account = settings.accrued_landed_costs_account
+    variance_account = settings.landed_cost_variance_account
+    clearing_account = settings.landed_costs_clearing_account
+
+    total_allocated = Decimal('0.0')
+    products_to_recalc = set()
+    
+    # Prepare Journal Entry Data
+    je_builder_lines = [] 
+
+    with transaction.atomic():
+        for item in allocation_data:
+            log_id = item['receipt_log_id']
+            amount = Decimal(str(item['amount']))
+            
+            # Lock the log for update
+            log = InventoryLog.objects.select_for_update().get(pk=log_id)
+            
+            # 1. Get Authoritative Remaining Quantity
+            # We must use the manager method that calculates this dynamically
+            log_with_qty = InventoryLog.objects.with_remaining_quantity().get(pk=log_id)
+            remaining_qty = log_with_qty.remaining_quantity
+            
+            total_allocated += amount
+
+            # 2. Create Allocation Record (Audit Trail)
+            LandedCostAllocation.objects.create(
+                invoice=invoice,
+                receipt_log=log,
+                amount=amount
+            )
+
+            # 3. PRORATED CALCULATION
+            # Avoid division by zero if log was created with 0 qty (unlikely but possible)
+            if log.quantity <= 0:
+                inventory_share = Decimal('0.0')
+                variance_share = amount
+            else:
+                # Calculate ratio of stock remaining
+                # Clamp between 0 and 1 to handle over-consumption/returns edge cases
+                ratio = max(Decimal('0.0'), min(Decimal('1.0'), remaining_qty / log.quantity))
+                
+                inventory_share = (amount * ratio).quantize(Decimal('0.001'))
+                variance_share = amount - inventory_share
+
+            logger.info(f"Log {log.id}: Total={log.quantity}, Rem={remaining_qty}. Split: Inv={inventory_share}, Var={variance_share}")
+
+            # 4. Apply Variance Share (Expense)
+            if variance_share != 0:
+                je_builder_lines.append({
+                    'account': variance_account,
+                    'amount': variance_share,
+                    'type': 'debit',
+                    'note': f"LC Variance (Sold Portion) for Log #{log.id}"
+                })
+
+            # 5. Apply Inventory Share (Capitalize)
+            if inventory_share != 0:
+                # We only add the INVENTORY SHARE to the unit cost.
+                # This ensures the unit cost increases by the exact amount allocated per unit.
+                cost_per_original_unit = inventory_share / log.quantity
+                log.costing_unit_price += cost_per_original_unit
+                log.landed_cost_component += cost_per_original_unit
+                log.save(update_fields=['costing_unit_price', 'landed_cost_component'])
+                
+                inv_account = _get_product_inventory_account(log.product)
+                je_builder_lines.append({
+                    'account': inv_account,
+                    'amount': inventory_share,
+                    'type': 'debit',
+                    'note': f"LC Capitalization (On-Hand) to Log #{log.id}"
+                })
+                
+                products_to_recalc.add((log.product_id, log.timestamp))
+
+        # 4. Create the Journal Entry
+        je = JournalEntry.objects.create(
+            date=timezone.now(), # Allocation happens Now, not invoice date
+            description=f"Allocation of Landed Cost Invoice {invoice.invoice_number}",
+            source_object=invoice,
+            status=JournalEntry.Status.POSTED
+        )
+        
+        # Credit the Source (Clearing)
+        JournalEntryLine.objects.create(
+            journal_entry=je, account=clearing_account, amount=total_allocated,
+            entry_type=JournalEntryLine.EntryType.CREDIT
+        )
+        
+        # Debit Destinations
+        for line in je_builder_lines:
+            JournalEntryLine.objects.create(
+                journal_entry=je, account=line['account'], amount=line['amount'],
+                entry_type=JournalEntryLine.EntryType.DEBIT
+            )
+            
+        je.validate_balance()
+        
+        invoice.status = LandedCostInvoice.Status.ALLOCATED
+        invoice.save(update_fields=['status'])
+
+    # 5. Trigger Recalculation for touched products
+    for prod_id, start_time in products_to_recalc:
+        recalculate_cost_history_for_product(prod_id, start_time)
 
 
 # ==============================================================================
@@ -826,3 +960,57 @@ def void_inventory_receipt(log_entry: InventoryLog, user, justification: str) ->
 
     logger.info(f"<-- Successfully voided InventoryLog ID {log_entry.id}.")
     return log_entry
+
+
+def apply_payment_to_landed_cost_invoice(user, invoice_id: int, bank_account_id: int, amount: Decimal, payment_date, description: str = ""):
+    """
+    Creates a Payment and applies it to a Landed Cost Invoice.
+    """
+    invoice = LandedCostInvoice.objects.select_for_update().get(pk=invoice_id)
+    
+    # Validation
+    if invoice.status not in [LandedCostInvoice.Status.AWAITING_PAYMENT, LandedCostInvoice.Status.PARTIALLY_PAID, LandedCostInvoice.Status.ALLOCATED, LandedCostInvoice.Status.AWAITING_ALLOCATION]:
+        # Note: We allow payment even if allocation isn't done yet, provided it's posted (has JE)
+        if not invoice.journal_entry:
+             raise ValidationError(_("Cannot pay an invoice that hasn't been posted."))
+        if invoice.status == LandedCostInvoice.Status.PAID:
+             raise ValidationError(_("Invoice is already fully paid."))
+
+    if amount <= 0:
+        raise ValidationError(_("Payment amount must be positive."))
+    
+    if amount > invoice.balance_due:
+        raise ValidationError(_(f"Payment amount ({amount}) exceeds balance due ({invoice.balance_due})."))
+
+    _check_period_is_open(payment_date)
+
+    with transaction.atomic():
+        # 1. Create Payment Record
+        payment = Payment.objects.create(
+            payment_type=Payment.PaymentType.PAYMENT_OUT,
+            supplier=invoice.vendor,
+            bank_account_id=bank_account_id,
+            amount=amount,
+            payment_date=payment_date,
+            description=description or f"Payment for LC Invoice {invoice.invoice_number}",
+            source_object=invoice # Link for traceability
+        )
+
+        # 2. Create Application Link
+        LandedCostPaymentApplication.objects.create(
+            payment=payment,
+            invoice=invoice,
+            amount_applied=amount
+        )
+
+        # 3. Update Invoice Status
+        invoice.amount_paid += amount
+        
+        if invoice.balance_due <= Decimal('0.001'):
+            invoice.status = LandedCostInvoice.Status.PAID
+        else:
+            invoice.status = LandedCostInvoice.Status.PARTIALLY_PAID
+        
+        invoice.save(update_fields=['amount_paid', 'status'])
+        
+        # Note: The Payment model's post_save signal (or payment service) handles the GL Entry (Cr Bank, Dr AP)

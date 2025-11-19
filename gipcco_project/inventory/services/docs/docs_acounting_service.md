@@ -19,7 +19,7 @@ Below is the list of the specialized modules that contain the actual business lo
   - Manages all journal entries related to the manufacturing process, from the consumption of raw materials into WIP to the receipt of finished goods.
 
 - **[`purchasing_service.md`](./purchasing_service.md):**
-  - Manages the complete purchasing and supplier return lifecycle, including three-way match validation, landed cost allocation, and debit memo creation.
+  - Manages the complete purchasing and supplier return lifecycle, including three-way match validation, landed cost allocation, debit memo creation, and **payments for landed cost invoices**.
 
 - **[`sales_transactions.md`](./accounting/sales_transactions.md):**
   - Responsible for creating the compound journal entries for customer sales, recording both revenue and the cost of goods sold (COGS).

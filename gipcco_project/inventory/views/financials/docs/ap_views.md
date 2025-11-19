@@ -58,6 +58,15 @@
 - **Returns:** A redirect to the supplier invoice detail view.
 - **Calls:** `accounting_service.allocate_landed_costs()`
 
+## `apply_payment_to_landed_cost_invoice_view(request, pk)`
+
+- **Purpose:** Handles applying a payment to a landed cost invoice.
+- **Args:**
+  - `request`: The HTTP request object containing payment details (amount, bank account, date).
+  - `pk`: The primary key of the landed cost invoice.
+- **Returns:** A redirect to the landed cost invoice detail view.
+- **Calls:** `purchasing_service.apply_payment_to_landed_cost_invoice()`
+
 ## `delete_supplier_invoice(request, pk)`
 
 - **Purpose:** Deletes a supplier invoice, but only if no payments are applied.

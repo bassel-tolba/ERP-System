@@ -14,7 +14,8 @@
     - `source_object`: A `GenericForeignKey` providing a traceable link to the origin of the payment if it's part of a larger workflow (e.g., a `BankTransfer` record).
     - `reconciliation`, `cleared_date`: Fields used by the bank reconciliation process to mark this payment as "cleared" and link it to a specific `BankReconciliation` event.
 - **Business Logic:**
-    - `total_applied` and `unapplied_amount` properties provide real-time calculation of how much of the payment has been allocated to invoices, which is crucial for A/P and A/R management.
+    - `total_applied` and `unapplied_amount` properties provide real-time calculation of how much of the payment has been allocated to `SupplierInvoice` or `LandedCostInvoice` records.
+    - Supports application to multiple invoice types via `PaymentApplication` (for standard A/P) and `LandedCostPaymentApplication` (for landed costs).
 
 ### Employee Sub-Ledger
 

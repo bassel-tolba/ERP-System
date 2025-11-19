@@ -15,13 +15,16 @@ This service manages the lifecycle and associated costs of finished goods. It ha
 
 ### 3. **Cost Calculation**
    - **`get_proportional_cost_for_receipt`**: This is a crucial costing function that calculates the cost of a single finished product batch.
-     - **Aggregates Total Cost**: It sums up the costs of all materials consumed in the main production plan (`Batch`) **plus** all materials consumed in any associated `continuation_batches`. This provides the total cost for the entire production run.
+     - **Delegates Total Cost Calculation**: It calls `costing_service.calculate_batch_total_value` to get the authoritative total cost for the entire production run (main plan + all continuations).
      - **Calculates Proportional Cost**: It then divides this total cost by the `number_of_batches_in_plan` to determine the cost that should be allocated to a single `FinishedProductReceipt`. This ensures that each unit produced from the plan is assigned an equal and accurate share of the total production cost.
-   - **`get_finished_product_cost_breakdown`**: Provides a detailed breakdown of the costs for a specific receipt, showing the cost contribution from the main plan and each continuation batch separately. This is useful for analysis and reporting.
+   - **`get_finished_product_cost_breakdown`**: Provides a detailed breakdown of the costs for a specific receipt, showing the cost contribution from the main plan and each continuation batch separately.
+     - It uses `costing_service.calculate_batch_total_value` to fetch the grand total, ensuring consistency with the costing engine. This is useful for analysis and reporting.
 
 ### 4. **Receipt Creation**
    - **`create_finished_product_receipt`**: This function handles the creation of a new `FinishedProductReceipt`.
-     - It performs validation to ensure receipts are only created for `IN_PROGRESS` plans.
+     - It performs critical validations:
+       - Receipts must be for `IN_PROGRESS` plans.
+       - **Crucially, it blocks receipt creation if any associated continuation batches are still in `DRAFT` or `PENDING_APPROVAL` status, preventing premature valuation.**
      - It uses `get_proportional_cost_for_receipt` to determine the `total_cost` for the new receipt.
      - It creates the main `FinishedProductReceipt` record and its associated `ReceiptSubBatch` records (e.g., pallets).
      - **Financial Impact**: The `post_save` signal on the `FinishedProductReceipt` model is responsible for calling the `accounting_service` to create the journal entry that moves the value from the Work-in-Progress (WIP) account to the Finished Goods Inventory account.

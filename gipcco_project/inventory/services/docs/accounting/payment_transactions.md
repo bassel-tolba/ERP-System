@@ -5,7 +5,7 @@
 ### Functions:
 
 - `create_je_for_supplier_payment(payment: Payment)`:
-  - **Description:** Creates a journal entry when a payment is made to a supplier.
+  - **Description:** Creates a journal entry when a payment is made to a supplier or a landed cost vendor.
   - **Accounting Logic:**
     - **Debit:** Accounts Payable (reducing the liability owed to the supplier).
     - **Credit:** The specific Bank/Cash account from which the payment was made.

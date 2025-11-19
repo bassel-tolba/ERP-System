@@ -130,7 +130,10 @@ class LandedCostInvoice(models.Model):
     """
     class Status(models.TextChoices):
         DRAFT = 'draft', _('Draft')
+        AWAITING_ALLOCATION = 'awaiting_allocation', _('Awaiting Allocation')
+        ALLOCATED = 'allocated', _('Allocated')
         AWAITING_PAYMENT = 'awaiting_payment', _('Awaiting Payment')
+        PARTIALLY_PAID = 'partially_paid', _('Partially Paid')
         PAID = 'paid', _('Paid')
 
     vendor = models.ForeignKey(
@@ -140,6 +143,9 @@ class LandedCostInvoice(models.Model):
     invoice_number = models.CharField(max_length=100, verbose_name=_("Invoice Number"))
     invoice_date = models.DateField(verbose_name=_("Invoice Date"))
     total_amount = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Total Amount"))
+    amount_paid = models.DecimalField(
+        max_digits=14, decimal_places=3, default=Decimal('0.000'), verbose_name=_("Amount Paid")
+    )
     status = models.CharField(
         max_length=25, choices=Status.choices, default=Status.DRAFT,
         verbose_name=_("Status")
@@ -162,6 +168,10 @@ class LandedCostInvoice(models.Model):
 
     def __str__(self):
         return f"Landed Cost Invoice {self.invoice_number} from {self.vendor.name}"
+
+    @property
+    def balance_due(self):
+        return self.total_amount - self.amount_paid
 
 
 class LandedCostInvoiceItem(models.Model):
@@ -186,6 +196,43 @@ class LandedCostInvoiceItem(models.Model):
     def __str__(self):
         return f"{self.cost_type.name}: {self.amount}"
 
+
+class LandedCostAllocation(models.Model):
+    """
+    Audit table recording the specific allocation of a Landed Cost Invoice
+    to an InventoryLog. This proves why inventory cost increased.
+    """
+    invoice = models.ForeignKey(
+        LandedCostInvoice, on_delete=models.CASCADE, related_name='allocations',
+        verbose_name=_("Source Invoice")
+    )
+    receipt_log = models.ForeignKey(
+        'InventoryLog', on_delete=models.PROTECT, related_name='landed_cost_allocations',
+        verbose_name=_("Target Receipt")
+    )
+    amount = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Allocated Amount"))
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'landed_cost_allocations'
+
+class LandedCostPaymentApplication(models.Model):
+    """
+    Links a generic Payment to a specific LandedCostInvoice.
+    """
+    payment = models.ForeignKey(
+        'inventory.Payment', on_delete=models.CASCADE, related_name='landed_cost_applications',
+        verbose_name=_("Payment")
+    )
+    invoice = models.ForeignKey(
+        LandedCostInvoice, on_delete=models.CASCADE, related_name='payment_applications',
+        verbose_name=_("Landed Cost Invoice")
+    )
+    amount_applied = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Amount Applied"))
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'landed_cost_payment_applications'
 
 class PurchaseOrderLandedCost(models.Model):
     """

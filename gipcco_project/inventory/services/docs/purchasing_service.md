@@ -59,3 +59,21 @@
     3. **It intelligently splits the debit:** A portion goes to an "Inventory Revaluation" account (for on-hand quantity) and the rest goes to a "Manufacturing Variance" account (for the portion already sold).
     4. Triggers the new, non-destructive `recalculate_cost_history_for_product` to update the product's `moving_average_cost` for future transactions only.
   - **Calls:** `get_inventory_state_at_datetime()`, `recalculate_cost_history_for_product()` from `costing_service.py`, `_check_period_is_open()` from `_helpers.py`.
+
+- `allocate_landed_costs_from_invoice(landed_cost_invoice_id: int, allocation_data: List[dict], user)`:
+  - **Description:** Performs the prorated allocation of a posted Landed Cost Invoice.
+  - **Business Logic:**
+    1. **Clearing Account:** Moves the balance from the "Landed Cost Clearing" account (set during posting).
+    2. **Prorated Split:** Calculates the ratio of `remaining_quantity` / `original_quantity` for the target Inventory Log.
+       - **Inventory Share:** The portion corresponding to remaining stock is capitalized into the `InventoryLog` (increasing `costing_unit_price`).
+       - **Variance Share:** The portion corresponding to goods already consumed/sold is expensed immediately to the "Landed Cost Variance" account.
+    3. **Recalculation:** Triggers `recalculate_cost_history_for_product` for affected items to ensure future transactions use the new weighted average cost.
+
+- `apply_payment_to_landed_cost_invoice(user, invoice_id: int, bank_account_id: int, amount: Decimal, payment_date, description: str)`:
+  - **Description:** Creates a `Payment` record and applies it to a `LandedCostInvoice`.
+  - **Workflow:**
+    1. Validates that the payment amount does not exceed the invoice balance.
+    2. Creates the `Payment` (Credit Bank, Debit A/P via internal signals).
+    3. Creates a `LandedCostPaymentApplication` to link the payment to the invoice.
+    4. Updates the invoice status to `Partially Paid` or `Paid`.
+  - **Calls:** `_check_period_is_open()` from `_helpers.py`.

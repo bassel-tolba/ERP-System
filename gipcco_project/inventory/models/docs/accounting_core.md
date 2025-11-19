@@ -59,3 +59,7 @@
 - **Description:** A singleton model that acts as a central registry for critical, system-wide accounts (e.g., A/P, A/R, WIP, GRNI). This is a crucial design pattern that eliminates hard-coded account codes from the business logic (services), making the system highly configurable and maintainable.
 - **Design Pattern:** Singleton. The `save()` method prevents the creation of more than one instance, and the `load()` classmethod provides a convenient, cached way to access the single settings object.
 - **Integration Points:** This model is referenced by nearly every service that creates a financial transaction to look up the correct GL account for a given process (e.g., posting an invoice, consuming materials for production, paying a supplier).
+- **Key Accounts Configured:**
+    - **Core:** Accounts Payable, Accounts Receivable, VAT (Input/Output), WIP Inventory, Finished Goods Inventory.
+    - **Landed Costs:** `Accrued Landed Costs` (Liability), `Landed Cost Clearing` (Temporary), `Landed Cost Variance` (Expense).
+    - **Variances:** `Manufacturing Variance`, `Inventory Revaluation`, `Purchase Price Variance`.

@@ -1,0 +1,182 @@
+{% extends 'inventory/layout.html' %}
+{% load humanize %}
+{% load inventory_filters %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-primary">
+                <div class="card-body d-flex justify-content-between align-items-center bg-light-primary">
+                    <div>
+                        <h1 class="h3 mb-1">معالج تخصيص التكاليف (Allocation Wizard)</h1>
+                        <p class="mb-0 text-muted">فاتورة رقم: <strong>{{ invoice.invoice_number }}</strong> | المورد: {{ invoice.vendor.name }}</p>
+                    </div>
+                    <div class="text-end">
+                        <p class="mb-0 small text-muted">الرصيد المعلق (Clearing Balance)</p>
+                        <h2 class="mb-0 fw-bold {% if clearing_balance < 0 %}text-success{% else %}text-danger{% endif %}" dir="ltr">
+                            {{ clearing_balance|floatformat:3|intcomma }}
+                        </h2>
+                        <small class="text-muted">هذا المبلغ يمثل الفرق بين التقديرات والفاتورة الفعلية</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form method="post" id="allocationForm">
+        {% csrf_token %}
+        
+        <div class="card shadow-sm mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">استلامات المخزون المرتبطة</h5>
+                <button type="button" class="btn btn-outline-primary btn-sm" onclick="autoAllocate()">
+                    <i class="bi bi-magic"></i> توزيع تلقائي (حسب القيمة)
+                </button>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>رقم الاستلام (QC)</th>
+                                <th>المنتج</th>
+                                <th class="text-center">الكمية</th>
+                                <th class="text-end">قيمة الاستلام</th>
+                                <th class="text-end" style="width: 200px;">المبلغ المخصص</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for receipt in receipts %}
+                            <tr>
+                                <td>
+                                    <span class="badge bg-secondary">{{ receipt.qc_no|default:receipt.id }}</span>
+                                    <br>
+                                    <small class="text-muted">{{ receipt.release_timestamp|date:"Y-m-d" }}</small>
+                                    <input type="hidden" name="receipt_id" value="{{ receipt.id }}">
+                                </td>
+                                <td>
+                                    <strong>{{ receipt.product.name }}</strong>
+                                    <br>
+                                    <small class="text-muted">{{ receipt.product.code }}</small>
+                                </td>
+                                <td class="text-center">{{ receipt.quantity|floatformat:2 }} {{ receipt.product.unit }}</td>
+                                <td class="text-end">
+                                    <span class="receipt-value" data-value="{{ receipt.total_value }}">
+                                        {{ receipt.total_value|floatformat:2|intcomma }}
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="input-group input-group-sm">
+                                        <input type="number" step="0.001" name="allocation_amount" 
+                                               class="form-control text-end allocation-input" 
+                                               placeholder="0.000" required
+                                               onchange="updateTotal()">
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center p-5 text-muted">
+                                    لا توجد استلامات مخزنية مرحلة (Released) مرتبطة بأمر الشراء هذا.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot class="table-light">
+                            <tr>
+                                <th colspan="4" class="text-end">إجمالي المخصص:</th>
+                                <th class="text-end">
+                                    <span id="totalAllocated" class="fw-bold fs-5">0.000</span>
+                                </th>
+                            </tr>
+                            <tr>
+                                <th colspan="4" class="text-end">المتبقي:</th>
+                                <th class="text-end">
+                                    <span id="remainingBalance" class="fw-bold text-danger">
+                                        {{ clearing_balance|floatformat:3 }}
+                                    </span>
+                                </th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between">
+            <a href="{% url 'inventory:view_landed_cost_invoice' pk=invoice.id %}" class="btn btn-secondary">إلغاء</a>
+            <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
+                <i class="bi bi-save"></i> حفظ وتخصيص
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    const TARGET_BALANCE = parseFloat("{{ clearing_balance }}");
+
+    function autoAllocate() {
+        let totalReceiptValue = 0;
+        const rows = document.querySelectorAll('tbody tr');
+        
+        // 1. Calculate Total Value of all receipts
+        rows.forEach(row => {
+            const valSpan = row.querySelector('.receipt-value');
+            if(valSpan) {
+                totalReceiptValue += parseFloat(valSpan.dataset.value);
+            }
+        });
+
+        if (totalReceiptValue === 0) return;
+
+        // 2. Distribute TARGET_BALANCE proportionally
+        let currentSum = 0;
+        const inputs = document.querySelectorAll('.allocation-input');
+        
+        inputs.forEach((input, index) => {
+            // Last item gets the remainder to fix rounding errors
+            if (index === inputs.length - 1) {
+                input.value = (TARGET_BALANCE - currentSum).toFixed(3);
+            } else {
+                const rowVal = parseFloat(rows[index].querySelector('.receipt-value').dataset.value);
+                const ratio = rowVal / totalReceiptValue;
+                const allocated = (TARGET_BALANCE * ratio);
+                // Round to 3 decimals
+                const roundedAllocated = Math.round(allocated * 1000) / 1000;
+                
+                input.value = roundedAllocated.toFixed(3);
+                currentSum += roundedAllocated;
+            }
+        });
+
+        updateTotal();
+    }
+
+    function updateTotal() {
+        let sum = 0;
+        document.querySelectorAll('.allocation-input').forEach(input => {
+            sum += parseFloat(input.value || 0);
+        });
+
+        const remaining = TARGET_BALANCE - sum;
+        
+        document.getElementById('totalAllocated').innerText = sum.toFixed(3);
+        
+        const remSpan = document.getElementById('remainingBalance');
+        remSpan.innerText = remaining.toFixed(3);
+
+        // Validation: Allow small floating point error (0.01)
+        const isValid = Math.abs(remaining) < 0.01;
+        
+        if (isValid) {
+            remSpan.className = 'fw-bold text-success';
+            remSpan.innerText = "0.000 (متطابق)";
+            document.getElementById('submitBtn').disabled = false;
+        } else {
+            remSpan.className = 'fw-bold text-danger';
+            document.getElementById('submitBtn').disabled = true;
+        }
+    }
+</script>
+{% endblock %}
