@@ -1,4 +1,4 @@
-[!iamge](<img width="1254" height="1254" alt="image" src="https://github.com/user-attachments/assets/ac08bb7c-7d54-438c-bc38-01799aaae707" />)
+<img width="1254" height="1254" alt="image" src="https://github.com/user-attachments/assets/ac08bb7c-7d54-438c-bc38-01799aaae707" />)
 
 # GIPCCO ERP
 
