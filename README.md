@@ -1,5 +1,5 @@
-<img width="500" height="300" alt="image" src="https://github.com/user-attachments/assets/a91afddb-595a-4832-a095-e1a0d1b28b33" />
 
+<img width="800" height="500" alt="Untitled design (2)" src="https://github.com/user-attachments/assets/a7f543ae-a594-4edb-badc-ee7226893604" />
 
 # GIPCCO ERP
 
